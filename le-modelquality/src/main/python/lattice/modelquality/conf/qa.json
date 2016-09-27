@@ -1,5 +1,6 @@
 {
     "endpoint":"https://admin-qa.lattice.local:8080/modelquality/",
     "apiHostPort":"https://bodcdevtca18.lattice.local:8081",
+    "influxEndpoint":"http://10.41.1.188:8086/query",
     "verify":"False"
 }

@@ -141,6 +141,9 @@ def model(name, description):
     print ModelRun.run(name, description, algorithm, dataflow, pipeline, propdata, sampling, dataset, \
         tenant, username, password)
 
+    #print 'All Model Runs'
+    #print ModelRun.getAll()
+
 def _write_entity(entitytype, entity):
 
     config = entity.getConfig()
@@ -186,11 +189,11 @@ def _read_entity(entitytype, entitycls):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Command-line interface to the Lattice model quality framework')
     parser.add_argument('-e', '--environment', metavar='ENV', choices=['devel','qa'], default='devel')
-    parser.add_argument('-v', '--verbose', action='store_true')    
+    parser.add_argument('-v', '--verbose', action='store_true')
 
-    subparsers = parser.add_subparsers(dest='subcommand')
+    subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
 
-    parser_initworkspace = subparsers.add_parser('init-workspace')
+    parser_initworkspace = subparsers.add_parser('init-workspace', help='initialize a local workspace for working with .json configuration files')
     parser_initworkspace.add_argument('name')
     parser_initworkspace.add_argument('tenant')
     parser_initworkspace.add_argument('username')

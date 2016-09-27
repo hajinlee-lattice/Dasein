@@ -15,6 +15,7 @@ class EnvConfig(object):
     _envname = ''
     _endpoint = ''
     _apiHostPort = ''
+    _influxEndpoint = ''
     _verify = ''
     _verbose = ''
 
@@ -28,6 +29,7 @@ class EnvConfig(object):
                 cfg = json.loads(cfgfile.read())
                 EnvConfig._endpoint = cfg['endpoint']
                 EnvConfig._apiHostPort = cfg['apiHostPort']
+                EnvConfig._influxEndpoint = cfg['influxEndpoint']
                 EnvConfig._verify = cfg['verify']
                 EnvConfig._verbose = verbose
 
@@ -42,6 +44,10 @@ class EnvConfig(object):
     @classmethod
     def getApiHostPort(self):
         return EnvConfig._apiHostPort
+
+    @classmethod
+    def getInfluxEndpoint(self):
+        return EnvConfig._influxEndpoint
 
     @classmethod
     def isVerbose(self):
