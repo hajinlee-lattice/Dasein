@@ -111,7 +111,7 @@
 
                         <ul class="enrichments">
                             <li class="box" 
-                                ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                                ng-repeat="enrichment in (filteredList = (vm.enrichments.marketo_match_fields
                                 | filter: vm.query
                                 | orderBy: SortOrder
                                 | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
