@@ -378,7 +378,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName,
             boolean internal) {
         try {
-            log.info("Sending PLS create model complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS create model (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
             if (internal) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_JOB_SUCCESS_INTERNAL);
@@ -398,9 +398,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_CREATE_MODEL_COMPLETION_EMAIL_SUBJECT, modelName), mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PLS create model complete email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS create model (" + modelName + ") complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS create model complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS create model (" + modelName + ") complete email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
@@ -408,7 +408,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName,
             boolean internal) {
         try {
-            log.info("Sending PLS create model error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS create model (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
             if (internal) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_JOB_ERROR_INTERNAL);
@@ -428,9 +428,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_CREATE_MODEL_ERROR_EMAIL_SUBJECT, modelName), mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PLS create model error email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS create model (" + modelName + ") error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS create model error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS create model (" + modelName + ") error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
@@ -438,7 +438,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName,
             boolean internal) {
         try {
-            log.info("Sending PLS scoring complete email to " + user.getEmail() + " started.");
+            log.info("Sending PLS scoring (" + modelName + ") complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
             if (internal) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_JOB_SUCCESS_INTERNAL);
@@ -458,16 +458,16 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_SCORE_COMPLETION_EMAIL_SUBJECT, modelName), mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS create scoring (" + modelName + ") complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS scoring complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS scoring (" + modelName + ") complete email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
     @Override
     public void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal) {
         try {
-            log.info("Sending PLS scoring error email to " + user.getEmail() + " started.");
+            log.info("Sending PLS scoring (" + modelName + ") error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder;
             if (internal) {
                 builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_JOB_ERROR_INTERNAL);
@@ -487,9 +487,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(String.format(EmailSettings.PLS_SCORE_ERROR_EMAIL_SUBJECT, modelName), mp,
                     Collections.singleton(user.getEmail()));
-            log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
+            log.info("Sending PLS create scoring (" + modelName + ") error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS scoring error email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS scoring (" + modelName + ") error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
