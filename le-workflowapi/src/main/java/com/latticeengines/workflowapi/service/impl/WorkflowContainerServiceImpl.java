@@ -155,7 +155,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         for (WorkflowJob workflowJob : workflowJobs) {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-                if (workflowId == null || workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
+                if (workflowId == null
+                        || (workflowJob.getStatus() != null && workflowJob.getStatus().equals(
+                                FinalApplicationStatus.FAILED))) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
