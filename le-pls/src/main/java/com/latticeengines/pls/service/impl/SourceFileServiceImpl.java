@@ -10,7 +10,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
@@ -59,8 +58,8 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
-    public void copySourceFile(Table table, SourceFile originalSourceFile, Tenant targetTenant) {
-        String outputFileName = "file_" + table.getName();
+    public void copySourceFile(String tableName, SourceFile originalSourceFile, Tenant targetTenant) {
+        String outputFileName = "file_" + tableName + ".csv";
         String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(targetTenant.getId())).toString()
                 + "/" + outputFileName;
@@ -76,9 +75,8 @@ public class SourceFileServiceImpl implements SourceFileService {
         file.setPath(outputPath);
         file.setSchemaInterpretation(originalSourceFile.getSchemaInterpretation());
         file.setState(originalSourceFile.getState());
-        file.setTableName(table.getName());
-        file.setTenant(targetTenant);
-        create(file);
+        file.setTableName(tableName);
+        sourceFileEntityMgr.create(file, targetTenant);
 
     }
 }

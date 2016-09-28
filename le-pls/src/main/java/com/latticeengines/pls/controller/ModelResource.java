@@ -126,7 +126,7 @@ public class ModelResource {
 
         SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(clone, sourceFile, tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
+            sourceFileService.copySourceFile(clone.getName(), sourceFile, tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
         } else {
             log.warn("Unable to find source file for model summary:" + modelSummary.getName());
         }

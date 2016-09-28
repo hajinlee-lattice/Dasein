@@ -79,7 +79,7 @@ public class PythonScriptModelService extends ModelServiceBase {
         Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
         SourceFile sourceFile = sourceFileService.findByTableName(trainingTableName);
         if (sourceFile != null) {
-            sourceFileService.copySourceFile(cpTrainingTable, sourceFile, targetTenant);
+            sourceFileService.copySourceFile(cpTrainingTable.getName(), sourceFile, targetTenant);
         }
         try {
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTable.getName(),

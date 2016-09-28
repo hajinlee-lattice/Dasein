@@ -2,25 +2,38 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
+import java.io.File;
 import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
+
+    private static final Log log = LogFactory.getLog(ModelCopyServiceImplTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -31,17 +44,42 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
 
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private SourceFileService sourceFileService;
+
     private Tenant modelCopySourceTenant = new Tenant();
 
     private Tenant modelCopyTargetTenant = new Tenant();
 
+    private SourceFile sourceFile;
+
+    private String sourceFileLocalPath;
+
+    private String outputFileName = "nonLatinInRows.csv";
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         modelCopySourceTenant.setId("modelCopySourceTenant");
+        modelCopySourceTenant.setName(CustomerSpace.parse(modelCopySourceTenant.getId()).toString());
         modelCopyTargetTenant.setId("modelCopyTargetTenant");
+        modelCopyTargetTenant.setName(CustomerSpace.parse(modelCopyTargetTenant.getId()).toString());
+        try {
+            tearDown();
+        } catch (Exception e) {
+            log.error(e);
+        }
+        tenantEntityMgr.create(modelCopySourceTenant);
+        tenantEntityMgr.create(modelCopyTargetTenant);
 
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + modelCopyTargetTenant.getId());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopySourceTenant.getId())).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
 
         String localPathBase = ClassLoader
                 .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
@@ -50,10 +88,29 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
                 + modelCopySourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data",
                 customerBase + modelCopySourceTenant.getId());
+
+        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(modelCopySourceTenant.getId())).toString()
+                + "/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/" + outputFileName;
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
+                outputPath);
+
+        setupSecurityContext(modelCopySourceTenant);
+        sourceFile = new SourceFile();
+        sourceFile.setTenant(modelCopySourceTenant);
+        sourceFile.setName(outputFileName);
+        sourceFile.setPath(outputPath);
+        sourceFile.setTableName("SourceFile_Account_copy_csv");
+        sourceFile.setDisplayName(outputFileName);
+        sourceFileService.create(sourceFile);
     }
 
-    @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
+        Tenant sourceTenant = tenantEntityMgr.findByTenantId(modelCopySourceTenant.getId());
+        tenantEntityMgr.delete(sourceTenant);
+        Tenant targetTenant = tenantEntityMgr.findByTenantId(modelCopyTargetTenant.getId());
+        tenantEntityMgr.delete(targetTenant);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -61,10 +118,12 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummary modelSummary = new ModelSummary();
         modelSummary.setId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
         modelSummary.setDisplayName("some model display name");
+
+        sourceFileService.copySourceFile("cpTrainingTable", sourceFile, modelCopyTargetTenant);
         pythonScriptModelService.copyHdfsData(modelCopySourceTenant.getId(), modelCopyTargetTenant.getId(),
                 "AccountModel", "cpTrainingTable", "cpEventTable", modelSummary);
-        String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration, customerBase
-                + modelCopyTargetTenant.getId() + "/models/cpEventTable");
+        String path = ModelingHdfsUtils.findModelSummaryPath(yarnConfiguration,
+                customerBase + modelCopyTargetTenant.getId() + "/models/cpEventTable");
         assertNotNull(path);
         String uuid = UuidUtils.parseUuid(path);
 
@@ -81,11 +140,17 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(provenance.get("EventTableName").asText(), "cpEventTable");
 
         System.out.println(new Path(path).getParent().getParent().toString());
-        path = ModelingHdfsUtils.getModelFilePath(yarnConfiguration, new Path(path).getParent().getParent()
-                .toString());
+        path = ModelingHdfsUtils.getModelFilePath(yarnConfiguration, new Path(path).getParent().getParent().toString());
         assertNotNull(path);
         contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         json = objectMapper.readTree(contents);
         assertEquals(json.get("Summary").get("ModelID").asText(), "ms__" + uuid + "-PLSModel");
+
+        setupSecurityContext(modelCopyTargetTenant);
+        SourceFile newSourceFile = sourceFileService.findByTableName("cpTrainingTable");
+        assertNotNull(newSourceFile);
+        assertEquals(newSourceFile.getDisplayName(), outputFileName);
+        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()),
+                FileUtils.readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile())));
     }
 }

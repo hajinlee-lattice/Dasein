@@ -1,6 +1,5 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;

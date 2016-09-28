@@ -45,6 +45,15 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(SourceFile sourceFile, Tenant tenant) {
+        sourceFile.setTenant(tenant);
+        sourceFile.setTenantId(tenant.getPid());
+        sourceFile.setPid(null);
+        super.create(sourceFile);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public SourceFile findByName(String name) {
         return sourceFileDao.findByName(name);
