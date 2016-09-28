@@ -50,6 +50,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public Table remediateAttributes(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
         Set<String> columnsToRemove = new HashSet<>();
 
@@ -57,11 +58,10 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             if (dataRule.isEnabled()) {
                 List<String> columnNames = new ArrayList<>();
                 if (isDefault) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, List<ColumnRuleResult>> eventToColumnResults = getObjectFromContext(COLUMN_RULE_RESULTS, Map.class);
-                    Iterator<List<ColumnRuleResult>> iter = eventToColumnResults.values().iterator();
+                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS, String.class, List.class);
+                    Iterator<List> iter = eventToColumnResults.values().iterator();
                     if (iter.hasNext()) {
-                        List<ColumnRuleResult> results = iter.next();
+                        List<ColumnRuleResult> results = JsonUtils.convertList(iter.next(), ColumnRuleResult.class);
                         for (ColumnRuleResult result : results) {
                             if (result.getDataRuleName().equals(dataRule.getName())) {
                                 columnNames = result.getFlaggedColumnNames();

@@ -151,7 +151,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return JsonUtils.serialize(dataComposition);
     }
 
-    @SuppressWarnings("unchecked")
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             ModelStepConfiguration modelStepConfiguration, Table eventTable) {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
@@ -168,7 +167,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         List<DataRule> dataRules = null;
         if (executionContext.containsKey(DATA_RULES)) {
-            dataRules = (List<DataRule>) getObjectFromContext(DATA_RULES, List.class);
+            dataRules = getListObjectFromContext(DATA_RULES, DataRule.class);
         } else {
             dataRules = modelStepConfiguration.getDataRules();
         }
@@ -226,6 +225,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected <V> V getObjectFromContext(String key, Class<V> clazz) {
         String strValue = getStringValueFromContext(key);
         return JsonUtils.deserialize(strValue, clazz);
+    }
+
+    protected <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
+        List<?> list = getObjectFromContext(key, List.class);
+        return JsonUtils.convertList(list, clazz);
+    }
+
+    protected <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
+        Map<?, ?> map = getObjectFromContext(key, Map.class);
+        return JsonUtils.convertMap(map, keyClazz, valueClazz);
     }
 
     protected <V> void putObjectInContext(String key, V val) {
