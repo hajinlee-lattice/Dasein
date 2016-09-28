@@ -346,7 +346,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         toReturn.push(columns);
 
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
-        var averageConversionRate = modelSummary.ModelDetails.TotalConversions/modelSummary.ModelDetails.TotalLeads;
+        var averageConversionRate = modelSummary.ModelDetails.TestingConversions/modelSummary.ModelDetails.TestingLeads;
 
         for (var x = 0; x < totalPredictors.length; x++) {
             var predictor = totalPredictors[x];
