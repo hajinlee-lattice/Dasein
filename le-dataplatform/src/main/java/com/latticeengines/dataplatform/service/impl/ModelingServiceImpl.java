@@ -460,9 +460,13 @@ public class ModelingServiceImpl implements ModelingService {
 
     private String getScriptPathWithVersion(String script) {
         String afterPart = StringUtils.substringAfter(script, "/app");
-        
-        // If this is empty, it means it's a customer supplied pipeline driver
-        if (afterPart.equals("")) {
+        String keepVersion = StringUtils.substringAfter(script, "/KEEPVERSION");
+
+        if (!keepVersion.equals("")) {
+            return "/app" + keepVersion;
+        } else if (afterPart.equals("")) {
+            // If this is empty, it means it's a customer supplied pipeline
+            // driver
             return script;
         }
         return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
