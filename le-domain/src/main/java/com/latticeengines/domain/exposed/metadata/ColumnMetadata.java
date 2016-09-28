@@ -160,7 +160,11 @@ public class ColumnMetadata {
 
     @JsonProperty("FundamentalType")
     private void setFundamentalTypeByString(String fundamentalType) {
-        setFundamentalType(FundamentalType.fromName(fundamentalType));
+        if (fundamentalType != null) {
+            setFundamentalType(FundamentalType.fromName(fundamentalType));
+        } else {
+            setFundamentalType(null);
+        }
     }
 
     @JsonProperty("StatisticalType")

@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.util.StringUtils;
+
 
 public class AccountLookupRequest {
 

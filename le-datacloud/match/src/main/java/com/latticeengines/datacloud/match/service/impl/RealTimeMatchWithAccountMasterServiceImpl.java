@@ -97,9 +97,13 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
                     && StringUtils.isEmpty(record.getParsedDuns());
 
             if (!shouldCallExternalMatch) {
-                accountLookupRequest
-                        .addLookupPair((StringUtils.isEmpty(record.getParsedDomain()) || record.isPublicDomain()) ? null
-                                : record.getParsedDomain(), record.getParsedDuns());
+                accountLookupRequest.addLookupPair(
+                        (StringUtils.isEmpty(record.getParsedDomain())
+                                || "null".equalsIgnoreCase(record.getParsedDomain().trim()) || record.isPublicDomain())
+                                        ? null : record.getParsedDomain(),
+                        (StringUtils.isEmpty(record.getParsedDuns())
+                                || "null".equalsIgnoreCase(record.getParsedDuns().trim()) ? null
+                                        : record.getParsedDuns()));
             }
 
             Pair<InternalOutputRecord, AccountLookupRequest> accountLookupRequestPair = new MutablePair<>(record,
