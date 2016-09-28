@@ -12,7 +12,7 @@ import com.latticeengines.metadata.service.ArtifactService;
 
 @Component("artifactService")
 public class ArtifactServiceImpl implements ArtifactService {
-    
+
     @Autowired
     private ArtifactEntityMgr artifactEntityMgr;
 
@@ -29,6 +29,11 @@ public class ArtifactServiceImpl implements ArtifactService {
     @Override
     public List<Artifact> findAll(String customerSpace, String moduleName) {
         return artifactEntityMgr.findAll();
+    }
+
+    @Override
+    public Artifact getArtifactByPath(String customerSpace, String path) {
+        return artifactEntityMgr.findByPath(path);
     }
 
 }

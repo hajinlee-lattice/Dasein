@@ -1,6 +1,8 @@
 package com.latticeengines.pls.service;
 
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface SourceFileService {
 
@@ -15,4 +17,6 @@ public interface SourceFileService {
     void delete(SourceFile sourceFile);
 
     SourceFile findByApplicationId(String applicationId);
+
+    void copySourceFile(Table table, SourceFile originalSourceFile, Tenant targetTenant);
 }

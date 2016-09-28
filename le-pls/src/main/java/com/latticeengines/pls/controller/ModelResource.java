@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,10 +44,12 @@ import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelReplaceService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
@@ -86,7 +87,10 @@ public class ModelResource {
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileService sourceFileService;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microserviceEndpoint;
@@ -120,12 +124,9 @@ public class ModelResource {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryEnrichedByDetails(parameters
                 .getSourceModelSummaryId());
 
-        SourceFile sourceFile = sourceFileEntityMgr.findByTableName(modelSummary.getTrainingTableName());
+        SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
-            sourceFile.setPid(null);
-            sourceFile.setTableName(clone.getName());
-            sourceFile.setName("file_" + clone.getName());
-            sourceFileEntityMgr.create(sourceFile);
+            sourceFileService.copySourceFile(clone, sourceFile, tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
         } else {
             log.warn("Unable to find source file for model summary:" + modelSummary.getName());
         }

@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 
 public interface ArtifactEntityMgr extends BaseEntityMgr<Artifact> {
 
+    public Artifact findByPath(String path);
 }

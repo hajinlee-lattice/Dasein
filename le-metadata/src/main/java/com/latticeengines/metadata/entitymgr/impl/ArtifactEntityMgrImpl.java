@@ -19,10 +19,10 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("artifactEntityMgr")
 public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implements ArtifactEntityMgr {
-    
+
     @Autowired
     private ArtifactDao artifactDao;
-    
+
     @Autowired
     private ModuleDao moduleDao;
 
@@ -30,7 +30,7 @@ public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implement
     public BaseDao<Artifact> getDao() {
         return artifactDao;
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(Artifact artifact) {
@@ -46,12 +46,15 @@ public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implement
         artifact.setTenantId(tenant.getPid());
         artifactDao.create(artifact);
     }
-    
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Artifact> findAll() {
         return super.findAll();
     }
 
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Artifact findByPath(String path) {
+        return artifactDao.findByField("PATH", path);
+    }
 
 }

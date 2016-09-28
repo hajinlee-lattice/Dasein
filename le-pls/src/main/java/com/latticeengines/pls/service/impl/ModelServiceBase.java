@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -48,6 +53,9 @@ public abstract class ModelServiceBase implements ModelService {
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private MetadataFileUploadService metadataFileUploadService;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;
@@ -95,14 +103,28 @@ public abstract class ModelServiceBase implements ModelService {
         FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelDirPath, ".");
 
-//        if (StringUtils.isNotEmpty(modelSummary.getModuleName())){
-//            
-//        }else{
-        //String newPivotFilePath = ModelingHdfsUtils.copyPivotMappingFile(yarnConfiguration, modelSummary, targetTenantId);
-        //}
+        Module module = null;
+        if (StringUtils.isNotEmpty(modelSummary.getModuleName())) {
+            module = metadataProxy.getModule(sourceTenantId, modelSummary.getModuleName());
+        } else if (StringUtils.isNotEmpty(modelSummary.getPivotArtifactPath())) {
+            Artifact pivotFileArtifact = metadataProxy.getArtifactByPath(sourceTenantId,
+                    modelSummary.getPivotArtifactPath());
+            module = metadataProxy.getModule(sourceTenantId, pivotFileArtifact.getModule().getName());
+        }
+
+        Map<String, Artifact> newArtifactsMap = new HashMap<>();
+        if (module != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
+            String newModuleName = "cp_module_" + UUID.randomUUID().toString();
+            newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration,
+                    module.getArtifacts(), customerSpace, newModuleName);
+            for (Artifact artifact : newArtifactsMap.values()) {
+                metadataProxy.createArtifact(customerSpace.toString(), newModuleName, artifact.getName(), artifact);
+            }
+        }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName());
+                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap);
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
         JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"

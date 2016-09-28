@@ -2,11 +2,11 @@ package com.latticeengines.pls.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,8 +24,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public class ModelingHdfsUtils {
 
@@ -54,7 +54,9 @@ public class ModelingHdfsUtils {
         JsonNode json = objectMapper.readTree(contents);
 
         ObjectNode summary = (ObjectNode) json.get("Summary");
-        summary.put("ModelID", modelId);
+        if (summary != null) {
+            summary.put("ModelID", modelId);
+        }
         return json;
     }
 
@@ -104,7 +106,8 @@ public class ModelingHdfsUtils {
     }
 
     public static JsonNode constructNewModelSummary(String contents, String targetTenantId, String cpTrainingTableName,
-            String cpEventTableName, String uuid, String modelDisplayName) throws IOException {
+            String cpEventTableName, String uuid, String modelDisplayName, Map<String, Artifact> artifactsMap)
+            throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
 
@@ -117,6 +120,13 @@ public class ModelingHdfsUtils {
         ObjectNode provenance = (ObjectNode) json.get("EventTableProvenance");
         provenance.put("TrainingTableName", cpTrainingTableName);
         provenance.put("EventTableName", cpEventTableName);
+        if (!artifactsMap.isEmpty()) {
+            if (artifactsMap.containsKey(ArtifactType.PivotMapping.getCode())) {
+                provenance.put("Pivot_Artifact_Path", artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
+            }
+            Artifact artifact = artifactsMap.values().iterator().next();
+            provenance.put("Module_Name", artifact.getModule().getName());
+        }
         return json;
     }
 
@@ -137,21 +147,24 @@ public class ModelingHdfsUtils {
         return new Path(paths.get(0)).getParent().getName();
     }
 
-    public static String copyPivotMappingFile(Configuration yarnConfiguration, ModelSummary modelSummary,
-            String targetTenantId) throws IllegalArgumentException, IOException {
-        String pivotMappingFilePath = modelSummary.getPivotArtifactPath();
-        if (StringUtils.isEmpty(pivotMappingFilePath)) {
-            return "";
+    public static Map<String, Artifact> copyArtifactsInModule(Configuration yarnConfiguration,
+            List<Artifact> artifacts, CustomerSpace customerSpace, String newModuleName)
+            throws IllegalArgumentException, IOException {
+        Map<String, Artifact> newArtifactsMap = new HashMap<>();
+
+        for (Artifact artifact : artifacts) {
+            ArtifactType artifactType = artifact.getArtifactType();
+            com.latticeengines.domain.exposed.camille.Path path = PathBuilder.buildMetadataPathForArtifactType(
+                    CamilleEnvironment.getPodId(), //
+                    customerSpace, newModuleName, artifactType);
+            String hdfsPath = String
+                    .format("%s/%s.%s", path.toString(), artifact.getName(), artifactType.getFileType());
+            HdfsUtils.copyFiles(yarnConfiguration, artifact.getPath(), hdfsPath);
+            Artifact newArtifact = new Artifact();
+            newArtifact.setPath(hdfsPath);
+            newArtifact.setArtifactType(artifactType);
+            newArtifactsMap.put(artifactType.getCode(), newArtifact);
         }
-        com.latticeengines.domain.exposed.camille.Path newMetadataPath = PathBuilder.buildMetadataPath(
-                CamilleEnvironment.getPodId(), CustomerSpace.parse(targetTenantId))
-                .append(UUID.randomUUID().toString());
-        HdfsUtils.mkdir(yarnConfiguration, newMetadataPath.toString());
-
-        String newPivotMappingFilePath = newMetadataPath.append(ArtifactType.PivotMapping.getPathToken())
-                .append(new Path(pivotMappingFilePath).getName()).toString();
-        HdfsUtils.copyFiles(yarnConfiguration, pivotMappingFilePath, newPivotMappingFilePath);
-
-        return newPivotMappingFilePath;
+        return newArtifactsMap;
     }
 }

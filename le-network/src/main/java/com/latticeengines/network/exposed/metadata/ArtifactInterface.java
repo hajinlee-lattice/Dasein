@@ -6,4 +6,6 @@ public interface ArtifactInterface {
 
     Boolean createArtifact(String customerSpace, String moduleName, String artifactName, Artifact artifact);
 
+    Artifact getArtifactByPath(String customerSpace, String artifactPath);
+
 }

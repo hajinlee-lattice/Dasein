@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -20,8 +22,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.util.MetadataUtils;
 
@@ -31,7 +33,7 @@ public class PythonScriptModelService extends ModelServiceBase {
     private static final Log log = LogFactory.getLog(PythonScriptModelService.class);
 
     @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private SourceFileService sourceFileService;
 
     protected PythonScriptModelService() {
         super(ModelType.PYTHONMODEL);
@@ -75,18 +77,13 @@ public class PythonScriptModelService extends ModelServiceBase {
         Table cpEventTable = metadataProxy.copyTable(sourceTenantId, eventTableName, targetTenantId);
 
         Tenant targetTenant = tenantEntityMgr.findByTenantId(targetTenantId);
-        SourceFile sourceFile = sourceFileEntityMgr.findByTableName(trainingTableName);
+        SourceFile sourceFile = sourceFileService.findByTableName(trainingTableName);
         if (sourceFile != null) {
-            sourceFile.setPid(null);
-            sourceFile.setTableName(cpTrainingTable.getName());
-            sourceFile.setTenant(targetTenant);
-            sourceFile.setName("file_" + cpTrainingTable.getName());
-            sourceFileEntityMgr.create(sourceFile);
+            sourceFileService.copySourceFile(cpTrainingTable, sourceFile, targetTenant);
         }
-
         try {
-            copyHdfsData(sourceTenantId, targetTenantId, eventTableName,
-                    cpTrainingTable.getName(), cpEventTable.getName(), modelSummary);
+            copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTable.getName(),
+                    cpEventTable.getName(), modelSummary);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_18111, new String[] { modelSummary.getName(), sourceTenantId,

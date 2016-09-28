@@ -216,6 +216,7 @@ public enum LedpCode {
     LEDP_18115("File Validation Failed due to: {0}"), //
     LEDP_18116("Failed to Authenticate Marketo REST Credentials due to: {0}"), //
     LEDP_18117("Failed to Authenticate Marketo SOAP Credentials due to: {0}"), //
+    LEDP_18118("Unable to copy source file"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

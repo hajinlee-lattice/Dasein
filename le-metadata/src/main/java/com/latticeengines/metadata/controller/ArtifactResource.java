@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.controller;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +51,8 @@ public class ArtifactResource {
     @ApiOperation(value = "Validate artifact file")
     public ResponseDocument<String> validateArtifact(@PathVariable ArtifactType artifactType, //
             @RequestParam("file") String artifactFilePath, HttpServletRequest request) {
-        ArtifactValidationService artifactValidationService = ArtifactValidation.getArtifactValidationService(artifactType);
+        ArtifactValidationService artifactValidationService = ArtifactValidation
+                .getArtifactValidationService(artifactType);
         if (artifactValidationService == null) {
             return ResponseDocument.successResponse("");
         }
@@ -59,5 +61,16 @@ public class ArtifactResource {
             return ResponseDocument.successResponse(error);
         }
         return ResponseDocument.failedResponse(new RuntimeException(error));
+    }
+
+    @RequestMapping(value = "/artifactpath/{artifactPath}", //
+    method = RequestMethod.GET, //
+    headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get Artifact By Path")
+    public Artifact getArtifactByPath(@PathVariable String customerSpace, //
+            @PathVariable String artifactPath, //
+            HttpServletRequest request) {
+        return artifactService.getArtifactByPath(customerSpace, artifactPath);
     }
 }
