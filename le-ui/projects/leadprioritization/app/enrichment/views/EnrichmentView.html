@@ -16,23 +16,30 @@
                         </a>
                         <input type="text" class="form-control" placeholder="Search {{vm.enrichments.length > filteredList.length ? '' : 'all '}}{{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
-                    <div class="tag" ng-if="vm.category" ng-click="vm.changeCategory({category: ''});">{{vm.category}}</div>
+                    <div class="tags">
+                        <div class="tag-type" ng-repeat="(key, value) in vm.selected_categories">
+                            <div class="tag category" ng-click="vm.changeCategory({category: value.category}); vm.metadata.current = 1;">{{value.category}}</div>
+                            <div class="tag subcategory" ng-repeat="(subcategory_key, subcategory_value) in value.subcategories" ng-click="vm.changeSubcategory({category: value.category, subcategory: subcategory_value}); vm.metadata.current = 1;">{{subcategory_value}}</div>
+                        </div>
+                    </div>
                 </li>
                 <li class="categories">
                     <div class="dropdown-categories" ng-class="{active: vm.show_categories}">
                         <h4 ng-click="vm.categoriesDropdown($event)">Search and browse by category</h4>
                         <ul ng-class="{active: vm.show_categories}">
                             <li ng-repeat="(key, value) in vm.categories">
-                                <div class="category" ng-class="{active: vm.category == value}">
+                                <div class="category" ng-class="{active: vm.inCategory({Category: value})}">
                                     <span class="subcategory-arrow" ng-class="{'subcategory-toggle': vm.subcategories[value]}"></span>
-                                    <span class="category-name" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});  vm.metadata.current = 1;">
+                                    <span class="category-name" ng-click="vm.changeCategory({category: value, event: $event});  vm.metadata.current = 1;">
                                         <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(value)}}"></div>
                                         {{value}}
                                     </span>
-                                    <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event, remove: (vm.category == value)});  vm.metadata.current = 1;" ng-class="{active: vm.category == value}"></span>
+                                    <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event});  vm.metadata.current = 1;" ng-class="{active: vm.inCategory({Category: value})}"></span>
                                 </div>                                
                                 <ul ng-if="vm.subcategories[value]">
-                                    <li ng-repeat="(key, value) in vm.subcategories[value]">{{value}}</li>
+                                    <li ng-repeat="(subcategory_key, subcategory_value) in vm.subcategories[value]" ng-click="vm.changeSubcategory({category: value, subcategory: subcategory_value, event: $event}); vm.metadata.current = 1;">
+                                        {{subcategory_value}}
+                                    </li>
                                 </ul>
                             </li>
                         </ul>
@@ -99,8 +106,9 @@
                     ng-repeat="enrichment in (filteredList = (vm.enrichments 
                     | filter: vm.query
                     | orderBy: SortOrder
+                    | filter: vm.inCategory
+                    | filter: vm.inSubcategory
                     | filter: { 
-                                'Category': vm.category || '', 
                                 'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
                                 'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
                                 })) 
@@ -112,7 +120,7 @@
                                 <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
                                 <ul class="categories">
                                     <li ng-if="enrichment.Category">{{::enrichment.Category}}</li>
-                                    <li ng-if="enrichment.SubCategory">{{::enrichment.SubCategory}}</li>
+                                    <li ng-if="enrichment.Subcategory">{{::enrichment.Subcategory}}</li>
                                 </ul>
                                 <ul class="tags">
                                     <li ng-if="enrichment.IsPremium" class="premium">premium</li>

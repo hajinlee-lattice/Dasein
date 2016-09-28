@@ -4,23 +4,31 @@
     section {
         margin-top: 2em;
     }
-    .tag {
-        position: relative;
-        display: inline-block;
-        font-size: 10px;
-        color: #fff;
-        background-color: #3989c4;
-        border: solid 1px #2e6c99;
-        padding: 0 5px;
-        padding-right: 15px;
-        cursor: pointer;
-        margin-right: 5px;
-        &:after {
-            @include font-awesome-inline("\f00d");
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            right: 3px;
+    .tags {
+        .tag-type {
+            display: inline-block;
+            .tag {
+                position: relative;
+                display: inline-block;
+                font-size: 10px;
+                color: #fff;
+                background-color: rgba(57,137,196,1);
+                border: solid 1px #2e6c99;
+                padding: 0 5px;
+                padding-right: 15px;
+                cursor: pointer;
+                margin-right: 5px;
+                &:after {
+                    @include font-awesome-inline("\f00d");
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    right: 3px;
+                }
+                &.subcategory {
+                    background-color: rgba(57,137,196,.75);
+                }
+            }
         }
     }
     .subheader-container {

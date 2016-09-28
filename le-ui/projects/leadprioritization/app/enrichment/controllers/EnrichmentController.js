@@ -2,8 +2,8 @@
 angular.module('lp.enrichment.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('EnrichmentController', function($scope, $filter, $timeout, $interval, $window, $document, $q, BrowserStorageUtility,
-    EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+.controller('EnrichmentController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
+    BrowserStorageUtility, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this,
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
@@ -36,7 +36,6 @@ angular.module('lp.enrichment.leadenrichment', [
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
-        category: null,
         userSelectedCount: 0,
         selectDisabled: 1,
         saveDisabled: 1,
@@ -48,6 +47,7 @@ angular.module('lp.enrichment.leadenrichment', [
         enrichments: [],
         subcategories: [],
         categories: [],
+        selected_categories: {},
         enable_grid: true,
         view: 'list'
     });
@@ -83,14 +83,69 @@ angular.module('lp.enrichment.leadenrichment', [
     vm.changeCategory = function(opts){
         var opts = opts || {},
             category = opts.category || vm.categoryOption || '',
-            event = opts.event || '',
-            remove = opts.remove || false;
+            subcategory = opts.subcategory || '',
+            event = opts.event || '';
 
         if(event && event.target && event.target.tagName === 'A') {
             event.preventDefault();
         }
-        vm.category = (remove ? '' : category);
+
+        if(vm.selected_categories[category]) {
+            delete vm.selected_categories[category];
+        } else {
+            vm.selected_categories[category] = ({category: category, subcategories: []});
+            if(subcategory) {
+                vm.selected_categories[category]['subcategories'].push(subcategory);
+            }
+        }
     }
+
+    vm.inCategory = function(enrichment){
+        if(enrichment.DisplayName && !(_.size(vm.selected_categories))) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
+            return true;
+        }
+        var selected = (typeof vm.selected_categories[enrichment.Category] === 'object');
+        return selected;
+    };
+
+    vm.changeSubcategory = function(opts){
+        var opts = opts || {},
+            category = opts.category || '',
+            subcategory = opts.subcategory || '',
+            event = opts.event || '';
+
+        if(event && event.target && event.target.tagName === 'A') {
+            event.preventDefault();
+        }
+        if(!vm.selected_categories[category]) {
+            vm.changeCategory({category: category, subcategory: subcategory});
+        } else {
+            var subcategories = vm.selected_categories[category]['subcategories'],
+                index = subcategories.indexOf(subcategory);
+
+            if(index != -1) {
+                subcategories.splice(index, 1);
+            } else {
+                subcategories.push(subcategory);
+            }
+        }
+    }
+
+    vm.inSubcategory = function(enrichment){
+        if(!(_.size(vm.selected_categories))) {
+            return true;
+        }
+        var category = vm.selected_categories[enrichment.Category],
+            subcategory = enrichment.Subcategory,
+            subcategories = category['subcategories'];
+
+        if(!subcategories.length) {
+            return true;
+        }
+
+        var selected = (typeof category === 'object' && subcategories.indexOf(subcategory) > -1);
+        return selected;
+    };
 
     vm.categoryClass = function(category){
         var category = category.toLowerCase().replace(' ','-');
@@ -221,7 +276,7 @@ angular.module('lp.enrichment.leadenrichment', [
             var sub_targets = parent.find('.subcategory-toggle'),
                 categories = parent.find('ul').first();
 
-            categories.css({minWidth: parent.width() - 1, top: parent.height() - 1});
+            categories.css({minWidth: parent.width(), top: parent.height() - 1});
 
             sub_targets.each(function(key, value){
                 var target = angular.element(value),
