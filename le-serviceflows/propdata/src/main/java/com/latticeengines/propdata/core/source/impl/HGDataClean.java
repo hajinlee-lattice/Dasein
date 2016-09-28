@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.core.source.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.DerivedSource;
@@ -11,9 +12,12 @@ public class HGDataClean implements DerivedSource {
 
     private static final long serialVersionUID = 603829385601451985L;
 
+    @Autowired
+    private HGDataRaw hgDataRaw;
+
     @Override
     public Source[] getBaseSources() {
-        return new Source[0];
+        return new Source[]{ hgDataRaw };
     }
 
     @Override

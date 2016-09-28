@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGDataClean;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
@@ -18,7 +18,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.HGDa
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("hgDataCleanService")
-public class HGDataCleanService extends AbstractTransformationService<HGDataCleanConfiguration>
+public class HGDataCleanService extends SingleDataFlowTransformationServiceBase<HGDataCleanConfiguration>
         implements TransformationService<HGDataCleanConfiguration> {
 
     private static final Log log = LogFactory.getLog(HGDataCleanService.class);
@@ -33,7 +33,7 @@ public class HGDataCleanService extends AbstractTransformationService<HGDataClea
 
     @Override
     public List<String> findUnprocessedVersions() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -52,20 +52,14 @@ public class HGDataCleanService extends AbstractTransformationService<HGDataClea
     }
 
     @Override
-    TransformationProgress transformHook(TransformationProgress progress,
-                                         HGDataCleanConfiguration transformationConfiguration) {
-        return null;
-    }
+    protected String getDataFlowBeanName() { return "hgDataCleanFlow"; }
 
     @Override
     HGDataCleanConfiguration createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
-        return null;
-    }
-
-    @Override
-    List<String> getRootBaseSourceDirPaths() {
-        return null;
+        HGDataCleanConfiguration configuration = new HGDataCleanConfiguration();
+        configuration.setVersion(newLatestVersion);
+        return configuration;
     }
 
     @Override

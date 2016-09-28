@@ -7,12 +7,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -35,7 +38,8 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     TransformationService<T> transformationService;
 
     Collection<TransformationProgress> progresses = new HashSet<>();
-    String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
+    protected String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
+    protected String targetVersion = baseSourceVersion;
 
     abstract TransformationService<T> getTransformationService();
 
@@ -45,7 +49,9 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     abstract T createTransformationConfiguration();
 
-    abstract protected String getPathForResult();
+    abstract String getPathForResult();
+
+    abstract void verifyResultAvroRecords(Iterator<GenericRecord> records);
 
     @BeforeMethod(groups = { "functional" })
     public void setUp() throws Exception {
@@ -132,6 +138,9 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
             }
             Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
         }
+
+        Iterator<GenericRecord> records =  AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        verifyResultAvroRecords(records);
     }
 
     protected void cleanupProgressTables() {

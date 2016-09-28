@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -26,7 +27,7 @@ public abstract class AbstractTransformationDataFlowService {
     @Value("${dataplatform.queue.scheme:legacy}")
     private String yarnQueueScheme;
 
-    @Value("${propdata.collection.cascading.platform:tez}")
+    @Value("${propdata.etl.cascading.platform:mr}")
     private String cascadingPlatform;
 
     @Value("${propdata.collection.cascading.partitions:8}")
@@ -52,16 +53,11 @@ public abstract class AbstractTransformationDataFlowService {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
 
-        // TODO - anoop - enable TEZ once object mapper jar version conflict is fixed
-        if ("tez".equalsIgnoreCase(getCascadingPlatform())) {
-            ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
-        } else {
-            ctx.setProperty(DataFlowProperty.ENGINE, "MR");
-        }
-
+        ctx.setProperty(DataFlowProperty.ENGINE, getCascadingPlatform().toUpperCase());
         ctx.setProperty(DataFlowProperty.PARAMETERS, parameters);
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sources);
         ctx.setProperty(DataFlowProperty.CUSTOMER, sourceName);
+        ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + CollectionDataFlowKeys.TRANSFORM_FLOW);
         ctx.setProperty(DataFlowProperty.RECORDNAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, sourceName);
         ctx.setProperty(DataFlowProperty.TARGETPATH, outputDir);
@@ -73,6 +69,7 @@ public abstract class AbstractTransformationDataFlowService {
         ctx.setProperty(DataFlowProperty.PARTITIONS, cascadingPartitions);
         ctx.setProperty(DataFlowProperty.JOBPROPERTIES, getJobProperties());
         ctx.setProperty(DataFlowProperty.ENFORCEGLOBALORDERING, false);
+
         return ctx;
     }
 

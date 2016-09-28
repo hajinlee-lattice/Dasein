@@ -21,8 +21,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DerivedSource;
@@ -60,6 +58,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
+    @Autowired
+    protected SimpleTransformationDataFlowService dataFlowService;
+
     @Override
     TransformationProgressEntityMgr getProgressEntityMgr() {
         return transformationProgressEntityMgr;
@@ -67,14 +68,13 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 
-    abstract TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration);
-
     abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
             List<SourceColumn> sourceColumns);
 
-    abstract List<String> getRootBaseSourceDirPaths();
-
     abstract T readTransformationConfigurationObject(String confStr) throws IOException;
+
+    protected abstract TransformationProgress transformHook(TransformationProgress progress,
+            T transformationConfiguration);
 
     @Override
     public boolean isManualTriggerred() {
@@ -126,7 +126,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             }
             writeTransformationConfig(transformationConfiguration, progress);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25011, transformationConfiguration.getSourceName(), e);
+            throw new RuntimeException(
+                    "Failed to start a new progress for " + transformationConfiguration.getSourceName(), e);
         }
         LoggingUtils.logInfo(getLogger(), progress,
                 "Started a new progress with version=" + transformationConfiguration.getVersion());
@@ -137,12 +138,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             throws IOException {
         transformationConfiguration.setRootOperationId(progress.getRootOperationUID());
         HdfsUtils.writeToFile(getYarnConfiguration(),
-                finalWorkflowOuputDir(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF,
+                initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF,
                 JsonUtils.serialize(transformationConfiguration));
     }
 
     protected T readTransformationConfig(TransformationProgress progress) throws IOException {
-        String confFilePath = finalWorkflowOuputDir(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF;
+        String confFilePath = initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF;
         String confStr = HdfsUtils.getHdfsFileContents(getYarnConfiguration(), confFilePath);
         return readTransformationConfigurationObject(confStr);
     }
@@ -207,6 +208,40 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return versionDirs;
     }
 
+    private void deleteFSEntry(TransformationProgress progress, String entryPath) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, entryPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, entryPath);
+            }
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to delete intermediate data.", e);
+        }
+    }
+
+    protected boolean hasSuccessFlag(String pathForSuccessFlagLookup) throws IOException {
+        String successFlagPath = pathForSuccessFlagLookup + HDFS_PATH_SEPARATOR + SUCCESS_FLAG;
+        LOG.info("Checking for success flag in " + pathForSuccessFlagLookup);
+        return HdfsUtils.fileExists(yarnConfiguration, successFlagPath);
+    }
+
+    protected boolean isAlreadyBeingProcessed(Source source, String version) {
+        return transformationProgressEntityMgr.findRunningProgress(source, version) != null;
+    }
+
+    @Override
+    public T createTransformationConfiguration(List<String> versionsToProcess) {
+        return createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
+                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
+    }
+
+    protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns, T configuration) {
+        configuration.setSourceName(getSource().getSourceName());
+        Map<String, String> sourceConfigurations = new HashMap<>();
+        configuration.setSourceConfigurations(sourceConfigurations);
+        configuration.setVersion(newLatestVersion);
+        configuration.setSourceColumns(sourceColumns);
+    }
+
     protected boolean doPostProcessing(TransformationProgress progress, String workflowDir) {
         String avroWorkflowDir = finalWorkflowOuputDir(progress);
         try {
@@ -263,37 +298,4 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return false;
     }
 
-    private void deleteFSEntry(TransformationProgress progress, String entryPath) {
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, entryPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, entryPath);
-            }
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to delete intermediate data.", e);
-        }
-    }
-
-    protected boolean hasSuccessFlag(String pathForSuccessFlagLookup) throws IOException {
-        String successFlagPath = pathForSuccessFlagLookup + HDFS_PATH_SEPARATOR + SUCCESS_FLAG;
-        LOG.info("Checking for success flag in " + pathForSuccessFlagLookup);
-        return HdfsUtils.fileExists(yarnConfiguration, successFlagPath);
-    }
-
-    protected boolean isAlreadyBeingProcessed(Source source, String version) {
-        return transformationProgressEntityMgr.findRunningProgress(source, version) != null;
-    }
-
-    @Override
-    public T createTransformationConfiguration(List<String> versionsToProcess) {
-        return createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
-                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
-    }
-
-    protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns, T configuration) {
-        configuration.setSourceName(getSource().getSourceName());
-        Map<String, String> sourceConfigurations = new HashMap<>();
-        configuration.setSourceConfigurations(sourceConfigurations);
-        configuration.setVersion(newLatestVersion);
-        configuration.setSourceColumns(sourceColumns);
-    }
 }

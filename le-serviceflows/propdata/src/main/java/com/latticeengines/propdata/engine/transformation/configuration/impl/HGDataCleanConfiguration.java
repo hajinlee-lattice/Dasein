@@ -10,7 +10,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 
 public class HGDataCleanConfiguration implements TransformationConfiguration {
 
-    private static final String sourceName = "hgDataClean";
+    private static final String sourceName = "HGDataClean";
     private String version;
     private Map<String, String> sourceConfigurations;
     private static final String serviceBeanName = "hgDataCleanService";

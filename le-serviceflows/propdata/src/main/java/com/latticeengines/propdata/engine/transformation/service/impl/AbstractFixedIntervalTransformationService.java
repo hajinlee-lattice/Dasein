@@ -49,7 +49,6 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
         return doPostProcessing(progress, workflowDir);
     }
 
-    @Override
     protected List<String> getRootBaseSourceDirPaths() {
         FixedIntervalSource source = (FixedIntervalSource) getSource();
         LOG.info("Source Name: " + source.getSourceName() + " Base Source Name: "

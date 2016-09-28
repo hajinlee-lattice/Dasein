@@ -3,18 +3,13 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.proxy.exposed.propdata.TransformationProxy;
 
 public abstract class FirehoseTransformationServiceImplTestNGBase<T extends TransformationConfiguration>
         extends TransformationServiceImplTestNGBase<T> {
-
-    @Autowired
-    TransformationProxy transformationProxy;
 
     @Test(groups = "functional")
     public void testTransformation() {

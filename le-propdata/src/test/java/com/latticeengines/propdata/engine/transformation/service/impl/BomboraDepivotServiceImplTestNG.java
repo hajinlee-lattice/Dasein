@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,4 +43,7 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
         conf.setVersion(baseSourceVersion);
         return conf;
     }
+
+    @Override
+    void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
 }

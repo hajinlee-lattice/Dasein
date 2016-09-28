@@ -8,6 +8,7 @@ import javax.mail.MethodNotSupportedException;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 
 public interface TransformationConfiguration {
+
     String getSourceName();
 
     Map<String, String> getSourceConfigurations();

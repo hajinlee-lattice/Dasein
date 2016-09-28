@@ -1,8 +1,10 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,4 +40,7 @@ public class BomboraFirehoseIngestionServiceImplTestNG
         BomboraFirehoseConfiguration conf = refreshService.createTransformationConfiguration(versionsToProcess);
         return conf;
     }
+
+    @Override
+    void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
 }

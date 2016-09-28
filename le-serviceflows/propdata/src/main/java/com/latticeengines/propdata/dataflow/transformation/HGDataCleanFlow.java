@@ -31,7 +31,7 @@ public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfigura
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node source = addSource("Source");
+        Node source = addSource("HGDataRaw");
         source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
                 new FieldMetadata(domainField, String.class));
 

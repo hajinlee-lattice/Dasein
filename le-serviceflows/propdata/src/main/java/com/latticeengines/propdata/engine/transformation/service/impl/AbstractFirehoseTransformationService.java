@@ -51,7 +51,6 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
         return doPostProcessing(progress, workflowDir);
     }
 
-    @Override
     protected List<String> getRootBaseSourceDirPaths() {
         DataImportedFromHDFS source = (DataImportedFromHDFS) getSource();
         return Collections.singletonList(source.getHDFSPathToImportFrom().toString());

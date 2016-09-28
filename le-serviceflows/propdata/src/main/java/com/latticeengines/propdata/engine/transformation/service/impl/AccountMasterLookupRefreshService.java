@@ -27,6 +27,7 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 @Component("accountMasterLookupRefreshService")
 public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTransformationService<AccountMasterLookupConfiguration>
         implements TransformationService<AccountMasterLookupConfiguration> {
+
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterLookupRefreshFlow";
 
     private static final Log log = LogFactory.getLog(AccountMasterLookupRefreshService.class);

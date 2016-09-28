@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.engine.testframework;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.testng.Assert;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.Source;
@@ -63,6 +67,9 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
+    private SqoopService sqoopService;
+
+    @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
@@ -71,6 +78,26 @@ public abstract class PropDataEngineAbstractTestNGBase extends AbstractTestNGSpr
     protected JdbcTemplate jdbcTemplateBulkDB;
 
     protected String podId;
+
+    protected void uploadBaseAvro(Source baseSource, String baseSourceVersion) {
+        InputStream baseAvroStream = ClassLoader
+                .getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
+                .toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetPath);
+            }
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                    .toString();
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
 
     protected void uploadDataToHdfs(Object[][] data, List<String> colNames, List<Class<?>> colTypes,
                                     String targetAvroPath, String recordName) {

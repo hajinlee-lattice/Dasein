@@ -56,6 +56,9 @@ public class TransformationProgress implements Progress {
     @Column(name = "NumRetries")
     protected int numRetries;
 
+    @Column(name = "BaseSourceVersions")
+    protected String baseSourceVersions;
+
     @Column(name = "Version")
     protected String version;
 
@@ -159,6 +162,14 @@ public class TransformationProgress implements Progress {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getBaseSourceVersions() {
+        return baseSourceVersions;
+    }
+
+    public void setBaseSourceVersions(String baseSourceVersions) {
+        this.baseSourceVersions = baseSourceVersions;
     }
 
     public void setYarnAppId(String yarnAppId) {
