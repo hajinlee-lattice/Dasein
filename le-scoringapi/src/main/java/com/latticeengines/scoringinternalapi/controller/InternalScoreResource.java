@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.monitor.exposed.ratelimit.RateLimit;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
@@ -83,39 +84,49 @@ public class InternalScoreResource extends BaseScoring {
         return getModelCount(request, start, considerAllStatus, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record")
-    public ScoreResponse scorePercentileRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest,
-            @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
+    public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
+            @RequestBody ScoreRequest scoreRequest, //
+            @RequestParam(value = "tenantIdentifier", required = true) //
+            String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         return scorePercentileRecord(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
-            @RequestBody BulkRecordScoreRequest scoreRequest,
-            @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
+    public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
+            @RequestBody BulkRecordScoreRequest scoreRequest, //
+            @RequestParam(value = "tenantIdentifier", required = true) //
+            String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         return scorePercentileRecords(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
-            @RequestBody BulkRecordScoreRequest scoreRequest,
-            @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
+    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
+            @RequestBody BulkRecordScoreRequest scoreRequest, //
+            @RequestParam(value = "tenantIdentifier", required = true) //
+            String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         return scoreRecordsDebug(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")
-    public DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest,
-            @RequestParam(value = "tenantIdentifier", required = true) String tenantIdentifier) {
+    public DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
+            @RequestBody ScoreRequest scoreRequest, //
+            @RequestParam(value = "tenantIdentifier", required = true) //
+            String tenantIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         return scoreProbabilityRecord(request, scoreRequest, customerSpace);
     }

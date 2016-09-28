@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -30,6 +31,9 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
 
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
     private static ObjectMapper om = new ObjectMapper();
+
+    @Value("${scoringapi.score.ratelimit:1800}")
+    private int ratelimit;
 
     @Test(groups = "deployment", enabled = true)
     public void getAllLeadEnrichmentAttributes() {
@@ -205,6 +209,12 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
     public void scoreRecords() throws IOException, InterruptedException {
         final String url = apiHostPort + "/scoreinternal/records";
         runScoringTest(url, true, false);
+    }
+
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "scoreRecords" })
+    public void testScoreLoadLimitReached() throws IOException, InterruptedException {
+        final String url = apiHostPort + "/scoreinternal/records";
+        runScoreLoadLimitTest(url, true, ratelimit);
     }
 
     private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {

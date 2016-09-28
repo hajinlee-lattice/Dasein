@@ -1,8 +1,5 @@
 package com.latticeengines.scoringapi.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.text.ParseException;
 import java.util.List;
 
@@ -16,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -27,9 +22,15 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.monitor.exposed.ratelimit.RateLimit;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
+import com.latticeengines.scoringinternalapi.controller.ScoreRequestRateLimiter;
 import com.wordnik.swagger.annotations.ApiParam;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
@@ -76,36 +77,42 @@ public class ScoreResource extends BaseScoring {
         return getModelCount(request, start, considerAllStatus, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record")
-    public ScoreResponse scorePercentileRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+    public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
+            @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         return scorePercentileRecord(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
+    public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         return scorePercentileRecords(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
+    public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         return scoreRecordsDebug(request, scoreRequest, customerSpace);
     }
 
+    @RateLimit(argumentParser = ScoreRequestRateLimiter.class)
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")
-    public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+    public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
+            @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         return scoreProbabilityRecord(request, scoreRequest, customerSpace);
     }

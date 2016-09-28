@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
+import com.latticeengines.monitor.exposed.ratelimit.RateLimitException;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 
 @ControllerAdvice
@@ -91,6 +92,13 @@ public class ScoringApiExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(Exception ex) {
         return generateExceptionResponse("general_error", ex, true);
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ExceptionHandlerErrors handleException(RateLimitException ex) {
+        return generateExceptionResponseNoAlert("too_many_requests", ex);
     }
 
     @ExceptionHandler

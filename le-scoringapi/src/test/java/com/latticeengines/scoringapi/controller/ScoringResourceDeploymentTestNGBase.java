@@ -49,6 +49,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected boolean shouldPrintPerformanceInfo = true;
     protected int baseAllModelCount = 0;
     protected int baseAllActiveModelCount = 0;
+    private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
 
     @Autowired
     protected InternalScoringApiInterface internalScoringApiProxy;
@@ -327,8 +328,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected void runScoringTest(final String url, InternalResourceRestApiProxy plsRest, String modelId,
             CustomerSpace customerSpace, Tenant tenant, boolean isInternalScoring, boolean isPmmlModel)
             throws IOException, InterruptedException {
-        final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = createModelList(modelId,
-                plsRest, customerSpace, tenant);
+        modelList = createModelList(modelId, plsRest, customerSpace, tenant);
 
         Runnable runnable = createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel, customerSpace);
 
@@ -363,9 +363,50 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         runScoringTest(url, false, false);
     }
 
+    protected void runScoreLoadLimitTest(final String url, final boolean isInternalScoring, int ratelimit)
+            throws IOException, InterruptedException {
+        int numberOfThreads = ratelimit / 200 + 2;
+
+        Runnable runnable = createScoringLoadLimitRunnable(url, modelList, isInternalScoring, false);
+
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            Thread th = new Thread(runnable);
+            threadPerfMap.put(th.getName(), new ArrayList<String>());
+            th.start();
+            threads.add(th);
+        }
+
+        for (Thread th : threads) {
+            th.join();
+        }
+
+        Assert.assertNotNull(exception);
+        Assert.assertNotNull(exception.getMessage());
+        Assert.assertTrue(exception.getMessage().contains("too_many_requests"));
+    }
+
+    private Runnable createScoringLoadLimitRunnable(final String url,
+            final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList,
+            final boolean isInternalScoring, boolean b) {
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    testScore(url, 200, 500000, modelList, isInternalScoring, false, customerSpace);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        return runnable;
+    }
+
     protected void runScoringTest(final String url, final boolean isInternalScoring, boolean isPmmlModel)
             throws IOException, InterruptedException {
-        final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList = createModelList();
+        modelList = createModelList();
 
         Runnable runnable = createScoringRunnable(url, modelList, isInternalScoring, isPmmlModel);
 

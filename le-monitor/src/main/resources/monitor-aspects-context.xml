@@ -15,5 +15,6 @@
     <aop:aspectj-autoproxy/>           
 
     <bean id="metricsAspect" class="com.latticeengines.monitor.exposed.metrics.impl.BaseMetricsAspectImpl" />
+    <bean id="ratelimitAspect" class="com.latticeengines.monitor.exposed.ratelimit.RateLimiterAspect" />
 
 </beans>
