@@ -128,10 +128,6 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                     return false;
                 }
             }
-            for (ModelSummaryDownloadFlag flag : waitingFlags) {
-                flag.setDownloaded(true);
-                modelSummaryDownloadFlagEntityMgr.update(flag);
-            }
         }
         return true;
     }

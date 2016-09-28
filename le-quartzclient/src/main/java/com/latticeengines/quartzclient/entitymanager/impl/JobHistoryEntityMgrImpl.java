@@ -27,6 +27,18 @@ public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl impleme
     }
 
     @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    public void createJobHistory(JobHistory jobHistory) {
+        jobHistoryDao.createJobHistory(jobHistory);
+    }
+
+    @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    public void deleteOldJobHistory(int retainingDays) {
+        jobHistoryDao.deleteOldJobHistory(retainingDays);
+    }
+
+    @Override
     @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public JobHistory getRecentUnfinishedJobHistory(String tenantId, String jobName) {
         return jobHistoryDao.getRecentUnfinishedJobHistory(tenantId, jobName);

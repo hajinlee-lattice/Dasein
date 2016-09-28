@@ -81,7 +81,19 @@ public class PreDefinedServerJob extends QuartzJobBean {
                 jobHistory.setTenantId(tenantId);
                 jobHistory.setTriggeredTime(new Date());
                 jobHistory.setTriggeredJobStatus(TriggeredJobStatus.TRIGGERED);
-                jobHistoryEntityMgr.saveJobHistory(jobHistory);
+                if (lastJobHistory == null) {
+                    jobHistory.setSequenceId((long)0);
+                } else {
+                    jobHistory.setSequenceId(lastJobHistory.getSequenceId() + 1);
+                }
+                jobHistory.setJobIdentifier(String.format("%s:%s:%s", tenantId, jobName,
+                        jobHistory.getSequenceId().toString()));
+                try {
+                    jobHistoryEntityMgr.createJobHistory(jobHistory);
+                } catch (Exception e) {
+                    log.error("One of the quartz clusters has already triggered the job.");
+                    return;
+                }
                 if (checkLastJobFailed(lastJobHistory)) {
                     triggerJobWithSecondaryUrl(jobHistory, jobArgs, secondaryUrl);
                 } else {
@@ -155,13 +167,17 @@ public class PreDefinedServerJob extends QuartzJobBean {
     private Boolean checkAllJobFinished(JobHistory jobHistory, PredefinedJobArguments jobArgs, int timeout, String
             queryApi) {
         if (jobHistory != null) {
+            int timeoutScaler = 1;
             if (jobHistory.getTriggeredJobStatus() != TriggeredJobStatus.START &&
                 jobHistory.getTriggeredJobStatus() != TriggeredJobStatus.TRIGGERED) {
                 return true;
             }
+            if (jobHistory.getTriggeredJobStatus() == TriggeredJobStatus.TRIGGERED) {
+                timeoutScaler = 5;
+            }
             Date now = new Date(System.currentTimeMillis());
             int elapsedSeconds = (int) (now.getTime() - jobHistory.getTriggeredTime().getTime()) / 1000;
-            if (elapsedSeconds > timeout) {
+            if (elapsedSeconds > timeout * timeoutScaler) {
                 String executionHost = jobHistory.getExecutionHost();
                 URI queryUrl = UriComponentsBuilder
                         .fromUriString(String.format(queryApi, executionHost)).build().toUri();

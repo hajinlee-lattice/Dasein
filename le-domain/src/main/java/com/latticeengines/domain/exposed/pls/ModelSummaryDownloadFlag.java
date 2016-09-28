@@ -26,10 +26,6 @@ public class ModelSummaryDownloadFlag implements HasPid {
     @Column(name = "MARK_TIME")
     private Date markTime;
 
-    @JsonProperty("downloaded")
-    @Column(name = "DOWNLOADED")
-    private boolean downloaded;
-
     @Override
     public Long getPid() {
         return pid;
@@ -56,11 +52,4 @@ public class ModelSummaryDownloadFlag implements HasPid {
         this.markTime = markTime;
     }
 
-    public boolean getDownloaded() {
-        return downloaded;
-    }
-
-    public void setDownloaded(boolean downloaded) {
-        this.downloaded = downloaded;
-    }
 }

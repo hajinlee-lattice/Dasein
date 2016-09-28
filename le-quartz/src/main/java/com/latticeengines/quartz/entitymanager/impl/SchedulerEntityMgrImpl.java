@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.quartz.service.JobHistoryCleanupJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -52,6 +53,12 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
 
     @Value("${quartz.predefined.jobs.enabled}")
     private boolean addPredefinedJobs;
+
+    @Value("${quartz.scheduler.jobs.history.retaining.days:30}")
+    private int jobHistoryRetainingDays;
+
+    @Value("${quartz.scheduler.jobs.history.cleanup.trigger:0 0 5 * * ?}")
+    private String jobHistoryCleanupJobCronTrigger;
 
     @Override
     public Boolean addJob(String tenantId, JobConfig jobConfig) {
@@ -211,6 +218,32 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             }
         } else {
             log.info("Predefined jobs will not added due to flag setting.");
+        }
+        addJobHistoryCleanupJob();
+    }
+
+    private void addJobHistoryCleanupJob() {
+        JobKey jobKey = new JobKey("jobHistoryCleanupJob", "BackgroundJobs");
+        try {
+            if (scheduler.checkExists(jobKey)) {
+                log.info("Job history clean up job already exists");
+                return;
+            } else {
+                JobDetail jobDetail = JobBuilder
+                        .newJob(com.latticeengines.quartz.service.JobHistoryCleanupJob.class)
+                        .withIdentity(jobKey).build();
+                jobDetail.getJobDataMap().put(JobHistoryCleanupJob.RETAININGDAYS, jobHistoryRetainingDays);
+                CronTrigger trigger = TriggerBuilder
+                        .newTrigger()
+                        .withIdentity("jobHistoryCleanupJob" + "_trigger",
+                                "BackgroundJobs")
+                        .withSchedule(
+                                CronScheduleBuilder.cronSchedule(jobHistoryCleanupJobCronTrigger)
+                                        .withMisfireHandlingInstructionDoNothing()).build();
+                scheduler.scheduleJob(jobDetail, trigger);
+            }
+        } catch (SchedulerException e) {
+            log.error(e.getMessage());
         }
     }
 

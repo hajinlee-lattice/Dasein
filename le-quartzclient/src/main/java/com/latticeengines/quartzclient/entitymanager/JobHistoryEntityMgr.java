@@ -15,4 +15,8 @@ public interface JobHistoryEntityMgr extends BaseJobHistoryEntityMgr {
 
     void saveJobHistory(JobHistory jobHistory);
 
+    void createJobHistory(JobHistory jobHistory);
+
+    void deleteOldJobHistory(int retainingDays);
+
 }

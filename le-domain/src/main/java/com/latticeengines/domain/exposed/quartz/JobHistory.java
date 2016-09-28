@@ -38,6 +38,14 @@ public class JobHistory implements HasPid, Serializable {
     @Column(name = "TenantId", nullable = false)
     private String tenantId;
 
+    @JsonProperty("sequence_id")
+    @Column(name = "SequenceId", nullable = false)
+    private Long sequenceId;
+
+    @JsonProperty("job_identifier")
+    @Column(name = "JobIdentifier", unique = true, nullable = false)
+    private String jobIdentifier;
+
     @JsonProperty("triggered_job_handle")
     @Column(name = "TriggeredJobHandle", nullable = true)
     private String triggeredJobHandle;
@@ -83,6 +91,22 @@ public class JobHistory implements HasPid, Serializable {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public void setSequenceId(Long sequenceId) {
+        this.sequenceId = sequenceId;
+    }
+
+    public Long getSequenceId() {
+        return sequenceId;
+    }
+
+    public void setJobIdentifier(String jobIdentifier) {
+        this.jobIdentifier = jobIdentifier;
+    }
+
+    public String getJobIdentifier() {
+        return jobIdentifier;
     }
 
     public String getTriggeredJobHandle() {

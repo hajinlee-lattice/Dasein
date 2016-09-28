@@ -40,10 +40,9 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
     public List<ModelSummaryDownloadFlag> getDownloadedFlags() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where DOWNLOADED = :downloaded order by PID",
+        String queryStr = String.format("from %s",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setBoolean("downloaded", true);
         List<?> list = query.list();
         if (list.size() == 0) {
             return null;
@@ -60,10 +59,9 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
     public List<ModelSummaryDownloadFlag> getWaitingFlags() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where DOWNLOADED = :downloaded order by PID",
+        String queryStr = String.format("from %s",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setBoolean("downloaded", false);
         List<?> list = query.list();
         if (list.size() == 0) {
             return null;

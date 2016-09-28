@@ -24,7 +24,6 @@ public class ModelDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<ModelSumma
         ModelSummaryDownloadFlag flag = new ModelSummaryDownloadFlag();
         flag.setTenantId(tenantId);
         flag.setMarkTime(new Date(System.currentTimeMillis()));
-        flag.setDownloaded(false);
         modelDownloadFlagDao.create(flag);
     }
 
