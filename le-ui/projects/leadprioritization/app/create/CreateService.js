@@ -155,7 +155,7 @@ angular
             headers: { 'Content-Type': 'application/json' }
         }).then(function(data) {
             console.log('GetSchemaToLatticeFields', csvFileName, data);
-            deferred.resolve(data.Result);
+            deferred.resolve(data.data.Result);
         });
 
         return deferred.promise;
