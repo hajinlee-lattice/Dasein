@@ -89,6 +89,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName());
         Assert.assertNotNull(enableLatticeMarketoCredentialPageFeatureFlag);
 
+        FeatureFlagDefinition enableInternalEnrichmentAttributesFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        Assert.assertNotNull(enableInternalEnrichmentAttributesFeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -146,6 +150,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableLatticeMarketoCredentialPageFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(enableInternalEnrichmentAttributesFeatureFlag.getConfigurable()
+                && enableInternalEnrichmentAttributesFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enableInternalEnrichmentAttributesFeatureFlag.getDisplayName() != null
+                && enableInternalEnrichmentAttributesFeatureFlag.getDocumentation() != null);
 
     }
 

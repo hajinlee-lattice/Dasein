@@ -44,7 +44,7 @@
       "displayName": "LP3_${TENANT}",
       "description": "A LP3 solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSetting\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"UseAccountMaster\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false,\"EnableLatticeMarketoCredentialPage\":false}"
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true,\"EnablePocTransform\":false,\"UseSalesforceSetting\":true,\"UseMarketoSettings\":true,\"UseEloquaSettings\":true,\"UseAccountMaster\":true,\"AllowPivotFile\":false,\"UseDnbRtsAndModeling\":false,\"EnableLatticeMarketoCredentialPage\":false,\"EnableInternalEnrichmentAttributes\":false}"
   },
   "TenantInfo": {
     "properties": {

@@ -120,6 +120,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         useDnbRtsAndModelingProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> enableLatticeMarketoCredentialPageProdSet = new HashSet<LatticeProduct>();
         enableLatticeMarketoCredentialPageProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> enableInternalEnrichmentAttributesProdSet = new HashSet<LatticeProduct>();
+        enableInternalEnrichmentAttributesProdSet.add(LatticeProduct.LPA3);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -156,6 +158,10 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
                 LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getDocumentation(),
                 enableLatticeMarketoCredentialPageProdSet, true);
+        FeatureFlagDefinition enableInternalEnrichmentAttributesFeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getDocumentation(),
+                enableInternalEnrichmentAttributesProdSet, true);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -175,6 +181,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 useDnbRtsAndModelingFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName(),
                 enableLatticeMarketoCredentialPageFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
+                enableInternalEnrichmentAttributesFeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,
