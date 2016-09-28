@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -140,6 +141,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     @Override
     public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
+        fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
+        fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
