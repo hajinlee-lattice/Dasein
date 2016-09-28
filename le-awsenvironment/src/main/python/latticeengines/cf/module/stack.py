@@ -3,8 +3,10 @@ import json
 import os
 import sys
 import time
+import tempfile
 from boto3.s3.transfer import S3Transfer
 
+# sys.path.append( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
 from .autoscaling import AutoScalingGroup, LaunchConfiguration
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
@@ -13,6 +15,7 @@ from .iam import InstanceProfile
 from .parameter import *
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
+# from conf import AwsEnvironment
 from ...conf import AwsEnvironment
 
 SUBNETS = [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3]
@@ -103,15 +106,25 @@ class Stack(Template):
         print 'Stack template is valid.'
 
     def upload(self, environment, prefix):
-        bucket = AwsEnvironment(environment).cf_bucket()
-        temp_file = "/tmp/zookeeper.json"
-        with open(temp_file, 'w') as tf:
-            tf.write(self.json())
-        print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", bucket, prefix, 'template.json') + ' ..')
-        client = boto3.client('s3')
-        transfer = S3Transfer(client)
-        transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'))
-        print 'done.'
+
+        try:
+            bucket = AwsEnvironment(environment).cf_bucket()
+            fi, temp_file =   tempfile.mkstemp()
+            os.write(fi, self.json())
+            os.close(fi)
+            print 'uploading template to %s' % (os.path.join("https://s3.amazonaws.com", bucket, prefix, 'template.json') + ' ..')
+            client = boto3.client('s3')
+            transfer = S3Transfer(client)
+            transfer.upload_file(temp_file, bucket, os.path.join(prefix, 'template.json'))
+            print 'done.'
+        finally:
+            os.unlink(temp_file)
+            try:
+                os.close(fi)
+            except:
+                #assume here because file already closed
+                pass
+
 
     def __mappings(self):
         json_file = os.path.join(TEMPLATE_DIR, 'common', 'common_mappings.json')
