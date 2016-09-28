@@ -4,7 +4,10 @@ angular.module('mainApp.create.csvBulkUpload', [
     'mainApp.models.leadenrichment',
     'mainApp.core.utilities.NavUtility'
 ])
-.controller('csvBulkUploadController', function($state, $stateParams, ResourceUtility, ImportService, ImportStore, ScoreLeadEnrichmentModal, RequiredFields, Model, IsPmml) {
+.controller('csvBulkUploadController', function(
+    $state, $stateParams, ResourceUtility, ImportService, ImportStore, StringUtility, 
+    ScoreLeadEnrichmentModal, RequiredFields, Model, IsPmml
+) {
     var vm = this;
 
     vm.importErrorMsg = "";
@@ -18,7 +21,7 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.schema = Model.ModelDetails.SourceSchemaInterpretation;
 
     vm.params = {
-        url: '/pls/scores/fileuploads',
+        url: '/pls/scores/fileuploads/new',
         label: (vm.schema == 'SalesforceLead' ? 'Lead' : 'Account') + ' List',
         infoTemplate: (vm.schema == 'SalesforceLead' ? 'Upload a CSV file with leads to score. The list of expected column headers is displayed below.' : 'Upload a CSV file with accounts to score. The list of expected column headers is displayed below.'),
         defaultMessage: "Example: us-target-list.csv",
@@ -38,6 +41,7 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.fileDone = function(result) {
         if (result.Result && result.Result.name) {
             vm.uploaded = true;
+            vm.Result = result.Result;
             vm.fileName = result.Result.name;
         }
     }
@@ -51,6 +55,24 @@ angular.module('mainApp.create.csvBulkUpload', [
     }
 
     vm.clickNext = function() {
+        console.log(vm.Result);
+        var fileName = fileName || vm.fileName,
+            modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.Result.display_name),
+            metaData = vm.metadata = vm.metadata || {};
+
+        metaData.name = fileName;
+        metaData.modelName = modelName;
+        metaData.displayName = vm.Result.display_name;
+        metaData.description = vm.Result.description;
+        metaData.schemaInterpretation = vm.Result.schema_interpretation;
+
+        console.log(metaData);
+        ImportStore.Set(fileName, metaData);
+
+        setTimeout(function() {
+            $state.go('home.model.scoring.mapping', { csvFileName: fileName });
+        }, 1);
+        /*
         if (!IsPmml) {
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.params.modelId, vm.fileName);
         } else {
@@ -59,6 +81,6 @@ angular.module('mainApp.create.csvBulkUpload', [
             ImportService.StartTestingSet(vm.params.modelId, vm.fileName, false).then(function(result) {
                 $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
             });
-        }
+        }*/
     }
 });

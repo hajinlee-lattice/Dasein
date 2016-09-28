@@ -2,14 +2,19 @@ angular
 .module('lp.create.import')
 .service('ImportStore', function($q) {
     var ImportStore = this;
+
     this.files = {};
+
     this.FieldDocuments = {};
+    this.CurrentFieldMapping = null;
+    this.ScoreFieldDocuments = {};
+    this.ScoreCurrentFieldMapping = null;
+
     this.advancedSettings = {
         oneLeadPerDomain: false,
         includePersonalEmailDomains: true,
         useLatticeAttributes: true
     };
-    this.CurrentFieldMapping = null;
 
     this.SetAdvancedSettings = function(key, value) {
         this.advancedSettings[key] = value;
@@ -50,8 +55,22 @@ angular
     this.SetFieldDocument = function(name, data) {
         this.FieldDocuments[name] = data;
     }
+
+    this.GetScoreFieldDocument = function(name) {
+        var deferred = $q.defer();
+
+        if (this.ScoreFieldDocuments[name]) {
+            deferred.resolve(this.ScoreFieldDocuments[name]);
+        }
+
+        return deferred.promise;
+    }
+
+    this.SetScoreFieldDocument = function(name, data) {
+        this.ScoreFieldDocuments[name] = data;
+    }
 })
-.service('ImportService', function($q, $http, ResourceUtility, BrowserStorageUtility, ImportStore, ServiceErrorUtility) {
+.service('ImportService', function($q, $http, $stateParams, ResourceUtility, BrowserStorageUtility, ImportStore, ServiceErrorUtility) {
     this.Upload = function(options) {
         var deferred = $q.defer(),
             formData = new FormData(),
@@ -123,35 +142,44 @@ angular
         return deferred.promise;
     };
 
-    this.GetSchemaToLatticeFields = function() {
+    this.GetSchemaToLatticeFields = function(csvFileName) {
         var deferred = $q.defer();
+        var params = csvFileName ? { 'displayName': csvFileName } : {};
 
         $http({
             method: 'GET',
-            url: '/pls/models/uploadfile/latticeschema',
+            url: csvFileName
+                ? '/pls/scores/fileuploads/headerfields'
+                : '/pls/models/uploadfile/latticeschema',
+            params: params,
             headers: { 'Content-Type': 'application/json' }
-        })
-        .success(function(data, status, headers, config) {
-            deferred.resolve(data.Result);
-        })
-        .error(function(data, status, headers, config) {
+        }).then(function(data) {
+            console.log('GetSchemaToLatticeFields', csvFileName, data);
             deferred.resolve(data.Result);
         });
 
         return deferred.promise;
-    }
+    };
 
-    this.GetFieldDocument = function(FileName) {
+    this.GetFieldDocument = function(FileName, score) {
         var deferred = $q.defer();
-        var schema = ImportStore.Get(FileName).schemaInterpretation;
+        var modelId = $stateParams.modelId;
+        var metaData = ImportStore.Get(FileName);
+        var schema = metaData.schemaInterpretation;
+        var params = score ? { 'modelId': modelId, 'displayName': FileName } : { 'schema': schema };
+
+        console.log(modelId, metaData);
 
         $http({
-            method: 'GET',
-            url: '/pls/models/uploadfile/' + FileName + '/fieldmappings',
-            headers: { 'Content-Type': 'application/json' },
-            params: { 'schema': schema }
+            method: score ? 'POST' : 'GET',
+            url: score
+                ? '/pls/scores/fileuploads/fieldmappings'
+                : '/pls/models/uploadfile/' + FileName + '/fieldmappings',
+            params: params,
+            headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
+            console.log('GetFieldDocument', score, modelId, params, data);
             if (data == null || !data.Success) {
                 if (data && data.Errors.length > 0) {
                     var errors = data.Errors.join('\n');
@@ -183,13 +211,15 @@ angular
         return deferred.promise;
     };
 
-    this.SaveFieldDocuments = function(FileName, FieldDocument) {
+    this.SaveFieldDocuments = function(FileName, FieldDocument, score) {
         var deferred = $q.defer();
         var result;
 
         $http({
             method: 'POST',
-            url: '/pls/models/uploadfile/fieldmappings',
+            url: score 
+                ? '/pls/models/uploadfile/fieldmappings'
+                : '/pls/models/uploadfile/fieldmappings',
             headers: { 'Content-Type': 'application/json' },
             params: { 'displayName': FileName },
             data: {

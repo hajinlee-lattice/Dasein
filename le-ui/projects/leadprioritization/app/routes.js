@@ -291,41 +291,6 @@ angular
                 }   
             }
         })
-        .state('home.model.scoring', {
-            url: '/scoring',
-            redirectto: 'model.scoring.import',
-            views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'Import a Report to Score';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    resolve: {
-                        RequiredFields: function($q, $http, $stateParams) {
-                            var deferred = $q.defer(),
-                                modelId = $stateParams.modelId;
-
-                            $http({
-                                'method': "GET",
-                                'url': '/pls/modelsummaries/metadata/required/' + modelId
-                            }).then(function(response) {
-                                deferred.resolve(response.data);
-                            });
-
-                            return deferred.promise; 
-                        }
-                    },
-                    controller: 'csvBulkUploadController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/create/scorefile/ScoreFileView.html'
-                }   
-            }
-        })
         .state('home.model.refine', {
             url: '/refine',
             params: {

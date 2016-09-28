@@ -54,6 +54,10 @@ angular
                 var response = response.resultObj;
 
                 if (modelId) {
+                    if (!JobsStore.data.models[modelId]) {
+                        JobsStore.data.models[modelId] = [];
+                    }
+                    
                     JobsStore.data.models[modelId].length = 0;
                 } else {
                     JobsStore.data.jobs.length = 0;

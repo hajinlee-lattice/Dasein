@@ -70,6 +70,79 @@ angular
                 }   
             }
         })
+        .state('home.model.scoring', {
+            url: '/scoring',
+            redirectto: 'model.scoring.import',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Import a Report to Score';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    resolve: {
+                        RequiredFields: function($q, $http, $stateParams) {
+                            var deferred = $q.defer(),
+                                modelId = $stateParams.modelId;
+
+                            $http({
+                                'method': "GET",
+                                'url': '/pls/modelsummaries/metadata/required/' + modelId
+                            }).then(function(response) {
+                                deferred.resolve(response.data);
+                            });
+
+                            return deferred.promise; 
+                        }
+                    },
+                    controller: 'csvBulkUploadController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/create/scorefile/ScoreFileView.html'
+                }   
+            }
+        })
+        .state('home.model.scoring.mapping', {
+            url: '/:csvFileName/mapping',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Score A File - Field Mapping'
+            },
+            views: {
+                "summary@": {
+                    template: ''
+                },
+                "main@": {
+                    resolve: {
+                        UnmappedFields: function($q, $stateParams, ImportService, ImportStore) {
+                            var deferred = $q.defer();
+
+                            ImportService.GetSchemaToLatticeFields($stateParams.csvFileName).then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        FieldDocument: function($q, $stateParams, ImportService, ImportStore) {
+                            var deferred = $q.defer();
+
+                            ImportService.GetFieldDocument($stateParams.csvFileName, true).then(function(result) {
+                                ImportStore.SetFieldDocument($stateParams.csvFileName, result.Result);
+                                deferred.resolve(result.Result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controllerAs: 'vm',
+                    controller: 'ScoreFieldsController',
+                    templateUrl: 'app/create/scorefields/ScoreFieldsView.html'
+                }   
+            }
+        })
         .state('home.models.import.job', {
             url: '/:applicationId/job',
             params: {
