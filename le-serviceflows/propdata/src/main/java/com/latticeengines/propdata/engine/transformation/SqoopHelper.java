@@ -2,6 +2,7 @@ package com.latticeengines.propdata.engine.transformation;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.Progress;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.datacloud.manage.Progress;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
 @Component
-public class HadoopHelper extends HdfsHelper {
+public class SqoopHelper {
     private static final int SECONDS_IN_24_HOURS = 24 * 3600;
 
     private static final String SQOOP_OPTION_WHERE = "--where";
@@ -33,6 +34,9 @@ public class HadoopHelper extends HdfsHelper {
 
     @Autowired
     protected SqoopService sqoopService;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Value("${propdata.collection.host}")
     private String dbHost;
@@ -57,7 +61,7 @@ public class HadoopHelper extends HdfsHelper {
         try {
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, splitColumn, whereClause);
             ApplicationId appId = sqoopService.importTable(importer);
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(getYarnConfiguration(), appId,
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId,
                     SECONDS_IN_24_HOURS);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "

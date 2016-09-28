@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.log4j.LogManager;
@@ -16,8 +18,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -27,27 +31,29 @@ import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.propdata.engine.transformation.ProgressHelper;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>
-        extends TransformationServiceBase implements TransformationService<T> {
-    private static final String SUCCESS_FLAG = "_SUCCESS";
+        implements TransformationService<T> {
 
     private static Logger LOG = LogManager.getLogger(AbstractTransformationService.class);
 
+    private static final String SUCCESS_FLAG = "_SUCCESS";
     private static final String TRANSFORMATION_CONF = "_CONF";
-
     private static final String AVRO_REGEX = "*.avro";
-
     protected static final String HDFS_PATH_SEPARATOR = "/";
+    private static final String AVRO_EXTENSION = ".avro";
+    private static final String WILD_CARD = "*";
+    protected static final String VERSION = "VERSION";
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
-    protected TransformationProgressEntityMgr transformationProgressEntityMgr;
+    protected TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -59,19 +65,16 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
-    protected SimpleTransformationDataFlowService dataFlowService;
+    private ProgressHelper progressHelper;
 
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return transformationProgressEntityMgr;
-    }
+    abstract Log getLogger();
 
     abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 
     abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
             List<SourceColumn> sourceColumns);
 
-    abstract T readTransformationConfigurationObject(String confStr) throws IOException;
+    abstract T parseTransConfJsonInsideWorkflow(String confStr) throws IOException;
 
     protected abstract TransformationProgress transformHook(TransformationProgress progress,
             T transformationConfiguration);
@@ -97,7 +100,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             if (StringUtils.isNotEmpty(actualCurrentVersion) && actualCurrentVersion.equals(expectedCurrentVersion)) {
                 // latest version is already processed
                 return Collections.emptyList();
-            } else if (transformationProgressEntityMgr.findRunningProgress(source, expectedCurrentVersion) != null) {
+            } else if (progressEntityMgr.findRunningProgress(source, expectedCurrentVersion) != null) {
                 // latest version is being processed
                 return Collections.emptyList();
             } else {
@@ -113,18 +116,16 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         checkTransformationConfigurationValidity(transformationConfiguration);
         TransformationProgress progress;
         try {
-            progress = getProgressEntityMgr().findEarliestFailureUnderMaxRetry(getSource(),
-                    transformationConfiguration.getVersion());
+            progress = progressEntityMgr.findEarliestFailureUnderMaxRetry(getSource(), transformationConfiguration.getVersion());
 
             if (progress == null) {
-                progress = getProgressEntityMgr().insertNewProgress(getSource(),
-                        transformationConfiguration.getVersion(), creator);
+                progress = progressEntityMgr.insertNewProgress(getSource(), transformationConfiguration.getVersion(), creator);
             } else {
                 LOG.info("Retrying " + progress.getRootOperationUID());
                 progress.setNumRetries(progress.getNumRetries() + 1);
-                progress = getProgressEntityMgr().updateStatus(progress, ProgressStatus.NEW);
+                progress = progressEntityMgr.updateStatus(progress, ProgressStatus.NEW);
             }
-            writeTransformationConfig(transformationConfiguration, progress);
+            writeTransConfOutsideWorkflow(transformationConfiguration, progress);
         } catch (Exception e) {
             throw new RuntimeException(
                     "Failed to start a new progress for " + transformationConfiguration.getSourceName(), e);
@@ -134,18 +135,18 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return progress;
     }
 
-    protected void writeTransformationConfig(T transformationConfiguration, TransformationProgress progress)
+    protected void writeTransConfOutsideWorkflow(T transformationConfiguration, TransformationProgress progress)
             throws IOException {
         transformationConfiguration.setRootOperationId(progress.getRootOperationUID());
-        HdfsUtils.writeToFile(getYarnConfiguration(),
+        HdfsUtils.writeToFile(yarnConfiguration,
                 initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF,
                 JsonUtils.serialize(transformationConfiguration));
     }
 
-    protected T readTransformationConfig(TransformationProgress progress) throws IOException {
+    protected T readTransConfInsideWorkflow(TransformationProgress progress) throws IOException {
         String confFilePath = initialDataFlowDirInHdfs(progress) + HDFS_PATH_SEPARATOR + TRANSFORMATION_CONF;
-        String confStr = HdfsUtils.getHdfsFileContents(getYarnConfiguration(), confFilePath);
-        return readTransformationConfigurationObject(confStr);
+        String confStr = HdfsUtils.getHdfsFileContents(yarnConfiguration, confFilePath);
+        return parseTransConfJsonInsideWorkflow(confStr);
     }
 
     @Override
@@ -153,13 +154,13 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMING);
+        progressEntityMgr.updateStatus(progress, ProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
 
         transformHook(progress, transformationConfiguration);
 
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
-        return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
+        return progressEntityMgr.updateStatus(progress, ProgressStatus.FINISHED);
     }
 
     @Override
@@ -187,8 +188,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     protected List<String> findSortedVersionsInDir(String dir, String cutoffDateVersion) throws IOException {
         List<String> versionDirs = new ArrayList<>();
 
-        if (HdfsUtils.fileExists(getYarnConfiguration(), dir)) {
-            List<String> fullVersionDirs = HdfsUtils.getFilesForDir(getYarnConfiguration(), dir);
+        if (HdfsUtils.fileExists(yarnConfiguration, dir)) {
+            List<String> fullVersionDirs = HdfsUtils.getFilesForDir(yarnConfiguration, dir);
             if (!CollectionUtils.isEmpty(fullVersionDirs)) {
                 java.util.Collections.sort(fullVersionDirs);
                 java.util.Collections.reverse(fullVersionDirs);
@@ -225,7 +226,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected boolean isAlreadyBeingProcessed(Source source, String version) {
-        return transformationProgressEntityMgr.findRunningProgress(source, version) != null;
+        return progressEntityMgr.findRunningProgress(source, version) != null;
     }
 
     @Override
@@ -296,6 +297,106 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         }
 
         return false;
+    }
+
+    public TransformationProgress findRunningJob() {
+        return progressHelper.findRunningJob(progressEntityMgr, getSource());
+    }
+
+    public TransformationProgress findJobToRetry(String version) {
+        return progressHelper.findJobToRetry(progressEntityMgr, getSource(), version);
+    }
+
+    protected boolean checkProgressStatus(TransformationProgress progress) {
+        return progressHelper.checkProgressStatus(progress, getLogger());
+    }
+
+    protected void logIfRetrying(TransformationProgress progress) {
+        progressHelper.logIfRetrying(progress, getLogger());
+    }
+
+    protected String snapshotDirInHdfs(TransformationProgress progress) {
+        return hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
+    }
+
+    protected boolean cleanupHdfsDir(String targetDir, TransformationProgress progress) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            }
+        } catch (Exception e) {
+            LoggingUtils.logError(getLogger(), progress, "Failed to cleanup hdfs dir " + targetDir, e);
+            return false;
+        }
+        return true;
+    }
+
+    public String getVersionString(TransformationProgress progress) {
+        return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
+    }
+
+    protected void extractSchema(TransformationProgress progress, String avroDir) throws Exception {
+        String version = getVersion(progress);
+        String avscPath = hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
+        if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
+            HdfsUtils.rmdir(yarnConfiguration, avscPath);
+        }
+
+        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
+                avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_EXTENSION);
+        if (files.size() > 0) {
+            String avroPath = files.get(0);
+            if (HdfsUtils.fileExists(yarnConfiguration, avroPath)) {
+                Schema schema = AvroUtils.getSchema(yarnConfiguration, new org.apache.hadoop.fs.Path(avroPath));
+                HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
+            }
+        } else {
+            throw new IllegalStateException("No avro file found at " + avroDir);
+        }
+    }
+
+    public void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {
+        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, getLogger());
+    }
+
+    protected TransformationProgress finishProgress(TransformationProgress progress) {
+        return progressHelper.finishProgress(progressEntityMgr, progress, getLogger());
+    }
+
+    protected String sourceDirInHdfs(Source source) {
+        String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source).toString();
+        getLogger().info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        return sourceDirInHdfs;
+    }
+
+    protected String sourceVersionDirInHdfs(TransformationProgress progress) {
+        String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(getSource(), progress.getVersion())
+                .toString();
+        getLogger().info("sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        return sourceDirInHdfs;
+    }
+
+    protected String initialDataFlowDirInHdfs(TransformationProgress progress) {
+        String workflowDir = dataFlowDirInHdfs(progress, CollectionDataFlowKeys.TRANSFORM_FLOW);
+        getLogger().info("initialDataFlowDirInHdfs for " + getSource().getSourceName() + " = " + workflowDir);
+        return workflowDir;
+    }
+
+    protected String dataFlowDirInHdfs(TransformationProgress progress, String dataFlowName) {
+        String dataflowDir = hdfsPathBuilder.constructWorkFlowDir(getSource(), dataFlowName)
+                .append(progress.getRootOperationUID()).toString();
+        getLogger().info("dataFlowDirInHdfs for " + getSource().getSourceName() + " = " + dataflowDir);
+        return dataflowDir;
+    }
+
+    protected String finalWorkflowOuputDir(TransformationProgress progress) {
+        // Firehose transformation has special setting. Otherwise, it is the
+        // default dataFlowDir
+        return initialDataFlowDirInHdfs(progress);
+    }
+
+    protected String getVersion(TransformationProgress progress) {
+        return progress.getVersion();
     }
 
 }

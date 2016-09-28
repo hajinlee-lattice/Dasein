@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.configuration.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ public class HGDataCleanConfiguration implements TransformationConfiguration {
     private String rootOperationId;
     private List<SourceColumn> sourceColumns = new ArrayList<SourceColumn>();
     private InputSourceConfig inputSourceConfig = null;
+    private Date fakedCurrentDate;
 
     @Override
     public void setSourceName(String sourceName) {
@@ -76,4 +78,11 @@ public class HGDataCleanConfiguration implements TransformationConfiguration {
     public void setSourceColumns(List<SourceColumn> sourceColumns) {
     }
 
+    public Date getFakedCurrentDate() {
+        return fakedCurrentDate;
+    }
+
+    public void setFakedCurrentDate(Date fakedCurrentDate) {
+        this.fakedCurrentDate = fakedCurrentDate;
+    }
 }

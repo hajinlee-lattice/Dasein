@@ -32,8 +32,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
 
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
 
-    private static final String VERSION = "VERSION";
-
     @Autowired
     private TransformationProgressEntityMgr progressEntityMgr;
 
@@ -46,11 +44,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
     }
 
     @Override
@@ -87,7 +80,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     }
 
     @Override
-    BomboraDepivotConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    BomboraDepivotConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, BomboraDepivotConfiguration.class);
     }
 

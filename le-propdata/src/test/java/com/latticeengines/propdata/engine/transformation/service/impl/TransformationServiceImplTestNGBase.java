@@ -4,8 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +42,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     Collection<TransformationProgress> progresses = new HashSet<>();
     protected String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
     protected String targetVersion = baseSourceVersion;
+    protected Calendar calendar = GregorianCalendar.getInstance();
 
     abstract TransformationService<T> getTransformationService();
 

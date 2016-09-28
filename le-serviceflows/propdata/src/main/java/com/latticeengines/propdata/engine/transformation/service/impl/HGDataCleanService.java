@@ -10,7 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGDataClean;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
@@ -18,7 +20,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.impl.HGDa
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("hgDataCleanService")
-public class HGDataCleanService extends SingleDataFlowTransformationServiceBase<HGDataCleanConfiguration>
+public class HGDataCleanService extends SimpleTransformationServiceBase<HGDataCleanConfiguration, TransformationFlowParameters>
         implements TransformationService<HGDataCleanConfiguration> {
 
     private static final Log log = LogFactory.getLog(HGDataCleanService.class);
@@ -63,7 +65,18 @@ public class HGDataCleanService extends SingleDataFlowTransformationServiceBase<
     }
 
     @Override
-    HGDataCleanConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    HGDataCleanConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return null;
+    }
+
+    @Override
+    protected TransformationFlowParameters getDataFlowParameters(TransformationProgress progress,
+                                                                 HGDataCleanConfiguration transformationConfiguration) {
+        TransformationFlowParameters parameters = new TransformationFlowParameters();
+        Date fakedNow = transformationConfiguration.getFakedCurrentDate();
+        if (fakedNow != null) {
+            parameters.setFakedCurrentTime(fakedNow);
+        }
+        return parameters;
     }
 }

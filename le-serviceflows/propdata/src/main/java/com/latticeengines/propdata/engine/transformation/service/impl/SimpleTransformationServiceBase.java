@@ -3,16 +3,32 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public abstract class SingleDataFlowTransformationServiceBase<T extends TransformationConfiguration>
+/**
+ * This is the base implementation of the transformatin service
+ * for simpliest sources: single base source, single dataflow.
+ */
+public abstract class SimpleTransformationServiceBase<T extends TransformationConfiguration, P extends TransformationFlowParameters>
         extends AbstractTransformationService<T> {
 
+    @Autowired
+    protected SimpleTransformationDataFlowService dataFlowService;
+
     protected abstract String getDataFlowBeanName();
+
+    protected abstract P getDataFlowParameters(TransformationProgress progress, T transformationConfiguration);
+
+    @Override
+    public boolean isManualTriggerred() {
+        return true;
+    }
 
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
         String workflowDir = initialDataFlowDirInHdfs(progress);
@@ -29,7 +45,7 @@ public abstract class SingleDataFlowTransformationServiceBase<T extends Transfor
             }
             baseSourceVersionMap.put(baseSource, baseSourceVersion);
 
-            TransformationFlowParameters parameters = new TransformationFlowParameters();
+            P parameters = getDataFlowParameters(progress, transformationConfiguration);
 
             dataFlowService.executeDataFlow(getSource(), workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
                     parameters);

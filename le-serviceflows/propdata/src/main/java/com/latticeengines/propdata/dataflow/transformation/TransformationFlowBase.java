@@ -4,14 +4,14 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public abstract class TransformationFlowBase<T extends TransformationConfiguration>
-        extends TypesafeDataFlowBuilder<TransformationFlowParameters> {
+public abstract class TransformationFlowBase<C extends TransformationConfiguration, P extends TransformationFlowParameters>
+        extends TypesafeDataFlowBuilder<P> {
 
-    protected T transformationConfiguration;
+    protected C transformationConfiguration;
 
     protected abstract Class<? extends TransformationConfiguration> getTransConfClass();
 
-    protected void readTransformationConfiguration(TransformationFlowParameters parameters) {
+    protected void readTransformationConfiguration(P parameters) {
 
     }
 

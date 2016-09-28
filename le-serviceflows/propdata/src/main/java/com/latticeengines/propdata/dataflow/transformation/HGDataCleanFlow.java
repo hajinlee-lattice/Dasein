@@ -2,6 +2,7 @@ package com.latticeengines.propdata.dataflow.transformation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +20,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.configuration.impl.HGDataCleanConfiguration;
 
 @Component("hgDataCleanFlow")
-public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfiguration> {
+public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfiguration, TransformationFlowParameters> {
 
     private static final String domainField = "URL";
     private static final Long ONE_MONTH = TimeUnit.DAYS.toMillis(30);
@@ -59,8 +60,14 @@ public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfigura
         aggregated = aggregated.addFunction("LocationCount.intValue()", new FieldList("LocationCount"),
                 new FieldMetadata("LocationCount", Integer.class));
 
-        aggregated = aggregated.addTimestamp("Creation_Date");
-        aggregated = aggregated.addTimestamp("LE_Last_Upload_Date");
+        Date now = new Date();
+        Date fakedCurrentDate = parameters.getFakedCurrentTime();
+        if (fakedCurrentDate != null) {
+            now = fakedCurrentDate;
+        }
+
+        aggregated = aggregated.addTimestamp("Creation_Date", now);
+        aggregated = aggregated.addTimestamp("LE_Last_Upload_Date", now);
 
         aggregated = aggregated.rename(
                 new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2", "HGCategory1Parent",

@@ -32,8 +32,6 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
 
     private static final Log log = LogFactory.getLog(AccountMasterLookupRefreshService.class);
 
-    private static final String VERSION = "VERSION";
-
     @Autowired
     private AccountMasterLookup source;
 
@@ -84,7 +82,7 @@ public class AccountMasterLookupRefreshService extends AbstractFixedIntervalTran
     }
 
     @Override
-    AccountMasterLookupConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterLookupConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterLookupConfiguration.class);
     }
 

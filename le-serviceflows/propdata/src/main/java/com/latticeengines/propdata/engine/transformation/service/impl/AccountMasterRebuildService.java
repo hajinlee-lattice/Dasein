@@ -30,8 +30,6 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
 
     private static final Log log = LogFactory.getLog(AccountMasterRebuildService.class);
 
-    private static final String VERSION = "VERSION";
-
     private boolean isManual = true;
 
     @Autowired
@@ -83,7 +81,7 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
     }
 
     @Override
-    AccountMasterRebuildConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterRebuildConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterRebuildConfiguration.class);
     }
 

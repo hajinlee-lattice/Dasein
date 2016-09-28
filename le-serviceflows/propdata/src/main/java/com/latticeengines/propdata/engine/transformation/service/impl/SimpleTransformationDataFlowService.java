@@ -17,13 +17,18 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.core.source.Source;
 
+/**
+ * This is use to submit basic dataflows.
+ * It reads Map<Source, String> baseSourceVersions to add source tables.
+ * then submit data flow using passed in <P extends TransformationFlowParameters>
+ */
 @Component("simpleTransformationDataFlowService")
 public class SimpleTransformationDataFlowService extends AbstractTransformationDataFlowService {
 
     private static final Log log = LogFactory.getLog(SimpleTransformationDataFlowService.class);
 
-    public void executeDataFlow(Source source, String workflowDir, Map<Source, String> baseSourceVersions,
-                                String flowBean, TransformationFlowParameters parameters) {
+    public <P extends TransformationFlowParameters> void executeDataFlow(Source source, String workflowDir,
+            Map<Source, String> baseSourceVersions, String flowBean, P parameters) {
 
         if (StringUtils.isEmpty(flowBean)) {
             throw new LedpException(LedpCode.LEDP_25012,
@@ -40,7 +45,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
 
     private Map<String, Table> setupSourceTables(Map<Source, String> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
-        for (Map.Entry<Source, String> entry: baseSourceVersions.entrySet()) {
+        for (Map.Entry<Source, String> entry : baseSourceVersions.entrySet()) {
             Source baseSource = entry.getKey();
             String baseSourceVersion = entry.getValue();
             log.info("Add base source " + baseSource.getSourceName());
@@ -48,7 +53,6 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         }
         return sourceTables;
     }
-
 
     private boolean addSource(Map<String, Table> sourceTables, Source source, String version) {
         String sourceName = source.getSourceName();

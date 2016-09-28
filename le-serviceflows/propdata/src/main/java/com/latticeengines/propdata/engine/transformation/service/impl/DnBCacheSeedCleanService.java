@@ -32,10 +32,7 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanService.class);
 
-    private static final String VERSION = "VERSION";
 
-    @Autowired
-    private TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
     private DnBCacheSeed source;
@@ -46,11 +43,6 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
     }
 
     @Override
@@ -87,7 +79,7 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     }
 
     @Override
-    DnBCacheSeedConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    DnBCacheSeedConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, DnBCacheSeedConfiguration.class);
     }
 

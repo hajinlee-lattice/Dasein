@@ -31,8 +31,6 @@ public class AccountMasterSeedRebuildService
 
     private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildService.class);
 
-    private static final String VERSION = "VERSION";
-
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterSeedRebuildFlow";
 
     @Autowired
@@ -97,7 +95,7 @@ public class AccountMasterSeedRebuildService
     }
 
     @Override
-    AccountMasterSeedConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    AccountMasterSeedConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, AccountMasterSeedConfiguration.class);
     }
 

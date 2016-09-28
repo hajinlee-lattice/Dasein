@@ -33,13 +33,8 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedIngestionService.class);
 
-    private static final String PATH_SEPARATOR = "/";
-
     private static final String SCHEMA = "schema";
-
     private static final String DNB_CACHESEED_AVRO_SCHEMA_AVSC = "DnBCacheSeedAvroSchema.avsc";
-
-    private static final String VERSION = "VERSION";
 
     @Autowired
     private DnBCacheSeedRaw source;
@@ -97,14 +92,14 @@ public class DnBCacheSeedIngestionService extends AbstractFirehoseTransformation
     @Override
     void uploadSourceSchema(String workflowDir) throws IOException {
         String schemaFileName = DNB_CACHESEED_AVRO_SCHEMA_AVSC;
-        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
-        String targetPath = workflowDir + PATH_SEPARATOR + schemaFileName;
+        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + HDFS_PATH_SEPARATOR + schemaFileName);
+        String targetPath = workflowDir + HDFS_PATH_SEPARATOR + schemaFileName;
 
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
     }
 
     @Override
-    DnBCacheSeedRawConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    DnBCacheSeedRawConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, DnBCacheSeedRawConfiguration.class);
     }
 

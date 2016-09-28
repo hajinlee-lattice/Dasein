@@ -53,9 +53,9 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
         FixedIntervalSource source = (FixedIntervalSource) getSource();
         LOG.info("Source Name: " + source.getSourceName() + " Base Source Name: "
                 + source.getBaseSources()[0].getSourceName() + " RootBaseSourceDirPath: "
-                + getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
+                + hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0]).toString());
         return Collections
-                .singletonList(getHdfsPathBuilder().constructSourceDir(source.getBaseSources()[0]).toString());
+                .singletonList(hdfsPathBuilder.constructSourceDir(source.getBaseSources()[0]).toString());
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -57,6 +60,8 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
     HGDataCleanConfiguration createTransformationConfiguration() {
         HGDataCleanConfiguration configuration = new HGDataCleanConfiguration();
         configuration.setVersion(targetVersion);
+        calendar.set(2016, Calendar.AUGUST, 1);
+        configuration.setFakedCurrentDate(calendar.getTime());
         return configuration;
     }
 
@@ -70,9 +75,17 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
         log.info("Start to verify records one by one.");
         int recordsToCheck = 100;
         int pos = 0;
+        Long sixMonths = 6 * TimeUnit.DAYS.toMillis(30);
         while (pos < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
-            System.out.println(record);
+            Long lastVerified = (Long) record.get("Last_Verified_Date");
+            Long timeStamp = (Long) record.get("LE_Last_Upload_Date");
+            try {
+                Assert.assertTrue(timeStamp < lastVerified + sixMonths);
+            } catch (Exception e) {
+                System.out.println(record);
+                throw e;
+            }
         }
     }
 

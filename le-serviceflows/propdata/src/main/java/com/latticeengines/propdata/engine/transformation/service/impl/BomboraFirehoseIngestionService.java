@@ -24,27 +24,17 @@ import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseInputSourceConfig;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("bomboraFirehoseIngestionService")
 public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService<BomboraFirehoseConfiguration>
         implements TransformationService<BomboraFirehoseConfiguration> {
 
-    private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
-
     private static final Log log = LogFactory.getLog(BomboraFirehoseIngestionService.class);
 
-    private static final String PATH_SEPARATOR = "/";
-
+    private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
     private static final String SCHEMA = "schema";
-
     private static final String BOMBORA_FIREHOSE_AVRO_SCHEMA_AVSC = "BomboraFirehoseAvroSchema.avsc";
-
-    private static final String VERSION = "VERSION";
-
-    @Autowired
-    private TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
     private BomboraFirehose source;
@@ -55,11 +45,6 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     @Override
     public DataImportedFromHDFS getSource() {
         return source;
-    }
-
-    @Override
-    TransformationProgressEntityMgr getProgressEntityMgr() {
-        return progressEntityMgr;
     }
 
     @Override
@@ -102,13 +87,13 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     @Override
     void uploadSourceSchema(String workflowDir) throws IOException {
         String schemaFileName = BOMBORA_FIREHOSE_AVRO_SCHEMA_AVSC;
-        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + PATH_SEPARATOR + schemaFileName);
-        String targetPath = workflowDir + PATH_SEPARATOR + schemaFileName;
+        InputStream fileStream = ClassLoader.getSystemResourceAsStream(SCHEMA + HDFS_PATH_SEPARATOR + schemaFileName);
+        String targetPath = workflowDir + HDFS_PATH_SEPARATOR + schemaFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, fileStream, targetPath);
     }
 
     @Override
-    BomboraFirehoseConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
+    BomboraFirehoseConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
         return JsonUtils.deserialize(confStr, BomboraFirehoseConfiguration.class);
     }
 
