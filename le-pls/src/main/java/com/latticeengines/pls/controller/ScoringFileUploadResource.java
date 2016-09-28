@@ -212,8 +212,8 @@ public class ScoringFileUploadResource {
                 sourceFile.setTableName(table.getName());
                 metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
 
-                sourceFileService.update(sourceFile);
             }
+            sourceFileService.update(sourceFile);
             return ResponseDocument.successResponse(sourceFile);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
