@@ -76,8 +76,6 @@ angular.module('lp.marketo', [
 		MarketoService.UpdateMarketoCredential(vm.credentialId, credential).then(function(result) {
 			if (result.success) {
 				$state.go('home.marketosettings.apikey');
-			} else {
-
 			}
 		});
 	}
@@ -89,8 +87,6 @@ angular.module('lp.marketo', [
 }])
 .controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
     var vm = this;
-
-    credId = vm.credential.credential_id;
 
     angular.extend(vm, {
 		credentials: MarketoCredentials

@@ -440,6 +440,7 @@ angular
 
                             MarketoService.GetMarketoCredentials().then(function(result) {
                                 deferred.resolve(result);
+                                console.log(result);
                             });
 
                             return deferred.promise;
