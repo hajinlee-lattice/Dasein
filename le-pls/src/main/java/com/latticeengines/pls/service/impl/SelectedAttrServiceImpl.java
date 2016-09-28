@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.StringUtils;
@@ -48,10 +47,6 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Autowired
     private TenantConfigServiceImpl tenantConfigService;
-
-    // TODO : remove this and corresponding configuration
-    @Value("${pls.leadenrichment.premium.max:10}")
-    private int premiumAttributesLimitation;
 
     @Override
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
@@ -96,8 +91,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
         }
 
-        selectedAttrEntityMgr.add(addAttrList);
-        selectedAttrEntityMgr.delete(deleteAttrList);
+        selectedAttrEntityMgr.upsert(addAttrList, deleteAttrList);
     }
 
     @Override

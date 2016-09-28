@@ -25,19 +25,10 @@ public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public List<SelectedAttribute> upsert(List<SelectedAttribute> newAttrs) {
-        List<SelectedAttribute> oldAttrs = dao.findAll();
-        for (SelectedAttribute attribute : oldAttrs) {
-            if (!newAttrs.contains(attribute)) {
-                dao.delete(attribute);
-            }
-        }
-        for (SelectedAttribute attribute : newAttrs) {
-            if (!oldAttrs.contains(attribute)) {
-                dao.create(attribute);
-            }
-        }
-        return dao.findAll();
+    public List<SelectedAttribute> upsert(List<SelectedAttribute> newAttrList, //
+            List<SelectedAttribute> dropAttrList) {
+        add(newAttrList);
+        return delete(dropAttrList);
     }
 
     @Override

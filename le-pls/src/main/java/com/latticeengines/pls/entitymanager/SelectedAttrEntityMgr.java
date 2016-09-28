@@ -8,7 +8,8 @@ public interface SelectedAttrEntityMgr {
 
     List<SelectedAttribute> findAll();
 
-    List<SelectedAttribute> upsert(List<SelectedAttribute> attributes);
+    List<SelectedAttribute> upsert(List<SelectedAttribute> newAttrList, //
+            List<SelectedAttribute> dropAttrList);
 
     List<SelectedAttribute> add(List<SelectedAttribute> newAttrList);
 

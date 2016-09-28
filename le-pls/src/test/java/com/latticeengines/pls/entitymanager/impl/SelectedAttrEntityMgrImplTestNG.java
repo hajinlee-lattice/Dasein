@@ -32,7 +32,7 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void upsert() {
         setupSecurityContext(tenant1);
-        entityMgr.upsert(new ArrayList<SelectedAttribute>());
+        entityMgr.upsert(new ArrayList<SelectedAttribute>(), new ArrayList<SelectedAttribute>());
 
         setupSecurityContext(tenant1);
 
@@ -41,20 +41,39 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         List<SelectedAttribute> attrs = new ArrayList<>();
         attrs.add(new SelectedAttribute("column1", tenant1));
         attrs.add(new SelectedAttribute("column2", tenant1));
-        entityMgr.upsert(attrs);
+        entityMgr.upsert(attrs, new ArrayList<SelectedAttribute>());
 
         Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute after inserting");
 
         attrs = new ArrayList<>();
         attrs.add(new SelectedAttribute("column1", tenant1));
         attrs.add(new SelectedAttribute("column3", tenant1));
-        entityMgr.upsert(attrs);
+        entityMgr.upsert(attrs, new ArrayList<SelectedAttribute>());
 
-        Assert.assertEquals(entityMgr.findAll().size(), 2, "There should still be 2 attribute after upserting");
+        Assert.assertEquals(entityMgr.findAll().size(), 3, "There should still be 3 attribute after upserting");
 
-        entityMgr.upsert(new ArrayList<SelectedAttribute>());
+        attrs = new ArrayList<>();
+        attrs.add(new SelectedAttribute("column2", tenant1));
+        attrs.add(new SelectedAttribute("column3", tenant1));
+        entityMgr.upsert(new ArrayList<SelectedAttribute>(), attrs);
+
+        Assert.assertEquals(entityMgr.findAll().size(), 1, "There should still be 1 attribute in the end");
+
+        attrs = new ArrayList<>();
+        attrs.add(new SelectedAttribute("column4", tenant1));
+
+        List<SelectedAttribute> delAttrs = new ArrayList<>();
+        delAttrs.add(new SelectedAttribute("column1", tenant1));
+        entityMgr.upsert(attrs, delAttrs);
+
+        Assert.assertEquals(entityMgr.findAll().size(), 1, "There should still be 1 attribute in the end");
+
+        delAttrs = new ArrayList<>();
+        delAttrs.add(new SelectedAttribute("column4", tenant1));
+        entityMgr.upsert(new ArrayList<SelectedAttribute>(), delAttrs);
 
         Assert.assertEquals(entityMgr.findAll().size(), 0, "There should still be 0 attribute in the end");
+
     }
 
     @Test(groups = "functional", dependsOnMethods = { "upsert" })
@@ -63,7 +82,7 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         List<SelectedAttribute> attrs = new ArrayList<>();
         attrs.add(new SelectedAttribute("column1", tenant1));
         attrs.add(new SelectedAttribute("column2", tenant1));
-        entityMgr.upsert(attrs);
+        entityMgr.upsert(attrs, new ArrayList<SelectedAttribute>());
         Assert.assertEquals(entityMgr.findAll().size(), 2, "There should be 2 attribute after inserting");
 
         setupSecurityContext(tenant2);
@@ -149,7 +168,8 @@ public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @AfterClass(groups = "functional")
     public void cleanup() throws Exception {
         setupSecurityContext(tenant1);
-        entityMgr.upsert(new ArrayList<SelectedAttribute>());
+        entityMgr.upsert(new ArrayList<SelectedAttribute>(), entityMgr.findAll());
+        Assert.assertTrue(entityMgr.findAll().size() == 0);
     }
 
 }
