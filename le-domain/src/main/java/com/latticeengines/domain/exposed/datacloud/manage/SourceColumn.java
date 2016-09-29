@@ -192,6 +192,7 @@ public class SourceColumn implements HasPid, Serializable {
         ADD_TIMESTAMP, //
         ADD_ROWNUM, //
         STANDARD_DOMAIN, //
-        CONVERT_TYPE;
+        CONVERT_TYPE, //
+        BIT_ENCODE;
     }
 }
