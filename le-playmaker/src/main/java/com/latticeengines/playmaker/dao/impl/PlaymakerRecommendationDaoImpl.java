@@ -290,8 +290,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private String getAccountExtensionColumns(String columns) {
         if (columns != null) {
-            columns = columns.trim();
-            if ("" == columns) {
+            columns = StringUtils.strip(columns);
+            if ("".equals(columns)) {
                 return "";
             }
         }
