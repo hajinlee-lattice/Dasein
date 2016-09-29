@@ -76,7 +76,7 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
         int recordsToCheck = 100;
         int pos = 0;
         Long sixMonths = 6 * TimeUnit.DAYS.toMillis(30);
-        while (pos < recordsToCheck && records.hasNext()) {
+        while (pos++ < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
             Long lastVerified = (Long) record.get("Last_Verified_Date");
             Long timeStamp = (Long) record.get("LE_Last_Upload_Date");

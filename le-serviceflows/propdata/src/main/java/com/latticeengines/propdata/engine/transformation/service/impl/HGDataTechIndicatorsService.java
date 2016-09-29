@@ -12,28 +12,29 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.source.impl.HGDataClean;
+import com.latticeengines.propdata.core.source.impl.HGDataTechIndicators;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.HGDataCleanConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-@Component("hgDataCleanService")
-public class HGDataCleanService extends SimpleTransformationServiceBase<HGDataCleanConfiguration, TransformationFlowParameters>
-        implements TransformationService<HGDataCleanConfiguration> {
+@Component("hgDataTechIndicatorsService")
+public class HGDataTechIndicatorsService
+        extends SimpleTransformationServiceBase<BasicTransformationConfiguration, TransformationFlowParameters>
+        implements TransformationService<BasicTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(HGDataCleanService.class);
+    private static final Log log = LogFactory.getLog(HGDataTechIndicatorsService.class);
 
     @Autowired
-    private HGDataClean hgDataClean;
+    private HGDataTechIndicators source;
 
     @Override
     public Source getSource() {
-        return hgDataClean;
+        return source;
     }
 
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
-        return HGDataCleanConfiguration.class;
+        return BasicTransformationConfiguration.class;
     }
 
     @Override
@@ -42,27 +43,27 @@ public class HGDataCleanService extends SimpleTransformationServiceBase<HGDataCl
     }
 
     @Override
-    protected String getDataFlowBeanName() { return "hgDataCleanFlow"; }
+    protected String getDataFlowBeanName() {
+        return "hgDataTechIndicatorsFlow";
+    }
 
     @Override
-    HGDataCleanConfiguration createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
-            List<SourceColumn> sourceColumns) {
-        HGDataCleanConfiguration configuration = new HGDataCleanConfiguration();
-        configuration.setSourceName(hgDataClean.getSourceName());
-        configuration.setSourceName("hgDataCleanService");
+    protected BasicTransformationConfiguration createNewConfiguration(List<String> latestBaseVersions,
+            String newLatestVersion, List<SourceColumn> sourceColumns) {
+        BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
+        configuration.setSourceName(source.getSourceName());
+        configuration.setSourceName("hgDataTechIndicatorsService");
         configuration.setVersion(newLatestVersion);
         return configuration;
     }
 
     @Override
     protected TransformationFlowParameters getDataFlowParameters(TransformationProgress progress,
-                                                                 HGDataCleanConfiguration transformationConfiguration) {
+                                                                 BasicTransformationConfiguration transConf) {
         TransformationFlowParameters parameters = new TransformationFlowParameters();
-        enrichStandardDataFlowParameters(parameters, transformationConfiguration, progress);
-        Date fakedNow = transformationConfiguration.getFakedCurrentDate();
-        if (fakedNow != null) {
-            parameters.setTimestamp(fakedNow);
-        }
+        enrichStandardDataFlowParameters(parameters, transConf, progress);
+        parameters.setTimestamp(new Date());
         return parameters;
     }
+
 }

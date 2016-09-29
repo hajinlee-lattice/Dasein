@@ -57,17 +57,7 @@ public class DnBCacheSeedCleanService extends SimpleTransformationServiceBase<Dn
     }
 
     @Override
-    Date checkTransformationConfigurationValidity(DnBCacheSeedConfiguration conf) {
-        conf.getSourceConfigurations().put(VERSION, conf.getVersion());
-        try {
-            return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
-        } catch (ParseException e) {
-            throw new LedpException(LedpCode.LEDP_25010, e);
-        }
-    }
-
-    @Override
-    DnBCacheSeedConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
+    protected DnBCacheSeedConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
             List<SourceColumn> sourceColumns) {
         DnBCacheSeedConfiguration configuration = new DnBCacheSeedConfiguration();
         DnBCacheSeedInputSourceConfig dnbCacheSeedInputSourceConfig = new DnBCacheSeedInputSourceConfig();
@@ -75,11 +65,6 @@ public class DnBCacheSeedCleanService extends SimpleTransformationServiceBase<Dn
         configuration.setDnBCacheSeedInputSourceConfig(dnbCacheSeedInputSourceConfig);
         setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
         return configuration;
-    }
-
-    @Override
-    DnBCacheSeedConfiguration parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
-        return JsonUtils.deserialize(confStr, DnBCacheSeedConfiguration.class);
     }
 
     @Override

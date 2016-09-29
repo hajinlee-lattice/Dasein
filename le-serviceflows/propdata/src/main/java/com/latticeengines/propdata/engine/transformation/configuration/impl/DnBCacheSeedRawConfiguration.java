@@ -47,6 +47,9 @@ public class DnBCacheSeedRawConfiguration implements TransformationConfiguration
     }
 
     @Override
+    public void setServiceBeanName(String serviceBeanName) {}
+
+    @Override
     public List<SourceColumn> getSourceColumns() {
         return sourceColumns;
     }
@@ -58,7 +61,7 @@ public class DnBCacheSeedRawConfiguration implements TransformationConfiguration
 
     @Override
     public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
+
     }
 
     @Override

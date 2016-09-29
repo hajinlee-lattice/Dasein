@@ -42,6 +42,10 @@ public class AccountMasterLookupConfiguration implements TransformationConfigura
     }
 
     @Override
+    public void setServiceBeanName(String serviceBeanName) {
+    }
+
+    @Override
     public List<SourceColumn> getSourceColumns() {
         return sourceColumns;
     }

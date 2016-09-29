@@ -8,6 +8,7 @@ import com.latticeengines.propdata.engine.transformation.configuration.InputSour
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 public class DnBCacheSeedConfiguration implements TransformationConfiguration {
+
     private String sourceName;
     private String version;
     private Map<String, String> sourceConfigurations;
@@ -39,6 +40,11 @@ public class DnBCacheSeedConfiguration implements TransformationConfiguration {
     @Override
     public String getServiceBeanName() {
         return serviceBeanName;
+    }
+
+    @Override
+    public void setServiceBeanName(String serviceBeanName) {
+        this.serviceBeanName = serviceBeanName;
     }
 
     @Override

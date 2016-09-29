@@ -11,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,8 @@ import com.latticeengines.propdata.engine.transformation.configuration.Transform
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration> extends PropDataEngineFunctionalTestNGBase {
+public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration>
+        extends PropDataEngineFunctionalTestNGBase {
 
     private static final int MAX_LOOPS = 100;
 
@@ -40,8 +42,9 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     TransformationService<T> transformationService;
 
     Collection<TransformationProgress> progresses = new HashSet<>();
-    protected String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
-    protected String targetVersion = baseSourceVersion;
+    private Date yesterday = new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(1));
+    protected String baseSourceVersion = HdfsPathBuilder.dateFormat.format(yesterday);
+    protected String targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
     protected Calendar calendar = GregorianCalendar.getInstance();
 
     abstract TransformationService<T> getTransformationService();
@@ -142,7 +145,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
             Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
         }
 
-        Iterator<GenericRecord> records =  AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
         verifyResultAvroRecords(records);
     }
 

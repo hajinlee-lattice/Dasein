@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -290,6 +291,15 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         return approvedUsages;
     }
 
+    @JsonIgnore
+    private String getMatchDestination() {
+        if (getGroups().contains(ColumnSelection.Predefined.LeadEnrichment.name())) {
+            return isPremium() ? "HGData_Pivoted_Source" : "BuiltWith_Pivoted_Source";
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
@@ -306,6 +316,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setIsPremium(isPremium());
+        metadata.setMatchDestination(getMatchDestination());
         return metadata;
     }
 

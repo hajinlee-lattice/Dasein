@@ -1,14 +1,17 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -88,6 +91,23 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         parameters.setBaseTables(Collections.singletonList(derivedSource.getBaseSources()[0].getSourceName()));
         parameters.setPrimaryKeys(Arrays.asList(getSource().getPrimaryKey()));
         return parameters;
+    }
+
+    protected Date checkTransformationConfigurationValidity(T conf) {
+        if (conf.getSourceConfigurations() == null) {
+            conf.setSourceConfigurations(new HashMap<String, String>());
+        }
+        conf.getSourceConfigurations().put(VERSION, conf.getVersion());
+        try {
+            return HdfsPathBuilder.dateFormat.parse(conf.getVersion());
+        } catch (ParseException e) {
+            throw new LedpException(LedpCode.LEDP_25010, e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected T parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
+        return JsonUtils.deserialize(confStr, (Class<T>) getConfigurationClass());
     }
 
 }

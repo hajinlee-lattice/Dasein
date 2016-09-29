@@ -19,6 +19,8 @@ public interface TransformationConfiguration {
 
     String getServiceBeanName();
 
+    void setServiceBeanName(String serviceBeanName);
+
     String getRootOperationId();
 
     void setRootOperationId(String rootOperationId);

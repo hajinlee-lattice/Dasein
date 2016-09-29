@@ -42,6 +42,10 @@ public class AccountMasterSeedConfiguration implements TransformationConfigurati
     }
 
     @Override
+    public void setServiceBeanName(String serviceBeanName) {
+    }
+
+    @Override
     public List<SourceColumn> getSourceColumns() {
         return sourceColumns;
     }

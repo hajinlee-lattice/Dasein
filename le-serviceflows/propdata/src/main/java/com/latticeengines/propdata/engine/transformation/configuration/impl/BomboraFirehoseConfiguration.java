@@ -48,6 +48,10 @@ public class BomboraFirehoseConfiguration implements TransformationConfiguration
     }
 
     @Override
+    public void setServiceBeanName(String serviceBeanName) {
+    }
+
+    @Override
     public List<SourceColumn> getSourceColumns() {
         return sourceColumns;
     }

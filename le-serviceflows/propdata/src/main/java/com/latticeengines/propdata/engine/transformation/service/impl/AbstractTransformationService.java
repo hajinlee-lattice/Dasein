@@ -128,7 +128,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             writeTransConfOutsideWorkflow(transformationConfiguration, progress);
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Failed to start a new progress for " + transformationConfiguration.getSourceName(), e);
+                    "Failed to start a new progress for " + getSource(), e);
         }
         LoggingUtils.logInfo(getLogger(), progress,
                 "Started a new progress with version=" + transformationConfiguration.getVersion());

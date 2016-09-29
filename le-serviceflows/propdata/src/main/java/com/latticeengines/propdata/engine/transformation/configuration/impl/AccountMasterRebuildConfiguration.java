@@ -43,6 +43,10 @@ public class AccountMasterRebuildConfiguration implements TransformationConfigur
     }
 
     @Override
+    public void setServiceBeanName(String serviceBeanName) {
+    }
+
+    @Override
     public List<SourceColumn> getSourceColumns() {
         return sourceColumns;
     }
