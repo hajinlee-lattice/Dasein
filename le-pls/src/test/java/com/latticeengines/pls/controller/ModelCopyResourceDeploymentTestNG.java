@@ -4,12 +4,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,13 +75,17 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
 
+    private String sourceFileLocalPath;
+
+    private String outputFileName = "nonLatinInRows.csv";
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTwoTenants();
         cleanup();
         setupHdfs();
         log.info("Wait for 300 seconds to download model summary");
-        Thread.sleep(300000L);
+        Thread.sleep(400000L);
         setupTables();
     }
 
@@ -134,11 +140,19 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         metadataProxy.createTable(tenant1.getId(), eventTable.getName(), eventTable);
 
         setupSecurityContext(tenant1);
+
+        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(tenant1.getId())).toString()
+                + "/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/" + outputFileName;
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
+                outputPath);
         SourceFile sourceFile = new SourceFile();
         sourceFile.setTenant(tenant1);
-        sourceFile.setName("sourceFile");
-        sourceFile.setPath("sourceFilePath");
+        sourceFile.setName(outputFileName);
+        sourceFile.setPath(outputPath);
         sourceFile.setTableName(trainingTable.getName());
+        sourceFile.setDisplayName(outputFileName);
         sourceFileEntityMgr.create(sourceFile);
     }
 
@@ -161,7 +175,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
         log.info("Wait for 300 seconds to download model summary");
-        Thread.sleep(300000L);
+        Thread.sleep(400000L);
 
         setupSecurityContext(tenant2);
 
@@ -211,5 +225,11 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertNotNull(summary);
         assertEquals(summary.getTrainingTableName(), newTrainingTableName);
         assertEquals(summary.getEventTableName(), newEventTableName);
+
+        SourceFile newSourceFile = sourceFileEntityMgr.getByTableName(newTrainingTableName);
+        assertNotNull(newSourceFile);
+        assertEquals(newSourceFile.getDisplayName(), outputFileName);
+        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()),
+                FileUtils.readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile())));
     }
 }
