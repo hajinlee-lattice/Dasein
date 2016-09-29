@@ -87,6 +87,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "DisplayDiscretizationStrategy", length = 1000)
     private String discretizationStrategy;
 
+    @Column(name = "DecodeStrategy", length = 1000)
+    private String decodeStrategy;
+
     @Override
     @JsonIgnore
     public Long getPid() {
@@ -234,6 +237,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @JsonIgnore
     public void setDiscretizationStrategy(String discretizationStrategy) {
         this.discretizationStrategy = discretizationStrategy;
+    }
+
+    @JsonIgnore
+    public String getDecodeStrategy() {
+        return decodeStrategy;
+    }
+
+    @JsonIgnore
+    public void setDecodeStrategy(String decodeStrategy) {
+        this.decodeStrategy = decodeStrategy;
     }
 
     @JsonIgnore
