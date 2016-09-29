@@ -18,33 +18,6 @@
         <component-name>propdata</component-name>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.3.2</version>
-                <executions>
-                    <execution>
-                        <id>ldcmanagedb</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
-                            <arguments>
-                                <argument>LDC_ManageDB</argument>
-                                <argument>false</argument>
-                                <argument>com.latticeengines.domain.exposed.datacloud.manage</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <profiles>
         <profile>
             <id>jetty</id>
