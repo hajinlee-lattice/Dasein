@@ -16,10 +16,12 @@ class EnvConfig(object):
     _endpoint = ''
     _apiHostPort = ''
     _influxEndpoint = ''
+    _hdfsHostPort = ''
+    _hdfsBasePath = ''
     _verify = ''
     _verbose = ''
 
-    def __init__(self, env='devel', verbose=False):
+    def __init__(self, env='qa', verbose=False):
         if not EnvConfig._initialized:
             if env.lower() not in self.environments:
                 raise ReferenceError('Unknown environment \"{0}\"; must be one of {1}'.format(env, str(self.environments)))
@@ -30,6 +32,8 @@ class EnvConfig(object):
                 EnvConfig._endpoint = cfg['endpoint']
                 EnvConfig._apiHostPort = cfg['apiHostPort']
                 EnvConfig._influxEndpoint = cfg['influxEndpoint']
+                EnvConfig._hdfsHostPort = cfg['hdfsHostPort']
+                EnvConfig._hdfsBasePath = cfg['hdfsBasePath']
                 EnvConfig._verify = cfg['verify']
                 EnvConfig._verbose = verbose
 
@@ -48,6 +52,14 @@ class EnvConfig(object):
     @classmethod
     def getInfluxEndpoint(self):
         return EnvConfig._influxEndpoint
+
+    @classmethod
+    def getHDFSHostPort(self):
+        return EnvConfig._hdfsHostPort
+
+    @classmethod
+    def getHDFSBasePath(self):
+        return EnvConfig._hdfsBasePath
 
     @classmethod
     def isVerbose(self):

@@ -18,8 +18,10 @@ setup(
     description = "Utitilies to use the modelquality APIs",
     long_description = long_descr,
     author = "Michael Wilson",
-    author_email = "mwilson@lattice-engines.com"
+    author_email = "mwilson@lattice-engines.com",
+    install_requires = ['requests', 'requests_toolbelt'],
+    scripts = ['bin/modelquality.py']
+    #entry_points = {
+    #    "console_scripts": ['bootstrap = bootstrap.bootstrap:main']
+    #    }
     )
-#entry_points = {
-#    "console_scripts": ['bootstrap = bootstrap.bootstrap:main']
-#    },

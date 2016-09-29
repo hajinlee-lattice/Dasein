@@ -8,6 +8,7 @@
 import copy
 from .entitybase import EntityBase
 from .pipelineresource import PipelineResource
+from .pipelinestep import PipelineStep
 
 class Pipeline(EntityBase):
 
@@ -34,7 +35,7 @@ class Pipeline(EntityBase):
         pipeline.setPipelineDriver(config['pipeline_driver'])
         pipeline.setPipelineLibScript(config['pipeline_lib_script'])
         pipeline.setPipelineScript(config['pipeline_script'])
-        pipeline.setPipelineSteps(config['pipeline_steps'])
+        pipeline.setPipelineStepsFromDict(config['pipeline_steps'])
         return pipeline
 
     def __init__(self, name):
@@ -44,6 +45,7 @@ class Pipeline(EntityBase):
         self._config['pipeline_lib_script'] = ''
         self._config['pipeline_script'] = ''
         self._config['pipeline_steps'] = []
+        self._piplineSteps = []
 
     def setName(self, name):
         self._config['name'] = name
@@ -69,11 +71,30 @@ class Pipeline(EntityBase):
     def getPipelineScript(self):
         return self._config['pipeline_script']
 
-    def setPipelineSteps(self, pipeline_steps):
+    def setPipelineStepsFromDict(self, pipeline_steps):
         self._config['pipeline_steps'] = copy.deepcopy(pipeline_steps)
+        self._piplineSteps = []
+        for stepconfig in pipeline_steps:
+            self._piplineSteps.append(PipelineStep.createFromConfig(stepconfig))
+
+    def setPipelineSteps(self, pipelineSteps):
+        self._piplineSteps = copy.deepcopy(pipelineSteps)
+        self._config['pipeline_steps'] = []
+        for step in pipelineSteps:
+            self._config['pipeline_steps'].append(step.getConfig())
 
     def getPipelineSteps(self):
-        return copy.deepcopy(self._config['pipeline_steps'])
+        return copy.deepcopy(self._piplineSteps)
 
     def getStepNamesInOrder(self):
         return [s['Name'] for s in self._config['pipeline_steps']]
+
+    def install(self):
+        stepOrFile = []
+        for step in self.getPipelineSteps():
+            step.install()
+            if step.getHDFSPath() != '':
+                stepOrFile.append({'pipeline_step_dir':step.getHDFSPath()})
+            else:
+                stepOrFile.append({'pipeline_step':step.getName()})
+        return self.getEntityResource().create(stepOrFile)

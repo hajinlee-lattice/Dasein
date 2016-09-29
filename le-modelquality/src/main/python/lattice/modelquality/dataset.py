@@ -5,8 +5,11 @@
 # $Rev$
 #
 
+import hdfs
+
 from .entitybase import EntityBase
 from .entityresource import EntityResource
+from .envconfig import EnvConfig
 
 class Dataset(EntityBase):
 
@@ -51,6 +54,8 @@ class Dataset(EntityBase):
         self._config['schemaInterpretation'] = 'SalesforceLead'
         self._config['scoring_data_sets'] = []
         self._config['training_hdfs_path'] = '/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv'
+        self._localModelingFileName = ''
+        self._localScoringFileName = ''
 
     def setName(self, name):
         self._config['name'] = name
@@ -109,3 +114,26 @@ class Dataset(EntityBase):
         if self._config['test_hdfs_path']:
             return self._config['test_hdfs_path']
         return None
+
+    def setLocalModelingFileName(self, filename):
+        self._localModelingFileName = filename
+        self._config['training_hdfs_path'] = ''
+        self._config['test_hdfs_path'] = ''
+
+    def install(self):        
+        if self.getName() in self.getAllNames():
+            print 'Cannot install: dataset with the same name already exists'
+            return
+        if self._localModelingFileName != '':
+            hdfsPath = EnvConfig().getHDFSBasePath() + '/' + self.getName()
+            client = hdfs.InsecureClient(EnvConfig.getHDFSHostPort())
+            client.makedirs(hdfsPath)
+            client.upload(hdfsPath, self._localModelingFileName)
+            fileName = self._localModelingFileName
+            i = fileName.rfind('/')
+            if( i != -1 ):
+                fileName = fileName[i+1:]
+            self._localModelingFileName = ''
+            self._config['training_hdfs_path'] = hdfsPath + '/' + fileName
+        return self.getEntityResource().create(self._config)
+

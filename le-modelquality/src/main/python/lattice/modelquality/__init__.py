@@ -14,5 +14,6 @@ from .modelmetrics     import ModelMetrics
 from .modelrun         import ModelRun
 from .pipeline         import Pipeline
 from .pipelineresource import PipelineResource
+from .pipelinestep     import PipelineStep
 from .propdata         import PropData
 from .sampling         import Sampling
