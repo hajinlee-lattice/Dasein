@@ -106,7 +106,7 @@ public class ModelingHdfsUtils {
     }
 
     public static JsonNode constructNewModelSummary(String contents, String targetTenantId, String cpTrainingTableName,
-            String cpEventTableName, String uuid, String modelDisplayName, Map<String, Artifact> artifactsMap)
+            String cpEventTableName, String uuid, String modelDisplayName, Map<String, Artifact> artifactsMap, String newModuleName)
             throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode json = objectMapper.readTree(contents);
@@ -124,8 +124,7 @@ public class ModelingHdfsUtils {
             if (artifactsMap.containsKey(ArtifactType.PivotMapping.getCode())) {
                 provenance.put("Pivot_Artifact_Path", artifactsMap.get(ArtifactType.PivotMapping.getCode()).getPath());
             }
-            Artifact artifact = artifactsMap.values().iterator().next();
-            provenance.put("Module_Name", artifact.getModule().getName());
+            provenance.put("Module_Name", newModuleName);
         }
         return json;
     }

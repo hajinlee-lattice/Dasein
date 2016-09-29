@@ -1,0 +1,10 @@
+TargetColumn,SourceColumn,SourceColumnType,Value
+x2Other,PD_DA_JobTitle,TEXT,_Other
+x2PartTime,PD_DA_JobTitle,TEXT,_Part_Time
+x2HealthCare,PD_DA_JobTitle,TEXT,_Health_Care
+x2Assistant,PD_DA_JobTitle,TEXT,_Assistant
+x2NoTitle,PD_DA_JobTitle,TEXT,
+x2Manager,PD_DA_JobTitle,TEXT,_Manager
+x2Manager,PD_DA_JobTitle,TEXT,_Upper_Management
+x2Sales,PD_DA_JobTitle,TEXT,_Sales
+x2Technical,PD_DA_JobTitle,TEXT,_Technical

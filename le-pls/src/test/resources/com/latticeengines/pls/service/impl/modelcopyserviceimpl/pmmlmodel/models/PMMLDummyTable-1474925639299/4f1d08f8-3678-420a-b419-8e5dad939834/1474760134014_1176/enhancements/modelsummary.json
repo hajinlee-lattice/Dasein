@@ -1,0 +1,27 @@
+{
+    "ModelDetails": {
+        "Name": "rfpmml_20160926_1433_14", 
+        "DisplayName": "rfpmml_20160926-1433-14", 
+        "LookupID": "mytestt.mytestt.Production|PMMLDummyTable-1474925639299|4f1d08f8-3678-420a-b419-8e5dad939834", 
+        "ModelID": "ms__4f1d08f8-3678-420a-b419-8e5dad939834-rfpmml_2", 
+        "TotalLeads": 0, 
+        "TestingLeads": 0, 
+        "TrainingLeads": 0, 
+        "TotalConversions": 0, 
+        "TestingConversions": 0, 
+        "TrainingConversions": 0, 
+        "ModelType": "PmmlModel", 
+        "RocScore": -1, 
+        "ConstructionTime": 1474925652, 
+        "TemplateVersion": null
+    }, 
+    "EventTableProvenance": {
+        "EventTableName": "PMMLDummyTable-1474925639299", 
+        "SourceSchemaInterpretation": "SalesforceLead", 
+        "Source_Schema_Interpretation": "SalesforceLead", 
+        "Event_Table_Name": "PMMLDummyTable-1474925639299", 
+        "Lattice_Version": "a/2.0.40-SNAPSHOT", 
+        "PMML_File": "/Pods/QA/Contracts/mytestt/Tenants/mytestt/Spaces/Production/Metadata/rfpmml_1474925594307/PMMLFiles/rfpmml.xml", 
+        "Module_Name": "rfpmml_1474925594307"
+    }
+}

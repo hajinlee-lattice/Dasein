@@ -113,9 +113,9 @@ public abstract class ModelServiceBase implements ModelService {
         }
 
         Map<String, Artifact> newArtifactsMap = new HashMap<>();
+        String newModuleName = "cp_module_" + UUID.randomUUID().toString();
         if (module != null) {
             CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
-            String newModuleName = "cp_module_" + UUID.randomUUID().toString();
             newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration,
                     module.getArtifacts(), customerSpace, newModuleName);
             for (Artifact artifact : newArtifactsMap.values()) {
@@ -124,7 +124,7 @@ public abstract class ModelServiceBase implements ModelService {
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap);
+                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap, newModuleName);
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
         JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"

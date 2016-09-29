@@ -31,9 +31,9 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
-public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelCopyServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(PythonScriptModelCopyServiceImplTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -82,7 +82,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
                 CustomerSpace.parse(modelCopyTargetTenant.getId())).toString());
 
         String localPathBase = ClassLoader
-                .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
+                .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelCopySourceTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
                 + modelCopySourceTenant.getId());
@@ -92,7 +92,7 @@ public class ModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
         String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(modelCopySourceTenant.getId())).toString()
                 + "/" + outputFileName;
-        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/" + outputFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
                 outputPath);
 
