@@ -11,8 +11,4 @@ public abstract class TransformationFlowBase<C extends TransformationConfigurati
 
     protected abstract Class<? extends TransformationConfiguration> getTransConfClass();
 
-    protected void readTransformationConfiguration(P parameters) {
-
-    }
-
 }

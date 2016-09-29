@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -31,11 +30,6 @@ public class HGDataCleanService extends SimpleTransformationServiceBase<HGDataCl
     @Override
     public Source getSource() {
         return hgDataClean;
-    }
-
-    @Override
-    public List<String> findUnprocessedVersions() {
-        return Collections.emptyList();
     }
 
     @Override
@@ -75,8 +69,9 @@ public class HGDataCleanService extends SimpleTransformationServiceBase<HGDataCl
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         Date fakedNow = transformationConfiguration.getFakedCurrentDate();
         if (fakedNow != null) {
-            parameters.setFakedCurrentTime(fakedNow);
+            parameters.setTimestamp(fakedNow);
         }
+        enrichStandardDataFlowParameters(parameters, transformationConfiguration, progress);
         return parameters;
     }
 }

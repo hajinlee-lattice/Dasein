@@ -2,7 +2,6 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -22,23 +22,18 @@ import com.latticeengines.propdata.core.source.impl.DnBCacheSeed;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedCleanService")
-public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformationService<DnBCacheSeedConfiguration>
+public class DnBCacheSeedCleanService extends SimpleTransformationServiceBase<DnBCacheSeedConfiguration, TransformationFlowParameters>
         implements TransformationService<DnBCacheSeedConfiguration> {
+
     private static final String DATA_FLOW_BEAN_NAME = "dnbCacheSeedCleanFlow";
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanService.class);
 
-
-
     @Autowired
     private DnBCacheSeed source;
-
-    @Autowired
-    private DnBCacheSeedCleanDataFlowService transformationDataFlowService;
 
     @Override
     public Source getSource() {
@@ -46,15 +41,19 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
     }
 
     @Override
-    Log getLogger() {
+    protected Log getLogger() {
         return log;
     }
 
     @Override
-    protected void executeDataFlow(TransformationProgress progress, String workflowDir,
-            DnBCacheSeedConfiguration transformationConfiguration) {
-        transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
-                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME, transformationConfiguration);
+    public String getDataFlowBeanName() { return DATA_FLOW_BEAN_NAME; }
+
+    @Override
+    protected TransformationFlowParameters getDataFlowParameters(TransformationProgress progress,
+                                                                 DnBCacheSeedConfiguration configuration) {
+        TransformationFlowParameters parameters = new TransformationFlowParameters();
+        enrichStandardDataFlowParameters(parameters, configuration, progress);
+        return parameters;
     }
 
     @Override
@@ -88,72 +87,4 @@ public class DnBCacheSeedCleanService extends AbstractFixedIntervalTransformatio
         return DnBCacheSeedConfiguration.class;
     }
 
-    /*
-     * GOAL: Ensure that over the period of time missing versions and also
-     * handled.
-     *
-     * LOGIC: return the first element (in high-to-low order) from
-     * latestBaseVersions for which there is no entry in latestVersions list
-     */
-    @Override
-    protected List<String> compareVersionLists(Source source, List<String> latestBaseVersions,
-            List<String> latestVersions, String baseDir) {
-        List<String> unprocessedBaseVersion = new ArrayList<>();
-
-        for (String baseVersion : latestBaseVersions) {
-            String pathForSuccessFlagLookup = baseDir + HDFS_PATH_SEPARATOR + baseVersion;
-            boolean shouldSkip = false;
-            if (latestVersions.size() == 0) {
-                // if there is no version in source then then pick most recent
-                // unprocessed version from base source version list
-
-                shouldSkip = shouldSkipVersion(source, baseVersion, pathForSuccessFlagLookup);
-
-                if (shouldSkip) {
-                    continue;
-                }
-
-                unprocessedBaseVersion.add(baseVersion);
-                return unprocessedBaseVersion;
-            }
-
-            boolean foundProcessedEntry = false;
-            // try to find matching version in source version list
-            for (String latestVersion : latestVersions) {
-                log.debug("Compare: " + baseVersion);
-                if (baseVersion.equals(latestVersion)) {
-                    // if found equal version then skip further checking for
-                    // this version and break from this inner loop
-                    foundProcessedEntry = true;
-                    break;
-                } else {
-                    if (baseVersion.compareTo(latestVersion) > 0) {
-                        // if here, that means no corresponding version (equal)
-                        // is found in source version list till now and in
-                        // sorted order as soon as we see smaller version from
-                        // base version than just break loop if any smaller
-                        // version is seen
-                        break;
-                    }
-                    continue;
-                }
-            }
-
-            if (!foundProcessedEntry) {
-                // if no equal version found in source version list then we
-                // should process this base version as long as it is safe to
-                // process it. Otherwise loop over to next base version
-                shouldSkip = shouldSkipVersion(source, baseVersion, pathForSuccessFlagLookup);
-                if (shouldSkip) {
-                    continue;
-                }
-
-                // if we found a version that is smaller than baseVersion
-                // then we return base version as this is a missing version
-                unprocessedBaseVersion.add(baseVersion);
-                return unprocessedBaseVersion;
-            }
-        }
-        return unprocessedBaseVersion;
-    }
 }

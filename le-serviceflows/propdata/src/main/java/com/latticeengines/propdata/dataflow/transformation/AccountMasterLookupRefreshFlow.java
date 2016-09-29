@@ -1,16 +1,18 @@
-package com.latticeengines.propdata.dataflow.refresh;
+package com.latticeengines.propdata.dataflow.transformation;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.datacloud.dataflow.SingleBaseSourceRefreshDataFlowParameter;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.AccountMasterLookupConfiguration;
 
 @Component("accountMasterLookupRefreshFlow")
-public class AccountMasterLookupRefreshFlow extends TypesafeDataFlowBuilder<SingleBaseSourceRefreshDataFlowParameter> {
+public class AccountMasterLookupRefreshFlow
+        extends TransformationFlowBase<AccountMasterLookupConfiguration, TransformationFlowParameters> {
 
     private final static String LATTICEID_FIELD = "LatticeID";
     private final static String KEY_FIELD = "Key";
@@ -20,7 +22,12 @@ public class AccountMasterLookupRefreshFlow extends TypesafeDataFlowBuilder<Sing
     private final static String PRIMARY_LOCATION_FIELD = "IsPrimaryLocation";
 
     @Override
-    public Node construct(SingleBaseSourceRefreshDataFlowParameter parameters) {
+    protected Class<? extends TransformationConfiguration> getTransConfClass() {
+        return AccountMasterLookupConfiguration.class;
+    }
+
+    @Override
+    public Node construct(TransformationFlowParameters parameters) {
         Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
         Node searchByDuns = addSearchByDuns(accountMasterSeed);
         Node searchByDomain = addSearchByDomainNode(accountMasterSeed);

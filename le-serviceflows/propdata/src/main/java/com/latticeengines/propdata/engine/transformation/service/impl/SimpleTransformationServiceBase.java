@@ -1,15 +1,23 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
+
 
 /**
  * This is the base implementation of the transformatin service
@@ -28,6 +36,11 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
     @Override
     public boolean isManualTriggerred() {
         return true;
+    }
+
+    @Override
+    public List<String> findUnprocessedVersions() {
+        return Collections.emptyList();
     }
 
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
@@ -59,6 +72,22 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         } else {
             return null;
         }
+    }
+
+    protected P enrichStandardDataFlowParameters(P parameters, T configuration, TransformationProgress progress) {
+        parameters.setTimestampField(getSource().getTimestampField());
+        try {
+            parameters.setTimestamp(HdfsPathBuilder.dateFormat.parse(progress.getVersion()));
+        } catch (ParseException e) {
+            throw new LedpException(LedpCode.LEDP_25012, e,
+                    new String[] { getSource().getSourceName(), e.getMessage() });
+        }
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
+
+        DerivedSource derivedSource = (DerivedSource) getSource();
+        parameters.setBaseTables(Collections.singletonList(derivedSource.getBaseSources()[0].getSourceName()));
+        parameters.setPrimaryKeys(Arrays.asList(getSource().getPrimaryKey()));
+        return parameters;
     }
 
 }

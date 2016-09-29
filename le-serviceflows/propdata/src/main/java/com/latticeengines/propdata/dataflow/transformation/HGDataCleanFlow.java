@@ -61,7 +61,7 @@ public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfigura
                 new FieldMetadata("LocationCount", Integer.class));
 
         Date now = new Date();
-        Date fakedCurrentDate = parameters.getFakedCurrentTime();
+        Date fakedCurrentDate = parameters.getTimestamp();
         if (fakedCurrentDate != null) {
             now = fakedCurrentDate;
         }
