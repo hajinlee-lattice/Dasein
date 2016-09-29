@@ -168,7 +168,7 @@ public class EnrichmentResource {
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        String fileName = onlySelectedAttributes ? "selectedEnrichmentAttributes.csv" : "enrichmentAttributes.csv";
+        String fileName = onlySelectedAttributes != null && onlySelectedAttributes ? "selectedEnrichmentAttributes.csv" : "enrichmentAttributes.csv";
         selectedAttrService.downloadAttributes(request, response, "application/csv", fileName, tenant,
                 onlySelectedAttributes);
     }
