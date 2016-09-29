@@ -7,9 +7,5 @@ import java.util.List;
 
 public interface ModelSummaryDownloadFlagDao extends BaseDao<ModelSummaryDownloadFlag> {
 
-    List<ModelSummaryDownloadFlag> getAllFlags();
-
-    List<ModelSummaryDownloadFlag> getDownloadedFlags();
-
     List<ModelSummaryDownloadFlag> getWaitingFlags();
 }

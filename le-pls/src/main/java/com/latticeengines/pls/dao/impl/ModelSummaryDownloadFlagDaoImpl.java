@@ -19,43 +19,6 @@ public class ModelSummaryDownloadFlagDaoImpl extends BaseDaoImpl<ModelSummaryDow
     }
 
     @Override
-    public List<ModelSummaryDownloadFlag> getAllFlags() {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("from %s", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        List<?> list = query.list();
-        if (list.size() == 0) {
-            return null;
-        } else {
-            List<ModelSummaryDownloadFlag> allFlags = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                allFlags.add((ModelSummaryDownloadFlag) list.get(i));
-            }
-            return allFlags;
-        }
-    }
-
-    @Override
-    public List<ModelSummaryDownloadFlag> getDownloadedFlags() {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();
-        String queryStr = String.format("from %s",
-                entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        List<?> list = query.list();
-        if (list.size() == 0) {
-            return null;
-        } else {
-            List<ModelSummaryDownloadFlag> allFlags = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                allFlags.add((ModelSummaryDownloadFlag) list.get(i));
-            }
-            return allFlags;
-        }
-    }
-
-    @Override
     public List<ModelSummaryDownloadFlag> getWaitingFlags() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummaryDownloadFlag> entityClz = getEntityClass();

@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface ModelSummaryDownloadFlagEntityMgr extends BaseEntityMgr<ModelSummaryDownloadFlag> {
 
-    List<ModelSummaryDownloadFlag> getDownloadedFlags();
-
     List<ModelSummaryDownloadFlag> getWaitingFlags();
 
     void addDownloadFlag(String tenantId);
