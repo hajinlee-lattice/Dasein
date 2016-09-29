@@ -261,7 +261,7 @@
       ],
       "DataType": "Integer",
       "Description": "Estimated annual revenue",
-      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":100000,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.005,\"maxBuckets\":5,\"maxPercentile\":1,\"includeNegatives\":\"True\"}}",
+      "DisplayDiscretizationStrategy": "{\"unified\": {}}",
       "DisplayName": "Annual Revenue",
       "Extensions": [
         {

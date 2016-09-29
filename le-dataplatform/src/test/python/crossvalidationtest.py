@@ -1,15 +1,15 @@
-import time
 import glob
 import json
 import sys
-
-import numpy as np
+import time
 
 from sklearn import cross_validation
 from sklearn import ensemble
 
 from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
+import numpy as np
 from trainingtestbase import TrainingTestBase
+
 
 class Timer:
     def __enter__(self):
@@ -47,25 +47,25 @@ class CrossValidationTest(TrainingTestBase):
         clf.fit(fake_train_X, fake_train_Y)
 
         crossValidationGenerator = CrossValidationGenerator()
-        mean, std = crossValidationGenerator.getMeanAndStdOfClf(clf, fake_train_X, fake_train_Y, numberOfFolds = 3)
+        mean, std = crossValidationGenerator.getMeanAndStdOfClf(clf, fake_train_X, fake_train_Y, numberOfFolds=3)
 
         expectedMean = 0.5
-        expectedDeltaInMean = 0.1 # Give a slack of 10% in the calculated mean
+        expectedDeltaInMean = 0.1  # Give a slack of 10% in the calculated mean
         self.assertAlmostEqual(mean, expectedMean, None , "Cross Validated Mean not within bounds", delta=expectedDeltaInMean)
         expectedStd = 0.01
-        expectedDeltaInStd = 0.1 # Give a slack of 10% in the calculated std dev
+        expectedDeltaInStd = 0.1  # Give a slack of 10% in the calculated std dev
         self.assertAlmostEqual(std, expectedStd, None , "Cross Validated Std not within bounds", delta=expectedDeltaInStd)
 
     # Check if error are caught in the functions.Induce an error by sending null classifiers and null data
     def atestCatchInducedError(self):
 
         enhancedSummaryGenerator = CrossValidationGenerator()
-        mean, std = enhancedSummaryGenerator.getMeanAndStdOfClf(classifier= None, features = None, targets= None, numberOfFolds = 3)
+        mean, std = enhancedSummaryGenerator.getMeanAndStdOfClf(classifier=None, features=None, targets=None, numberOfFolds=3)
 
         self.assertTrue(mean is None)
         self.assertTrue(std is None)
 
-        mean, std = enhancedSummaryGenerator.getCrossValidationMetrics(mediator = None)
+        mean, std = enhancedSummaryGenerator.getCrossValidationMetrics(mediator=None)
 
         self.assertTrue(mean is None)
         self.assertTrue(std is None)
@@ -76,7 +76,7 @@ class CrossValidationTest(TrainingTestBase):
             del sys.modules['launcher']
         from launcher import Launcher
 
-        traininglauncher = Launcher("modelCrossValidated.json")
+        traininglauncher = Launcher("modeldriver-crossvalidation.json")
         traininglauncher.execute(False)
         traininglauncher.training
 
@@ -117,7 +117,7 @@ class CrossValidationTest(TrainingTestBase):
                 accuracyWithoutCrossValidation = clf.score(fake_train_X, fake_train_Y)
 
                 numberofTimesToTrain = 2
-                accuracyWithCrossValidation = cross_validation.cross_val_score( clf, fake_train_X, fake_train_Y, cv=numberofTimesToTrain).mean()
+                accuracyWithCrossValidation = cross_validation.cross_val_score(clf, fake_train_X, fake_train_Y, cv=numberofTimesToTrain).mean()
 
                 self.assertAlmostEqual(accuracyWithCrossValidation, accuracyWithoutCrossValidation, None , "Cross Validated Accuracy not close enough to Non-Cross-Validated Accuracy", delta=0.1)
         finally:

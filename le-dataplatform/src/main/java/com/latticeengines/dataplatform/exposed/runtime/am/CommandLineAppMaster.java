@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.exposed.runtime.am;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -16,7 +15,6 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
-import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
