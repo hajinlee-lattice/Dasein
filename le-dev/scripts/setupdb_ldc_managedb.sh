@@ -15,10 +15,10 @@ else
 fi
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv || true
-gunzip --keep $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv.gz
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv || true
-gunzip --keep $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv.gz
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv
 
 mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5
 if version_gt ${mysql_version} ${threshold_version}; then
