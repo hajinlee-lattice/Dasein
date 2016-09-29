@@ -132,15 +132,16 @@ angular.module('lp.enrichment.leadenrichment', [
     }
 
     vm.inSubcategory = function(enrichment){
-        if(!(_.size(vm.selected_categories))) {
+        var category = vm.selected_categories[enrichment.Category],
+            subcategories = (category && category['subcategories'] ? category['subcategories'] : []),
+            subcategory = enrichment.Subcategory;
+
+        if(enrichment.DisplayName && !subcategories.length) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
             return true;
         }
-        var category = vm.selected_categories[enrichment.Category],
-            subcategory = enrichment.Subcategory,
-            subcategories = category['subcategories'];
 
         if(!subcategories.length) {
-            return true;
+            return false;
         }
 
         var selected = (typeof category === 'object' && subcategories.indexOf(subcategory) > -1);
