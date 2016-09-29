@@ -34,24 +34,24 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
 
     @Autowired
     private Configuration yarnConfiguration;
-
+    
     @Autowired
     private PipelineEntityMgr pipelineEntityMgr;
-
+    
     @Autowired
     private PipelineStepEntityMgr pipelineStepEntityMgr;
-
+    
     @Autowired
     private PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
-
+    
     @Override
     public Pipeline createLatestProductionPipeline() {
         Pipeline pipeline = new Pipeline();
         String version = getVersion();
         pipeline.setName("PRODUCTION-" + version);
-        String pipelineJson = String.format("/KEEPVERSION/%s/dataplatform/scripts/pipeline.json", version);
+        String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
         setPipelineProperties(pipeline, pipelineJson);
-
+        
         try {
             String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
             pipeline.addStepsFromPipelineJson(pipelineContents);
@@ -61,13 +61,12 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         }
         return pipeline;
     }
-
+    
     @Override
-    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String extension,
-            boolean isMetadata) {
+    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String extension, boolean isMetadata) {
         try {
             String fileName = "metadata";
-
+            
             if (!isMetadata) {
                 fileName = stepName;
             }
@@ -94,10 +93,9 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             PipelineStep step = null;
             if (psof.pipelineStepName != null) {
                 step = pipelineStepEntityMgr.findByName(psof.pipelineStepName);
-
+                
                 if (step == null) {
-                    throw new RuntimeException(
-                            String.format("Pipeline step with name %s does not exist", psof.pipelineStepName));
+                    throw new RuntimeException(String.format("Pipeline step with name %s does not exist", psof.pipelineStepName));
                 }
             } else if (psof.pipelineStepDir != null) {
                 try {
@@ -124,20 +122,20 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        
         return p;
     }
-
+    
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
         String version = getVersion();
-        String pythonLibScript = String.format("/KEEPVERSION/%s/dataplatform/scripts/lepipeline.tar.gz", version);
-        String pipelineScript = String.format("/KEEPVERSION/%s/dataplatform/scripts/pipeline.py", version);
+        String pythonLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz", version);
+        String pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py", version);
 
         pipeline.setPipelineLibScript(pythonLibScript);
         pipeline.setPipelineDriver(pipelineJson);
         pipeline.setPipelineScript(pipelineScript);
     }
-
+    
     private String createPipelineInHdfs(Pipeline pipeline) throws IOException {
         List<PipelineStep> steps = pipeline.getPipelineSteps();
         Map<String, PipelineStep> stepsMap = new HashMap<>();
@@ -155,18 +153,17 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, new ByteArrayInputStream(pipelineContents.getBytes()), path);
         return path;
     }
-
+    
     private String getPythonScript(String hdfsPath) {
         try {
-            List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath,
-                    new HdfsUtils.HdfsFilenameFilter() {
-
-                        @Override
-                        public boolean accept(String filename) {
-                            return filename.endsWith(".py");
-                        }
-                    });
-
+            List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, new HdfsUtils.HdfsFilenameFilter() {
+                
+                @Override
+                public boolean accept(String filename) {
+                    return filename.endsWith(".py");
+                }
+            });
+            
             if (pythonFiles.size() != 1) {
                 throw new RuntimeException("Must have exactly one python file for a pipeline step.");
             }
