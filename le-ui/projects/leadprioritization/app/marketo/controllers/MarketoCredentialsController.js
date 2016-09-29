@@ -18,12 +18,16 @@ angular.module('lp.marketo', [
 		restIdentityEndpoint: '',
 		restClientId: '',
 		restClientSecret: '',
-		state: 'create'
+		state: 'create',
+		saveInProgress: false,
+    	addUserErrorMessage: "",
+    	showAddUserError: false
     });
-    // $scope.credentialIsSetup = false;
-    // $scope.credentials = MarketoCredentials.resultObj;
 
 	vm.createCredentialClicked = function() {
+		
+		vm.saveInProgress = true;
+
 		var credential = {
             credentialName: vm.credentialName,
             soapEndpoint: vm.soapEndpoint,
@@ -35,7 +39,11 @@ angular.module('lp.marketo', [
             restClientSecret: vm.restClientSecret
 		};
 
-		MarketoService.CreateMarketoCredential(credential);
+		MarketoService.CreateMarketoCredential(credential).then(function(result){
+			if (result.success) {
+				$state.go('home.marketosettings.apikey');
+			}
+		});
 
 	};
 
@@ -58,7 +66,10 @@ angular.module('lp.marketo', [
 		restIdentityEndpoint: MarketoCredential.rest_identity_endpoint,
 		restClientId: MarketoCredential.rest_client_id,
 		restClientSecret: MarketoCredential.rest_client_secret,
-		state: 'edit'
+		state: 'edit',
+		saveInProgress: false,
+    	addUserErrorMessage: "",
+    	showAddUserError: false
     });
 
 	vm.saveCredentialClicked = function() {
