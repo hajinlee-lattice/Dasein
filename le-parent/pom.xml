@@ -100,7 +100,7 @@
             <id>central</id>
             <name>LE Maven REPOSITORY</name>
             <layout>default</layout>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public</url>
+            <url>http://10.41.1.75:8081/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -118,7 +118,7 @@
         <pluginRepository>
             <id>central</id>
             <name>LE Maven Plugin Repository</name>
-            <url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/groups/public</url>
+            <url>http://10.41.1.75:8081/repository/maven-public/</url>
             <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>

@@ -24,5 +24,4 @@ public interface BaseEntityMgr<T> {
  
     List<T> findAll();
 
-    
 }
