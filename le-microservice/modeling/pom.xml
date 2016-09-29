@@ -9,16 +9,16 @@
 
     <properties>
         <component-name>modeling-microservice</component-name>
-        <le.microservice.version>2.0.41-SNAPSHOT</le.microservice.version>
-        <le.dataplatform.version>2.0.41-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>2.0.41-SNAPSHOT</le.domain.version>
-        <le.monitor.version>2.0.41-SNAPSHOT</le.monitor.version>
+        <le.microservice.version>2.0.42-SNAPSHOT</le.microservice.version>
+        <le.dataplatform.version>2.0.42-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>2.0.42-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.42-SNAPSHOT</le.monitor.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.41-SNAPSHOT</version>
+        <version>2.0.42-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
