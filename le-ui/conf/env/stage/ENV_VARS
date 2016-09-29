@@ -1,3 +1,4 @@
+export NODE_APPS=leui,leadmin
 export NODE_ENV=stage
 export API_URL=https://app.lattice-engines.com
 export HTTP_PORT=3000

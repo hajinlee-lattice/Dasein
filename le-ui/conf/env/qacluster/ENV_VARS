@@ -1,7 +1,10 @@
+export NODE_APPS=leui,leadmin
 export NODE_ENV=qa
 export API_URL=https://${OUTSIDE_TOMCAT}:8081
-export APICON_URL=https://${INSIDE_TOMCAT}:8073
-export APIADMIN_URL=https://${INSIDE_TOMCAT}:8085
+export API_CON_URL=https://${INSIDE_TOMCAT}:8073
+export API_ADMIN_URL=https://${INSIDE_TOMCAT}:8085
+export API_MCSVC_URL=https://${INSIDE_TOMCAT}:8080
+export API_INFLUXDB_URL=http://${INSIDE_TOMCAT}:8086
 export ADMIN_HTTP_PORT=false
 export ADMIN_HTTPS_PORT=3002
 export COMPRESSED=true

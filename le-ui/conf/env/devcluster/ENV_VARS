@@ -1,9 +1,12 @@
+export NODE_APPS=leui,leadmin
 export NODE_ENV=development
 export API_URL=http://localhost:8081
-export APICON_URL=http://localhost:8073
+export API_CON_URL=http://localhost:8073
 export HTTP_PORT=3000
 export HTTPS_PORT=false
-export APIADMIN_URL=http://localhost:8085
+export API_ADMIN_URL=http://localhost:8085
+export API_MCSVC_URL=http://localhost:8080
+export API_INFLUXDB_URL=http://localhost:8086
 export ADMIN_HTTP_PORT=3003
 export ADMIN_HTTPS_PORT=false
 export COMPRESSED=false

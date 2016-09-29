@@ -12,11 +12,14 @@ module.exports = function (grunt) {
         // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
         env: {
             dev: {
+                NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://10.41.0.13:8081',
-                APIADMIN_URL: 'https://admin-qa.lattice.local:8085/',
-                APICON_URL: 'https://testapi.lattice-engines.com:8073',
+                API_ADMIN_URL: 'https://10.41.0.25:8085',
+                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
+                API_MCSVC_URL: 'https://10.41.0.25:8080',
+                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -28,10 +31,13 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false
             },
             devb: {
+                NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
-                APIADMIN_URL: 'https://admin-qa.lattice.local:8085/',
-                APICON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
+                API_ADMIN_URL: 'https://10.41.0.26:8085',
+                API_CON_URL: 'https://bodcdevsvipb26.lattice.local:8073',
+                API_MCSVC_URL: 'https://10.41.0.26:8080',
+                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -43,10 +49,13 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false
             },
             local: {
+                NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'development',
                 API_URL: 'http://localhost:8081',
-                APIADMIN_URL: 'http://localhost:8085',
-                APICON_URL: 'http://localhost:8073',
+                API_ADMIN_URL: 'http://localhost:8085',
+                API_CON_URL: 'http://localhost:8073',
+                API_MCSVC_URL: 'http://localhost:8080',
+                API_INFLUXDB_URL: 'http://localhost:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -58,11 +67,14 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false
             },
             qa: {
+                NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
-                APIADMIN_URL: 'https://admin-qa.lattice.local:8085/',
-                APICON_URL: 'https://testapi.lattice-engines.com',
+                API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
+                API_CON_URL: 'https://testapi.lattice-engines.com',
+                API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
+                API_INFLUXDB_URL: 'http://localhost:8086',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
@@ -75,32 +87,34 @@ module.exports = function (grunt) {
                 WHITELIST: '10.41.0.14, 10.41.0.16'
             },
             production: {
+                NODE_APPS: 'leui',
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
-                // APIADMIN_URL: ' https://admin.prod.lattice.local:8085/',
-                APICON_URL: 'https://api.lattice-engines.com',
+                API_ADMIN_URL: ' https://admin.prod.lattice.local:8085/',
+                API_CON_URL: 'https://api.lattice-engines.com',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
                 HTTPS_PORT: 3000,
-                // ADMIN_HTTP_PORT: 3003,
-                // ADMIN_HTTPS_PORT: 3002,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
                 WHITELIST: '10.51.12.109, 10.51.51.109'
             },
             proddev: {
+                NODE_APPS: 'leui',
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
-                // APIADMIN_URL: '  https://admin.prod.lattice.local:8085/',
-                APICON_URL: 'https://api.lattice-engines.com',
+                API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
+                API_CON_URL: 'https://api.lattice-engines.com',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
                 HTTPS_PORT: 3000,
-                // ADMIN_HTTP_PORT: 3003,
-                // ADMIN_HTTPS_PORT: 3002,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
@@ -148,7 +162,6 @@ module.exports = function (grunt) {
         'env:proddev',
         'run:node'
     ]);
-
 
     grunt.registerTask('production', defaultText, [
         'env:production',
