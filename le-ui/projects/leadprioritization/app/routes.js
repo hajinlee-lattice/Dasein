@@ -366,6 +366,15 @@ angular
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',
             resolve: { 
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+                    
+                    FeatureFlagService.GetAllFlags().then(function() {
+                        deferred.resolve();
+                    });
+                    
+                    return deferred.promise;
+                },
                 urls: function($q, $http) { 
                     var deferred = $q.defer();
 
@@ -394,7 +403,21 @@ angular
                 "navigation@": {
                     // -- ben::bookmark 
                     // templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                    controller: function($scope, $state, FeatureFlagService) {
+                        FeatureFlagService.GetAllFlags().then(function() {
+
+                            var flags = FeatureFlagService.Flags();
+                            $scope.latticeIsEnabled = FeatureFlagService.FlagIsEnabled(flags.LATTICE_MARKETO_PAGE);
+
+                            console.log($scope.latticeIsEnabled);
+
+                            if ($scope.latticeIsEnabled != true) {
+                                $state.go('home.marketosettings.sureshot');
+                            }
+
+                        });
+                    },
+                    templateUrl: 'app/navigation/sidebar/RootView.html'                    
                 },
                 "summary@": {
                     template: ''
@@ -449,6 +472,33 @@ angular
                     controller: 'MarketoCredentialsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/MarketoCredentialsView.html'
+                }   
+            }
+        })
+        .state('home.marketosettings.sureshot', {
+            url: '/sureshot',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings'
+            },
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_APIKEY';
+                        }
+                    },
+                    controller: function($scope, $state) {
+                        $scope.state = 'home.marketosettings.apikey';
+                    },
+                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
+                },
+                "main@": {
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                    },
+                    template: '<div id="sureshot_iframe_container"></div>'
                 }   
             }
         })
