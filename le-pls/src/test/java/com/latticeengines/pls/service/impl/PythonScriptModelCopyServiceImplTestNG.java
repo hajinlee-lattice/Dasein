@@ -62,10 +62,10 @@ public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGB
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        modelCopySourceTenant.setId("modelCopySourceTenant");
-        modelCopySourceTenant.setName(CustomerSpace.parse(modelCopySourceTenant.getId()).toString());
-        modelCopyTargetTenant.setId("modelCopyTargetTenant");
-        modelCopyTargetTenant.setName(CustomerSpace.parse(modelCopyTargetTenant.getId()).toString());
+        modelCopySourceTenant.setId(CustomerSpace.parse("modelCopySourceTenant").toString());
+        modelCopySourceTenant.setName(modelCopySourceTenant.getId());
+        modelCopyTargetTenant.setId(CustomerSpace.parse("modelCopyTargetTenant").toString());
+        modelCopyTargetTenant.setName(modelCopyTargetTenant.getId());
         try {
             tearDown();
         } catch (Exception e) {
