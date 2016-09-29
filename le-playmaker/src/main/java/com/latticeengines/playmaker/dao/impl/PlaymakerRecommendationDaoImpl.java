@@ -265,7 +265,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
+                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals(
+                        "NORECOMMENDATIONS"))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -288,7 +289,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getAccountExtensionColumns(String columns) {
-
+        if (columns != null) {
+            columns = columns.trim();
+            if ("" == columns) {
+                return "";
+            }
+        }
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
         Set<String> columnsInDb = new HashSet<>();
