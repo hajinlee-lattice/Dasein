@@ -66,7 +66,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private SourceFileEntityMgr sourceFileEntityMgr;
 
     private static final String localPathBase = ClassLoader.getSystemResource(
-            "com/latticeengines/pls/service/impl/modelcopyserviceimpl").getPath();
+            "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
 
     private Tenant tenant1;
 
@@ -119,7 +119,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Table trainingTable = JsonUtils
                 .deserialize(
                         IOUtils.toString(ClassLoader
-                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/tables/TrainingTable.json")),
+                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json")),
                         Table.class);
         Extract extract = trainingTable.getExtracts().get(0);
         extract.setPath(PathBuilder
@@ -132,7 +132,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Table eventTable = JsonUtils
                 .deserialize(
                         IOUtils.toString(ClassLoader
-                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/tables/EventTable.json")),
+                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json")),
                         Table.class);
         extract = eventTable.getExtracts().get(0);
         extract.setPath(customerBase + tenant1.getId() + "/data/AccountModel/Samples/allTraining-r-00000.avro");
@@ -144,7 +144,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(tenant1.getId())).toString()
                 + "/" + outputFileName;
-        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/" + outputFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
                 outputPath);
         SourceFile sourceFile = new SourceFile();
