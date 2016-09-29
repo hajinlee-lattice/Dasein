@@ -8,8 +8,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.MutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,13 +52,13 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         Date receivedAt = new Date();
         String rootOperationUID = UUID.randomUUID().toString();
 
-        List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs = new ArrayList<>();
-        AccountLookupRequest request = createLookupRequest(matchContext, lookupRequestPairs);
+        List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets = new ArrayList<>();
+        AccountLookupRequest request = createLookupRequest(matchContext, lookupRequestTriplets);
 
-        if (request.getIds().size() < lookupRequestPairs.size()) {
+        if (request.getIds().size() < lookupRequestTriplets.size()) {
             // TODO anoop - in M6 - add the logic for external lookup based on
             // namelocation from DnB matcher
-            doNameLocationBasedLookup(input, matchContext, lookupRequestPairs);
+            doNameLocationBasedLookup(input, matchContext, lookupRequestTriplets);
         }
 
         // TODO - anoop - currently assuming happy path - handle other scenarios
@@ -66,7 +66,7 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         List<LatticeAccount> matchedResults = accountLookupService.batchLookup(request);
 
         MatchOutput output = createMatchOutput(input, matchContext, receivedAt, rootOperationUID, matchedResults,
-                lookupRequestPairs);
+                lookupRequestTriplets);
 
         return output;
     }
@@ -74,21 +74,67 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
     @Override
     @MatchStep(threshold = 0L)
     public BulkMatchOutput matchBulk(BulkMatchInput input) {
-        input.setRequestId(UUID.randomUUID().toString());
+        String rootOperationUID = UUID.randomUUID().toString();
+        input.setRequestId(rootOperationUID);
+
         BulkMatchOutput output = new BulkMatchOutput();
         List<MatchOutput> outputList = new ArrayList<>();
         output.setOutputList(outputList);
+
+        List<MatchContext> matchContexts = new ArrayList<>();
+
+        // prepare match contexts
         for (MatchInput singleInput : input.getInputList()) {
-            MatchOutput singleOutput = match(singleInput);
-            outputList.add(singleOutput);
+            MatchContext matchContext = prepareMatchContext(singleInput, null, true);
+            matchContexts.add(matchContext);
         }
+
+        List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets = new ArrayList<>();
+
+        AccountLookupRequest bulkAccountLookupRequest = createBulkLookupRequest(matchContexts, lookupRequestTriplets);
+
+        List<LatticeAccount> matchedResults = accountLookupService.batchLookup(bulkAccountLookupRequest);
+        int idx = 0;
+        int idxInRunningMatchContext = 0;
+        MatchContext runningMatchContext = null;
+        for (LatticeAccount result : matchedResults) {
+
+            MatchContext matchContext = lookupRequestTriplets.get(idx++).getRight();
+
+            if (runningMatchContext != matchContext) {
+                runningMatchContext = matchContext;
+                idxInRunningMatchContext = 0;
+            }
+
+            MatchOutput matchOutput = matchContext.getOutput();
+
+            if (matchOutput.getResult() == null) {
+                matchOutput.setResult(new ArrayList<OutputRecord>());
+            }
+
+            List<OutputRecord> outputRecordList = matchOutput.getResult();
+
+            List<Column> selectedColumns = matchContext.getColumnSelection().getColumns();
+            OutputRecord outputRecord = createOutputRecord(selectedColumns, result, idxInRunningMatchContext++);
+            outputRecordList.add(outputRecord);
+            outputList.add(matchOutput);
+        }
+
         return output;
     }
 
     private AccountLookupRequest createLookupRequest(MatchContext matchContext,
-            List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs) {
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
         String dataCloudVersion = matchContext.getInput().getDataCloudVersion();
         AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
+
+        populateLookupRequest(matchContext, lookupRequestTriplets, accountLookupRequest);
+        return accountLookupRequest;
+    }
+
+    private void populateLookupRequest(MatchContext matchContext,
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets,
+            AccountLookupRequest accountLookupRequest) {
 
         for (InternalOutputRecord record : matchContext.getInternalResults()) {
             // we can not do direct lookup against account master if duns is not
@@ -106,9 +152,19 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
                                         : record.getParsedDuns()));
             }
 
-            Pair<InternalOutputRecord, AccountLookupRequest> accountLookupRequestPair = new MutablePair<>(record,
-                    shouldCallExternalMatch ? null : accountLookupRequest);
-            lookupRequestPairs.add(accountLookupRequestPair);
+            Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> accountLookupRequestTriplet = new MutableTriple<>(
+                    record, accountLookupRequest, matchContext);
+            lookupRequestTriplets.add(accountLookupRequestTriplet);
+        }
+    }
+
+    private AccountLookupRequest createBulkLookupRequest(List<MatchContext> matchContexts,
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
+        String dataCloudVersion = matchContexts.get(0).getInput().getDataCloudVersion();
+        AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
+
+        for (MatchContext matchContext : matchContexts) {
+            populateLookupRequest(matchContext, lookupRequestTriplets, accountLookupRequest);
         }
 
         return accountLookupRequest;
@@ -116,7 +172,7 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
 
     private MatchOutput createMatchOutput(MatchInput input, MatchContext matchContext, Date receivedAt,
             String rootOperationUID, List<LatticeAccount> matchedResults,
-            List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs) {
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
         List<OutputRecord> outputRecords = new ArrayList<>();
         MatchOutput output = matchContext.getOutput();
         output.setResult(outputRecords);
@@ -124,13 +180,13 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         List<Column> selectedColumns = columnSelection.getColumns();
         int index = 0;
 
-        for (Pair<InternalOutputRecord, AccountLookupRequest> pair : lookupRequestPairs) {
-            if (pair.getValue() == null) {
-                outputRecords.add(pair.getKey());
+        for (Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> triplet : lookupRequestTriplets) {
+            if (triplet.getMiddle() == null) {
+                outputRecords.add(triplet.getLeft());
             } else {
                 LatticeAccount result = matchedResults.get(index++);
 
-                OutputRecord outputRecord = pair.getKey();
+                OutputRecord outputRecord = triplet.getLeft();
                 outputRecord.setMatched(result != null);
                 outputRecord.setOutput(
                         outputRecord.isMatched() ? getAttributeValues(selectedColumns, result.getAttributes()) : null);
@@ -140,6 +196,15 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
         }
 
         return output;
+    }
+
+    private OutputRecord createOutputRecord(List<Column> selectedColumns, LatticeAccount result, Integer rowNumber) {
+        OutputRecord outputRecord = new OutputRecord();
+        outputRecord.setMatched(result != null);
+        outputRecord.setOutput(
+                outputRecord.isMatched() ? getAttributeValues(selectedColumns, result.getAttributes()) : null);
+        outputRecord.setRowNumber(rowNumber);
+        return outputRecord;
     }
 
     private List<Object> getAttributeValues(List<Column> selectedColumns, Map<String, Object> attributes) {
@@ -162,13 +227,13 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWith
     }
 
     private void doNameLocationBasedLookup(MatchInput input, MatchContext matchContext,
-            List<Pair<InternalOutputRecord, AccountLookupRequest>> lookupRequestPairs) {
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
         // TODO - need to be implemented by M7
 
         if (input.getReturnUnmatched()) {
-            for (Pair<InternalOutputRecord, AccountLookupRequest> pair : lookupRequestPairs) {
-                if (pair.getValue() == null) {
-                    InternalOutputRecord record = pair.getKey();
+            for (Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> triplet : lookupRequestTriplets) {
+                if (triplet.getMiddle() == null) {
+                    InternalOutputRecord record = triplet.getLeft();
                     record.setOutput(record.getInput());
                     record.setMatched(false);
                 }

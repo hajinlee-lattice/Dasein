@@ -8,8 +8,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -38,9 +40,9 @@ import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerI
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
-import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
+import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
@@ -189,7 +191,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public List<T> batchFindByKey(List<String> ids) {
         if (disabled)
             return null;
-        Map<String, GenericRecord> records = dataStore.batchFindRecord(ids);
+
+        List<String> uniqueIds = dedupIds(ids);
+
+        Map<String, GenericRecord> records = dataStore.batchFindRecord(uniqueIds);
         List<T> entities = new ArrayList<T>();
         for (String id : ids) {
             GenericRecord record = (id == null) ? null : records.get(id);
@@ -274,7 +279,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
         }
 
-        GenericRecord record  = null;
+        GenericRecord record = null;
         ReflectDatumWriter<T> writer = new ReflectDatumWriter<T>(schema);
         GenericDatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -310,6 +315,12 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         Type type = getClass().getGenericSuperclass();
         ParameterizedType paramType = (ParameterizedType) type;
         return (Class<T>) paramType.getActualTypeArguments()[0];
+    }
+
+    private List<String> dedupIds(List<String> ids) {
+        Set<String> uniqueIds = new HashSet<>();
+        uniqueIds.addAll(ids);
+        return new ArrayList<String>(uniqueIds);
     }
 
     public class BaseFabricEntityStreamProc implements FabricStreamProc {

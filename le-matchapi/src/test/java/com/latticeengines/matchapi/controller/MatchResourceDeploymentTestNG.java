@@ -46,6 +46,21 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private static final String avroDir = "/tmp/MatchResourceDeploymentTestNG";
     private static final String fileName = "SourceFile_csv.avro";
     private static final String podId = "MatchResourceDeploymentTestNG";
+    private static List<String> domains = new ArrayList<>();
+
+    static {
+        domains.add("fb.com");
+        domains.add("google.com");
+        domains.add("salesforce.com");
+        domains.add("microsoft.com");
+        domains.add("ibm.com");
+        domains.add("dnb.com");
+        domains.add("wikipedia.com");
+        domains.add("amazon.com");
+        domains.add("wipro.com");
+        domains.add("apple.com");
+        domains.add("apache.com");
+    }
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -96,7 +111,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", enabled = true)
     public void testAccountMasterRTSBulkMatch() throws IOException {
-        int size = 2;
+        int size = 200;
         List<MatchInput> inputList = prepareBulkMatchInput(size, "2.0.0", true);
 
         BulkMatchInput input = new BulkMatchInput();
@@ -106,7 +121,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         ObjectMapper om = new ObjectMapper();
         System.out.println(om.writeValueAsString(input));
 
+        long startLookup = System.currentTimeMillis();
         BulkMatchOutput output = matchProxy.matchRealTime(input);
+        System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
+                + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                + (System.currentTimeMillis() - startLookup) + " millis");
         Assert.assertNotNull(output);
         Assert.assertNotNull(output.getOutputList());
         Assert.assertEquals(output.getOutputList().size(), size);
@@ -114,6 +133,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (MatchOutput outputRecord : output.getOutputList()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getResult().size() > 0);
+            Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
         }
     }
 
@@ -121,7 +141,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         List<MatchInput> inputList = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            MatchInput input = prepareSimpleMatchInput(resolveKeyMap, "salesforce.com", false, true, null);
+            MatchInput input = prepareSimpleMatchInput(resolveKeyMap, //
+                    domains.get(i % domains.size()), //
+                    false, true, null);
             input.setReturnUnmatched(false);
             input.setDataCloudVersion(dataCloudVersion);
             inputList.add(input);
