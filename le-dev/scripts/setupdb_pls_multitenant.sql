@@ -10,3 +10,20 @@ source WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
 
 INSERT INTO QUARTZ_JOBACTIVE(IsActive, JobName, TenantId) VALUES (1, 'modelSummaryDownload', 'PredefinedJobs');
 INSERT INTO QUARTZ_JOBACTIVE(IsActive, JobName, TenantId) VALUES (0, 'dataCloudRefresh', 'PredefinedJobs');
+
+INSERT INTO TENANT(
+  TENANT_ID,
+  NAME,
+  REGISTERED_TIME,
+  UI_VERSION
+) VALUES (
+  'LocalTest.LocalTest.Production',
+  'LocalTest',
+  NOW(),
+  '3.0'
+), (
+  'PropDataService.PropDataService.Production',
+  'PropDataService',
+  NOW(),
+  '3.0'
+)
