@@ -41,9 +41,9 @@ class Server {
                 const credentials = {
                     cert: httpsCert
                 };
-                
-                options.config.HTTPS_KEY  ? credentials.key = httpsKey : null; 
-                options.config.HTTPS_PASS ? credentials.passphrase = options.config.HTTPS_PASS : null; 
+
+                options.config.HTTPS_KEY  ? credentials.key = httpsKey : null;
+                options.config.HTTPS_PASS ? credentials.passphrase = options.config.HTTPS_PASS : null;
 
                 https.globalAgent.maxSockets = Infinity;
                 this.httpsServer = https.createServer(credentials, this.app);
@@ -76,13 +76,13 @@ class Server {
         // helmet enables/modifies/removes http headers for security concerns
         this.app.use(helmet());
 
-        
+
         // default cookie behavior - favors security
         /* don't need this yet
         this.app.use(session({
             name: 'sessionId',
             secret: 'LEs3Cur1ty',
-            cookie: { 
+            cookie: {
                 secure: true,
                 expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
             }
@@ -97,7 +97,7 @@ class Server {
             const accessLogStream = fs.createWriteStream(logDirectory + '/' + this.options.name + '_access.log', {
                 flags: 'a'
             });
-            
+
             const map = {
                 default:':datetime> :method :url :status :response-time ms - :res[content-length]',
                 verbose:':utctime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
@@ -110,20 +110,20 @@ class Server {
             morgan.token("utctime", function getDateTime() {
                 return new Date().getTime();
             });
-            
+
             this.app.use(morgan(
-                map[this.options.config.LOGGING_LEVEL], 
-                { 
-                    stream: accessLogStream 
+                map[this.options.config.LOGGING_LEVEL],
+                {
+                    stream: accessLogStream
                 }
             ));
 
             this.app.use(morgan(
-                map['default'], 
-                { 
-                    skip: function (req, res) { 
-                        return res.statusCode < 400
-                    } 
+                map['default'],
+                {
+                    skip: function (req, res) {
+                        return res.statusCode < 400;
+                    }
                 }
             ));
         } catch(err) {
@@ -171,7 +171,7 @@ class Server {
 
         if (API_URL) {
             API_PATH = API_PATH || '/pls';
-            
+
             console.log(chalk.white('>') + ' API PROXY:', API_LOCAL_PATH, ' -> ', API_URL+API_PATH);
 
             try {
@@ -182,8 +182,8 @@ class Server {
 
                     try {
                         if (req.method === 'POST') {
-                            r = request.post({ 
-                                uri: url, 
+                            r = request.post({
+                                uri: url,
                                 json: req.body
                             });
 
@@ -226,7 +226,7 @@ class Server {
                             let token = req.query.Authorization.replace(/ /g,'+');
                             req.headers["Authorization"] = token || '';
                         }
-                        
+
                         if (req.query.TenantId) {
                             let tenant = req.query.TenantId;
                             req.headers["TenantId"] = tenant || '';
@@ -250,7 +250,7 @@ class Server {
                 Object.keys(route.folders).forEach(folder => {
                     displayString += (displayString ? ', ' : '') + route.folders[folder];
                     this.app.use(
-                        folder, 
+                        folder,
                         this.express.static(dir + route.folders[folder]) //, { maxAge: 3600000 })
                     );
                 });
@@ -264,12 +264,12 @@ class Server {
             displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
-                const html5mode = route.html5mode == true;
+                const html5mode = route.html5mode === true;
                 Object.keys(route.pages).forEach(page => {
                     //console.log('\t'+route.pages[page]+'\t->',page);
                     // if !internal ip && page == '/admin'
                     this.app.get(
-                        page + (html5mode ? '*' : ''), 
+                        page + (html5mode ? '*' : ''),
                         (req, res) => res.render(dir + '/' + route.pages[page])
                     );
                 });
@@ -281,7 +281,6 @@ class Server {
         // catch 404 and forwarding to error handler
         this.app.use((req, res, next) => {
             const err = new Error('Not Found');
-            console.log('not found')
             err.status = 404;
             next(err);
         });
@@ -337,13 +336,13 @@ class Server {
 
 
         if (this.httpServer) {
-            this.httpServer.listen(options.protocols.http, () => { 
-                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + options.protocols.http); 
+            this.httpServer.listen(options.protocols.http, () => {
+                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + options.protocols.http);
             });
         }
 
         if (this.httpsServer) {
-            this.httpsServer.listen(options.protocols.https, () => { 
+            this.httpsServer.listen(options.protocols.https, () => {
                 console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + options.protocols.https);
                 console.log(line);
             });
