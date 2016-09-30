@@ -1,7 +1,7 @@
 angular
 .module('lp.create.import')
-.controller('CustomFieldsController', function(
-    $scope, $state, $stateParams, $timeout, ResourceUtility, 
+.controller('ScoreFieldsController', function(
+    $scope, $state, $stateParams, $timeout, ResourceUtility, ScoreLeadEnrichmentModal,
     ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
 ) {
     var vm = this;
@@ -15,31 +15,33 @@ angular
             { id: 1, name: "Map to Standard Field" },
             { id: 2, name: "Ignore this field" }
         ],
-        ignoredFields: FieldDocument.ignoredFields = [],
+        ignoredFields: FieldDocument.ignoredFields,
         fieldMappings: FieldDocument.fieldMappings,
-        RequiredFields: [],
-        initialized: false
+        fieldsMap: {},
+        RequiredFields: ['id','email','event'],
+        FileHeaders: [],
+        UserFields: [],
+        MappedFields: [],
+        AvailableFields: [],
+        initialized: false,
+        modelId: $stateParams.modelId
     });
 
     vm.init = function() {
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
-        vm.UnmappedFields = UnmappedFields[vm.schema] || [];
-
-        /*
-        for (var i=0; i < FieldDocument.fieldMappings.length; i++) {
-            vm.fieldMappings.push(FieldDocument.fieldMappings[i]);
-        }
-        */
+        vm.UnmappedFields = UnmappedFields || [];
+        
+        vm.refreshLatticeFields();
 
         vm.UnmappedFields.forEach(function(field, index) {
-            if (field.requiredType == 'Required') {
-                vm.RequiredFields.push(field.name);
+            if (vm.ignoredFields.indexOf(field) < 0) {
+                vm.FileHeaders.push(field);
             }
         });
 
-        vm.refreshLatticeFields();
+        console.log('scorefields', vm);
     }
 
     vm.changeMappingOption = function(mapping, selectedOption) {
@@ -72,28 +74,39 @@ angular
 
     vm.changeLatticeField = function(mapping) {
         mapping.mappedToLatticeField = true;
-        mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField].fieldType;
+        //mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField].fieldType;
         
         vm.refreshLatticeFields();
 
         setTimeout(function() {
-            vm.validateForm();
+            //vm.validateForm();
             $scope.$digest();
         },1);
     }
 
     vm.refreshLatticeFields = function() {
-        vm.fieldMappingsMapped = {};
-        vm.UnmappedFieldsMap = {};
+        vm.UserFields = [];
+        vm.MappedFields = [];
+        vm.AvailableFields = [];
 
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.mappedField && !fieldMapping.ignored) {
-                vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
+        for (var i=0; i < vm.fieldMappings.length; i++) {
+            var field = vm.fieldMappings[i];
+
+            if (field.userField) {
+                vm.UserFields.push(field.userField);
             }
-        });
+
+            if (field.mappedField) {
+                vm.MappedFields.push(field.mappedField);
+                vm.fieldsMap[field.mappedField] = field;
+            }
+
+        }
         
-        vm.UnmappedFields.forEach(function(UnmappedField, index) {
-            vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
+        vm.MappedFields.forEach(function(field, index) {
+            if (vm.ignoredFields.indexOf(field) < 0 && vm.UserFields.indexOf(field) < 0 && vm.AvailableFields.indexOf(field) < 0) {
+                vm.AvailableFields.push(field);
+            }
         });
     }
 
@@ -112,6 +125,7 @@ angular
         ShowSpinner('Saving Field Mappings...');
 
         // build ignoredFields list from temp 'ignored' fieldMapping property
+        /*
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             if (fieldMapping.ignored) {
                 vm.ignoredFields.push(fieldMapping.userField);
@@ -119,14 +133,15 @@ angular
                 delete fieldMapping.ignored;
             }
         });
+        */
 
-        ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument).then(function(result) {
+        ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Executing Modeling Job...');
 
             ImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {
                     setTimeout(function() {
-                        $state.go('home.models.import.job', { applicationId: result.Result });
+                        ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName);
                     }, 1);
                 }
             });
@@ -177,10 +192,6 @@ angular
 
         // make sure there are no empty drop-down selection
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.ignored) {
-                return;
-            }
-
             if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                 vm.FormValidated = false;
             }

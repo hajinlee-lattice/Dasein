@@ -56,22 +56,30 @@ angular.module('mainApp.create.csvBulkUpload', [
 
     vm.clickNext = function() {
         console.log(vm.Result);
-        var fileName = fileName || vm.fileName,
-            modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.Result.display_name),
-            metaData = vm.metadata = vm.metadata || {};
+        if (IsPmml) {
+            ShowSpinner('Executing Scoring Job...');
 
-        metaData.name = fileName;
-        metaData.modelName = modelName;
-        metaData.displayName = vm.Result.display_name;
-        metaData.description = vm.Result.description;
-        metaData.schemaInterpretation = vm.Result.schema_interpretation;
+            ImportService.StartTestingSet(vm.params.modelId, vm.fileName, false).then(function(result) {
+                $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
+            });
+        } else {
+            var fileName = fileName || vm.fileName,
+                modelName = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.Result.display_name),
+                metaData = vm.metadata = vm.metadata || {};
 
-        console.log(metaData);
-        ImportStore.Set(fileName, metaData);
+            metaData.name = fileName;
+            metaData.modelName = modelName;
+            metaData.displayName = vm.Result.display_name;
+            metaData.description = vm.Result.description;
+            metaData.schemaInterpretation = vm.Result.schema_interpretation;
 
-        setTimeout(function() {
-            $state.go('home.model.scoring.mapping', { csvFileName: fileName });
-        }, 1);
+            console.log(metaData);
+            ImportStore.Set(fileName, metaData);
+
+            setTimeout(function() {
+                $state.go('home.model.scoring.mapping', { csvFileName: fileName });
+            }, 1);
+        }
         /*
         if (!IsPmml) {
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.params.modelId, vm.fileName);

@@ -214,14 +214,16 @@ angular
     this.SaveFieldDocuments = function(FileName, FieldDocument, score) {
         var deferred = $q.defer();
         var result;
+        var modelId = $stateParams.modelId;
+        var params = score ? { 'modelId': modelId, 'displayName': FileName } : { 'displayName': FileName };
 
         $http({
             method: 'POST',
             url: score 
-                ? '/pls/models/uploadfile/fieldmappings'
+                ? '/pls/scores/fileuploads/fieldmappings/resolve'
                 : '/pls/models/uploadfile/fieldmappings',
             headers: { 'Content-Type': 'application/json' },
-            params: { 'displayName': FileName },
+            params: params,
             data: {
                 'fieldMappings': FieldDocument.fieldMappings,
                 'ignoredFields': FieldDocument.ignoredFields

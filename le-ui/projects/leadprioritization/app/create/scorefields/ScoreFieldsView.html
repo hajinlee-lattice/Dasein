@@ -1,5 +1,6 @@
 <section class="container custom-fields">
 	<form novalidate name="fieldMappingForm">
+	<!--
 	<div class="row">
 		<div class="ten columns offset-one">
 			<hgroup ng-if="vm.RequiredFields.length > 0">
@@ -9,25 +10,25 @@
 			</hgroup>
 		</div>
 	</div>
-
+	-->
 	<div class="row field-mapping-form">
-		<div class="ten offset-one columns">
+		<div class="six offset-three columns">
 			<table class="unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
-						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
+						<!-- <th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th> -->
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
-						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th>
+						<!-- <th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_CUSTOM_FIELD_TYPE')}}</th> -->
 					</tr>
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="fieldMapping in vm.fieldMappings">
+                    <tr ng-repeat="field in vm.FileHeaders">
 						<td class="field_mapping_label">
-							<label for="fieldType_{{ ::fieldMapping.userField }}">{{ ::fieldMapping.userField }}</label>
+							<label for="fieldType_{{ ::field }}">{{ ::field }}</label>
 						</td>
-
+						<!--
 						<td class="field_mapping_inputs">
                             <select class="form-control" 
 	                            	ng-model="selectedOption" 
@@ -36,40 +37,26 @@
 									ng-options="mappingOption as mappingOption.name for mappingOption in ::vm.mappingOptions">
                             </select>
 						</td>
-
+						-->
 						<td class="field-mapping-inputs">
                             <select required
-                            		name="mapping_lattice_field_select_{{ ::fieldMapping.userField }}"
+                            		name="mapping_lattice_field_select_{{ ::vm.fieldsMap[field].userField }}"
                             		class="form-control"
-	                            	ng-if="selectedOption.id == 1"
-	                            	ng-model="fieldMapping.mappedField"
-                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
-	                            	ng-change="vm.changeLatticeField(fieldMapping)">
-	                            <option value="{{fieldMapping.mappedField}}"
-	                            		ng-if="vm.UnmappedFieldsMap[fieldMapping.mappedField]"
-	                            		ng-selected="fieldMapping.mappedField == fieldMapping.userField">
-	                            	{{fieldMapping.mappedField}}
+	                            	ng-model="vm.fieldsMap[field].mappedField"
+	                            	ng-change="vm.changeLatticeField(vm.fieldsMap[field])">
+	                            <option value="{{vm.fieldsMap[field].mappedField}}"
+	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(field) > -1) }"
+	                            		ng-selected="true">
+	                            	{{vm.fieldsMap[field].mappedField}}
 	                            </option>
-	                            <option value="{{UnmappedField.name}}"
-	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(UnmappedField.name) > -1) }"
-	                            		ng-if="!vm.fieldMappingsMapped[UnmappedField.name] && UnmappedField.name != fieldMapping.mappedField"
-	                            		ng-repeat="UnmappedField in vm.UnmappedFields"
-	                            		ng-selected="fieldMapping.mappedField == UnmappedField.name">
-	                            	{{UnmappedField.name}}
+	                            <option value="{{UnmappedField}}"
+	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(UnmappedField) > -1) }"
+	                            		ng-repeat="UnmappedField in vm.AvailableFields">
+	                            	{{UnmappedField}}
 	                            </option>
                             </select>
-					        <input 	required
-									type="text"
-									class="form-control" 
-									name="mapping_custom_field_input_{{ ::fieldMapping.userField }}"
-          							ng-minlength="1"
-                            		ng-init="vm.changeMappingOption(fieldMapping, selectedOption)"
-									ng-model="fieldMapping.mappedField"
-									ng-value="fieldMapping.mappedField"
-									ng-keyup="vm.validateForm()"
-									ng-if="selectedOption.id == 0" />
 						</td>
-
+						<!--
 						<td class="field_mapping_type">
 							<select 
 									class="custom-select" 
@@ -84,6 +71,7 @@
 								<option value="BOOLEAN">Boolean</option>
 							</select>
 						</td>
+						-->
 					</tr>
 				</tbody>
 			</table>

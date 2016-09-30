@@ -109,7 +109,7 @@ angular
             url: '/:csvFileName/mapping',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Score A File - Field Mapping'
+                pageTitle: ''
             },
             views: {
                 "summary@": {
