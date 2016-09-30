@@ -58,7 +58,7 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
-    private final static String tenantName = "Global Test Tenant";
+    private final static String tenantName = "Global Test Tenant" + System.currentTimeMillis();
     private final static Log log = LogFactory.getLog(LP2EndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
