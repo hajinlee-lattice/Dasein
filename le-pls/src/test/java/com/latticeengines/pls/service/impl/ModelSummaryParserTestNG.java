@@ -2,13 +2,12 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
-import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
 public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated {
@@ -55,10 +56,11 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated 
         assertTrue(summary.getTop10PercentLift() > summary.getTop20PercentLift());
         assertTrue(summary.getTop20PercentLift() > summary.getTop30PercentLift());
         ModelSummaryProvenance provenance = summary.getModelSummaryConfiguration();
-        assertEquals(provenance.getBag().size(), 3);
+        assertEquals(provenance.getBag().size(), 4);
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
+        assertNotNull(provenance.getString(ProvenancePropertyName.TrainingFilePath));
     }
 
     private boolean topPredictorsAreSortedAndSet(List<Predictor> predictors) {
