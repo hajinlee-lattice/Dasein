@@ -1,29 +1,100 @@
 {
   "pipeline": {
-    "name": "Pipeline1",
-    "pipeline_script": "/app/dataplatform/scripts/pipeline/pipeline.py",
-    "pipeline_lib_script": "/app/dataplatform/scripts/lepipeline.tar.gz",
-    "pipeline_driver": "/app/dataplatform/scripts/pipeline/pipeline.json",
+    "name": "PRODUCTION-",
+    "pipeline_script": "/app//dataplatform/scripts/pipeline.py",
+    "pipeline_lib_script": "/app//dataplatform/scripts/lepipeline.tar.gz",
+    "pipeline_driver": "/app//dataplatform/scripts/pipeline.json",
     "pipeline_steps": [
       {
-        "name": "pivotstep",
-        "script": "pivotstep.py",
-        "pipeline_property_defs": [
-          {
-            "name": "minCategoricalCount",
-            "pipeline_property_values": [
-              {
-                "value": "5"
-              }
-            ]
+        "Name": "remediatedatarulesstep",
+        "MainClassName": "RemediateDataRulesStep",
+        "OperatesOnColumns": [],
+        "ColumnTransformFilePath": "remediatedatarulesstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {
+          "params": "params",
+          "enabledRules": {
+            "PopulatedRowCountDS": [],
+            "UniqueValueCountDS": []
           }
-        ]
+        },
+        "LoadFromHdfs": false
+      },
+      {
+        "Name": "pivotstep",
+        "MainClassName": "PivotStep",
+        "OperatesOnColumns": [],
+        "ColumnTransformFilePath": "pivotstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {
+          "columnsToPivot": "emptyDictionary",
+          "categoricalColumns": "categoricalColumns",
+          "dataprofile": "dataprofile",
+          "pvalueThreshold": 0.1,
+          "minCategoricalCount": 5,
+          "maxCategoricalCount": 10
+        },
+        "LoadFromHdfs": false
+      },
+      {
+        "Name": "enumeratedcolumntransformstep",
+        "MainClassName": "EnumeratedColumnTransformStep",
+        "OperatesOnColumns": [
+          "Categorical"
+        ],
+        "ColumnTransformFilePath": "enumeratedcolumntransformstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {
+          "columns": "categoricalColumns"
+        },
+        "LoadFromHdfs": false
+      },
+      {
+        "Name": "columntypeconversionstep",
+        "MainClassName": "ColumnTypeConversionStep",
+        "OperatesOnColumns": [],
+        "ColumnTransformFilePath": "columntypeconversionstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {
+          "columnsToConvert": "columnsToTransform"
+        },
+        "LoadFromHdfs": false
+      },
+      {
+        "Name": "imputationstep",
+        "MainClassName": "ImputationStep",
+        "OperatesOnColumns": [
+          "Numerical"
+        ],
+        "ColumnTransformFilePath": "imputationstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {
+          "columns": "orderedDictContinuousColumns",
+          "imputationValues": "emptyDictionary",
+          "targetCol": "targetColumn"
+        },
+        "LoadFromHdfs": false
+      },
+      {
+        "Name": "exportdfstep",
+        "MainClassName": "ExportDataFrameStep",
+        "OperatesOnColumns": [],
+        "ColumnTransformFilePath": "exportdfstep.py",
+        "KeyWhenSortingByAscending": -1,
+        "UniqueColumnTransformName": "",
+        "NamedParameterListToInit": {},
+        "LoadFromHdfs": false
       }
     ]
   },
   "algorithm": {
     "name": "RF",
-    "script": "/app/dataplatform/scripts/algorithm/rf_train.py",
+    "script": "/app//dataplatform/scripts/algorithm/rf_train.py",
     "algorithm_property_defs": [
       {
         "name": "n_estimators",
@@ -100,7 +171,7 @@
     ]
   },
   "sampling": {
-    "name": "sampling1",
+    "name": "PRODUCTION-",
     "sampling_property_defs": [
       {
         "name": "model.sampling.test.percentage",
@@ -147,7 +218,7 @@
     ]
   },
   "data_set": {
-    "name": "MuleSoft",
+    "name": "DataSet1",
     "industry": "Industry1",
     "dataSetType": "FILE",
     "schemaInterpretation": "SalesforceLead",
@@ -158,7 +229,7 @@
       "UIVersion": "2.0"
     },
     "customer_space": "Model_Quality_Test.Model_Quality_Test.Production",
-    "training_hdfs_path": "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv",
+    "training_hdfs_path": "/Pods/Default/Services/ModelQuality/Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv",
     "test_hdfs_path": null,
     "scoring_data_sets": [
       {
@@ -168,13 +239,14 @@
     ]
   },
   "prop_data": {
-    "name": "propData1",
-    "data_cloud_version": "",
+    "name": "PRODUCTION-",
     "exclude_propdata_columns": false,
-    "predefined_selection_name": null
+    "predefined_selection_name": null,
+    "data_cloud_version": "1.0.0",
+    "exclude_public_domains": false
   },
   "data_flow": {
-    "name": "dataFlow1",
+    "name": "PRODUCTION-",
     "match": true,
     "transform_group": "STANDARD",
     "transform_dedup_type": "MULTIPLELEADSPERDOMAIN"
