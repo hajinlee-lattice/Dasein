@@ -43,6 +43,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         JOBS_PAGE: 'JobsPage',
         MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
         API_CONSOLE_PAGE: 'APIConsolePage',
+        LATTICE_MARKETO_PAGE: 'EnableLatticeMarketoCredentialPage',
 
         ALLOW_PIVOT_FILE:'AllowPivotFile',
         USE_ELOQUA_SETTINGS: 'UseEloquaSettings',
