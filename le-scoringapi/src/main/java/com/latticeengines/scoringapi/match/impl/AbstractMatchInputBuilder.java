@@ -138,9 +138,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
     private void setMatchKeyMap(InterpretedFields interpreted, Map<String, Object> record, MatchInput matchInput) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
