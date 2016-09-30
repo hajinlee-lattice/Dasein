@@ -25,4 +25,8 @@ public class MatchTypeUtil {
         return false;
     }
 
+    public static String getVersionForEnforcingAccountMasterBasedMatch() {
+        return DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING + "0.0";
+    }
+
 }

@@ -34,41 +34,26 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             ModelSummary modelSummary, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection) {
+        return buildMatchInput(space, interpreted, //
+                record, modelSummary, //
+                selectedLeadEnrichmentAttributes, //
+                skipPredefinedSelection, null);
+    }
+
+    @Override
+    public MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion) {
         MatchInput matchInput = new MatchInput();
-        Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
-        matchInput.setKeyMap(keyMap);
 
-        UnionSelection unionSelections = new UnionSelection();
+        setMatchKeyMap(interpreted, record, matchInput);
 
-        Map<Predefined, String> predefinedSelections = new HashMap<>();
-
-        if (modelSummary != null && modelSummary.getPredefinedSelection() != null) {
-            String version = null;
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
-                version = modelSummary.getPredefinedSelectionVersion();
-            }
-            predefinedSelections.put(modelSummary.getPredefinedSelection(), version);
-        } else {
-            predefinedSelections.put(Predefined.getLegacyDefaultSelection(), null);
-        }
-        unionSelections.setPredefinedSelections(predefinedSelections);
-        if (modelSummary != null) {
-            setDataCloudVersion(modelSummary, matchInput, predefinedSelections);
-        }
-
-        if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
-            ColumnSelection customSelection = getCustomColumnSelection(selectedLeadEnrichmentAttributes);
-            unionSelections.setCustomSelection(customSelection);
-        }
-
-        matchInput.setUnionSelection(unionSelections);
+        setColumnSelections(modelSummary, selectedLeadEnrichmentAttributes, //
+                skipPredefinedSelection, overrideDataCloudVersion, matchInput);
 
         matchInput.setTenant(new Tenant(space.toString()));
         List<String> fields = new ArrayList<>();
@@ -121,9 +106,82 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         return bulkInput;
     }
 
-    public void setDataCloudVersion(ModelSummary modelSummary, MatchInput matchInput,
-            Map<Predefined, String> predefinedSelections) {
-        matchInput.setDataCloudVersion(modelSummary.getDataCloudVersion());
+    protected void setColumnSelections(ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion, //
+            MatchInput matchInput) {
+        if (skipPredefinedSelection) {
+            ColumnSelection customSelection = populateCustomSelection(selectedLeadEnrichmentAttributes);
+            matchInput.setCustomSelection(customSelection);
+        } else {
+            setMatchUnionSelection(modelSummary, selectedLeadEnrichmentAttributes, matchInput);
+        }
+
+        setDataCloudVersion(modelSummary, overrideDataCloudVersion, matchInput);
+    }
+
+    protected void setDataCloudVersion(ModelSummary modelSummary, //
+            String overrideDataCloudVersion, //
+            MatchInput matchInput) {
+        if (overrideDataCloudVersion != null) {
+            matchInput.setDataCloudVersion(overrideDataCloudVersion);
+        } else if (modelSummary != null) {
+            matchInput.setDataCloudVersion(modelSummary.getDataCloudVersion());
+        }
+    }
+
+    protected void setPredefinedSelections(ModelSummary modelSummary, Map<Predefined, String> predefinedSelections,
+            UnionSelection unionSelections) {
+        unionSelections.setPredefinedSelections(predefinedSelections);
+    }
+
+    private void setMatchKeyMap(InterpretedFields interpreted, Map<String, Object> record, MatchInput matchInput) {
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
+        matchInput.setKeyMap(keyMap);
+    }
+
+    private void setMatchUnionSelection(ModelSummary modelSummary,
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, MatchInput matchInput) {
+        UnionSelection unionSelections = new UnionSelection();
+
+        Map<Predefined, String> predefinedSelections = getPredefinedSelection(modelSummary);
+        setPredefinedSelections(modelSummary, predefinedSelections, unionSelections);
+
+        ColumnSelection customSelection = populateCustomSelection(selectedLeadEnrichmentAttributes);
+        unionSelections.setCustomSelection(customSelection);
+
+        matchInput.setUnionSelection(unionSelections);
+    }
+
+    private Map<Predefined, String> getPredefinedSelection(ModelSummary modelSummary) {
+        Map<Predefined, String> predefinedSelections = new HashMap<>();
+
+        if (modelSummary != null && modelSummary.getPredefinedSelection() != null) {
+            String version = null;
+            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
+                version = modelSummary.getPredefinedSelectionVersion();
+            }
+            predefinedSelections.put(modelSummary.getPredefinedSelection(), version);
+        } else {
+            predefinedSelections.put(Predefined.getLegacyDefaultSelection(), null);
+        }
+        return predefinedSelections;
+    }
+
+    private ColumnSelection populateCustomSelection(List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
+        ColumnSelection customSelection = null;
+        if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
+            customSelection = getCustomColumnSelection(selectedLeadEnrichmentAttributes);
+        }
+        return customSelection;
     }
 
     private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, //

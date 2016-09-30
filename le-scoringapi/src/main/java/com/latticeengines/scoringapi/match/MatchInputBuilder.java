@@ -21,6 +21,14 @@ public interface MatchInputBuilder {
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection);
 
+    MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion);
+
     BulkMatchInput buildMatchInput(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             List<ModelSummary> originalOrderModelSummaryList, //

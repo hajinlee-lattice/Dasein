@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
@@ -17,10 +17,10 @@ public class AccountMasterMatchInputBuilder extends AbstractMatchInputBuilder {
     }
 
     @Override
-    public void setDataCloudVersion(ModelSummary modelSummary, MatchInput matchInput,
-            Map<Predefined, String> predefinedSelections) {
-        super.setDataCloudVersion(modelSummary, matchInput, predefinedSelections);
-
+    protected void setPredefinedSelections(ModelSummary modelSummary, //
+            Map<Predefined, String> predefinedSelections, //
+            UnionSelection unionSelections) {
+        super.setPredefinedSelections(modelSummary, predefinedSelections, unionSelections);
         // TODO - work with Lei to fis RTS version to 2.0 during AM
         // based model creation
         predefinedSelections.put(modelSummary.getPredefinedSelection(), "2.0");

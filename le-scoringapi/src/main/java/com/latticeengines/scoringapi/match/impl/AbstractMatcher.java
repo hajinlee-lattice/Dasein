@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
@@ -155,7 +156,45 @@ public abstract class AbstractMatcher implements Matcher, ApplicationContextAwar
             log.debug(objectType + JsonUtils.serialize(obj));
         }
     }
-    
+
+    protected String getDataCloudVersion(ModelSummary modelSummary) {
+        return modelSummary == null ? null : modelSummary.getDataCloudVersion();
+    }
+
+    /*
+     * LOGIC
+     * 
+     * if no enrichment needed
+     * 
+     * .....then follow regular path
+     * 
+     * else if enrichment needed
+     * 
+     * .....if model datacloud version is for account master
+     * 
+     * .........then follow regular path
+     * 
+     * .....else if model datacloud version is for RTS
+     * 
+     * .........then follow regular path but without enrichment
+     * 
+     * .........and explicitly call account master based matching with
+     * ..........enrichment option (without Predefined column selection)
+     * 
+     */
+    protected boolean shouldCallEnrichmentExplicitly(ModelSummary modelSummary, boolean forEnrichment) {
+        boolean shouldCallEnrichmentExplicitly = true;
+
+        if (!forEnrichment) {
+            shouldCallEnrichmentExplicitly = false;
+        } else if (MatchTypeUtil.isValidForAccountMasterBasedMatch(//
+                getDataCloudVersion(modelSummary))) {
+            shouldCallEnrichmentExplicitly = false;
+        }
+
+        return shouldCallEnrichmentExplicitly;
+    }
+
     private void mergeMatchedOutput(List<String> matchFieldNames, //
             OutputRecord outputRecord, //
             Map<String, FieldSchema> fieldSchemas, //
