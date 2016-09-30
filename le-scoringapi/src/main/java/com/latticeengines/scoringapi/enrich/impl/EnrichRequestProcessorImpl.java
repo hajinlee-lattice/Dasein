@@ -38,12 +38,12 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, FieldSchema> fieldSchemas = new HashMap<>();
         fieldSchemas.put("domain", new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.Domain));
-        fieldSchemas.put("companyName", new FieldSchema(FieldSource.REQUEST, FieldType.STRING,
-                FieldInterpretation.CompanyName));
-        fieldSchemas.put("companyState", new FieldSchema(FieldSource.REQUEST, FieldType.STRING,
-                FieldInterpretation.State));
-        fieldSchemas.put("companyCountry", new FieldSchema(FieldSource.REQUEST, FieldType.STRING,
-                FieldInterpretation.Country));
+        fieldSchemas.put("companyName",
+                new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.CompanyName));
+        fieldSchemas.put("companyState",
+                new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.State));
+        fieldSchemas.put("companyCountry",
+                new FieldSchema(FieldSource.REQUEST, FieldType.STRING, FieldInterpretation.Country));
         Map<String, Object> record = new HashMap<>();
         record.put("domain", request.getDomain());
         record.put("companyName", request.getCompany());
@@ -58,7 +58,7 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, Object> enrichmentAttributes = null;
 
-        Map<String, Map<String, Object>> matchedRecordEnrichmentMap = matcher.matchAndJoin(space, interpreted,
+        Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space, interpreted,
                 fieldSchemas, record, null, true);
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {

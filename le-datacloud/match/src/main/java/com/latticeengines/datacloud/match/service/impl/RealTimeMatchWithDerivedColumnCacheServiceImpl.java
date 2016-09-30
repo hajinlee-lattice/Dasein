@@ -14,6 +14,7 @@ import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -21,8 +22,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 
 @Component("realTimeMatchWithDerivedColumnCacheService")
 public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeMatchService {
-
-    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 
     @Autowired
     @Qualifier("realTimeMatchPlanner")
@@ -34,12 +33,7 @@ public class RealTimeMatchWithDerivedColumnCacheServiceImpl implements RealTimeM
 
     @Override
     public boolean accept(String version) {
-        if (StringUtils.isEmpty(version)
-                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForRTSBasedMatch(version);
     }
 
     @Override

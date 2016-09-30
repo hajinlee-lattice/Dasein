@@ -15,6 +15,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.datacloud.match.exposed.service.BulkMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
@@ -22,8 +23,6 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("bulkMatchServiceWithDerivedColumnCache")
 public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchService {
-
-    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 
     private static Log log = LogFactory.getLog(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
@@ -56,12 +55,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     @Override
     public boolean accept(String version) {
-        if (StringUtils.isEmpty(version)
-                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForRTSBasedMatch(version);
     }
 
     @Override

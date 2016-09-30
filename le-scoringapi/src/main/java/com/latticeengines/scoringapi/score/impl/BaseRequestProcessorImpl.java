@@ -1,6 +1,7 @@
 package com.latticeengines.scoringapi.score.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +22,7 @@ public class BaseRequestProcessorImpl {
     protected HttpStopWatch httpStopWatch;
 
     @Autowired
-    protected Matcher matcher;
+    protected List<Matcher> matchers;
 
     @Autowired
     protected RequestInfo requestInfo;
@@ -50,4 +51,12 @@ public class BaseRequestProcessorImpl {
         return map;
     }
 
+    protected Matcher getMatcher(boolean isBulk) {
+        for (Matcher matcher : matchers) {
+            if (matcher.accept(isBulk)) {
+                return matcher;
+            }
+        }
+        return null;
+    }
 }

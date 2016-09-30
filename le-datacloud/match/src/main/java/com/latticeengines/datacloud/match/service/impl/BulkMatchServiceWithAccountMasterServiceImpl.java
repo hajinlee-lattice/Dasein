@@ -8,7 +8,6 @@ import java.util.Properties;
 import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
@@ -43,8 +43,6 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServiceWithDerivedColumnCacheImpl {
 
     private static Log log = LogFactory.getLog(BulkMatchServiceWithAccountMasterServiceImpl.class);
-
-    private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
     private static final String ACCOUNT_MASTER_LOOKUP_KEY = "AccountMasterLookup";
@@ -85,12 +83,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Override
     public boolean accept(String version) {
-        if (!StringUtils.isEmpty(version)
-                && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
@@ -148,8 +141,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
         Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup,
                 dataVersion.getAccountLookupHdfsVersion());
-        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion(), sourceTable
-                .getExtracts().get(0).getPath());
+        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion(),
+                sourceTable.getExtracts().get(0).getPath());
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion.getAccountMasterHdfsVersion());
         extraSources.put(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion(),
                 sourceTable.getExtracts().get(0).getPath());

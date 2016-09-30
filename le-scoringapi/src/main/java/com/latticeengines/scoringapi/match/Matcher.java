@@ -13,6 +13,8 @@ public interface Matcher {
     public static final String RESULT = "RESULT";
     public static final String ENRICHMENT = "ENRICHMENT";
 
+    public boolean accept(boolean isBulk);
+
     Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             InterpretedFields interpreted, //
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //

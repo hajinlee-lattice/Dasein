@@ -26,23 +26,17 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("realTimeMatchWithAccountMasterService")
 public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchWithDerivedColumnCacheServiceImpl {
-
-    private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     @Autowired
     private AccountLookupService accountLookupService;
 
     @Override
     public boolean accept(String version) {
-        if (!StringUtils.isEmpty(version)
-                && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
