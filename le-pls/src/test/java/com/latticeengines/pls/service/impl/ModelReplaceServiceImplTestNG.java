@@ -59,7 +59,7 @@ public class ModelReplaceServiceImplTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase
                 + modelReplaceSourceTenant.getId());
 
-        localPathBase = ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl")
+        localPathBase = ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel")
                 .getPath();
         HdfsUtils.mkdir(yarnConfiguration, customerBase + modelReplaceTargetTenant.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase
