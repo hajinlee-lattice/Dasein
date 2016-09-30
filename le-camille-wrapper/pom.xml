@@ -38,7 +38,7 @@
         <snapshotRepository>
             <id>deployment</id>
             <name>Snapshots</name>
-            <url>https://bodcdevnexus75.dev.lattice.local:8443/repository/maven-releases/</url>
+            <url>https://bodcdevnexus75.dev.lattice.local:8443/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
