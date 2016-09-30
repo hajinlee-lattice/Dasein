@@ -2,6 +2,7 @@ package com.latticeengines.propdata.dataflow.common;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
+
 public class BitEncodeUtils {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -25,6 +27,8 @@ public class BitEncodeUtils {
         Map<String, EnrichedBitCodeBook> codeBookMap = getCodeBooks(columns);
         List<Node> encodedNodes = new ArrayList<>();
 
+        List<String> retainedFields = new ArrayList<>(Arrays.asList(groupByFields));
+
         for (Map.Entry<String, EnrichedBitCodeBook> codeBookEntry : codeBookMap.entrySet()) {
             String targetColumn = codeBookEntry.getKey();
             String keyColumn = codeBookEntry.getValue().getKeyColumn();
@@ -33,6 +37,7 @@ public class BitEncodeUtils {
             Node encodedNode = node.bitEncode(groupByFields, keyColumn, valueColumn, targetColumn, codeBook);
             encodedNode = encodedNode.renamePipe("encoded-" + targetColumn);
             encodedNodes.add(encodedNode);
+            retainedFields.add(targetColumn);
         }
 
         Node join = null;
@@ -45,7 +50,7 @@ public class BitEncodeUtils {
             }
         }
 
-        return join;
+        return join.retain(new FieldList(retainedFields.toArray(new String[retainedFields.size()])));
     }
 
     private static Map<String, EnrichedBitCodeBook> getCodeBooks(List<SourceColumn> columns) {

@@ -12,20 +12,20 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.source.impl.HGDataTechIndicators;
+import com.latticeengines.propdata.core.source.impl.BuiltWithTechIndicators;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
-@Component("hgDataTechIndicatorsService")
-public class HGDataTechIndicatorsService
+@Component("builtWithTechIndicatorsService")
+public class BuiltWithTechIndicatorsService
         extends SimpleTransformationServiceBase<BasicTransformationConfiguration, TransformationFlowParameters>
         implements TransformationService<BasicTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(HGDataTechIndicatorsService.class);
+    private static final Log log = LogFactory.getLog(BuiltWithTechIndicatorsService.class);
 
     @Autowired
-    private HGDataTechIndicators source;
+    private BuiltWithTechIndicators source;
 
     @Override
     public Source getSource() {
@@ -44,7 +44,7 @@ public class HGDataTechIndicatorsService
 
     @Override
     protected String getDataFlowBeanName() {
-        return "hgDataTechIndicatorsFlow";
+        return "builtWithTechIndicatorsFlow";
     }
 
     @Override
@@ -52,7 +52,7 @@ public class HGDataTechIndicatorsService
             String newLatestVersion, List<SourceColumn> sourceColumns) {
         BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
         configuration.setSourceName(source.getSourceName());
-        configuration.setServiceBeanName("hgDataTechIndicatorsService");
+        configuration.setServiceBeanName("builtWithTechIndicatorsService");
         configuration.setVersion(newLatestVersion);
         return configuration;
     }
