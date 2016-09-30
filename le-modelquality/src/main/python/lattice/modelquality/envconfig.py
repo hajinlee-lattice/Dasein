@@ -34,7 +34,7 @@ class EnvConfig(object):
                 EnvConfig._influxEndpoint = cfg['influxEndpoint']
                 EnvConfig._hdfsHostPort = cfg['hdfsHostPort']
                 EnvConfig._hdfsBasePath = cfg['hdfsBasePath']
-                EnvConfig._verify = cfg['verify']
+                EnvConfig._verify = False if cfg['verify'] == 'False' else True
                 EnvConfig._verbose = verbose
 
     @classmethod

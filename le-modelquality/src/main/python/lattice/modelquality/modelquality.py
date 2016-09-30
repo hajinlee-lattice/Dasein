@@ -1,9 +1,13 @@
-#!/usr/bin/env python
+
+#
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
+#
 
 import argparse, datetime, json, sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 
-from lattice.modelquality import *
+from . import *
 
 ENTITIES = { \
     'algorithm' : Algorithm, \
@@ -13,6 +17,71 @@ ENTITIES = { \
     'sampling' : Sampling, \
     'dataset' : Dataset \
 }
+
+def main():
+    parser = argparse.ArgumentParser(description='Command-line interface to the Lattice model quality framework')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa'], default='qa', help='select environment (devel, qa)')
+
+    subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
+
+    parser_initworkspace = subparsers.add_parser('init-workspace', help='initialize a local workspace for working with .json configuration files')
+    parser_initworkspace.add_argument('name')
+    parser_initworkspace.add_argument('tenant')
+    parser_initworkspace.add_argument('username')
+    parser_initworkspace.add_argument('password')
+
+    parser_useworkspace = subparsers.add_parser('use-workspace', help='switch which local workspace is being used')
+    parser_useworkspace.add_argument('name')
+
+    parser_install_latest = subparsers.add_parser('install-latest', help='install the latest standard configurations to the model quality framework')
+
+    parser_list = subparsers.add_parser('list', help='list all the configurations for a given entity')
+    parser_list.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+
+    parser_print = subparsers.add_parser('print', help='print to STDOUT a named configuration for a given entity')
+    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('name')
+
+    parser_retrieve = subparsers.add_parser('retrieve', help='retrieve a named configuration for a given entity and write to the local workspace')
+    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_retrieve.add_argument('name')
+
+    parser_print = subparsers.add_parser('new', help='create a new named configuration for a given entity and write to the local workspace')
+    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('name')
+
+    parser_retrieve = subparsers.add_parser('install', help='install the named configuration for a given entity')
+    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_retrieve.add_argument('name')
+
+    parser_print = subparsers.add_parser('model', help="submit a job to create a model with the configurations in the local workspace")
+    parser_print.add_argument('name')
+    parser_print.add_argument('description')
+    
+    args = parser.parse_args()
+
+    EnvConfig(args.env, verbose=args.verbose)
+
+    if args.subcommand == 'init-workspace':
+        workspace_initialize(args.name, args.tenant, args.username, args.password)
+    elif args.subcommand == 'use-workspace':
+        workspace_use(args.name)
+    elif args.subcommand == 'retrieve':
+        retrieve(args.module, ENTITIES[args.module], args.name)
+    elif args.subcommand == 'install-latest':
+        install_latest()
+    elif args.subcommand == 'list':
+        list(ENTITIES[args.module])
+    elif args.subcommand == 'print':
+        printentity(ENTITIES[args.module], args.name)
+    elif args.subcommand == 'new':
+        createnew(args.module, ENTITIES[args.module], args.name)
+    elif args.subcommand == 'model':
+        model(args.name, args.description)
+    elif args.subcommand == 'install':
+        install(args.module, ENTITIES[args.module], args.name)
+
 
 def workspace_initialize(name, tenant, username, password):
     
@@ -185,67 +254,3 @@ def _read_entity(entitytype, entitycls):
         return None
 
     return entitycls.createFromConfig(config)
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Command-line interface to the Lattice model quality framework')
-    parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa'], default='devel', help='select environment (devel, qa)')
-
-    subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
-
-    parser_initworkspace = subparsers.add_parser('init-workspace', help='initialize a local workspace for working with .json configuration files')
-    parser_initworkspace.add_argument('name')
-    parser_initworkspace.add_argument('tenant')
-    parser_initworkspace.add_argument('username')
-    parser_initworkspace.add_argument('password')
-
-    parser_useworkspace = subparsers.add_parser('use-workspace', help='switch which local workspace is being used')
-    parser_useworkspace.add_argument('name')
-
-    parser_install_latest = subparsers.add_parser('install-latest', help='install the latest standard configurations to the model quality framework')
-
-    parser_list = subparsers.add_parser('list', help='list all the configurations for a given entity')
-    parser_list.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-
-    parser_print = subparsers.add_parser('print', help='print to STDOUT a named configuration for a given entity')
-    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-    parser_print.add_argument('name')
-
-    parser_retrieve = subparsers.add_parser('retrieve', help='retrieve a named configuration for a given entity and write to the local workspace')
-    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-    parser_retrieve.add_argument('name')
-
-    parser_print = subparsers.add_parser('new', help='create a new named configuration for a given entity and write to the local workspace')
-    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-    parser_print.add_argument('name')
-
-    parser_retrieve = subparsers.add_parser('install', help='install the named configuration for a given entity')
-    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-    parser_retrieve.add_argument('name')
-
-    parser_print = subparsers.add_parser('model', help="submit a job to create a model with the configurations in the local workspace")
-    parser_print.add_argument('name')
-    parser_print.add_argument('description')
-    
-    args = parser.parse_args()
-
-    EnvConfig(args.env, verbose=args.verbose)
-
-    if args.subcommand == 'init-workspace':
-        workspace_initialize(args.name, args.tenant, args.username, args.password)
-    elif args.subcommand == 'use-workspace':
-        workspace_use(args.name)
-    elif args.subcommand == 'retrieve':
-        retrieve(args.module, ENTITIES[args.module], args.name)
-    elif args.subcommand == 'install-latest':
-        install_latest()
-    elif args.subcommand == 'list':
-        list(ENTITIES[args.module])
-    elif args.subcommand == 'print':
-        printentity(ENTITIES[args.module], args.name)
-    elif args.subcommand == 'new':
-        createnew(args.module, ENTITIES[args.module], args.name)
-    elif args.subcommand == 'model':
-        model(args.name, args.description)
-    elif args.subcommand == 'install':
-        install(args.module, ENTITIES[args.module], args.name)

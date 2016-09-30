@@ -3,7 +3,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 from distutils.util import convert_path
 
-version = 'Pre'
+version = '0.0.0'
 
 with open("README.txt", "rb") as f:
     long_descr = f.read()
@@ -20,8 +20,7 @@ setup(
     author = "Michael Wilson",
     author_email = "mwilson@lattice-engines.com",
     install_requires = ['requests', 'requests_toolbelt'],
-    scripts = ['bin/modelquality.py']
-    #entry_points = {
-    #    "console_scripts": ['bootstrap = bootstrap.bootstrap:main']
-    #    }
+    entry_points = {
+        "console_scripts": ['modelquality = lattice.modelquality.modelquality:main']
+        }
     )
