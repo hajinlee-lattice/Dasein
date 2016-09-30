@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public class DnBCacheSeedConfiguration implements TransformationConfiguration {
+public class DnBCacheSeedConfiguration extends BasicTransformationConfiguration implements TransformationConfiguration {
 
     private String sourceName;
     private String version;

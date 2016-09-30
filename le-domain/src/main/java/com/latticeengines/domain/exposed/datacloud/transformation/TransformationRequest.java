@@ -1,29 +1,54 @@
 package com.latticeengines.domain.exposed.datacloud.transformation;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TransformationRequest {
-    private String sourceBeanName;
-    private String submitter;
 
     @JsonProperty("SourceBeanName")
+    private String sourceBeanName;
+
+    @JsonProperty("Submitter")
+    private String submitter;
+
+    // you can use the list specify versions for different bases, or multiple
+    // versions of a single base source. it all depends on your source's nature.
+    @JsonProperty("BaseVersions")
+    private List<String> baseVersions;
+
+    @JsonProperty("TargetVersion")
+    private String targetVersion;
+
     public String getSourceBeanName() {
         return sourceBeanName;
     }
 
-    @JsonProperty("SourceBeanName")
     public void setSourceBeanName(String sourceBeanName) {
         this.sourceBeanName = sourceBeanName;
     }
 
-    @JsonProperty("Submitter")
     public String getSubmitter() {
         return submitter;
     }
 
-    @JsonProperty("Submitter")
     public void setSubmitter(String creator) {
         this.submitter = creator;
     }
-}
 
+    public List<String> getBaseVersions() {
+        return baseVersions;
+    }
+
+    public void setBaseVersions(List<String> baseVersions) {
+        this.baseVersions = baseVersions;
+    }
+
+    public String getTargetVersion() {
+        return targetVersion;
+    }
+
+    public void setTargetVersion(String targetVersion) {
+        this.targetVersion = targetVersion;
+    }
+}

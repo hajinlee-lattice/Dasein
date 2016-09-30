@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
@@ -71,8 +70,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 
-    abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
-            List<SourceColumn> sourceColumns);
+    public abstract T createTransformationConfiguration(List<String> baseVersionsToProcess, String targetVersion);
 
     abstract T parseTransConfJsonInsideWorkflow(String confStr) throws IOException;
 
@@ -154,7 +152,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        progressEntityMgr.updateStatus(progress, ProgressStatus.TRANSFORMING);
+        progressEntityMgr.updateStatus(progress, ProgressStatus.PROCESSING);
         LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
 
         transformHook(progress, transformationConfiguration);
@@ -229,16 +227,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return progressEntityMgr.findRunningProgress(source, version) != null;
     }
 
-    @Override
-    public T createTransformationConfiguration(List<String> versionsToProcess) {
-        return createNewConfiguration(versionsToProcess, versionsToProcess.get(0),
-                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
-    }
-
     protected void setAdditionalDetails(String newLatestVersion, List<SourceColumn> sourceColumns, T configuration) {
         configuration.setSourceName(getSource().getSourceName());
-        Map<String, String> sourceConfigurations = new HashMap<>();
-        configuration.setSourceConfigurations(sourceConfigurations);
+        configuration.setSourceConfigurations(new HashMap<String, String>());
         configuration.setVersion(newLatestVersion);
         configuration.setSourceColumns(sourceColumns);
     }
@@ -397,6 +388,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected String getVersion(TransformationProgress progress) {
         return progress.getVersion();
+    }
+
+    protected String createNewVersionStringFromNow() {
+        return HdfsPathBuilder.dateFormat.format(new Date());
     }
 
 }

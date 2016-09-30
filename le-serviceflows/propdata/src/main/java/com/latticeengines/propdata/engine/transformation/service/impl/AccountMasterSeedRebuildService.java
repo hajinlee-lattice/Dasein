@@ -45,7 +45,7 @@ public class AccountMasterSeedRebuildService
     }
 
     @Override
-    public List<String> findUnprocessedVersions() {
+    public List<String> findUnprocessedBaseVersions() {
         List<String> versions = new ArrayList<String>();
         versions.add(HdfsPathBuilder.dateFormat.format(new Date()));
         return versions;

@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.dao.TransformationProgressDao;
 import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
@@ -122,4 +122,28 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
             return null;
         }
     }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public boolean hasActiveForBaseSourceVersions(Source source, String baseSourceVersions) {
+        List<TransformationProgress> progresses = progressDao.findAllForBaseSourceVersions(source.getSourceName(),
+                baseSourceVersions);
+
+        if (progresses == null || progresses.isEmpty()) {
+            return false;
+        }
+
+        // active means either finished, running or failed but under max retries
+        for (TransformationProgress progress: progresses) {
+            if (ProgressStatus.FINISHED.equals(progress.getStatus()) || ProgressStatus.PROCESSING.equals(progress.getStatus())) {
+                return true;
+            }
+            if (ProgressStatus.FAILED.equals(progress.getStatus()) && progress.getNumRetries() <= MAX_RETRIES) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

@@ -20,6 +20,8 @@ public interface TransformationProgressEntityMgr {
 
     TransformationProgress findRunningProgress(Source source, String version);
 
+    boolean hasActiveForBaseSourceVersions(Source source, String baseSourceVersions);
+
     void deleteAllProgressesOfSource(Source source);
 
     TransformationProgress updateStatus(TransformationProgress progress, ProgressStatus status);

@@ -65,7 +65,8 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
             return null;
         }
         TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
-        return executor.kickOffNewProgress(transformationProgressEntityMgr);
+        return executor.kickOffNewProgress(transformationProgressEntityMgr, request.getBaseVersions(),
+                request.getTargetVersion());
     }
 
     private List<TransformationProgress> scanForNewWorkFlow(String hdfsPod) {

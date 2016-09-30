@@ -68,7 +68,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
                 log.info("Processing transformation progress: " + progress.getRootOperationUID());
                 if (progress != null) {
                     progress.setStartDate(new Date());
-                    progress.setStatus(ProgressStatus.TRANSFORMING);
+                    progress.setStatus(ProgressStatus.PROCESSING);
                     progress = transformationProgressEntityMgr.updateProgress(progress);
                 }
                 transformationService.transform(progress, transformationConfiguration);

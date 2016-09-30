@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -22,7 +24,20 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
     abstract void uploadSourceSchema(String workflowDir) throws IOException;
+
     abstract void executeDataFlow(TransformationProgress progress, String workflowDir, T transformationConfiguration);
+
+    abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
+            List<SourceColumn> sourceColumns);
+
+    @Override
+    public T createTransformationConfiguration(List<String> baseVersionsToProcess, String targetVersion) {
+        if (StringUtils.isEmpty(targetVersion)) {
+            targetVersion = baseVersionsToProcess.get(0);
+        }
+        return createNewConfiguration(baseVersionsToProcess, targetVersion,
+                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
+    }
 
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
@@ -57,7 +72,7 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
     }
 
     @Override
-    public List<String> findUnprocessedVersions() {
+    public List<String> findUnprocessedBaseVersions() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
         String rootBaseSourceDir = getRootBaseSourceDirPaths().get(0);

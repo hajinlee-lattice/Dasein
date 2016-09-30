@@ -17,6 +17,12 @@ public interface TransformationConfiguration {
 
     String getVersion();
 
+    void setVersion(String newLatestVersion);
+
+    String getBaseVersions();
+
+    void setBaseVersions(String baseVersions);
+
     String getServiceBeanName();
 
     void setServiceBeanName(String serviceBeanName);
@@ -30,8 +36,6 @@ public interface TransformationConfiguration {
     void setSourceName(String sourceName);
 
     void setSourceConfigurations(Map<String, String> sourceConfigurations);
-
-    void setVersion(String newLatestVersion);
 
     void setSourceColumns(List<SourceColumn> sourceColumns);
 }

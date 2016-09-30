@@ -26,8 +26,8 @@ public class TransformationExecutorImpl implements TransformationExecutor {
 
     private String jobSubmitter;
     private TransformationWorkflowConfiguration.Builder builder = new TransformationWorkflowConfiguration.Builder();
-    private WorkflowProxy workflowProxy;    
-	private TransformationService transformationService;
+    private WorkflowProxy workflowProxy;
+    private TransformationService transformationService;
     private CustomerSpace customerSpace;
 
     public TransformationExecutorImpl(TransformationService transformationService, WorkflowProxy workflowProxy) {
@@ -39,16 +39,19 @@ public class TransformationExecutorImpl implements TransformationExecutor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public TransformationProgress kickOffNewProgress(TransformationProgressEntityMgr transformationProgressEntityMgr) {
+    public TransformationProgress kickOffNewProgress(TransformationProgressEntityMgr transformationProgressEntityMgr,
+            List<String> baseVersions, String targetVersion) {
         Integer retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
-                List<String> unprocessedVersions = transformationService.findUnprocessedVersions();
-                if (CollectionUtils.isEmpty(unprocessedVersions)) {
+                if (baseVersions == null || baseVersions.isEmpty()) {
+                    baseVersions = transformationService.findUnprocessedBaseVersions();
+                }
+                if (CollectionUtils.isEmpty(baseVersions)) {
                     return null;
                 }
                 TransformationConfiguration transformationConfiguration = transformationService
-                        .createTransformationConfiguration(unprocessedVersions);
+                        .createTransformationConfiguration(baseVersions, targetVersion);
                 if (transformationConfiguration != null) {
                     TransformationProgress progress = transformationService
                             .startNewProgress(transformationConfiguration, jobSubmitter);
@@ -73,8 +76,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             TransformationProgress progress, TransformationProgressEntityMgr transformationProgressEntityMgr) {
         log.info("Kick off workflow for progress " + progress);
 
-        TransformationWorkflowConfiguration configuration = builder
-                .workflowName("propdataTransformationWorkflow") //
+        TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow") //
                 .payloadName("Transformation") //
                 .customerSpace(customerSpace) //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //

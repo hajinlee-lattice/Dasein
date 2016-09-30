@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -24,6 +26,18 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
     abstract List<String> compareVersionLists(Source source, List<String> latestBaseVersions,
             List<String> latestVersions, String baseDir);
     abstract void executeDataFlow(TransformationProgress progress, String workflowDir, T transformationConfiguration);
+
+    abstract T createNewConfiguration(List<String> latestBaseVersions, String newLatestVersion,
+                                      List<SourceColumn> sourceColumns);
+
+    @Override
+    public T createTransformationConfiguration(List<String> baseVersionsToProcess, String targetVersion) {
+        if (StringUtils.isEmpty(targetVersion)) {
+            targetVersion = baseVersionsToProcess.get(0);
+        }
+        return createNewConfiguration(baseVersionsToProcess, targetVersion,
+                sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
+    }
 
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transformationConfiguration) {
@@ -59,7 +73,7 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
     }
 
     @Override
-    public List<String> findUnprocessedVersions() {
+    public List<String> findUnprocessedBaseVersions() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
         String rootBaseSourceDir = getRootBaseSourceDirPaths().get(0);
@@ -67,11 +81,11 @@ public abstract class AbstractFixedIntervalTransformationService<T extends Trans
                 + ((FixedIntervalSource) source).getDirForBaseVersionLookup();
         Date cutoffDate = getCutoffDate(null);
         String cutoffDateVersion = HdfsPathBuilder.dateFormat.format(cutoffDate);
-        LOG.info("findUnprocessedVersions() source = " + source);
-        LOG.info("findUnprocessedVersions() rootSourceDir = " + rootSourceDir);
-        LOG.info("findUnprocessedVersions() rootBaseSourceDir = " + rootBaseSourceDir);
-        LOG.info("findUnprocessedVersions() rootDirForVersionLookup = " + rootDirForVersionLookup);
-        LOG.info("findUnprocessedVersions() cutoffDateVersion = " + cutoffDateVersion);
+        LOG.info("findUnprocessedBaseVersions() source = " + source);
+        LOG.info("findUnprocessedBaseVersions() rootSourceDir = " + rootSourceDir);
+        LOG.info("findUnprocessedBaseVersions() rootBaseSourceDir = " + rootBaseSourceDir);
+        LOG.info("findUnprocessedBaseVersions() rootDirForVersionLookup = " + rootDirForVersionLookup);
+        LOG.info("findUnprocessedBaseVersions() cutoffDateVersion = " + cutoffDateVersion);
 
         List<String> latestVersions = null;
         List<String> latestBaseVersions = null;

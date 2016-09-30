@@ -20,13 +20,13 @@ public interface TransformationService<T extends TransformationConfiguration> {
 
     Source getSource();
 
-    List<String> findUnprocessedVersions();
+    List<String> findUnprocessedBaseVersions();
 
     List<List<String>> findUnprocessedBaseSourceVersions();
 
     Class<? extends TransformationConfiguration> getConfigurationClass();
 
-    T createTransformationConfiguration(List<String> versionsToProcess);
+    T createTransformationConfiguration(List<String> baseVersionsToProcess, String targetVersion);
 
     boolean isManualTriggerred();
 }

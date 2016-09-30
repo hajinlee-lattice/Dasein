@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.propdata.engine.transformation.configuration.InputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
-public class AccountMasterRebuildConfiguration implements TransformationConfiguration {
+public class AccountMasterRebuildConfiguration extends BasicTransformationConfiguration implements TransformationConfiguration {
     private String sourceName;
     private String version;
     private Map<String, String> sourceConfigurations;

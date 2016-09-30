@@ -37,7 +37,7 @@ public class BomboraFirehoseIngestionServiceImplTestNG
     BomboraFirehoseConfiguration createTransformationConfiguration() {
         List<String> versionsToProcess = new ArrayList<>();
         versionsToProcess.add(baseSourceVersion);
-        BomboraFirehoseConfiguration conf = refreshService.createTransformationConfiguration(versionsToProcess);
+        BomboraFirehoseConfiguration conf = refreshService.createTransformationConfiguration(versionsToProcess, null);
         return conf;
     }
 

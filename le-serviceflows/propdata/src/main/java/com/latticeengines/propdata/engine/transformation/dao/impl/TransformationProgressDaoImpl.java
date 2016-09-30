@@ -71,4 +71,15 @@ public class TransformationProgressDaoImpl extends BaseDaoWithAssignedSessionFac
         return (List<TransformationProgress>) query.list();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<TransformationProgress> findAllForBaseSourceVersions(String sourceName, String baseVersions) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where SourceName = :sourceName and BaseSourceVersions = :baseVersions", getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("sourceName", sourceName);
+        query.setString("baseVersions", baseVersions);
+        return (List<TransformationProgress>) query.list();
+    }
+
 }

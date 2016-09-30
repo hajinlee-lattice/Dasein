@@ -1,34 +1,20 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.DnBCacheSeed;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.DnBCacheSeedInputSourceConfig;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("dnbCacheSeedCleanService")
-public class DnBCacheSeedCleanService extends SimpleTransformationServiceBase<DnBCacheSeedConfiguration, TransformationFlowParameters>
+public class DnBCacheSeedCleanService
+        extends SimpleTransformationServiceBase<DnBCacheSeedConfiguration, TransformationFlowParameters>
         implements TransformationService<DnBCacheSeedConfiguration> {
-
-    private static final String DATA_FLOW_BEAN_NAME = "dnbCacheSeedCleanFlow";
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanService.class);
 
@@ -46,29 +32,17 @@ public class DnBCacheSeedCleanService extends SimpleTransformationServiceBase<Dn
     }
 
     @Override
-    public String getDataFlowBeanName() { return DATA_FLOW_BEAN_NAME; }
-
-    @Override
-    protected TransformationFlowParameters getDataFlowParameters(TransformationProgress progress,
-                                                                 DnBCacheSeedConfiguration configuration) {
-        TransformationFlowParameters parameters = new TransformationFlowParameters();
-        enrichStandardDataFlowParameters(parameters, configuration, progress);
-        return parameters;
+    public String getDataFlowBeanName() {
+        return "dnbCacheSeedCleanFlow";
     }
 
     @Override
-    protected DnBCacheSeedConfiguration createNewConfiguration(List<String> latestBaseVersion, String newLatestVersion,
-            List<SourceColumn> sourceColumns) {
-        DnBCacheSeedConfiguration configuration = new DnBCacheSeedConfiguration();
-        DnBCacheSeedInputSourceConfig dnbCacheSeedInputSourceConfig = new DnBCacheSeedInputSourceConfig();
-        dnbCacheSeedInputSourceConfig.setVersion(latestBaseVersion.get(0));
-        configuration.setDnBCacheSeedInputSourceConfig(dnbCacheSeedInputSourceConfig);
-        setAdditionalDetails(newLatestVersion, sourceColumns, configuration);
-        return configuration;
+    protected String getServiceBeanName() {
+        return "dnbCacheSeedCleanService";
     }
 
     @Override
-    public Class<? extends TransformationConfiguration> getConfigurationClass() {
+    public Class<DnBCacheSeedConfiguration> getConfigurationClass() {
         return DnBCacheSeedConfiguration.class;
     }
 
