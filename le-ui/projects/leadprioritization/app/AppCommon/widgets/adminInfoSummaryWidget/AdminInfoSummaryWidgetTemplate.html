@@ -22,16 +22,16 @@
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
                     <td>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="modelsummary.json" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
+                        <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/predictorcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="predictors.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
+                        <a href="/files/datafiles/predictorcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/diagnosticsjson?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="diagnostics.json" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
+                        <a href="/files/datafiles/diagnosticsjson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
                         
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/metadataavsc?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="metadata.avsc" filetype="application/json">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a></span>
+                        <a href="/files/datafiles/metadataavsc?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a></span>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
@@ -39,10 +39,10 @@
                             : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="readout.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/scorecsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="scores.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="/files/datafiles/scorecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
@@ -52,24 +52,24 @@
                         <a href="javascript:void(0)" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/rfmodelcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="rfmodel.csv" filetype="text/csv">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="/files/datafiles/rfmodelcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
                     <th>{{ResourceUtility.getString('MODEL_POST_MATCH_EVENT_TABLE_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_TRAINING_CSV')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/postmatcheventtablecsv/training?modelId={{ModelId}}&Authorization={{AuthToken}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="/files/datafiles/postmatcheventtablecsv/training?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_FILE_LABEL')}}</th>
                     <td>
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="TrainingFile.csv" filetype="text/csv" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
+                        <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
                         <br/></span>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_PIVOT_FILE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/pivotmappingcsv?modelId={{ModelId}}&Authorization={{AuthToken}}" filename="PivotMappingFile.csv" filetype="text/csv" ng-if="showPivotMapping && PivotArtifactPath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!showPivotMapping || !PivotArtifactPath">N/A</a></span>
+                        <a href="/files/datafiles/pivotmappingcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="showPivotMapping && PivotArtifactPath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!showPivotMapping || !PivotArtifactPath">N/A</a></span>
                     </td>
                 </tr>
             </tbody>
