@@ -117,6 +117,8 @@ angular
                 vm.ignoredFields.push(fieldMapping.userField);
 
                 delete fieldMapping.ignored;
+                fieldMapping.mappedField = "";
+                fieldMapping.mappedToLatticeField = false;
             }
         });
 
