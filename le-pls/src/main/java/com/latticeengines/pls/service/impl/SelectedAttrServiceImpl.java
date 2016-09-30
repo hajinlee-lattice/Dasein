@@ -11,10 +11,15 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,9 +37,14 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
+    private static final Log log = LogFactory.getLog(SelectedAttrServiceImpl.class);
+
+    private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
+
+    private static final int MAX_SAVE_RETRY = 5;
+
     private static List<String> CSV_HEADERS = Arrays.asList("Attribute", "Category", "Description", "Data Type",
             "Status", "Premium");
-    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
 
     @Autowired
     private SelectedAttrEntityMgr selectedAttrEntityMgr;
@@ -59,7 +69,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         int additionalPremiumAttrCount = 0;
         List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null);
 
-        List<SelectedAttribute> addAttrList = new ArrayList<>();
+        final List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
             for (String selectedAttrStr : attributes.getSelectedAttributes()) {
                 LeadEnrichmentAttribute selectedAttr = findEnrichmentAttributeByName(allAttributes, selectedAttrStr);
@@ -71,7 +81,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             }
         }
 
-        List<SelectedAttribute> deleteAttrList = new ArrayList<>();
+        final List<SelectedAttribute> deleteAttrList = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
@@ -91,7 +101,14 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             throw new LedpException(LedpCode.LEDP_18112, new String[] { premiumAttributeLimitation.toString() });
         }
 
-        selectedAttrEntityMgr.upsert(addAttrList, deleteAttrList);
+        DatabaseUtils.retry("saveEnrichmentAttributeSelection", MAX_SAVE_RETRY, ConstraintViolationException.class,
+                "Ignoring ConstraintViolationException exception and retrying save operation",
+                UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES, new Closure() {
+                    @Override
+                    public void execute(Object input) {
+                        selectedAttrEntityMgr.upsert(addAttrList, deleteAttrList);
+                    }
+                });
     }
 
     @Override
@@ -221,12 +238,6 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
                 if (!selectedAttributeNames.contains(column.getColumnId())) {
                     continue;
                 }
-            }
-
-            if (column.getSubcategory() == null) {
-                // TODO - remove this once backend support for subcategory
-                // is implemented
-                column.setSubcategory(DUMMY_SUBCATEGORY);
             }
 
             if (category != null) {

@@ -13,23 +13,50 @@ public class DatabaseUtils {
     }
 
     public static void retry(String operationName, int retries, Closure action) {
+        retry(operationName, retries, null, "Deadlock detected performing", null, action);
+    }
+
+    public static void retry(String operationName, int retries, Class<? extends Exception> customExceptionClazz,
+            String customMessage, String customExcetionMessageSubstr, Closure action) {
+        Class<? extends Exception> defaultExceptionClazz = LockAcquisitionException.class;
+        String defaultMessage = "Deadlock detected performing";
+
         Exception thrown = null;
         for (int i = 0; i < retries; ++i) {
             long sleep = RetryUtils.getExponentialWaitTime(i);
             try {
                 action.execute(null);
                 return;
-            } catch (LockAcquisitionException exception) {
-                log.warn(String.format("Deadlock detected performing %s", operationName), exception);
-                thrown = exception;
-                if (i != retries - 1) {
-                    log.warn(String.format("Sleeping for %d milliseconds and retrying", sleep));
-                    sleep(sleep);
+            } catch (Exception exception) {
+                boolean shouldRetry = false;
+
+                if (customExceptionClazz != null //
+                        && customExceptionClazz.isAssignableFrom(exception.getClass())) {
+                    if (StringUtils.objectIsNullOrEmptyString(customExcetionMessageSubstr) //
+                            || exception.getMessage().trim().toLowerCase()
+                                    .contains(customExcetionMessageSubstr.trim().toLowerCase())) {
+                        log.warn(String.format("%s %s", customMessage, operationName), exception);
+                        shouldRetry = true;
+                    }
+                } else if (defaultExceptionClazz != null//
+                        && defaultExceptionClazz.isAssignableFrom(exception.getClass())) {
+                    log.warn(String.format("%s %s", defaultMessage, operationName), exception);
+                    shouldRetry = true;
+                }
+
+                if (shouldRetry) {
+                    thrown = exception;
+                    if (i != retries - 1) {
+                        log.warn(String.format("Sleeping for %d milliseconds and retrying", sleep));
+                        sleep(sleep);
+                    }
+                } else {
+                    throw exception;
                 }
             }
         }
-        throw new RuntimeException(String.format("Could not perform operation %s after %d retries", operationName,
-                retries), thrown);
+        throw new RuntimeException(
+                String.format("Could not perform operation %s after %d retries", operationName, retries), thrown);
     }
 
     private static void sleep(long msec) {
