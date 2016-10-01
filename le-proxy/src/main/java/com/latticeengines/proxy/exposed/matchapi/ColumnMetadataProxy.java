@@ -25,6 +25,8 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
 
     private static Log log = LogFactory.getLog(ColumnMetadataProxy.class);
+    private static final String DEFAULT = "default";
+
     private LoadingCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
 
     public ColumnMetadataProxy() {
@@ -32,6 +34,9 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         enrichmentColumnsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<ColumnMetadata>>() {
                     public List<ColumnMetadata> load(String dataCloudVersion) throws Exception {
+                        if (DEFAULT.equals(dataCloudVersion)) {
+                            dataCloudVersion = "";
+                        }
                         List<ColumnMetadata> columns= requestColumnSelection(Predefined.Enrichment, dataCloudVersion);
                         log.info("Loaded " + columns.size() + " columns into LoadingCache.");
                         return columns;
@@ -44,7 +49,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         if (Predefined.Enrichment.equals(selectName)) {
             try {
                 if (StringUtils.isEmpty(dataCloudVersion)) {
-                    dataCloudVersion = "default";
+                    dataCloudVersion = DEFAULT;
                 }
                 return enrichmentColumnsCache.get(dataCloudVersion);
             } catch (Exception e) {
@@ -59,7 +64,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private List<ColumnMetadata> requestColumnSelection(Predefined selectName, String dataCloudVersion) {
         String url = constructUrl("/predefined/{selectName}", String.valueOf(selectName.name()));
         if (StringUtils.isNotBlank(dataCloudVersion)) {
-            url = constructUrl("/predefined/{selectName}?datacloudversion", String.valueOf(selectName.name()),
+            url = constructUrl("/predefined/{selectName}?datacloudversion={dataCloudVersion}", String.valueOf(selectName.name()),
                     dataCloudVersion);
         }
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
