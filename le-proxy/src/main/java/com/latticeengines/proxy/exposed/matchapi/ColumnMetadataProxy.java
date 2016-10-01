@@ -43,7 +43,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
         if (Predefined.Enrichment.equals(selectName)) {
             try {
-                if (StringUtils.isNotEmpty(dataCloudVersion)) {
+                if (StringUtils.isEmpty(dataCloudVersion)) {
                     dataCloudVersion = "default";
                 }
                 return enrichmentColumnsCache.get(dataCloudVersion);
