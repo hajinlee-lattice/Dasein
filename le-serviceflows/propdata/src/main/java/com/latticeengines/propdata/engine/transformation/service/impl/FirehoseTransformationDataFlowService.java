@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.mail.MethodNotSupportedException;
 
-import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
