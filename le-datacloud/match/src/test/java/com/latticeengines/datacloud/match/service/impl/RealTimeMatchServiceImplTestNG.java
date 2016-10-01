@@ -11,10 +11,12 @@ import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 
 @Component
 public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -25,11 +27,27 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Autowired
     private TestMatchInputService testMatchInputService;
 
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
+
     @Test(groups = "functional")
     public void testSimpleMatch() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = getMatchService(input).match(input);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+    }
+
+    @Test(groups = "functional")
+    public void testSimpleMatchAccountMaster() {
+        Object[][] data = new Object[][] {
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        DataCloudVersion version = versionEntityMgr.latestApprovedForMajorVersion("2.0");
+        input.setDataCloudVersion(version.getVersion());
         MatchOutput output = getMatchService(input).match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);

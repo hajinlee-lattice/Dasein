@@ -33,7 +33,7 @@ public class ColumnSelection {
         for (ExternalColumn externalColumn : externalColumns) {
             Column column = new Column();
             column.setExternalColumnId(externalColumn.getExternalColumnID());
-            column.setColumnName(externalColumn.getDefaultColumnName());
+            column.setColumnName(externalColumn.getExternalColumnID());
             columns.add(column);
         }
         setColumns(columns);
@@ -44,7 +44,7 @@ public class ColumnSelection {
         for (AccountMasterColumn accountMasterColumn : accountMasterColumns) {
             Column column = new Column();
             column.setExternalColumnId(accountMasterColumn.getColumnId());
-            column.setColumnName(accountMasterColumn.getDisplayName());
+            column.setColumnName(accountMasterColumn.getColumnId());
             columns.add(column);
         }
         setColumns(columns);

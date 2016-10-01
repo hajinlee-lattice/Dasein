@@ -2,10 +2,8 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +24,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchFetcher;
-import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 @Component("realTimeMatchFetcher")
-public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetcher {
+public class RealTimeMatchFetcher implements MatchFetcher {
 
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
     private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE = 10;
+    private static final Long GROUPING_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -52,6 +52,9 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @Autowired
     @Qualifier("pdScheduler")
     private ThreadPoolTaskScheduler scheduler;
+
+    @Autowired
+    private BeanDispatcherImpl beanDispatcher;
 
     private boolean fetchersInitiated = false;
 
@@ -86,8 +89,17 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     @Override
     @MatchStep
     public MatchContext fetch(MatchContext matchContext) {
-        queue.add(matchContext);
-        return waitForResult(matchContext.getOutput().getRootOperationUID());
+        if (enableFetchers) {
+            queue.add(matchContext);
+            return waitForResult(matchContext.getOutput().getRootOperationUID());
+        } else {
+            return fetchSync(matchContext);
+        }
+    }
+
+    private MatchContext fetchSync(MatchContext matchContext) {
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        return dbHelper.fetch(matchContext);
     }
 
     private void scanQueue() {
@@ -124,6 +136,8 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
     }
 
     private class Fetcher implements Runnable {
+        private String groupDataCloudVersion;
+
         @Override
         public void run() {
             String name = Thread.currentThread().getName();
@@ -131,17 +145,27 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
             while (true) {
                 try {
                     fetcherActivity.put(name, System.currentTimeMillis());
+                    groupDataCloudVersion = null;
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
                         int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
                         int inGroup = 0;
+                        Long startGrouping = System.currentTimeMillis();
 
-                        while (inGroup < thisGroupSize && !queue.isEmpty()) {
+                        while (inGroup < thisGroupSize && !queue.isEmpty()
+                                && System.currentTimeMillis() - startGrouping < GROUPING_TIMEOUT) {
                             try {
                                 MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
-                                    matchContextList.add(matchContext);
-                                    inGroup += matchContext.getInput().getData().size();
+                                    if (StringUtils.isEmpty(groupDataCloudVersion)) {
+                                        groupDataCloudVersion = matchContext.getInput().getDataCloudVersion();
+                                    }
+                                    if (matchContext.getInput().getDataCloudVersion().equals(groupDataCloudVersion)) {
+                                        matchContextList.add(matchContext);
+                                        inGroup += matchContext.getInput().getData().size();
+                                    } else {
+                                        queue.add(matchContext);
+                                    }
                                 }
                             } catch (InterruptedException e) {
                                 // skip
@@ -171,52 +195,13 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
         private void fetchMultipleContexts(List<MatchContext> matchContextList) {
             try {
                 if (!matchContextList.isEmpty()) {
-                    MatchContext mergedContext = mergeContexts(matchContextList);
-                    mergedContext = fetchSync(mergedContext);
-                    splitContext(mergedContext, matchContextList);
+                    DbHelper dbHelper = beanDispatcher.getDbHelper(groupDataCloudVersion);
+                    MatchContext mergedContext = dbHelper.mergeContexts(matchContextList, groupDataCloudVersion);
+                    mergedContext = dbHelper.fetch(mergedContext);
+                    dbHelper.splitContext(mergedContext, matchContextList, map);
                 }
             } catch (Exception e) {
                 log.error("Failed to fetch multi-context match input.", e);
-            }
-        }
-
-        private MatchContext mergeContexts(List<MatchContext> matchContextList) {
-            MatchContext mergedContext = new MatchContext();
-            Set<String> domainSet = new HashSet<>();
-            Set<NameLocation> nameLocationSet = new HashSet<>();
-            Map<String, Set<String>> srcColSetMap = new HashMap<>();
-            for (MatchContext matchContext : matchContextList) {
-                domainSet.addAll(matchContext.getDomains());
-                nameLocationSet.addAll(matchContext.getNameLocations());
-                Map<String, Set<String>> srcColMap1 = matchContext.getPartitionColumnsMap();
-                for (Map.Entry<String, Set<String>> entry : srcColMap1.entrySet()) {
-                    String sourceName = entry.getKey();
-                    if (srcColSetMap.containsKey(sourceName)) {
-                        srcColSetMap.get(sourceName).addAll(entry.getValue());
-                    } else {
-                        srcColSetMap.put(sourceName, new HashSet<>(entry.getValue()));
-                    }
-                }
-            }
-
-            Map<String, Set<String>> srcColMap = new HashMap<>();
-            for (Map.Entry<String, Set<String>> entry : srcColSetMap.entrySet()) {
-                srcColMap.put(entry.getKey(), new HashSet<>(entry.getValue()));
-            }
-
-            mergedContext.setDomains(domainSet);
-            mergedContext.setNameLocations(nameLocationSet);
-            mergedContext.setPartitionColumnsMap(srcColMap);
-            return mergedContext;
-        }
-
-        private void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
-            List<Map<String, Object>> resultSet = mergedContext.getResultSet();
-            for (MatchContext context : matchContextList) {
-                context.setResultSet(resultSet);
-                String rootUid = context.getOutput().getRootOperationUID();
-                map.putIfAbsent(rootUid, context);
-                log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);
             }
         }
 
@@ -224,12 +209,19 @@ public class RealTimeMatchFetcher extends MatchFetcherBase implements MatchFetch
 
     @Override
     public List<String> enqueue(List<MatchContext> matchContexts) {
-        queue.addAll(matchContexts);
-
         List<String> rootUids = new ArrayList<>(matchContexts.size());
 
-        for (MatchContext context : matchContexts) {
-            rootUids.add(context.getOutput().getRootOperationUID());
+        if (enableFetchers) {
+            queue.addAll(matchContexts);
+            for (MatchContext context : matchContexts) {
+                rootUids.add(context.getOutput().getRootOperationUID());
+            }
+        } else {
+            for (MatchContext context : matchContexts) {
+                String uuid = context.getOutput().getRootOperationUID();
+                map.putIfAbsent(uuid, fetchSync(context));
+                rootUids.add(uuid);
+            }
         }
 
         return rootUids;

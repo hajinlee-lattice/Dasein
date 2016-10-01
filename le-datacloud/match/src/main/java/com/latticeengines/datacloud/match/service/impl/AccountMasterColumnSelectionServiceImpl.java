@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +21,15 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("accountMasterColumnSelectionService")
 public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionService {
 
     private Log log = LogFactory.getLog(ColumnSelectionServiceImpl.class);
-
-    private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
@@ -53,12 +53,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @Override
     public boolean accept(String version) {
-        if (!StringUtils.isEmpty(version)
-                && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
@@ -72,7 +67,17 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @Override
     public List<String> getMatchedColumns(ColumnSelection selection) {
-        throw new UnsupportedOperationException();
+        List<String> columnNames = new ArrayList<>();
+        for (Column column : selection.getColumns()) {
+            AccountMasterColumn externalColumn = accountMasterColumnService
+                    .getMetadataColumn(column.getExternalColumnId());
+            if (externalColumn != null) {
+                columnNames.add(externalColumn.getAmColumnId());
+            } else {
+                columnNames.add(column.getColumnName());
+            }
+        }
+        return columnNames;
     }
 
     @Override
@@ -83,11 +88,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     @Override
     public String getCurrentVersion(Predefined predefined) {
         return "2.0";
-    }
-
-    @Override
-    public Boolean isValidVersion(Predefined predefined, String version) {
-        return "2.0".equals(version);
     }
 
     private void loadCaches() {

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -21,6 +19,7 @@ import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -29,8 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -41,17 +38,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     private static Log log = LogFactory.getLog(MatchPlannerBase.class);
 
     @Autowired
-    protected List<ColumnSelectionService> columnSelectionServiceList;
-
-    @Resource(name = "columnMetadataServiceDispatch")
-    protected ColumnMetadataService columnMetadataService;
+    private PublicDomainService publicDomainService;
 
     @Autowired
-    private PublicDomainService publicDomainService;
+    private BeanDispatcherImpl beanDispatcher;
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            ColumnSelectionService columnSelectionService = getColumnSelectionService(input.getDataCloudVersion());
+            ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input.getDataCloudVersion());
             input.setPredefinedVersion(validateOrAssignPredefinedVersion(columnSelectionService,
                     input.getPredefinedSelection(), input.getPredefinedVersion()));
         }
@@ -59,7 +53,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Trace
     ColumnSelection parseColumnSelection(MatchInput input) {
-        ColumnSelectionService columnSelectionService = getColumnSelectionService(input.getDataCloudVersion());
+        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input.getDataCloudVersion());
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection());
         } else if (input.getPredefinedSelection() != null) {
@@ -89,13 +83,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             version = columnSelectionService.getCurrentVersion(predefined);
             log.debug("Assign version " + version + " to column selection " + predefined);
         }
-        if (!columnSelectionService.isValidVersion(predefined, version)) {
-            throw new IllegalArgumentException(
-                    "The specified version " + version + " is invalid for the selection " + predefined);
-        }
         return version;
     }
 
+    // this is a dispatcher method
     MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
@@ -116,18 +107,17 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         context.setInternalResults(records);
         context.setDomains(domainSet);
         context.setNameLocations(nameLocationSet);
+
+        DbHelper dbHelper = beanDispatcher.getDbHelper(input.getDataCloudVersion());
+        dbHelper.populateMatchHints(context);
+
         return context;
     }
 
     @MatchStep(threshold = 100L)
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
-        if (!skipExecutionPlanning) {
-            ColumnSelectionService columnSelectionService = getColumnSelectionService(
-                    matchContext.getInput().getDataCloudVersion());
-
-            ColumnSelection columnSelection = matchContext.getColumnSelection();
-            matchContext.setPartitionColumnsMap(columnSelectionService.getPartitionColumnMap(columnSelection));
-        }
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        dbHelper.sketchExecutionPlan(matchContext, skipExecutionPlanning);
         return matchContext;
     }
 
@@ -198,7 +188,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
                     record.setPublicDomain(true);
                     if (excludePublicDomains) {
-                        log.warn("A record with publid domain is excluded from input.");
+                        log.warn("A record with public domain is excluded from input.");
                         return;
                     }
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
@@ -315,6 +305,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @MatchStep(threshold = 100L)
     @Trace
     private MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection selection, String dataCloudVersion) {
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         List<ColumnMetadata> metadata = columnMetadataService.fromSelection(selection, dataCloudVersion);
         matchOutput.setMetadata(metadata);
         return matchOutput;
@@ -335,15 +326,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
         matchOutput.setOutputFields(fields);
         return matchOutput;
-    }
-
-    protected ColumnSelectionService getColumnSelectionService(String version) {
-        for (ColumnSelectionService handler : columnSelectionServiceList) {
-            if (handler.accept(version)) {
-                return handler;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_25021, new String[] { version });
     }
 
 }

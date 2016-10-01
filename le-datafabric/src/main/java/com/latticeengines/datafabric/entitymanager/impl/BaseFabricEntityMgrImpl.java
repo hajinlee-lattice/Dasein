@@ -193,8 +193,12 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             return null;
 
         List<String> uniqueIds = dedupIds(ids);
-
-        Map<String, GenericRecord> records = dataStore.batchFindRecord(uniqueIds);
+        Map<String, GenericRecord> records = new HashMap<>();
+        if (uniqueIds.size() == 1) {
+            records.put(uniqueIds.get(0), dataStore.findRecord(uniqueIds.get(0)));
+        } else  {
+            records = dataStore.batchFindRecord(uniqueIds);
+        }
         List<T> entities = new ArrayList<T>();
         for (String id : ids) {
             GenericRecord record = (id == null) ? null : records.get(id);

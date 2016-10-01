@@ -9,11 +9,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import javax.annotation.Resource;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -39,22 +38,25 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
-import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
@@ -65,6 +67,12 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJobConfiguration> {
 
     private static final Log log = LogFactory.getLog(DataCloudProcessor.class);
+
+    private static final String INTEGER = Integer.class.getSimpleName();
+    private static final String LONG = Long.class.getSimpleName();
+    private static final String FLOAT = Float.class.getSimpleName();
+    private static final String DOUBLE = Double.class.getSimpleName();
+
 
     @Autowired
     private ApplicationContext appContext;
@@ -80,9 +88,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Qualifier("bulkMatchExecutor")
     private MatchExecutor matchExecutor;
 
-    @Resource(name = "columnMetadataServiceDispatch")
-    private ColumnMetadataService columnMetadataService;
-
     @Autowired
     private SoftwareLibraryService softwareLibraryService;
 
@@ -93,8 +98,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Configuration yarnConfiguration;
 
     @Autowired
-    @Qualifier("columnSelectionService")
-    private ColumnSelectionService columnSelectionService;
+    private BeanDispatcherImpl beanDispatcher;
+
+    private ColumnMetadataService columnMetadataService;
+
+    @Autowired
+    @Qualifier("accountMasterColumnService")
+    private MetadataColumnService<AccountMasterColumn> columnService;
 
     @Autowired
     private MetricService metricService;
@@ -116,14 +126,19 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Integer numThreads;
     private MatchInput matchInput;
     private String podId;
+    private String dataCloudVersion;
     private Boolean returnUnmatched;
     private Boolean excludePublicDomains;
+    private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
 
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
         try {
             appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
+
+            dataCloudVersion = jobConfiguration.getDataCloudVersion();
+            columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
 
             receivedAt = new Date();
 
@@ -163,6 +178,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             inputSchema = jobConfiguration.getInputAvroSchema();
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
+
             Integer rowsProcessed = 0;
             setProgress(0.07f);
 
@@ -229,6 +245,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         matchInput.setKeyMap(keyMap);
         matchInput.setData(data);
         matchInput.setExcludePublicDomains(excludePublicDomains);
+        matchInput.setDataCloudVersion(dataCloudVersion);
         return matchInput;
     }
 
@@ -274,6 +291,9 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
+                if (MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
+                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
+                }
                 builder.set(fields.get(i), value);
             }
             records.add(builder.build());
@@ -284,6 +304,31 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             AvroUtils.appendToHdfsFile(yarnConfiguration, outputAvro, records);
         }
         log.info("Write " + records.size() + " generic records to " + outputAvro);
+    }
+
+    private Object matchDeclaredType(Object value, String columnId) {
+        if (value == null || fieldsWithNoMetadata.contains(columnId)) {
+            return value;
+        }
+        AccountMasterColumn metadataColumn = columnService.getMetadataColumn(columnId);
+        if (metadataColumn == null) {
+            fieldsWithNoMetadata.add(columnId);
+            return value;
+        }
+        String javaClass = metadataColumn.getJavaClass();
+        if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
+            return Integer.valueOf(String.valueOf(value));
+        }
+        if (LONG.equalsIgnoreCase(javaClass) && !(value instanceof Long)) {
+            return Long.valueOf(String.valueOf(value));
+        }
+        if (FLOAT.equalsIgnoreCase(javaClass) && !(value instanceof Float)) {
+            return Float.valueOf(String.valueOf(value));
+        }
+        if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
+            return Double.valueOf(String.valueOf(value));
+        }
+        return value;
     }
 
     @MatchStep

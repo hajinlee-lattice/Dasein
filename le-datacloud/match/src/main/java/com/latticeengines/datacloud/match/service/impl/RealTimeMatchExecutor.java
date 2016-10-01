@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -14,6 +15,7 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchFetcher;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 @Component("realTimeMatchExecutor")
@@ -29,25 +31,29 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     @MatchStep
     public MatchContext execute(MatchContext matchContext) {
         matchContext = fetcher.fetch(matchContext);
-        matchContext = doPostProcessing(matchContext);
-        generateOutputMetric(matchContext);
-        return matchContext;
-    }
-
-    private MatchContext doPostProcessing(MatchContext matchContext) {
         matchContext = complete(matchContext);
+        generateOutputMetric(matchContext);
         return matchContext;
     }
 
     @Override
     @MatchStep(threshold = 10000L)
     public List<MatchContext> executeBulk(List<MatchContext> matchContexts) {
-        List<String> rootUids = fetcher.enqueue(matchContexts);
-        matchContexts = fetcher.waitForResult(rootUids);
-        for (MatchContext matchContext : matchContexts) {
-            doPostProcessing(matchContext);
+        if (matchContexts.isEmpty()) {
+            return Collections.emptyList();
         }
-        return matchContexts;
+
+        MatchInput input = matchContexts.get(0).getInput();
+        if (input == null) {
+            throw new NullPointerException("Cannot find a MatchInput in MatchContext");
+        }
+
+        List<String> rootUids = fetcher.enqueue(matchContexts);
+        List<MatchContext> outputContexts = fetcher.waitForResult(rootUids);
+        for (MatchContext matchContext : outputContexts) {
+            complete(matchContext);
+        }
+        return outputContexts;
     }
 
     @MatchStep

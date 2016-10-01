@@ -27,14 +27,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
 @Component("columnSelectionService")
 public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     private Log log = LogFactory.getLog(ColumnSelectionServiceImpl.class);
-
-    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
 
     @Resource(name = "externalColumnService")
     private MetadataColumnService<ExternalColumn> externalColumnService;
@@ -58,12 +57,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @Override
     public boolean accept(String version) {
-        if (StringUtils.isEmpty(version)
-                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING)) {
-            return true;
-        }
-
-        return false;
+        return MatchTypeUtil.isValidForRTSBasedMatch(version);
     }
 
     @Override
@@ -110,11 +104,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public String getCurrentVersion(Predefined predefined) {
         return "1.0";
-    }
-
-    @Override
-    public Boolean isValidVersion(Predefined predefined, String version) {
-        return "1.0".equals(version);
     }
 
     @Trace(dispatcher = true)

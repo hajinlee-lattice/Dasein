@@ -2,8 +2,7 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -11,11 +10,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 
 import io.swagger.annotations.Api;
@@ -26,8 +26,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/metadata")
 public class ColumnMetadataResource implements ColumnMetadataInterface {
 
-    @Resource(name = "columnMetadataServiceDispatch")
-    private ColumnMetadataService columnMetadataService;
+    @Autowired
+    private BeanDispatcher beanDispatcher;
 
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -36,6 +36,7 @@ public class ColumnMetadataResource implements ColumnMetadataInterface {
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         try {
+            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
             return columnMetadataService.fromPredefinedSelection(selectName, dataCloudVersion);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25006, e, new String[] { selectName.getName() });

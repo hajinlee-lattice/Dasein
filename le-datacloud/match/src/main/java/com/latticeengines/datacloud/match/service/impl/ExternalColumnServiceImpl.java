@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("externalColumnService")
 public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<ExternalColumn> {
@@ -19,6 +20,11 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
 
     private final ConcurrentMap<String, ExternalColumn> whiteColumnCache = new ConcurrentHashMap<>();
     private final ConcurrentSkipListSet<String> blackColumnCache = new ConcurrentSkipListSet<>();
+
+    @Override
+    public boolean accept(String version) {
+        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+    }
 
     @Override
     protected MetadataColumnEntityMgr<ExternalColumn> getMetadataColumnEntityMgr() {

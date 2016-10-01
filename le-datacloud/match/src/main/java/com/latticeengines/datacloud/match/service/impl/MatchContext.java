@@ -10,6 +10,8 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -29,6 +31,9 @@ public class MatchContext implements Fact, Dimension {
     private boolean returnUnmatched;
     private Long numRows;
     private MatchEngine matchEngine;
+
+    private AccountLookupRequest accountLookupRequest;
+    private List<LatticeAccount> matchedAccounts;
 
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
@@ -128,6 +133,22 @@ public class MatchContext implements Fact, Dimension {
 
     public void setMatchEngine(MatchEngine matchEngine) {
         this.matchEngine = matchEngine;
+    }
+
+    public AccountLookupRequest getAccountLookupRequest() {
+        return accountLookupRequest;
+    }
+
+    public void setAccountLookupRequest(AccountLookupRequest accountLookupRequest) {
+        this.accountLookupRequest = accountLookupRequest;
+    }
+
+    public List<LatticeAccount> getMatchedAccounts() {
+        return matchedAccounts;
+    }
+
+    public void setMatchedAccounts(List<LatticeAccount> matchedAccounts) {
+        this.matchedAccounts = matchedAccounts;
     }
 
     @JsonIgnore

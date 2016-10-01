@@ -52,6 +52,9 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
             client = new AmazonDynamoDBClient(credentials);
         }
 
+        //ListTablesResult result = client.listTables();
+        //log.info("Found dynamo tables: " + result.getTableNames());
+
         initialized = true;
     }
 

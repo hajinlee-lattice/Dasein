@@ -20,11 +20,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.newrelic.api.agent.Trace;
 
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> implements ColumnMetadataService {
@@ -130,14 +130,33 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 fieldBuilder = fieldBuilder.prop("DiscretizationStrategy", columnMetadata.getDiscretizationStrategy());
             }
             fieldBuilder = fieldBuilder.prop("Nullable", "true");
-            String dataType = columnMetadata.getDataType();
-            Schema.Type type = getAvroTypeDataType(dataType);
+            Schema.Type type = getAvroTypeDataType(columnMetadata);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);
         }
         return fieldAssembler.endRecord();
     }
 
-    abstract protected Schema.Type getAvroTypeDataType(String dataType);
+    private Schema.Type getAvroTypeDataType(ColumnMetadata columnMetadata) {
+        String javaClass = columnMetadata.getJavaClass();
+        if (StringUtils.isNotEmpty(javaClass)) {
+            try {
+                return AvroUtils.getAvroType(javaClass);
+            } catch (Exception e) {
+                log.error("Cannot parse avro type by java class " + javaClass, e);
+            }
+        }
+
+        String dataType = columnMetadata.getDataType();
+        if (StringUtils.isEmpty(dataType)) {
+            return null;
+        }
+
+        try {
+            return AvroUtils.convertSqlTypeToAvro(dataType);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to convert to avro type from sql server data type " + dataType, e);
+        }
+    }
 
     private void loadCache() {
         for (Predefined selection : Predefined.values()) {

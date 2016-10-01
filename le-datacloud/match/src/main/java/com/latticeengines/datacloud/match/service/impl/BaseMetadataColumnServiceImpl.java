@@ -57,7 +57,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         E column;
         try {
             column = getMetadataColumnEntityMgr().findById(columnId);
-            log.info("Loaded metadata from DB for columnId = " + columnId);
+            log.debug("Loaded metadata from DB for columnId = " + columnId);
         } catch (Exception e) {
             log.error(String.format("Failed to retrieve column information for [%s]", columnId), e);
             return null;

@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +26,7 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     @Override
     public List<MatchContext> executeBulk(List<MatchContext> matchContexts) {
-        List<MatchContext> result = new ArrayList<>(matchContexts.size());
-        for (MatchContext matchContext : matchContexts) {
-            result.add(execute(matchContext));
-        }
-        return result;
+        throw new UnsupportedOperationException("This method is not supported.");
     }
 
 }

@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchInput implements Fact, Dimension {
 
+    private static final String DEFAULT_VERSION = "1.0.0";
+
     private Tenant tenant;
 
     private List<String> fields;
@@ -46,7 +48,7 @@ public class MatchInput implements Fact, Dimension {
     // if not provided, pick latest
     private String predefinedVersion;
 
-    private String dataCloudVersion;
+    private String dataCloudVersion = DEFAULT_VERSION;
 
     private String matchEngine;
     private Integer numSelectedColumns;

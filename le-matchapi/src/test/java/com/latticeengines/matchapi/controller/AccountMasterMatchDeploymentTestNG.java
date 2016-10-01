@@ -3,8 +3,6 @@ package com.latticeengines.matchapi.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -20,17 +18,18 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.PropDataConstants;
@@ -70,10 +69,9 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
 
     @Autowired
     private MatchCommandService matchCommandService;
-    
 
-    @Resource(name = "columnMetadataServiceDispatch")
-    private ColumnMetadataService columnMetadataService;
+    @Autowired
+    private BeanDispatcher beanDispatcher;
 
     @Test(groups = "deployment")
     public void testBulkMatchWithSchema() throws Exception {
@@ -191,6 +189,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         List<String> fieldNames = getFieldNamesFromCSVFile(csvFile);
         fieldNames = fieldNames.subList(9, fieldNames.size());
         ColumnSelection selection = getColumnSelection(fieldNames);
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(DATA_CLOUD_VERSION);
         List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(selection, DATA_CLOUD_VERSION);
         List<Class<?>> fieldTypesInMetadata = getFieldTypesFromMetadata(metadatas);
         List<Class<?>> fieldTypes = new ArrayList<>();

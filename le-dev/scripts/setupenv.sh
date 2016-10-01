@@ -20,7 +20,7 @@ rm -rf $TEZ_TARBALL || true
 echo "downloading tez tarball from sftp"
 chmod 600 $WSHOME/le-dev/sftpdevkey
 scp -i $WSHOME/le-dev/sftpdevkey sftpdev@10.41.1.31:/artifactory/tez-0.8.2.tar.gz $TEZ_TARBALL
-hadoop fs -copyFromLocal $TEZ_TARBALL /apps/tez || true
+hdfs dfs -put -f $TEZ_TARBALL /apps/tez || true
 rm -rf $TEZ_TARBALL || true
 
 sudo pip install -r $WSHOME/le-dev/scripts/requirements.txt || true

@@ -1,8 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import javax.annotation.Resource;
-
 import org.apache.avro.Schema;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -14,11 +13,22 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 @Component
 public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Resource(name = "columnMetadataServiceDispatch")
-    private ColumnMetadataService columnMetadataService;
+    @Autowired
+    private BeanDispatcherImpl beanDispatcher;
 
     @Test(groups = "functional")
-    public void testAvroSchema() {
+    public void testAvroSchemaForDerivedColumnsCache() {
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService("1.0.0");
+        for (Predefined predefined : Predefined.values()) {
+            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), null);
+            Assert.assertEquals(schema.getFields().size(),
+                    columnMetadataService.fromPredefinedSelection(predefined, null).size());
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testAvroSchemaForAccountMaster() {
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService("2.0.0");
         for (Predefined predefined : Predefined.values()) {
             Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), null);
             Assert.assertEquals(schema.getFields().size(),

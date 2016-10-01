@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("accountMasterColumnService")
 public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {
@@ -21,6 +22,12 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
 
     private final ConcurrentMap<String, AccountMasterColumn> whiteColumnCache = new ConcurrentHashMap<>();
     private final ConcurrentSkipListSet<String> blackColumnCache = new ConcurrentSkipListSet<>();
+
+    @Override
+    public boolean accept(String version) {
+        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+    }
+
 
     @Override
     protected MetadataColumnEntityMgr<AccountMasterColumn> getMetadataColumnEntityMgr() {

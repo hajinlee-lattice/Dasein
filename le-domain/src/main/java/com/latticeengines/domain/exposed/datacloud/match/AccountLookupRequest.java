@@ -6,8 +6,6 @@ import java.util.List;
 
 public class AccountLookupRequest {
 
-    public static final int maxRequests = 100;
-
     public static final String DOMAIN = "_DOMAIN_";
     public static final String DUNS = "_DUNS_";
     public static final String UNKNOWN = "NULL";
@@ -18,7 +16,7 @@ public class AccountLookupRequest {
 
     public AccountLookupRequest(String version) {
         this.version = version;
-        ids = new ArrayList<String>();
+        ids = new ArrayList<>();
     }
 
     public String getVersion() {
@@ -29,6 +27,10 @@ public class AccountLookupRequest {
         if (domain == null) domain = UNKNOWN;
         if (duns == null) duns = UNKNOWN;
         ids.add(DOMAIN + domain + DUNS + duns);
+    }
+
+    public void addId(String id) {
+        ids.add(id);
     }
 
     public List<String> getIds() {

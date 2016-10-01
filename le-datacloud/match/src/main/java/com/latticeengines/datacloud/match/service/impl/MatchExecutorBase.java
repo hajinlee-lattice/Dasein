@@ -6,40 +6,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
-import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.newrelic.api.agent.Trace;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
 
-    @Resource(name = "columnMetadataServiceDispatch")
-    private ColumnMetadataService columnMetadataService;
-
     @Autowired
-    private List<ColumnSelectionService> columnSelectionServiceList;
-
-    @Resource(name = "externalColumnService")
-    private MetadataColumnService<ExternalColumn> externalColumnService;
+    private BeanDispatcherImpl beanDispatcher;
 
     @Autowired
     private PublicDomainService publicDomainService;
@@ -52,9 +40,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @MatchStep
     MatchContext complete(MatchContext matchContext) {
-        List<InternalOutputRecord> internalOutputRecords = distributeResults(matchContext.getInternalResults(),
-                matchContext.getResultSet());
-        matchContext.setInternalResults(internalOutputRecords);
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        matchContext = dbHelper.updateInternalResults(matchContext);
         matchContext = mergeResults(matchContext);
         matchContext.getOutput().setFinishedAt(new Date());
         Long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
@@ -63,111 +50,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     @VisibleForTesting
-    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
-            Map<String, List<Map<String, Object>>> resultsMap) {
-        for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
-            String sourceName = result.getKey();
-            distributeQueryResults(records, sourceName, result.getValue());
-        }
-        return records;
-    }
-
-    @VisibleForTesting
-    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
-            List<Map<String, Object>> results) {
-        distributeQueryResults(records, results);
-        return records;
-    }
-
-    private void distributeQueryResults(List<InternalOutputRecord> records, List<Map<String, Object>> rows) {
-        distributeQueryResults(records, null, rows);
-    }
-
-    @Trace
-    private void distributeQueryResults(List<InternalOutputRecord> records, String sourceName,
-            List<Map<String, Object>> rows) {
-        boolean singlePartitionMode = StringUtils.isEmpty(sourceName);
-
-        for (InternalOutputRecord record : records) {
-            if (record.isFailed()) {
-                continue;
-            }
-            // try using domain first
-            boolean matched = false;
-            String parsedDomain = record.getParsedDomain();
-            if (StringUtils.isNotEmpty(parsedDomain)) {
-                for (Map<String, Object> row : rows) {
-                    if (row.containsKey(MatchConstants.DOMAIN_FIELD)
-                            && parsedDomain.equals(row.get(MatchConstants.DOMAIN_FIELD))) {
-                        if (singlePartitionMode) {
-                            record.setQueryResult(row);
-                        } else {
-                            record.getResultsInPartition().put(sourceName, row);
-                        }
-                        matched = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!matched) {
-                NameLocation nameLocation = record.getParsedNameLocation();
-                if (nameLocation != null) {
-                    String parsedName = nameLocation.getName();
-                    String parsedCountry = nameLocation.getCountry();
-                    String parsedState = nameLocation.getState();
-                    String parsedCity = nameLocation.getCity();
-                    if (StringUtils.isNotEmpty(parsedName)) {
-                        for (Map<String, Object> row : rows) {
-                            if (row.get(MatchConstants.NAME_FIELD) == null
-                                    || !parsedName.equalsIgnoreCase((String) row.get(MatchConstants.NAME_FIELD))) {
-                                continue;
-                            }
-
-                            Object countryInRow = row.get(MatchConstants.COUNTRY_FIELD);
-                            Object stateInRow = row.get(MatchConstants.STATE_FIELD);
-                            Object cityInRow = row.get(MatchConstants.CITY_FIELD);
-
-                            if (countryInRow != null && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
-                                continue;
-                            }
-
-                            if (countryInRow == null && !LocationUtils.USA.equalsIgnoreCase(parsedCountry)) {
-                                continue;
-                            }
-
-                            if (StringUtils.isNotEmpty(parsedState) && stateInRow != null
-                                    && !parsedState.equalsIgnoreCase((String) stateInRow)) {
-                                continue;
-                            }
-
-                            if (StringUtils.isNotEmpty(parsedCity) && cityInRow != null
-                                    && !parsedCity.equalsIgnoreCase((String) cityInRow)) {
-                                continue;
-                            }
-
-                            if (singlePartitionMode) {
-                                record.setQueryResult(row);
-                            } else {
-                                record.getResultsInPartition().put(sourceName, row);
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
-    @VisibleForTesting
     @MatchStep
     @Trace
     MatchContext mergeResults(MatchContext matchContext) {
+        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(matchContext);
+        MetadataColumnService metadataColumnService = beanDispatcher.getMetadataColumnService(matchContext);
+
         List<InternalOutputRecord> records = matchContext.getInternalResults();
-        List<String> columnNames = getColumnSelectionService(matchContext.getInput().getDataCloudVersion())
-                .getMatchedColumns(matchContext.getColumnSelection());
+        List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
 
@@ -192,17 +82,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             internalRecord.setColumnMatched(new ArrayList<Boolean>());
             List<Object> output = new ArrayList<>();
-            // currently make the code easy to be switched between query by
-            // partiion vs query by join
-            // after we gain more data on the performance, we can pick one
-            Map<String, Map<String, Object>> resultsByPartition = internalRecord.getResultsInPartition();
+
             Map<String, Object> results = internalRecord.getQueryResult();
             boolean matchedAnyColumn = false;
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
-                ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId());
-                String field = (externalColumn != null) ? externalColumn.getDefaultColumnName()
-                        : column.getColumnName();
+
+                MetadataColumn metadataColumn = (MetadataColumn) metadataColumnService
+                        .getMetadataColumn(column.getExternalColumnId());
+
+                String field = (metadataColumn != null) ? metadataColumn.getColumnId() : column.getColumnName();
 
                 Object value = null;
                 boolean matched = false;
@@ -221,21 +110,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     matched = true;
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
-                } else if (externalColumn != null && StringUtils.isNotEmpty(externalColumn.getTablePartition())) {
-                    String tableName = externalColumn.getTablePartition();
-                    if (resultsByPartition.containsKey(tableName)) {
-                        matched = true;
-                        Object objInResult = resultsByPartition.get(tableName).get(field);
-                        value = (objInResult == null ? value : objInResult);
-                    }
-                } else {
-                    for (Map<String, Object> resultSet : resultsByPartition.values()) {
-                        if (resultSet.containsKey(field)) {
-                            matched = true;
-                            Object objInResult = resultSet.get(field);
-                            value = (objInResult == null ? value : objInResult);
-                        }
-                    }
                 }
 
                 output.add(value);
@@ -298,15 +172,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
 
         return matchContext;
-    }
-
-    private ColumnSelectionService getColumnSelectionService(String matchVersion) {
-        for (ColumnSelectionService handler : columnSelectionServiceList) {
-            if (handler.accept(matchVersion)) {
-                return handler;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
     }
 
 }

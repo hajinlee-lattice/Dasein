@@ -129,17 +129,20 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(tableName);
         GenericRecord record = null;
+        Item item = null;
         try {
-            Item item = table.getItem(ID, id);
-            if (item != null) {
-                ByteBuffer blob = item.getByteBuffer(BLOB);
-                record = bytesToAvro(blob);
-            }
+            item = table.getItem(ID, id);
         } catch (NoSuchMethodError e) {
+            log.info("The table name is " + tableName);
+            log.info("The key is " + id);
             throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
                     + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {
             log.error("Unable to find record " + tableName + " id " + id, e);
+        }
+        if (item != null) {
+            ByteBuffer blob = item.getByteBuffer(BLOB);
+            record = bytesToAvro(blob);
         }
         return record;
     }
@@ -240,6 +243,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
             } while (!unprocessed.isEmpty());
         } catch (NoSuchMethodError e) {
+            log.info("The table name is " + tableName);
+            log.info("The keys are " + idList);
             throw new RuntimeException("If you see NoSuchMethodError on jackson json, "
                     + "it might because the table name or key attributes are wrong.", e);
         } catch (Exception e) {

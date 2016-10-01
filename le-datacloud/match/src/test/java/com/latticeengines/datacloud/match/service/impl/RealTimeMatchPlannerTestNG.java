@@ -60,19 +60,6 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
-    public void testInvalidSelectionVersion() {
-        MatchInput input = prepareMatchInput();
-        input.setPredefinedVersion("0.0");
-
-        try {
-            matchPlanner.plan(input);
-            Assert.fail("Should throw exception due to invalid selection version.");
-        } catch (IllegalArgumentException e) {
-            // ignore
-        }
-    }
-
-    @Test(groups = "functional")
     public void testUnionSelection() {
         MatchInput input = prepareMatchInput();
         input.setPredefinedSelection(Predefined.Model);

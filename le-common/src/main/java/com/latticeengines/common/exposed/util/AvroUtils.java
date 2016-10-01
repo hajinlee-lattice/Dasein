@@ -16,9 +16,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
@@ -397,6 +397,11 @@ public class AvroUtils {
     public static Type convertSqlTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
         // the argument 'type' looks like NVARCHAR(MAX), or NVARCHAR(255), etc.
         String typeStr = org.apache.commons.lang.StringUtils.substringBefore(type.toLowerCase(), "(");
+
+        if ("DATETIME".equalsIgnoreCase(typeStr)) {
+            typeStr = "TIMESTAMP".toLowerCase();
+        }
+
         Map<String, Integer> sqlTypeMap = new HashMap<String, Integer>();
         for (java.lang.reflect.Field field : java.sql.Types.class.getFields()) {
             sqlTypeMap.put(field.getName().toLowerCase(), (Integer) field.get(null));
@@ -454,25 +459,32 @@ public class AvroUtils {
         if (javaType == null) {
             return null;
         }
-        switch (javaType.getSimpleName()) {
-        case "Double":
-            return Type.DOUBLE;
-        case "Float":
-            return Type.FLOAT;
-        case "Integer":
-            return Type.INT;
-        case "Long":
-            return Type.LONG;
-        case "String":
-            return Type.STRING;
-        case "Boolean":
-            return Type.BOOLEAN;
-        case "Date":
-            return Type.LONG;
-        case "Timestamp":
-            return Type.LONG;
-        default:
-            throw new RuntimeException("Unknown avro type for java type " + javaType.getSimpleName());
+        return getAvroType(javaType.getSimpleName());
+    }
+
+    public static Type getAvroType(String javaClassName) {
+        if (org.apache.commons.lang.StringUtils.isEmpty(javaClassName)) {
+            return null;
+        }
+        switch (javaClassName) {
+            case "Double":
+                return Type.DOUBLE;
+            case "Float":
+                return Type.FLOAT;
+            case "Integer":
+                return Type.INT;
+            case "Long":
+                return Type.LONG;
+            case "String":
+                return Type.STRING;
+            case "Boolean":
+                return Type.BOOLEAN;
+            case "Date":
+                return Type.LONG;
+            case "Timestamp":
+                return Type.LONG;
+            default:
+                throw new RuntimeException("Unknown avro type for java type " + javaClassName);
         }
 
     }

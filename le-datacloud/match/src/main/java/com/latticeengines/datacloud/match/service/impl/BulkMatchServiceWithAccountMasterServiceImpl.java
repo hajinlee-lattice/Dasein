@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.annotation.Resource;
-
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +48,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String INPUT_AVRO_KEY = "InputAvro";
     private static final String PUBLIC_DOMAIN_KEY = "PublicDomain";
 
-    @Resource(name = "columnMetadataServiceDispatch")
+    @Autowired
+    @Qualifier("accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
