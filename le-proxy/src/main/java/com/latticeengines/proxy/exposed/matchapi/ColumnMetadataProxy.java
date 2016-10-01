@@ -43,6 +43,9 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
         if (Predefined.Enrichment.equals(selectName)) {
             try {
+                if (StringUtils.isNotEmpty(dataCloudVersion)) {
+                    dataCloudVersion = "default";
+                }
                 return enrichmentColumnsCache.get(dataCloudVersion);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get enrichment column metadata from loading cache.", e);
