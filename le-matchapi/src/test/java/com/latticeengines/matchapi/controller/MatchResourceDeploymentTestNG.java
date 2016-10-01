@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -135,6 +136,45 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             Assert.assertTrue(outputRecord.getResult().size() > 0);
             Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
         }
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testAccountMasterRTSMatchWithMultipleRecords() throws IOException {
+        int size = 200;
+        MatchInput matchInput = prepareMatchInputWithMultipleRecords(size);
+
+        long startLookup = System.currentTimeMillis();
+        MatchOutput output = matchProxy.matchRealTime(matchInput);
+        System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
+                + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                + (System.currentTimeMillis() - startLookup) + " millis");
+        Assert.assertNotNull(output);
+        Assert.assertNotNull(output.getResult());
+        Assert.assertEquals(output.getResult().size(), size);
+
+        for (OutputRecord outputRecord : output.getResult()) {
+            Assert.assertNotNull(outputRecord);
+            Assert.assertTrue(outputRecord.getOutput().size() > 0);
+            Assert.assertTrue(outputRecord.isMatched());
+        }
+    }
+
+    private MatchInput prepareMatchInputWithMultipleRecords(int size) {
+        List<MatchInput> inputList = prepareBulkMatchInput(size, "2.0.0", true);
+
+        MatchInput matchInput = inputList.get(0);
+        List<List<Object>> inputDataList = matchInput.getData();
+
+        for (MatchInput input : inputList) {
+            if (input == matchInput) {
+                continue;
+            }
+
+            inputDataList.add(input.getData().get(0));
+        }
+
+        matchInput.setNumRows(inputList.size());
+        return matchInput;
     }
 
     private List<MatchInput> prepareBulkMatchInput(int count, String dataCloudVersion, boolean resolveKeyMap) {
