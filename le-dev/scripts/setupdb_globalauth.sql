@@ -69,16 +69,16 @@ INSERT INTO GlobalAuthentication (
   Created_By,
   Last_Modified_by
 ) SELECT
- GlobalUser_ID,
- 'bnguyen@lattice-engines.com',
-  'mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=',
+  GlobalUser_ID,
+  Email,
+  'EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=',
   0,
   NOW(),
   NOW(),
   0,
   0
 FROM GlobalUser
-WHERE Email = 'bnguyen@lattice-engines.com';
+WHERE Email = 'pls-super-admin-tester@test.lattice-engines.com';
 
 INSERT INTO GlobalAuthentication (
   User_ID,
@@ -90,38 +90,16 @@ INSERT INTO GlobalAuthentication (
   Created_By,
   Last_Modified_by
 ) SELECT
- GlobalUser_ID,
- 'pls-super-admin-tester@test.lattice-engines.com',
-  'EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=',
+  GlobalUser_ID,
+  Email,
+  'mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=',
   0,
   NOW(),
   NOW(),
   0,
   0
 FROM GlobalUser
-WHERE Email = 'pls-super-admin-tester@test.lattice-engines.com';
-
-
-INSERT INTO GlobalUserTenantRight (
-  Tenant_ID,
-  User_ID,
-  Operation_Name,
-  Creation_Date,
-  Last_Modification_Date,
-  Created_By,
-  Last_Modified_by
-) SELECT
-  u.GlobalUser_ID,
-  t.GlobalTenant_ID,
-  'SUPER_ADMIN',
-  NOW(),
-  NOW(),
-  0,
-  0
-FROM GlobalUser u, GlobalTenant t
-WHERE u.Email = 'bnguyen@lattice-engines.com'
-AND t.Deployment_ID = 'LocalTest.LocalTest.Production'
-LIMIT 1;
+WHERE Email = 'bnguyen@lattice-engines.com';
 
 INSERT INTO GlobalUserTenantRight (
   Tenant_ID,
@@ -132,14 +110,14 @@ INSERT INTO GlobalUserTenantRight (
   Created_By,
   Last_Modified_by
 ) SELECT
-  u.GlobalUser_ID,
   t.GlobalTenant_ID,
+  u.GlobalUser_ID,
   'SUPER_ADMIN',
   NOW(),
   NOW(),
   0,
   0
 FROM GlobalUser u, GlobalTenant t
-WHERE u.Email = 'pls-super-admin-tester@test.lattice-engines.com'
+WHERE u.Email IN ('bnguyen@lattice-engines.com', 'pls-super-admin-tester@test.lattice-engines.com')
 AND t.Deployment_ID = 'LocalTest.LocalTest.Production'
-LIMIT 1;
+LIMIT 2;
