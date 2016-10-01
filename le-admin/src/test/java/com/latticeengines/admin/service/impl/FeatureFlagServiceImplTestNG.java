@@ -93,6 +93,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         Assert.assertNotNull(enableInternalEnrichmentAttributesFeatureFlag);
 
+        FeatureFlagDefinition enableDataProfilingV2FeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName());
+        Assert.assertNotNull(enableDataProfilingV2FeatureFlag);
+
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
@@ -155,6 +159,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableInternalEnrichmentAttributesFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableInternalEnrichmentAttributesFeatureFlag.getDisplayName() != null
                 && enableInternalEnrichmentAttributesFeatureFlag.getDocumentation() != null);
+
+        Assert.assertTrue(enableDataProfilingV2FeatureFlag.getConfigurable()
+                && enableDataProfilingV2FeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enableDataProfilingV2FeatureFlag.getDisplayName() != null
+                && enableDataProfilingV2FeatureFlag.getDocumentation() != null);
 
     }
 

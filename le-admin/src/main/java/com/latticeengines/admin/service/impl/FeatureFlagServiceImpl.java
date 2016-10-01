@@ -122,6 +122,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         enableLatticeMarketoCredentialPageProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> enableInternalEnrichmentAttributesProdSet = new HashSet<LatticeProduct>();
         enableInternalEnrichmentAttributesProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> enableDataProfilingV2ProdSet = new HashSet<LatticeProduct>();
+        enableDataProfilingV2ProdSet.add(LatticeProduct.LPA3);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -162,6 +164,9 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getDocumentation(),
                 enableInternalEnrichmentAttributesProdSet, true);
+        FeatureFlagDefinition enableDataProfilingV2FeatureFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
+                LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getDocumentation(), enableDataProfilingV2ProdSet, true);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -183,6 +188,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 enableLatticeMarketoCredentialPageFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
                 enableInternalEnrichmentAttributesFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
+                enableDataProfilingV2FeatureFlag);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,
