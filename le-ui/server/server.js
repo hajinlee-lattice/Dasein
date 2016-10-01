@@ -153,7 +153,7 @@ class Server {
             const proxy = options.config.proxies[path];
             switch (proxy.type) {
                 case 'file_pipe':
-                    this.createFileProxy(options.API_URL, proxy.local_path, proxy.remote_path);
+                    this.createFileProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
                     break;
                 case 'pipe':
                     this.createApiProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
@@ -290,7 +290,8 @@ class Server {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('server/error', {
-                    options: this.options,
+                    config: this.options.config,
+                    routes: this.options.routes,
                     url: req.originalUrl,
                     status: err.status,
                     message: err.message,
