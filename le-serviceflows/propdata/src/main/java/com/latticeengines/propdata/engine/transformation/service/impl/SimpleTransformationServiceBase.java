@@ -45,6 +45,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
     }
 
     //!! override this if the parameter class is not BasicTransformationConfiguration
+    @Override
     @SuppressWarnings("unchecked")
     public Class<T> getConfigurationClass() {
         return (Class<T>) BasicTransformationConfiguration.class;
@@ -111,6 +112,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         return configuration;
     }
 
+    @Override
     protected TransformationProgress transformHook(TransformationProgress progress, T transConf) {
         String workflowDir = initialDataFlowDirInHdfs(progress);
         if (!cleanupHdfsDir(workflowDir, progress)) {
@@ -167,6 +169,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         return parameters;
     }
 
+    @Override
     protected Date checkTransformationConfigurationValidity(T conf) {
         if (conf.getSourceConfigurations() == null) {
             conf.setSourceConfigurations(new HashMap<String, String>());
@@ -179,9 +182,9 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     protected T parseTransConfJsonInsideWorkflow(String confStr) throws IOException {
-        return JsonUtils.deserialize(confStr, (Class<T>) getConfigurationClass());
+        return JsonUtils.deserialize(confStr, getConfigurationClass());
     }
 
 }
