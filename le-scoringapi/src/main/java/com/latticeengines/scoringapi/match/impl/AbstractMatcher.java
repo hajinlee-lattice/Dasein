@@ -1,6 +1,5 @@
 package com.latticeengines.scoringapi.match.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -8,11 +7,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -39,7 +35,7 @@ import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
 
-public abstract class AbstractMatcher implements Matcher, ApplicationContextAware {
+public abstract class AbstractMatcher implements Matcher {
 
     private static final Log log = LogFactory.getLog(AbstractMatcher.class);
 
@@ -54,7 +50,8 @@ public abstract class AbstractMatcher implements Matcher, ApplicationContextAwar
     @Value("${scoringapi.propdata.shortcircuit:false}")
     protected boolean shouldShortcircuitPropdata;
 
-    protected List<RealTimeMatchService> realTimeMatchServiceList;
+    @Autowired
+    private List<RealTimeMatchService> realTimeMatchServiceList;
 
     @Autowired
     protected MatchProxy matchProxy;
@@ -65,18 +62,10 @@ public abstract class AbstractMatcher implements Matcher, ApplicationContextAwar
     @Autowired
     protected EnrichmentMetadataCache enrichmentMetadataCache;
 
-    private ApplicationContext applicationContext;
-
     @PostConstruct
     public void initialize() throws Exception {
         if (shouldShortcircuitPropdata) {
             log.info("Initialize propdata fetcher executors as scoringapi-propdata shortcircuit is on.");
-            Map<String, RealTimeMatchService> realTimeMatchServiceMap = //
-                    applicationContext//
-                            .getBeansOfType(RealTimeMatchService.class, //
-                                    false, true);
-            realTimeMatchServiceList = //
-                    new ArrayList<RealTimeMatchService>(realTimeMatchServiceMap.values());
             realTimeMatchFetcher.initExecutors();
         } else {
             log.info("Skip initialization of propdata fetcher executors "
@@ -226,11 +215,6 @@ public abstract class AbstractMatcher implements Matcher, ApplicationContextAwar
                 }
             }
         }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
     }
 
 }
