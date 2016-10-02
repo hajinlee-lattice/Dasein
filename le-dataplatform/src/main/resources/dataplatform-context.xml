@@ -27,4 +27,5 @@
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:swlib-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
+    <import resource="classpath:common-threadpool-context.xml"/>
 </beans>

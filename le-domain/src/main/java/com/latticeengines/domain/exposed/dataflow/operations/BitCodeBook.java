@@ -34,4 +34,8 @@ public class BitCodeBook implements Serializable {
         KEY_EXISTS
     }
 
+    public enum DecodeStrategy {
+        BOOLEAN_YESNO
+    }
+
 }

@@ -12,6 +12,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.BitDecodeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.BitEncodeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
@@ -340,6 +341,13 @@ public class Node {
             BitCodeBook codeBook) {
         return new Node(builder.register(new BitEncodeOperation(opInput(identifier), groupbyFields, keyField,
                 valueField, encodedField, codeBook)), builder);
+    }
+
+    public Node bieDecode(String encodedField, String[] decodeFields, BitCodeBook codeBook,
+            BitCodeBook.DecodeStrategy decodeStrategy) {
+        return new Node(builder.register(
+                new BitDecodeOperation(opInput(identifier), encodedField, decodeFields, codeBook, decodeStrategy)),
+                builder);
     }
 
     public Table getSourceSchema() {

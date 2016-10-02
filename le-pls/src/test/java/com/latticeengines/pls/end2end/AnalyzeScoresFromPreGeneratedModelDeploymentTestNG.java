@@ -23,8 +23,8 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
 
     private static final Log log  = LogFactory.getLog(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
 
-    private static final String TENANT_ID = "LETest1473667385248.LETest1473667385248.Production";
-    private static final String MODEL_ID = "ms__18ff920a-ece0-4016-af78-fc5de2a081b5-SelfServ";
+    private static final String TENANT_ID = "LETest1475376367072.LETest1475376367072.Production";
+    private static final String MODEL_ID = "ms__fda1cf4f-7a34-4f2d-90ed-9fabe2550280-SelfServ";
 
     private static final int NUM_RECORDS_TO_SCORE = 100;
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
