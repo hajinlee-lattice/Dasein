@@ -59,7 +59,13 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
             try {
                 dt = format.parse(date);
             } catch (ParseException e) {
-                e.printStackTrace();
+                format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+                try {
+                    dt = format.parse(date);
+                } catch (ParseException e1) {
+                    e.printStackTrace();
+                    e1.printStackTrace();
+                }
                 return null;
             }
         }
