@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.propdata.core"/>
 
@@ -13,8 +12,7 @@
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
-
-    <task:scheduler id="pdScheduler" pool-size="4" />
+    <import resource="classpath:common-threadpool-context.xml"/>
 
     <bean id="dataCloudVersionDao" class="com.latticeengines.propdata.core.dao.impl.DataCloudVersionDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>

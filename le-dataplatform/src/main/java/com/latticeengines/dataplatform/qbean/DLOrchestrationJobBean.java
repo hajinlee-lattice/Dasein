@@ -1,21 +1,18 @@
 package com.latticeengines.dataplatform.qbean;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.PostConstruct;
-
-import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -29,7 +26,9 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 @Component("dlOrchestrationQuartzJob")
 public class DLOrchestrationJobBean implements QuartzJobBean {
 
-    private AsyncTaskExecutor dlOrchestrationJobTaskExecutor;
+    @Autowired
+    @Qualifier("taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
@@ -105,24 +104,13 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
     @Value("${dataplatform.dlorchestrationjob.queue.capacity}")
     private int queueCapacity;
 
-    @PostConstruct
-    public void init() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setCorePoolSize(corePoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-        dlOrchestrationJobTaskExecutor = executor;
-    }
-
     @Override
     public Callable<Boolean> getCallable() {
         DLOrchestrationCallable.Builder builder = new DLOrchestrationCallable.Builder();
         builder.alertService(alertService)
                 .appTimeLineWebAppAddress(appTimeLineWebAppAddress)
                 .debugProcessorImpl(debugProcessorImpl)
-                .dlOrchestrationJobTaskExecutor(dlOrchestrationJobTaskExecutor)
+                .dlOrchestrationJobTaskExecutor(taskExecutor)
                 .featuresThreshold(featuresThreshold)
                 .metadataService(metadataService)
                 .modelCommandEntityMgr(modelCommandEntityMgr)

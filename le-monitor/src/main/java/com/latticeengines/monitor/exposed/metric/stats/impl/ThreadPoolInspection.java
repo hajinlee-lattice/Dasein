@@ -13,7 +13,7 @@ import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 public class ThreadPoolInspection extends AbstractIntegerInspection implements Inspection {
 
     @Autowired
-    @Qualifier("monitorScheduler")
+    @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired

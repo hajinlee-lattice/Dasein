@@ -31,22 +31,4 @@
 
     <mvc:annotation-driven/>
 
-    <bean id="deleteModelThreadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-        <property name="corePoolSize" value="${pls.modeldeletion.core.pool.size}" />
-        <property name="maxPoolSize" value="${pls.modeldeletion.max.pool.size}" />
-        <property name="queueCapacity" value="${pls.modeldeletion.queue.capacity}" />
-        <property name="rejectedExecutionHandler">
-            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
-        </property>
-    </bean>
-
-    <bean id="modelSummaryDownloadExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-        <property name="corePoolSize" value="${pls.downloader.core.pool.size}" />
-        <property name="maxPoolSize" value="${pls.downloader.max.pool.size}" />
-        <property name="queueCapacity" value="${pls.downloader.queue.capacity}" />
-        <property name="rejectedExecutionHandler">
-            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
-        </property>
-    </bean>
-
 </beans>

@@ -24,7 +24,7 @@ public class StatsServiceImpl implements StatsService {
     private MetricService metricService;
 
     @Autowired
-    @Qualifier("monitorScheduler")
+    @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Override

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchFetcher;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 @Component("realTimeMatchFetcher")
 public class RealTimeMatchFetcher implements MatchFetcher {
@@ -33,7 +34,7 @@ public class RealTimeMatchFetcher implements MatchFetcher {
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
     private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE = 10;
-    private static final Long GROUPING_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+    private static final Long GROUPING_TIMEOUT = 100L;
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -50,7 +51,7 @@ public class RealTimeMatchFetcher implements MatchFetcher {
     private boolean enableFetchers;
 
     @Autowired
-    @Qualifier("pdScheduler")
+    @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Autowired
@@ -146,24 +147,33 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                 try {
                     fetcherActivity.put(name, System.currentTimeMillis());
                     groupDataCloudVersion = null;
+                    Long startGrouping = System.currentTimeMillis();
+
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
                         int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
                         int inGroup = 0;
-                        Long startGrouping = System.currentTimeMillis();
 
                         while (inGroup < thisGroupSize && !queue.isEmpty()
                                 && System.currentTimeMillis() - startGrouping < GROUPING_TIMEOUT) {
                             try {
                                 MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
-                                    if (StringUtils.isEmpty(groupDataCloudVersion)) {
-                                        groupDataCloudVersion = matchContext.getInput().getDataCloudVersion();
+                                    String version = matchContext.getInput().getDataCloudVersion();
+                                    if (StringUtils.isEmpty(version)) {
+                                        version = MatchInput.DEFAULT_DATACLOUD_VERSION;
                                     }
-                                    if (matchContext.getInput().getDataCloudVersion().equals(groupDataCloudVersion)) {
+                                    if (StringUtils.isEmpty(groupDataCloudVersion)) {
+                                        groupDataCloudVersion = version;
+                                    }
+                                    if (version.equals(groupDataCloudVersion)) {
                                         matchContextList.add(matchContext);
                                         inGroup += matchContext.getInput().getData().size();
                                     } else {
+                                        log.info("Found a match context with a version, "
+                                                + matchContext.getInput().getDataCloudVersion()
+                                                + " different from that in current group, " + groupDataCloudVersion
+                                                + ". Putting it back to the queue");
                                         queue.add(matchContext);
                                     }
                                 }
@@ -175,6 +185,8 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                         if (matchContextList.size() == 1) {
                             MatchContext matchContext = fetchSync(matchContextList.get(0));
                             map.putIfAbsent(matchContext.getOutput().getRootOperationUID(), matchContext);
+                            log.debug("Put the result for " + matchContext.getOutput().getRootOperationUID()
+                                    + " back into concurrent map.");
                         } else {
                             fetchMultipleContexts(matchContextList);
                         }
@@ -199,6 +211,11 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                     MatchContext mergedContext = dbHelper.mergeContexts(matchContextList, groupDataCloudVersion);
                     mergedContext = dbHelper.fetch(mergedContext);
                     dbHelper.splitContext(mergedContext, matchContextList, map);
+                    for (MatchContext context : matchContextList) {
+                        String rootUid = context.getOutput().getRootOperationUID();
+                        map.putIfAbsent(rootUid, context);
+                        log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);
+                    }
                 }
             } catch (Exception e) {
                 log.error("Failed to fetch multi-context match input.", e);
@@ -212,7 +229,9 @@ public class RealTimeMatchFetcher implements MatchFetcher {
         List<String> rootUids = new ArrayList<>(matchContexts.size());
 
         if (enableFetchers) {
+            log.info("Enqueueing " + matchContexts.size() + " match contexts");
             queue.addAll(matchContexts);
+            log.info("Enqueued " + matchContexts.size() + " match contexts");
             for (MatchContext context : matchContexts) {
                 rootUids.add(context.getOutput().getRootOperationUID());
             }
@@ -243,13 +262,8 @@ public class RealTimeMatchFetcher implements MatchFetcher {
 
             for (String rootUid : rootUids) {
                 MatchContext storedResult = intermediateResults.get(rootUid);
-
-                if (storedResult == null) {
-                    log.debug("Check for " + rootUid);
-                }
-
                 if (storedResult == null && map.containsKey(rootUid)) {
-                    log.debug(foundResultCount + ", \nFound fetch result for RootOperationUID=" + rootUid);
+                    log.debug(foundResultCount + ": Found fetch result for RootOperationUID=" + rootUid);
                     intermediateResults.put(rootUid, map.remove(rootUid));
                     foundResultCount++;
 

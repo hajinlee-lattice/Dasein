@@ -43,6 +43,8 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
             return Collections.emptyList();
         }
 
+        log.info("Enter executeBulk for " + matchContexts.size() + " match contexts.");
+
         MatchInput input = matchContexts.get(0).getInput();
         if (input == null) {
             throw new NullPointerException("Cannot find a MatchInput in MatchContext");

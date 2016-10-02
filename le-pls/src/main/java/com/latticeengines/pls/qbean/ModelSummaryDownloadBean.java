@@ -1,20 +1,17 @@
 package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.annotation.PostConstruct;
-
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
-import com.latticeengines.pls.mbean.TimeStampContainer;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.impl.FeatureImportanceParser;
 import com.latticeengines.pls.service.impl.ModelSummaryDownloadCallable;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
@@ -26,8 +23,6 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
-
-    private AsyncTaskExecutor modelSummaryDownloadExecutor;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -65,16 +60,9 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
     @Value("${pls.downloader.partial.count:20}")
     private int maxPartialDownloadCount;
 
-    @PostConstruct
-    public void init() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setCorePoolSize(corePoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-        modelSummaryDownloadExecutor = executor;
-    }
+    @Autowired
+    @Qualifier("taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Override
     public Callable<Boolean> getCallable() {
@@ -85,7 +73,7 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser)
                 .featureImportanceParser(featureImportanceParser)
-                .modelSummaryDownloadExecutor(modelSummaryDownloadExecutor)
+                .modelSummaryDownloadExecutor(taskExecutor)
                 .timeStampContainer(timeStampContainer)
                 .modelSummaryDownloadFlagEntityMgr(modelSummaryDownloadFlagEntityMgr)
                 .fullDownloadInterval(fullDownloadInterval)

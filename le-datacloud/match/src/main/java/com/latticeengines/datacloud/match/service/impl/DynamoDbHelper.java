@@ -115,9 +115,6 @@ public class DynamoDbHelper implements DbHelper {
                 accountsInOrder.add(allAccounts.get(id));
             }
             context.setMatchedAccounts(accountsInOrder);
-            String rootUid = context.getOutput().getRootOperationUID();
-            contextRepo.putIfAbsent(rootUid, context);
-            log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);
         }
     }
 

@@ -6,7 +6,7 @@
        http://www.springframework.org/schema/task
        http://www.springframework.org/schema/task/spring-task.xsd">
 
-    <task:scheduler id="monitorScheduler" pool-size="2"/>
+    <import resource="classpath:common-threadpool-context.xml" />
 
     <task:executor id="monitorExecutor"
                    pool-size="1-4"

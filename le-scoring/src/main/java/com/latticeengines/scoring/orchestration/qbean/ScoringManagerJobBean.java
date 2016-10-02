@@ -64,6 +64,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     @PostConstruct
     public void init() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setBeanName("scoringManagerJobQuartz");
         executor.setMaxPoolSize(maxPoolSize);
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);

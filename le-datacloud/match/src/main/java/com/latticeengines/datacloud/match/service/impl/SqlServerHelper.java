@@ -28,10 +28,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
-import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -52,10 +50,6 @@ public class SqlServerHelper implements DbHelper {
     @Autowired
     @Qualifier("columnSelectionService")
     private ColumnSelectionService columnSelectionService;
-
-    @Autowired
-    @Qualifier("externalColumnService")
-    private MetadataColumnService<ExternalColumn> externalColumnService;
 
     @PostConstruct
     private void postConstruct() {
@@ -194,9 +188,6 @@ public class SqlServerHelper implements DbHelper {
         List<Map<String, Object>> resultSet = mergedContext.getResultSet();
         for (MatchContext context : matchContextList) {
             context.setResultSet(resultSet);
-            String rootUid = context.getOutput().getRootOperationUID();
-            contextRepo.putIfAbsent(rootUid, context);
-            log.debug("Put match context to concurrent map for RootOperationUID=" + rootUid);
         }
     }
 

@@ -41,7 +41,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private ConcurrentMap<Predefined, ColumnSelection> predefinedSelectionMap = new ConcurrentHashMap<>();
 
     @Autowired
-    @Qualifier("pdScheduler")
+    @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

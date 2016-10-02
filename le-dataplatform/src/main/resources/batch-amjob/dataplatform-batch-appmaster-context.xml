@@ -18,9 +18,7 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="taskScheduler"
-        class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
-    <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+    <import resource="classpath:common-threadpool-context.xml"/>
     <bean id="yarnEventPublisher"
         class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
     <bean class="org.springframework.yarn.event.LoggingListener">
