@@ -426,7 +426,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
                 data, ModelSummary.class);
         assertNotNull(newSummary);
         ModelSummaryProvenance provenance = newSummary.getModelSummaryConfiguration();
-        assertEquals(provenance.getBag().size(), 3);
+        assertEquals(provenance.getBag().size(), 4);
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
