@@ -34,7 +34,6 @@ public class RealTimeMatchFetcher implements MatchFetcher {
     private static final Log log = LogFactory.getLog(RealTimeMatchFetcher.class);
     private static final Integer QUEUE_SIZE = 20000;
     private static final Integer TIMEOUT_MINUTE = 10;
-    private static final Long GROUPING_TIMEOUT = 100L;
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
@@ -147,15 +146,12 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                 try {
                     fetcherActivity.put(name, System.currentTimeMillis());
                     groupDataCloudVersion = null;
-                    Long startGrouping = System.currentTimeMillis();
 
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
                         int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
                         int inGroup = 0;
-
-                        while (inGroup < thisGroupSize && !queue.isEmpty()
-                                && System.currentTimeMillis() - startGrouping < GROUPING_TIMEOUT) {
+                        while (inGroup < thisGroupSize && !queue.isEmpty()) {
                             try {
                                 MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
@@ -175,6 +171,7 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                                                 + " different from that in current group, " + groupDataCloudVersion
                                                 + ". Putting it back to the queue");
                                         queue.add(matchContext);
+                                        break;
                                     }
                                 }
                             } catch (InterruptedException e) {
@@ -210,7 +207,7 @@ public class RealTimeMatchFetcher implements MatchFetcher {
                     DbHelper dbHelper = beanDispatcher.getDbHelper(groupDataCloudVersion);
                     MatchContext mergedContext = dbHelper.mergeContexts(matchContextList, groupDataCloudVersion);
                     mergedContext = dbHelper.fetch(mergedContext);
-                    dbHelper.splitContext(mergedContext, matchContextList, map);
+                    dbHelper.splitContext(mergedContext, matchContextList);
                     for (MatchContext context : matchContextList) {
                         String rootUid = context.getOutput().getRootOperationUID();
                         map.putIfAbsent(rootUid, context);

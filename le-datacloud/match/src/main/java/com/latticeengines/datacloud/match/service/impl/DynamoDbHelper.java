@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.MutableTriple;
@@ -102,8 +101,7 @@ public class DynamoDbHelper implements DbHelper {
 
 
     @Override
-    public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList,
-                             ConcurrentMap<String, MatchContext> contextRepo) {
+    public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
         Map<String, LatticeAccount> allAccounts = new HashMap<>();
         for (LatticeAccount account: mergedContext.getMatchedAccounts()) {
             allAccounts.put(account.getId(), account);

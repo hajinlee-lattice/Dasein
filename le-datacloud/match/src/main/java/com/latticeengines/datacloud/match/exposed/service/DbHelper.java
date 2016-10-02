@@ -18,7 +18,6 @@ public interface DbHelper extends HasDataCloudVersion {
 
     MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion);
 
-    void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList,
-            ConcurrentMap<String, MatchContext> contextRepo);
+    void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList);
 
 }

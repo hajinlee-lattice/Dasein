@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -183,8 +182,7 @@ public class SqlServerHelper implements DbHelper {
     }
 
     @Override
-    public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList,
-            ConcurrentMap<String, MatchContext> contextRepo) {
+    public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
         List<Map<String, Object>> resultSet = mergedContext.getResultSet();
         for (MatchContext context : matchContextList) {
             context.setResultSet(resultSet);

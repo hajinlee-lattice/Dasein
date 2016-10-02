@@ -34,7 +34,7 @@ import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void getModels() {
         List<Model> models = getModelList();
         Assert.assertTrue(models.size() >= 1);
@@ -51,7 +51,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         return models;
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
         Fields fields = getFieldsForModel(modelId);
@@ -74,7 +74,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         return fields;
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void scoreRecord() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -85,7 +85,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void scoreDebugRecord() throws IOException {
         String url = apiHostPort + "/score/record/debug";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -99,7 +99,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         Assert.assertTrue(difference < 0.1);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void scoreOutOfRangeRecord() throws IOException {
         String url = apiHostPort + "/score/record/debug";
         URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
