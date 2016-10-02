@@ -1,15 +1,11 @@
 package com.latticeengines.scoring.orchestration.qbean;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -23,7 +19,8 @@ import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerCalla
 @Component("scoringManagerJob")
 public class ScoringManagerJobBean implements QuartzJobBean {
 
-    private AsyncTaskExecutor scoringProcessorExecutor;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
@@ -61,18 +58,6 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     @Value("${scoring.queue.capacity}")
     private int queueCapacity;
 
-    @PostConstruct
-    public void init() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setBeanName("scoringManagerJobQuartz");
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setCorePoolSize(corePoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-        scoringProcessorExecutor = executor;
-    }
-
     @Override
     public Callable<Boolean> getCallable() {
         ScoringManagerCallable.Builder builder = new ScoringManagerCallable.Builder();
@@ -83,7 +68,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
                 .scoringCommandEntityMgr(scoringCommandEntityMgr)
                 .scoringCommandResultEntityMgr(scoringCommandResultEntityMgr)
                 .scoringJdbcTemplate(scoringJdbcTemplate)
-                .scoringProcessorExecutor(scoringProcessorExecutor)
+                .scoringProcessorExecutor(taskExecutor)
                 .yarnConfiguration(yarnConfiguration)
                 .applicationContext(appCtx);
 
