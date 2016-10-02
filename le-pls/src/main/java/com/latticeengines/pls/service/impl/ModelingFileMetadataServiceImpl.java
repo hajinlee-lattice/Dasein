@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {
-    private static final Logger log = Logger.getLogger(ModelingFileMetadataServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ModelingFileMetadataServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;
