@@ -1,6 +1,9 @@
 package com.latticeengines.pls.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +56,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
-                null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
+                null, null, false, null, null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -73,8 +76,8 @@ public class EnrichmentResource {
             @ApiParam(value = "Category", required = true) //
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, category, null, false,
-                null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
+                category, null, false, null, null);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -91,7 +94,8 @@ public class EnrichmentResource {
             @ApiParam(value = "Update lead enrichment selection", required = true) //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request));
+        selectedAttrService.save(attributes, tenant,
+                getLeadEnrichmentPremiumAttributesLimitation(request));
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //
@@ -124,9 +128,10 @@ public class EnrichmentResource {
             Integer max //
     ) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
+                subcategory, onlySelectedAttributes, offset, max);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/count", //
@@ -153,9 +158,10 @@ public class EnrichmentResource {
             Boolean onlySelectedAttributes//
     ) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
+                : Category.fromName(category));
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter,
+                categoryEnum, subcategory, onlySelectedAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH
@@ -168,9 +174,13 @@ public class EnrichmentResource {
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        String fileName = onlySelectedAttributes != null && onlySelectedAttributes ? "selectedEnrichmentAttributes.csv" : "enrichmentAttributes.csv";
-        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName, tenant,
-                onlySelectedAttributes);
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        String dateString = dateFormat.format(new Date());
+        String fileName = onlySelectedAttributes != null && onlySelectedAttributes
+                ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
+                : String.format("enrichmentAttributes_%s.csv", dateString);
+        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName,
+                tenant, onlySelectedAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/premiumattributeslimitation", //
@@ -178,7 +188,8 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(
+            HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
@@ -203,8 +214,8 @@ public class EnrichmentResource {
         return selectedAttrService.getSelectedAttributePremiumCount(tenant);
     }
 
-    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
-            Category category) {
+    private boolean containsAtleastOneAttributeForCategory(
+            List<LeadEnrichmentAttribute> allAttributes, Category category) {
         if (!CollectionUtils.isEmpty(allAttributes)) {
             for (LeadEnrichmentAttribute attr : allAttributes) {
                 if (category.toString().equals(attr.getCategory())) {
