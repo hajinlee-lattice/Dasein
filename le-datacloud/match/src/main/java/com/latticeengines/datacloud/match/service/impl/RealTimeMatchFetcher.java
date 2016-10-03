@@ -84,6 +84,7 @@ public class RealTimeMatchFetcher implements MatchFetcher {
         }, TimeUnit.SECONDS.toMillis(10));
 
         fetchersInitiated = true;
+        enableFetchers = true;
     }
 
     @Override

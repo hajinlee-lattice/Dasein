@@ -1,6 +1,9 @@
 package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -12,8 +15,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+
+
 
 @Entity
 @Access(AccessType.FIELD)
@@ -59,6 +67,12 @@ public class SourceColumn implements HasPid, Serializable {
 
     @Column(name = "Groups", nullable = false)
     private String groups = "";
+
+    @Column(name = "Categories", length = 1000)
+    private String categories;
+
+    @Transient
+    private List<String> categoryList;
 
     public SourceColumn() {
         super();
@@ -158,6 +172,27 @@ public class SourceColumn implements HasPid, Serializable {
 
     public void setGroups(String groups) {
         this.groups = groups == null ? "" : groups;
+    }
+
+    private String getCategories() {
+        return categories;
+    }
+
+    private void setCategories(String categories) {
+        this.categories = categories;
+        getCategoryList();
+    }
+
+    public List<String> getCategoryList() {
+        if (categoryList == null) {
+            List<String> catList = new ArrayList<>();
+            String catStr = getCategories();
+            if (StringUtils.isNotEmpty(catStr)) {
+                catList = Arrays.asList(catStr.split(","));
+            }
+            this.categoryList = catList;
+        }
+        return this.categoryList;
     }
 
     @Override
