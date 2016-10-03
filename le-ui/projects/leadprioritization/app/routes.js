@@ -412,7 +412,7 @@ angular
                             console.log($scope.latticeIsEnabled);
 
                             if ($scope.latticeIsEnabled != true) {
-                                $state.go('home.marketosettings.sureshot');
+                                $state.go('home.marketosettings.credentials');
                             }
 
                         });
@@ -443,20 +443,9 @@ angular
                     controller: function($scope, $state) {
                         $scope.state = $state.current.name;
                     },
-                    /*
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                    -- ben::bookmark
-                    */
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                /*
-                    controller: function(urls) {
-                        $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
-                    },
-                    */
                     resolve: {
                         MarketoCredentials: function($q, MarketoService) {
                             var deferred = $q.defer();
@@ -475,8 +464,8 @@ angular
                 }   
             }
         })
-        .state('home.marketosettings.sureshot', {
-            url: '/sureshot',
+        .state('home.marketosettings.credentials', {
+            url: '/credentials',
             params: {
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Settings'
