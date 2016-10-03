@@ -12,7 +12,26 @@ module.exports = function (grunt) {
         // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
         env: {
             dev: {
-                NODE_APPS: 'leui,leadmin',
+                NODE_APPS: 'leui',
+                NODE_ENV: 'development',
+                API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://10.41.0.13:8081',
+                API_ADMIN_URL: 'https://10.41.0.25:8085',
+                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
+                API_MCSVC_URL: 'https://10.41.0.25:8080',
+                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
+            dev_admin: {
+                NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
                 API_URL: 'https://testapp.lattice-engines.com',
                 //API_URL: 'https://10.41.0.13:8081',

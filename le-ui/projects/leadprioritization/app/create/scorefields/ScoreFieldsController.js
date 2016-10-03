@@ -7,22 +7,17 @@ angular
     var vm = this;
 
     angular.extend(vm, {
-        FormValidated: true,
         ResourceUtility: ResourceUtility,
         csvFileName: $stateParams.csvFileName,
-        mappingOptions: [
-            { id: 0, name: "Use as Custom Predictor" },
-            { id: 1, name: "Map to Standard Field" },
-            { id: 2, name: "Ignore this field" }
-        ],
         ignoredFields: FieldDocument.ignoredFields,
         fieldMappings: FieldDocument.fieldMappings,
         fieldsMap: {},
-        RequiredFields: ['id','email','event'],
+        RequiredFields: ['id','email'],
         FileHeaders: [],
         UserFields: [],
         MappedFields: [],
         AvailableFields: [],
+        FormValidated: true,
         initialized: false,
         modelId: $stateParams.modelId
     });
@@ -42,46 +37,6 @@ angular
         });
 
         console.log('scorefields', vm);
-    }
-
-    vm.changeMappingOption = function(mapping, selectedOption) {
-        mapping.mappedToLatticeField = mapping.mappedToLatticeField || false;
-        delete mapping.ignored;
-
-        switch (selectedOption.id) {
-            case 0: // custom user mapping
-                mapping.mappedField = mapping.mappedField || mapping.userField;
-                break;
-            case 1: // map to lattice cloud
-                mapping.mappedField = vm.UnmappedFieldsMap[mapping.mappedField] 
-                    ? mapping.mappedField 
-                    : '';
-
-                mapping.mappedToLatticeField = true;
-                break;
-            case 2: // ignore this field
-                mapping.ignored = true; 
-                break;
-        }
-
-        vm.refreshLatticeFields();
-
-        setTimeout(function() {
-            vm.validateForm();
-            $scope.$digest();
-        },1);
-    }
-
-    vm.changeLatticeField = function(mapping) {
-        mapping.mappedToLatticeField = true;
-        //mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField].fieldType;
-        
-        vm.refreshLatticeFields();
-
-        setTimeout(function() {
-            //vm.validateForm();
-            $scope.$digest();
-        },1);
     }
 
     vm.refreshLatticeFields = function() {
@@ -104,13 +59,27 @@ angular
         }
         
         vm.MappedFields.forEach(function(field, index) {
-            if (vm.ignoredFields.indexOf(field) < 0 && vm.UserFields.indexOf(field) < 0 && vm.AvailableFields.indexOf(field) < 0) {
+            if (vm.ignoredFields.indexOf(field) < 0 && 
+                vm.UserFields.indexOf(field) < 0 && 
+                vm.AvailableFields.indexOf(field) < 0) {
                 vm.AvailableFields.push(field);
             }
         });
     }
 
-    vm.resetClicked = function($event) {
+    vm.changeLatticeField = function(mapping, field) {
+        console.log('change', mapping.userField, field, mapping);
+        //mapping.userField = field;
+
+        vm.refreshLatticeFields();
+
+        setTimeout(function() {
+            vm.validateForm();
+            $scope.$digest();
+        },1);
+    }
+
+    vm.clickReset = function($event) {
         /*
         ImportStore.ResetAdvancedSettings();
         $state.go('home.models.import');
@@ -125,39 +94,27 @@ angular
         ShowSpinner('Saving Field Mappings...');
 
         // build ignoredFields list from temp 'ignored' fieldMapping property
-        /*
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.ignored) {
-                vm.ignoredFields.push(fieldMapping.userField);
-
-                delete fieldMapping.ignored;
-            }
-        });
-        */
-
+        
+        FieldDocument.fieldMappings = vm.fieldMappings.filter(function(a) { return a.userField });
+        
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Executing Modeling Job...');
 
+            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName);
+            /*
             ImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {
                     setTimeout(function() {
-                        ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName);
                     }, 1);
                 }
             });
+            */
         });
     }
 
     vm.validateMappingSelect = function(mapping) {
         var name = 'mapping_lattice_field_select_';
 
-        vm.validateIsDuplicate(name, mapping);
-    }
-
-    vm.validateMappingInput = function(mapping) {
-        var name = 'mapping_custom_field_input_';
-
-        vm.validateIsReserved(name, mapping);
         vm.validateIsDuplicate(name, mapping);
     }
 
@@ -196,22 +153,16 @@ angular
                 vm.FormValidated = false;
             }
 
-            if (fieldMapping.mappedToLatticeField) {
-                vm.validateMappingSelect(fieldMapping);
-            } else {
-                vm.validateMappingInput(fieldMapping);
-            }
+            vm.validateMappingSelect(fieldMapping);
         });
 
         // make sure all lattice required fields are mapped
         vm.RequiredFields.forEach(function(requiredField, index) {
-            if (!vm.fieldMappingsMapped[requiredField]) {
+            if (!vm.MappedFields.indexOf(requiredField) < 0) {
                 vm.FormValidated = false;
             }
         });
     }
 
-    //$timeout(function() {
-        vm.init();
-    //}, 1);
+    vm.init();
 });

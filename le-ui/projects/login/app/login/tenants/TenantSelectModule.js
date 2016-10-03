@@ -51,7 +51,9 @@ angular.module('login.tenants', [
 
         vm.visible = true;
         
-        $('[autofocus]').focus();
+        setTimeout(function() {
+            $('[autofocus]').focus();
+        },100);
     }
 
 

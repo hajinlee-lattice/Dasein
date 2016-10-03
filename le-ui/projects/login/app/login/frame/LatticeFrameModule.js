@@ -14,7 +14,6 @@ angular.module('login.frame', [
     $scope.login = LoginStore.login;
     $scope.state = $state;
 
-    console.log('timedout:', SessionTimeoutUtility.hasSessionTimedOut(), LoginDocument.UserName);
     if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
         return LoginService.Logout();
     } else {

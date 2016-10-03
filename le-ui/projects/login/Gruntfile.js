@@ -86,12 +86,14 @@ module.exports = function (grunt) {
             },
             dist:    {
                 files: {
-                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/assets/styles/main.scss'
+                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/app/app.scss'
                 }
             },
             dev:     {
                 files: {
-                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
+                    '<%= pls.assets %>/css/production.css': [
+                        '<%= pls.app %>/app.scss'
+                    ]
                 }
             }
         },
@@ -324,8 +326,8 @@ module.exports = function (grunt) {
 
     var sentryText = 'Watches for changes in any javascript file, and automatically re-runs linting and karma unit tests. If your computer can handle the strain, this should be running during active develpment';
     grunt.registerTask('sentry', sentryText, [
-        'nodemon:dev',
-        'watch:scripts',
+        //'nodemon:dev',
+        //'watch:scripts',
         'watch:css'
     ]);
 };
