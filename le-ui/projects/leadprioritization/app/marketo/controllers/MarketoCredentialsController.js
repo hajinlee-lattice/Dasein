@@ -20,8 +20,8 @@ angular.module('lp.marketo', [
 		restClientSecret: '',
 		state: 'create',
 		saveInProgress: false,
-    	addUserErrorMessage: "",
-    	showAddUserError: false
+    	addCredentialErrorMessage: "",
+    	showAddCredentialError: false
     });
 
 	vm.createCredentialClicked = function() {
@@ -40,8 +40,15 @@ angular.module('lp.marketo', [
 		};
 
 		MarketoService.CreateMarketoCredential(credential).then(function(result){
-			if (result.success) {
+
+			var errorMsg = result.errorMsg;
+
+			if (result.Success) {
 				$state.go('home.marketosettings.apikey');
+			} else {
+				vm.saveInProgress = false;
+				vm.addCredentialErrorMessage = errorMsg;
+				vm.showAddCredentialError = true;
 			}
 		});
 
@@ -85,8 +92,15 @@ angular.module('lp.marketo', [
 		};
 
 		MarketoService.UpdateMarketoCredential(vm.credentialId, credential).then(function(result) {
-			if (result.success) {
+			
+			var errorMsg = result.errorMsg;
+
+			if (result.Success) {
 				$state.go('home.marketosettings.apikey');
+			} else {
+				vm.saveInProgress = false;
+				vm.addCredentialErrorMessage = errorMsg;
+				vm.showAddCredentialError = true;
 			}
 		});
 	}
