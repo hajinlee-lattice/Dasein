@@ -3,34 +3,45 @@ package com.latticeengines.domain.exposed.scoringapi;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dmg.pmml.DataType;
+
 public enum FieldType {
-    BOOLEAN(Boolean.class, "boolean"), //
-    INTEGER(Long.class, "int"), //
+    BOOLEAN(Boolean.class, new DataType[] { DataType.BOOLEAN }, "boolean"), //
+    INTEGER(Long.class, new DataType[] { DataType.INTEGER }, "int"), //
     // Typical stored as a double precision value.
-    FLOAT(Double.class, "float", "double"), //
-    LONG(Long.class, "long"), //
+    FLOAT(Double.class, new DataType[] { DataType.FLOAT, DataType.DOUBLE }, "float", "double"), //
+    LONG(Long.class, new DataType[] { DataType.INTEGER }, "long"), //
     // Encoded with UTF-8.
-    STRING(String.class, "string");
+    STRING(String.class, new DataType[] { DataType.STRING }, "string");
 
     private static Map<Class<?>, FieldType> javaToFieldTypeMap = new HashMap<>();
     private static Map<String, FieldType> avroToFieldTypeMap = new HashMap<>();
+    private static Map<DataType, FieldType> pmmlTypeToFieldTypeMap = new HashMap<>();
 
     static {
         for (FieldType fieldType : FieldType.values()) {
             javaToFieldTypeMap.put(fieldType.type(), fieldType);
+            
+            for (DataType pmmlType : fieldType.pmmlTypes) {
+                pmmlTypeToFieldTypeMap.put(pmmlType, fieldType);
+            }
+            
             for (String avroType : fieldType.avroTypes) {
                 avroToFieldTypeMap.put(avroType, fieldType);
             }
+            
         }
     }
 
-    private FieldType(Class<?> type, String... avroTypes) {
+    private FieldType(Class<?> type, DataType[] pmmlTypes, String... avroTypes) {
         this.type = type;
+        this.pmmlTypes = pmmlTypes;
         this.avroTypes = avroTypes;
     }
 
     private final Class<?> type;
     private final String[] avroTypes;
+    private final DataType[] pmmlTypes;
 
     public Class<?> type() {
         return type;
@@ -39,6 +50,10 @@ public enum FieldType {
     public String[] avroTypes() {
         return avroTypes;
     }
+    
+    public DataType[] pmmlTypes() {
+        return pmmlTypes;
+    }
 
     public static FieldType getFromJavaType(Class<?> javaType) {
         return javaToFieldTypeMap.get(javaType);
@@ -46,6 +61,10 @@ public enum FieldType {
 
     public static FieldType getFromAvroType(String avroType) {
         return avroToFieldTypeMap.get(avroType);
+    }
+    
+    public static FieldType getFromPmmlType(DataType pmmlType) {
+        return pmmlTypeToFieldTypeMap.get(pmmlType);
     }
 
     public static Object parse(FieldType fieldtype, Object rawvalue) {
