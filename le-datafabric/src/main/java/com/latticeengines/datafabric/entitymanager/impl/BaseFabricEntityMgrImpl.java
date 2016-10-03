@@ -23,7 +23,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,8 +190,9 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     @Override
     public List<T> batchFindByKey(List<String> ids) {
-        if (disabled)
+        if (disabled) {
             return null;
+        }
 
         List<String> uniqueIds = dedupIds(ids);
         Map<String, GenericRecord> records = new HashMap<>();
@@ -202,7 +203,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
         List<T> entities = new ArrayList<T>();
         for (String id : ids) {
-            GenericRecord record = (id == null) ? null : records.get(id);
+            GenericRecord record = StringUtils.isEmpty(id) ? null : records.get(id);
             entities.add((record == null) ? null : recordToEntity(record));
         }
         return entities;
@@ -329,7 +330,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                 uniqueIds.add(id);
             }
         }
-        return new ArrayList<String>(uniqueIds);
+        return new ArrayList<>(uniqueIds);
     }
 
     public class BaseFabricEntityStreamProc implements FabricStreamProc {

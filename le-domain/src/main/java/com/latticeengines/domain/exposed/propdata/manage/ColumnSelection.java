@@ -89,6 +89,15 @@ public class ColumnSelection {
         return list;
     }
 
+    @JsonIgnore
+    public List<String> getColumnIds() {
+        List<String> list = new ArrayList<>();
+        for (Column column : columns) {
+            list.add(column.getExternalColumnId());
+        }
+        return list;
+    }
+
     public static ColumnSelection combine(Collection<ColumnSelection> selectionCollection) {
         Set<Column> columns = new HashSet<>();
         for (ColumnSelection selection : selectionCollection) {

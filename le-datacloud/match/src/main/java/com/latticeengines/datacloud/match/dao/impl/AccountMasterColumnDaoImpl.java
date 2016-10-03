@@ -23,12 +23,21 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
     @Override
     public List<AccountMasterColumn> findByTag(String tag) {
         Session session = getSessionFactory().getCurrentSession();
-        Class<AccountMasterColumn> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where Groups like :tag", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where groups like :tag", getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
         return query.list();
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AccountMasterColumn> findAllByVersion(String version) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("from %s where dataCloudVersion = :version", getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("version", version);
+        return query.list();
     }
 
 }

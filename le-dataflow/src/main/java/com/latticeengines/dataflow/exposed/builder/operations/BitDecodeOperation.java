@@ -17,12 +17,13 @@ public class BitDecodeOperation extends Operation {
 
     private final BitCodeBook.DecodeStrategy decodeStrategy;
 
-    public BitDecodeOperation(Input prior, String encodedField, String[] decodeFields, BitCodeBook codeBook,
-            BitCodeBook.DecodeStrategy decodeStrategy) {
-        this.decodeStrategy = decodeStrategy;
+    public BitDecodeOperation(Input prior, String encodedField, String[] decodeFields, BitCodeBook codeBook) {
+        this.decodeStrategy = codeBook.getDecodeStrategy();
+        if (this.decodeStrategy == null) {
+            throw new IllegalArgumentException("DecodeStrategy cannot be null for a bit decode opertion.");
+        }
         this.metadata = constructMetadata(prior.metadata, decodeFields);
-        Function<?> function = new BitDecodeFunction(new Fields(decodeFields), encodedField, decodeFields,
-                decodeStrategy, codeBook);
+        Function<?> function = new BitDecodeFunction(new Fields(decodeFields), encodedField, decodeFields, codeBook);
         this.pipe = new Each(prior.pipe, new Fields(encodedField), function, Fields.ALL);
     }
 

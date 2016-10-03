@@ -6,8 +6,10 @@ public interface MetadataColumnEntityMgr<E> {
 
     List<E> findByTag(String tag);
 
-    List<E> findAll();
+    List<E> findAll(String dataCloudVersion);
 
     E findById(String columnId);
+
+
 
 }

@@ -8,17 +8,22 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.newrelic.api.agent.Trace;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
+
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
 
     @PostConstruct
     private void postConstruct() {
@@ -28,6 +33,11 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     @Override
     public List<E> findByColumnSelection(Predefined selectName) {
         return getMetadataColumnEntityMgr().findByTag(selectName.getName());
+    }
+
+    @Override
+    public List<E> scan(String dataCloudVersion) {
+        return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
     }
 
     @Override
@@ -71,12 +81,12 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         }
     }
 
-    @Override
-    public void loadCache() {
-        log.info("Start loading black and white column caches.");
+    private void loadCache() {
+        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+        log.info("Start loading black and white column caches for version " + latestVersion);
         getBlackColumnCache().clear();
         getWhiteColumnCache().clear();
-        List<E> columns = getMetadataColumnEntityMgr().findAll();
+        List<E> columns = getMetadataColumnEntityMgr().findAll(latestVersion);
         synchronized (getWhiteColumnCache()) {
             for (E column : columns) {
                 getWhiteColumnCache().put(column.getColumnId(), column);

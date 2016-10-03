@@ -22,7 +22,7 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ExternalColumn> findByTag(String tag) {
-        List<ExternalColumn> columns = getExternalColumnDao().findByTag(tag);
+        List<ExternalColumn> columns = externalColumnDao.findByTag(tag);
         List<ExternalColumn> toReturn = new ArrayList<>();
         for (ExternalColumn column: columns) {
             if (column.getTagList().contains(tag)) {
@@ -32,20 +32,16 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
         return toReturn;
     }
 
-    protected ExternalColumnDao getExternalColumnDao() {
-        return externalColumnDao;
-    }
-
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ExternalColumn> findAll() {
-        return getExternalColumnDao().findAll();
+    public List<ExternalColumn> findAll(String dataCloudVersion) {
+        return externalColumnDao.findAll();
     }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ExternalColumn findById(String externalColumnId) {
-        return getExternalColumnDao().findByField("ExternalColumnID", externalColumnId);
+        return externalColumnDao.findByField("ExternalColumnID", externalColumnId);
     }
 
 }

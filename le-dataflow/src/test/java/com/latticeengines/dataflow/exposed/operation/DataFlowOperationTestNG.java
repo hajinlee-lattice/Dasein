@@ -668,7 +668,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource("Feature");
 
-                BitCodeBook codebook1 = new BitCodeBook(BitCodeBook.Algorithm.KEY_EXISTS);
+                BitCodeBook codebook1 = new BitCodeBook(BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
                 Map<String, Integer> bitPosMap1 = new HashMap<>();
                 bitPosMap1.put("f1", 0);
                 bitPosMap1.put("f2", 1);
@@ -676,7 +676,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 bitPosMap1.put("f4", 3);
                 codebook1.setBitsPosMap(bitPosMap1);
 
-                BitCodeBook codebook2 = new BitCodeBook(BitCodeBook.Algorithm.KEY_EXISTS);
+                BitCodeBook codebook2 = new BitCodeBook(BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
                 Map<String, Integer> bitPosMap2 = new HashMap<>();
                 bitPosMap2.put("g1", 3);
                 bitPosMap2.put("g2", 2);
@@ -684,8 +684,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 bitPosMap2.put("g4", 0);
                 codebook2.setBitsPosMap(bitPosMap2);
 
-                node = node.bitDecode("Feature", new String[]{ "f1", "f2", "f3", "f4" }, codebook1, BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
-                node = node.bitDecode("Feature", new String[]{ "g1", "g2", "g3", "g4" }, codebook2, BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
+                node = node.bitDecode("Feature", new String[]{ "f1", "f2", "f3", "f4" }, codebook1);
+                node = node.bitDecode("Feature", new String[]{ "g1", "g2", "g3", "g4" }, codebook2);
                 node = node.retain(new FieldList("Domain", "f1", "f2", "f3", "f4", "g1", "g2", "g3", "g4"));
                 return node;
             }

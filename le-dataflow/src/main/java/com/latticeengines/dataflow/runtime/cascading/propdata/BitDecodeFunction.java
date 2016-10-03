@@ -31,17 +31,17 @@ public class BitDecodeFunction extends BaseOperation implements Function {
     private final String encodedColumn;
     private int[] bitPositions;
     private Map<String, Integer> bitPositionIdx = new HashMap<>();
-    private final BitCodeBook.DecodeStrategy decodeStrategy;
     private String[] decodeFields;
 
     public BitDecodeFunction(Fields fieldDeclaration, String encodedColumn, String[] decodedFields,
-            BitCodeBook.DecodeStrategy decodeStrategy, BitCodeBook codeBook) {
+            BitCodeBook codeBook) {
         super(1, fieldDeclaration);
+        if (codeBook.getDecodeStrategy() == null) {
+            throw new IllegalArgumentException("Cannot find decode stragety in the code book.");
+        }
         this.codeBook = codeBook;
         this.encodedColumn = encodedColumn;
-        this.decodeStrategy = decodeStrategy;
         this.decodeFields = decodedFields;
-
         assignBitPos();
     }
 
@@ -57,8 +57,8 @@ public class BitDecodeFunction extends BaseOperation implements Function {
     }
 
     private void assignBitPos() {
-        switch (codeBook.getAlgorithm()) {
-        case KEY_EXISTS:
+        switch (codeBook.getDecodeStrategy()) {
+        case BOOLEAN_YESNO:
             assignSingleDigitBitPos();
             break;
         default:
@@ -104,17 +104,17 @@ public class BitDecodeFunction extends BaseOperation implements Function {
     }
 
     private Map<String, Object> translateBits(boolean[] bits) {
-        switch (decodeStrategy) {
-            case BOOLEAN_YESNO:
-                return translateBitsToYesNo(bits);
-            default:
-                throw new UnsupportedOperationException("Unsupported decode strategy " + decodeStrategy);
+        switch (codeBook.getDecodeStrategy()) {
+        case BOOLEAN_YESNO:
+            return translateBitsToYesNo(bits);
+        default:
+            throw new UnsupportedOperationException("Unsupported decode strategy " + codeBook.getDecodeStrategy());
         }
     }
 
     private Map<String, Object> translateBitsToYesNo(boolean[] bits) {
         Map<String, Object> valueMap = new HashMap<>();
-        for (String decodeField: decodeFields) {
+        for (String decodeField : decodeFields) {
             if (bitPositionIdx.containsKey(decodeField)) {
                 int idx = bitPositionIdx.get(decodeField);
                 boolean bit = bits[idx];

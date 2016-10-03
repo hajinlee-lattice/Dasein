@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,7 +50,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "AMColumnID", nullable = false, length = 64)
     private String amColumnId;
 
-    @Column(name = "DataCloudVersion", nullable = false, length = 100)
+    @Index(name = "IX_VERSION")
+    @Column(name = "DataCloudVersion", nullable = false, length = 50)
     private String dataCloudVersion;
 
     @Column(name = "DisplayName", nullable = false)

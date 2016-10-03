@@ -23,4 +23,6 @@ public interface BaseDao<T> {
     T findByKey(Class<T> entityClz, Long key);
 
     <F> T findByField(String fieldName, F value);
+
+    <F> List<T> findAllByField(String fieldName, F value);
 }

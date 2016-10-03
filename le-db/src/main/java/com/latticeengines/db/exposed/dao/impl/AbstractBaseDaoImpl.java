@@ -1,5 +1,6 @@
 package com.latticeengines.db.exposed.dao.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -94,6 +95,19 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
                     fieldValue.toString()));
         }
         return results.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F> List<T> findAllByField(String fieldName, F fieldValue) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("value", fieldValue);
+        List<T> results = query.list();
+        if (results.size() == 0) {
+            return Collections.emptyList();
+        }
+        return results;
     }
 
     @SuppressWarnings("unchecked")

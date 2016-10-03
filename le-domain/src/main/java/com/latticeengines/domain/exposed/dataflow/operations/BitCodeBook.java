@@ -4,14 +4,23 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 public class BitCodeBook implements Serializable {
 
     private static final long serialVersionUID = -7220566464433207501L;
-    private Map<String, Integer> bitsPosMap = new HashMap<>();
-    private final Algorithm algorithm;
+    private ImmutableMap<String, Integer> bitsPosMap;
+    private final Algorithm encodeAlgo;
+    private final DecodeStrategy decodeStrategy;
 
-    public BitCodeBook(Algorithm algorithm) {
-        this.algorithm = algorithm;
+    public BitCodeBook(Algorithm encodeAlgo) {
+        this.encodeAlgo = encodeAlgo;
+        this.decodeStrategy = null;
+    }
+
+    public BitCodeBook(DecodeStrategy decodeStrategy) {
+        this.decodeStrategy = decodeStrategy;
+        this.encodeAlgo = null;
     }
 
     public void setBitsPosMap(Map<String, Integer> bitsPosMap) {
@@ -21,11 +30,15 @@ public class BitCodeBook implements Serializable {
                 copy.put(entry.getKey(), entry.getValue());
             }
         }
-        this.bitsPosMap = copy;
+        this.bitsPosMap = ImmutableMap.copyOf(copy);
     }
 
-    public Algorithm getAlgorithm() {
-        return algorithm;
+    public Algorithm getEncodeAlgo() {
+        return encodeAlgo;
+    }
+
+    public DecodeStrategy getDecodeStrategy() {
+        return decodeStrategy;
     }
 
     public Integer getBitPosForkey(String key) {

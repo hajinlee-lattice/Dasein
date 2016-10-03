@@ -40,6 +40,9 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
     public BitEncodeBuffer(Fields fieldDeclaration, String keyField, String valueField, String encodedField,
             BitCodeBook codeBook) {
         super(fieldDeclaration);
+        if (codeBook.getEncodeAlgo() == null) {
+            throw new IllegalArgumentException("Cannot find encode algorithm in the code book.");
+        }
         this.codeBook = codeBook;
         this.encodedField = encodedField;
         this.keyField = keyField;
@@ -63,7 +66,7 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
     }
 
     private List<Integer> trueBits(TupleEntry arguments, BitCodeBook codeBook) {
-        switch (codeBook.getAlgorithm()) {
+        switch (codeBook.getEncodeAlgo()) {
         case KEY_EXISTS:
             return encodeKeyExists(arguments, codeBook);
         default:

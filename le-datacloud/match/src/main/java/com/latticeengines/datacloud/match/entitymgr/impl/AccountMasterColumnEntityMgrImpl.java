@@ -18,10 +18,6 @@ public class AccountMasterColumnEntityMgrImpl implements MetadataColumnEntityMgr
     @Resource(name = "accountMasterColumnDao")
     private AccountMasterColumnDao accountMasterColumnDao;
 
-    protected AccountMasterColumnDao getExternalColumnDao() {
-        return accountMasterColumnDao;
-    }
-
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AccountMasterColumn> findByTag(String tag) {
@@ -30,8 +26,8 @@ public class AccountMasterColumnEntityMgrImpl implements MetadataColumnEntityMgr
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AccountMasterColumn> findAll() {
-        return accountMasterColumnDao.findAll();
+    public List<AccountMasterColumn> findAll(String dataCloudVersion) {
+        return accountMasterColumnDao.findAllByField("dataCloudVersion", dataCloudVersion);
     }
 
     @Override
