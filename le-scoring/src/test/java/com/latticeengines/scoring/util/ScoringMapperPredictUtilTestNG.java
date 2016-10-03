@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.util;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
@@ -286,5 +290,26 @@ public class ScoringMapperPredictUtilTestNG {
         //
         // // delete the score.txt file to the current directory
         // dest.delete();
+    }
+
+    @Test(groups = "unit", dataProvider = "dataProvider")
+    public void testCalculateResult(String id, Double score, String bucketDisplayName, int percentile)
+            throws IOException {
+        String str = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
+                "com/latticeengines/scoring/models/sampleModel/enhancements/scorederivation.json").getFile()));
+        ScoreDerivation scoreDerivation = JsonUtils.deserialize(str, ScoreDerivation.class);
+        ScoreOutput scoreOutput = ScoringMapperPredictUtil.calculateResult(scoreDerivation, "modelid", id, score);
+        assertEquals(scoreOutput.getBucketDisplayName(), bucketDisplayName);
+        assertEquals(scoreOutput.getPercentile().intValue(), percentile);
+    }
+
+    @DataProvider(name = "dataProvider")
+    public static Object[][] getDataProvider() {
+
+        return new Object[][] { { "1", 0.000000000001, "Low", 5 }, { "2", 0.004348735014947, "Low", 5 },
+                { "3", 0.0043699051529779457, "Low", 7 }, { "4", 0.0051464898248356631, "Medium", 70 },
+                { "5", 0.015708183828150646, "High", 96 }, { "6", 0.29277674285102184, "Highest", 99 },
+
+        };
     }
 }

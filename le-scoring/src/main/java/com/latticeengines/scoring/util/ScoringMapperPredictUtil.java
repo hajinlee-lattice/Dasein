@@ -347,7 +347,7 @@ public class ScoringMapperPredictUtil {
 
     }
 
-    private static ScoreOutput calculateResult(ScoreDerivation derivation, //
+    public static ScoreOutput calculateResult(ScoreDerivation derivation, //
             String modelGuid, String leadId, double score) {
 
         ScoreOutput scoreOutput = new ScoreOutput();
@@ -384,9 +384,9 @@ public class ScoringMapperPredictUtil {
             }
             if (scoreOutput.getPercentile() == null) {
                 if (score <= lowest) {
-                    scoreOutput.setPercentile(1);
+                    scoreOutput.setPercentile(5);
                 } else if (score >= highest) {
-                    scoreOutput.setPercentile(100);
+                    scoreOutput.setPercentile(99);
                 }
             }
         }
