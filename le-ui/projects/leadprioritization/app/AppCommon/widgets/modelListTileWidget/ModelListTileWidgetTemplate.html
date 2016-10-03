@@ -51,7 +51,7 @@
                     <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
                 </li>
 
-                <li data-ng-if="data.ModelFileType != 'PmmlModel' && showRefineAndClone" data-ng-click="showCopyModelToTenantModal($event, data)">
+                <li data-ng-if="showRefineAndClone" data-ng-click="showCopyModelToTenantModal($event, data)">
                     <a href="javascript:void(0)">Copy to Another Tenant</a>
                     <i class="ico ico-lattice-dots"></i>
                 </li>
