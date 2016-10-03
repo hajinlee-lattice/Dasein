@@ -30,14 +30,4 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
 
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<AccountMasterColumn> findAllByVersion(String version) {
-        Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("from %s where dataCloudVersion = :version", getEntityClass().getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setParameter("version", version);
-        return query.list();
-    }
-
 }

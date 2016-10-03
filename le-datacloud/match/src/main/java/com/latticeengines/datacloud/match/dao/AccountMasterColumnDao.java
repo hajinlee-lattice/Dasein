@@ -7,5 +7,4 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 
 public interface AccountMasterColumnDao extends BaseDao<AccountMasterColumn> {
 	List<AccountMasterColumn> findByTag(String tag);
-	List<AccountMasterColumn> findAllByVersion(String version);
 }
