@@ -12,7 +12,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.DataField;
-import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
@@ -147,7 +146,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
                 }
 
                 field.setName(name);
-                FieldType fieldType = getFieldType(pmmlField.dataField.getDataType());
+                FieldType fieldType = FieldType.getFromPmmlType(pmmlField.dataField.getDataType());
                 field.setType(Arrays.asList(fieldType.avroTypes()[0]));
             } else {
                 field.setName(pmmlField.miningField.getName().getValue());
@@ -278,7 +277,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             FieldSchema fieldSchema = new FieldSchema();
             fieldSchema.source = FieldSource.REQUEST;
 
-            fieldSchema.type = getFieldType(pmmlField.dataField.getDataType());
+            fieldSchema.type = FieldType.getFromPmmlType(pmmlField.dataField.getDataType());
             fieldSchema.interpretation = FieldInterpretation.Feature;
             fields.put(columnName, fieldSchema);
         }
@@ -293,28 +292,6 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         }
         datacomposition.fields = fields;
         return JsonUtils.serialize(datacomposition);
-    }
-
-    // TODO: temporary mapping to avoid adding the new PMML dependency in
-    // le-domain
-    // Fix this in FieldType when JPMML version is updated across the entire
-    // product
-    // and the RandomForest change has been ported over from our version to the
-    // new version of JPMML
-    private FieldType getFieldType(DataType pmmlDataType) {
-        switch (pmmlDataType.toString()) {
-        case "BOOLEAN":
-            return FieldType.BOOLEAN;
-        case "STRING":
-            return FieldType.STRING;
-        case "INTEGER":
-            return FieldType.INTEGER;
-        case "DOUBLE":
-        case "FLOAT":
-            return FieldType.FLOAT;
-        default:
-            return FieldType.STRING;
-        }
     }
 
 }
