@@ -78,6 +78,11 @@ public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfigurati
             return this;
         }
 
+        public Builder queue(String queue) {
+            stepConfigiguraton.setQueue(queue);
+            return this;
+        }
+
         public Builder setBeanName(String string) {
             stepConfigiguraton.setBeanName("cascadingBulkMatchDataflow");
             return this;

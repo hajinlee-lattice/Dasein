@@ -86,6 +86,22 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
             sourceTables.put(name, sourceTable);
         }
 
+        DataFlowContext ctx = getDataFlowContext(dataFlowConfig, sourceTables);
+
+        String property = String.format("dataflowapi.flow.%s.debug", dataFlowConfig.getDataFlowBeanName());
+        String debugStr = PropertyUtils.getProperty(property);
+        log.info(String.format("%s: %s", property, debugStr));
+        boolean debug = Boolean.parseBoolean(debugStr);
+        ctx.setProperty(DataFlowProperty.DEBUG, debug);
+
+        log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
+        Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
+        log.info(String.format("Setting metadata for table %s", table.getName()));
+        metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
+        return null;
+    }
+
+    private DataFlowContext getDataFlowContext(DataFlowConfiguration dataFlowConfig, Map<String, Table> sourceTables) {
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, dataFlowConfig.getTargetTableName());
         ctx.setProperty(DataFlowProperty.CUSTOMER, dataFlowConfig.getCustomerSpace().toString());
@@ -101,7 +117,11 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         log.info(String.format("Target path is %s", targetPath));
         ctx.setProperty(DataFlowProperty.EXTRACTFILTERS, getExtractFilters(dataFlowConfig));
         ctx.setProperty(DataFlowProperty.TARGETPATH, targetPath);
-        ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        if (StringUtils.isNotEmpty(dataFlowConfig.getQueue())) {
+            ctx.setProperty(DataFlowProperty.QUEUE, dataFlowConfig.getQueue());
+        } else {
+            ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
+        }
         ctx.setProperty(DataFlowProperty.FLOWNAME, dataFlowConfig.getDataFlowBeanName());
         ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
@@ -120,18 +140,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         if (dataFlowConfig.getJobProperties() != null) {
             ctx.setProperty(DataFlowProperty.JOBPROPERTIES, dataFlowConfig.getJobProperties());
         }
-
-        String property = String.format("dataflowapi.flow.%s.debug", dataFlowConfig.getDataFlowBeanName());
-        String debugStr = PropertyUtils.getProperty(property);
-        log.info(String.format("%s: %s", property, debugStr));
-        boolean debug = Boolean.parseBoolean(debugStr);
-        ctx.setProperty(DataFlowProperty.DEBUG, debug);
-
-        log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
-        Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
-        log.info(String.format("Setting metadata for table %s", table.getName()));
-        metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
-        return null;
+        return ctx;
     }
 
     private Map<String, List<ExtractFilter>> getExtractFilters(DataFlowConfiguration dataFlowConfiguration) {

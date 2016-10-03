@@ -62,16 +62,19 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     public MatchCommand match(MatchInput input, String hdfsPodId) {
         MatchInputValidator.validateBulkInput(input, yarnConfiguration);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
-
         String rootOperationUid = UUID.randomUUID().toString().toUpperCase();
+        hdfsPodId = setPodId(hdfsPodId);
 
+        return submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+    }
+
+    protected String setPodId(String hdfsPodId) {
         if (StringUtils.isEmpty(hdfsPodId)) {
             hdfsPodId = CamilleEnvironment.getPodId();
         }
         log.info("PodId = " + hdfsPodId);
         HdfsPodContext.changeHdfsPodId(hdfsPodId);
-
-        return submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+        return hdfsPodId;
     }
 
     @Override

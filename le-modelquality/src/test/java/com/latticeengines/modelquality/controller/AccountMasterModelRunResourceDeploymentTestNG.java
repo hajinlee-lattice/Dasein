@@ -27,7 +27,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterCsvFile")
+    @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterCsvFile")
     public void runModelAccountMaster(String dataSetName, String csvFile) {
         try {
             ModelRun modelRun = createModelRuns().get(0);
@@ -74,14 +74,22 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
-        return new Object[][] { { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
-                { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
-                { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
-                { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
-                { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
-                { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
-                { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
-                { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
+        return new Object[][] {
+        // { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
+        { "bams_domain", "bams_domain.csv" }, //
+        // { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" },
+        // //
+        // { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" },
+        // //
+        // { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
+        // { "HootSuite_domain_AccountMaster",
+        // "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv"
+        // },
+        // //
+        // { "CornerStone_domain_AccountMaster",
+        // "CornerStone_domain.csv" }, //
+        // { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
+        // { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
 
         };
     }

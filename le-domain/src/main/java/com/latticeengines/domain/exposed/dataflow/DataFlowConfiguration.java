@@ -16,6 +16,7 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     private Integer partitions;
     private Properties jobProperties;
     private String engine;
+    private String queue;
 
     @JsonProperty("bean_name")
     public String getDataFlowBeanName() {
@@ -95,6 +96,16 @@ public class DataFlowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("engine")
     public void setEngine(String engine) {
         this.engine = engine;
+    }
+
+    @JsonProperty("queue")
+    public void setQueue(String queue) {
+        this.queue = queue;
+    }
+
+    @JsonProperty("queue")
+    public String getQueue() {
+        return queue;
     }
 
 }

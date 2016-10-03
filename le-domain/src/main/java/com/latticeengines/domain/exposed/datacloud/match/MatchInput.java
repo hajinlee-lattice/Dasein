@@ -60,6 +60,8 @@ public class MatchInput implements Fact, Dimension {
 
     private String tableName;
 
+    private boolean bulkOnly;
+
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
         return returnUnmatched == null ? Boolean.FALSE : returnUnmatched;
@@ -266,6 +268,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("TableName")
     public String getTableName() {
         return tableName;
+    }
+
+    @JsonProperty("BulkOnly")
+    public boolean isBulkOnly() {
+        return bulkOnly;
+    }
+
+    @JsonProperty("BulkOnly")
+    public void setBulkOnly(boolean bulkOnly) {
+        this.bulkOnly = bulkOnly;
     }
 
     @Override

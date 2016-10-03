@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -25,6 +24,7 @@ import org.testng.Assert;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
@@ -42,7 +42,7 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
     }
 
     protected void uploadAvroData(List<List<Object>> data, List<String> fieldNames, List<Class<?>> fieldTypes,
-                                  String avroDir, String fileName) {
+            String avroDir, String fileName) {
         Map<String, Class<?>> schemaMap = new HashMap<>();
         for (int i = 0; i < fieldNames.size(); i++) {
             schemaMap.put(fieldNames.get(i), fieldTypes.get(i));
@@ -71,7 +71,7 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @SuppressWarnings("unchecked")
     protected void uploadDataCsv(String avroDir, String fileName, String csvFile, List<Class<?>> fieldTypes,
-                                 String IdKey) {
+            String IdKey) {
         try {
             URL url = Thread.currentThread().getContextClassLoader().getResource(csvFile);
             if (url == null) {
@@ -100,7 +100,7 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
                                     value = Integer.valueOf(field);
                                 }
                             } catch (Exception ex) {
-                                ex.printStackTrace();
+                                System.out.println("Data error=" + ex.getMessage());
                                 value = null;
                             }
                             row.add(value);

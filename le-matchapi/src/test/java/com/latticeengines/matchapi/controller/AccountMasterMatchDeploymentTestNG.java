@@ -118,7 +118,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 11);
+        Assert.assertEquals(fields.size(), 10);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
         Assert.assertEquals(records.size(), 14);
@@ -264,6 +264,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         columns.add(new Column("SALES_VOLUME_US_DOLLARS"));
         columns.add(new Column("YEAR_STARTED"));
         customSelection.setColumns(columns);
+        matchInput.setBulkOnly(true);
         // matchInput.setCustomSelection(customSelection);
         return matchInput;
     }

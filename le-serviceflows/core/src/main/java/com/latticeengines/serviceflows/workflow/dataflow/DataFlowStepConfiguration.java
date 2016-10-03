@@ -31,6 +31,8 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     private Properties jobProperties;
 
     private String engine;
+    
+    private String queue;
 
     @JsonProperty("extra_sources")
     public Map<String, String> getExtraSources() {
@@ -100,6 +102,16 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("engine")
     public void setEngine(String engine) {
         this.engine = engine;
+    }
+
+    @JsonProperty("queue")
+    public String getQueue() {
+        return queue;
+    }
+
+    @JsonProperty("queue")
+    public void setQueue(String queue) {
+        this.queue = queue;
     }
 
     @JsonProperty("data_flow_params")

@@ -8,17 +8,13 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -37,6 +33,7 @@ import com.latticeengines.propdata.core.source.impl.AccountMaster;
 import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("bulkMatchServiceWithAccountMaster")
 public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServiceWithDerivedColumnCacheImpl {
@@ -60,6 +57,9 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Value("${datacloud.match.cascading.partitions:8}")
     protected Integer cascadingPartitions;
+
+    @Value("${datacloud.match.cascading.rows.threshold:10000}")
+    private Integer cascadingBulkRowsThreshold;
 
     @Autowired
     private AccountMaster accountMaster;
@@ -88,6 +88,13 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Override
     protected MatchCommand submitBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
+        if (input.isBulkOnly() || input.getNumRows() > cascadingBulkRowsThreshold) {
+            return submitCascadingBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+        }
+        return super.submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+    }
+
+    private MatchCommand submitCascadingBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
         propDataTenantService.bootstrapServiceTenant();
         String targetPath = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         CascadingBulkMatchWorkflowConfiguration.Builder builder = new CascadingBulkMatchWorkflowConfiguration.Builder();
@@ -102,6 +109,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties()) //
                 .engine("MR") //
+                .queue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .setBeanName("cascadingBulkMatchDataflow");
 
         Schema outputSchema = constructOutputSchema(input, rootOperationUid);
@@ -120,6 +128,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         jobProperties.put("mapred.reduce.tasks", "1");
         jobProperties.put("cascading.spill.map.threshold", "100000");
         jobProperties.put("mapreduce.job.running.map.limit", "100");
+        jobProperties.put("mapreduce.map.memory.mb", "1024");
+        jobProperties.put("mapreduce.reduce.memory.mb", "1024");
         return jobProperties;
     }
 
@@ -141,8 +151,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
         Table sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMasterLookup,
                 dataVersion.getAccountLookupHdfsVersion());
-        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion(),
-                sourceTable.getExtracts().get(0).getPath());
+        extraSources.put(ACCOUNT_MASTER_LOOKUP_KEY + dataVersion.getAccountLookupHdfsVersion(), sourceTable
+                .getExtracts().get(0).getPath());
         sourceTable = hdfsSourceEntityMgr.getTableAtVersion(accountMaster, dataVersion.getAccountMasterHdfsVersion());
         extraSources.put(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion(),
                 sourceTable.getExtracts().get(0).getPath());
@@ -186,18 +196,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                     "PropDataMatchOutput", input.getDataCloudVersion());
         }
 
-        InputBuffer inputBuffer = input.getInputBuffer();
-        AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
-        String avroPath = avroInputBuffer.getAvroDir();
-        Schema inputSchema = avroInputBuffer.getSchema();
-        if (inputSchema == null) {
-            inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
-            log.info("Using extracted input schema: \n"
-                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-        } else {
-            log.info("Using provited input schema: \n"
-                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-        }
         return outputSchema;
     }
+
 }

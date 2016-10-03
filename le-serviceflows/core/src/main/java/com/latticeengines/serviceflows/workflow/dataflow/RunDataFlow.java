@@ -52,6 +52,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setPartitions(configuration.getPartitions());
         dataFlowConfig.setJobProperties(configuration.getJobProperties());
         dataFlowConfig.setEngine(configuration.getEngine());
+        dataFlowConfig.setQueue(configuration.getQueue());
 
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
         dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());
