@@ -101,6 +101,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
 
         for (Job job : jobs) {
+            if (job.getInputs() == null) {
+                job.setInputs(new HashMap<String, String>());
+            }
+            job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
+                    getJobSourceFileExists(job.getApplicationId()).toString());
+
             String modelId = null;
             if (job.getInputs() != null
                     && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
@@ -113,9 +119,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 continue;
             }
 
-            if (job.getInputs() == null) {
-                job.setInputs(new HashMap<String, String>());
-            }
             if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
                 job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
             }
@@ -123,8 +126,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     modelIdToModelSummaries.get(modelId).getDisplayName());
             job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
                     modelIdToModelSummaries.get(modelId).getModelType());
-            job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
-                    getJobSourceFileExists(job.getApplicationId()).toString());
         }
     }
 

@@ -139,9 +139,26 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
 
     @Override
     public FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
+        if (schemaInterpretationStr == null) {
+            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
+        }
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
+
+        fieldMappingDocument.getRequiredFields().add("Id");
+        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+            fieldMappingDocument.getRequiredFields().add("Website");
+        } else {
+            fieldMappingDocument.getRequiredFields().add("Email");
+        }
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
         List<Attribute> requiredAttributes = modelMetadataService.getRequiredColumns(modelId);
