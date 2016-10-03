@@ -23,6 +23,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -323,7 +324,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private List<String> dedupIds(List<String> ids) {
         Set<String> uniqueIds = new HashSet<>();
-        uniqueIds.addAll(ids);
+        for (String id: ids) {
+            if (StringUtils.isNotEmpty(id)) {
+                uniqueIds.add(id);
+            }
+        }
         return new ArrayList<String>(uniqueIds);
     }
 
