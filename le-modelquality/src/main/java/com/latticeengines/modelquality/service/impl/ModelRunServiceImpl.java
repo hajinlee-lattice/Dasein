@@ -4,34 +4,41 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.DataSetType;
 import com.latticeengines.domain.exposed.modelquality.Environment;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
+import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
 
 @Component("modelRunService")
-public class ModelRunServiceImpl implements ModelRunService {
+public class ModelRunServiceImpl extends BaseServiceImpl implements ModelRunService {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelRunServiceImpl.class);
-    
+
     @Resource(name = "fileModelRunService")
     private ModelRunService fileModelRunService;
-    
+
     @Resource(name = "eventTableModelRunService")
     private ModelRunService eventTableModelRunService;
-    
+
+    @Autowired
+    private DataSetEntityMgr dataSetEntityMgr;
+
     @Override
-    public String run(ModelRun modelRun, Environment env) {
-        SelectedConfig config = modelRun.getSelectedConfig();
-        DataSetType dataSetType = config.getDataSet().getDataSetType();
+    public ModelRun createModelRun(ModelRunEntityNames modelRunEntityNames, Environment env) {
+        String datasetName = modelRunEntityNames.getDataSetName();
+        DataSet dataset = dataSetEntityMgr.findByName(datasetName);
+        DataSetType dataSetType = dataset.getDataSetType();
         if (dataSetType == DataSetType.FILE) {
-            return fileModelRunService.run(modelRun, env);
+            return fileModelRunService.createModelRun(modelRunEntityNames, env);
         } else {
-            return eventTableModelRunService.run(modelRun, env);
+            return eventTableModelRunService.createModelRun(modelRunEntityNames, env);
         }
     }
 

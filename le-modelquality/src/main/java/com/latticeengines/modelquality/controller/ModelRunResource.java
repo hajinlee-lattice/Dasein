@@ -1,13 +1,9 @@
 package com.latticeengines.modelquality.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,89 +11,95 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Environment;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
+import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
+import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "modelquality", description = "REST resource to run model for model quality")
 @RestController
-public class ModelRunResource {
+@RequestMapping("/modelruns")
+public class ModelRunResource implements ModelQualityModelRunInterface, CrudInterface<ModelRunEntityNames> {
 
-    @Resource(name = "modelRunService")
+    @Autowired
     private ModelRunService modelRunService;
 
     @Autowired
     private ModelRunEntityMgr modelRunEntityMgr;
 
-    private static final Log log = LogFactory.getLog(ModelRunResource.class);
-
-    @RequestMapping(value = "/modelruns", method = RequestMethod.POST, headers = "Accept=application/json")
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Run a Model")
-    public ResponseDocument<String> runModel(@RequestBody ModelRun modelRun, //
+    @ApiOperation(value = "Get ModelRuns")
+    public List<ModelRunEntityNames> getModelRuns() {
+        return getAll();
+    }
+
+    @Override
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Create model run")
+    public String createModelRun(@RequestBody ModelRunEntityNames modelRunEntityNames, //
             @RequestParam("tenant") String tenant, //
             @RequestParam("username") String username, //
             @RequestParam("password") String password, //
             @RequestParam("apiHostPort") String apiHostPort) {
-        try {
-            Environment env = new Environment();
-            env.tenant = tenant;
-            env.username = username;
-            env.password = password;
-            env.apiHostPort = apiHostPort;
-            modelRunService.setEnvironment(env);
-            String modelRunId = modelRunService.run(modelRun, env);
-            return ResponseDocument.successResponse(modelRunId);
-
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+        return create(modelRunEntityNames, tenant, username, password, apiHostPort);
     }
 
-    @RequestMapping(value = "/modelruns", method = RequestMethod.GET, headers = "Accept=application/json")
+    @Override
+    @RequestMapping(value = "/{modelRunName}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get ModelRuns")
-    public ResponseDocument<List<ModelRun>> getModelRuns() {
-        try {
-            List<ModelRun> modelRuns = modelRunEntityMgr.findAll();
-            return ResponseDocument.successResponse(modelRuns);
-
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+    @ApiOperation(value = "Get ModelRun by name")
+    public ModelRunEntityNames getModelRunByName(String modelRunName) {
+        return getByName(modelRunName);
     }
 
-    @RequestMapping(value = "/modelruns/{modelRunId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @Override
+    @RequestMapping(value = "/status/{modelRunName}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get ModelRun")
-    public ResponseDocument<ModelRun> getModelRun(@PathVariable String modelRunId) {
-        try {
-            ModelRun modelRun = new ModelRun();
-            modelRun.setPid(Long.valueOf(modelRunId));
-            ModelRun returnedModelRun = modelRunEntityMgr.findByKey(modelRun);
-            return ResponseDocument.successResponse(returnedModelRun);
-
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
-            return ResponseDocument.failedResponse(e);
-        }
+    @ApiOperation(value = "Get ModelRun Status by name")
+    public String getModelRunStatusByName(String modelRunName) {
+        return getStatusByName(modelRunName).toString();
     }
 
-    @RequestMapping(value = "/modelruns", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Delete ModelRuns")
-    public void deleteModelRuns() {
-        try {
-            modelRunEntityMgr.deleteAll();
-        } catch (Exception e) {
-            log.error("Failed on this API!", e);
+    @Override
+    public ModelRunEntityNames getByName(String name) {
+        ModelRun run = modelRunEntityMgr.findByName(name);
+        ModelRunEntityNames runnames = new ModelRunEntityNames(run);
+        return runnames;
+    }
+
+    public ModelRunStatus getStatusByName(String name) {
+        ModelRun run = modelRunEntityMgr.findByName(name);
+        return run.getStatus();
+    }
+
+    @Override
+    public String create(ModelRunEntityNames config, Object... params) {
+        Environment env = new Environment();
+        env.tenant = (String) params[0];
+        env.username = (String) params[1];
+        env.password = (String) params[2];
+        env.apiHostPort = (String) params[3];
+        modelRunService.setEnvironment(env);
+        ModelRun run = modelRunService.createModelRun(config, env);
+        return run.getName();
+    }
+
+    @Override
+    public List<ModelRunEntityNames> getAll() {
+        List<ModelRunEntityNames> result = new ArrayList<>();
+        for (ModelRun run : modelRunEntityMgr.findAll()) {
+            ModelRunEntityNames runnames = new ModelRunEntityNames(run);
+            result.add(runnames);
         }
+        return result;
     }
 }

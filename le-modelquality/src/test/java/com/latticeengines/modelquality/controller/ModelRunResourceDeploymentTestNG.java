@@ -6,18 +6,18 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
-    
+
     private String user = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
     private String password = TestFrameworkUtils.GENERAL_PASSWORD;
-    
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         super.cleanupDb();
@@ -30,18 +30,17 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         try {
             List<ModelRun> modelRuns = createModelRuns();
             for (ModelRun modelRun : modelRuns) {
-                modelRun.getSelectedConfig().getDataSet().setName("MuleSoft");
-                modelRun.getSelectedConfig() //
-                        .getDataSet() //
+                modelRun.getDataSet().setName("MuleSoft");
+                modelRun.getDataSet() //
                         .setTrainingSetHdfsPath( //
                                 "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
-                
-                ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
+
+                ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
+
+                String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //
                         mainTestTenant.getId(), user, password, plsDeployedHostPort);
-                Assert.assertTrue(response.isSuccess());
-                
-                String modelRunId = response.getResult();
-                waitAndCheckModelRun(modelRunId);
+                Assert.assertEquals(modelRun.getName(), modelName);
+                waitAndCheckModelRun(modelName);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -53,18 +52,16 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     public void runModelAlfresco() {
         try {
             ModelRun modelRun = createModelRuns().get(0);
-            modelRun.getSelectedConfig().getDataSet().setName("Alfresco");
-            modelRun.getSelectedConfig()
-                    .getDataSet()
-                    .setTrainingSetHdfsPath(
-                            "/Pods/Default/Services/ModelQuality/Alfresco_SFDC_LP3_ModelingLead_ReducedRows_20160712_125241.csv");
-            ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
+            modelRun.getDataSet().setName("Alfresco");
+            modelRun.getDataSet().setTrainingSetHdfsPath(
+                    "/Pods/Default/Services/ModelQuality/Alfresco_SFDC_LP3_ModelingLead_ReducedRows_20160712_125241.csv");
+
+            ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
+
+            String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //
                     mainTestTenant.getId(), user, password, plsDeployedHostPort);
-
-            Assert.assertTrue(response.isSuccess());
-
-            String modelRunId = response.getResult();
-            waitAndCheckModelRun(modelRunId);
+            Assert.assertEquals(modelRun.getName(), modelName);
+            waitAndCheckModelRun(modelName);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -76,18 +73,16 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     public void runModelNGINX() {
         try {
             ModelRun modelRun = createModelRuns().get(0);
-            modelRun.getSelectedConfig().getDataSet().setName("NGINX");
-            modelRun.getSelectedConfig()
-                    .getDataSet()
-                    .setTrainingSetHdfsPath(
-                            "/Pods/Default/Services/ModelQuality/NGINX_PLS_LP3_ModelingLead_ReducedRows_20160712_125224.csv");
-            ResponseDocument<String> response = modelQualityProxy.runModel(modelRun, //
-                    mainTestTenant.getId(), user, password, plsDeployedHostPort);
+            modelRun.getDataSet().setName("NGINX");
+            modelRun.getDataSet().setTrainingSetHdfsPath(
+                    "/Pods/Default/Services/ModelQuality/NGINX_PLS_LP3_ModelingLead_ReducedRows_20160712_125224.csv");
 
-            Assert.assertTrue(response.isSuccess());
-            
-            String modelRunId = response.getResult();
-            waitAndCheckModelRun(modelRunId);
+            ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
+
+            String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //
+                    mainTestTenant.getId(), user, password, plsDeployedHostPort);
+            Assert.assertEquals(modelRun.getName(), modelName);
+            waitAndCheckModelRun(modelName);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -95,24 +90,13 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "runModelNGINX", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "runModelMuleSoft", enabled = true)
     public void getModelRuns() {
         try {
-            ResponseDocument<List<ModelRun>> response = modelQualityProxy.getModelRuns();
-            Assert.assertTrue(response.isSuccess());
+            List<ModelRunEntityNames> response = modelQualityProxy.getModelRuns();
         } catch (Exception ex) {
             Assert.fail(ex.getMessage());
         }
     }
-
-    @Test(groups = "deployment", dependsOnMethods = "getModelRuns", enabled = false)
-    public void deleteModelRuns() {
-        try {
-            modelQualityProxy.deleteModelRuns();
-        } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
-        }
-    }
-
 
 }

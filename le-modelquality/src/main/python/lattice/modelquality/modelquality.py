@@ -164,9 +164,6 @@ def printentity(entitycls, name):
     entity = entitycls.getByName(name)
     entity.printConfig()
 
-
-    exit(0)
-
 def createnew(entitytype, entitycls, name):
 
     entity = entitycls(name)

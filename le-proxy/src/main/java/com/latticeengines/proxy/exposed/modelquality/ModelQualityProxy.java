@@ -7,12 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
-import com.latticeengines.domain.exposed.modelquality.ModelConfig;
-import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
@@ -20,7 +18,8 @@ import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAlgorithmInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataFlowInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataSetInterface;
-import com.latticeengines.network.exposed.modelquality.ModelQualityInterface;
+import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
+import com.latticeengines.network.exposed.modelquality.ModelQualityPipelineInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityPropDataInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualitySamplingInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -28,48 +27,43 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 @Component("modelQualityProxy")
 @SuppressWarnings("unchecked")
 public class ModelQualityProxy extends MicroserviceRestApiProxy //
-    implements ModelQualityInterface, //
-               ModelQualitySamplingInterface, //
-               ModelQualityDataSetInterface, //
-               ModelQualityDataFlowInterface, //
-               ModelQualityAlgorithmInterface, //
-               ModelQualityPropDataInterface {
+        implements ModelQualitySamplingInterface, //
+        ModelQualityDataSetInterface, //
+        ModelQualityDataFlowInterface, //
+        ModelQualityAlgorithmInterface, //
+        ModelQualityPropDataInterface, //
+        ModelQualityModelRunInterface, //
+        ModelQualityPipelineInterface {
 
     public ModelQualityProxy() {
         super("modelquality");
     }
 
     @Override
-    public ResponseDocument<String> runModel(ModelRun modelRun, String tenant, String username,
-            String encryptedPassword, String apiHostPort) {
+    public String createModelRun(ModelRunEntityNames modelRunEntityNames, String tenant, String username,
+            String password, String apiHostPort) {
         String url = constructUrl(
-                "/modelruns?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
-                tenant, username, encryptedPassword, apiHostPort);
-        return post("runModel", url, modelRun, ResponseDocument.class);
+                "/modelruns/?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
+                tenant, username, password, apiHostPort);
+        return post("createModelRun", url, modelRunEntityNames, String.class);
     }
 
     @Override
-    public ResponseDocument<List<ModelRun>> getModelRuns() {
-        String url = constructUrl("/modelruns");
-        return get("getModelRuns", url, ResponseDocument.class);
+    public List<ModelRunEntityNames> getModelRuns() {
+        String url = constructUrl("/modelruns/");
+        return get("getModelRuns", url, List.class);
     }
 
     @Override
-    public void deleteModelRuns() {
-        String url = constructUrl("/modelruns");
-        delete("deleteModelRuns", url);
+    public ModelRunEntityNames getModelRunByName(String modelRunName) {
+        String url = constructUrl("/modelruns/{modelRunName}", modelRunName);
+        return get("getModelRunByName", url, ModelRunEntityNames.class);
     }
 
     @Override
-    public ResponseDocument<List<ModelConfig>> getModelConfigs() {
-        String url = constructUrl("/modelconfigs");
-        return get("getModelConfigs", url, ResponseDocument.class);
-    }
-
-    @Override
-    public ResponseDocument<String> upsertModelConfigs(List<ModelConfig> modelConfigs) {
-        String url = constructUrl("/modelconfigs");
-        return post("upsertModelConfig", url, modelConfigs, ResponseDocument.class);
+    public String getModelRunStatusByName(String modelRunName) {
+        String url = constructUrl("/modelruns/status/{modelRunName}", modelRunName);
+        return get("getModelRunStatusByName", url, String.class);
     }
 
     @Override
@@ -85,7 +79,7 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
                 fileName, stepName);
         return post("uploadPipelineStepPythonScript", url, file, String.class);
     }
-    
+
     @Override
     public String uploadPipelineStepMetadata(String fileName, //
             String stepName, //
@@ -94,7 +88,6 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
                 fileName, stepName);
         return post("uploadPipelineStepMetadata", url, requestEntity, String.class);
     }
-    
 
     @Override
     public String uploadPipelineStepPythonScript(String fileName, //
@@ -103,12 +96,6 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
         String url = constructUrl("/pipelines/pipelinestepfiles/python?fileName={fileName}&stepName={stepName}", //
                 fileName, stepName);
         return post("uploadPipelineStepPythonScript", url, requestEntity, String.class);
-    }
-
-    @Override
-    public ResponseDocument<ModelRun> getModelRun(String modelRunId) {
-        String url = constructUrl("/modelruns/{modelRunId}", modelRunId);
-        return get("getModelRun", url, ResponseDocument.class);
     }
 
     @Override
@@ -248,6 +235,5 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
         String url = constructUrl("/propdataconfigs/{propDataConfigName}", propDataConfigName);
         return get("getPropDataConfigs", url, PropData.class);
     }
-
 
 }

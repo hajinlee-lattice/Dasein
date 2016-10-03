@@ -10,14 +10,18 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
+import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.Environment;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
-import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
+import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -31,25 +35,39 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     private ModelRunEntityMgr modelRunEntityMgr;
 
     @Autowired
+    private DataSetEntityMgr dataSetEntityMgr;
+
+    @Autowired
+    private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
+
+    @Autowired
     protected MetricService metricService;
 
     protected Environment env;
     protected RestTemplate restTemplate;
-    protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor("");
-    
+    protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
+            "");
+
     @Override
     public void setEnvironment(Environment env) {
         this.env = env;
     }
 
     @Override
-    public String run(ModelRun modelRun, Environment env) {
+    public ModelRun createModelRun(ModelRunEntityNames modelRunEntityNames, Environment env) {
         this.env = env;
+        ModelRun modelRun = new ModelRun();
+        AnalyticPipeline analyticPipeline = analyticPipelineEntityMgr
+                .findByName(modelRunEntityNames.getAnalyticPipelineName());
+        DataSet dataset = dataSetEntityMgr.findByName(modelRunEntityNames.getDataSetName());
+        modelRun.setName(modelRunEntityNames.getName());
+        modelRun.setAnalyticPipeline(analyticPipeline);
+        modelRun.setDataSet(dataset);
         modelRun.setStatus(ModelRunStatus.PROGRESS);
+        modelRun.setDescription(modelRunEntityNames.getDescription());
         modelRunEntityMgr.create(modelRun);
-        
         runAsync(modelRun);
-        return modelRun.getPid() + "";
+        return modelRun;
     }
 
     private void runAsync(ModelRun modelRun) {
@@ -58,7 +76,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         runner.start();
     }
 
-    protected abstract void runModel(SelectedConfig config);
+    protected abstract void runModel(ModelRun modelRun);
 
     protected String getDeployedRestAPIHostPort() {
         String deployedHostPort = env.apiHostPort;
@@ -66,7 +84,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
                 : deployedHostPort;
     }
 
-    private void setup(SelectedConfig config) throws Exception {
+    private void setup() throws Exception {
         restTemplate = new RestTemplate();
         Tenant tenant = new Tenant();
         tenant.setId(env.tenant);
@@ -109,10 +127,8 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         @Override
         public void run() {
             try {
-                SelectedConfig config = modelRun.getSelectedConfig();
-                setup(config);
-                runModel(config);
-
+                setup();
+                runModel(modelRun);
                 modelRun.setStatus(ModelRunStatus.COMPLETED);
                 modelRunEntityMgr.update(modelRun);
 

@@ -11,6 +11,9 @@ hdfs dfs -put -f $WSHOME/le-dev/testartifacts/PublicDomain/PublicDomain.avro /Po
 hdfs dfs -put -f $WSHOME/le-dev/testartifacts/PublicDomain/PublicDomain.csv /Pods/Default/Services/PropData/MatchService/PublicDomain
 hdfs dfs -put -f $WSHOME/le-dev/testartifacts/AccountMaster/AccountMaster.avro /tmp/AccountMaster
 
+hdfs dfs -mkdir -p /Pods/Default/Services/ModelQuality
+hdfs dfs -put -f $WSHOME/le-pls/src/test/resources/com/latticeengines/pls/end2end/selfServiceModeling/csvfiles/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv /Pods/Default/Services/ModelQuality/
+
 # Expand aliases
 echo "Expanding aliases."
 shopt -s expand_aliases

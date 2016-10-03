@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
 public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
@@ -30,10 +31,10 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
     @Test(groups = "manual")
     public void run() {
         try {
-            modelRunService.run(modelRun1, null);
+            modelRunService.createModelRun(new ModelRunEntityNames(modelRun1), null);
             System.out.println("Finished modelRun1");
 
-            modelRunService.run(modelRun2, null);
+            modelRunService.createModelRun(new ModelRunEntityNames(modelRun2), null);
             System.out.println("Finished modelRun2");
 
         } catch (Exception ex) {

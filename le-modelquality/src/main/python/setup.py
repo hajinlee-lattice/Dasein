@@ -19,7 +19,7 @@ setup(
     long_description = long_descr,
     author = "Michael Wilson",
     author_email = "mwilson@lattice-engines.com",
-    install_requires = ['requests', 'requests_toolbelt'],
+    install_requires = ['hdfs', 'requests', 'requests_toolbelt'],
     entry_points = {
         "console_scripts": ['modelquality = lattice.modelquality.modelquality:main']
         }

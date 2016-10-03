@@ -6,7 +6,7 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.dao.ModelRunDao;
 
-@Component("modelRunDao")
+@Component("qualityModelRunDao")
 public class ModelRunDaoImpl extends BaseDaoImpl<ModelRun> implements ModelRunDao {
 
     @Override

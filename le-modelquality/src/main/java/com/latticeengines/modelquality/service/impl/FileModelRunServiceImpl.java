@@ -26,7 +26,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
 import com.latticeengines.domain.exposed.modeling.factory.PropDataFactory;
+import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
+import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -55,15 +57,22 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     private WorkflowProxy workflowProxy;
 
     @Override
-    protected void runModel(SelectedConfig config) {
-        SourceFile sourceFile = uploadFile(config);
-        resolveMetadata(config, sourceFile);
-        String modelName = createModel(config, sourceFile);
+    protected void runModel(ModelRun modelRun) {
+        SelectedConfig selectedConfig = new SelectedConfig();
+        AnalyticPipeline analyticPipeline = modelRun.getAnalyticPipeline();
+        DataSet dataset = modelRun.getDataSet();
+        selectedConfig.setPipeline(analyticPipeline.getPipeline());
+        selectedConfig.setAlgorithm(analyticPipeline.getAlgorithm());
+        selectedConfig.setDataSet(dataset);
+        selectedConfig.setPropData(analyticPipeline.getPropData());
+        selectedConfig.setDataFlow(analyticPipeline.getDataFlow());
+        selectedConfig.setSampling(analyticPipeline.getSampling());
+        SourceFile sourceFile = uploadFile(dataset);
+        resolveMetadata(dataset, sourceFile);
+        String modelName = createModel(selectedConfig, sourceFile);
         ModelSummary modelSummary = retrieveModelSummary(modelName);
-
-        log.info(modelSummary.getId());
-        
-        saveMetricsToReportDB(modelSummary, config);
+        log.info(String.format("ModelSummaryID: %s", modelSummary.getId()));
+        saveMetricsToReportDB(modelSummary, selectedConfig);
     }
 
     private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config) {
@@ -74,8 +83,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
     }
 
-    public SourceFile uploadFile(SelectedConfig config) {
-        DataSet dataSet = config.getDataSet();
+    public SourceFile uploadFile(DataSet dataSet) {
         SchemaInterpretation schemaInterpretation = dataSet.getSchemaInterpretation();
 
         if (schemaInterpretation == null) {
@@ -98,8 +106,8 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         String fileName = StringUtils.substringAfterLast(dataSet.getTrainingSetHdfsPath(), "/");
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         @SuppressWarnings("rawtypes")
-        ResponseDocument response = restTemplate.postForObject(String.format(
-                "%s/pls/models/uploadfile/unnamed?displayName=%s", getDeployedRestAPIHostPort(), fileName),
+        ResponseDocument response = restTemplate.postForObject(String
+                .format("%s/pls/models/uploadfile/unnamed?displayName=%s", getDeployedRestAPIHostPort(), fileName),
                 requestEntity, ResponseDocument.class);
         SourceFile sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -107,14 +115,15 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         return sourceFile;
     }
 
-    public void resolveMetadata(SelectedConfig config, SourceFile sourceFile) {
-        DataSet dataSet = config.getDataSet();
+    public void resolveMetadata(DataSet dataSet, SourceFile sourceFile) {
         SchemaInterpretation schemaInterpretation = dataSet.getSchemaInterpretation();
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         @SuppressWarnings("rawtypes")
-        ResponseDocument response = restTemplate.getForObject(String.format(
-                "%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getDeployedRestAPIHostPort(),
-                sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
+        ResponseDocument response = restTemplate
+                .getForObject(
+                        String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s",
+                                getDeployedRestAPIHostPort(), sourceFile.getName(), schemaInterpretation.name()),
+                        ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
 
@@ -130,27 +139,27 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
                 getDeployedRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
-    private String createModel(SelectedConfig config, SourceFile sourceFile) {
+    private String createModel(SelectedConfig selectedConfig, SourceFile sourceFile) {
         ModelingParameters parameters = new ModelingParameters();
         parameters.setName("SelfServiceModelingByModelQuality" + DateTime.now().getMillis());
         parameters.setDescription("SelfServiceModelingByModelQuality");
         parameters.setFilename(sourceFile.getName());
         String modelName = parameters.getName();
 
-        configModelingParams(config, parameters);
+        configModelingParams(selectedConfig, parameters);
         model(parameters);
         return modelName;
     }
 
-    private void configModelingParams(SelectedConfig config, ModelingParameters parameters) {
-        String configJson = JsonUtils.serialize(config);
+    private void configModelingParams(SelectedConfig selectedConfig, ModelingParameters parameters) {
+        String configJson = JsonUtils.serialize(selectedConfig);
         Map<String, String> runTimeParams = new HashMap<>();
         runTimeParams.put(AlgorithmFactory.MODEL_CONFIG, configJson);
         runTimeParams.put(DataFlowFactory.DATAFLOW_DO_SORT_FOR_ATTR_FLOW, "true");
         parameters.setRunTimeParams(runTimeParams);
 
-        DataFlowFactory.configDataFlow(config, parameters);
-        PropDataFactory.configPropData(config, parameters);
+        DataFlowFactory.configDataFlow(selectedConfig, parameters);
+        PropDataFactory.configPropData(selectedConfig, parameters);
     }
 
     @SuppressWarnings("rawtypes")
