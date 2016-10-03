@@ -343,8 +343,8 @@ public class Node {
                 valueField, encodedField, codeBook)), builder);
     }
 
-    public Node bieDecode(String encodedField, String[] decodeFields, BitCodeBook codeBook,
-            BitCodeBook.DecodeStrategy decodeStrategy) {
+    public Node bitDecode(String encodedField, String[] decodeFields, BitCodeBook codeBook,
+                          BitCodeBook.DecodeStrategy decodeStrategy) {
         return new Node(builder.register(
                 new BitDecodeOperation(opInput(identifier), encodedField, decodeFields, codeBook, decodeStrategy)),
                 builder);

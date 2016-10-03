@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -23,6 +25,7 @@ import cascading.tuple.TupleEntry;
 public class BitDecodeFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -1829655353767648350L;
+    private static final Log log = LogFactory.getLog(BitDecodeFunction.class);
 
     private final BitCodeBook codeBook;
     private final String encodedColumn;
@@ -69,6 +72,8 @@ public class BitDecodeFunction extends BaseOperation implements Function {
                 int bitPos = codeBook.getBitPosForkey(decodeField);
                 bitPositionIdx.put(decodeField, bitPosList.size());
                 bitPosList.add(bitPos);
+            } else {
+                log.warn("Cannot find field " + decodeField + " from the codebook.");
             }
         }
         bitPositions = ArrayUtils.toPrimitive(bitPosList.toArray(new Integer[bitPosList.size()]));

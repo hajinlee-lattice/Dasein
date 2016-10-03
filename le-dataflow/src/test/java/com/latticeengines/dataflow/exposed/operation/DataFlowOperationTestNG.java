@@ -558,7 +558,12 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     public void testDepivot() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
-        prepareDepivotData(avroDir, fileName);
+
+        Object[][] data = new Object[][] {
+                { "dom1.com", "topic1", 1.0, "topic2", 2.0, "topic3", 3.0, "topic4", 4.0, 123L },
+                { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L } };
+
+        uploadDepivotAvro(data, avroDir, fileName);
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
             @Override
@@ -599,7 +604,15 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     public void testBitEncode() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
-        prepareBitEncodeData(avroDir, fileName);
+        Object[][] data = new Object[][] {
+                { "dom1.com", "f1", 1, 123L }, //
+                { "dom1.com", "f2", 2, 125L }, //
+                { "dom1.com", "f3", 3, 124L }, //
+                { "dom2.com", "f2", 4, 101L }, //
+                { "dom2.com", "f3", 2, 102L }
+        };
+
+        uploadAvro(data, avroDir, fileName);
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
             @Override
@@ -638,6 +651,75 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
+
+    @Test(groups = "functional")
+    public void testBitDecode() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        Object[][] data = new Object[][] {
+                { "dom1.com", BitCodecUtils.encode(new int[]{1, 3}), 1, 123L }, //
+                { "dom2.com", BitCodecUtils.encode(new int[]{0, 2}), 2, 102L }
+        };
+        uploadAvro(data, avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node node = addSource("Feature");
+
+                BitCodeBook codebook1 = new BitCodeBook(BitCodeBook.Algorithm.KEY_EXISTS);
+                Map<String, Integer> bitPosMap1 = new HashMap<>();
+                bitPosMap1.put("f1", 0);
+                bitPosMap1.put("f2", 1);
+                bitPosMap1.put("f3", 2);
+                bitPosMap1.put("f4", 3);
+                codebook1.setBitsPosMap(bitPosMap1);
+
+                BitCodeBook codebook2 = new BitCodeBook(BitCodeBook.Algorithm.KEY_EXISTS);
+                Map<String, Integer> bitPosMap2 = new HashMap<>();
+                bitPosMap2.put("g1", 3);
+                bitPosMap2.put("g2", 2);
+                bitPosMap2.put("g3", 1);
+                bitPosMap2.put("g4", 0);
+                codebook2.setBitsPosMap(bitPosMap2);
+
+                node = node.bitDecode("Feature", new String[]{ "f1", "f2", "f3", "f4" }, codebook1, BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
+                node = node.bitDecode("Feature", new String[]{ "g1", "g2", "g3", "g4" }, codebook2, BitCodeBook.DecodeStrategy.BOOLEAN_YESNO);
+                node = node.retain(new FieldList("Domain", "f1", "f2", "f3", "f4", "g1", "g2", "g3", "g4"));
+                return node;
+            }
+        });
+
+        for (GenericRecord record : readOutput()) {
+            String domain = record.get("Domain").toString();
+            switch (domain) {
+                case "dom1.com":
+                    Assert.assertEquals(record.get("f1").toString(), "No");
+                    Assert.assertEquals(record.get("f2").toString(), "Yes");
+                    Assert.assertEquals(record.get("f3").toString(), "No");
+                    Assert.assertEquals(record.get("f4").toString(), "Yes");
+                    Assert.assertEquals(record.get("g1").toString(), "Yes");
+                    Assert.assertEquals(record.get("g2").toString(), "No");
+                    Assert.assertEquals(record.get("g3").toString(), "Yes");
+                    Assert.assertEquals(record.get("g4").toString(), "No");
+                    break;
+                case "dom2.com":
+                    Assert.assertEquals(record.get("f1").toString(), "Yes");
+                    Assert.assertEquals(record.get("f2").toString(), "No");
+                    Assert.assertEquals(record.get("f3").toString(), "Yes");
+                    Assert.assertEquals(record.get("f4").toString(), "No");
+                    Assert.assertEquals(record.get("g1").toString(), "No");
+                    Assert.assertEquals(record.get("g2").toString(), "Yes");
+                    Assert.assertEquals(record.get("g3").toString(), "No");
+                    Assert.assertEquals(record.get("g4").toString(), "Yes");
+                    break;
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
     private void prepareSimplePivotData(String avroDir, String fileName) {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
@@ -660,26 +742,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 { "dom1.com", "f2", 3, 121L }, { "dom1.com", "f2", 2, 122L }, { "dom2.com", "f1", 1, 123L },
                 { "dom2.com", "f2", 2, 125L }, { "dom2.com", "f3", 4, 124L }, { "dom2.com", "f3", 1, 122L },
                 { "dom2.com", "f2", 3, 121L }, { "dom2.com", "f2", 2, 122L } };
-
-        uploadAvro(data, avroDir, fileName);
-    }
-
-    private void prepareDepivotData(String avroDir, String fileName) {
-        Object[][] data = new Object[][] {
-                { "dom1.com", "topic1", 1.0, "topic2", 2.0, "topic3", 3.0, "topic4", 4.0, 123L },
-                { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L } };
-
-        uploadDepivotAvro(data, avroDir, fileName);
-    }
-
-    private void prepareBitEncodeData(String avroDir, String fileName) {
-        Object[][] data = new Object[][] {
-                { "dom1.com", "f1", 1, 123L }, //
-                { "dom1.com", "f2", 2, 125L }, //
-                { "dom1.com", "f3", 3, 124L }, //
-                { "dom2.com", "f2", 4, 101L }, //
-                { "dom2.com", "f3", 2, 102L }
-        };
 
         uploadAvro(data, avroDir, fileName);
     }

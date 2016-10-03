@@ -15,7 +15,13 @@ public class BitCodeBook implements Serializable {
     }
 
     public void setBitsPosMap(Map<String, Integer> bitsPosMap) {
-        this.bitsPosMap = bitsPosMap;
+        Map<String, Integer> copy = new HashMap<>();
+        if (bitsPosMap != null) {
+            for (Map.Entry<String, Integer> entry: bitsPosMap.entrySet()) {
+                copy.put(entry.getKey(), entry.getValue());
+            }
+        }
+        this.bitsPosMap = copy;
     }
 
     public Algorithm getAlgorithm() {

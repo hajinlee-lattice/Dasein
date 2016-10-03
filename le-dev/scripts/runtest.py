@@ -31,9 +31,9 @@ def testOpts(args):
     opts = ['-Pgenerate'] if args.project == 'security' else []
     if args.groups is None:
         testPattern = '-Dtest=%s' % args.test if args.test[-6:] == 'TestNG' else '-Dtest=*%s*' % args.test
-        return opts + ['-P%s' % p for p in args.profiles.split(',')] + [testPattern, 'clean', args.command]
+        return opts + ['-P%s' % p for p in args.profiles.split(',')] + [testPattern, 'clean'] +  args.command.split(',')
     else:
-        return opts + ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, '-Dtest=*%s*' % args.test, 'clean', args.command]
+        return opts + ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, '-Dtest=*%s*' % args.test, 'clean'] + args.command.split(',')
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')

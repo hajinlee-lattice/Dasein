@@ -41,6 +41,10 @@
                                     <value>file:///${project.basedir}/src/test/resources/log4j.properties</value>
                                 </systemProperty>
                             </systemProperties>
+                            <scanIntervalSeconds>0</scanIntervalSeconds>
+                            <stopPort>10976</stopPort>
+                            <stopKey>STOP</stopKey>
+                            <stopWait>10</stopWait>
                         </configuration>
                         <dependencies>
                             <dependency>
@@ -54,6 +58,51 @@
                                 <version>5.0.2</version>
                             </dependency>
                         </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>tomcat</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.tomcat.maven</groupId>
+                        <artifactId>tomcat7-maven-plugin</artifactId>
+                        <version>${tomcat.plugin.version}</version>
+                        <configuration>
+                            <port>8076</port>
+                            <path>/</path>
+                            <additionalClasspathDirs>
+                                <additionalClasspathDir>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathDir>
+                                <additionalClasspathDir>${env.JAVA_HOME}/lib/tools.jar</additionalClasspathDir>
+                            </additionalClasspathDirs>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>log4j.configuration</name>
+                                    <value>file:///${project.basedir}/src/test/resources/log4j.properties</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-tomcat</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run-war</goal>
+                                </goals>
+                                <configuration>
+                                    <fork>true</fork>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-tomcat</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>shutdown</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
