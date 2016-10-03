@@ -45,12 +45,4 @@ public class InternalResource extends InternalResourceBase {
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
-    @RequestMapping(value = "/externalcolumncache", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Invalidate and rebuild caches in ExternalColumnService")
-    public String invalidateExternalColumnsCache() {
-        externalColumnService.loadCache();
-        return "OK";
-    }
-
 }
