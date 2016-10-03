@@ -132,6 +132,7 @@ angular.module('lp.marketo.enrichment', [
     vm.save = function() {
         var saved_marketoMatchFields = [];
         _.each(vm.match_fields, function(value, key){
+            vm.selected_fields[key] = vm.marketo_field[key] || 'null';
             saved_marketoMatchFields.push({
                 marketoFieldName: vm.marketo_field[key],
                 marketo_match_field_name: value.data.marketo_match_field_name,
