@@ -16,31 +16,38 @@
 			<table class="unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
-						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
 					</tr>
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="field in vm.FileHeaders">
+                    <tr ng-repeat="field in vm.fieldMappings">
 						<td class="field_mapping_label">
-							<label for="fieldType_{{ field }}">{{ field }}</label>
+							<label for="fieldType_{{ field.mappedField }}">{{ field.mappedField }}</label>
 						</td>
 						<td class="field-mapping-inputs">
                             <select required
-                            		name="mapping_lattice_field_select_{{ vm.fieldsMap[field].mappedField }}"
+                            		name="mapping_lattice_field_select_{{ field.mappedField }}"
                             		class="form-control"
-	                            	ng-model="vm.fieldsMap[field].userField"
-	                            	ng-change="vm.changeLatticeField(vm.fieldsMap[field], field)">
-	                            <option value="{{vm.fieldsMap[field].userField}}"
-	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(field) > -1) }"
-	                            		ng-selected="true">
-	                            	{{vm.fieldsMap[field].userField}}
+                            		ng-class="{ 'disabled': field.userField == vm.ignoredFieldName }"
+	                            	ng-model="field.userField"
+	                            	ng-change="vm.changeLatticeField(field, field.userField)">
+	                            <option value="{{ vm.ignoredFieldName }}"
+	                            		ng-if="field.userField && field.userField != vm.ignoredFieldName"
+	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(field.userField) > -1) }"
+	                            		ng-selected="!field.userField">
+	                            	{{ vm.ignoredFieldName }}
 	                            </option>
-	                            <option value="{{UnmappedField}}"
+	                            <option value="{{ field.userField }}"
+	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(field.userField) > -1) }"
+	                            		ng-selected="true">
+	                            	{{ field.userField }}
+	                            </option>
+	                            <option value="{{ UnmappedField }}"
 	                            		ng-class="{ 'required': (vm.RequiredFields.indexOf(UnmappedField) > -1) }"
 	                            		ng-repeat="UnmappedField in vm.AvailableFields">
-	                            	{{UnmappedField}}
+	                            	{{ UnmappedField }}
 	                            </option>
                             </select>
 						</td>

@@ -1,7 +1,7 @@
 angular
 .module('lp.create.import')
 .controller('ScoreFieldsController', function(
-    $scope, $state, $stateParams, $timeout, ResourceUtility, ScoreLeadEnrichmentModal,
+    $scope, $state, $stateParams, $timeout, $rootScope, ResourceUtility, ScoreLeadEnrichmentModal,
     ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
 ) {
     var vm = this;
@@ -19,7 +19,8 @@ angular
         AvailableFields: [],
         FormValidated: true,
         initialized: false,
-        modelId: $stateParams.modelId
+        modelId: $stateParams.modelId,
+        ignoredFieldName: '-- Unmapped Field --'
     });
 
     vm.init = function() {
@@ -49,6 +50,8 @@ angular
 
             if (field.userField) {
                 vm.UserFields.push(field.userField);
+            } else {
+                field.userField = vm.ignoredFieldName;
             }
 
             if (field.mappedField) {
@@ -73,10 +76,10 @@ angular
 
         vm.refreshLatticeFields();
 
-        setTimeout(function() {
+        $timeout(function() {
             vm.validateForm();
-            $scope.$digest();
-        },1);
+            $rootScope.$apply();
+        }, 100);
     }
 
     vm.clickReset = function($event) {
@@ -95,10 +98,10 @@ angular
 
         // build ignoredFields list from temp 'ignored' fieldMapping property
         
-        FieldDocument.fieldMappings = vm.fieldMappings.filter(function(a) { return a.userField });
+        FieldDocument.fieldMappings = vm.fieldMappings.filter(function(field) { return field.userField != vm.ignoredFieldName });
         
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
-            ShowSpinner('Executing Modeling Job...');
+            ShowSpinner('Preparing Scoring Job...');
 
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName);
             /*
@@ -121,7 +124,7 @@ angular
     vm.validateIsReserved = function(name, mapping) {
         var isReserved = !!vm.UnmappedFieldsMap[mapping.mappedField];
         
-        if ($scope.fieldMappingForm[name + mapping.userField]) {
+        if (mapping.userField && $scope.fieldMappingForm[name + mapping.userField]) {
             $scope.fieldMappingForm[name + mapping.userField].$setValidity("Reserved", !isReserved);
         }
     }
@@ -131,14 +134,14 @@ angular
         var isDuplicate = false;
 
         vm.fieldMappings.forEach(function(field) {
-            if (field.mappedField == value && !field.ignored) {
+            if (field.userField != vm.ignoredFieldName && field.mappedField == value && !field.ignored) {
                 if (mapping.userField != field.userField) {
                     isDuplicate = true;
                 }
             }
         }); 
         
-        if ($scope.fieldMappingForm[name + mapping.userField]) {
+        if (mapping.userField != vm.ignoredFieldName && $scope.fieldMappingForm[name + mapping.userField]) {
             $scope.fieldMappingForm[name + mapping.userField].$setValidity("Duplicate", !isDuplicate);
         }
     }
@@ -149,7 +152,7 @@ angular
 
         // make sure there are no empty drop-down selection
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
+            if (fieldMapping.userField != vm.ignoredFieldName && !fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                 vm.FormValidated = false;
             }
 
