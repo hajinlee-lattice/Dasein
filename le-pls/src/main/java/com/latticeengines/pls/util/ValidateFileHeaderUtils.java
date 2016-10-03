@@ -83,11 +83,15 @@ public class ValidateFileHeaderUtils {
             }
             int i = 0;
             while (i < MAX_NUM_ROWS && csvRecordIterator.hasNext()) {
-                String columnField = csvRecordIterator.next().get(columnHeaderName);
-                if (columnField != null && !columnField.isEmpty()) {
-                    columnFields.add(columnField);
+                try {
+                    String columnField = csvRecordIterator.next().get(columnHeaderName);
+                    if (columnField != null && !columnField.isEmpty()) {
+                        columnFields.add(columnField);
+                    }
+                    i++;
+                } catch (IllegalArgumentException exp) {
+                    continue;
                 }
-                i++;
             }
 
             return columnFields;
