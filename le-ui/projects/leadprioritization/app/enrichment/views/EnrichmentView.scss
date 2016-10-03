@@ -62,7 +62,7 @@
                     }
                 }
                 .tag {
-                    margin-top: 14px;
+                    margin-top: 4px;
                 }
             }
             li.categories {
@@ -131,6 +131,9 @@
                                         width: 15px;
                                         background-color: #222;
                                     }
+                                    &.show-subcategory {
+                                        font-weight: bold;
+                                    }
                                 }
                                 .subcategory-arrow {
                                     &.subcategory-toggle {
@@ -196,6 +199,10 @@
                                         }
                                     }
                                     &.active {
+                                        .subcategory-name {
+                                            font-weight: bold;
+                                            color: #3989c4;
+                                        }
                                         .change-category {
                                             color: #3989c4;
                                             &:after {
@@ -250,6 +257,12 @@
                     }
                 }
             }
+            li.menu {
+                white-space: nowrap;
+            }
+            button.save {
+                display: none;
+            }
             .button, a.button {
                 border-radius: 0;
                 padding: 6px 9px;
@@ -274,6 +287,11 @@
                 transition: none;
                 border: 1px solid rgba(0,0,0,.2);
                 box-shadow: 0 7px 0 -5px rgba(0, 0, 0, .05);
+            }
+            ul.subheader {
+                button.save:not([disabled]) {
+                    display: inline-block;
+                }
             }
         }
     }
@@ -333,7 +351,7 @@
                     border-bottom: 1px solid #f1f1f1;
                 }
                 .fa {
-                    position: realtive;
+                    position: relative;
                     top: -1px;
                     font-size: 10px;
                     color: white;
@@ -341,6 +359,7 @@
                     border: solid 1px #569339;
                     padding: 3px;
                     padding-bottom: 2px;
+                    margin-right: 3px;
                 }
                 .badge {
                     color: #3989c4;

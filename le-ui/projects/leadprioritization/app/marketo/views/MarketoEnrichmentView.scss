@@ -1,4 +1,4 @@
-[data-x-controller="MarketoEnrichmentController"] {
+.container.MarketoEnrichmentController {
     padding: 10px;
     section.step {
         padding: 18px 0;
@@ -81,6 +81,12 @@
                             overflow: auto;
                             &.dashed {
                                 border-style: dashed;
+                            }
+                        }
+                        .webhook-url {
+                            .attribute {
+                                white-space: nowrap;
+                                overflow: auto;
                             }
                         }
                         .instructions-image {

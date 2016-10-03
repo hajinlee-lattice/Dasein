@@ -374,7 +374,7 @@ angular.module('lp.enrichment.leadenrichment', [
         getEnrichmentData({max: enrichment_chunk_size});
         vm.categories = EnrichmentCategories.data;
         _.each(vm.categories, function(value, key){
-            var subcategory = getEnrichmentSubcategories(value);
+            getEnrichmentSubcategories(value);
         });
 
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;

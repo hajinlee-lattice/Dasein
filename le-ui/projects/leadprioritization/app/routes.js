@@ -573,6 +573,15 @@ angular
                 },
                 "main@": {
                     resolve: {
+                        EnrichmentData: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getEnrichments().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
                         MarketoCredential: function($q, $stateParams, MarketoService) {
                             var deferred = $q.defer();
                             var id = $stateParams.id;
@@ -587,7 +596,7 @@ angular
                             var deferred = $q.defer();
 
                             MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
-                                deferred.resolve(result.data);
+                                deferred.resolve(result);
                             });
 
                             return deferred.promise;

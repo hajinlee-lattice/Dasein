@@ -1,8 +1,8 @@
 angular.module('lp.marketo.enrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('MarketoEnrichmentController', function($scope, $timeout, $state, $stateParams, 
-    BrowserStorageUtility, MarketoCredential, MarketoMatchFields) {
+.controller('MarketoEnrichmentController', function($scope, $interval, $timeout, $state, $stateParams, $filter, $q,
+    BrowserStorageUtility, EnrichmentData, MarketoCredential, MarketoMatchFields, MarketoService) {
     var vm = this;
 
     angular.extend(vm, {
@@ -11,18 +11,18 @@ angular.module('lp.marketo.enrichment', [
         saved: false,
         step: 1,
         marketo_fields: null,
+        marketo_field: [],
         required_fields: [],
         selected_fields: {},
         match_fields: {},
-        enrichments: MarketoCredential.enrichment,
-        marketoMatchFields: MarketoMatchFields,
+        enrichments: EnrichmentData.data,
+        marketoEnrichments: MarketoCredential.enrichment, // Match Fields, labels
+        marketoMatchFields: MarketoMatchFields, // Marketo Fields, dropdowns
         pagesize: 5
     });
 
-    console.log(MarketoMatchFields);
-
     vm.webhook_name = 'Lattice Lead Enrichment';
-    vm.webhook_url = 'url';
+    vm.webhook_url = vm.marketoEnrichments.webhook_url + vm.marketoEnrichments.tenant_credential_guid;
     vm.webhook_request_type = 'POST';
     vm.webhook_request_token = 'JSON';
     vm.webhook_response_type = 'JSON';
@@ -33,34 +33,46 @@ angular.module('lp.marketo.enrichment', [
         email_or_website: {
             label: 'Email or Website',
             required: true,
-            options: [
-                'email@mail.me',
-                'http://www.website.me'
-            ]
+            data: vm.marketoEnrichments.marketo_match_fields[0],
+            options: vm.marketoMatchFields
         },
         company: {
             label: 'Company',
-            options: [
-                'Company, LLC',
-                'Alone, INC.'
-            ]
+            data: vm.marketoEnrichments.marketo_match_fields[1],
+            options: vm.marketoMatchFields
         },
         state: {
             label: 'State',
-            options: [
-                'Graceland',
-                'Eldorado'
-            ]
+            data: vm.marketoEnrichments.marketo_match_fields[2],
+            options: vm.marketoMatchFields
         },
         country: {
             label: 'Country',
-            options: [
-                'Elviso',
-                'USA'
-            ]
+            data: vm.marketoEnrichments.marketo_match_fields[3],
+            options: vm.marketoMatchFields
         }
     }
 
+    var setOptionsSelectedState = $interval(function(){
+        var has_selected = false,
+            are_selected = false;
+        _.each(vm.marketoEnrichments.marketo_match_fields, function(value, key){
+            if(value.marketoFieldName) {
+                has_selected = true;
+            }
+        })
+        var selected = document.querySelectorAll('option[selected="selected"]');
+        _.each(selected, function(value, key){
+            value.selected = true;
+            are_selected = true;
+            if(value.parentElement.attributes.required) {
+                vm.save_ready = true;
+            }
+        });
+        if(has_selected && are_selected) {
+            $interval.cancel(setOptionsSelectedState);
+        }
+    }, 1000);
 
     vm.open = function(opts) {
         var opts = opts || {};
@@ -84,14 +96,6 @@ angular.module('lp.marketo.enrichment', [
             }
         }
     }
-    
-    vm.save = function() {
-        _.each(vm.match_fields, function(value, key){
-            vm.selected_fields[key] = vm.marketo_field[key] || null;
-        })
-        vm.saved = true;
-        vm.open({step: 2});
-    }
 
     vm.changeField = function(type) {
         var type = type || '',
@@ -113,6 +117,29 @@ angular.module('lp.marketo.enrichment', [
         } else {
             vm.save_ready = true;
         }
+    }
+    
+    var UpdateEnrichmentFields = function(credentialId, marketoMatchFields) {
+        var deferred = $q.defer();
+        
+        MarketoService.UpdateEnrichmentFields(credentialId, marketoMatchFields).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+
+    vm.save = function() {
+        var saved_marketoMatchFields = [];
+        _.each(vm.match_fields, function(value, key){
+            saved_marketoMatchFields.push({
+                marketoFieldName: vm.marketo_field[key],
+                marketo_match_field_name: value.data.marketo_match_field_name,
+            });
+        })
+        UpdateEnrichmentFields(vm.params.id, saved_marketoMatchFields);
+        vm.saved = true;
+        vm.open({step: 2});
     }
 
     vm.fieldType = function(fieldType){

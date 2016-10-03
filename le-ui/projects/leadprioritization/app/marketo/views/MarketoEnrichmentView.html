@@ -1,4 +1,4 @@
-<div class="container" data-x-controller="MarketoEnrichmentController">
+<div class="container MarketoEnrichmentController">
     <section id="main-content" class="container">
         <section class="step step-1" ng-class="{active: (!vm.step || !vm.saved || vm.step == 1), ready: true}">
             <h2 ng-click="vm.open({event: $event})"><strong>Step 1:</strong> Matching Fields<span ng-if="vm.step == 1">: <em>Email or Website</em></span></h2>
@@ -18,8 +18,15 @@
                     </div>
                     <div class="field" ng-repeat="(type, field) in vm.match_fields" ng-class="{required: field.required}">
                         <label class="col match" for="{{type}}">{{field.label}}</label>
-                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="value as value for (key, value) in field.options" ng-required="field.required">
+                        <!--
+                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="item.displayName as item.apiName for item in field.options" ng-required="field.required">
                             <option value="">Select Value</option>
+                        </select>
+                        -->
+                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-required="field.required">
+                            <option value="" style="display: none;">Select Value</option>
+                            <option value="" ng-if="!field.required"> -- </option>
+                            <option ng-repeat="(key, item) in field.options" value="{{item.apiName}}" ng-selected="field.data.marketoFieldName == item.apiName" data-type="{{type}}">{{item.displayName}}</option>
                         </select>
                     </div>
                 </form>
@@ -40,18 +47,30 @@
                 <div class="settings">
                     <div class="setting col">
                         <h4>Settings:</h4>
-                        <h5>Webhook Name:</h5>
-                        <div class="attribute dashed">{{vm.webhook_name}}</div>
-                        <h5>URL:</h5>
-                        <div class="attribute dashed">{{vm.webhook_url}}</div>
-                        <h5>Request Type:</h5>
-                        <div class="attribute">{{vm.webhook_request_type}}</div>
-                        <h5>Template:</h5>
-                        <div class="attribute dashed"><pre>{{vm.selected_fields | json}}</pre></div>
-                        <h5>Request Token Encodeing:</h5>
-                        <div class="attribute">{{vm.webhook_request_token}}</div>
-                        <h5>Request Type:</h5>
-                        <div class="attribute">{{vm.webhook_response_type}}</div>
+                        <ul>
+                            <li class="webhook-name">
+                                <h5>Webhook Name:</h5>
+                                <div class="attribute dashed">{{vm.webhook_name}}</div>
+                            </li>
+                            <li class="webhook-url">
+                                <h5>URL:</h5>
+                                <div class="attribute dashed">{{vm.webhook_url}}</div>
+                                <h5>Request Type:</h5>
+                            </li>
+                            <li class="webhook-template">
+                                <div class="attribute">{{vm.webhook_request_type}}</div>
+                                <h5>Template:</h5>
+                                <div class="attribute dashed"><pre>{{vm.selected_fields | json}}</pre></div>
+                            </li>
+                            <li class="request-token">
+                                <h5>Request Token Encodeing:</h5>
+                                <div class="attribute">{{vm.webhook_request_token}}</div>
+                            </li>
+                            <li class="request-type">
+                                <h5>Request Type:</h5>
+                                <div class="attribute">{{vm.webhook_response_type}}</div>
+                            </li>
+                        </ul>
                     </div>
                     <div class="setting col">
                         <h4>Help:</h4>
@@ -111,7 +130,7 @@
 
                         <ul class="enrichments">
                             <li class="box" 
-                                ng-repeat="enrichment in (filteredList = (vm.enrichments.marketo_match_fields
+                                ng-repeat="enrichment in (filteredList = (vm.enrichments
                                 | filter: vm.query
                                 | orderBy: SortOrder
                                 | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
