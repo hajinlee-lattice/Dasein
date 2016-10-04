@@ -76,8 +76,6 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small_Testing.csv";
 
-    // TODO change this value to a smaller value, at least 0.5, after fixing
-    // PLS-1944
     private static final double DIFFERENCE_THRESHOLD = 0.5;
 
     private Path mrScoreResultDir;
