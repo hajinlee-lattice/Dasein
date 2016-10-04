@@ -61,7 +61,7 @@
     "proddev":  "npm run sass && concurrent -kr \"grunt proddev\" \"npm run sentry\"",
     "qa":   "grunt qa",
     "prod": "grunt prod",
-    "build":"concurrent \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\"",
+    "build":"concurrent \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run adminbuild\"",
     "sass": "concurrent \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\"",
     "sentry":   "concurrent \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\"",
     "//": "individual projects",
