@@ -337,6 +337,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setAttributes(fields);
         parameters.setSourceModelSummaryId(copiedModelSummary.getId());
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
+        parameters.setExcludePropDataAttributes(true);
 
         ResponseDocument<?> response;
         response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),

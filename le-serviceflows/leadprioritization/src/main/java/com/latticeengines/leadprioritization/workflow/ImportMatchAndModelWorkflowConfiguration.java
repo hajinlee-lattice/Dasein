@@ -150,6 +150,12 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            match.setSkipStep(skipMatchingStep);
+            matchResult.setSkipStep(skipMatchingStep);
+            return this;
+        }
+
         public Builder matchType(MatchCommandType matchCommandType) {
             match.setMatchCommandType(matchCommandType);
             return this;

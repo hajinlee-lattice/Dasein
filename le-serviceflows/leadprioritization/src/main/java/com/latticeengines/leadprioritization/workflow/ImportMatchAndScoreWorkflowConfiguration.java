@@ -77,6 +77,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             scoreWorkflowConfigurationBuilder.modelId(modelId);
             return this;
         }
+        
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            scoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
+            return this;
+        }
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             scoreWorkflowConfigurationBuilder.matchClientDocument(matchClientDocument);

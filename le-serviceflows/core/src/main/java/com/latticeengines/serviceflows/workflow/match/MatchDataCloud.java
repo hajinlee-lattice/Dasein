@@ -54,6 +54,13 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         putObjectInContext(MATCH_RESULT_TABLE, matchResultTable);
     }
 
+    @Override
+    public void skipStep() {
+        log.info("skipping matching step and registering event table now:");
+        putObjectInContext(EVENT_TABLE,
+                metadataProxy.getTable(configuration.getCustomerSpace().toString(), configuration.getInputTableName()));
+    }
+
     private Table preMatchEventTable() {
         Table preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getInputTableName());
@@ -76,7 +83,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         MatchInput matchInput = new MatchInput();
         matchInput.setYarnQueue(getConfiguration().getMatchQueue());
         matchInput.setTableName(preMatchEventTable.getName());
-        
+
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
             throw new RuntimeException("Must specify either CustomizedColumnSelection or PredefinedColumnSelection");
@@ -104,7 +111,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         }
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
         log.info("Using Data Cloud Version = " + getConfiguration().getDataCloudVersion());
-        
+
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
@@ -142,7 +149,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } catch (Exception e) {
             throw new RuntimeException("Failed to extract avro schema from input avro.", e);
         }
-        
+
         Schema schema = AvroUtils.alignFields(providedSchema, extractedSchema);
 
         inputBuffer.setSchema(schema);
@@ -189,8 +196,8 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {
-            throw new IllegalStateException(
-                    "The terminal status of match is " + status + " instead of " + MatchStatus.FINISHED);
+            throw new IllegalStateException("The terminal status of match is " + status + " instead of "
+                    + MatchStatus.FINISHED);
         }
 
     }

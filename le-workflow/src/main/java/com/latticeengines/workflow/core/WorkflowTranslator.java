@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.FailureReportingListener;
 import com.latticeengines.workflow.listener.LEJobListener;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -27,6 +28,7 @@ import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.listener.LogJobListener;
@@ -49,7 +51,8 @@ public class WorkflowTranslator {
 
     @PostConstruct
     public void init() {
-        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(), new FailureReportingListener(workflowJobEntityMgr));
+        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(), new FailureReportingListener(
+                workflowJobEntityMgr));
     }
 
     public Job buildWorkflow(String name, Workflow workflow) throws Exception {
@@ -72,14 +75,14 @@ public class WorkflowTranslator {
         return simpleJobBuilder.build();
     }
 
-    protected Step step(AbstractStep<?> step) throws Exception {
+    protected Step step(AbstractStep<? extends BaseStepConfiguration> step) throws Exception {
         return stepBuilderFactory.get(step.name()) //
                 .tasklet(tasklet(step)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //
                 .build();
     }
 
-    protected Tasklet tasklet(final AbstractStep<?> step) {
+    protected Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step) {
         return new Tasklet() {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
@@ -93,13 +96,17 @@ public class WorkflowTranslator {
 
                 if (!step.isDryRun()) {
                     boolean configurationWasSet = step.setup();
-                    if (configurationWasSet) {
-                        validateConfiguration(step);
+                    if (step.getConfiguration().isSkipStep()) {
+                        step.skipStep();
+                    } else {
+                        step.onConfigurationInitialized();
+                        if (configurationWasSet) {
+                            validateConfiguration(step);
+                        }
+                        step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
+                        step.execute();
+                        step.onExecutionCompleted();
                     }
-
-                    step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
-                    step.execute();
-                    step.onExecutionCompleted();
                 }
 
                 return RepeatStatus.FINISHED;

@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -129,6 +130,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
                 .inputTableName(sourceFile.getTableName()) //
+                .skipMatchingStep(summary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchClientDocument(matchClientDocument) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //

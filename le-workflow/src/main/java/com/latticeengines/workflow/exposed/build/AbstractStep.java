@@ -27,7 +27,6 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     private Class<T> configurationClass;
     private JobParameters jobParameters;
 
-
     public abstract void execute();
 
     @SuppressWarnings("unchecked")
@@ -62,13 +61,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public void setConfiguration(T configuration) {
         this.configuration = configuration;
         log.info("Configuration instance set for " + configurationClass.getName());
-        onConfigurationInitialized();
+
     }
 
-    protected void onConfigurationInitialized() {
+    public void onConfigurationInitialized() {
     }
 
     public void onExecutionCompleted() {
+    }
+
+    public void skipStep() {
+        log.info("Skipping step: " + configurationClass.getName());
     }
 
     /**

@@ -104,6 +104,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
                         parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,

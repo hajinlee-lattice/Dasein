@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -95,6 +96,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourcePort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName(tableToScore) //
+                .skipMatchingStep(summary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //

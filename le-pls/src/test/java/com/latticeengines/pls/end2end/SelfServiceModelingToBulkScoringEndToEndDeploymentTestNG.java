@@ -393,7 +393,6 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     public class ScoreResult {
 
         private static final double EPS = 1e-6;
-        private static final double DELTA = 1;
 
         public Double rawScore;
         public Double score;

@@ -1,18 +1,19 @@
 package com.latticeengines.workflow.exposed.build;
 
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 public class WorkflowBuilder {
 
     private Workflow workflow = new Workflow();
 
-    public WorkflowBuilder next(AbstractStep<?> step) {
+    public WorkflowBuilder next(AbstractStep<? extends BaseStepConfiguration> step) {
         workflow.step(step);
         return this;
     }
 
     public WorkflowBuilder next(AbstractWorkflow<?> nextWorkflow) {
-        for (AbstractStep<?> step : nextWorkflow.defineWorkflow().getSteps()) {
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
             workflow.step(step);
         }
 

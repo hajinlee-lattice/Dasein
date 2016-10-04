@@ -144,6 +144,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .dedupFlowExtraSources(extraSources) //
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .skipMatchingStep(parameters.getExcludePropDataColumns()) //
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
