@@ -53,27 +53,6 @@ angular.module('lp.marketo.enrichment', [
         }
     }
 
-    var setOptionsSelectedState = $interval(function(){
-        var has_selected = false,
-            are_selected = false;
-        _.each(vm.marketoEnrichments.marketo_match_fields, function(value, key){
-            if(value.marketoFieldName) {
-                has_selected = true;
-            }
-        })
-        var selected = document.querySelectorAll('option[selected="selected"]');
-        _.each(selected, function(value, key){
-            value.selected = true;
-            are_selected = true;
-            if(value.parentElement.attributes.required) {
-                vm.save_ready = true;
-            }
-        });
-        if(has_selected && are_selected) {
-            $interval.cancel(setOptionsSelectedState);
-        }
-    }, 1000);
-
     vm.open = function(opts) {
         var opts = opts || {};
         if(opts.step) {
@@ -97,13 +76,31 @@ angular.module('lp.marketo.enrichment', [
         }
     }
 
+    vm.selected_options = {};
+    vm.disabled_options = [];
+    _.each(vm.match_fields, function(value, key){
+        if(value.data.marketoFieldName) {
+            vm.selected_options[key] = value.data.marketoFieldName;
+            vm.disabled_options.push(value.data.marketoFieldName);
+        }
+    })
+    vm.selectOption = function(type, option) {
+        vm.selected_options[type] = option;
+        vm.disabled_options = [];
+        _.each(vm.selected_options, function(value, key){
+            if(!vm.disabled_options.includes(value)) {
+                vm.disabled_options.push(value);
+            }
+        });
+    }
+
     vm.changeField = function(type) {
         var type = type || '',
             value = vm.marketo_field[type],
             required = vm.match_fields[type].required;
 
         if(required) {
-            if(value) {
+            if(vm.marketo_field[type]) {
                 var index = vm.required_fields.indexOf(type);
                 vm.required_fields.splice(index, 1);
             } else {
@@ -112,7 +109,8 @@ angular.module('lp.marketo.enrichment', [
                 }
             }
         }
-        if(vm.required_fields.length) {
+
+        if(vm.required_fields.length && !vm.save_ready) {
             vm.save_ready = false;
         } else {
             vm.save_ready = true;
@@ -131,8 +129,9 @@ angular.module('lp.marketo.enrichment', [
 
     vm.save = function() {
         var saved_marketoMatchFields = [];
+        console.log(vm.marketo_field);
         _.each(vm.match_fields, function(value, key){
-            vm.selected_fields[key] = vm.marketo_field[key] || 'null';
+            vm.selected_fields[key] = vm.marketo_field[key] || null;
             saved_marketoMatchFields.push({
                 marketoFieldName: vm.marketo_field[key],
                 marketo_match_field_name: value.data.marketo_match_field_name,
@@ -155,10 +154,36 @@ angular.module('lp.marketo.enrichment', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
+    var setOptionsSelectedState = $interval(function(){
+        var has_selected = false,
+            are_selected = false;
+        _.each(vm.marketoEnrichments.marketo_match_fields, function(value, key){
+            if(value.marketoFieldName) {
+                has_selected = true;
+            }
+        })
+        var selected = document.querySelectorAll('option[selected="selected"]');
+        _.each(selected, function(value, key){
+            vm.marketo_field[value.parentNode.name] = value.value;
+            //value.selected = true;
+            are_selected = true;
+            if(value.parentElement.attributes.required) {
+                vm.save_ready = true;
+            }
+        });
+        if(has_selected && are_selected) {
+            $interval.cancel(setOptionsSelectedState);
+        }
+    }, 1000);
+
     vm.init = function() {
-        _.each(vm.match_fields, function(field, key){
-            if(field.required && vm.required_fields.indexOf(key) == -1) {
+        _.each(vm.match_fields, function(value, key){
+            if(value.required && vm.required_fields.indexOf(key) == -1) {
                 vm.required_fields.push(key);
+            }
+            vm.selected_fields[key] = value.data.marketoFieldName || null;
+            if(value.data.marketoFieldName) {
+                vm.saved = true;
             }
         });
     }

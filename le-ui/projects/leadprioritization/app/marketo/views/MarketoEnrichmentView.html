@@ -19,14 +19,14 @@
                     <div class="field" ng-repeat="(type, field) in vm.match_fields" ng-class="{required: field.required}">
                         <label class="col match" for="{{type}}">{{field.label}}</label>
                         <!--
-                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="item.displayName as item.apiName for item in field.options" ng-required="field.required">
+                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="item.displayName as item.apiName for item in field.options track by item.apiName" ng-required="field.required">
                             <option value="">Select Value</option>
                         </select>
                         -->
-                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-required="field.required">
+                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type); vm.selectOption(type, vm.marketo_field[type]);" ng-required="field.required">
                             <option value="" style="display: none;">Select Value</option>
                             <option value="" ng-if="!field.required"> -- </option>
-                            <option ng-repeat="(key, item) in field.options" value="{{item.apiName}}" ng-selected="field.data.marketoFieldName == item.apiName" data-type="{{type}}">{{item.displayName}}</option>
+                            <option ng-repeat="(key, item) in field.options" value="{{item.apiName}}" ng-selected="field.data.marketoFieldName == item.apiName" ng-disabled="vm.disabled_options.includes(item.apiName) && item.apiName !== vm.selected_options[type]" data-type="{{type}}">{{item.displayName}}</option>
                         </select>
                     </div>
                 </form>

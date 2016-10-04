@@ -11,7 +11,8 @@ angular.module('lp.enrichment.leadenrichment')
         toggle: {
             show: {
                 selected: false,
-                premium: false
+                premium: false,
+                internal: false
             },
             hide: {
                 premium: false
