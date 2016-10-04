@@ -162,6 +162,7 @@ public class ModelingHdfsUtils {
             Artifact newArtifact = new Artifact();
             newArtifact.setPath(hdfsPath);
             newArtifact.setArtifactType(artifactType);
+            newArtifact.setName(artifact.getName());
             newArtifactsMap.put(artifactType.getCode(), newArtifact);
         }
         return newArtifactsMap;
