@@ -28,6 +28,6 @@ process.on('SIGTERM', err => {
     console.log(chalk.red(DateUtil.getTimeStamp() + ':SIGTERM>'), err);
 });
 
-process.on('ECONNRESET', err => { 
+process.on('ECONNRESET', err => {
     console.log(chalk.red(DateUtil.getTimeStamp() + ':ECONNRESET>'), err);
 });

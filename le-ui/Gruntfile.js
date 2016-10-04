@@ -204,6 +204,10 @@ module.exports = function (grunt) {
         'run:pm2'
     ]);
 
+    grunt.registerTask('dev_admin', devText, [
+        'env:dev_admin',
+        'run:node'
+    ]);
 
     grunt.registerTask('pm2', devText, [
         'env:qa',
