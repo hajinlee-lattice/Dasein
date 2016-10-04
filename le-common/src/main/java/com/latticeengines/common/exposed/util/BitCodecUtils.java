@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.IOException;
 import java.util.BitSet;
+import java.util.Map;
 
 import org.xerial.snappy.Snappy;
 

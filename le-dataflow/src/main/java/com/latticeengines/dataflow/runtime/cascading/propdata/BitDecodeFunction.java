@@ -1,12 +1,11 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +30,7 @@ public class BitDecodeFunction extends BaseOperation implements Function {
     private final String encodedColumn;
     private int[] bitPositions;
     private Map<String, Integer> bitPositionIdx = new HashMap<>();
-    private String[] decodeFields;
+    private List<String> decodeFields;
 
     public BitDecodeFunction(Fields fieldDeclaration, String encodedColumn, String[] decodedFields,
             BitCodeBook codeBook) {
@@ -41,8 +40,9 @@ public class BitDecodeFunction extends BaseOperation implements Function {
         }
         this.codeBook = codeBook;
         this.encodedColumn = encodedColumn;
-        this.decodeFields = decodedFields;
-        assignBitPos();
+        this.decodeFields = Arrays.asList(decodedFields);
+
+        bitPositions = codeBook.assignBitPosAndUpdateIdxMap(this.decodeFields, bitPositionIdx);
     }
 
     @Override
@@ -56,29 +56,6 @@ public class BitDecodeFunction extends BaseOperation implements Function {
         }
     }
 
-    private void assignBitPos() {
-        switch (codeBook.getDecodeStrategy()) {
-        case BOOLEAN_YESNO:
-            assignSingleDigitBitPos();
-            break;
-        default:
-        }
-    }
-
-    private void assignSingleDigitBitPos() {
-        List<Integer> bitPosList = new ArrayList<>();
-        for (String decodeField : decodeFields) {
-            if (codeBook.hasKey(decodeField)) {
-                int bitPos = codeBook.getBitPosForkey(decodeField);
-                bitPositionIdx.put(decodeField, bitPosList.size());
-                bitPosList.add(bitPos);
-            } else {
-                log.warn("Cannot find field " + decodeField + " from the codebook.");
-            }
-        }
-        bitPositions = ArrayUtils.toPrimitive(bitPosList.toArray(new Integer[bitPosList.size()]));
-    }
-
     private Tuple decode(TupleEntry arguments) {
         String encodedStr = arguments.getString(encodedColumn);
 
@@ -89,7 +66,7 @@ public class BitDecodeFunction extends BaseOperation implements Function {
             throw new RuntimeException("Failed to decode string " + encodedStr, e);
         }
 
-        Map<String, Object> valueMap = translateBits(bits);
+        Map<String, Object> valueMap = codeBook.translateBits(bits, decodeFields, bitPositionIdx);
         Tuple result = Tuple.size(fieldDeclaration.size());
         for (int i = 0; i < fieldDeclaration.size(); i++) {
             String fieldName = (String) fieldDeclaration.get(i);
@@ -101,27 +78,6 @@ public class BitDecodeFunction extends BaseOperation implements Function {
         }
 
         return result;
-    }
-
-    private Map<String, Object> translateBits(boolean[] bits) {
-        switch (codeBook.getDecodeStrategy()) {
-        case BOOLEAN_YESNO:
-            return translateBitsToYesNo(bits);
-        default:
-            throw new UnsupportedOperationException("Unsupported decode strategy " + codeBook.getDecodeStrategy());
-        }
-    }
-
-    private Map<String, Object> translateBitsToYesNo(boolean[] bits) {
-        Map<String, Object> valueMap = new HashMap<>();
-        for (String decodeField : decodeFields) {
-            if (bitPositionIdx.containsKey(decodeField)) {
-                int idx = bitPositionIdx.get(decodeField);
-                boolean bit = bits[idx];
-                valueMap.put(decodeField, bit ? "Yes" : "No");
-            }
-        }
-        return valueMap;
     }
 
 }

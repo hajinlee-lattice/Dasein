@@ -83,7 +83,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
 
         for (Map.Entry<String, Integer> bitPos : bitPosExpected.entrySet()) {
             Integer posExpected = bitPos.getValue();
-            Integer posGenerated = codeBook.getBitPosForkey(bitPos.getKey());
+            Integer posGenerated = codeBook.getBitPosForKey(bitPos.getKey());
             Assert.assertEquals(posGenerated, posExpected,
                     String.format("Expect the bit position of %s to be %d, but found %d instead", bitPos.getKey(),
                             posExpected, posGenerated));

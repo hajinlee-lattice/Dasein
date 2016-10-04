@@ -77,7 +77,7 @@ public class BitEncodeBuffer extends BaseGroupbyBuffer implements Buffer, Serial
     private List<Integer> encodeKeyExists(TupleEntry arguments, BitCodeBook codeBook) {
         String key = arguments.getString(keyField);
         if (codeBook.hasKey(key)) {
-            return singletonList(codeBook.getBitPosForkey(key));
+            return singletonList(codeBook.getBitPosForKey(key));
         }
         return emptyList();
     }

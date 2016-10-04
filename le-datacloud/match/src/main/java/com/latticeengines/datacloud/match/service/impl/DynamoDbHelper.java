@@ -9,18 +9,22 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.MutableTriple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
@@ -31,6 +35,10 @@ public class DynamoDbHelper implements DbHelper {
 
     @Autowired
     private AccountLookupService accountLookupService;
+
+    @Autowired
+    @Qualifier("accountMasterColumnSelectionService")
+    private ColumnSelectionService columnSelectionService;
 
     @Override
     public boolean accept(String version) {
@@ -70,7 +78,8 @@ public class DynamoDbHelper implements DbHelper {
         for (int i = 0; i < internalRecordsInOrder.size(); i++) {
             LatticeAccount matchedAccount = accountsInOrder.get(i);
             InternalOutputRecord internalOutputRecord = internalRecordsInOrder.get(i);
-            updateInternalRecordByMatchedAccount(internalOutputRecord, matchedAccount, context.getColumnSelection());
+            updateInternalRecordByMatchedAccount(internalOutputRecord, matchedAccount, context.getColumnSelection(),
+                    context.getInput().getDataCloudVersion());
         }
         context.setInternalResults(internalRecordsInOrder);
         return context;
@@ -91,7 +100,7 @@ public class DynamoDbHelper implements DbHelper {
         }
         if (!allIds.isEmpty()) {
             AccountLookupRequest request = new AccountLookupRequest(dataCloudVersion);
-            for (String id: allIds) {
+            for (String id : allIds) {
                 request.addId(id);
             }
             mergedContext.setAccountLookupRequest(request);
@@ -99,17 +108,16 @@ public class DynamoDbHelper implements DbHelper {
         return mergedContext;
     }
 
-
     @Override
     public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
         Map<String, LatticeAccount> allAccounts = new HashMap<>();
-        for (LatticeAccount account: mergedContext.getMatchedAccounts()) {
+        for (LatticeAccount account : mergedContext.getMatchedAccounts()) {
             allAccounts.put(account.getId(), account);
         }
         for (MatchContext context : matchContextList) {
             List<String> idsInOrder = context.getAccountLookupRequest().getIds();
             List<LatticeAccount> accountsInOrder = new ArrayList<>();
-            for (String id: idsInOrder) {
+            for (String id : idsInOrder) {
                 accountsInOrder.add(allAccounts.get(id));
             }
             context.setMatchedAccounts(accountsInOrder);
@@ -142,15 +150,28 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, LatticeAccount account,
-                                                      ColumnSelection columnSelection) {
+            ColumnSelection columnSelection, String dataCloudVersion) {
         List<Column> columns = columnSelection.getColumns();
+        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
+                .getDecodeParameters(columnSelection, dataCloudVersion);
 
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
-        for (Column column: columns) {
+        for (Column column : columns) {
             String columnName = column.getColumnName();
+
+            Map<String, Object> decodedAttributes = new HashMap<>();
+            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry: parameters.entrySet()) {
+                BitCodeBook codeBook = entry.getValue().getLeft();
+                List<String> decodeFields = entry.getValue().getRight();
+                String encodeField = entry.getKey();
+                decodedAttributes.putAll(codeBook.decode(encodeField, decodeFields));
+            }
+
             if (amAttributes.containsKey(columnName)) {
                 queryResult.put(columnName, amAttributes.get(columnName));
+            } else if (decodedAttributes.containsKey(columnName)) {
+                queryResult.put(columnName, decodedAttributes.get(columnName));
             } else {
                 queryResult.put(columnName, null);
             }
