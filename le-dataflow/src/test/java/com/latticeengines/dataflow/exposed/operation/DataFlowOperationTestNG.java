@@ -659,7 +659,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         Object[][] data = new Object[][] {
                 { "dom1.com", BitCodecUtils.encode(new int[]{1, 3}), 1, 123L }, //
-                { "dom2.com", BitCodecUtils.encode(new int[]{0, 2}), 2, 102L }
+                { "dom2.com", BitCodecUtils.encode(new int[]{0, 2}), 2, 102L }, //
+                { "dom3.com", null, 2, 102L }
         };
         uploadAvro(data, avroDir, fileName);
 
@@ -713,6 +714,16 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                     Assert.assertEquals(record.get("g2").toString(), "Yes");
                     Assert.assertEquals(record.get("g3").toString(), "No");
                     Assert.assertEquals(record.get("g4").toString(), "Yes");
+                    break;
+                case "dom3.com":
+                    Assert.assertNull(record.get("f1"));
+                    Assert.assertNull(record.get("f2"));
+                    Assert.assertNull(record.get("f3"));
+                    Assert.assertNull(record.get("f4"));
+                    Assert.assertNull(record.get("g1"));
+                    Assert.assertNull(record.get("g2"));
+                    Assert.assertNull(record.get("g3"));
+                    Assert.assertNull(record.get("g4"));
                     break;
             }
         }
