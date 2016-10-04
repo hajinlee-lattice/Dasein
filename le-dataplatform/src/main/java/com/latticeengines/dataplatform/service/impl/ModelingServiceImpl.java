@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
@@ -465,6 +467,15 @@ public class ModelingServiceImpl implements ModelingService {
         if (afterPart.equals("")) {
             return script;
         }
+
+        // The model quality framework specifies the production version to run;
+        // keep the path as-is
+        Pattern pattern_stack_and_version = Pattern.compile("^/app/[a|b]/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/");
+        Matcher c_stack_and_version = pattern_stack_and_version.matcher(script);
+        if (c_stack_and_version.matches()) {
+            return script;
+        }
+        
         return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
     }
 
