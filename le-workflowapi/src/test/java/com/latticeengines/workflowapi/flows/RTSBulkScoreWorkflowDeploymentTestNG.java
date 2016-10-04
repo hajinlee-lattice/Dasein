@@ -75,6 +75,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
+    private LeadEnrichmentAttributesOperationMap selectedAttributeMap;
+
     protected static String TENANT_ID;
 
     protected Tenant tenant;
@@ -113,7 +115,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private void saveAttributeSelection(CustomerSpace customerSpace) {
         internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
                 plsApiHostPort);
-        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        selectedAttributeMap = checkSelection(customerSpace);
         System.out.println(selectedAttributeMap.getDeselectedAttributes());
         System.out.println(selectedAttributeMap.getSelectedAttributes());
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
@@ -175,10 +177,14 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
             String[] header = reader.readNext();
             System.out.println(Arrays.toString(header));
             Assert.assertEquals(header[header.length - 4], "Score");
-            Assert.assertTrue(header[header.length - 1].contains("Has"));
-            Assert.assertTrue(header[header.length - 2].contains("Has"));
-            Assert.assertTrue(header[header.length - 3].contains("Has"));
+            Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 1]));
+            Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 2]));
+            Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 3]));
         }
+    }
+
+    private boolean headerBelongsToLeadEnrichmentAttributes(String header) {
+        return selectedAttributeMap.getSelectedAttributes().contains(header);
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
