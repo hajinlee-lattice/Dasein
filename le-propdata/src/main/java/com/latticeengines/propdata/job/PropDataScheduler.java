@@ -1,9 +1,11 @@
 package com.latticeengines.propdata.job;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.CronScheduleBuilder;
@@ -46,6 +48,8 @@ public class PropDataScheduler {
     @Autowired
     private ProgressOrchestrator progressOrchestrator;
 
+    private ConcurrentSkipListSet<String> scheduledJobs = new ConcurrentSkipListSet<>();
+
     @PostConstruct
     private void registerJobs() throws SchedulerException {
         scheduler = new StdSchedulerFactory().getScheduler();
@@ -73,6 +77,7 @@ public class PropDataScheduler {
                 }
             }
         }
+        log.info("Following services are scheduled: " + ArrayUtils.toString(scheduledJobs));
     }
 
     private void registerJob(Source source) throws SchedulerException {
@@ -95,11 +100,12 @@ public class PropDataScheduler {
 
     private void scheduleJob(Source source, String serviceName, Object service, Class<? extends Job> jobClass)
             throws SchedulerException {
-        if (service != null) {
+        if (service != null && !scheduledJobs.contains(serviceName)) {
             JobDetail job = JobBuilder.newJob(jobClass).usingJobData("dryrun", dryrun).build();
             job.getJobDataMap().put(serviceName, service);
             job.getJobDataMap().put("serviceFlowsZkConfigService", serviceFlowsZkConfigService);
             scheduler.scheduleJob(job, cronTriggerForSource(source));
+            scheduledJobs.add(serviceName);
         }
     }
 
