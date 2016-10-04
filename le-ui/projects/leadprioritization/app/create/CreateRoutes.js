@@ -117,7 +117,7 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        UnmappedFields: function($q, $stateParams, ImportService, ImportStore) {
+                        FileHeaders: function($q, $stateParams, ImportService, ImportStore) {
                             var deferred = $q.defer();
 
                             ImportService.GetSchemaToLatticeFields($stateParams.csvFileName).then(function(result) {

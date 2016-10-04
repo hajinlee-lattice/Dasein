@@ -277,6 +277,10 @@ section.container.custom-fields {
                 word-wrap: break-word;
                 padding: 0;
                 margin: 0;
+
+                &.required {
+                    font-weight: bold;
+                }
             }
         }
         td {
@@ -326,6 +330,10 @@ section.container.custom-fields {
                 }
                 &.ng-valid.ng-valid-required.disabled {
                     border-left-color: #bbb;
+                }
+                &.ng-valid.ng-valid-required.required,
+                &.required {
+                    border-left-color: #ef6a31;
                 }
             }
         }

@@ -20,10 +20,10 @@
               <a class="button orange-button block-button" href="#" data-ng-click="cancelJobClickConfirm($event)">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
             </div>
             <div class="six columns" ng-show="!jobId && opts.sref">
-              <a class="button orange-button block-button" href="{{opts.sref}}" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+              <a class="button orange-button block-button" ui-sref="{{ opts.sref }}" data-ng-click="cancelClick()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
             </div>
             <div class="six columns" ng-show="!jobId && opts.resetImport">
-              <a class="button orange-button block-button" href="{{opts.sref}}" data-ng-click="resetImport()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
+              <a class="button orange-button block-button" href="{{ opts.sref || '#' }}" data-ng-click="resetImport()">{{ResourceUtility.getString('BUTTON_YES_CANCEL_LABEL')}}</a>
             </div>
           </div>
         </div>
