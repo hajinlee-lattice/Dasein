@@ -16,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -26,8 +27,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -54,10 +55,10 @@ public class MatchCommand implements HasPid {
     @Column(name = "MatchStatus", nullable = false, length = 20)
     private MatchStatus matchStatus;
 
-    @Column(name = "Customer", length=200)
+    @Column(name = "Customer", length = 200)
     protected String customer;
 
-    @Column(name = "ColumnSelection", length=50)
+    @Column(name = "ColumnSelection", length = 50)
     protected String columnSelection;
 
     @Column(name = "CreateTime")
@@ -70,25 +71,28 @@ public class MatchCommand implements HasPid {
     @Column(name = "StatusBeforeFailed", length = 20)
     protected MatchStatus statusBeforeFailed;
 
-    @Column(name = "ErrorMessage", length=1000)
+    @Column(name = "ErrorMessage", length = 1000)
     protected String errorMessage;
 
     @Column(name = "NumRetries")
     protected int numRetries;
 
-    @Column(name = "ApplicationId", length=50)
+    @Column(name = "ApplicationId", length = 50)
     protected String applicationId;
 
     @Column(name = "Progress")
     protected Float progress;
 
-    @Column(name = "ResultLocation", length=400)
+    @Column(name = "ResultLocation", length = 400)
     protected String resultLocation;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "matchCommand")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SUBSELECT)
     private List<MatchBlock> matchBlocks;
+
+    @Transient
+    private String cascadingFlow;
 
     @Override
     @JsonIgnore
@@ -270,6 +274,16 @@ public class MatchCommand implements HasPid {
     @JsonProperty("LatestStatusUpdate")
     private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
         this.latestStatusUpdate = DateTimeUtils.parse(latestStatusUpdateString);
+    }
+
+    @JsonProperty("CascadingFlow")
+    public void setCascadingFlow(String cascadingFlow) {
+        this.cascadingFlow = cascadingFlow;
+    }
+
+    @JsonProperty("CascadingFlow")
+    public String getCascadingFlow() {
+        return cascadingFlow;
     }
 
 }

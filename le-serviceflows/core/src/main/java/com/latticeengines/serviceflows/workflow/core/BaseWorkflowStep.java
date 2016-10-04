@@ -53,6 +53,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MATCH_TABLE = "MATCH_TABLE";
     protected static final String MATCH_ROOT_UID = "MATCH_ROOT_UID";
     protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
+    protected static final String MATCH_IS_CASCADING_FLOW = "MATCH_IS_CASCADING_FLOW";
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
     protected static final String MATCH_PREDEFINED_SELECTION_VERSION = "MATCH_PREDEFINED_SELECTION_VERSION";
     protected static final String MATCH_CUSTOMIZED_SELECTION = "MATCH_CUSTOMIZED_SELECTION";

@@ -89,7 +89,9 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Override
     protected MatchCommand submitBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
         if (input.isBulkOnly() || input.getNumRows() > cascadingBulkRowsThreshold) {
-            return submitCascadingBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+            MatchCommand matchCommand = submitCascadingBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
+            matchCommand.setCascadingFlow("true");
+            return matchCommand;
         }
         return super.submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);
     }

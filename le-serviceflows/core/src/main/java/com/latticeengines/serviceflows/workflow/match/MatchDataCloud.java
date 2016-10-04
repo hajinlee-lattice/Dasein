@@ -64,7 +64,12 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
     private void match(Table preMatchEventTable) {
         MatchInput input = prepareMatchInput(preMatchEventTable);
         matchCommand = matchProxy.matchBulk(input, "");
+        configContext();
         waitForMatchCommand();
+    }
+
+    private void configContext() {
+        putStringValueInContext(MATCH_IS_CASCADING_FLOW, matchCommand.getCascadingFlow());
     }
 
     private MatchInput prepareMatchInput(Table preMatchEventTable) {

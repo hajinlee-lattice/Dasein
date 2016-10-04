@@ -28,21 +28,21 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     private String resultTableName;
 
-    private boolean isAccountMaster = false;
+    private boolean isCascadingFlow = false;
 
     @Override
     public void onConfigurationInitialized() {
         ProcessMatchResultConfiguration configuration = getConfiguration();
-        String dataCloudVersion = configuration.getDataCloudVersion();
-        if (dataCloudVersion != null && dataCloudVersion.trim().startsWith("2.")) {
-            isAccountMaster = true;
+        String isCascadingFlowStr = getStringValueFromContext(MATCH_IS_CASCADING_FLOW);
+        if ("true".equals(isCascadingFlowStr)) {
+            isCascadingFlow = true;
         }
 
         Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
         Table preMatchTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
         resultTableName = matchResultTable.getName();
         String eventTableName = resultTableName;
-        if (!isAccountMaster) {
+        if (!isCascadingFlow) {
             eventTableName = resultTableName.replaceFirst(MatchDataCloud.LDC_MATCH, EVENT);
         }
         configuration.setTargetTableName(eventTableName);
@@ -54,7 +54,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     @Override
     public void execute() {
-        if (!isAccountMaster) {
+        if (!isCascadingFlow) {
             super.execute();
         }
     };
@@ -64,7 +64,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
-        if (!isAccountMaster) {
+        if (!isCascadingFlow) {
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), resultTableName);
         }
     }
