@@ -3,11 +3,13 @@ package com.latticeengines.domain.exposed.dataflow.operations;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
@@ -66,6 +68,10 @@ public class BitCodeBook implements Serializable {
     public Map<String, Object> decode(String encodedStr, List<String> decodeFields) {
         if (getDecodeStrategy() == null) {
             throw new IllegalArgumentException("Must provide decode strategy to decode.");
+        }
+
+        if (StringUtils.isEmpty(encodedStr)) {
+            return Collections.emptyMap();
         }
 
         Map<String, Integer> bitPositionIdx = new HashMap<>();

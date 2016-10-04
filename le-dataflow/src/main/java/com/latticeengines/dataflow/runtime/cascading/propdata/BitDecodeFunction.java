@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,6 +59,10 @@ public class BitDecodeFunction extends BaseOperation implements Function {
 
     private Tuple decode(TupleEntry arguments) {
         String encodedStr = arguments.getString(encodedColumn);
+
+        if (StringUtils.isEmpty(encodedStr)) {
+            return null;
+        }
 
         boolean[] bits;
         try {
