@@ -141,7 +141,9 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
         } else if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME_SUFFIX.name())) {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
-                    clientName) + "~" + appMasterProperties.getProperty(AppMasterProperty.APP_NAME_SUFFIX.name());
+                    clientName)
+                    + JobNameServiceImpl.JOBNAME_DELIMITER
+                    + appMasterProperties.getProperty(AppMasterProperty.APP_NAME_SUFFIX.name());
         } else {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                     clientName);
