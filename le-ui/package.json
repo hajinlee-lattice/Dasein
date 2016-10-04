@@ -70,9 +70,9 @@
     "InstallLP":"cd projects/leadprioritization/ && npm install --production",
     "InstallAdmin": "cd projects/tenantconsole/ && npm install --production",
     "InstallDevCommon": "cd projects/common/ && npm install",
-    "InstallDevLogin":  "cd projects/login/ && npm install",
     "InstallDevPD": "cd projects/prospectdiscovery/ && npm install",
     "InstallDevLP": "cd projects/leadprioritization/ && npm install",
+    "InstallDevLogin":  "cd projects/login/ && npm install",
     "InstallDevAdmin":  "cd projects/tenantconsole/ && npm install   && grunt init",
     "commonbuild":  "cd projects/common/ && grunt build",
     "pdbuild":  "cd projects/prospectdiscovery/ && grunt build",
@@ -82,12 +82,12 @@
     "commonsass":   "cd projects/common/ && grunt sass:dist",
     "pdsass":   "cd projects/prospectdiscovery/ && grunt sass:dev",
     "lpsass":   "cd projects/leadprioritization/ && grunt sass:dev",
-    "loginsass":"cd projects/leadprioritization/ && grunt sass:dev",
+    "loginsass":"cd projects/login/ && grunt sass:dev",
     "adminless":"cd projects/tenantconsole/ && grunt less:dev",
     "commonsentry": "cd projects/common/ && grunt sentry",
     "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
     "lpsentry": "cd projects/leadprioritization/ && grunt sentry",
-    "loginsentry":  "cd projects/leadprioritization/ && grunt sentry",
+    "loginsentry":  "cd projects/login/ && grunt sentry",
     "adminsentry":  "cd projects/tenantconsole/ && grunt sentry"
   }
 }
