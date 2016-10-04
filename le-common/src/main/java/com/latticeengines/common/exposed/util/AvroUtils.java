@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -168,21 +172,52 @@ public class AvroUtils {
         }
     }
 
-    public static Long count(Configuration configuration, String path) {
+    public static Long count(final Configuration configuration, String path) {
         Long count = 0L;
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
-            for (String match : matches) {
-                FileReader<GenericRecord> reader = getAvroFileReader(configuration, new Path(match));
-                while (reader.hasNext()) {
-                    reader.next();
-                    count++;
-                }
+
+            if (matches.size() == 1) {
+                return countOneFile(configuration, matches.get(0));
             }
+
+            ExecutorService executorService = Executors.newFixedThreadPool(Math.min(8, matches.size()));
+            Map<String, Future<Long>> futures = new HashMap<>();
+            for (final String match : matches) {
+                Future<Long> future = executorService.submit(new Callable<Long>() {
+                    @Override
+                    public Long call() throws Exception {
+                        return countOneFile(configuration, match);
+                    }
+                });
+                futures.put(match, future);
+            }
+
+            for (Map.Entry<String, Future<Long>> entry: futures.entrySet()) {
+                String file = entry.getKey();
+                Long partialCount;
+                try {
+                    partialCount = entry.getValue().get();
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to count file " + file, e);
+                }
+                count += partialCount;
+            }
+
             return count;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Long countOneFile(Configuration configuration, String path) {
+        Long count = 0L;
+        FileReader<GenericRecord> reader = getAvroFileReader(configuration, new Path(path));
+        while (reader.hasNext()) {
+            reader.next();
+            count++;
+        }
+        return count;
     }
 
     @SuppressWarnings("deprecation")
