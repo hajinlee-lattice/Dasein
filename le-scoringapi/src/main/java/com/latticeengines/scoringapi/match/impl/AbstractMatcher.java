@@ -1,10 +1,12 @@
 package com.latticeengines.scoringapi.match.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.impl.RealTimeMatchFetcher;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -31,6 +34,7 @@ import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.match.Matcher;
@@ -93,15 +97,6 @@ public abstract class AbstractMatcher implements Matcher {
             }
         }
         throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
-    }
-
-    protected List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space) {
-        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
-        if (selectedLeadEnrichmentAttributes == null) {
-            // we need to execute only once therefore null check is done
-            selectedLeadEnrichmentAttributes = enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
-        }
-        return selectedLeadEnrichmentAttributes;
     }
 
     protected void getRecordFromMatchOutput(Map<String, FieldSchema> fieldSchemas, //
@@ -171,10 +166,11 @@ public abstract class AbstractMatcher implements Matcher {
      * ..........enrichment option (without Predefined column selection)
      * 
      */
-    protected boolean shouldCallEnrichmentExplicitly(ModelSummary modelSummary, boolean forEnrichment) {
+    protected boolean shouldCallEnrichmentExplicitly(ModelSummary modelSummary, boolean forEnrichment,
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
         boolean shouldCallEnrichmentExplicitly = true;
 
-        if (!forEnrichment) {
+        if (!forEnrichment || CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
             shouldCallEnrichmentExplicitly = false;
         } else if (MatchTypeUtil.isValidForAccountMasterBasedMatch(//
                 getDataCloudVersion(modelSummary))) {
@@ -184,13 +180,61 @@ public abstract class AbstractMatcher implements Matcher {
         return shouldCallEnrichmentExplicitly;
     }
 
+    protected void doEnrichmentPostProcessing(Map<String, Object> record, //
+            boolean forEnrichment, MatchInput matchInput, //
+            Map<String, Map<String, Object>> resultMap) {
+        if (forEnrichment) {
+            Map<String, Object> enrichmentData = new HashMap<>();
+
+            List<Column> customSelectionColumns = getCustomSelectionColumns(matchInput);
+
+            if (customSelectionColumns != null) {
+                for (Column attr : customSelectionColumns) {
+                    if (record.containsKey(attr.getExternalColumnId())) {
+                        enrichmentData.put(attr.getExternalColumnId(), //
+                                record.get(attr.getExternalColumnId()));
+                    }
+                }
+            }
+            resultMap.put(ENRICHMENT, enrichmentData);
+        }
+    }
+
+    protected MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion) {
+        MatchInputBuilder matchInputBuilder = //
+                getMatchInputBuilder(getDataCloudVersion(modelSummary));
+        return matchInputBuilder.buildMatchInput(space, interpreted, //
+                record, modelSummary, //
+                selectedLeadEnrichmentAttributes, //
+                skipPredefinedSelection, //
+                overrideDataCloudVersion);
+    }
+
+    private List<Column> getCustomSelectionColumns(MatchInput matchInput) {
+        List<Column> customSelectionColumns = null;
+
+        if (matchInput.getUnionSelection() != null //
+                && matchInput.getUnionSelection().getCustomSelection() != null) {
+            customSelectionColumns = matchInput.getUnionSelection().getCustomSelection().getColumns();
+        } else if (matchInput.getCustomSelection() != null) {
+            customSelectionColumns = matchInput.getCustomSelection().getColumns();
+        }
+
+        return customSelectionColumns;
+    }
+
     private void mergeMatchedOutput(List<String> matchFieldNames, //
             OutputRecord outputRecord, //
             Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
-        if (matchFieldNames.size() != matchFieldValues.size()) {
+        if (matchFieldNames == null || matchFieldNames.size() != matchFieldValues.size()) {
             throw new LedpException(LedpCode.LEDP_31005,
                     new String[] { String.valueOf(matchFieldNames.size()), String.valueOf(matchFieldValues.size()) });
         }

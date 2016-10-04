@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
@@ -154,5 +155,23 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchServ
         }
 
         return attributeValues;
+    }
+
+    private void doNameLocationBasedLookup(MatchInput input, MatchContext matchContext,
+            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
+        // TODO - need to be implemented by M7
+
+        if (input.getReturnUnmatched()) {
+            for (Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> triplet : lookupRequestTriplets) {
+                if (triplet.getMiddle() == null) {
+                    InternalOutputRecord record = triplet.getLeft();
+                    record.setOutput(null);
+                    record.setMatched(false);
+                }
+            }
+
+        } else {
+            throw new NotImplementedException("Impl of name location based lookup is yet to be implemented");
+        }
     }
 }

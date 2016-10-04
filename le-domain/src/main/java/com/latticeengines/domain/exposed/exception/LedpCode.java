@@ -455,6 +455,7 @@ public enum LedpCode {
     LEDP_31019("Scored txt does not exist {0}"), //
     LEDP_31020("Too many scored txt files exist at {0}"), //
     LEDP_31021("Could not find ID field name from datacomposition schema {0}"), //
+    LEDP_31022("No match found"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //

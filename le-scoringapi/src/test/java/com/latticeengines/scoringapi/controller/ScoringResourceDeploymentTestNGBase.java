@@ -89,6 +89,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
             record.setModelAttributeValuesMap(modelAttributeValuesMap);
             record.setRule("Dummy Rule");
+            if (i == 0) {
+                record.setPerformEnrichment(true);
+            }
 
             records.add(record);
         }
@@ -172,14 +175,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
                 if (record.isPerformEnrichment()) {
                     Assert.assertNotNull(result.getEnrichmentAttributeValues());
-                    // TODO - enable it
-                    // if (shouldSelectAttributeBeforeTest()) {
-                    // Assert.assertTrue(result.getEnrichmentAttributeValues().size()
-                    // > 0);
-                    // } else {
-                    // Assert.assertEquals(result.getEnrichmentAttributeValues().size(),
-                    // 0);
-                    // }
+                    Assert.assertTrue(result.getEnrichmentAttributeValues().size() > 0);
                 } else {
                     Assert.assertNull(result.getEnrichmentAttributeValues());
                 }

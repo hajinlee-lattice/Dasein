@@ -210,19 +210,58 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         for (Object res : resultObjList) {
             System.out.println("Expected score = " + expectedScores.get(idx).intValue());
             DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
-            Assert.assertEquals(result.getScores().get(0).getScore().intValue(), new Double(
-                    signleRecordScoreResponseList.get(idx).getScore()).intValue());
+            Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
+                    new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
             Assert.assertEquals(result.getScores().get(0).getScore().intValue(), expectedScores.get(idx).intValue());
             Assert.assertEquals(new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue(),
                     expectedScores.get(idx).intValue());
-            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(), result
-                    .getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
+            matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
+                    result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
             idx++;
         }
     }
 
     private void matchTransformedRecord(Map<String, Object> singleRecordScoreTransformedRecord,
             Map<String, Object> batchScoreTransformedRecord) {
+
+        if (singleRecordScoreTransformedRecord.size() != batchScoreTransformedRecord.size()) {
+            for (String key : singleRecordScoreTransformedRecord.keySet()) {
+                if (!batchScoreTransformedRecord.containsKey(key)) {
+                    System.out.println("Extra key present in singleRecordScoreTransformedRecord: " + key);
+                }
+            }
+
+            try {
+                ObjectMapper om = new ObjectMapper();
+                for (String key : singleRecordScoreTransformedRecord.keySet()) {
+                    if (batchScoreTransformedRecord.containsKey(key)) {
+                        if (singleRecordScoreTransformedRecord.get(key) != null
+                                && batchScoreTransformedRecord.get(key) != null) {
+                            if (!om.writeValueAsString(singleRecordScoreTransformedRecord.get(key))
+                                    .equals(om.writeValueAsString(batchScoreTransformedRecord.get(key)))) {
+                                System.out.println("Value mismatch singleRecordScoreTransformedRecord: "
+                                        + om.writeValueAsString(singleRecordScoreTransformedRecord.get(key))
+                                        + " and batchScoreTransformedRecord: "
+                                        + om.writeValueAsString(batchScoreTransformedRecord.get(key)));
+                            }
+                        } else {
+                            if (singleRecordScoreTransformedRecord.get(key) != null) {
+                                System.out.println(
+                                        "Value mismatch batchScoreTransformedRecord: null and singleRecordScoreTransformedRecord: "
+                                                + om.writeValueAsString(singleRecordScoreTransformedRecord.get(key)));
+                            } else if (batchScoreTransformedRecord.get(key) != null) {
+                                System.out.println(
+                                        "Value mismatch singleRecordScoreTransformedRecord: null and batchScoreTransformedRecord: "
+                                                + om.writeValueAsString(batchScoreTransformedRecord.get(key)));
+                            }
+                        }
+                    }
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
         Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
         Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
 

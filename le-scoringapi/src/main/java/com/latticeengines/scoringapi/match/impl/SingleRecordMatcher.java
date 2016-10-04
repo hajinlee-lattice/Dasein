@@ -10,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
-import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
@@ -37,11 +35,16 @@ public class SingleRecordMatcher extends AbstractMatcher {
             Map<String, Object> record, //
             ModelSummary modelSummary, //
             boolean forEnrichment) {
-        boolean shouldCallEnrichmentExplicitly = //
-                shouldCallEnrichmentExplicitly(modelSummary, forEnrichment);
+        boolean shouldCallEnrichmentExplicitly = false;
+        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
-        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = //
-                getEnrichmentMetadata(space);
+        if (forEnrichment) {
+            selectedLeadEnrichmentAttributes = //
+                    enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
+
+            shouldCallEnrichmentExplicitly = shouldCallEnrichmentExplicitly(modelSummary, //
+                    forEnrichment, selectedLeadEnrichmentAttributes);
+        }
 
         if (shouldCallEnrichmentExplicitly) {
             Map<String, Map<String, Object>> result = new HashMap<>();
@@ -127,53 +130,5 @@ public class SingleRecordMatcher extends AbstractMatcher {
         logInDebugMode("matchOutput:", matchOutput);
 
         return matchOutput;
-    }
-
-    private MatchInput buildMatchInput(CustomerSpace space, //
-            InterpretedFields interpreted, Map<String, Object> record, //
-            ModelSummary modelSummary, //
-            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean skipPredefinedSelection, //
-            String overrideDataCloudVersion) {
-        MatchInputBuilder matchInputBuilder = //
-                getMatchInputBuilder(getDataCloudVersion(modelSummary));
-        return matchInputBuilder.buildMatchInput(space, interpreted, //
-                record, modelSummary, //
-                selectedLeadEnrichmentAttributes, //
-                skipPredefinedSelection, //
-                overrideDataCloudVersion);
-    }
-
-    private void doEnrichmentPostProcessing(Map<String, Object> record, //
-            boolean forEnrichment, MatchInput matchInput, //
-            Map<String, Map<String, Object>> resultMap) {
-        if (forEnrichment) {
-            Map<String, Object> enrichmentData = new HashMap<>();
-
-            List<Column> customSelectionColumns = getCustomSelectionColumns(matchInput);
-
-            if (customSelectionColumns != null) {
-                for (Column attr : customSelectionColumns) {
-                    if (record.containsKey(attr.getExternalColumnId())) {
-                        enrichmentData.put(attr.getExternalColumnId(), //
-                                record.get(attr.getExternalColumnId()));
-                    }
-                }
-            }
-            resultMap.put(ENRICHMENT, enrichmentData);
-        }
-    }
-
-    private List<Column> getCustomSelectionColumns(MatchInput matchInput) {
-        List<Column> customSelectionColumns = null;
-
-        if (matchInput.getUnionSelection() != null //
-                && matchInput.getUnionSelection().getCustomSelection() != null) {
-            customSelectionColumns = matchInput.getUnionSelection().getCustomSelection().getColumns();
-        } else if (matchInput.getCustomSelection() != null) {
-            customSelectionColumns = matchInput.getCustomSelection().getColumns();
-        }
-
-        return customSelectionColumns;
     }
 }
