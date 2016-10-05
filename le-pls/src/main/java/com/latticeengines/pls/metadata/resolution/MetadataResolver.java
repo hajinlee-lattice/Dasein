@@ -47,7 +47,6 @@ public class MetadataResolver {
     private SchemaInterpretation schema;
     private FieldMappingDocument fieldMappingDocument;
     private Configuration yarnConfiguration;
-    private Table metadata;
 
     private static class Result {
         public List<FieldMapping> fieldMappings;
@@ -62,28 +61,29 @@ public class MetadataResolver {
         this.schema = schemaInterpretation;
         this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
-        result = new Result();
+        this.result = new Result();
     }
 
-    public MetadataResolver(String csvPath, Table metadata, Configuration yarnConfiguration,
+    public MetadataResolver(String csvPath, Configuration yarnConfiguration,
             FieldMappingDocument fieldMappingDocument) {
         this.csvPath = csvPath;
-        this.metadata = metadata;
         this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
-        result = new Result();
+        this.result = new Result();
     }
 
-    public FieldMappingDocument getFieldMappingsDocumentBestEffort() {
+    public FieldMappingDocument getFieldMappingsDocumentBestEffort(Table metadata) {
         FieldMappingDocument fieldMappingsDocument = new FieldMappingDocument();
 
-        calculate();
+        result.metadata = metadata;
+        result.fieldMappings = new ArrayList<>();
+        calculateHelper();
         fieldMappingsDocument.setFieldMappings(result.fieldMappings);
 
         return fieldMappingsDocument;
     }
 
-    public void calculateBasedOnFieldMappingDocumentAndTable() {
+    public void calculateBasedOnFieldMappingDocumentAndTable(Table metadata) {
         result.metadata = metadata;
         calculateBasedOnMetadta();
         // sort the order based on header fields
@@ -112,9 +112,8 @@ public class MetadataResolver {
         log.info("After sorting header list: " + result.metadata.getAttributes());
     }
 
-    public void calculateBasedOnFieldMappingDocument() {
-        SchemaRepository repository = SchemaRepository.instance();
-        result.metadata = repository.getSchema(schema);
+    public void calculateBasedOnFieldMappingDocument(Table metadata) {
+        result.metadata = metadata;
         calculateBasedOnMetadta();
     }
 

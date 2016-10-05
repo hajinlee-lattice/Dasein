@@ -73,9 +73,10 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getFieldMappingsTest() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
+
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository
+                .instance().getSchema(SchemaInterpretation.SalesforceAccount));
 
         Set<String> expectedUnknownColumns = Sets.newHashSet(new String[] { "Some Column", "Boolean Column",
                 "Number Column", "Almost Boolean Column" });
@@ -88,7 +89,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         }
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument();
+        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
 
         assertTrue(resolver.isMetadataFullyDefined());
         Table table = resolver.getMetadata();
@@ -132,9 +134,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToLatticeAttr_assertMappedCorrectly() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository
+                .instance().getSchema(SchemaInterpretation.SalesforceAccount));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equals("Some Column")) {
@@ -147,7 +149,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
 
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument();
+        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
 
         Table table = resolver.getMetadata();
         assertEquals(table.getAttribute(InterfaceName.Industry).getDisplayName(), "Some Column");
@@ -155,9 +158,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_mapUnknownColumnToIgnore_assertColumnsIgnored() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
 
         assertFalse(resolver.isMetadataFullyDefined());
         List<String> ignoredFields = new ArrayList<>();
@@ -168,7 +171,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
         fieldMappingDocument.setIgnoredFields(ignoredFields);
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument();
+        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
 
         assertTrue(resolver.isMetadataFullyDefined());
         Table table = resolver.getMetadata();
@@ -182,9 +186,9 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Test(groups = "functional")
     public void getMappingFromDocument_setColumnToSpecificType_assertTypeIsSet() {
-        MetadataResolver resolver = new MetadataResolver(hdfsPath, SchemaInterpretation.SalesforceAccount,
-                yarnConfiguration, null);
-        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort();
+        MetadataResolver resolver = new MetadataResolver(hdfsPath, yarnConfiguration, null);
+        FieldMappingDocument fieldMappingDocument = resolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 if (fieldMapping.getUserField().equals("Almost Boolean Column")) {
@@ -197,7 +201,8 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         }
 
         resolver.setFieldMappingDocument(fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocument();
+        resolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(
+                SchemaInterpretation.SalesforceAccount));
         assertTrue(resolver.isMetadataFullyDefined());
 
         Table table = resolver.getMetadata();
@@ -232,13 +237,12 @@ public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
         });
         assertEquals(table.getAttributes().size(), 30);
 
-        MetadataResolver resolver = new MetadataResolver(hdfsPath2, SchemaInterpretation.SalesforceLead,
-                yarnConfiguration, null);
+        MetadataResolver resolver = new MetadataResolver(hdfsPath2, yarnConfiguration, null);
         List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(fieldMappings);
-        resolver = new MetadataResolver(hdfsPath2, table, yarnConfiguration, fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocumentAndTable();
+        resolver.setFieldMappingDocument(fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocumentAndTable(table);
 
         boolean foundSomeColumn = false;
         for (FieldMapping fieldMapping : fieldMappings) {

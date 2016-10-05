@@ -20,10 +20,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -52,27 +54,43 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            SchemaInterpretation schemaInterpretation) {
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         if (sourceFile.getSchemaInterpretation() != schemaInterpretation) {
             sourceFile.setSchemaInterpretation(schemaInterpretation);
             sourceFileService.update(sourceFile);
         }
-        MetadataResolver resolver = getMetadataResolver(sourceFile, schemaInterpretation, null);
-        return resolver.getFieldMappingsDocumentBestEffort();
+
+        MetadataResolver resolver = getMetadataResolver(sourceFile, null);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), parameters);
+        return resolver.getFieldMappingsDocumentBestEffort(table);
+    }
+
+    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation, ModelingParameters parameters) {
+        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
+        if (parameters != null) {
+            if (parameters.getExcludePropDataColumns()) {
+                if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+                    table.removeAttribute(InterfaceName.Website.name());
+                } else if (schemaInterpretation == SchemaInterpretation.SalesforceLead) {
+                    table.removeAttribute(InterfaceName.Email.name());
+                }
+            }
+        }
+        return table;
     }
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
-        MetadataResolver resolver = getMetadataResolver(sourceFile, sourceFile.getSchemaInterpretation(),
-                fieldMappingDocument);
+        MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
-        resolver.calculateBasedOnFieldMappingDocument();
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), null);
+        resolver.calculateBasedOnFieldMappingDocument(table);
 
         String customerSpace = MultiTenantContext.getTenant().getId().toString();
 
@@ -80,10 +98,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
         }
 
-        Table table = resolver.getMetadata();
-        table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
-        metadataProxy.createTable(customerSpace, table.getName(), table);
-        sourceFile.setTableName(table.getName());
+        Table newTable = resolver.getMetadata();
+        newTable.setName("SourceFile_" + sourceFileName.replace(".", "_"));
+        metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
+        sourceFile.setTableName(newTable.getName());
         sourceFileService.update(sourceFile);
     }
 
@@ -220,8 +238,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return sourceFile;
     }
 
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile, SchemaInterpretation schemaInterpretation,
-            FieldMappingDocument fieldMappingDocument) {
-        return new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration, fieldMappingDocument);
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument) {
+        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
     }
 }

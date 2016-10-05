@@ -89,6 +89,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private ModelSummary clonedModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
+    private ModelingParameters parameters;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -99,6 +100,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Test environment setup finished.");
         saveAttributeSelection(CustomerSpace.parse(tenantToAttach.getName()));
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
+
     }
 
     @SuppressWarnings("rawtypes")
@@ -140,10 +142,18 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
+        parameters = new ModelingParameters();
+        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
+        parameters.setDisplayName(MODEL_DISPLAY_NAME);
+        parameters.setDescription("Test");
+        parameters.setModuleName("module1");
+        parameters.setPivotFileName("pivotvalues.csv");
+        parameters.setFilename(sourceFile.getName());
+
         sourceFile.setSchemaInterpretation(schemaInterpretation);
-        ResponseDocument response = restTemplate.getForObject(
+        ResponseDocument response = restTemplate.postForObject(
                 String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
-                        sourceFile.getName(), schemaInterpretation.name()), ResponseDocument.class);
+                        sourceFile.getName(), schemaInterpretation.name()), parameters, ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
 
@@ -170,13 +180,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
-        ModelingParameters parameters = new ModelingParameters();
-        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
-        parameters.setDisplayName(MODEL_DISPLAY_NAME);
-        parameters.setDescription("Test");
-        parameters.setFilename(sourceFile.getName());
-        parameters.setModuleName("module1");
-        parameters.setPivotFileName("pivotvalues.csv");
         modelName = parameters.getName();
         model(parameters);
     }

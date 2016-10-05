@@ -7,6 +7,7 @@ import java.util.*;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.wordnik.swagger.annotations.ApiOperation;
+
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
@@ -93,20 +95,21 @@ public class ModelingFileUploadResource {
         return uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName, schemaInterpretation, file);
     }
 
-    @RequestMapping(value="{sourceFileName}/fieldmappings", method = RequestMethod.GET)
+    @RequestMapping(value="{sourceFileName}/fieldmappings", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Decides if the csv is a lead or model based. Returned the best mapping and unknown columns as well as lattice fields")
     public ResponseDocument<FieldMappingDocument> getFieldMappings( //
                                                                     @PathVariable String sourceFileName,
-                                                                    @RequestParam(value="schema", required = false) SchemaInterpretation schemaInterpretation) {
-        return ResponseDocument.successResponse(modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation));
+                                                                    @RequestParam(value="schema", required = false) SchemaInterpretation schemaInterpretation,
+                                                                    @RequestBody ModelingParameters parameters) {
+        return ResponseDocument.successResponse(modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName, schemaInterpretation, parameters));
     }
 
     @RequestMapping(value="fieldmappings", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve all field mappings")
     public void saveFieldMappingDocument( //
                                           @RequestParam(value = "displayName", required = true) String csvFileName,
-                                          @RequestBody FieldMappingDocument fieldMappingDocument) {
+                                          @RequestBody FieldMappingDocument fieldMappingDocument ) {
         modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);
     }
 

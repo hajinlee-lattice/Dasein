@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public interface ModelingFileMetadataService {
 
-    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation);
+    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation, ModelingParameters parameters);
 
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
 

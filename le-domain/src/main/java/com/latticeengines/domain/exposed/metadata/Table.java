@@ -143,6 +143,21 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         attribute.setTenant(getTenant());
     }
 
+    public void removeAttribute(final String name) {
+        if (name == null) {
+            return;
+        }
+        Iterables.removeIf(attributes, new Predicate<Attribute>() {
+            @Override
+            public boolean apply(@Nullable Attribute attribute) {
+                if (attribute.getName() == null) {
+                    return false;
+                }
+                return attribute.getName().equals(name);
+            }
+        });
+    }
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("attributes")

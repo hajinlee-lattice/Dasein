@@ -36,6 +36,7 @@ import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflo
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -97,12 +98,12 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
             MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(),
-                    sourceFile.getSchemaInterpretation(), yarnConfiguration, null) {
+                    yarnConfiguration, null) {
             };
-            FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort();
-            this.mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);
+            FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
+            mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);
             metadataResolver.setFieldMappingDocument(fieldMappingDocument);
-            metadataResolver.calculateBasedOnFieldMappingDocument();
+            metadataResolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
 
             Table table = metadataResolver.getMetadata();
             System.out.println(table);

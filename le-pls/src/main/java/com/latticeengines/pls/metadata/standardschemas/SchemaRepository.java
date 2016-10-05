@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+
 import org.apache.avro.Schema;
 import org.joda.time.DateTime;
 
@@ -86,7 +87,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "ACCOUNT NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
-                .withValidator(InterfaceName.Website.name()) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -95,7 +95,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY", "BILLING CITY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
-                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -104,7 +103,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -113,7 +111,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY", "BILLING COUNTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
-                .withValidator(InterfaceName.Website.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -230,7 +227,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "COMPANY", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
-                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -239,7 +235,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
-                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -248,7 +243,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -257,7 +251,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
-                .withValidator(InterfaceName.Email.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
@@ -438,6 +431,7 @@ public class SchemaRepository {
             return this;
         }
 
+        @SuppressWarnings("unused")
         public AttributeBuilder withValidator(String otherField) {
             attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherField));
             return this;

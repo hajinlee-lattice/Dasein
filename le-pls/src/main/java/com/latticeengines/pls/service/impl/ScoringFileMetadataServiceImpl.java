@@ -124,8 +124,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(fieldMappings);
-        resolver = new MetadataResolver(sourceFile.getPath(), table, yarnConfiguration, fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocumentAndTable();
+        resolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
+        resolver.calculateBasedOnFieldMappingDocumentAndTable(table);
         log.info("After resolving table is: " + table.toString());
 
         // Don't dedup on primary key for scoring

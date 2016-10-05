@@ -103,7 +103,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                         + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/");
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void modelAccountData() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
         assertNotNull(summary);
@@ -141,6 +141,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         parameters.setName("testWorkflowAccount_clone");
         parameters.setDisplayName("clone");
         parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
+        parameters.setExcludePropDataAttributes(true);
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         WorkflowExecutionId workflowId = workflowService.start(modelAndEmailWorkflow.name(), configuration);
