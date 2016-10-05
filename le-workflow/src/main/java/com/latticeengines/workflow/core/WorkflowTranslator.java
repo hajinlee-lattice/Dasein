@@ -8,10 +8,12 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.FailureReportingListener;
 import com.latticeengines.workflow.listener.LEJobListener;
 
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.SimpleJobBuilder;
@@ -87,17 +89,19 @@ public class WorkflowTranslator {
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
 
-                JobParameters jobParameters = context.getStepContext().getStepExecution().getJobParameters();
+                StepExecution stepExecution = context.getStepContext().getStepExecution();
+                JobParameters jobParameters = stepExecution.getJobParameters();
                 step.setJobParameters(jobParameters);
 
-                ExecutionContext executionContext = context.getStepContext().getStepExecution().getJobExecution()
+                ExecutionContext executionContext = stepExecution.getJobExecution()
                         .getExecutionContext();
                 step.setExecutionContext(executionContext);
 
                 if (!step.isDryRun()) {
                     boolean configurationWasSet = step.setup();
-                    if (step.getConfiguration().isSkipStep()) {
+                    if (step.getConfiguration() != null && step.getConfiguration().isSkipStep()) {
                         step.skipStep();
+                        stepExecution.setExitStatus(ExitStatus.NOOP);
                     } else {
                         step.onConfigurationInitialized();
                         if (configurationWasSet) {

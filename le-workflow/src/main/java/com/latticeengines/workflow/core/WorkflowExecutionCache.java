@@ -16,12 +16,14 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -165,6 +167,9 @@ public class WorkflowExecutionCache {
             JobStep jobStep = new JobStep();
             jobStep.setJobStepType(stepExecution.getStepName());
             jobStep.setStepStatus(getJobStatusFromBatchStatus(stepExecution.getStatus()));
+            if(stepExecution.getExitStatus() == ExitStatus.NOOP) {
+                jobStep.setStepStatus(JobStatus.SKIPPED);
+            }
             jobStep.setStartTimestamp(stepExecution.getStartTime());
             jobStep.setEndTimestamp(stepExecution.getEndTime());
             steps.add(jobStep);

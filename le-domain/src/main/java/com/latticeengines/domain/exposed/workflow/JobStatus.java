@@ -14,7 +14,8 @@ public enum JobStatus {
     RUNNING(1, "Running"), //
     COMPLETED(2, "Completed"), //
     FAILED(3, "Failed"), //
-    CANCELLED(4, "Cancelled");
+    CANCELLED(4, "Cancelled"), 
+    SKIPPED(5, "Skipped"); //
 
     private JobStatus(int statusId, String status) {
         this.statusId = statusId;

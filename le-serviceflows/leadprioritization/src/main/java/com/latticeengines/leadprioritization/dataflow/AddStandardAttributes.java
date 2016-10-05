@@ -24,21 +24,24 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         Node eventTable = addSource(parameters.eventTable);
         Node last = eventTable;
 
-        Attribute emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Email) != null //
-        ? eventTable.getSourceAttribute(InterfaceName.Email) //
-                : eventTable.getSourceAttribute(InterfaceName.Website);
+        String domainSourceName = "";
+        if (eventTable.getSourceAttribute(InterfaceName.Website) != null) {
+            domainSourceName = InterfaceName.Website.name();
+        } else if (eventTable.getSourceAttribute(InterfaceName.Email) != null) {
+            domainSourceName = InterfaceName.Email.name();
+        }
 
         Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
-        TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+        TransformationPipeline.stdLengthDomain.arguments.put("column", domainSourceName);
 
         for (TransformDefinition definition : definitions) {
             last = addFunction(last, eventTable, definition);
         }
-        
+
         if (parameters.doSort) {
             last = last.sort("InternalId", true);
         }
-        
+
         return last;
     }
 
