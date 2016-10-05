@@ -116,7 +116,7 @@ def provision(environment, stackname, zkhosts, profile=None, cleanupzk=False, co
             PARAM_BROKER_MEMORY.config(profile.broker_mem()),
             PARAM_BROKER_HEAP_SIZE.config(profile.broker_heap()),
             PARAM_ENVIRONMENT.config(environment),
-            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
+            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile_arn()),
             PARAM_EFS_SECURITY_GROUP.config(config.efs_sg()),
         ],
         TimeoutInMinutes=60,

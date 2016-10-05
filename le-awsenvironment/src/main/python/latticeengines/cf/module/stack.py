@@ -315,7 +315,7 @@ class ECSStack(Stack):
             PARAM_SECURITY_GROUP.config(tomcat_sg),
             PARAM_INSTANCE_TYPE.config(instance_type),
             PARAM_ENVIRONMENT.config(environment),
-            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile()),
+            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile_arn()),
             PARAM_TARGET_GROUP.config(tgrp),
             PARAM_CAPACITY.config(str(init_cap)),
             PARAM_MAX_CAPACITY.config(str(max_cap))
