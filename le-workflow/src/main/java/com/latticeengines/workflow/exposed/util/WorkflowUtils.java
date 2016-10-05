@@ -32,7 +32,6 @@ public class WorkflowUtils {
                 workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
             } catch (Exception e) {
                 log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
-                job.setJobStatus(JobStatus.FAILED);
             }
         }
         // We only trust the WorkflowJob status if it is non-null

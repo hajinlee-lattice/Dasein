@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -177,7 +179,10 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public void stop(WorkflowExecutionId workflowId) {
         try {
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
             jobOperator.stop(workflowId.getId());
+            workflowJob.setStatus(FinalApplicationStatus.KILLED);
+            workflowJobEntityMgr.updateWorkflowJob(workflowJob);
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
             throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
