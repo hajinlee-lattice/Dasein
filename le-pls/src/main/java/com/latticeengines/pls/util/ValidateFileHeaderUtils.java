@@ -59,7 +59,7 @@ public class ValidateFileHeaderUtils {
             return headerFields;
 
         } catch (IllegalArgumentException e) {
-            throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_18109, new String[]{e.getMessage()});
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -67,7 +67,7 @@ public class ValidateFileHeaderUtils {
     }
 
     public static List<String> getCSVColumnValues(String columnHeaderName, InputStream stream,
-            CloseableResourcePool closeableResourcePool) {
+                                                  CloseableResourcePool closeableResourcePool) {
         try {
             List<String> columnFields = new ArrayList<>();
             InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
@@ -82,6 +82,7 @@ public class ValidateFileHeaderUtils {
                 throw new LedpException(LedpCode.LEDP_18110);
             }
             int i = 0;
+            boolean oneColumnMalformedCSV = false;
             while (i < MAX_NUM_ROWS && csvRecordIterator.hasNext()) {
                 try {
                     String columnField = csvRecordIterator.next().get(columnHeaderName);
@@ -90,8 +91,12 @@ public class ValidateFileHeaderUtils {
                     }
                     i++;
                 } catch (IllegalArgumentException exp) {
+                    oneColumnMalformedCSV = true;
                     continue;
                 }
+            }
+            if (oneColumnMalformedCSV) {
+                log.warn(String.format("One row for column: %s in the csv caused a csv parsing error, this might be due to a malformed csv", columnHeaderName));
             }
 
             return columnFields;
@@ -103,7 +108,7 @@ public class ValidateFileHeaderUtils {
 
     @SuppressWarnings("unchecked")
     public static void checkForDuplicateHeaders(List<Attribute> attributes, String fileDisplayName,
-            Set<String> headerFields) {
+                                                Set<String> headerFields) {
         Map<String, List<String>> duplicates = new HashMap<>();
         for (final Attribute attribute : attributes) {
             final List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
@@ -129,26 +134,26 @@ public class ValidateFileHeaderUtils {
                         .format("In file %s, cannot have columns %s as CSV headers because they correspond to the same information (%s)\n",
                                 fileDisplayName, StringUtils.join(entry.getValue()), entry.getKey()));
             }
-            throw new LedpException(LedpCode.LEDP_18107, new String[] { sb.toString() });
+            throw new LedpException(LedpCode.LEDP_18107, new String[]{sb.toString()});
         }
     }
 
     public static void checkForEmptyHeaders(String fileDisplayName, Set<String> headerFields) {
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
-                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
+                throw new LedpException(LedpCode.LEDP_18096, new String[]{fileDisplayName});
             }
         }
     }
 
-    // UNUSED
     public static void checkForMissingRequiredFields(List<Attribute> attributes, String fileDisplayName,
-            Set<String> headerFields, boolean respectNullability) {
+                                                     Set<String> headerFields, boolean respectNullability) {
 
         Set<String> missingRequiredFields = new HashSet<>();
         Iterator<Attribute> attrIterator = attributes.iterator();
 
-        iterateAttr: while (attrIterator.hasNext()) {
+        iterateAttr:
+        while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
             Iterator<String> headerIterator = headerFields.iterator();
 
@@ -170,7 +175,7 @@ public class ValidateFileHeaderUtils {
         }
         if (!missingRequiredFields.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
+                    new String[]{StringUtils.join(missingRequiredFields, ","), fileDisplayName});
         }
 
         checkForEmptyHeaders(fileDisplayName, headerFields);
