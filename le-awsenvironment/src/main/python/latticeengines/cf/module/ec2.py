@@ -63,16 +63,6 @@ def ecs_metadata(ec2, ecscluster):
                             "echo $PUBADDR >> /etc/externaladdr.txt"
                         ] ] }
                     },
-                    "02_newrelic" : {
-                        "command" : { "Fn::Join": [ "\n", [
-                            "#!/bin/bash",
-                            "usermod -a -G docker newrelic",
-                            "nrsysmond-config --set license_key=a0ae1b9e8030099c9f5152c81bd3853bfe42ec4c",
-                            {"Fn::Join": ["", ["echo hostname=$HOSTNAME-", { "Ref" : "AWS::StackName" }, " >> /etc/newrelic/nrsysmond.cfg"]]},
-                            "echo cgroup_root=\"/cgroup\" >> /etc/newrelic/nrsysmond.cfg",
-                            "/etc/init.d/newrelic-sysmond start"
-                        ] ] }
-                    },
                     "03_le_dirs" : {
                         "command" : { "Fn::Join": [ "\n", [
                             "#!/bin/bash",
