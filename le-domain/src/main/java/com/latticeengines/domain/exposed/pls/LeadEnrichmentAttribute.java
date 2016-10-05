@@ -39,6 +39,10 @@ public class LeadEnrichmentAttribute {
     @JsonProperty("Subcategory")
     private String subcategory;
 
+    // TODO - hook it up with data from table in M7
+    @JsonProperty("IsInternal")
+    private Boolean isInternal = Boolean.FALSE;
+
     public String getDisplayName() {
         return displayName;
     }
@@ -125,6 +129,16 @@ public class LeadEnrichmentAttribute {
 
     public void setSubcategory(String subcategory) {
         this.subcategory = subcategory;
+    }
+
+    // TODO - hook it up with data from table in M7
+    public Boolean getIsInternal() {
+        return isInternal;
+    }
+
+    // TODO - hook it up with data from table in M7
+    public void setIsInternal(Boolean isInternal) {
+        this.isInternal = isInternal;
     }
 
 }
