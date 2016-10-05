@@ -86,7 +86,7 @@ module.exports = function (grunt) {
             },
             dist:    {
                 files: {
-                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/app/app.scss'
+                    '<%= pls.assets %>/css/production.css': '<%= pls.app %>/app.scss'
                 }
             },
             dev:     {
@@ -126,7 +126,9 @@ module.exports = function (grunt) {
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
-                files: ['<%= pls.app %>/assets/styles/**/*.scss'],
+                files: [
+                    '<%= pls.app %>/**/*.scss'
+                ],
                 tasks: ['sass:dev']
             }
         },
@@ -289,7 +291,8 @@ module.exports = function (grunt) {
         'uglify:production',
         //'filerev',
         'usemin',
-        'processhtml:dist'
+        'processhtml:dist',
+        'sass:dev'
     ]);
 
     grunt.registerTask('init', [
