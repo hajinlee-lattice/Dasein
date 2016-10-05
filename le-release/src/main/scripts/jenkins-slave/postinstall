@@ -1,4 +1,0 @@
-#!/bin/bash
-echo "postinstalling now"
-echo "export SQOOP_HOME=/usr/lib/sqoop" >> /home/LATTICE/build/.bashrc
-echo "export HADOOP_HOME=/usr/lib/hadoop" >> /home/LATTICE/build/.bashrc
