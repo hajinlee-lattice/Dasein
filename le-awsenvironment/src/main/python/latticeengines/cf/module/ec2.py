@@ -20,14 +20,6 @@ def ecs_metadata(ec2, ecscluster):
                 "reload": [ "install" ]
             },
             "install" : {
-                "packages": {
-                    "rpm": {
-                        "newrelic": "http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm"
-                    },
-                    "yum" : {
-                        "newrelic-sysmond": []
-                    }
-                },
                 "files" : {
                     "/etc/cfn/cfn-hup.conf" : {
                         "content" : { "Fn::Join" : ["", [
