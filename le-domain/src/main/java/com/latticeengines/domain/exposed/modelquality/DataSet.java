@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MODELQUALITY_DATASET", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_DATASET", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
 
@@ -49,7 +49,7 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     @Column(name = "CUSTOMER_SPACE", nullable = false)
     private String customerSpace;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @Column(name = "INDUSTRY", nullable = false)

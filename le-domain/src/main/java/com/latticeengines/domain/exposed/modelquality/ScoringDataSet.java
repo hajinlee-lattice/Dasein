@@ -18,30 +18,29 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "MODELQUALITY_SCORING_DATASET")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ScoringDataSet implements HasName, HasPid {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
-    
+
     @JsonProperty("data_hdfs_path")
     @Column(name = "DATA_PATH")
     private String dataHdfsPath;
-    
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "FK_DATASET_ID", nullable = false)
     private DataSet dataSet;
-    
-    
+
     @Override
     public String getName() {
         return name;
@@ -52,15 +51,16 @@ public class ScoringDataSet implements HasName, HasPid {
         this.name = name;
     }
 
+    @Override
     public Long getPid() {
         return pid;
     }
 
+    @Override
     public void setPid(Long pid) {
         this.pid = pid;
     }
 
-    
     public String getDataHdfsPath() {
         return dataHdfsPath;
     }
@@ -76,6 +76,5 @@ public class ScoringDataSet implements HasName, HasPid {
     public void setDataSet(DataSet dataSet) {
         this.dataSet = dataSet;
     }
-
 
 }

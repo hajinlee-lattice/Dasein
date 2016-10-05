@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_ANALYTIC_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_ANALYTIC_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AnalyticPipeline implements HasName, HasPid {
 
@@ -33,9 +33,9 @@ public class AnalyticPipeline implements HasName, HasPid {
     private Long pid;
 
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
-    
+
     @JsonProperty("pipeline")
     @JoinColumn(name = "FK_PIPELINE_ID", nullable = false)
     @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
@@ -80,11 +80,11 @@ public class AnalyticPipeline implements HasName, HasPid {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setPipeline(Pipeline pipeline) {
         this.pipeline = pipeline;
     }
-    
+
     public Pipeline getPipeline() {
         return pipeline;
     }
@@ -92,11 +92,11 @@ public class AnalyticPipeline implements HasName, HasPid {
     public void setAlgorithm(Algorithm algorithm) {
         this.algorithm = algorithm;
     }
-    
+
     public Algorithm getAlgorithm() {
         return algorithm;
     }
-    
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

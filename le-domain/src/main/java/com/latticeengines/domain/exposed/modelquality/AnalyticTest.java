@@ -35,7 +35,7 @@ public class AnalyticTest implements HasName, HasPid {
     private Long pid;
 
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @JsonProperty("data_sets")

@@ -40,7 +40,7 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @ManyToOne

@@ -44,7 +44,7 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @Column(name = "SCRIPT", nullable = false)

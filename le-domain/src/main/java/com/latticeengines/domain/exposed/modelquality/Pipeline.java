@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable {
 
@@ -43,7 +43,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @JsonProperty("pipeline_script")
@@ -114,7 +114,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
             PipelineStep step = p.getPipelineStep();
             step.setSortKey(p.getOrder());
             steps.add(step);
-            
+
         }
         return steps;
     }
@@ -133,17 +133,17 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
         pipelineStep.addPipelineToPipelineStep(p);
         pipelineSteps.add(p);
     }
-    
+
     public void addStepsFromPipelineJson(String pipelineContents) {
         PipelineJson json = JsonUtils.deserialize(pipelineContents, PipelineJson.class);
         Map<String, PipelineStep> steps = json.getSteps();
-        
+
         for (Map.Entry<String, PipelineStep> entry : steps.entrySet()) {
             addPipelineStep(entry.getValue());
         }
-        
+
     }
-    
+
     @JsonIgnore
     public List<PipelineToPipelineSteps> getPipelineToPipelineSteps() {
         return pipelineSteps;

@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Sampling implements HasName, HasPid, Fact, Dimension {
 
@@ -42,7 +42,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @Column(name = "PARALLEL_ENABLED", nullable = false)
@@ -103,7 +103,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
 
     public void setSamplingPropertyDefs(List<SamplingPropertyDef> samplingPropertyDefs) {
         this.samplingPropertyDefs = samplingPropertyDefs;
-        for (SamplingPropertyDef samplingPropertyDef: samplingPropertyDefs) {
+        for (SamplingPropertyDef samplingPropertyDef : samplingPropertyDefs) {
             samplingPropertyDef.setSampling(this);
         }
     }

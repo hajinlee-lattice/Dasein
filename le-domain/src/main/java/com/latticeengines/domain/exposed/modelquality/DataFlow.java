@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 @Entity
-@Table(name = "MODELQUALITY_DATAFLOW", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" })})
+@Table(name = "MODELQUALITY_DATAFLOW", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class DataFlow implements HasName, HasPid, Fact, Dimension {
 
@@ -32,7 +32,7 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @Column(name = "MATCH", nullable = false)

@@ -30,7 +30,7 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
     @JsonProperty("exclude_propdata_columns")
@@ -110,12 +110,11 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     public void setExcludePublicDomains(boolean excludePublicDomains) {
         this.excludePublicDomains = excludePublicDomains;
     }
-    
+
     @MetricTag(tag = "ExcludePublicDomains")
     @JsonIgnore
     public String isExcludePublicDomainsStrValue() {
         return "" + excludePublicDomains;
     }
-
 
 }
