@@ -16,7 +16,7 @@ class EnvConfig(object):
     _endpoint = ''
     _apiHostPort = ''
     _influxEndpoint = ''
-    _hdfsHostPort = ''
+    _hdfsHostPortList = []
     _hdfsBasePath = ''
     _verify = ''
     _verbose = ''
@@ -32,7 +32,7 @@ class EnvConfig(object):
                 EnvConfig._endpoint = cfg['endpoint']
                 EnvConfig._apiHostPort = cfg['apiHostPort']
                 EnvConfig._influxEndpoint = cfg['influxEndpoint']
-                EnvConfig._hdfsHostPort = cfg['hdfsHostPort']
+                EnvConfig._hdfsHostPortList = cfg['hdfsHostPortList']
                 EnvConfig._hdfsBasePath = cfg['hdfsBasePath']
                 EnvConfig._verify = False if cfg['verify'] == 'False' else True
                 EnvConfig._verbose = verbose
@@ -54,8 +54,8 @@ class EnvConfig(object):
         return EnvConfig._influxEndpoint
 
     @classmethod
-    def getHDFSHostPort(self):
-        return EnvConfig._hdfsHostPort
+    def getHDFSHostPortList(self):
+        return EnvConfig._hdfsHostPortList
 
     @classmethod
     def getHDFSBasePath(self):

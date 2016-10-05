@@ -126,7 +126,14 @@ class Dataset(EntityBase):
             return
         if self._localModelingFileName != '':
             hdfsPath = EnvConfig().getHDFSBasePath() + '/' + self.getName()
-            client = hdfs.InsecureClient(EnvConfig.getHDFSHostPort())
+            client = None
+            for hostPort in EnvConfig.getHDFSHostPortList():
+                client = hdfs.InsecureClient(hostPort)
+                try:
+                    client.list('/')
+                    break
+                except:
+                    pass
             client.makedirs(hdfsPath)
             client.upload(hdfsPath, self._localModelingFileName)
             fileName = self._localModelingFileName
