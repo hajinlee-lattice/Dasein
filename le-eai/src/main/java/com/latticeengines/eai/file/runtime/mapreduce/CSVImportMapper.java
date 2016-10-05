@@ -121,23 +121,15 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
                 try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
                     dataFileWriter.create(schema, new File(avroFileName));
-                    for (Iterator<CSVRecord> iterator = parser.iterator();; lineNum++) {
-                        id = null;
+                    for (Iterator<CSVRecord> iterator = parser.iterator(); iterator.hasNext(); lineNum++) {
+                        beforeEachRecord();
                         LOG.info("Start to processing line: " + lineNum);
                         CSVRecord csvRecord = null;
-                        missingRequiredColValue = false;
-                        fieldMalFormed = false;
-                        rowError = false;
                         try {
-                            if (iterator.hasNext()) {
-                                csvRecord = iterator.next();
-                            } else {
-                                break;
-                            }
+                            csvRecord = iterator.next();
                         } catch (Exception e) {
                             LOG.error(e);
-                            context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
-                            context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
+                            handleErrorWhenReadFromCSV(context);
                             continue;
                         }
                         GenericRecord avroRecord = toGenericRecord(headers, csvRecord);
@@ -145,25 +137,41 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             dataFileWriter.append(avroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
                         } else {
-                            if (missingRequiredColValue) {
-                                context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
-                            } else if (fieldMalFormed) {
-                                context.getCounter(RecordImportCounter.FIELD_MALFORMED).increment(1);
-                            } else if (rowError) {
-                                context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
-                            }
-                            context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-
-                            id = id != null ? id : "";
-                            csvFilePrinter.printRecord(parser.getRecordNumber() + 1, id, errorMap.values().toString());
-                            csvFilePrinter.flush();
-
-                            errorMap.clear();
+                            handleErrorWhenConvertToAvro(context, parser.getRecordNumber() + 1);
                         }
                     }
                 }
             }
         }
+    }
+
+    private void beforeEachRecord() {
+        id = null;
+        missingRequiredColValue = false;
+        fieldMalFormed = false;
+        rowError = false;
+    }
+
+    private void handleErrorWhenReadFromCSV(Context context) {
+        context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
+        context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
+    }
+
+    private void handleErrorWhenConvertToAvro(Context context, long lineNumber) throws IOException {
+        if (missingRequiredColValue) {
+            context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
+        } else if (fieldMalFormed) {
+            context.getCounter(RecordImportCounter.FIELD_MALFORMED).increment(1);
+        } else if (rowError) {
+            context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
+        }
+        context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
+
+        id = id != null ? id : "";
+        csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
+        csvFilePrinter.flush();
+
+        errorMap.clear();
     }
 
     public String getCSVFilePath(Path[] paths) {
@@ -177,41 +185,72 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private GenericRecord toGenericRecord(Set<String> headers, CSVRecord csvRecord) {
         GenericRecord avroRecord = new GenericData.Record(schema);
-        for (final String header : headers) {
-            Attribute attr = table.getAttributeFromDisplayName(header);
-            if (attr == null) {
-                LOG.info(String.format("Not found csv header %s from the table schema", header));
-                continue;
-            }
-            Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
-            String csvFieldValue = null;
-            try {
-                csvFieldValue = String.valueOf(csvRecord.get(header));
-            } catch (Exception e) { // This catch is for the row error
-                LOG.error(e);
-                csvFieldValue = null;
-            }
+        for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
-
-            List<InputValidator> validators = attr.getValidators();
-            try {
-                validateAttribute(validators, csvRecord, attr);
-                if (attr.isNullable() && StringUtils.isEmpty(csvFieldValue)) {
-                    avroFieldValue = null;
-                } else {
-                    avroFieldValue = toAvro(csvFieldValue, avroType, attr);
-                    if (attr.getName().equals(InterfaceName.Id.name())) {
-                        id = String.valueOf(avroFieldValue);
-                    }
+            if (headers.contains(attr.getDisplayName())) {
+                Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
+                String csvFieldValue = null;
+                try {
+                    csvFieldValue = String.valueOf(csvRecord.get(attr.getDisplayName()));
+                } catch (Exception e) { // This catch is for the row error
+                    LOG.error(e);
                 }
+                List<InputValidator> validators = attr.getValidators();
+                try {
+                    validateAttribute(validators, csvRecord, attr);
+                    if (!attr.isNullable() || !StringUtils.isEmpty(csvFieldValue)) {
+                        avroFieldValue = toAvro(csvFieldValue, avroType, attr);
+                        if (attr.getName().equals(InterfaceName.Id.name())) {
+                            id = String.valueOf(avroFieldValue);
+                        }
+                    }
+                    avroRecord.put(attr.getName(), avroFieldValue);
+                } catch (Exception e) {
+                    LOG.error(e);
+                    errorMap.put(attr.getDisplayName(), e.getMessage());
+                }
+            } else {
                 avroRecord.put(attr.getName(), avroFieldValue);
-            } catch (Exception e) {
-                LOG.error(e);
-                errorMap.put(header, e.getMessage());
             }
         }
         avroRecord.put(InterfaceName.InternalId.name(), lineNum);
         return avroRecord;
+        // for (final String header : headers) {
+        // Attribute attr = table.getAttributeFromDisplayName(header);
+        // if (attr == null) {
+        // LOG.info(String.format("Not found csv header %s from the table schema",
+        // header));
+        // continue;
+        // }
+        // Type avroType =
+        // schema.getField(attr.getName()).schema().getTypes().get(0).getType();
+        // String csvFieldValue = null;
+        // try {
+        // csvFieldValue = String.valueOf(csvRecord.get(header));
+        // } catch (Exception e) { // This catch is for the row error
+        // LOG.error(e);
+        // csvFieldValue = null;
+        // }
+        // Object avroFieldValue = null;
+        //
+        // List<InputValidator> validators = attr.getValidators();
+        // try {
+        // validateAttribute(validators, csvRecord, attr);
+        // if (attr.isNullable() && StringUtils.isEmpty(csvFieldValue)) {
+        // avroFieldValue = null;
+        // } else {
+        // avroFieldValue = toAvro(csvFieldValue, avroType, attr);
+        // if (attr.getName().equals(InterfaceName.Id.name())) {
+        // id = String.valueOf(avroFieldValue);
+        // }
+        // }
+        // avroRecord.put(attr.getName(), avroFieldValue);
+        // } catch (Exception e) {
+        // LOG.error(e);
+        // errorMap.put(header, e.getMessage());
+        // }
+        // }
+
     }
 
     private void validateAttribute(List<InputValidator> validators, CSVRecord csvRecord, Attribute attr) {
