@@ -60,7 +60,10 @@ section.container.setup-import {
             }
         }
         div.fileUpload {
-            position: relative;   
+            position: relative;
+            &:hover {
+                background: #fafafa;
+            }
             input.upload {
                 font-size: 0;
                 top: 0;

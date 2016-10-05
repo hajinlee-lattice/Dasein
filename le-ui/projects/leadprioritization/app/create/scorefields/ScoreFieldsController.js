@@ -14,9 +14,6 @@ angular
         fieldMappings: FieldDocument.fieldMappings,
         requiredFields: FieldDocument.requiredFields,
         FileHeaders: [],
-        UserFields: [],
-        MappedFields: [],
-        AvailableFields: [],
         FormValidated: true,
         initialized: false,
         ignoredFieldLabel: '-- Unmapped Field --'
@@ -37,6 +34,7 @@ angular
     }
 
     vm.refreshLatticeFields = function() {
+        vm.FieldMap = {};
         vm.UserFields = [];
         vm.MappedFields = [];
         vm.AvailableFields = [];
@@ -51,6 +49,7 @@ angular
             }
 
             if (field.mappedField) {
+                vm.FieldMap[field.mappedField] = field;
                 vm.MappedFields.push(field.mappedField);
             }
 
