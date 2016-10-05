@@ -273,8 +273,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(selectedAttributeList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
         for (LeadEnrichmentAttribute attr : selectedAttributeList) {
             Assert.assertNotNull(attr.getCategory());
-            // TODO - enable this once enrichment metadata is fixed
-            // Assert.assertNotNull(attr.getSubcategory());
+            Assert.assertNotNull(attr.getSubcategory(), attr.getFieldName() + " should not have empty subcategory");
         }
     }
 
