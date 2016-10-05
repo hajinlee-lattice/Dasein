@@ -1,8 +1,8 @@
 angular
 .module('lp.create.import')
 .controller('ScoreFieldsController', function(
-    $scope, $state, $stateParams, $timeout, $rootScope, ResourceUtility, ScoreLeadEnrichmentModal,
-    ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal
+    $scope, $state, $stateParams, $timeout, $rootScope, $anchorScroll, ResourceUtility, 
+    ScoreLeadEnrichmentModal, ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal
 ) {
     var vm = this;
 
@@ -82,6 +82,8 @@ angular
     };
 
     vm.clickNext = function() {
+        $anchorScroll();
+
         ShowSpinner('Saving Field Mappings...');
 
         FieldDocument.fieldMappings = vm.fieldMappings.filter(function(field) { return field.userField != vm.ignoredFieldLabel });
