@@ -169,7 +169,7 @@ class ECSStack(Stack):
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
             subnet = SUBNETS[n % 3]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, "ecs-container", ecscluster) \
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet)
 
