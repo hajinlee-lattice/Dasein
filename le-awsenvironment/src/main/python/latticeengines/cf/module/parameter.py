@@ -78,7 +78,7 @@ PARAM_ENVIRONMENT = Parameter("Environment", "Environment tag. For example, qacl
 PARAM_SECURITY_GROUP = Parameter("SecurityGroupId", "The security group to be used by EC2", type="AWS::EC2::SecurityGroup::Id")
 PARAM_INSTANCE_TYPE = InstanceTypeParameter("InstanceType", "EC2 instance type")
 
-PARAM_ECS_INSTANCE_PROFILE = ArnParameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
+PARAM_ECS_INSTANCE_PROFILE = Parameter("EcsInstanceProfile", "InstanceProfile for ECS instances auto scaling group")
 PARAM_ELB_NAME = Parameter("ElbName", "Name of the main elastic load balancer name")
 PARAM_TARGET_GROUP=ArnParameter("TargetGroupArn", "Arn of the target group for load balancer")
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
