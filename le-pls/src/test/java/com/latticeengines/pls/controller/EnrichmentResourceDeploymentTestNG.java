@@ -31,7 +31,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "adOBE cRea";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "Et PErformance tEc";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -308,7 +308,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
-                SEARCH_DISPLAY_NAME_STR1, Category.WEBSITE_PROFILE);
+                SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
@@ -353,7 +353,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
             assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR2.toUpperCase()));
         }
 
-        assertEquals(combinedAttributeList.size(), 4);
+        // this number can change as per update in enrichment metadata table
+        assertEquals(combinedAttributeList.size(), 19);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR4,
                 Category.TECHNOLOGY_PROFILE);

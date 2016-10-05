@@ -109,6 +109,8 @@ public class RealTimeMatchWithAccountMasterServiceImpl extends RealTimeMatchServ
                         (StringUtils.isEmpty(record.getParsedDuns())
                                 || "null".equalsIgnoreCase(record.getParsedDuns().trim()) ? null
                                         : record.getParsedDuns()));
+            } else {
+                accountLookupRequest.addLookupPair(null, null);
             }
 
             Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> accountLookupRequestTriplet = new MutableTriple<>(

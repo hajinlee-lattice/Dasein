@@ -234,9 +234,10 @@ public abstract class AbstractMatcher implements Matcher {
             Map<String, Object> record) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
-        if (matchFieldNames == null || matchFieldNames.size() != matchFieldValues.size()) {
+        if (matchFieldNames == null || (matchFieldValues!= null && matchFieldNames.size() != matchFieldValues.size())) {
             throw new LedpException(LedpCode.LEDP_31005,
-                    new String[] { String.valueOf(matchFieldNames.size()), String.valueOf(matchFieldValues.size()) });
+                    new String[] { String.valueOf(matchFieldNames == null ? "0" : matchFieldNames.size()),
+                            matchFieldValues == null ? "0" : String.valueOf(matchFieldValues.size()) });
         }
 
         for (int i = 0; i < matchFieldNames.size(); i++) {
@@ -244,10 +245,11 @@ public abstract class AbstractMatcher implements Matcher {
             FieldSchema schema = fieldSchemas.get(fieldName);
             if (schema == null || (schema != null && schema.source != FieldSource.REQUEST)) {
                 Object fieldValue = null;
+                Object unparsedFieldValue = matchFieldValues==null?null:matchFieldValues.get(i);
                 if (schema != null) {
-                    fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
+                    fieldValue = unparsedFieldValue == null? null:FieldType.parse(schema.type, unparsedFieldValue);
                 } else {
-                    fieldValue = matchFieldValues.get(i);
+                    fieldValue = unparsedFieldValue;
                 }
                 record.put(fieldName, fieldValue);
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {

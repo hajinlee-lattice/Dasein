@@ -54,11 +54,11 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         domains.add("google.com");
         domains.add("salesforce.com");
         domains.add("microsoft.com");
-        domains.add("ibm.com");
+        domains.add("yahoo.com");
         domains.add("dnb.com");
         domains.add("wikipedia.com");
         domains.add("amazon.com");
-        domains.add("wipro.com");
+        domains.add("gmail.com");
         domains.add("apple.com");
         domains.add("apache.com");
     }
@@ -131,14 +131,23 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(output.getOutputList());
         Assert.assertEquals(output.getOutputList().size(), size);
 
+        int idx = 0;
+
         for (MatchOutput outputRecord : output.getOutputList()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getResult().size() > 0);
-            Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
+            if (domains.get(idx % domains.size()) == "yahoo.com" //
+                    || domains.get(idx % domains.size()) == "gmail.com") {
+                Assert.assertFalse(outputRecord.getResult().get(0).isMatched());
+            } else {
+                Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
+            }
+
+            idx++;
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testAccountMasterRTSMatchWithMultipleRecords() throws IOException {
         int size = 200;
         MatchInput matchInput = prepareMatchInputWithMultipleRecords(size);
@@ -152,10 +161,17 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(output.getResult());
         Assert.assertEquals(output.getResult().size(), size);
 
+        int idx = 0;
+
         for (OutputRecord outputRecord : output.getResult()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getOutput().size() > 0);
-            Assert.assertTrue(outputRecord.isMatched());
+            if (domains.get(idx % domains.size()) == "yahoo.com" //
+                    || domains.get(idx % domains.size()) == "gmail.com") {
+                Assert.assertFalse(outputRecord.isMatched());
+            } else {
+                Assert.assertTrue(outputRecord.isMatched());
+            }
         }
     }
 

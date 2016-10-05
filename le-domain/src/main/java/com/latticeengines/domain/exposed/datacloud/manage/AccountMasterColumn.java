@@ -36,7 +36,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterColumn", uniqueConstraints = {@UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" })})
+@Table(name = "AccountMasterColumn", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
@@ -309,7 +310,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setColumnName(getAmColumnId());
         metadata.setDescription(getDescription());
         metadata.setJavaClass(getJavaClass());
-        metadata.setDataType(getJavaClass());
+        // remove this type conversion once codescience has started using
+        // JavaType instead of SQLServer data types
+        metadata.setDataType(JavaToSQLServerDataTypeConverter.convert(getJavaClass()));
         metadata.setDisplayName(getDisplayName());
         metadata.setCategory(getCategory());
         metadata.setStatisticalType(getStatisticalType());
@@ -322,4 +325,53 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         return metadata;
     }
 
+    // remove this internal class once codescience has started using JavaType
+    // instead of SQLServer data types
+    static class JavaToSQLServerDataTypeConverter {
+
+        private static final String STRING = "string";
+        private static final String DOUBLE = "double";
+        private static final String BOOLEAN = "boolean";
+        private static final String INTEGER = "integer";
+        private static final String LONG = "long";
+        private static final String FLOAT = "float";
+        private static final String SQL_STRING = "NVARCHAR(MAX)";
+        private static final String SQL_FLOAT = "FLOAT";
+        private static final String SQL_DECIMAL = "DECIMAL";
+        private static final String SQL_BIT = "BIT";
+        private static final String SQL_INT = "INT";
+        private static final String SQL_BIGINT = "BIGINT";
+
+        public static String convert(String javaClass) {
+            String dataType = null;
+
+            if (javaClass != null) {
+                switch (javaClass.toLowerCase()) {
+                case STRING:
+                    dataType = SQL_STRING;
+                    break;
+                case FLOAT:
+                    dataType = SQL_FLOAT;
+                    break;
+                case DOUBLE:
+                    dataType = SQL_DECIMAL;
+                    break;
+                case BOOLEAN:
+                    dataType = SQL_BIT;
+                    break;
+                case INTEGER:
+                    dataType = SQL_INT;
+                    break;
+                case LONG:
+                    dataType = SQL_BIGINT;
+                    break;
+                default:
+                    dataType = javaClass;
+                }
+            }
+
+            return dataType;
+        }
+
+    }
 }
