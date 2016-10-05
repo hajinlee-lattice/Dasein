@@ -282,6 +282,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:build',
+        'sass:dev',
         'html2js',
         'copy:dist',
         'useminPrepare',
@@ -291,8 +292,7 @@ module.exports = function (grunt) {
         'uglify:production',
         //'filerev',
         'usemin',
-        'processhtml:dist',
-        'sass:dev'
+        'processhtml:dist'
     ]);
 
     grunt.registerTask('init', [
