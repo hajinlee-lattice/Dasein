@@ -13,6 +13,9 @@ if [ ! -z "CATALINA_HOME" ]; then
     cp $WSHOME/le-dev/tomcat/dev/server.xml $CATALINA_HOME/conf/server.xml
 fi
 
+rm -rf $WSHOME/le-dev/testartifacts/certificates/cacerts || true
+wget -P $WSHOME/le-dev/testartifacts/certificates http://10.41.1.10/tars/cacerts
+
 mkdir -p $WSHOME/le-dev/hadoop/artifacts/
 export TEZ_TARBALL=$WSHOME/le-dev/hadoop/artifacts/tez-0.8.2.tar.gz
 hadoop fs -mkdir -p /apps/tez || true
