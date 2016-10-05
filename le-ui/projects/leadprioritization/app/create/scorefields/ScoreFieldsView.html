@@ -1,5 +1,4 @@
-<section class="container custom-fields">
-	<form novalidate name="fieldMappingForm">
+<section class="container custom-fields score-file">
 	<!--
 	<div class="row">
 		<div class="ten columns offset-one">
@@ -12,7 +11,12 @@
 	</div>
 	-->
 	<div class="row field-mapping-form">
-		<div class="six offset-three columns">
+		<form novalidate name="RequiredFieldMappingForm">
+		<div class="ten offset-one columns box-outline">
+			<div class="field-mapping-section-header">
+				<h4>Required fields</h4>
+				<h5>Make sure all the required fields are mapped correctly.</h5>
+			</div>
 			<table class="unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
@@ -22,7 +26,7 @@
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="field in vm.fieldMappings">
+                    <tr ng-repeat="field in vm.fieldMappings" ng-if="vm.requiredFields.indexOf(field.mappedField) > -1">
 						<td class="field_mapping_label">
 							<label 	for="fieldType_{{ field.mappedField }}"
 									ng-class="{ 'required': vm.requiredFields.indexOf(field.mappedField) > -1 }">
@@ -55,44 +59,88 @@
 				</tbody>
 			</table>
 
+			<div 	class="container field-mapping-validation" 
+					ng-repeat="RequiredField in vm.requiredFields" 
+					ng-if="vm.FieldMap[RequiredField].userField == vm.ignoredFieldLabel">
+				<div class="ten columns offset-one has-error">
+					<p class="help-block">
+				    	* Required column is unmapped: <i class="orange-text">{{RequiredField}}</i>
+					</p>
+		    	</div>
+		    </div>
 		</div>
+		</form>
 	</div>
 
-	<div class="row field-mapping-validation">
-		<div class="ten columns offset-one" ng-class="{ 'has-error' : fieldMappingForm.$invalid }">
-      		<p class="help-block">
-      			* One or more of your columns is unmapped or is using a reserved name
-      		</p>
-    	</div>
-  	</div>
-
-	<div 	class="row field-mapping-validation" 
-			ng-repeat="RequiredField in vm.requiredFields" 
-			ng-if="vm.FieldMap[RequiredField].userField == vm.ignoredFieldLabel">
-		<div class="ten columns offset-one has-error">
-			<p class="help-block">
-		    	* Required column is unmapped: <i class="orange-text">{{RequiredField}}</i>
-			</p>
-    	</div>
-    </div>
-
-	<div class="row">
-		<div class="ten columns offset-one field-mapping-actions">
-			<div class="pull-left">
-				<button data-ng-click="vm.clickReset()" class="button white-button" type="button">
-					{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
-				</button>
+	<div class="row field-mapping-form">
+		<form novalidate name="OptionalFieldMappingForm">
+		<div class="ten offset-one columns box-outline">
+			<div class="field-mapping-section-header">
+				<h4>Optional fields</h4>
+				<h5>
+					To get the most accurate scores, every field in your model should match a field in your life.  
+					Check that all the fields you want mapped are mapped correctly.
+				</h5>
 			</div>
-			<div class="pull-right">
-				<button 
-						ng-click="vm.clickNext(); NextClicked = true;" 
-						ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
-						class="button orange-button" 
-						type="button">
-					{{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
-				</button>
+			<table class="unstyled">
+				<thead ng-if="vm.initialized">
+					<tr>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
+						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
+					</tr>
+				</thead>
+
+				<tbody>
+                    <tr ng-repeat="field in vm.fieldMappings" ng-if="vm.requiredFields.indexOf(field.mappedField) < 0">
+						<td class="field_mapping_label">
+							<label 	for="fieldType_{{ field.mappedField }}"
+									ng-class="{ 'required': vm.requiredFields.indexOf(field.mappedField) > -1 }">
+								{{ field.mappedField }}
+							</label>
+						</td>
+						<td class="field-mapping-inputs">
+                            <select required
+                            		name="mapping_lattice_field_select_{{ field.mappedField }}"
+                            		class="form-control"
+                            		ng-class="{ 'required': (field.userField == vm.ignoredFieldLabel && vm.requiredFields.indexOf(field.mappedField) > -1), 'disabled': (field.userField == vm.ignoredFieldLabel && vm.requiredFields.indexOf(field.mappedField) == -1) }"
+	                            	ng-model="field.userField"
+	                            	ng-change="vm.changeLatticeField(field, field.userField)">
+	                            <option value="{{ vm.ignoredFieldLabel }}"
+	                            		ng-if="field.userField && field.userField != vm.ignoredFieldLabel""
+	                            		ng-selected="!field.userField">
+	                            	{{ vm.ignoredFieldLabel }}
+	                            </option>
+	                            <option value="{{ field.userField }}"
+	                            		ng-selected="true">
+	                            	{{ field.userField }}
+	                            </option>
+	                            <option value="{{ UnmappedField }}"
+	                            		ng-repeat="UnmappedField in vm.AvailableFields">
+	                            	{{ UnmappedField }}
+	                            </option>
+                            </select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div 	class="container field-mapping-actions">
+				<div class="pull-left">
+					<button data-ng-click="vm.clickReset()" class="button gray-button nav-button" type="button">
+						{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
+					</button>
+				</div>
+				<div class="pull-right">
+					<button 
+							ng-click="vm.clickNext(); NextClicked = true;" 
+							ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
+							class="button orange-button nav-button" 
+							type="button">
+						{{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+					</button>
+				</div>
 			</div>
 		</div>
+		</form>
 	</div>
-	</form>
 </section>

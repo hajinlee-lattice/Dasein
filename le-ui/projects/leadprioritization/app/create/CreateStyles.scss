@@ -344,11 +344,13 @@ section.container.custom-fields {
     .field-mapping-actions {
         padding-top: 1em;
         border-top: #b0b0b0 solid 1px;
+        margin: 0 1em;
     }
     .field-mapping-form {
         margin-bottom: 1em;
     }
     .field-mapping-validation {
+        margin: 0 1em;
         i.orange-text {
             font-weight: bold;
         }
@@ -534,6 +536,89 @@ Media Queries
                 top: 8px;
                 width: 271px;
                 height: 121px;
+            }
+        }
+    }
+}
+
+/* score a file - field mapping */
+section.custom-fields.score-file {
+    .field-mapping-section-header {
+        padding: 1.5em 2.75em;
+        
+        h4 {
+            font-weight: bold;
+            margin-bottom: 0.5em;
+            color: #666;
+        }
+
+        h5 {
+            font-weight: bold;
+            font-size: 12pt;
+            line-height: 20px;
+            color: #666;
+        }
+    }
+    .field-mapping-actions {
+        border: none;
+        padding: 0;
+        margin: 2em 2.5em;
+    }
+    .columns.box-outline {
+        border-radius: 4px;
+        box-shadow: 0 0 10px 0 rgba(57,137,195,0.1);
+        border: solid 1px #d0d0d0;
+        padding: 0;
+        padding-bottom: 0;
+        margin-bottom: 1em;
+        
+        table {
+            margin-bottom: 0;
+            
+            tr {
+                border-bottom: 1px solid #e9e9e9;
+
+                select {
+                    width: auto;
+                    max-width: 80%;
+                }
+
+                td {
+                    border-right: 1px solid #e9e9e9;
+                    width: 50%;
+                    
+                    &.field-mapping-inputs {
+                        padding: 0.5em 1em 0.5em;
+                    }
+
+                    &:last-child {
+                        border-right: none;
+                    } 
+                }
+            }
+
+            thead {
+                tr {
+                    th {
+                        border: none;
+                        padding: .5em 1em;
+                        color: #bbb;
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    &:nth-child(odd) {
+                        background: #f9f9f9;
+                    }
+                    
+                    td {
+                        &.field_mapping_label label {
+                            width: auto;
+                        }
+                    }
+                }
             }
         }
     }
