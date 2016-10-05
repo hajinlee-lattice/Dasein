@@ -77,10 +77,12 @@ angular.module('lp.marketo.enrichment', [
     }
 
     vm.selected_options = {};
+    vm.initial_options = {};
     vm.disabled_options = [];
     _.each(vm.match_fields, function(value, key){
         if(value.data.marketoFieldName) {
             vm.selected_options[key] = value.data.marketoFieldName;
+            vm.initial_options[key] = value.data.marketoFieldName;
             vm.disabled_options.push(value.data.marketoFieldName);
         }
     })
@@ -95,6 +97,18 @@ angular.module('lp.marketo.enrichment', [
     }
 
     vm.changeField = function(type) {
+        vm.saved = false;
+        if(vm.marketo_field[type] === vm.initial_options[type]){
+            vm.saved = true;
+        }
+        for( var i in vm.marketo_field) {
+            if(vm.marketo_field[i] && vm.marketo_field[i] !== vm.initial_options[i]){
+                vm.saved = false;
+                break;
+            } else if(vm.marketo_field[i] && vm.marketo_field[i] === vm.initial_options[i]){
+                vm.saved = true;
+            }
+        }
         var type = type || '',
             value = vm.marketo_field[type],
             required = vm.match_fields[type].required;

@@ -24,8 +24,7 @@
                         </select>
                         -->
                         <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type); vm.selectOption(type, vm.marketo_field[type]);" ng-required="field.required">
-                            <option value="" style="display: none;">Select Value</option>
-                            <option value="" ng-if="!field.required"> -- </option>
+                            <option value="" ng-if="!field.required">Select Value</option>
                             <option ng-repeat="(key, item) in field.options" value="{{item.apiName}}" ng-selected="field.data.marketoFieldName == item.apiName" ng-disabled="vm.disabled_options.includes(item.apiName) && item.apiName !== vm.selected_options[type]" data-type="{{type}}">{{item.displayName}}</option>
                         </select>
                     </div>

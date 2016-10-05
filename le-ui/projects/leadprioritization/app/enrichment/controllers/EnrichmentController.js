@@ -52,7 +52,7 @@ angular.module('lp.enrichment.leadenrichment', [
         view: 'list'
     });
 
-    var enrichment_chunk_size = 100;
+    var enrichment_chunk_size = 1000;
     var getEnrichmentData = function(opts) {
         var deferred = $q.defer(),
             opts = opts || {},
