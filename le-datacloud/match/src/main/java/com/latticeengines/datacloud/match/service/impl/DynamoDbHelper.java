@@ -172,7 +172,8 @@ public class DynamoDbHelper implements DbHelper {
                 BitCodeBook codeBook = entry.getValue().getLeft();
                 List<String> decodeFields = entry.getValue().getRight();
                 String encodeField = entry.getKey();
-                decodedAttributes.putAll(codeBook.decode(encodeField, decodeFields));
+                String encodedStr = (String) amAttributes.get(encodeField);
+                decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
             }
 
             if (amAttributes.containsKey(columnName)) {
