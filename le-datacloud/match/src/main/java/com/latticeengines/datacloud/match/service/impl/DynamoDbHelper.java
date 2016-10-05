@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
+import com.newrelic.api.agent.Trace;
 
 @Component("dynamoDbHelper")
 public class DynamoDbHelper implements DbHelper {
@@ -151,13 +152,19 @@ public class DynamoDbHelper implements DbHelper {
 
     private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, LatticeAccount account,
             ColumnSelection columnSelection, String dataCloudVersion) {
-        List<Column> columns = columnSelection.getColumns();
+        Map<String, Object> queryResult = parseLatticeAccount(account, columnSelection, dataCloudVersion);
+        record.setQueryResult(queryResult);
+    }
+
+    @Trace
+    private Map<String, Object> parseLatticeAccount(LatticeAccount account,
+                                                    ColumnSelection columnSelection, String dataCloudVersion) {
         Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
                 .getDecodeParameters(columnSelection, dataCloudVersion);
 
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
-        for (Column column : columns) {
+        for (Column column : columnSelection.getColumns()) {
             String columnName = column.getColumnName();
 
             Map<String, Object> decodedAttributes = new HashMap<>();
@@ -176,7 +183,7 @@ public class DynamoDbHelper implements DbHelper {
                 queryResult.put(columnName, null);
             }
         }
-        record.setQueryResult(queryResult);
+        return queryResult;
     }
 
 }
