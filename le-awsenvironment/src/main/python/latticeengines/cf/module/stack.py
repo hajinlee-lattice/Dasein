@@ -2,11 +2,10 @@ import boto3
 import json
 import os
 import sys
-import time
 import tempfile
+import time
 from boto3.s3.transfer import S3Transfer
 
-# sys.path.append( os.path.dirname( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) ) )
 from .autoscaling import AutoScalingGroup, LaunchConfiguration
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
@@ -15,7 +14,6 @@ from .iam import InstanceProfile
 from .parameter import *
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
-# from conf import AwsEnvironment
 from ...conf import AwsEnvironment
 
 SUBNETS = [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3]
@@ -336,16 +334,8 @@ class ECSStack(Stack):
             ],
             Tags=[
                 {
-                    'Key': 'latticeengies.cluster.name',
-                    'Value': stackname
-                },
-                {
-                    'Key': 'latticeengies.cluster.type',
-                    'Value': 'ecs'
-                },
-                {
-                    'Key': 'latticeengines.product',
-                    'Value': 'LPI'
+                    'Key': 'product',
+                    'Value': 'lpi'
                 }
             ]
         )

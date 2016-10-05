@@ -95,16 +95,8 @@ def provision(environment, stackname):
         ],
         Tags=[
             {
-                'Key': 'latticeengies.cluster.name',
-                'Value': stackname
-            },
-            {
-                'Key': 'latticeengies.cluster.type',
-                'Value': 'observer'
-            },
-            {
-                'Key': 'latticeengines.product',
-                'Value': 'LPI'
+                'Key': 'product',
+                'Value': 'lpi'
             }
         ]
     )
