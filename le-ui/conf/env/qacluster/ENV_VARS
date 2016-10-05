@@ -1,4 +1,4 @@
-export NODE_APPS=leui,leadmin
+export NODE_APPS={{NODE_APPS}}
 export NODE_ENV=qa
 export API_URL=https://${OUTSIDE_TOMCAT}:8081
 export API_CON_URL=https://${INSIDE_TOMCAT}:8073
