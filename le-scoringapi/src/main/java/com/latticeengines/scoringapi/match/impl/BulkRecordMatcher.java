@@ -223,7 +223,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             MatchInput matchInput = buildMatchInput(space, //
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
-                    selectedLeadEnrichmentAttributes, false, null);
+                    recordModelTuple.getRecord().isPerformEnrichment()?selectedLeadEnrichmentAttributes:null, false, null);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null
