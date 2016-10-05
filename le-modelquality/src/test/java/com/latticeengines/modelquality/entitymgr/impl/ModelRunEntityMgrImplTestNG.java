@@ -19,9 +19,6 @@ import com.latticeengines.domain.exposed.modelquality.DataSetType;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
-import com.latticeengines.domain.exposed.modelquality.PipelinePropertyDef;
-import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
-import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
@@ -91,14 +88,16 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        algorithmEntityMgr.deleteAll();
+        modelRunEntityMgr.deleteAll();
         analyticPipelineEntityMgr.deleteAll();
+        algorithmEntityMgr.deleteAll();
         dataFlowEntityMgr.deleteAll();
         dataSetEntityMgr.deleteAll();
+        pipelineToPipelineStepsEntityMgr.deleteAll();
+        pipelineStepEntityMgr.deleteAll();
         pipelineEntityMgr.deleteAll();
         propDataEntityMgr.deleteAll();
         samplingEntityMgr.deleteAll();
-        modelRunEntityMgr.deleteAll();
 
         Algorithm algorithm = algorithmService.createLatestProductionAlgorithm();
         DataFlow dataflow = dataFlowService.createLatestProductionDataFlow();
@@ -111,7 +110,7 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         dataset.setDataSetType(DataSetType.FILE);
         dataset.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
         dataSetEntityMgr.create(dataset);
-        Pipeline pipeline = createLocalPipeline();
+        Pipeline pipeline = pipelineService.createLatestProductionPipeline();
         PropData propdata = propDataService.createLatestProductionPropData();
         Sampling sampling = samplingService.createLatestProductionSamplingConfig();
 
@@ -132,22 +131,6 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         modelRun.setStatus(ModelRunStatus.NEW);
         modelRun.setAnalyticPipeline(analyticPipeline);
         modelRun.setDataSet(dataset);
-    }
-
-    private Pipeline createLocalPipeline() {
-        Pipeline pipeline = new Pipeline();
-        pipeline.setName("Test pipeline");
-        PipelineStep pipelineStep = new PipelineStep();
-        pipelineStep.setName("pivotstep");
-        pipelineStep.setScript("pivotstep.py");
-        PipelinePropertyDef pipelinePropertyDef = new PipelinePropertyDef("pivotstep.threshold");
-        PipelinePropertyValue pipelinePropertyValue = new PipelinePropertyValue("0.10");
-
-        pipeline.addPipelineStep(pipelineStep);
-        pipelineStep.addPipelinePropertyDef(pipelinePropertyDef);
-        pipelinePropertyDef.addPipelinePropertyValue(pipelinePropertyValue);
-
-        return pipeline;
     }
 
     @Test(groups = "functional")

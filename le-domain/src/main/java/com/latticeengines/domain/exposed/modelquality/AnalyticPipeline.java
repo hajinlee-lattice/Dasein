@@ -38,27 +38,27 @@ public class AnalyticPipeline implements HasName, HasPid {
     
     @JsonProperty("pipeline")
     @JoinColumn(name = "FK_PIPELINE_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private Pipeline pipeline;
 
     @JsonProperty("algorithm")
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private Algorithm algorithm;
 
     @JsonProperty("prop_data")
     @JoinColumn(name = "FK_PROPDATA_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private PropData propData;
 
     @JsonProperty("data_flow")
     @JoinColumn(name = "FK_DATAFLOW_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private DataFlow dataFlow;
 
     @JsonProperty("sampling")
     @JoinColumn(name = "FK_SAMPLING_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private Sampling sampling;
 
     @Override

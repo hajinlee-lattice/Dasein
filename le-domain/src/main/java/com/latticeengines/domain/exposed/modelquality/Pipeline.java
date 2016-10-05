@@ -17,6 +17,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -57,6 +60,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pk.pipeline")
+    @Fetch(FetchMode.SUBSELECT)
     private List<PipelineToPipelineSteps> pipelineSteps = new ArrayList<>();
 
     @Override
