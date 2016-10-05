@@ -35,6 +35,9 @@ public class CloneModelingParameters {
     @JsonProperty
     private boolean excludePropDataAttributes = false;
 
+    @JsonProperty
+    private boolean enableTransformations;
+
     public String getName() {
         return name;
     }
@@ -105,6 +108,14 @@ public class CloneModelingParameters {
 
     public void setExcludePropDataAttributes(boolean excludePropDataAttributes) {
         this.excludePropDataAttributes = excludePropDataAttributes;
+    }
+
+    public boolean enableTransformation() {
+        return enableTransformations;
+    }
+
+    public void setEnableTransformations(boolean enableTransformations) {
+        this.enableTransformations = enableTransformations;
     }
 
     @Override

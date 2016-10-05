@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @Component("modelSummaryParser")
-public class ModelSummaryParser {;
+public class ModelSummaryParser {
 
     private static final Log log = LogFactory.getLog(ModelSummaryParser.class);
 
@@ -110,15 +110,21 @@ public class ModelSummaryParser {;
         String lookupId = JsonUtils.getOrDefault(details.get("LookupID"), String.class, "");
         summary.setName(String.format("%s-%s", name.replace(' ', '_'),
                 getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
-        summary.setDisplayName(JsonUtils.getOrDefault(details.get("DisplayName"), String.class, ""));
+        summary.setDisplayName(
+                JsonUtils.getOrDefault(details.get("DisplayName"), String.class, ""));
         summary.setLookupId(lookupId);
         summary.setRocScore(JsonUtils.getOrDefault(details.get("RocScore"), Double.class, 0.0));
-        summary.setTrainingRowCount(JsonUtils.getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
-        summary.setTestRowCount(JsonUtils.getOrDefault(details.get("TestingLeads"), Long.class, 0L));
+        summary.setTrainingRowCount(
+                JsonUtils.getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
+        summary.setTestRowCount(
+                JsonUtils.getOrDefault(details.get("TestingLeads"), Long.class, 0L));
         summary.setTotalRowCount(JsonUtils.getOrDefault(details.get("TotalLeads"), Long.class, 0L));
-        summary.setTrainingConversionCount(JsonUtils.getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
-        summary.setTestConversionCount(JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
-        summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
+        summary.setTrainingConversionCount(
+                JsonUtils.getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
+        summary.setTestConversionCount(
+                JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
+        summary.setTotalConversionCount(
+                JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
         summary.setModelType(JsonUtils.getOrDefault(details.get("ModelType"), String.class,
                 ModelType.PYTHONMODEL.getModelType()));
@@ -141,29 +147,32 @@ public class ModelSummaryParser {;
 
         JsonNode eventTableProvenance = json.get("EventTableProvenance");
         if (eventTableProvenance != null) {
-            summary.setEventTableName(JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class,
-                    ""));
+            summary.setEventTableName(JsonUtils
+                    .getOrDefault(eventTableProvenance.get("EventTableName"), String.class, ""));
             summary.setSourceSchemaInterpretation(JsonUtils.getOrDefault(
                     eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
-            summary.setTrainingTableName(JsonUtils.getOrDefault(eventTableProvenance.get("TrainingTableName"),
+            summary.setTrainingTableName(JsonUtils
+                    .getOrDefault(eventTableProvenance.get("TrainingTableName"), String.class, ""));
+            summary.setPivotArtifactPath(JsonUtils.getOrDefault(
+                    eventTableProvenance.get("Pivot_Artifact_Path"), String.class, null));
+            summary.setModuleName(JsonUtils.getOrDefault(eventTableProvenance.get("Module_Name"),
                     String.class, ""));
-            summary.setTransformationGroupName(JsonUtils.getOrDefault(
-                    eventTableProvenance.get("Transformation_Group_Name"), String.class,
-                    TransformationGroup.STANDARD.getName()));
-            summary.setPivotArtifactPath(JsonUtils.getOrDefault(eventTableProvenance.get("Pivot_Artifact_Path"),
-                    String.class, null));
-            summary.setModuleName(JsonUtils.getOrDefault(eventTableProvenance.get("Module_Name"), String.class, ""));
 
             ModelSummaryProvenance configuration = new ModelSummaryProvenance();
             configuration.setBoolean(ProvenancePropertyName.IsOneLeadPerDomain,
-                    JsonUtils.getOrDefault(eventTableProvenance.get("Is_One_Lead_Per_Domain"), Boolean.class, false));
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Is_One_Lead_Per_Domain"),
+                            Boolean.class, false));
             configuration.setBoolean(ProvenancePropertyName.ExcludePropdataColumns,
-                    JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Propdata_Columns"), Boolean.class, false));
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Propdata_Columns"),
+                            Boolean.class, false));
             configuration.setBoolean(ProvenancePropertyName.ExcludePublicDomains,
-                    JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Public_Domains"), Boolean.class, false));
-            configuration.setString(ProvenancePropertyName.TrainingFilePath,
-                    JsonUtils.getOrDefault(eventTableProvenance.get("Training_File_Path"),
-                            String.class, ""));
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Exclude_Public_Domains"),
+                            Boolean.class, false));
+            configuration.setString(ProvenancePropertyName.TrainingFilePath, JsonUtils.getOrDefault(
+                    eventTableProvenance.get("Training_File_Path"), String.class, ""));
+            configuration.setString(ProvenancePropertyName.TransformationGroupName,
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Transformation_Group_Name"),
+                            String.class, TransformationGroup.STANDARD.getName()));
             summary.setModelSummaryConfiguration(configuration);
         }
 
@@ -205,17 +214,20 @@ public class ModelSummaryParser {;
 
     @SuppressWarnings("unchecked")
     private void setLiftStatistics(JsonNode json, ModelSummary summary) {
-        List<Map<String, ?>> segmentations = JsonUtils.getOrDefault(json, List.class, new ArrayList<>());
+        List<Map<String, ?>> segmentations = JsonUtils.getOrDefault(json, List.class,
+                new ArrayList<>());
 
         if (segmentations.size() == 0) {
             return;
         }
-        List<Map<String, Integer>> segments = (List<Map<String, Integer>>) segmentations.get(0).get("Segments");
+        List<Map<String, Integer>> segments = (List<Map<String, Integer>>) segmentations.get(0)
+                .get("Segments");
 
         long totalRowCount = 0;
         long totalConvertedCount = 0;
         int i = 1;
-        double averageProbability = (double) summary.getTotalConversionCount() / (double) summary.getTotalRowCount();
+        double averageProbability = (double) summary.getTotalConversionCount()
+                / (double) summary.getTotalRowCount();
         double top10PctLift = 0;
         double top20PctLift = 0;
         double top30PctLift = 0;
@@ -227,13 +239,16 @@ public class ModelSummaryParser {;
             totalConvertedCount += convertedCount;
 
             if (i == 10) {
-                top10PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
+                top10PctLift = ((double) totalConvertedCount / (double) totalRowCount)
+                        / averageProbability;
             }
             if (i == 20) {
-                top20PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
+                top20PctLift = ((double) totalConvertedCount / (double) totalRowCount)
+                        / averageProbability;
             }
             if (i == 30) {
-                top30PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
+                top30PctLift = ((double) totalConvertedCount / (double) totalRowCount)
+                        / averageProbability;
             }
             i++;
         }
@@ -260,18 +275,22 @@ public class ModelSummaryParser {;
         for (final JsonNode predictorJson : predictorsJsonNode) {
             Predictor predictor = new Predictor();
 
-            predictor.setName(JsonUtils.getOrDefault(predictorJson.get(NAME), String.class, DEFAULT_PREDICTOR_NAME));
-            predictor.setDisplayName(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_DISPLAY_NAME), String.class,
-                    DEFAULT_PREDICTOR_DISPLAY_NAME));
-            predictor.setApprovedUsage(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE),
-                    String.class, DEFAULT_PREDICTOR_APPROVED_USAGE));
-            predictor.setCategory(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_CATEGORY), String.class,
-                    DEFAULT_PREDICTOR_CATEGORY));
-            predictor.setFundamentalType(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_FUNDAMENTAL_TYPE),
-                    String.class, DEFAULT_PREDICTOR_FUNDAMENTAL_TYPE));
-            predictor.setUncertaintyCoefficient(JsonUtils.getOrDefault(
-                    predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT), Double.class,
-                    DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
+            predictor.setName(JsonUtils.getOrDefault(predictorJson.get(NAME), String.class,
+                    DEFAULT_PREDICTOR_NAME));
+            predictor.setDisplayName(
+                    JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_DISPLAY_NAME), String.class,
+                            DEFAULT_PREDICTOR_DISPLAY_NAME));
+            predictor.setApprovedUsage(
+                    JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_APPROVED_USAGE),
+                            String.class, DEFAULT_PREDICTOR_APPROVED_USAGE));
+            predictor.setCategory(JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_CATEGORY),
+                    String.class, DEFAULT_PREDICTOR_CATEGORY));
+            predictor.setFundamentalType(
+                    JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_FUNDAMENTAL_TYPE),
+                            String.class, DEFAULT_PREDICTOR_FUNDAMENTAL_TYPE));
+            predictor.setUncertaintyCoefficient(
+                    JsonUtils.getOrDefault(predictorJson.get(PREDICTOR_UNCERTAINTY_COEFFICIENT),
+                            Double.class, DEFAULT_PREDICTOR_UNCERTAINTY_COEFFICIENT));
             predictor.setModelSummary(summary);
             predictor.setTenantId(summary.getTenantId());
 
@@ -323,8 +342,8 @@ public class ModelSummaryParser {;
     }
 
     public boolean isIncomplete(JsonNode summaryJson) {
-        return !(summaryJson.has("Segmentations") && summaryJson.has("Predictors") && summaryJson.has("ModelDetails")
-                && summaryJson.has("TopSample") && summaryJson.has("BottomSample") && summaryJson
-                    .has("EventTableProvenance"));
+        return !(summaryJson.has("Segmentations") && summaryJson.has("Predictors")
+                && summaryJson.has("ModelDetails") && summaryJson.has("TopSample")
+                && summaryJson.has("BottomSample") && summaryJson.has("EventTableProvenance"));
     }
 }

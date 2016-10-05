@@ -14,8 +14,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -49,14 +47,21 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         String modelSummaryId = modelSummary.getId();
 
-        String transformationGroupName = modelSummary.getTransformationGroupName();
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummaryId });
+        TransformationGroup transformationGroup;
+        String originalTransformationGroup = modelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName);
+        if (parameters.enableTransformation()
+                && originalTransformationGroup == "none") {
+            transformationGroup = getTransformationGroupFromZK();
+        } else if (parameters.enableTransformation()) {
+            transformationGroup = TransformationGroup
+                    .fromName(originalTransformationGroup);
+        } else {
+            transformationGroup = TransformationGroup.NONE;
         }
 
         MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName,
-                parameters, TransformationGroup.fromName(transformationGroupName),
-                userRefinedAttributes, modelSummary);
+                parameters, transformationGroup, userRefinedAttributes, modelSummary);
         return workflowJobService.submit(configuration);
     }
 
@@ -111,7 +116,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                         parameters.isExcludePropDataAttributes()) //
                 .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
                         parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
-                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath)
+                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .matchColumnSelection(Predefined.getDefaultSelection(), null)

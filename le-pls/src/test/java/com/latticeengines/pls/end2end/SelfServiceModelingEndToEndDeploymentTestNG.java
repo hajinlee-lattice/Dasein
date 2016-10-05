@@ -340,6 +340,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setAttributes(fields);
         parameters.setSourceModelSummaryId(copiedModelSummary.getId());
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
+        parameters.setEnableTransformations(true);
         parameters.setExcludePropDataAttributes(true);
 
         ResponseDocument<?> response;

@@ -4,6 +4,7 @@ public enum ProvenancePropertyName {
     IsOneLeadPerDomain("Is_One_Lead_Per_Domain", Boolean.class), //
     ExcludePropdataColumns("Exclude_Propdata_Columns", Boolean.class), //
     ExcludePublicDomains("Exclude_Public_Domains", Boolean.class),
+    TransformationGroupName("Transformation_Group_Name", String.class),
     TrainingFilePath("Training_File_Path", String.class);
 
     private String name;
