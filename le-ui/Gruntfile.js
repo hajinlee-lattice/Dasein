@@ -85,6 +85,24 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
+            local_admin: {
+                NODE_APPS: 'leadmin',
+                NODE_ENV: 'development',
+                API_URL: 'http://localhost:8081',
+                API_ADMIN_URL: 'http://localhost:8085',
+                API_CON_URL: 'http://localhost:8073',
+                API_MCSVC_URL: 'http://localhost:8080',
+                API_INFLUXDB_URL: 'http://localhost:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
             qa: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
@@ -206,6 +224,11 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev_admin', devText, [
         'env:dev_admin',
+        'run:node'
+    ]);
+
+    grunt.registerTask('local_admin', devText, [
+        'env:local_admin',
         'run:node'
     ]);
 
