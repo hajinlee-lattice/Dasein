@@ -49,6 +49,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         USE_ELOQUA_SETTINGS: 'UseEloquaSettings',
         USE_MARKETO_SETTINGS: 'UseMarketoSettings',
         USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings',
+
+        ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes'
     };
     this.Flags = function(){ return flags; };
 
@@ -94,6 +96,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.LEAD_ENRICHMENT_PAGE, false);
+            SetFlag(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, false);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();

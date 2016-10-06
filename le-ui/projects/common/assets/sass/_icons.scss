@@ -46,6 +46,23 @@ Icons
 		-webkit-mask: url("/assets/images/ico-bullseye.svg");
 		mask: url("/assets/images/ico-bullseye.svg");
 	}
+	&.ico-back {
+		background-color: transparent;
+		&:after {
+			font-size: 21px;
+			content: '\f053';
+			display: block;
+			font-family: FontAwesome;
+			font-style: normal;
+			font-weight: normal;
+			text-decoration: inherit;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translateY(-50%) translateX(-50%);
+			margin-left: -2px;
+		}
+	}
 	&.ico-model {
 		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-model.svg");

@@ -18,11 +18,6 @@
                     </div>
                     <div class="field" ng-repeat="(type, field) in vm.match_fields" ng-class="{required: field.required}">
                         <label class="col match" for="{{type}}">{{field.label}}</label>
-                        <!--
-                        <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type)" ng-options="item.displayName as item.apiName for item in field.options track by item.apiName" ng-required="field.required">
-                            <option value="">Select Value</option>
-                        </select>
-                        -->
                         <select class="col marketo" name="{{type}}" id="{{type}}" ng-model="vm.marketo_field[type]" ng-change="vm.changeField(type); vm.selectOption(type, vm.marketo_field[type]);" ng-required="field.required">
                             <option value="" ng-if="!field.required">Select Value</option>
                             <option ng-repeat="(key, item) in field.options" value="{{item.apiName}}" ng-selected="field.data.marketoFieldName == item.apiName" ng-disabled="vm.disabled_options.includes(item.apiName) && item.apiName !== vm.selected_options[type]" data-type="{{type}}">{{item.displayName}}</option>
@@ -130,9 +125,8 @@
                         <ul class="enrichments">
                             <li class="box" 
                                 ng-repeat="enrichment in (filteredList = (vm.enrichments
-                                | filter: vm.query
-                                | orderBy: SortOrder
-                                | filter: { 'Category': vm.category || '', 'IsSelected': (!vm.metadata.selectedToggle ? '' : true) })) 
+                                | orderBy: 'FieldName'
+                                | filter: { 'IsSelected': true })) 
                                 | startFrom: (vm.current - 1) * vm.pagesize 
                                 | limitTo: vm.pagesize" 
                                 ng-class="{'active': enrichment.IsSelected}">

@@ -3,11 +3,14 @@ angular.module('lp.enrichment.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('EnrichmentController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
-    BrowserStorageUtility, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+    BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
     var vm = this,
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
-        pagesize = Math.round(approximate_pagesize / across) * across;
+        pagesize = Math.round(approximate_pagesize / across) * across,
+        enrichment_chunk_size = 1000;
+
+    var flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         label: {
@@ -48,24 +51,28 @@ angular.module('lp.enrichment.leadenrichment', [
         subcategories: [],
         categories: [],
         selected_categories: {},
+        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
         view: 'list'
     });
-
-    var enrichment_chunk_size = 1000;
+    
     var getEnrichmentData = function(opts) {
         var deferred = $q.defer(),
             opts = opts || {},
             max = opts.max || 100,
-            offset = opts.offset || 0;
+            offset = opts.offset || 0,
+            _store;
 
         EnrichmentStore.getEnrichments(opts).then(function(result) {
             if (result != null && result.status === 200) {
                 vm.enrichments_loaded = true;
                 vm.enrichments = vm.enrichments.concat(result.data);
+                _store = result; // just a copy of the correct data strucuture and properties for later
                 if(result.data.length === max) {
                     getEnrichmentData({max: max, offset: offset + max});
                 } else {
+                    _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
+                    EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                     vm.enrichments_completed = true;
                 }
             }

@@ -106,14 +106,19 @@ angular.module('lp.enrichment.leadenrichment')
 
     this.getEnrichments = function(opts){
         var deferred = $q.defer();
-        EnrichmentService.getEnrichments(opts).then(function(response){
-            EnrichmentStore.setEnrichments(response);
+        if (this.enrichments) {
+            deferred.resolve(this.enrichments);
+        } else {
+            EnrichmentService.getEnrichments(opts).then(function(response){
+            //EnrichmentStore.setEnrichments(response);
             deferred.resolve(response);
         });
+        }
         return deferred.promise;
     }
 
     this.setEnrichments = function(item){
+        console.log(item);
         this.enrichments = item;
     }
 
@@ -183,7 +188,7 @@ angular.module('lp.enrichment.leadenrichment')
         var deferred = $q.defer();
         var opts = opts || {},
             offset = opts.offset || 0,
-            max = opts.max || 20;
+            max = opts.max || null;
         $http({
             method: 'get',
             url: '/pls/enrichment/lead',

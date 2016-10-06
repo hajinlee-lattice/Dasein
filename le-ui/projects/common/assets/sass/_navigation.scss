@@ -207,7 +207,7 @@ nav.primary-nav {
             &:hover > a span:first-of-type {
                 background-color: #464646;
                 transition: none;
-                span {
+                span:not(.no-svg) {
                     background-color: white;
                 }
             }
@@ -312,7 +312,7 @@ nav.primary-nav {
 
 html:not(.no-cssmask) {
     nav.primary-nav {
-        .ico {
+        .ico:not(.no-svg) {
             background-color: #fff;
         }
     }
