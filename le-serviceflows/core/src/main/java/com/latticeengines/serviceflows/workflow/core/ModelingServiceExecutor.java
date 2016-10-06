@@ -79,16 +79,14 @@ public class ModelingServiceExecutor {
 
     public void init() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(
-                new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
-                        builder.getTable())), true);
+        fs.delete(new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir,
+                builder.getCustomer(), builder.getTable())), true);
     }
 
     public void cleanCustomerDataDir() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(
-                new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir, builder.getCustomer(),
-                        builder.getTable())), true);
+        fs.delete(new Path(String.format("%s/%s/data/%s", modelingServiceHdfsBaseDir,
+                builder.getCustomer(), builder.getTable())), true);
     }
 
     public void runPipeline() throws Exception {
@@ -101,10 +99,10 @@ public class ModelingServiceExecutor {
     }
 
     public void writeMetadataFiles() throws Exception {
-        String metadataHdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
-                builder.getCustomer(), builder.getMetadataTable());
-        String rtsHdfsPath = String.format("%s/%s/data/%s/datacomposition.json", modelingServiceHdfsBaseDir,
-                builder.getCustomer(), builder.getMetadataTable());
+        String metadataHdfsPath = String.format("%s/%s/data/%s/metadata.avsc",
+                modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getMetadataTable());
+        String rtsHdfsPath = String.format("%s/%s/data/%s/datacomposition.json",
+                modelingServiceHdfsBaseDir, builder.getCustomer(), builder.getMetadataTable());
         HdfsUtils.writeToFile(yarnConfiguration, metadataHdfsPath, builder.getMetadataContents());
         HdfsUtils.writeToFile(yarnConfiguration, rtsHdfsPath, builder.getDataCompositionContents());
     }
@@ -189,10 +187,8 @@ public class ModelingServiceExecutor {
             Map<String, List<String>> enabledRules = new HashMap<>();
             for (DataRule dataRule : dataRules) {
                 if (dataRule.isEnabled()) {
-                    enabledRules.put(
-                            dataRule.getName(),
-                            dataRule.getColumnsToRemediate() == null ? new ArrayList<String>() : dataRule
-                                    .getColumnsToRemediate());
+                    enabledRules.put(dataRule.getName(), dataRule.getColumnsToRemediate() == null
+                            ? new ArrayList<String>() : dataRule.getColumnsToRemediate());
                 }
             }
             enabledRulesProp = String.format("remediatedatarulesstep.enabledRules=%s",
@@ -207,7 +203,8 @@ public class ModelingServiceExecutor {
         String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
         if (StringUtils.isNotEmpty(enabledRulesProp)) {
             if (!algorithm.getPipelineProperties().isEmpty()) {
-                algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " " + enabledRulesProp);
+                algorithm.setPipelineProperties(
+                        algorithm.getPipelineProperties() + " " + enabledRulesProp);
             } else {
                 algorithm.setPipelineProperties(enabledRulesProp);
             }
@@ -238,27 +235,31 @@ public class ModelingServiceExecutor {
         if (builder.getTrainingTableName() != null) {
             props.add("Training_Table_Name=" + builder.getTrainingTableName());
         }
-        if (builder.getTransformationGroupName() != null) {
-            props.add("Transformation_Group_Name=" + builder.getTransformationGroupName());
-        }
         if (builder.getPredefinedColumnSelection() != null) {
-            props.add("Predefined_ColumnSelection_Name=" + builder.getPredefinedColumnSelection().getName());
-            props.add("Predefined_ColumnSelection_Version=" + builder.getPredefinedSelectionVersion());
+            props.add("Predefined_ColumnSelection_Name="
+                    + builder.getPredefinedColumnSelection().getName());
+            props.add("Predefined_ColumnSelection_Version="
+                    + builder.getPredefinedSelectionVersion());
         } else if (builder.getCustomizedColumnSelection() != null) {
-            props.add("Customized_ColumnSelection=" + JsonUtils.serialize(builder.getCustomizedColumnSelection()));
+            props.add("Customized_ColumnSelection="
+                    + JsonUtils.serialize(builder.getCustomizedColumnSelection()));
         }
         if (builder.getPivotArtifactPath() != null) {
             props.add("Pivot_Artifact_Path=" + builder.getPivotArtifactPath());
         }
-        if (builder.getModuleName() != null){
+        if (builder.getModuleName() != null) {
             props.add("Module_Name=" + builder.getModuleName());
         }
         if (builder.dataCloudVersion != null) {
             props.add("Data_Cloud_Version=" + builder.dataCloudVersion);
         }
         String provenanceProperties = StringUtils.join(props, " ");
-        provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
+        provenanceProperties += " "
+                + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
         provenanceProperties += builder.modelSummaryProvenance.getProvenancePropertyString();
+        if (builder.getTransformationGroupName() != null) {
+            provenanceProperties += " Transformation_Group_Name=" + builder.getTransformationGroupName();
+        }
         log.info("The model provenance property is: " + provenanceProperties);
 
         model.setProvenanceProperties(provenanceProperties);
@@ -327,7 +328,8 @@ public class ModelingServiceExecutor {
         } while (!YarnUtils.TERMINAL_STATUS.contains(status.getStatus()));
 
         if (status.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new LedpException(LedpCode.LEDP_28010, new String[] { appId, status.getStatus().toString() });
+            throw new LedpException(LedpCode.LEDP_28010,
+                    new String[] { appId, status.getStatus().toString() });
         }
 
         return status;
@@ -340,7 +342,8 @@ public class ModelingServiceExecutor {
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
         StringList features = modelProxy.getFeatures(model);
-        return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
+        return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()),
+                features.getElements());
     }
 
     public static class Builder {
