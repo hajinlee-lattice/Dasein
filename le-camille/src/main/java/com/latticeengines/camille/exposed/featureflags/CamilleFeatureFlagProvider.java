@@ -1,11 +1,15 @@
 package com.latticeengines.camille.exposed.featureflags;
 
-import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.camille.exposed.util.ConfigurationMultiCache;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
@@ -18,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagProvider;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 
 public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
@@ -25,9 +30,24 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     }.getClass().getEnclosingClass());
 
     public CamilleFeatureFlagProvider() {
+        ensurePodDivisionExists();
+
         definitionCache = ConfigurationCache.construct(new PodDivisionScope(), new Path("/"
                 + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE));
         valueCache = ConfigurationMultiCache.construct();
+    }
+
+    private void ensurePodDivisionExists() {
+        Camille c = CamilleEnvironment.getCamille();
+        if (!StringUtils.isEmpty(CamilleEnvironment.getDivision())) {
+            try {
+                c.upsert(
+                        PathBuilder.buildPodDivisionPath(CamilleEnvironment.getPodId(),
+                                CamilleEnvironment.getDivision()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            } catch (Exception e) {
+                log.error("Could not upsert pod division path", e);
+            }
+        }
     }
 
     @Override
