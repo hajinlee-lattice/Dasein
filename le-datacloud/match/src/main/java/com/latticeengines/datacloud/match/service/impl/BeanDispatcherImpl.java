@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
@@ -17,19 +16,15 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 public class BeanDispatcherImpl implements BeanDispatcher {
 
     @Autowired
-    @Lazy
     private List<DbHelper> dbHelpers;
 
     @Autowired
-    @Lazy
     private List<ColumnSelectionService> columnSelectionServices;
 
     @Autowired
-    @Lazy
     private List<ColumnMetadataService> columnMetadataServices;
 
     @Autowired
-    @Lazy
     private List<MetadataColumnService> metadataColumnServices;
 
     public DbHelper getDbHelper(String dataCloudVersion) {
