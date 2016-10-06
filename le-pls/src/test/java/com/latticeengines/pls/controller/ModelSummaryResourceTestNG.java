@@ -87,7 +87,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         tenantId = eloquaTenant.getId();
         modelId = eloquaModelId;
 
-        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + eloquaModelId + "/container_01/";
+        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + eloquaModelId
+                + "/container_01/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
         URL metadataDiagnosticsUrl = ClassLoader
@@ -127,8 +128,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             Assert.fail("Should have thrown an exception.");
         } catch (Exception e) {
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.FORBIDDEN,
-                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.FORBIDDEN, "Should return forbidden 403, but got "
+                    + getErrorHandler().getResponseString());
         }
     }
 
@@ -167,8 +168,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Should return 500, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.INTERNAL_SERVER_ERROR, "Should return 500, but got "
+                    + getErrorHandler().getResponseString());
             assertTrue(e.getMessage().contains("Model with id 123 not found"));
         }
         assertTrue(exception);
@@ -181,8 +182,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.FORBIDDEN,
-                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.FORBIDDEN, "Should return forbidden 403, but got "
+                    + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
@@ -326,8 +327,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.FORBIDDEN,
-                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.FORBIDDEN, "Should return forbidden 403, but got "
+                    + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
@@ -407,8 +408,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         int originalNumModels = response.size();
         ModelSummary data = new ModelSummary();
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        InputStream modelSummaryFileAsStream = ClassLoader
+                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
         String uuid = eloquaModelId.replace("-" + eloquaModelName, "").replace(modelIdPrefix, "");
         contents = contents.replace("{uuid}", uuid);
@@ -426,7 +427,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
                 data, ModelSummary.class);
         assertNotNull(newSummary);
         ModelSummaryProvenance provenance = newSummary.getModelSummaryConfiguration();
-        assertEquals(provenance.getBag().size(), 4);
+        assertEquals(provenance.getBag().size(), 5);
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
@@ -490,8 +491,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.FORBIDDEN,
-                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.FORBIDDEN, "Should return forbidden 403, but got "
+                    + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
@@ -507,8 +508,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception e) {
             exception = true;
             HttpStatus status = getErrorHandler().getStatusCode();
-            assertEquals(status, HttpStatus.FORBIDDEN,
-                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+            assertEquals(status, HttpStatus.FORBIDDEN, "Should return forbidden 403, but got "
+                    + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }

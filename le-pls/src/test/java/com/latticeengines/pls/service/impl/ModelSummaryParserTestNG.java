@@ -56,7 +56,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated 
         assertTrue(summary.getTop10PercentLift() > summary.getTop20PercentLift());
         assertTrue(summary.getTop20PercentLift() > summary.getTop30PercentLift());
         ModelSummaryProvenance provenance = summary.getModelSummaryConfiguration();
-        assertEquals(provenance.getBag().size(), 4);
+        assertEquals(provenance.getBag().size(), 5);
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
