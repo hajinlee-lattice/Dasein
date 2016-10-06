@@ -9,9 +9,7 @@ public class SeedMergeFieldMapping {
 
     private String leColumn;
 
-    private Boolean isDuns;
-
-    private Boolean isDomain;
+    private ColumnType columnType;
 
     @JsonProperty("TargetColumn")
     public String getTargetColumn() {
@@ -43,23 +41,17 @@ public class SeedMergeFieldMapping {
         this.leColumn = leColumn;
     }
 
-    @JsonProperty("IsDuns")
-    public Boolean getIsDuns() {
-        return isDuns;
+    @JsonProperty("ColumnType")
+    public ColumnType getColumnType() {
+        return columnType;
     }
 
-    @JsonProperty("IsDuns")
-    public void setIsDuns(Boolean isDuns) {
-        this.isDuns = isDuns;
+    @JsonProperty("ColumnType")
+    public void setColumnType(ColumnType columnType) {
+        this.columnType = columnType;
     }
 
-    @JsonProperty("IsDomain")
-    public Boolean getIsDomain() {
-        return isDomain;
-    }
-
-    @JsonProperty("IsDomain")
-    public void setIsDomain(Boolean isDomain) {
-        this.isDomain = isDomain;
+    public enum ColumnType {
+        DOMAIN, DUNS, IS_PRIMARY_DOMAIN, IS_PRIMARY_LOCATION, NUMBER_OF_LOCATION, OTHER
     }
 }

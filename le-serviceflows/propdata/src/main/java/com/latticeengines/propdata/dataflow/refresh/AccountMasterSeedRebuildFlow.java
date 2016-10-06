@@ -42,6 +42,8 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private String leDunsColumn;
     private String dnbDomainColumn;
     private String leDomainColumn;
+    private String dnbIsPrimaryDomainColumn;
+    private String dnbIsPrimaryLocationColumn;
     
     /*
         Implement of PD-1196
@@ -167,7 +169,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private Node processC1(Node node) {
         Node res = node.filter(dnbDomainColumn + " == null", new FieldList(dnbDomainColumn));
         Map<String, String> map = new HashMap<String, String>();
-        map.put("LE_IS_PRIMARY_DOMAIN", "Y");
+        map.put(dnbIsPrimaryDomainColumn, "Y");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
         res = callAccountMasterSeedFunction(res, true, set, map);
@@ -189,7 +191,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         res4 = res4.groupByAndLimit(new FieldList(leDunsColumn, leDomainColumn), new FieldList(dnbDomainColumn), 1,
                 true, true);
         Map<String, String> map = new HashMap<String, String>();
-        map.put("LE_IS_PRIMARY_DOMAIN", "N");
+        map.put(dnbIsPrimaryDomainColumn, "N");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
         res4 = callAccountMasterSeedFunction(res4, true, set, map);
@@ -205,8 +207,8 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         String filterExpression = dnbDomainColumn + " == null";
         Node res = node.filter(filterExpression, new FieldList(dnbDomainColumn));
         Map<String, String> map = new HashMap<String, String>();
-        map.put("LE_IS_PRIMARY_DOMAIN", "Y");
-        map.put("LE_IS_PRIMARY_LOCATION", "Y");
+        map.put(dnbIsPrimaryDomainColumn, "Y");
+        map.put(dnbIsPrimaryLocationColumn, "Y");
         res = callAccountMasterSeedFunction(res, false, new HashSet<String>(), map);
         return res;
     }
@@ -288,13 +290,23 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
             if (item.getLeColumn() != null) {
                 latticeCacheSeedColumnMapping.put(item.getLeColumn(), item.getTargetColumn());
             }
-            if (item.getIsDuns()) {
-                dnbDunsColumn = item.getDnbColumn();
-                leDunsColumn = item.getLeColumn();
-            }
-            if (item.getIsDomain()) {
-                dnbDomainColumn = item.getDnbColumn();
-                leDomainColumn = item.getLeColumn();
+            switch (item.getColumnType()) {
+                case DOMAIN:
+                    dnbDomainColumn = item.getDnbColumn();
+                    leDomainColumn = item.getLeColumn();
+                    break;
+                case DUNS:
+                    dnbDunsColumn = item.getDnbColumn();
+                    leDunsColumn = item.getLeColumn();
+                    break;
+                case IS_PRIMARY_DOMAIN:
+                    dnbIsPrimaryDomainColumn = item.getDnbColumn();
+                    break;
+                case IS_PRIMARY_LOCATION:
+                    dnbIsPrimaryLocationColumn = item.getDnbColumn();
+                    break;
+                default:
+                    break;
             }
         }
     }
