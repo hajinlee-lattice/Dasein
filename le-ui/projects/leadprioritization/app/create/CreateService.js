@@ -144,7 +144,7 @@ angular
 
     this.GetSchemaToLatticeFields = function(csvFileName) {
         var deferred = $q.defer();
-        var params = csvFileName ? { 'displayName': csvFileName } : {};
+        var params = csvFileName ? { 'displayName': csvFileName } : { 'excludeLatticeDataAttributes': ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true };
 
         $http({
             method: 'GET',
@@ -171,12 +171,17 @@ angular
         console.log(modelId, metaData);
 
         $http({
-            method: score ? 'POST' : 'GET',
+            method: 'POST',
             url: score
                 ? '/pls/scores/fileuploads/fieldmappings'
                 : '/pls/models/uploadfile/' + FileName + '/fieldmappings',
             params: params,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            data: {
+                deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
+                excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
+                excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true
+            }
         })
         .success(function(data, status, headers, config) {
             console.log('GetFieldDocument', score, modelId, params, data);

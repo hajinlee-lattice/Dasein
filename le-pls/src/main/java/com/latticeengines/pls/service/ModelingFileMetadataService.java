@@ -12,13 +12,17 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public interface ModelingFileMetadataService {
 
-    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, SchemaInterpretation schemaInterpretation, ModelingParameters parameters);
+    FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
+            SchemaInterpretation schemaInterpretation, ModelingParameters parameters);
 
     void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument);
 
-    InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser, String fileName);
+    InputStream validateHeaderFields(InputStream stream, CloseableResourcePool leCsvParser,
+            String fileName);
 
-    InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema, CloseableResourcePool leCsvParser, String fileName);
+    InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
+            CloseableResourcePool leCsvParser, String fileName);
 
-    Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields();
+    Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields(
+            boolean excludeLatticeDataAttributes);
 }
