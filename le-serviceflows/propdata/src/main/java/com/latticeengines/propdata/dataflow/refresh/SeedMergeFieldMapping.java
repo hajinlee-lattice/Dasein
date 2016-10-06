@@ -3,52 +3,63 @@ package com.latticeengines.propdata.dataflow.refresh;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SeedMergeFieldMapping {
-    private String sourceColumn;
+    private String targetColumn;
 
-    private String mainSourceColumn;
+    private String dnbColumn;
 
-    private String mergedSourceColumn;
+    private String leColumn;
 
-    private Boolean isDedup;
+    private Boolean isDuns;
 
-    @JsonProperty("SourceColumn")
-    public String getSourceColumn() {
-        return sourceColumn;
+    private Boolean isDomain;
+
+    @JsonProperty("TargetColumn")
+    public String getTargetColumn() {
+        return targetColumn;
     }
 
-    @JsonProperty("SourceColumn")
-    public void setSourceColumn(String sourceColumn) {
-        this.sourceColumn = sourceColumn;
+    @JsonProperty("TargetColumn")
+    public void setTargetColumn(String targetColumn) {
+        this.targetColumn = targetColumn;
     }
 
-    @JsonProperty("MainSourceColumn")
-    public String getMainSourceColumn() {
-        return mainSourceColumn;
+    @JsonProperty("DnBColumn")
+    public String getDnbColumn() {
+        return dnbColumn;
     }
 
-    @JsonProperty("MainSourceColumn")
-    public void setMainSourceColumn(String mainSourceColumn) {
-        this.mainSourceColumn = mainSourceColumn;
+    @JsonProperty("DnBColumn")
+    public void setDnbColumn(String dnbColumn) {
+        this.dnbColumn = dnbColumn;
     }
 
-    @JsonProperty("MergedSourceColumn")
-    public String getMergedSourceColumn() {
-        return mergedSourceColumn;
+    @JsonProperty("LeColumn")
+    public String getLeColumn() {
+        return leColumn;
     }
 
-    @JsonProperty("MergedSourceColumn")
-    public void setMergedSourceColumn(String mergedSourceColumn) {
-        this.mergedSourceColumn = mergedSourceColumn;
+    @JsonProperty("LeColumn")
+    public void setLeColumn(String leColumn) {
+        this.leColumn = leColumn;
     }
 
-    @JsonProperty("IsDedup")
-    public Boolean getIsDedup() {
-        return isDedup;
+    @JsonProperty("IsDuns")
+    public Boolean getIsDuns() {
+        return isDuns;
     }
 
-    @JsonProperty("IsDedup")
-    public void setIsDedup(Boolean isDedup) {
-        this.isDedup = isDedup;
+    @JsonProperty("IsDuns")
+    public void setIsDuns(Boolean isDuns) {
+        this.isDuns = isDuns;
     }
 
+    @JsonProperty("IsDomain")
+    public Boolean getIsDomain() {
+        return isDomain;
+    }
+
+    @JsonProperty("IsDomain")
+    public void setIsDomain(Boolean isDomain) {
+        this.isDomain = isDomain;
+    }
 }

@@ -3,8 +3,10 @@ package com.latticeengines.propdata.dataflow.refresh;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -19,12 +21,12 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedFunction;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedRebuildFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 
 @Component("accountMasterSeedRebuildFlow")
@@ -36,6 +38,35 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private Map<String, String> dnbCacheSeedColumnMapping = new HashMap<String, String>();
     // latticeCacheSeed columns -> accountMasterSeed columns
     private Map<String, String> latticeCacheSeedColumnMapping = new HashMap<String, String>();
+    private String dnbDunsColumn;
+    private String leDunsColumn;
+    private String dnbDomainColumn;
+    private String leDomainColumn;
+    
+    /*
+        Implement of PD-1196
+        A) DnBCacheSeed OUTER JOIN LatticeCacheSeed by DUNS && URL
+        1. LE_DUNS = DnB_DUNS (not NULL), LE_URL = DnB_URL (not NULL): 
+            Take all the attributes from DnB (Result1)
+    
+        B) Let LatticeCacheSeed = Result of A with DnB_DUNS NULL && DnB_URL NULL, retain only LatticeCacheSeed columns
+           Let DnBCacheSeed = Result of A with LE_DUNS NULL && LE_URL NULL, retain only DnBCacheSeed columns
+    
+        C) DnBCacheSeed LEFT JOIN LatticeCacheSeed(DUNS+URL) by DUNS
+        1. LE_DUNS = DnB_DUNS, DnB_URL NULL:
+            Take LE_URL, and all the other attributes from DnB, set IS_PRIMARY_DOMAIN = Y (Result2)
+        2. LE_DUNS = DnB_DUNS, LE_URL != DnB_URL:
+            Take all the attributes from DnB (Result3)
+            Add a new row: Take LE_URL, and all the other attributes from DnB, set IS_PRIMARY_DOMAIN = N (Result4)
+        3. LE_DUNS NULL
+            Take all the attributes from DnB (Result5)
+    
+        D) LatticeCacheSeed(URL) LEFT JOIN DnBCacheSeed by URL
+        1. DnB_URL NULL
+            Take all the attributes from LatticeCacheSeed, set IS_PRIMARY_DOMAIN = Y, IS_PRIMARY_LOCATION = Y (Result6)
+            
+        E) Merge Result 1, 2, 3, 4, 5, 6
+    */
 
 
     @Override
@@ -46,68 +77,163 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
             throw new LedpException(LedpCode.LEDP_25010, e);
         }
         Node dnbCacheSeed = addSource(parameters.getBaseTables().get(0));
-        dnbCacheSeed = addRetainDnBColumnNode(dnbCacheSeed);
+        dnbCacheSeed = retainDnBColumns(dnbCacheSeed);
         Node latticeCacheSeed = addSource(parameters.getBaseTables().get(1));
-        latticeCacheSeed = addFilterDomainNode(latticeCacheSeed);
-        Node accountMasterSeed = addJoinNode(latticeCacheSeed, dnbCacheSeed, JoinType.OUTER);
-        accountMasterSeed = addTmpOutputNode(accountMasterSeed, parameters.getBaseSourcePrimaryKeys().get(0));
-        accountMasterSeed = addRetainAccountMasterSeedColumnNode(accountMasterSeed);
-        accountMasterSeed = addRenameAccountMasterSeedColumnNode(accountMasterSeed);
+        latticeCacheSeed = retainLeColumns(latticeCacheSeed);
+
+        // Step A
+        List<String> dnbJoinFields = new ArrayList<String>();
+        dnbJoinFields.add(dnbDunsColumn);
+        dnbJoinFields.add(dnbDomainColumn);
+        List<String> leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDunsColumn);
+        leJoinFields.add(leDomainColumn);
+        Node joinedA = join(dnbCacheSeed, dnbJoinFields, latticeCacheSeed, leJoinFields, JoinType.OUTER);
+        Node res1 = processA(joinedA);
+        
+        // Step B
+        Node dnbCacheSeedRefined = joinedA.filter(leDunsColumn + " == null && " + leDomainColumn + " == null",
+                new FieldList(leDunsColumn, leDomainColumn));
+        dnbCacheSeedRefined = retainDnBColumns(dnbCacheSeedRefined);
+        dnbCacheSeedRefined = dnbCacheSeedRefined.renamePipe("DnbCacheSeedRefined");
+        
+        Node latticeCacheSeedDunsDomain = joinedA.filter(
+                dnbDunsColumn + " == null && " + dnbDomainColumn + " == null && " + leDunsColumn + " != null && "
+                        + leDomainColumn + " != null",
+                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
+        latticeCacheSeedDunsDomain = retainLeColumns(latticeCacheSeedDunsDomain);
+        Node latticeCacheSeedOnlyDomain = joinedA.filter(
+                dnbDunsColumn + " == null && " + dnbDomainColumn + " == null && " + leDunsColumn + " == null && "
+                        + leDomainColumn + " != null",
+                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
+        latticeCacheSeedOnlyDomain = retainLeColumns(latticeCacheSeedOnlyDomain);
+
+        // Step C
+        dnbJoinFields = new ArrayList<String>();
+        dnbJoinFields.add(dnbDunsColumn);
+        leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDunsColumn);
+        Node joinedC = join(dnbCacheSeedRefined, dnbJoinFields, latticeCacheSeedDunsDomain, leJoinFields,
+                JoinType.LEFT);
+        Node joinedCWithLeDuns = joinedC.filter(leDunsColumn + " != null", new FieldList(leDunsColumn));
+        Node joinedCWithoutLeDuns = joinedC.filter(leDunsColumn + " == null", new FieldList(leDunsColumn));
+        Node res2 = processC1(joinedCWithLeDuns);
+        Node res3 = processC2Part1(joinedCWithLeDuns);
+        Node res4 = processC2Part2(joinedCWithLeDuns);
+        Node res5 = processC3(joinedCWithoutLeDuns);
+
+        // Step D
+        dnbJoinFields = new ArrayList<String>();
+        dnbJoinFields.add(dnbDomainColumn);
+        leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDomainColumn);
+        Node res6 = join(dnbCacheSeedRefined, dnbJoinFields, latticeCacheSeedOnlyDomain, leJoinFields, JoinType.RIGHT);
+        res6 = processD(res6);
+
+        // Step E
+        Node accountMasterSeed = res1.merge(res2).merge(res3).merge(res4).merge(res5).merge(res6);
+
+        accountMasterSeed = retainAccountMasterSeedColumnNode(accountMasterSeed);
+        accountMasterSeed = renameAccountMasterSeedColumnNode(accountMasterSeed);
         accountMasterSeed = addColumnNode(accountMasterSeed, parameters.getColumns());
         return accountMasterSeed;
     }
 
-    private Node addRetainDnBColumnNode(Node node) {
+    private Node retainDnBColumns(Node node) {
         List<String> columnNames = new ArrayList<String>(dnbCacheSeedColumnMapping.keySet());
         return node.retain(new FieldList(columnNames));
     }
 
-    private Node addFilterDomainNode(Node node) {
-        StringBuilder sb = new StringBuilder();
-        List<String> columnNames = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
-            SeedMergeFieldMapping item = entry.getValue();
-            if (item.getIsDedup()) {
-                sb.append(item.getMergedSourceColumn() + " != null && ");
-                columnNames.add(item.getMergedSourceColumn());
-            }
-        }
-        if (sb.length() > 0) {
-            LOG.info("Filter expression: " + sb.substring(0, sb.length() - 4));
-            node.filter(sb.substring(0, sb.length() - 4), new FieldList(columnNames));
-        }
-        return node;
+    private Node retainLeColumns(Node node) {
+        List<String> columnNames = new ArrayList<String>(latticeCacheSeedColumnMapping.keySet());
+        return node.retain(new FieldList(columnNames));
     }
 
-    private Node addJoinNode(Node latticeCacheSeed, Node dnbCacheSeed, JoinType joinType) {
-        List<String> latticeJoinColumns = new ArrayList<String>();
-        List<String> dnbJoinColumns = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
-            SeedMergeFieldMapping item = entry.getValue();
-            if (item.getIsDedup()) {
-                latticeJoinColumns.add(item.getMergedSourceColumn());
-                dnbJoinColumns.add(item.getMainSourceColumn());
-            }
-        }
-        return latticeCacheSeed.join(new FieldList(latticeJoinColumns), dnbCacheSeed, new FieldList(dnbJoinColumns),
+    private Node join(Node leftNode, List<String> leftNodeJoinFields, Node rightNode, List<String> rightNodeJoinFields,
+            JoinType joinType) {
+        return leftNode.join(new FieldList(leftNodeJoinFields), rightNode, new FieldList(rightNodeJoinFields),
                 joinType);
     }
 
-    private Node addTmpOutputNode(Node node, List<String> dnbPrimaryKeys) {
+    private Node processA(Node node) {
+        String filterExpression = dnbDunsColumn + " != null && " + leDunsColumn + " != null && " + dnbDomainColumn
+                + " != null && " + leDomainColumn + " != null";
+        Node res = node.filter(filterExpression,
+                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
+        res = callAccountMasterSeedFunction(res, true, new HashSet<String>(), new HashMap<String, String>());
+        return res;
+    }
+
+    private Node processC1(Node node) {
+        Node res = node.filter(dnbDomainColumn + " == null", new FieldList(dnbDomainColumn));
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("LE_IS_PRIMARY_DOMAIN", "Y");
+        Set<String> set = new HashSet<String>();
+        set.add(leDomainColumn);
+        res = callAccountMasterSeedFunction(res, true, set, map);
+        return res;
+    }
+
+    private Node processC2Part1(Node node) {
+        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
+                + ".equals(" + leDomainColumn + "))";
+        Node res3 = node.filter(filterExpression, new FieldList(dnbDomainColumn, leDomainColumn));
+        res3 = callAccountMasterSeedFunction(res3, true, new HashSet<String>(), new HashMap<String, String>());
+        return res3;
+    }
+
+    private Node processC2Part2(Node node) {
+        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
+                + ".equals(" + leDomainColumn + "))";
+        Node res4 = node.filter(filterExpression, new FieldList(dnbDomainColumn, leDomainColumn));
+        res4 = res4.groupByAndLimit(new FieldList(leDunsColumn, leDomainColumn), new FieldList(dnbDomainColumn), 1,
+                true, true);
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("LE_IS_PRIMARY_DOMAIN", "N");
+        Set<String> set = new HashSet<String>();
+        set.add(leDomainColumn);
+        res4 = callAccountMasterSeedFunction(res4, true, set, map);
+        return res4;
+    }
+
+    private Node processC3(Node node) {
+        Node res5 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, String>());
+        return res5;
+    }
+
+    private Node processD(Node node) {
+        String filterExpression = dnbDomainColumn + " == null";
+        Node res = node.filter(filterExpression, new FieldList(dnbDomainColumn));
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("LE_IS_PRIMARY_DOMAIN", "Y");
+        map.put("LE_IS_PRIMARY_LOCATION", "Y");
+        res = callAccountMasterSeedFunction(res, false, new HashSet<String>(), map);
+        return res;
+    }
+
+    private Node callAccountMasterSeedFunction(Node node, boolean takeAllFromDnB, Set<String> exceptColumns,
+            Map<String, String> setDnBColumnValues) {
         for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
             String outputColumn = "Tmp_" + entry.getKey();
-            String latticeColumn = entry.getValue().getMergedSourceColumn();
-            String dnbColumn = entry.getValue().getMainSourceColumn();
-            List<String> inputColumns = new ArrayList<String>();
-            inputColumns.add(latticeColumn);
-            inputColumns.add(dnbColumn);
-            node = node.apply(new AccountMasterSeedFunction(outputColumn, latticeColumn, dnbColumn, dnbPrimaryKeys),
-                    new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+            String latticeColumn = entry.getValue().getLeColumn();
+            String dnbColumn = entry.getValue().getDnbColumn();
+            if ((takeAllFromDnB && !exceptColumns.contains(latticeColumn))
+                    || (!takeAllFromDnB && exceptColumns.contains(dnbColumn))) {
+                node = node.apply(
+                        new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, true,
+                                setDnBColumnValues),
+                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+            } else {
+                node = node.apply(
+                        new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, false,
+                                setDnBColumnValues),
+                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+            }
         }
         return node;
     }
 
-    private Node addRetainAccountMasterSeedColumnNode(Node node) {
+    private Node retainAccountMasterSeedColumnNode(Node node) {
         List<String> columnNames = new ArrayList<String>();
         for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
             columnNames.add("Tmp_" + entry.getKey());
@@ -115,7 +241,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         return node.retain(new FieldList(columnNames));
     }
 
-    private Node addRenameAccountMasterSeedColumnNode(Node node) {
+    private Node renameAccountMasterSeedColumnNode(Node node) {
         List<String> newColumnNames = new ArrayList<String>();
         List<String> oldColumnNames = new ArrayList<String>();
         for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
@@ -157,10 +283,18 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         }
 
         for (SeedMergeFieldMapping item : list) {
-            accountMasterSeedColumnMapping.put(item.getSourceColumn(), item);
-            dnbCacheSeedColumnMapping.put(item.getMainSourceColumn(), item.getSourceColumn());
-            if (item.getMergedSourceColumn() != null) {
-                latticeCacheSeedColumnMapping.put(item.getMergedSourceColumn(), item.getSourceColumn());
+            accountMasterSeedColumnMapping.put(item.getTargetColumn(), item);
+            dnbCacheSeedColumnMapping.put(item.getDnbColumn(), item.getTargetColumn());
+            if (item.getLeColumn() != null) {
+                latticeCacheSeedColumnMapping.put(item.getLeColumn(), item.getTargetColumn());
+            }
+            if (item.getIsDuns()) {
+                dnbDunsColumn = item.getDnbColumn();
+                leDunsColumn = item.getLeColumn();
+            }
+            if (item.getIsDomain()) {
+                dnbDomainColumn = item.getDnbColumn();
+                leDomainColumn = item.getLeColumn();
             }
         }
     }

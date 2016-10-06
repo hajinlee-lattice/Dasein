@@ -1,6 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.List;
+import java.util.Map;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -15,35 +15,31 @@ public class AccountMasterSeedFunction extends BaseOperation implements Function
 
     private static final long serialVersionUID = 704139437526099546L;
 
-    private String latticeColumn;
+    private boolean takeAllFromDnB;
     private String dnbColumn;
-    private List<String> dnbPrimaryKeys;
+    private String leColumn;
+    private Map<String, String> setDnBColumnValues;
 
-    public AccountMasterSeedFunction(String outputColumn, String latticeColumn, String dnbColumn,
-            List<String> dnbPrimaryKeys) {
+    public AccountMasterSeedFunction(String outputColumn, String dnbColumn, String leColumn, boolean takeAllFromDnB,
+            Map<String, String> setDnBColumnValues) {
         super(new Fields(outputColumn));
-        this.latticeColumn = latticeColumn;
+        this.leColumn = leColumn;
         this.dnbColumn = dnbColumn;
-        this.dnbPrimaryKeys = dnbPrimaryKeys;
+        this.takeAllFromDnB = takeAllFromDnB;
+        this.setDnBColumnValues = setDnBColumnValues;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        boolean fromDnb = false;
-        for (String dnbPrimaryKey : dnbPrimaryKeys) {
-            if (arguments.getObject(dnbPrimaryKey) != null) {
-                fromDnb = true;
-                break;
-            }
-        }
-        if (fromDnb && dnbColumn != null) {
+        if (setDnBColumnValues.containsKey(dnbColumn)) {
+            functionCall.getOutputCollector().add(new Tuple(setDnBColumnValues.get(dnbColumn)));
+        } else if (takeAllFromDnB) {
             functionCall.getOutputCollector().add(new Tuple(arguments.getObject(dnbColumn)));
-        } else if (!fromDnb && latticeColumn != null) {
-            functionCall.getOutputCollector().add(new Tuple(arguments.getObject(latticeColumn)));
+        } else if (!takeAllFromDnB && leColumn != null) {
+            functionCall.getOutputCollector().add(new Tuple(arguments.getObject(leColumn)));
         } else {
             functionCall.getOutputCollector().add(Tuple.size(1));
         }
-
     }
 }

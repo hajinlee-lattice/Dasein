@@ -18,8 +18,8 @@ public class AccountMasterLookupRefreshFlow
     private final static String KEY_FIELD = "Key";
     private final static String DOMAIN_FIELD = "Domain";
     private final static String DUNS_FIELD = "DUNS";
-    private final static String PRIMARY_DOMAIN_FIELD = "IsPrimaryDomain";
-    private final static String PRIMARY_LOCATION_FIELD = "IsPrimaryLocation";
+    private final static String PRIMARY_DOMAIN_FIELD = "LE_IS_PRIMARY_DOMAIN";
+    private final static String PRIMARY_LOCATION_FIELD = "LE_IS_PRIMARY_LOCATION";
 
     @Override
     protected Class<? extends TransformationConfiguration> getTransConfClass() {
