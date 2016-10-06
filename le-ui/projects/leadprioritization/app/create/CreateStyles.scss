@@ -548,13 +548,17 @@ section.custom-fields.score-file {
         
         h4 {
             font-weight: bold;
-            margin-bottom: 0.5em;
             color: #666;
+            
+            span {
+                font-weight: normal;
+            }
         }
 
         h5 {
             font-weight: bold;
             font-size: 12pt;
+            margin-top: 0.5em;
             line-height: 20px;
             color: #666;
         }
@@ -563,6 +567,10 @@ section.custom-fields.score-file {
         border: none;
         padding: 0;
         margin: 2em 2.5em;
+        
+        .field-mapping-actions-remap {
+            margin-right: 0.75em;
+        }
     }
     .columns.box-outline {
         border-radius: 4px;
@@ -572,6 +580,13 @@ section.custom-fields.score-file {
         padding-bottom: 0;
         margin-bottom: 1em;
         
+        &.disabled {
+            background: #f1f1f1;
+            h4 {
+                color: #bbb;
+            }
+        }
+
         table {
             margin-bottom: 0;
             

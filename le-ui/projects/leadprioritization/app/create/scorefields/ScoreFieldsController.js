@@ -16,6 +16,7 @@ angular
         FileHeaders: [],
         FormValidated: true,
         initialized: false,
+        NextClicked: false,
         ignoredFieldLabel: '-- Unmapped Field --'
     });
 
@@ -78,7 +79,7 @@ angular
             $event.stopPropagation();
         }
 
-        CancelJobModal.show(null, { sref: 'home.model.scoring' });
+        CancelJobModal.show(null, { sref: 'home.model.jobs' });
     };
 
     vm.clickNext = function() {
