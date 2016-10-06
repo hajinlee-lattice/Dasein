@@ -5,13 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.steps.PersistDataRules;
-import com.latticeengines.leadprioritization.workflow.steps.RemediateDataRules;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
-import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.serviceflows.workflow.modeling.SetMatchSelection;
 import com.latticeengines.serviceflows.workflow.modeling.WriteMetadataFiles;
@@ -38,19 +35,10 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     private Profile profile;
 
     @Autowired
-    private ReviewModel reviewModel;
-
-    @Autowired
     private CreateModel createModel;
 
     @Autowired
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
-
-    @Autowired
-    private PersistDataRules persistDataRules;
-
-    @Autowired
-    private RemediateDataRules remediateDataRules;
 
     @Bean
     public Job modelWorkflowJob() throws Exception {
@@ -64,12 +52,8 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //
                 .next(profile) //
-                .next(reviewModel) //
-                .next(remediateDataRules) //
-                .next(writeMetadataFiles) // Repeat to write out the post-datarule datacomposition
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
-                .next(persistDataRules) //
                 .build();
     }
 }
