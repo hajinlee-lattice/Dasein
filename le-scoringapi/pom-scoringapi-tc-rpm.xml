@@ -31,14 +31,19 @@
                     <group>Application/Collectors</group>
                     <mappings>
                         <mapping>
-                            <directory>/usr/share/tomcat/webapps/scoringapi</directory>
-                            <username>tomcat</username>
-                            <groupname>tomcat</groupname>
-                            <filemode>775</filemode>
+                            <directory>/tmp/le-scoringapi-tc-rpm/war</directory>
                             <sources>
                                 <source>
                                     <location>target/le-scoringapi-${le.rpm.version}.war</location>
                                     <destination>ROOT.war</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/le-scoringapi-tc-rpm/env</directory>
+                            <sources>
+                                <source>
+                                    <location>conf/env</location>
                                 </source>
                             </sources>
                         </mapping>
