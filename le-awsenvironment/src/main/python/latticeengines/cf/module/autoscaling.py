@@ -97,7 +97,7 @@ class LaunchConfiguration(Resource):
         }
 
     def set_instance_profile(self, profile):
-        assert isinstance(profile, InstanceProfile) or isinstance(profile, ArnParameter)
+        assert isinstance(profile, InstanceProfile) or isinstance(profile, Parameter)
         self._template["Properties"]["IamInstanceProfile"] = profile.ref()
         return self
 
