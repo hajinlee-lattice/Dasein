@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -145,7 +146,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         provisionEndToEndTestTenants();
     }
 
-    @BeforeClass(groups = "deployment")
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         cleanup();
     }
