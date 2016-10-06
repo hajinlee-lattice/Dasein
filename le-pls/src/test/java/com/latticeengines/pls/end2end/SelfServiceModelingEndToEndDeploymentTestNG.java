@@ -14,11 +14,13 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,14 +35,17 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.Path;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -65,6 +70,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -79,6 +85,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Autowired
     private ScoreCorrectnessService scoreCompareService;
+
+    @Autowired
+    private TenantService tenantService;
+
+    @Value("${encryption.enabled}")
+    private boolean encryptionEnabled;
 
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
@@ -96,7 +108,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
-        testBed.bootstrapForProduct(LatticeProduct.LPA3);
+
+        if (encryptionEnabled) {
+            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
+                    .construct(new CustomerSpaceScope(CustomerSpace.parse(tenantToAttach.getId())));
+            assertTrue(controller.exists(new Path("/EncryptionKey")));
+        }
+
         log.info("Test environment setup finished.");
         saveAttributeSelection(CustomerSpace.parse(tenantToAttach.getName()));
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";

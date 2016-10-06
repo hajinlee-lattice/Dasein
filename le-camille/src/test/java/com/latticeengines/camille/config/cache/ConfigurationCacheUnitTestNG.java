@@ -1,5 +1,6 @@
 package com.latticeengines.camille.config.cache;
 
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -42,6 +43,19 @@ public class ConfigurationCacheUnitTestNG {
         controller.create(path, new Document("foo"));
 
         ConfigurationCache<PodScope> cache = ConfigurationCache.construct(scope, path);
+
+        Assert.assertEquals(cache.get(), controller.get(path));
+    }
+
+    @Test(groups = "unit")
+    public void testPodDivisionScope() throws Exception {
+        PodDivisionScope scope = new PodDivisionScope();
+        Path path = new Path("/foo");
+
+        ConfigurationController<PodDivisionScope> controller = ConfigurationController.construct(scope);
+        controller.create(path, new Document("foo"));
+
+        ConfigurationCache<PodDivisionScope> cache = ConfigurationCache.construct(scope, path);
 
         Assert.assertEquals(cache.get(), controller.get(path));
     }

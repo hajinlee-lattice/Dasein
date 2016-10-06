@@ -237,6 +237,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         testProdSet.add(LatticeProduct.LPA);
         testProdSet.add(LatticeProduct.LPA3);
         testProdSet.add(LatticeProduct.PD);
+        testProdSet.add(LatticeProduct.CG);
         definition.setAvailableProducts(testProdSet);
         definition.setConfigurable(true);
         return definition;

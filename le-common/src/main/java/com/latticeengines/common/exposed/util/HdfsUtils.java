@@ -20,6 +20,8 @@ import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.crypto.key.KeyProvider;
+import org.apache.hadoop.crypto.key.KeyProviderFactory;
 import org.apache.hadoop.fs.FileChecksum;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -27,6 +29,8 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.hdfs.protocol.EncryptionZone;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
@@ -123,7 +127,7 @@ public class HdfsUtils {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
     }
-    
+
     public static final void copyFromLocalDirToHdfs(Configuration configuration, String localPath, String hdfsPath)
             throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
@@ -161,8 +165,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final void compressGZFileWithinHDFS(Configuration configuration,
-            String gzHdfsPath, String uncompressedFilePath) throws IOException {
+    public static final void compressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
+            String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFilePath = new Path(uncompressedFilePath);
             Path outputFilePath = new Path(gzHdfsPath);
@@ -219,7 +223,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter) throws IOException {
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -298,7 +303,8 @@ public class HdfsUtils {
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths.addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
+                    filePaths
+                            .addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
@@ -326,7 +332,8 @@ public class HdfsUtils {
         return fs.open(new Path(hdfsPath));
     }
 
-    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws IOException {
+    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
@@ -396,5 +403,102 @@ public class HdfsUtils {
             FileStatus status = fs.getFileStatus(new Path(filePath));
             return status.getLen();
         }
+    }
+
+    public static List<EncryptionZone> getEncryptionZones(Configuration configuration) {
+        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
+            List<EncryptionZone> zones = new ArrayList<>();
+            RemoteIterator<EncryptionZone> iter = fs.listEncryptionZones();
+            while (iter.hasNext()) {
+                zones.add(iter.next());
+            }
+            return zones;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void createEncryptionZone(Configuration configuration, String path, String keyname) {
+        try (DistributedFileSystem fs = (DistributedFileSystem) DistributedFileSystem.newInstance(configuration)) {
+            fs.createEncryptionZone(new Path(path), keyname);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static EncryptionZone getEncryptionZone(Configuration configuration, String path) {
+        List<EncryptionZone> zones = getEncryptionZones(configuration);
+        for (EncryptionZone zone : zones) {
+            if (zone.getPath().equals(path)) {
+                return zone;
+            }
+        }
+        return null;
+    }
+
+    public static void deleteKey(Configuration configuration, String keyName) {
+        KeyProvider provider = getKeyProvider(configuration);
+        try {
+            provider.deleteKey(keyName);
+            provider.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Could not delete key %s with provider %s", keyName, provider), e);
+        }
+    }
+
+    public static void createKey(Configuration configuration, String keyName) {
+        KeyProvider provider = getKeyProvider(configuration);
+        try {
+            provider.createKey(keyName, new KeyProvider.Options(configuration));
+            provider.flush();
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Could not create key %s with provider %s", keyName, provider), e);
+        }
+    }
+
+    public static void rollKey(Configuration configuration, String keyName) {
+        KeyProvider provider = getKeyProvider(configuration);
+        try {
+            provider.rollNewVersion(keyName);
+            provider.flush();
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Could not roll key %s with provider %s", keyName, provider), e);
+        }
+    }
+
+    public static boolean keyExists(Configuration configuration, String keyName) {
+        KeyProvider provider = getKeyProvider(configuration);
+        try {
+            List<String> keys = provider.getKeys();
+            if (keys != null) {
+                return keys.contains(keyName);
+            }
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Could not check if key %s exists using provider %s", keyName,
+                    provider), e);
+        }
+    }
+
+    private static KeyProvider getKeyProvider(Configuration configuration) {
+        KeyProvider provider = null;
+        List<KeyProvider> providers;
+        try {
+            providers = KeyProviderFactory.getProviders(configuration);
+            for (KeyProvider p : providers) {
+                if (!p.isTransient()) {
+                    provider = p;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (provider == null) {
+            throw new RuntimeException(
+                    "No KeyProvider has been specified.  Please check your core-site.xml (hadoop.security.key.provider.path) and hdfs-site.xml (dfs.encryption.key.provider.uri)");
+        }
+
+        return provider;
     }
 }

@@ -71,6 +71,7 @@ public enum LedpCode {
     LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
     LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
     LEDP_15016("Cannot model with an empty feature list."), //
+    LEDP_15017("Cannot provision modeling service because {0}"), //
 
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
@@ -482,7 +483,14 @@ public enum LedpCode {
 
     // le-saml
     LEDP_33000("An identity provider with ID {0} already exists"), //
-    LEDP_33001("Validation failed for Identity Provider with Entity ID {0}: {1}");
+    LEDP_33001("Validation failed for Identity Provider with Entity ID {0}: {1}"), //
+
+    // le-encryption
+    LEDP_34000("Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "
+            + "empty or non-existent data directories.  Try a different customer id"), //
+    LEDP_34001("Could not create key for customer {0}"), //
+    LEDP_34002("Could not delete key for customer {0}"), //
+    LEDP_34003("Could not locate tenant with name {0}"); //
 
     private String message;
 

@@ -1,1 +1,13 @@
-{"RootPath":"/","Nodes":[{"Node":"FeaturesThreshold","Data":"-1","Metadata":{"Type":"number","Required":false}}]}
+{
+  "RootPath": "/",
+  "Nodes": [
+    {
+      "Node": "FeaturesThreshold",
+      "Data": "-1",
+      "Metadata": {
+        "Type": "number",
+        "Required": false
+      }
+    }
+  ]
+}

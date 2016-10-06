@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
@@ -22,8 +22,8 @@ import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.engine.ingestion.dao.IngestionProgressDao;
 
 @Component("ingestionProgressDao")
-public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress>
-        implements IngestionProgressDao {
+public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress> implements
+        IngestionProgressDao {
     private static final Log log = LogFactory.getLog(IngestionProgressDaoImpl.class);
 
     @Override
@@ -85,16 +85,16 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
     public boolean isIngestionTriggered(Ingestion ingestion) {
         Session session = getSessionFactory().getCurrentSession();
         Class<IngestionProgress> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :latestScheduledTime",
-                entityClz.getSimpleName());
+        String queryStr = String
+                .format("select 1 from %s where IngestionId = :ingestionId AND TriggeredBy = :triggeredBy AND LastestStatusUpdateTime >= :latestScheduledTime",
+                        entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("ingestionId", ingestion.getPid());
         query.setParameter("triggeredBy", PropDataConstants.SCAN_SUBMITTER);
         Date latestScheduledTime = CronUtils.getPreviousFireTime(ingestion.getCronExpression()).toDate();
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        log.debug("Latest scheduled time: " + latestScheduledTime == null ? "null"
-                : df.format(latestScheduledTime) + " for ingestion " + ingestion.toString());
+        log.debug("Latest scheduled time: " + latestScheduledTime == null ? "null" : df.format(latestScheduledTime)
+                + " for ingestion " + ingestion.toString());
         query.setParameter("latestScheduledTime", latestScheduledTime);
         if (CollectionUtils.isEmpty(query.list())) {
             return true;
@@ -108,9 +108,9 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
     public List<IngestionProgress> getRetryFailedProgresses() {
         Session session = getSessionFactory().getCurrentSession();
         Class<IngestionProgress> progressEntityClz = IngestionProgress.class;
-        String queryStr = String.format(
-                "from %s progress where progress.status = :status and progress.retries < progress.ingestion.newJobMaxRetry",
-                progressEntityClz.getSimpleName());
+        String queryStr = String
+                .format("from %s progress where progress.status = :status and progress.retries < progress.ingestion.newJobMaxRetry",
+                        progressEntityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("status", ProgressStatus.FAILED);
         return query.list();
@@ -121,9 +121,9 @@ public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         Session session = getSessionFactory().getCurrentSession();
         Class<Ingestion> ingestionEntityClz = Ingestion.class;
         Class<IngestionProgress> progressEntityClz = IngestionProgress.class;
-        String queryStr = String.format(
-                "select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and not (lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
-                progressEntityClz.getSimpleName(), ingestionEntityClz.getSimpleName());
+        String queryStr = String
+                .format("select 1 from %s lhs, %s rhs where lhs.IngestionId = rhs.PID and lhs.Destination = :destination and lhs.Status != :finishStatus and not (lhs.Status = :failedStatus and lhs.Retries >= rhs.NewJobMaxRetry)",
+                        progressEntityClz.getSimpleName(), ingestionEntityClz.getSimpleName());
         Query query = session.createSQLQuery(queryStr);
         query.setParameter("destination", progress.getDestination());
         query.setParameter("finishStatus", ProgressStatus.FINISHED.toString());

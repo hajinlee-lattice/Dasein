@@ -15,6 +15,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId);
     }
 
+    public static Path buildPodDivisionPath(String podId, String division) {
+        return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division);
+    }
+
     public static Path buildServicesPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.SERVICES);
     }

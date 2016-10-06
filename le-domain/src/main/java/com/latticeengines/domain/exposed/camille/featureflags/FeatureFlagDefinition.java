@@ -2,15 +2,18 @@ package com.latticeengines.domain.exposed.camille.featureflags;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FeatureFlagDefinition {
     private String displayName;
     private String documentation;
     private Set<LatticeProduct> availableProducts;
     private boolean configurable;
+    private boolean modifiableAfterProvisioning = true;
 
     @JsonProperty("DisplayName")
     public String getDisplayName() {
@@ -50,6 +53,16 @@ public class FeatureFlagDefinition {
     @JsonProperty("Configurable")
     public void setConfigurable(boolean configurable) {
         this.configurable = configurable;
+    }
+
+    @JsonProperty("ModifiableAfterProvisioning")
+    public boolean isModifiableAfterProvisioning() {
+        return modifiableAfterProvisioning;
+    }
+
+    @JsonProperty("ModifiableAfterProvisioning")
+    public void setModifiableAfterProvisioning(boolean modifiableAfterProvisioning) {
+        this.modifiableAfterProvisioning = modifiableAfterProvisioning;
     }
 
     @Override

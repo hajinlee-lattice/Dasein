@@ -17,5 +17,6 @@ $HADOOP_HOME/sbin/yarn-daemon.sh start resourcemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh start timelineserver
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
+$HADOOP_HOME/sbin/kms.sh start
 ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
 

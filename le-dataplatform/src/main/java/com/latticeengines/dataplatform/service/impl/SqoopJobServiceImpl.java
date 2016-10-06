@@ -471,6 +471,7 @@ public class SqoopJobServiceImpl {
         String appIdFilePath = getBinaryInputDir(uuid) + "/" + appIdFileName;
         config.set("sqoop.sync", Boolean.toString(sync));
         config.set("sqoop.app.id.file.name", appIdFilePath);
+        config.set("mapreduce.job.user.classpath.first", "true");
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(config));
         return getApplicationId(appIdFilePath);
     }

@@ -186,6 +186,36 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
+    public void testGetJobReportByUser() throws Exception {
+        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
+
+        Properties containerProperties = createContainerPropertiesForYarnJob();
+
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+                containerProperties);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
+        jobService.killJob(applicationId);
+        status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
+        assertNotNull(status);
+        assertEquals(status, FinalApplicationStatus.KILLED);
+
+        ApplicationReport app = jobService.getJobReportById(applicationId);
+
+        List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
+        int numJobs = reports.size();
+        assertTrue(numJobs > 0);
+
+        applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
+
+        status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
+        reports = jobService.getJobReportByUser(app.getUser());
+        assertTrue(reports.size() > numJobs);
+        jobService.killJob(applicationId);
+    }
+
+    @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testCheckJobName() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();

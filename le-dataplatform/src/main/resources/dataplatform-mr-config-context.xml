@@ -14,6 +14,8 @@
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
         fs.defaultFS=${dataplatform.fs.defaultFS}
+        hadoop.security.key.provider.path=${dataplatform.hadoop.security.key.provider.path}
+        dfs.encryption.key.provider.uri=${dataplatform.dfs.encryption.key.provider.uri}
         yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
         yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
         mapred.job.tracker=${dataplatform.mapred.job.tracker}
@@ -23,6 +25,10 @@
         mapreduce.map.cpu.vcores=${dataplatform.container.map.virtualcores}
         mapreduce.reduce.cpu.vcores=${dataplatform.container.reduce.virtualcores}
         mapreduce.job.queuename=Priority0.MapReduce.0
+        mapreduce.framework.name=yarn
+        mapreduce.job.user.classpath.first=true
+        yarn.resourcemanager.system-metrics-publisher.enabled=true
+        yarn.timeline-service.enabled=true
         yarn.resourcemanager.ha.enabled=${dataplatform.yarn.resourcemanager.ha.enabled}
         yarn.resourcemanager.ha.rm-ids=${dataplatform.yarn.resourcemanager.ha.rm-ids}
         yarn.resourcemanager.ha.id=${dataplatform.yarn.resourcemanager.ha.id}

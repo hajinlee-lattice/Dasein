@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.encryption.exposed.service.KeyManagementService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -75,6 +76,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private DefaultConfigOverwriter overwriter;
+
+    @Autowired
+    private KeyManagementService keyManagementService;
 
     @Value("${pls.api.hostport}")
     private String plsEndHost;
@@ -219,6 +223,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean deleteTenant(String contractId, String tenantId) {
+        keyManagementService.deleteKey(new CustomerSpace(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
         return tenantEntityMgr.deleteTenant(contractId, tenantId);
     }
 
@@ -266,16 +272,16 @@ public class TenantServiceImpl implements TenantService {
                         newState = BootstrapState.createInitialState();
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(
-                            String.format("Error getting the newState of the Service: %s", serviceName));
+                    throw new RuntimeException(String.format("Error getting the newState of the Service: %s",
+                            serviceName));
                 }
                 log.info(String.format("State of required service %s is %s", serviceName, newState));
 
                 if (newState != null) {
                     if (state == null) {
                         state = newState;
-                    } else
-                        if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
+                    } else if (!serviceName.equals(DanteComponent.componentName)
+                            || danteIsEnabled(contractId, tenantId)) {
                         state = mergeBootstrapStates(state, newState, serviceName);
                     }
                 }
@@ -291,10 +297,9 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId,
-            String serviceName) {
-        SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId,
-                serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
+        SerializableDocumentDirectory rawDir = tenantEntityMgr
+                .getTenantServiceConfig(contractId, tenantId, serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
@@ -333,11 +338,10 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
-            String serviceName) {
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
-            return BootstrapState.constructErrorState(0, 0,
-                    "At least one of the components encountered an error : " + serviceName);
+            return BootstrapState.constructErrorState(0, 0, "At least one of the components encountered an error : "
+                    + serviceName);
         }
 
         if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {

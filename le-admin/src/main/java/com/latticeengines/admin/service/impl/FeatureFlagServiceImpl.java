@@ -124,6 +124,9 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         enableInternalEnrichmentAttributesProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> enableDataProfilingV2ProdSet = new HashSet<LatticeProduct>();
         enableDataProfilingV2ProdSet.add(LatticeProduct.LPA3);
+        Set<LatticeProduct> enableDataEncryptionProdSet = new HashSet<LatticeProduct>();
+        enableDataEncryptionProdSet.add(LatticeProduct.LPA3);
+        enableDataEncryptionProdSet.add(LatticeProduct.CG);
 
         FeatureFlagDefinition danteFeatureFlag = createDefaultFeatureFlag(LatticeFeatureFlag.DANTE.getName(),
                 LatticeFeatureFlag.DANTE.getDocumentation(), danteProdSet, true);
@@ -150,6 +153,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition allowPivotFileFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName(), LatticeFeatureFlag.ALLOW_PIVOT_FILE.getDocumentation(),
                 allowPivotFileProdSet, true);
+
         FeatureFlagDefinition useAccountMasterFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName(),
                 LatticeFeatureFlag.USE_ACCOUNT_MASTER.getDocumentation(), useAccountMasterProdSet, true);
@@ -167,6 +171,10 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition enableDataProfilingV2FeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getDocumentation(), enableDataProfilingV2ProdSet, true);
+        FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(),
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, true);
+        enableDataEncryption.setModifiableAfterProvisioning(false);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.QUOTA.getName(), quotaFeatureFlag);
@@ -190,6 +198,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 enableInternalEnrichmentAttributesFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
                 enableDataProfilingV2FeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), enableDataEncryption);
     }
 
     private FeatureFlagDefinition createDefaultFeatureFlag(String displayName, String documentation,
@@ -201,6 +210,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         featureFlagProdSet.addAll(latticeProduct);
         featureFlagDef.setAvailableProducts(featureFlagProdSet);
         featureFlagDef.setConfigurable(configurable);
+        featureFlagDef.setModifiableAfterProvisioning(true);
         return featureFlagDef;
     }
 

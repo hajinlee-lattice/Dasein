@@ -86,6 +86,7 @@ alias pdapitests='mvn -Papi.functional -DargLine="" -DPROPDATA_MADISON_QUARTZ_EN
 alias svcflowtests='mvn -Pfunctional -DargLine="" verify'
 alias svcflowtestscluster='SERVICEFLOWS_LOCAL=false mvn -Pfunctional-cluster -DargLine="" verify'
 alias samltests='mvn -Pfunctional -DargLine="" verify'
+alias encrtests='mvn -Pfunctional -DargLine="" verify'
 alias samldeptests='mvn -Pdeployment -DargLine="" verify'
 alias samldeptestsssl='sudo ssl/install_cert.sh $JAVA_HOME $WSHOME && mvn -Pdeployment -DargLine="" verify'
 alias recordtransformertest='MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m" mvn -Pfunctional -Djetty.port=8016 -DTENANT=tenant10 -Dtest=RecordTransformerTestNG verify &> /tmp/test.log'

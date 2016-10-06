@@ -4,7 +4,7 @@ import os
 PROPERTY_DIR = "/conf/env/"
 PROPERTY_FILE_SUFFIX = "*.properties"
 LINE_SEPERATOR = "\n=============================\n"
-ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster')
+ENVIRONMENTS=('dev', 'devcluster', 'qacluster','prodcluster','qacluster2')
 ENV_WITH_AWS=('qacluster','prodcluster')
 
 WSHOME=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -29,6 +29,21 @@ def main():
                     and 'le-docker' not in dir_name \
                     and 'le-awsenvironment' not in dir_name:
                 aggregated += aggregate_props(dir_name, keys)
+
+        # hack for qacluster2 #
+        if environment == 'qacluster2':
+            for dir_name, _, _ in os.walk(WSHOME):
+                end_with = PROPERTY_DIR + 'qacluster'
+                if dir_name[-len(end_with):] == end_with \
+                       and 'le-config' not in dir_name \
+                       and 'le-docker' not in dir_name \
+                       and 'le-awsenvironment' not in dir_name \
+                       and 'le-dataplatform' not in dir_name \
+                       and 'le-pls' not in dir_name \
+                       and 'le-scoringapi' not in dir_name \
+                       and 'le-encryption' not in dir_name:
+                    aggregated += aggregate_props(dir_name, keys)
+        # END hack for qacluster2 #
 
         target_path=os.path.join(confdir(environment), 'latticeengines.properties')
         if os.path.isfile(target_path):

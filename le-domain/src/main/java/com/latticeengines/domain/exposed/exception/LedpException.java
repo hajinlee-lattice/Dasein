@@ -15,11 +15,11 @@ public class LedpException extends RuntimeException {
         this(code, t, new String[] {});
     }
 
-    public LedpException(LedpCode code, String[] params) {
+    public LedpException(LedpCode code, Object[] params) {
         this(code, null, params);
     }
 
-    public LedpException(LedpCode code, Throwable t, String[] params) {
+    public LedpException(LedpCode code, Throwable t, Object[] params) {
         super(buildMessage(code, params), t);
         this.code = code;
     }
@@ -33,17 +33,17 @@ public class LedpException extends RuntimeException {
         this.code = code;
     }
 
-    public static String buildMessage(LedpCode code, String[] params) {
+    public static String buildMessage(LedpCode code, Object[] params) {
         String msg = code.getMessage();
 
         for (int i = 0; i < params.length; i++) {
-            String param = params[i];            
+            Object param = params[i];
             if (param != null) {
                 // we need to escape $ from param otherwise it interfere with
                 // replace logic
-                param = param.replace("$", "\\$");
+                param = param.toString().replace("$", "\\$");
             }
-            msg = msg.replaceAll("\\{" + i + "\\}", param);
+            msg = msg.replaceAll("\\{" + i + "\\}", param.toString());
         }
         return msg;
     }

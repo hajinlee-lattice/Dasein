@@ -17,6 +17,7 @@
         <le.camille.version>2.0.43-SNAPSHOT</le.camille.version>
         <le.db.version>2.0.43-SNAPSHOT</le.db.version>
         <le.security.version>2.0.43-SNAPSHOT</le.security.version>
+        <le.encryption.version>2.0.40-SNAPSHOT</le.encryption.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
@@ -300,6 +301,18 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
             <version>${spring.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-encryption</artifactId>
+            <version>${le.encryption.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-encryption</artifactId>
+            <version>${le.encryption.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

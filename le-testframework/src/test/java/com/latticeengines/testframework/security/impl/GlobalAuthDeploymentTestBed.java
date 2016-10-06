@@ -312,7 +312,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 List<BasicNameValuePair> adHeaders = loginAd();
                 String url = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
                         + customerSpace.getContractId();
-                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false, adHeaders);
+                String jsonResponse = HttpClientWithOptionalRetryUtils.sendDeleteRequest(url, false, adHeaders);
                 log.info("DELETE customer space " + customerSpace + " in tenant console: " + jsonResponse);
             } catch (Exception e) {
                 log.warn("DELETE customer space " + customerSpace + " in tenant console failed.", e);

@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.featureflags;
 
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     }.getClass().getEnclosingClass());
 
     public CamilleFeatureFlagProvider() {
-        definitionCache = ConfigurationCache.construct(new PodScope(), new Path("/"
+        definitionCache = ConfigurationCache.construct(new PodDivisionScope(), new Path("/"
                 + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE));
         valueCache = ConfigurationMultiCache.construct();
     }
@@ -212,6 +213,6 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         return toReturn;
     }
 
-    private ConfigurationCache<PodScope> definitionCache;
+    private ConfigurationCache<PodDivisionScope> definitionCache;
     private ConfigurationMultiCache<CustomerSpaceScope> valueCache;
 }

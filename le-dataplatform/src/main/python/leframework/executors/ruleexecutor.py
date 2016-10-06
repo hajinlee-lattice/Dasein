@@ -82,4 +82,4 @@ class DataRuleExecutor(Executor):
 
     @overrides(Executor)
     def accept(self, filename):
-        return True
+        return filename is not None and filename.endswith('avro')

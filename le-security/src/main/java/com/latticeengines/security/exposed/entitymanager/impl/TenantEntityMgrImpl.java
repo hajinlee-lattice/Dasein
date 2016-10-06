@@ -52,4 +52,9 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
         super.delete(tenant1);
     }
 
+    @Override
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    public void update(Tenant tenant) {
+        super.update(tenant);
+    }
 }

@@ -8,6 +8,11 @@ cp $WSHOME/le-dev/hadoop/dev/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/mapred-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/tez-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/yarn-site.xml $HADOOP_CONF_DIR
+cp $WSHOME/le-dev/hadoop/dev/kms-site.xml $HADOOP_CONF_DIR
+cp $WSHOME/le-dev/hadoop/dev/core-site.xml $HADOOP_CONF_DIR
+cp $WSHOME/le-dev/hadoop/dev/hdfs-site.xml $HADOOP_CONF_DIR
+sed -i "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+sed -i "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
 
 if [ ! -z "CATALINA_HOME" ]; then
     cp $WSHOME/le-dev/tomcat/dev/server.xml $CATALINA_HOME/conf/server.xml
@@ -37,3 +42,10 @@ sudo chmod a+w /var/log/scoring/mapper
 
 sudo mkdir -p /var/cache/scoringapi || true
 sudo chmod a+w /var/cache/scoringapi
+
+existing=$(hadoop key list | grep master)
+if [ -z existing ]; then
+    hadoop key create master
+else
+    echo "Master key already installed"
+fi

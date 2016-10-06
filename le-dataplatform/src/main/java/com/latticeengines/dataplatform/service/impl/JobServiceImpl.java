@@ -103,19 +103,19 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private void overwriteAMQueueAssignment(Properties appMasterProperties) {
-        String queue = (String)appMasterProperties.get(AppMasterProperty.QUEUE.name());
+        String queue = (String) appMasterProperties.get(AppMasterProperty.QUEUE.name());
         if (queue != null)
             appMasterProperties.put(AppMasterProperty.QUEUE.name(), overwriteQueueInternal(queue));
     }
 
     private void overwriteContainerQueueAssignment(Properties containerProperties) {
-        String queue = (String)containerProperties.get("QUEUE");
+        String queue = (String) containerProperties.get("QUEUE");
         if (queue != null)
             containerProperties.put("QUEUE", overwriteQueueInternal(queue));
     }
 
     private void overwriteMRQueueAssignment(Properties mRProperties) {
-        String queue = (String)mRProperties.get(MapReduceProperty.QUEUE.name());
+        String queue = (String) mRProperties.get(MapReduceProperty.QUEUE.name());
         if (queue != null)
             mRProperties.put(MapReduceProperty.QUEUE.name(), overwriteQueueInternal(queue));
     }

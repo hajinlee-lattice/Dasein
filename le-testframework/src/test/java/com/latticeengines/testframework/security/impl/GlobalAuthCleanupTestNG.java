@@ -93,12 +93,21 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                 cleanupTenantInGA(tenant);
                 cleanupTenantInZK(CustomerSpace.parse(tenant.getId()).getContractId());
                 cleanupTenantInDL(CustomerSpace.parse(tenant.getId()).getContractId());
+                deleteKey(tenant);
             }
         }
 
         cleanupTenantsInHdfs();
 
         log.info("Finished cleaning up test tenants.");
+    }
+
+    private void deleteKey(Tenant tenant) {
+        try {
+            HdfsUtils.deleteKey(yarnConfiguration, CustomerSpace.parse(tenant.getId()).getContractId());
+        } catch (Exception e) {
+            log.error(String.format("Failed to cleanup key for customer %s", tenant.getId()), e);
+        }
     }
 
     private void cleanupTenantInGA(Tenant tenant) {
@@ -125,13 +134,14 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     private void cleanupTenantsInHdfs() {
         String contractsPath = PathBuilder.buildContractsPath(podId).toString();
         try {
-            List<FileStatus> fileStatuses = HdfsUtils.getFileStatusesForDir(yarnConfiguration, contractsPath, new HdfsUtils.HdfsFileFilter() {
-                @Override
-                public boolean accept(FileStatus file) {
-                    return file.isDirectory();
-                }
-            });
-            for (FileStatus fileStatus: fileStatuses) {
+            List<FileStatus> fileStatuses = HdfsUtils.getFileStatusesForDir(yarnConfiguration, contractsPath,
+                    new HdfsUtils.HdfsFileFilter() {
+                        @Override
+                        public boolean accept(FileStatus file) {
+                            return file.isDirectory();
+                        }
+                    });
+            for (FileStatus fileStatus : fileStatuses) {
                 if (TestFrameworkUtils.isTestTenant(fileStatus.getPath().getName())) {
                     Long modifiedTime = fileStatus.getModificationTime();
                     if ((System.currentTimeMillis() - modifiedTime) > cleanupThreshold) {
@@ -183,14 +193,13 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             magicRestTemplate.delete(permStoreUrl);
             log.info("Cleanup VDB permstore for tenant " + tenantName);
         } catch (Exception e) {
-            log.error("Failed to clean up permstore for vdb " + tenantName + " : "
-                    + errorHandler.getStatusCode() + ", " + errorHandler.getResponseString());
+            log.error("Failed to clean up permstore for vdb " + tenantName + " : " + errorHandler.getStatusCode()
+                    + ", " + errorHandler.getResponseString());
         }
 
         try {
             List<BasicNameValuePair> adHeaders = loginAd();
-            String adminUrl = adminApiHostPort + "/admin/tenants/" + tenantName + "?contractId="
-                    + tenantName;
+            String adminUrl = adminApiHostPort + "/admin/tenants/" + tenantName + "?contractId=" + tenantName;
             String response = HttpClientWithOptionalRetryUtils.sendGetRequest(adminUrl, false, adHeaders);
             TenantDocument tenantDoc = JsonUtils.deserialize(response, TenantDocument.class);
             String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
@@ -198,11 +207,10 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
             log.info("Delete DL tenant " + tenantName + " result=" + JsonUtils.serialize(result));
         } catch (Exception e) {
-            log.error("Failed to clean up dl tenant " + tenantName + " : "
-                    + errorHandler.getStatusCode() + ", " + errorHandler.getResponseString());
+            log.error("Failed to clean up dl tenant " + tenantName + " : " + errorHandler.getStatusCode() + ", "
+                    + errorHandler.getResponseString());
         }
     }
-
 
     private List<BasicNameValuePair> loginAd() throws IOException {
         List<BasicNameValuePair> headers = new ArrayList<>();
@@ -224,4 +232,3 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     }
 
 }
-

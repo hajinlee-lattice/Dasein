@@ -1,0 +1,35 @@
+{
+  "ConfigDirectories": [
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+      ]
+    }
+  ],
+  "CustomerSpaceInfo": {
+    "properties": {
+      "displayName": "CG_${TENANT}",
+      "description": "A CG solution for ${TENANT} in ${TENANT}"
+    },
+    "featureFlags": "{}"
+  },
+  "TenantInfo": {
+    "properties": {
+      "displayName": "CG_${TENANT}",
+      "description": "A CG tenant under the contract ${TENANT}"
+    }
+  },
+  "ContractInfo": {
+    "properties": {}
+  },
+  "SpaceConfig": {
+    "Product": "Customer Growth",
+    "Products": [
+      "Customer Growth"
+    ]
+  }
+}

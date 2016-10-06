@@ -102,7 +102,12 @@ public class PLSComponentManager {
         }
         List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
 
-        Tenant tenant = new Tenant();
+        Tenant tenant;
+        if (tenantService.hasTenantId(PLSTenantId)) {
+            tenant = tenantService.findByTenantId(PLSTenantId);
+        } else {
+            tenant = new Tenant();
+        }
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
 

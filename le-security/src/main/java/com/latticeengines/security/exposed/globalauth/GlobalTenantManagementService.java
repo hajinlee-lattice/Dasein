@@ -4,7 +4,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface GlobalTenantManagementService {
 
-    Boolean registerTenant(Tenant tenant);
+    boolean registerTenant(Tenant tenant);
     
-    Boolean discardTenant(Tenant tenant);
+    boolean discardTenant(Tenant tenant);
+
+    boolean tenantExists(Tenant tenant);
 }

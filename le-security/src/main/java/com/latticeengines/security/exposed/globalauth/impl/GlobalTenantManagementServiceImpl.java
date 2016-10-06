@@ -5,16 +5,16 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 
 @Component("globalTenantManagementService")
-public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl
-        implements GlobalTenantManagementService {
+public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
+        GlobalTenantManagementService {
 
     private static final Log log = LogFactory.getLog(GlobalTenantManagementServiceImpl.class);
 
@@ -22,7 +22,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override
-    public synchronized Boolean registerTenant(Tenant tenant) {
+    public synchronized boolean registerTenant(Tenant tenant) {
 
         try {
             log.info(String.format("Registering tenant with id %s.", tenant.getId()));
@@ -36,13 +36,12 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
             gaTenantEntityMgr.create(tenantData);
             return true;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18012, new String[] { tenant.getId(),
-                    tenant.getName() });
+            throw new LedpException(LedpCode.LEDP_18012, new String[] { tenant.getId(), tenant.getName() });
         }
     }
 
     @Override
-    public synchronized Boolean discardTenant(Tenant tenant) {
+    public synchronized boolean discardTenant(Tenant tenant) {
 
         try {
             log.info(String.format("Discarding tenant with id %s.", tenant.getId()));
@@ -57,4 +56,9 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
         }
     }
 
+    @Override
+    public synchronized boolean tenantExists(Tenant tenant) {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
+        return tenantData != null;
+    }
 }

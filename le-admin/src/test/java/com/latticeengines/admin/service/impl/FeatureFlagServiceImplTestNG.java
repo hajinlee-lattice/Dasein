@@ -89,6 +89,9 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName());
         Assert.assertNotNull(enableLatticeMarketoCredentialPageFeatureFlag);
 
+        FeatureFlagDefinition enableDataEncryptionFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName());
+
         FeatureFlagDefinition enableInternalEnrichmentAttributesFeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         Assert.assertNotNull(enableInternalEnrichmentAttributesFeatureFlag);
@@ -155,6 +158,12 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
 
+        Assert.assertTrue(enableDataEncryptionFeatureFlag.getConfigurable()
+                && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
+                && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.CG)
+                && enableDataEncryptionFeatureFlag.getDisplayName() != null
+                && enableDataEncryptionFeatureFlag.getDocumentation() != null);
+
         Assert.assertTrue(enableInternalEnrichmentAttributesFeatureFlag.getConfigurable()
                 && enableInternalEnrichmentAttributesFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableInternalEnrichmentAttributesFeatureFlag.getDisplayName() != null
@@ -175,7 +184,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(newDefinition);
         Assert.assertEquals(newDefinition.getDisplayName(), definition.getDisplayName());
         Assert.assertEquals(newDefinition.getDocumentation(), definition.getDocumentation());
-        Assert.assertEquals(newDefinition.getAvailableProducts().size(), 3);
+        Assert.assertEquals(newDefinition.getAvailableProducts().size(), 4);
         Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.LPA));
         Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.LPA3));
         Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.PD));

@@ -38,7 +38,8 @@ public class TestLatticeComponent extends LatticeComponent {
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
-        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD));
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD,
+                LatticeProduct.CG));
     }
 
     @Override

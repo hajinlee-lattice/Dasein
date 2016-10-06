@@ -12,6 +12,8 @@
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
         fs.defaultFS=${dataplatform.fs.defaultFS}
+        hadoop.security.key.provider.path=${dataplatform.hadoop.security.key.provider.path}
+        dfs.encryption.key.provider.uri=${dataplatform.dfs.encryption.key.provider.uri}
         yarn.resourcemanager.ha.enabled=${dataplatform.yarn.resourcemanager.ha.enabled}
         yarn.resourcemanager.ha.rm-ids=${dataplatform.yarn.resourcemanager.ha.rm-ids}
         yarn.resourcemanager.ha.id=${dataplatform.yarn.resourcemanager.ha.id}
@@ -28,5 +30,5 @@
         yarn.client.failover-sleep-base-ms=${dataplatform.yarn.client.failover-sleep-base-ms}
         yarn.client.failover-sleep-max-ms=${dataplatform.yarn.client.failover-sleep-max-ms}
     </yarn:configuration>
-      
+
 </beans>

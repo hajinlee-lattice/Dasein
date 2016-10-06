@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
@@ -13,6 +14,8 @@ public class PathTranslatorFactory {
         switch (scope.getType()) {
         case POD:
             return new PodPathTranslator((PodScope)scope);
+        case POD_DIVISION:
+            return new PodDivisionPathTranslator((PodDivisionScope)scope);
         case CONTRACT:
             return new ContractPathTranslator((ContractScope)scope);
         case CUSTOMER_SPACE:

@@ -4,14 +4,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.encryption.exposed.service.DataEncryptionService;
 
 @Component
 public class ModelingComponent extends LatticeComponent {
@@ -20,12 +21,15 @@ public class ModelingComponent extends LatticeComponent {
     @Value("${admin.modeling.dryrun}")
     private boolean dryrun;
 
-    public LatticeComponentInstaller installer = new ModelingInstaller();
-    public CustomerSpaceServiceUpgrader upgrader = new ModelingUpgrader();
+    @Autowired
+    private DataEncryptionService dataEncryptionService;
+
+    private ModelingInstaller installer = new ModelingInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new ModelingUpgrader();
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
-        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD));
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD, LatticeProduct.CG));
     }
 
     @Override
@@ -41,6 +45,7 @@ public class ModelingComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
+        installer.setDataEncryptionService(dataEncryptionService);
 
         return installer;
     }
@@ -59,6 +64,7 @@ public class ModelingComponent extends LatticeComponent {
     public boolean doRegistration() {
         String defaultJson = "modeling_default.json";
         String metadataJson = "modeling_metadata.json";
-        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        return true;
     }
 }

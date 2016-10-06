@@ -27,6 +27,7 @@
         <le.serviceflows.leadprioritization.version>2.0.43-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.43-SNAPSHOT</le.proxy.version>
         <le.quartzclient.version>2.0.43-SNAPSHOT</le.quartzclient.version>
+        <le.encryption.version>2.0.40-SNAPSHOT</le.encryption.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 

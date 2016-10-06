@@ -20,6 +20,7 @@ public enum LatticeFeatureFlag {
     USE_DNB_RTS_AND_MODELING("UseDnbRtsAndModeling", "User DNB RTS and Modeling"), //
     ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE("EnableLatticeMarketoCredentialPage",
             "Enable Lattice Marketo Credential Page"), //
+    ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
     ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES("EnableInternalEnrichmentAttributes", "Enable Internal Enrichment Attributes"), //
     ENABLE_DATA_PROFILING_V2("EnableDataProfilingV2", "Enable Data Profiling Version 2");
 

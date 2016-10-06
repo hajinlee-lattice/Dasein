@@ -8,4 +8,5 @@ $HADOOP_HOME/sbin/yarn-daemon.sh stop resourcemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh stop nodemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh stop timelineserver
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh stop historyserver
+$HADOOP_HOME/sbin/kms.sh stop
 $ZOOKEEPER_HOME/bin/zkServer.sh stop 

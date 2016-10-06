@@ -16,6 +16,8 @@
         dfs.namenode.rpc-address.${scoringapi.dfs.nameservices}.nn1=${scoringapi.dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${scoringapi.dfs.nameservices}.nn2=${scoringapi.dfs.namenode.rpc-address.nn2}
         fs.defaultFS=${scoringapi.fs.defaultFS}
+        hadoop.security.key.provider.path=${scoringapi.hadoop.security.key.provider.path}
+        dfs.encryption.key.provider.uri=${scoringapi.dfs.encryption.key.provider.uri}
     </yarn:configuration>
 
 </beans>

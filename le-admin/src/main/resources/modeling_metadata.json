@@ -1,6 +1,12 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "FeaturesThreshold", "Data": {"Type": "number", "Required": false} }
+    {
+      "Node": "FeaturesThreshold",
+      "Data": {
+        "Type": "number",
+        "Required": false
+      }
+    }
   ]
 }
