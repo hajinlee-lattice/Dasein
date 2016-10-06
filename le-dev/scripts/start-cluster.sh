@@ -17,6 +17,11 @@ $HADOOP_HOME/sbin/yarn-daemon.sh start resourcemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager
 $HADOOP_HOME/sbin/yarn-daemon.sh start timelineserver
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
+
+OLD_CATALINA_HOME=$CATALINA_HOME
+CATALINA_HOME=$HADOOP_HOME/share/hadoop/kms/tomcat
 $HADOOP_HOME/sbin/kms.sh start
+CATALINA_HOME=$OLD_CATALINA_HOME
+
 ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
 
