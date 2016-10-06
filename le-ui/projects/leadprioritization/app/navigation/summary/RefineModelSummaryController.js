@@ -22,14 +22,16 @@ angular.module('lp.navigation.review', [
         schemaInterpretation: Model.ModelDetails.SourceSchemaInterpretation,
         oneLeadPerDomain: Model.EventTableProvenance.Is_One_Lead_Per_Domain == "true",
         includePersonalEmailDomains: Model.EventTableProvenance.Exclude_Public_Domains == "false",
-        useLatticeAttributes: Model.EventTableProvenance.Exclude_Propdata_Columns == "false"
+        useLatticeAttributes: Model.EventTableProvenance.Exclude_Propdata_Columns == "false",
+        enableTransformations: (Model.EventTableProvenance.Transformation_Group_Name ||
+            Model.ModelDetails.TransformationGroupName == "none") ? false : true
     });
 
     vm.createModelClicked = function() {
         if (vm.totalRecordsAfter < 7000 || vm.successEventsAfter < 150 || vm.conversionRateAfter > 10) {
             RefineModelThresholdModal.show(vm.totalRecordsAfter, vm.successEventsAfter, vm.conversionRateAfter);
         } else {
-            UpdateFieldsModal.show(vm.oneLeadPerDomain, vm.includePersonalEmailDomains, vm.useLatticeAttributes,
+            UpdateFieldsModal.show(vm.oneLeadPerDomain, vm.includePersonalEmailDomains, vm.useLatticeAttributes, vm.enableTransformations,
                 vm.modelId, null, Model.ModelDetails.DisplayName, ModelReviewStore.GetDataRules(vm.modelId));
         }
     };

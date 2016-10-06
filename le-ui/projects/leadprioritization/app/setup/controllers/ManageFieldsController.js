@@ -27,6 +27,8 @@ angular.module('lp.managefields', [
         Model.EventTableProvenance.Exclude_Public_Domains == "false";
     $scope.useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns == null ? true :
         Model.EventTableProvenance.Exclude_Propdata_Columns == "false";
+    $scope.enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name == "none" ||
+        Model.ModelDetails.TransformationGroupName == "none") ? false : true;
     $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
 
     getOptionsAndFields();
@@ -358,12 +360,13 @@ angular.module('lp.managefields', [
 
     $scope.advancedSettingsClicked = function() {
         FieldMappingSettingsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains,
-            $scope.useLatticeAttributes, $scope.sourceType);
+            $scope.useLatticeAttributes, $scope.enableTransformations, $scope.sourceType);
     };
 
-    $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes) {
+    $scope.$on(NavUtility.MANAGE_FIELDS_ADVANCED_SETTINGS_EVENT, function(event, oneLeadPerDomain, includePersonalEmailDomains, useLatticeAttributes, enableTransformations) {
         $scope.oneLeadPerDomain = oneLeadPerDomain;
         $scope.includePersonalEmailDomains = includePersonalEmailDomains;
+        $scope.enableTransformations = enableTransformations;
 
         if ($scope.useLatticeAttributes != useLatticeAttributes) {
             if (!useLatticeAttributes) {
@@ -413,7 +416,7 @@ angular.module('lp.managefields', [
 
         var editedData = getAllEditedData();
         if ((editedData != null && editedData.length > 0) || advancedSettingsFlagsChanged()) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.modelId,
+            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations, $scope.modelId,
                 $scope.fields.concat($scope.fieldsNotDisplayed), Model.ModelDetails.DisplayName);
 
             $scope.saveInProgress = false;
@@ -430,6 +433,8 @@ angular.module('lp.managefields', [
         $scope.oneLeadPerDomain = Model.EventTableProvenance.Is_One_Lead_Per_Domain;
         $scope.includePersonalEmailDomains = !Model.EventTableProvenance.Exclude_Public_Domains;
         $scope.useLatticeAttributes = !Model.EventTableProvenance.Exclude_Propdata_Columns;
+        $scope.enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name == "none" ||
+            Model.ModelDetails.TransformationGroupName == "none") ? false : true;
         $scope.dirtyRows = {};
 
         $scope.indexToOldFieldsForListFieldsPage = {};

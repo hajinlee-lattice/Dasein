@@ -13,7 +13,8 @@ angular
     this.advancedSettings = {
         oneLeadPerDomain: false,
         includePersonalEmailDomains: true,
-        useLatticeAttributes: true
+        useLatticeAttributes: true,
+        enableTransformations: true
     };
 
     this.SetAdvancedSettings = function(key, value) {
@@ -28,6 +29,7 @@ angular
         this.advancedSettings.oneLeadPerDomain = false;
         this.advancedSettings.includePersonalEmailDomains = true;
         this.advancedSettings.useLatticeAttributes = true;
+        this.advancedSettings.enableTransformations = true;
     };
 
     this.Get = function(name, root) {
@@ -180,7 +182,8 @@ angular
             data: {
                 deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
                 excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
-                excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true
+                excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true,
+                transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'NONE',
             }
         })
         .success(function(data, status, headers, config) {
@@ -253,6 +256,7 @@ angular
                 deduplicationType: ImportStore.GetAdvancedSetting('oneLeadPerDomain') ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
                 excludePublicDomains: ImportStore.GetAdvancedSetting('includePersonalEmailDomains') ? false : true,
                 excludePropDataColumns: ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true,
+                transformationGroup: ImportStore.GetAdvancedSetting('enableTransformations') ? null : 'NONE',
                 displayName: MetaData.displayName
             };
 
