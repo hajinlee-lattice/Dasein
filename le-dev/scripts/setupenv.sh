@@ -46,7 +46,7 @@ sudo mkdir -p /var/cache/scoringapi || true
 sudo chmod a+w /var/cache/scoringapi
 
 existing=$(hadoop key list | grep master)
-if [ -z existing ]; then
+if [ -z "$existing" ]; then
     hadoop key create master
 else
     echo "Master key already installed"
