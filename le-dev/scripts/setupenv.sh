@@ -3,6 +3,8 @@
 printf "%s\n" "${HADOOP_CONF_DIR:?You must set HADOOP_CONF_DIR}"
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
+printf "%s\n" "${HADOOP_NAMENODE_DATA_DIR:?You must set HADOOP_NAMENODE_DATA_DIR}"
+printf "%s\n" "${HADOOP_DATANODE_DATA_DIR:?You must set HADOOP_DATANODE_DATA_DIR}"
 
 cp $WSHOME/le-dev/hadoop/dev/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/mapred-site.xml $HADOOP_CONF_DIR
