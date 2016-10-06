@@ -73,8 +73,8 @@ INSERT INTO GlobalAuthentication (
   Email,
   'EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=',
   0,
-  UNIX_TIMESTAMP(NOW()),
-  UNIX_TIMESTAMP(NOW()),
+  NOW(),
+  NOW(),
   0,
   0
 FROM GlobalUser
@@ -94,8 +94,8 @@ INSERT INTO GlobalAuthentication (
   Email,
   'mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=',
   0,
-  UNIX_TIMESTAMP(NOW()),
-  UNIX_TIMESTAMP(NOW()),
+  NOW(),
+  NOW(),
   0,
   0
 FROM GlobalUser
@@ -113,8 +113,8 @@ INSERT INTO GlobalUserTenantRight (
   t.GlobalTenant_ID,
   u.GlobalUser_ID,
   'SUPER_ADMIN',
-  UNIX_TIMESTAMP(NOW()),
-  UNIX_TIMESTAMP(NOW()),
+  NOW(),
+  NOW(),
   0,
   0
 FROM GlobalUser u, GlobalTenant t
