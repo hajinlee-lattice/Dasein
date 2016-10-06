@@ -17,7 +17,7 @@
         <le.camille.version>2.0.43-SNAPSHOT</le.camille.version>
         <le.db.version>2.0.43-SNAPSHOT</le.db.version>
         <le.security.version>2.0.43-SNAPSHOT</le.security.version>
-        <le.encryption.version>2.0.40-SNAPSHOT</le.encryption.version>
+        <le.encryption.version>2.0.43-SNAPSHOT</le.encryption.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
