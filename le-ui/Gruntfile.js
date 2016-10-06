@@ -68,7 +68,7 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false
             },
             local: {
-                NODE_APPS: 'leui,leadmin',
+                NODE_APPS: 'leui',
                 NODE_ENV: 'development',
                 API_URL: 'http://localhost:8081',
                 API_ADMIN_URL: 'http://localhost:8085',
