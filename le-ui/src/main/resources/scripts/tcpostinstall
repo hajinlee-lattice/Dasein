@@ -21,9 +21,9 @@ python /tmp/le-ui/replace_token.py /opt/node/latest/conf/env/${LE_ENVIRONMENT} $
 cp /opt/node/latest/conf/env/${LE_ENVIRONMENT}/ENV_VARS /opt/node/latest
 
 if [ "${INSTALL_MODE}" == "EXTERNAL" ]; then
-    sed -i "s|{{NODE_APPS}}|leui|g" /opt/node/latest
+    sed -i "s|{{NODE_APPS}}|leui|g" /opt/node/latest/ENV_VARS
 else
-    sed -i "s|{{NODE_APPS}}|leadmin|g" /opt/node/latest
+    sed -i "s|{{NODE_APPS}}|leadmin|g" /opt/node/latest/ENV_VARS
 fi
 
 chmod -R 755 /opt/node/latest
