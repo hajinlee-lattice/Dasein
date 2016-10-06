@@ -13,8 +13,8 @@ cp $WSHOME/le-dev/hadoop/dev/yarn-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/kms-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/core-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/hdfs-site.xml $HADOOP_CONF_DIR
-sed -i "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
-sed -i "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+sed -i".orig" "s|[$][{]HADOOP_NAMENODE_DATA_DIR[}]|${HADOOP_NAMENODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
+sed -i".orig" "s|[$][{]HADOOP_DATANODE_DATA_DIR[}]|${HADOOP_DATANODE_DATA_DIR}|" $HADOOP_CONF_DIR/hdfs-site.xml
 
 if [ ! -z "CATALINA_HOME" ]; then
     cp $WSHOME/le-dev/tomcat/dev/server.xml $CATALINA_HOME/conf/server.xml
