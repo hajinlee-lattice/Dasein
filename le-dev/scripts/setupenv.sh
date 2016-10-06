@@ -6,6 +6,8 @@ printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among develop
 printf "%s\n" "${HADOOP_NAMENODE_DATA_DIR:?You must set HADOOP_NAMENODE_DATA_DIR}"
 printf "%s\n" "${HADOOP_DATANODE_DATA_DIR:?You must set HADOOP_DATANODE_DATA_DIR}"
 
+bash $WSHOME/le-dev/start-cluster.sh || true
+
 cp $WSHOME/le-dev/hadoop/dev/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/mapred-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/dev/tez-site.xml $HADOOP_CONF_DIR
