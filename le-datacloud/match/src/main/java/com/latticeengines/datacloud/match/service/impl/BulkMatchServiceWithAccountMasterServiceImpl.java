@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -16,12 +17,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
+import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -48,6 +51,10 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Autowired
     @Qualifier("accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
+
+    @Autowired
+    @Qualifier("accountMasterColumnSelectionService")
+    private ColumnSelectionService columnSelectionService;
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
     protected String microServiceHostPort;
@@ -182,6 +189,11 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         parameters.setOutputSchemaPath(outputSchemaPath);
         parameters.setKeyMap(input.getKeyMap());
 
+        ColumnSelection columnSelection = bulkMatchPlanner.parseColumnSelection(input);
+        Map<String, Pair<BitCodeBook, List<String>>> decodedParameters = columnSelectionService.getDecodeParameters(
+                columnSelection, input.getDataCloudVersion());
+        if (decodedParameters != null && decodedParameters.size() > 0)
+            parameters.wrapDecodedParameters(decodedParameters);
         return parameters;
     }
 

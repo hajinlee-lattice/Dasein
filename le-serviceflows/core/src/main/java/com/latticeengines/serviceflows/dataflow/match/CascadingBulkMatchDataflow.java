@@ -19,9 +19,10 @@ import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DecodedPair;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {
@@ -56,10 +57,8 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         Node accountMasterSource = addSource(parameters.getAccountMaster());
         List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters, accountMasterSource);
         List<String> predefinedFields = outputList.get(1);
-        List<FieldMetadata> fieldMetadata = getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
-        FieldMetadata latticeIdMetadata = new FieldMetadata(LATTICE_ID_FIELDNAME, String.class);
-        fieldMetadata.add(0, latticeIdMetadata);
-        accountMasterSource.setSchema(fieldMetadata);
+        predefinedFields.addAll(outputList.get(2));
+        System.out.println("Predefined columns=" + predefinedFields);
         accountMasterSource = accountMasterSource.retain(new FieldList(predefinedFields));
 
         Node matchedLookupIdNode = matchedLookupNode.retain(latticeIdField);
@@ -69,10 +68,45 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
 
         JoinType joinType = parameters.getReturnUnmatched() ? JoinType.LEFT : JoinType.INNER;
         matchedLookupNode = matchedLookupNode.join(latticeIdField, hashMatchedNode, latticeIdField, joinType);
+
+        matchedLookupNode = decodeColumns(matchedLookupNode, parameters, outputList.get(2));
+
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
+        List<FieldMetadata> fieldMetadata = getOutputMetadata(inputMetadata, parameters, resultFields);
+        accountMasterSource.setSchema(fieldMetadata);
         matchedLookupNode = matchedLookupNode.retain(new FieldList(resultFields.toArray(new String[0])));
 
+        return matchedLookupNode;
+    }
+
+    private List<FieldMetadata> getOutputMetadata(List<FieldMetadata> inputMetadatas,
+            CascadingBulkMatchDataflowParameters parameters, List<String> resultFields) {
+        List<FieldMetadata> metadatas = getMetadataFromSchemaPath(parameters.getOutputSchemaPath());
+        List<FieldMetadata> newMetadatas = new ArrayList<>();
+        newMetadatas.addAll(inputMetadatas);
+        for (FieldMetadata metadata : metadatas) {
+            if (resultFields.contains(metadata.getFieldName())) {
+                newMetadatas.add(metadata);
+            }
+        }
+        return newMetadatas;
+    }
+
+    private Node decodeColumns(Node matchedLookupNode, CascadingBulkMatchDataflowParameters parameters,
+            List<String> encodedColumns) {
+        Map<String, DecodedPair> decodedParameters = parameters.getDecodedParameters();
+        if (decodedParameters != null && decodedParameters.size() > 0) {
+            for (Map.Entry<String, DecodedPair> entry : decodedParameters.entrySet()) {
+                if (encodedColumns.contains(entry.getKey()) && entry.getValue() != null
+                        && entry.getValue().getBitCodeBook() != null && entry.getValue().getDecodedColumns() != null) {
+                    log.info("Eecode column=" + entry.getKey() + ", Decoded columns' count="
+                            + entry.getValue().getDecodedColumns().size());
+                    matchedLookupNode = matchedLookupNode.bitDecode(entry.getKey(), entry.getValue()
+                            .getDecodedColumns().toArray(new String[0]), entry.getValue().getBitCodeBook());
+                }
+            }
+        }
         return matchedLookupNode;
     }
 
@@ -90,20 +124,41 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         FieldList predefinedFieldList = buildFieldListFromSchema(parameters.getOutputSchemaPath());
         List<String> predefinedFields = new ArrayList<>();
         predefinedFields.add(LATTICE_ID_FIELDNAME);
+        List<String> encodedColumns = new ArrayList<>();
+        Set<String> decodedColumnSet = getDecodedColumns(parameters, accountMasterFieldSet, encodedColumns);
         for (String predefinedField : predefinedFieldList.getFields()) {
             if (!inputputFieldSet.contains(predefinedField.toLowerCase())
-                    && accountMasterFieldSet.contains(predefinedField)) {
-                predefinedFields.add(predefinedField);
+                    && (accountMasterFieldSet.contains(predefinedField) || decodedColumnSet.contains(predefinedField))) {
+                if (accountMasterFieldSet.contains(predefinedField)) {
+                    predefinedFields.add(predefinedField);
+                }
                 outputFields.add(predefinedField);
             }
-            if (!accountMasterFieldSet.contains(predefinedField)) {
-                log.warn("Missing predefined field in Account Master file:" + predefinedField);
+            if (!accountMasterFieldSet.contains(predefinedField) && !decodedColumnSet.contains(predefinedField)) {
+                log.warn("Missing predefined field in Account Master file or Encoded columns:" + predefinedField);
             }
         }
         List<List<String>> outputList = new ArrayList<List<String>>();
         outputList.add(outputFields);
         outputList.add(predefinedFields);
+        outputList.add(encodedColumns);
         return outputList;
+    }
+
+    private Set<String> getDecodedColumns(CascadingBulkMatchDataflowParameters parameters,
+            Set<String> accountMasterFieldSet, List<String> encodedColumns) {
+        Set<String> decodedColumns = new HashSet<>();
+        if (parameters.getDecodedParameters() != null) {
+            for (Map.Entry<String, DecodedPair> entry : parameters.getDecodedParameters().entrySet()) {
+                if (accountMasterFieldSet.contains(entry.getKey())) {
+                    decodedColumns.addAll(entry.getValue().getDecodedColumns());
+                    encodedColumns.add(entry.getKey());
+                } else {
+                    log.warn("Missing decoded column=" + entry.getKey());
+                }
+            }
+        }
+        return decodedColumns;
     }
 
     private Node matchLookup(CascadingBulkMatchDataflowParameters parameters, Node inputSource,

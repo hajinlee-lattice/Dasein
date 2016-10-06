@@ -1,14 +1,18 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
 
@@ -42,6 +46,8 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
     private String yarnQueue;
 
     private Map<MatchKey, List<String>> keyMap;
+
+    private Map<String, DecodedPair> decodedParameters;
 
     @JsonProperty("input_avro")
     public String getInputAvro() {
@@ -133,4 +139,23 @@ public class CascadingBulkMatchDataflowParameters extends DataFlowParameters {
         return keyMap;
     }
 
+    @JsonProperty("decoded_parameters")
+    public Map<String, DecodedPair> getDecodedParameters() {
+        return decodedParameters;
+    }
+
+    @JsonProperty("decoded_parameters")
+    public void setDecodedParameters(Map<String, DecodedPair> decodedParameters) {
+        this.decodedParameters = decodedParameters;
+    }
+
+    public void wrapDecodedParameters(Map<String, Pair<BitCodeBook, List<String>>> decodedParameters) {
+        if (decodedParameters != null) {
+            this.decodedParameters = new HashMap<String, DecodedPair>();
+            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : decodedParameters.entrySet()) {
+                this.decodedParameters.put(entry.getKey(), new DecodedPair(entry.getValue().getLeft(), entry
+                        .getValue().getRight()));
+            }
+        }
+    }
 }
