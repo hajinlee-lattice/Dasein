@@ -19,11 +19,11 @@ INSERT INTO TENANT(
 ) VALUES (
   'LocalTest.LocalTest.Production',
   'LocalTest',
-  NOW(),
+  UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR)),
   '3.0'
 ), (
   'PropDataService.PropDataService.Production',
   'PropDataService',
-  NOW(),
+  UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR)),
   '3.0'
 )
