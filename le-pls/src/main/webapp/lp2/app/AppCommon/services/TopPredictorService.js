@@ -364,7 +364,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     }
                     percentTotal = percentTotal.toFixed(1);
                     var lift = element.Lift.toPrecision(2);
-                    var conversionRate = lift * averageConversionRate;
+                    var conversionRate = element.Lift * averageConversionRate;
                     var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                     var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
                     if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
