@@ -120,7 +120,7 @@ angular.module('lp.marketo', [
 			
 			var errorMsg = result.errorMsg;
 
-			if (result.Success) {
+			if (result.success) {
 				$state.go('home.marketosettings.apikey');
 			} else {
 				vm.saveInProgress = false;
