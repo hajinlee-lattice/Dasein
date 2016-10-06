@@ -62,15 +62,16 @@ angular
     this.CreateMarketoCredential = function(credential) {
         var deferred = $q.defer(),
             data = {
-                name: credential.credentialName,
-                soap_endpoint: credential.soapEndpoint,
-                soap_user_id: credential.soapUserId,
-                soap_encryption_key: credential.soapEncryptionKey,
-                rest_endpoint: credential.restEndpoint,
-                rest_identity_endpoint: credential.restIdentityEndpoint,
-                rest_client_id: credential.restClientId,
-                rest_client_secret: credential.restClientSecret
-            };
+            name: credential.credentialName,
+            soap_endpoint: credential.soapEndpoint,
+            soap_user_id: credential.soapUserId,
+            soap_encryption_key: credential.soapEncryptionKey,
+            rest_endpoint: credential.restEndpoint,
+            rest_identity_endpoint: credential.restIdentityEndpoint,
+            rest_client_id: credential.restClientId,
+            rest_client_secret: credential.restClientSecret
+        };
+
         $http({
             method: 'POST',
             url: '/pls/marketo/credentials/',
@@ -82,17 +83,18 @@ angular
                     data: response.data,
                     success: true
                 };
+                
                 deferred.resolve(result);
-                $state.go('home.marketosettings.apikey');
+
             }, function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                deferred.resolve(errorMsg);
             }
-        )
+        );
 
         return deferred.promise;
     }
@@ -192,8 +194,12 @@ angular
                     response.data = {};
                 }
 
-                var errorMsg = response.data.errorMsg || 'unspecified error';
-                deferred.reject(errorMsg);
+                var result = {
+                    errorMsg: response.data.errorMsg || 'unspecified error',
+                    success: false
+                };
+
+                deferred.reject(result);
             }
         )
 

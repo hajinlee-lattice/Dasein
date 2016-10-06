@@ -409,8 +409,6 @@ angular
                             var flags = FeatureFlagService.Flags();
                             $scope.latticeIsEnabled = FeatureFlagService.FlagIsEnabled(flags.LATTICE_MARKETO_PAGE);
 
-                            console.log($scope.latticeIsEnabled);
-
                             if ($scope.latticeIsEnabled != true) {
                                 $state.go('home.marketosettings.credentials');
                             }

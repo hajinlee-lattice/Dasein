@@ -41,16 +41,41 @@ angular.module('lp.marketo', [
 
 		MarketoService.CreateMarketoCredential(credential).then(function(result){
 
-			var errorMsg = result.errorMsg;
-
-			if (result.Success) {
-				$state.go('home.marketosettings.apikey');
+			if (result != null && result.success === true) {
+				$state.go('home.marketosettings.apikey', {}, { reload: true });
 			} else {
 				vm.saveInProgress = false;
-				vm.addCredentialErrorMessage = errorMsg;
+				vm.addCredentialErrorMessage = result;
 				vm.showAddCredentialError = true;
 			}
+
 		});
+
+	};
+
+	vm.onBlur = function($event){
+
+		var desiredCredentialName = vm.credentialName;
+
+
+		// var id = arr.length + 1;
+		// var found = arr.some(function (el) {
+		// 	return el.username === name;
+		// });
+		// if (!found) { arr.push({ id: id, username: name }); }
+		console.log(vm.credentials);
+
+        _.each(vm.credentials, function(value, key){
+
+        	vm.credential = value;
+
+			if(value.value == desiredCredentialName){
+				return true;
+			} else {
+				return false;
+			}
+
+	   	});
 
 	};
 
