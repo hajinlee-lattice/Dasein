@@ -118,7 +118,6 @@ angular.module('lp.enrichment.leadenrichment')
     }
 
     this.setEnrichments = function(item){
-        console.log(item);
         this.enrichments = item;
     }
 

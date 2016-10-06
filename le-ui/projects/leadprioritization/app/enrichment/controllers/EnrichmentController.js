@@ -4,6 +4,7 @@ angular.module('lp.enrichment.leadenrichment', [
 ])
 .controller('EnrichmentController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
     BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+
     var vm = this,
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
@@ -35,7 +36,7 @@ angular.module('lp.enrichment.leadenrichment', [
         },
         enrichments_loaded: false,
         enrichments_completed: false,
-        enrichmetns: {},
+        enrichments: [],
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -56,6 +57,13 @@ angular.module('lp.enrichment.leadenrichment', [
         view: 'list'
     });
     
+    var stopGetEnrichments = false;
+    $scope.$on('$locationChangeStart', function (event, newUrl, oldUrl, newState, oldState) {
+        if(oldUrl.endsWith('/enrichment')) {
+            stopGetEnrichments = true; // if you leave the page mid-chunking in of enrichments this will stop the promise
+        }
+    });
+
     var getEnrichmentData = function(opts) {
         var deferred = $q.defer(),
             opts = opts || {},
@@ -68,6 +76,10 @@ angular.module('lp.enrichment.leadenrichment', [
                 vm.enrichments_loaded = true;
                 vm.enrichments = vm.enrichments.concat(result.data);
                 _store = result; // just a copy of the correct data strucuture and properties for later
+                if(stopGetEnrichments) {
+                    vm.enrichments = []; // unset enrichments
+                    return false;  // stop getting enrichments
+                }
                 if(result.data.length === max) {
                     getEnrichmentData({max: max, offset: offset + max});
                 } else {
