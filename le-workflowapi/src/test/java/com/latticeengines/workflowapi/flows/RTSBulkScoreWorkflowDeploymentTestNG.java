@@ -75,7 +75,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
-    private LeadEnrichmentAttributesOperationMap selectedAttributeMap;
+    private List<String> selectedAttributeNameList;
 
     protected static String TENANT_ID;
 
@@ -115,9 +115,9 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private void saveAttributeSelection(CustomerSpace customerSpace) {
         internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
                 plsApiHostPort);
-        selectedAttributeMap = checkSelection(customerSpace);
-        System.out.println(selectedAttributeMap.getDeselectedAttributes());
-        System.out.println(selectedAttributeMap.getSelectedAttributes());
+        LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
+        System.out.println("The deselected attributes are: " + selectedAttributeMap.getDeselectedAttributes());
+        System.out.println("The selected attributes are: " + selectedAttributeNameList);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
@@ -131,17 +131,19 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
         int premiumSelectCount = 2;
         int selectCount = 1;
-
+        selectedAttributeNameList = new ArrayList<String>();
         for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
             if (attr.getIsPremium()) {
                 if (premiumSelectCount > 0) {
                     premiumSelectCount--;
                     selectedAttributes.add(attr.getFieldName());
+                    selectedAttributeNameList.add(attr.getDisplayName());
                 }
             } else {
                 if (selectCount > 0) {
                     selectCount--;
                     selectedAttributes.add(attr.getFieldName());
+                    selectedAttributeNameList.add(attr.getDisplayName());
                 }
             }
         }
@@ -175,7 +177,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         try (CSVReader reader = new CSVReader(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
                 files.get(0))))) {
             String[] header = reader.readNext();
-            System.out.println(Arrays.toString(header));
+            System.out.println("The header is " + Arrays.toString(header));
             Assert.assertEquals(header[header.length - 4], "Score");
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 1]));
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 2]));
@@ -184,7 +186,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     }
 
     private boolean headerBelongsToLeadEnrichmentAttributes(String header) {
-        return selectedAttributeMap.getSelectedAttributes().contains(header);
+        return selectedAttributeNameList.contains(header);
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
