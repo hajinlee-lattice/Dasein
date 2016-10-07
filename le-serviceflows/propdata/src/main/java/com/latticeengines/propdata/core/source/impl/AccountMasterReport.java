@@ -102,7 +102,7 @@ public class AccountMasterReport implements CharacterizationSource {
 
     @Override
     public String getPercentKey() {
-	return "Percent";
+	return "Pcnt";
     }
 
     @Override
