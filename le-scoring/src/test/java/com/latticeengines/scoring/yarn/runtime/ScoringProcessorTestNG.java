@@ -89,7 +89,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
         BulkRecordScoreRequest scoreRequest = null;
         do {
-            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig, new HashMap<String, String>());
             if (scoreRequest == null) {
                 break;
             }

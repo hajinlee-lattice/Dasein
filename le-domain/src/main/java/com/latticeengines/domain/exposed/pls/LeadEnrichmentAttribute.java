@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -41,6 +42,7 @@ public class LeadEnrichmentAttribute {
 
     // TODO - hook it up with data from table in M7
     @JsonProperty("IsInternal")
+    @JsonIgnore
     private Boolean isInternal = Boolean.FALSE;
 
     public String getDisplayName() {
