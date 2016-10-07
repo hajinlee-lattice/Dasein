@@ -89,7 +89,7 @@ public class AccountMasterSeed implements FixedIntervalSource {
     }
 
     public String[] getRetainFields() {
-        return new String[] { "LatticeID", "DUNS", "Domain", "Name", "Street",
-                              "City", "State", "Country", "ZipCode" };
+        return new String[] { "LatticeID", "DUNS", "Domain", "Name", "Street", "City", "State", "Country", "ZipCode",
+                "LE_IS_PRIMARY_DOMAIN", "LE_IS_PRIMARY_LOCATION", "LE_NUMBER_OF_LOCATIONS" };
     }
 }
