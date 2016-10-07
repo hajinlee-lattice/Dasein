@@ -27,18 +27,18 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     private NetworkServerControl serverControl;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional.platform")
     public void setup() throws Exception {
         serverControl = new NetworkServerControl();
         serverControl.start(null);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "functional.platform")
     public void tearDown() throws Exception {
         serverControl.shutdown();
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void getDataTypes() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("10.41.1.250") //
@@ -71,7 +71,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     }
 
-    @Test(groups = { "functional" }, enabled = true)
+    @Test(groups = { "functional.platform" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrl() {
         String url = "jdbc:sqlserver://10.41.1.250:1433;databaseName=SP_7_Tests;user=root;password=welcome";
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -86,7 +86,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(metadataService.getConnectionPassword(creds), "welcome");
     }
 
-    @Test(groups = { "functional" }, enabled = true)
+    @Test(groups = { "functional.platform" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClass() {
         String url = "jdbc:derby://localhost:1527/testdb;create=true";
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -97,13 +97,13 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
     }
 
-    @Test(groups = { "functional" }, enabled = true)
+    @Test(groups = { "functional.platform" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClassForFile() throws Exception {
         AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
         assertEquals(metadataService.getJdbcConnectionUrl(dbInfo.getKey()), dbInfo.getValue());
     }
 
-    @Test(groups = { "functional" }, enabled = false)
+    @Test(groups = { "functional.platform" }, enabled = false)
     public void createDataSchema() throws Exception {
         AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
         DataSchema schema = metadataService.createDataSchema(dbInfo.getKey(), "Nutanix");

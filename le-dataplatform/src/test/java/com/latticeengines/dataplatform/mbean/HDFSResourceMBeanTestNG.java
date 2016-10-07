@@ -20,7 +20,7 @@ public class HDFSResourceMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Test(groups = { "functional", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" })
     public void testCheckHDFSResource() {
         String files = hdfsRcMBean.checkHDFSResource();
         String s = versionManager.getCurrentVersionInStack(stackName).equals("") ? "" : "/";

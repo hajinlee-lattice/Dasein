@@ -18,7 +18,7 @@ public class PythonClientCustomizationTestNG extends DataPlatformFunctionalTestN
     @Autowired
     private DefaultYarnClientCustomization defaultYarnClientCustomization;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional.platform")
     public void PythonClientCustomization() {
         assertNotNull(pythonClientCustomization.getConfiguration());
 
@@ -26,7 +26,7 @@ public class PythonClientCustomizationTestNG extends DataPlatformFunctionalTestN
                 pythonClientCustomization);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional.platform")
     public void DefaultYarnClientCustomization() {
         assertNotNull(defaultYarnClientCustomization.getConfiguration());
 

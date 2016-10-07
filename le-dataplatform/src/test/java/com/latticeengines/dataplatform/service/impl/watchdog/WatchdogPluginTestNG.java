@@ -11,7 +11,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Test(groups = {"functional"})
+    @Test(groups = {"functional.platform"})
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
         assertEquals(registry.size(), 3);
