@@ -44,6 +44,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private String leDomainColumn;
     private String dnbIsPrimaryDomainColumn;
     private String dnbIsPrimaryLocationColumn;
+    private String dnbNumberOfLocationColumn;
     
     /*
         Implement of PD-1196
@@ -120,8 +121,12 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         Node joinedCWithLeDuns = joinedC.filter(leDunsColumn + " != null", new FieldList(leDunsColumn));
         Node joinedCWithoutLeDuns = joinedC.filter(leDunsColumn + " == null", new FieldList(leDunsColumn));
         Node res2 = processC1(joinedCWithLeDuns);
-        Node res3 = processC2Part1(joinedCWithLeDuns);
-        Node res4 = processC2Part2(joinedCWithLeDuns);
+        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
+                + ".equals(" + leDomainColumn + "))";
+        Node joinedCWithLeDunsWithDiffDomain = joinedCWithLeDuns.filter(filterExpression,
+                new FieldList(dnbDomainColumn, leDomainColumn));
+        Node res3 = processC2Part1(joinedCWithLeDunsWithDiffDomain);
+        Node res4 = processC2Part2(joinedCWithLeDunsWithDiffDomain);
         Node res5 = processC3(joinedCWithoutLeDuns);
 
         // Step D
@@ -162,13 +167,13 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
                 + " != null && " + leDomainColumn + " != null";
         Node res = node.filter(filterExpression,
                 new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
-        res = callAccountMasterSeedFunction(res, true, new HashSet<String>(), new HashMap<String, String>());
+        res = callAccountMasterSeedFunction(res, true, new HashSet<String>(), new HashMap<String, Object>());
         return res;
     }
 
     private Node processC1(Node node) {
         Node res = node.filter(dnbDomainColumn + " == null", new FieldList(dnbDomainColumn));
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put(dnbIsPrimaryDomainColumn, "Y");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
@@ -177,20 +182,14 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     }
 
     private Node processC2Part1(Node node) {
-        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
-                + ".equals(" + leDomainColumn + "))";
-        Node res3 = node.filter(filterExpression, new FieldList(dnbDomainColumn, leDomainColumn));
-        res3 = callAccountMasterSeedFunction(res3, true, new HashSet<String>(), new HashMap<String, String>());
+        Node res3 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
         return res3;
     }
 
     private Node processC2Part2(Node node) {
-        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
-                + ".equals(" + leDomainColumn + "))";
-        Node res4 = node.filter(filterExpression, new FieldList(dnbDomainColumn, leDomainColumn));
-        res4 = res4.groupByAndLimit(new FieldList(leDunsColumn, leDomainColumn), new FieldList(dnbDomainColumn), 1,
+        Node res4 = node.groupByAndLimit(new FieldList(leDunsColumn, leDomainColumn), new FieldList(dnbDomainColumn), 1,
                 true, true);
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put(dnbIsPrimaryDomainColumn, "N");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
@@ -199,22 +198,23 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     }
 
     private Node processC3(Node node) {
-        Node res5 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, String>());
+        Node res5 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
         return res5;
     }
 
     private Node processD(Node node) {
         String filterExpression = dnbDomainColumn + " == null";
         Node res = node.filter(filterExpression, new FieldList(dnbDomainColumn));
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put(dnbIsPrimaryDomainColumn, "Y");
         map.put(dnbIsPrimaryLocationColumn, "Y");
+        map.put(dnbNumberOfLocationColumn, 1);
         res = callAccountMasterSeedFunction(res, false, new HashSet<String>(), map);
         return res;
     }
 
     private Node callAccountMasterSeedFunction(Node node, boolean takeAllFromDnB, Set<String> exceptColumns,
-            Map<String, String> setDnBColumnValues) {
+            Map<String, Object> setDnBColumnValues) {
         for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
             String outputColumn = "Tmp_" + entry.getKey();
             String latticeColumn = entry.getValue().getLeColumn();
@@ -224,12 +224,14 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
                 node = node.apply(
                         new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, true,
                                 setDnBColumnValues),
-                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn,
+                                entry.getKey().equals(dnbNumberOfLocationColumn) ? Integer.class : String.class));
             } else {
                 node = node.apply(
                         new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, false,
                                 setDnBColumnValues),
-                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn, String.class));
+                        new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn,
+                                entry.getKey().equals(dnbNumberOfLocationColumn) ? Integer.class : String.class));
             }
         }
         return node;
@@ -304,6 +306,9 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
                     break;
                 case IS_PRIMARY_LOCATION:
                     dnbIsPrimaryLocationColumn = item.getDnbColumn();
+                    break;
+                case NUMBER_OF_LOCATION:
+                    dnbNumberOfLocationColumn = item.getDnbColumn();
                     break;
                 default:
                     break;

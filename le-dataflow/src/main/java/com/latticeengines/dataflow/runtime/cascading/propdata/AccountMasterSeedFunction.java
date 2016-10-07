@@ -18,10 +18,10 @@ public class AccountMasterSeedFunction extends BaseOperation implements Function
     private boolean takeAllFromDnB;
     private String dnbColumn;
     private String leColumn;
-    private Map<String, String> setDnBColumnValues;
+    private Map<String, Object> setDnBColumnValues;
 
     public AccountMasterSeedFunction(String outputColumn, String dnbColumn, String leColumn, boolean takeAllFromDnB,
-            Map<String, String> setDnBColumnValues) {
+            Map<String, Object> setDnBColumnValues) {
         super(new Fields(outputColumn));
         this.leColumn = leColumn;
         this.dnbColumn = dnbColumn;
