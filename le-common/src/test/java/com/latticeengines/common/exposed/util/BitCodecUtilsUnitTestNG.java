@@ -12,8 +12,6 @@ public class BitCodecUtilsUnitTestNG {
         int[] trueBits = new int[] { 2, 4, 6, 8, 1000, 9999, 99990 };
         String encoded = BitCodecUtils.encode(trueBits);
 
-        Assert.assertTrue(encoded.length() < 4000);
-
         boolean[] values = BitCodecUtils.decode(encoded, new int[]{ 0, 1, 2, 3, 4, 5, 6, 1000, 9999, 99990, 99999 });
 
         Assert.assertTrue(values[2]);

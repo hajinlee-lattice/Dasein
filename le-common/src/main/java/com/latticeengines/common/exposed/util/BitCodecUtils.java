@@ -2,9 +2,6 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.IOException;
 import java.util.BitSet;
-import java.util.Map;
-
-import org.xerial.snappy.Snappy;
 
 public class BitCodecUtils {
 
@@ -27,15 +24,11 @@ public class BitCodecUtils {
     }
 
     private static BitSet strToBits(String str) throws IOException {
-        byte[] compressedBytes = Base64Utils.decodeBase64(str);
-        byte[] uncompressedBytes = Snappy.uncompress(compressedBytes);
-        return BitSet.valueOf(uncompressedBytes);
+        return BitSet.valueOf(Base64Utils.decodeBase64(str));
     }
 
     private static String bitsToStr(BitSet bits) throws IOException {
-        byte[] uncompressedBytes = bits.toByteArray();
-        byte[] compressedBytes = Snappy.compress(uncompressedBytes);
-        return Base64Utils.encodeBase64(compressedBytes);
+        return Base64Utils.encodeBase64(bits.toByteArray());
     }
 
 }
