@@ -202,6 +202,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     }
 
     private String modifyStringForCSV(String value) {
+        if (value == null) {
+            return "";
+        }
         return "\"" + value.replaceAll("\"", "\"\"") + "\"";
     }
 
