@@ -59,7 +59,6 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
-    private Classifier classifier4Mins;
 
     private String baseDir = "/functionalTests/" + suffix;
 
@@ -68,7 +67,6 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
         classifier2Mins = setupClassifier("train_2mins.py");
-        classifier4Mins = setupClassifier("train_4mins.py");
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -94,12 +92,12 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
         doCopy(fs, copyEntries);
 
-        // Timeout set to 10s
-        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
+        // Timeout set to 5s
+        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 5000L);
         throttleLongHangingJobs.setModelingJobService(modelingJobService);
         throttleLongHangingJobs.setYarnService(yarnService);
         throttleLongHangingJobs.setJobEntityMgr(jobEntityMgr);
-        // Runs every 15 seconds
+        // Runs every 8 seconds
         this.startQuartzJob(new Runnable() {
 
             @Override
@@ -110,7 +108,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
                     e.printStackTrace();
                 }
             }
-        }, 15L);
+        }, 8L);
     }
 
     @AfterClass(groups = {"functional"})
@@ -127,7 +125,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             ModelingJob p0 = getJob(classifier1Min, 0, "DELL");
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
@@ -136,11 +134,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
             model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
-            p0 = getJob(classifier4Mins, 0, "DELL");
-            model.addModelingJob(p0);
-            appIds.add(modelingJobService.submitJob(p0));
-
-            Thread.sleep(5000L);
+            Thread.sleep(2000L);
         }
 
         waitForAllJobsToFinish(appIds);
