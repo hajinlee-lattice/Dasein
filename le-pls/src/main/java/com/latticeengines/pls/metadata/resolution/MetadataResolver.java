@@ -254,6 +254,7 @@ public class MetadataResolver {
                     knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
                     knownColumn.setMappedToLatticeField(true);
                     result.fieldMappings.add(knownColumn);
+                    break;
                 }
             }
             if (!foundMatchingAttribute) {
