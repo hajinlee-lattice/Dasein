@@ -8,6 +8,9 @@ app.service('MainNavService', function(){
         if (stateName.indexOf("TENANT") === 0) {
             return "Tenants";
         }
+        if (stateName.indexOf("MODELQUALITY") === 0) {
+            return "ModelQuality";
+        }
         return "unknown";
     };
 });

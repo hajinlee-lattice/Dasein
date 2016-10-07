@@ -1,3 +1,5 @@
+@import "modelquality";
+
 @default: #477CBA;
 @defaultLighter: #A3BEDC;
 @primary: #e96339;
@@ -288,6 +290,27 @@ a.accordion-toggle {
 
 div.panel-heading:hover {
   background-color: @defaultLighter;
+}
+
+
+/* extend bootstrap */
+li {
+  list-style-type: none;
+}
+
+.no-border.list-group .list-group-item {
+  border: none;
+}
+.no-gutter.row,
+.no-gutter.container,
+.no-gutter.container-fluid{
+  margin-left: 0;
+  margin-right: 0;
+}
+.no-gutter,
+.no-gutter>[class^="col-"] {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /*

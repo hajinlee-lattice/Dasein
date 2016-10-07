@@ -1,11 +1,12 @@
-var app = angular.module("TenantConsoleApp", [
-    "ui.router",
+var app = angular.module('TenantConsoleApp', [
+    'ui.router',
     'LocalStorageModule',
     'le.common.util.BrowserStorageUtility',
-    "app.core.directive.MainNavDirective",
-    "app.login.controller.LoginCtrl",
-    "app.tenants.controller.TenantListCtrl",
-    "app.tenants.controller.TenantConfigCtrl"
+    'app.core.directive.MainNavDirective',
+    'app.login.controller.LoginCtrl',
+    'app.tenants.controller.TenantListCtrl',
+    'app.tenants.controller.TenantConfigCtrl',
+    'app.modelquality'
 ]);
 
 app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
@@ -20,7 +21,7 @@ app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorage
         response: function (response) {
             if (response.status === 401) {
                 // handle the case where the user is not authenticated
-                $window.location.href="/";
+                $window.location.href='/';
             }
             return response || $q.when(response);
         }
@@ -31,42 +32,96 @@ app.factory('jsonInterceptor', function () {
     return {
         request: function (config) {
             config.headers = config.headers || {};
-            config.headers["Content-Type"] = "application/json";
+            config.headers['Content-Type'] = 'application/json';
             return config;
         }
     };
 });
 
 app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStorageServiceProvider) {
+
     $httpProvider.interceptors.push('authInterceptor');
     $httpProvider.interceptors.push('jsonInterceptor');
 
-    $urlRouterProvider.when("", "/login");
-    $urlRouterProvider.when("/tenants", "/tenants/");
+    $urlRouterProvider.when('', '/login');
+    $urlRouterProvider.when('/tenants', '/tenants/');
+    $urlRouterProvider.when('/modelquality', '/modelquality/dashboard');
+    $urlRouterProvider.when('/modelquality/', '/modelquality/dashboard');
 
     // For any unmatched url, redirect to
-    $urlRouterProvider.otherwise("/");
+    $urlRouterProvider.otherwise('/');
 
     // define states of the app
     $stateProvider
         .state('LOGIN', {
-            url: "/login",
+            url: '/login',
             templateUrl: 'app/login/view/LoginView.html'
         })
         .state('TENANT', {
-            url: "/tenants",
-            templateUrl: "app/core/view/MainBaseView.html"
+            url: '/tenants',
+            templateUrl: 'app/core/view/MainBaseView.html'
         })
         .state('TENANT.LIST', {
-            url: "/",
-            templateUrl: "app/tenants/view/TenantListView.html"
+            url: '/',
+            templateUrl: 'app/tenants/view/TenantListView.html'
         })
         .state('TENANT.CONFIG', {
-            url: "/{tenantId}?contractId&new&readonly&listenState",
-            templateUrl: "app/tenants/view/TenantConfigView.html"
+            url: '/{tenantId}?contractId&new&readonly&listenState',
+            templateUrl: 'app/tenants/view/TenantConfigView.html'
+        })
+        .state('MODELQUALITY', {
+            url: '/modelquality',
+            views: {
+                '': {
+                    templateUrl: 'app/modelquality/view/ModelQualityRootView.html',
+                    controller: 'ModelQualityRootCtrl'
+                },
+                'navigation@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/view/NavigationView.html',
+                    controller: 'ModelQualityNavigationCtrl',
+                    controllerAs: 'vm_modelqualityNav'
+                }
+            }
+        })
+        .state('MODELQUALITY.DASHBOARD', {
+            url: '/dashboard',
+            views: {
+                'main@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/dashboard/view/DashboardView.html',
+                    controller: 'ModelQualityDashboardCtrl'
+                }
+            },
+            resolve: {
+                MeasurementData: function (InfluxDbService) {
+                    return InfluxDbService.Query({
+                        q: 'SELECT * FROM ModelingMeasurement',
+                        db: 'ModelQuality'
+                    });
+                }
+            }
+        })
+        .state('MODELQUALITY.CREATEPIPELINE', {
+            url: '/createpipeline',
+            views: {
+                'main@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/pipeline/view/CreatePipelineView.html',
+                    controller: 'ModelQualityCreatePipelineCtrl',
+                    controllerAs: 'vm_createPipeline'
+                },
+                'createPipelineStep@MODELQUALITY.CREATEPIPELINE': {
+                    templateUrl: 'app/modelquality/pipeline/view/CreatePipelineStepView.html',
+                    controller: 'ModelQualityCreatePipelineStepCtrl',
+                    controllerAs: 'vm_createPipelineStep'
+                }
+            },
+            resolve: {
+                Pipelines: function (ModelQualityService) {
+                    return ModelQualityService.GetAllPipelines();
+                }
+            }
         })
         .state('NOWHERE', {
-            url: "/",
+            url: '/',
             templateUrl: 'app/core/view/Http404View.html'
         });
 

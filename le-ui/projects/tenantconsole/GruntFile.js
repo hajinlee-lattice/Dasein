@@ -15,7 +15,7 @@ module.exports = function(grunt) {
             qtip2: '2.2.1',
             underscore: '1.8.2',
             webfont: '1.5.16',
-
+            d3: '4.2.5',
             bootstrap: '3.3.4',
             "font-awesome": '4.3.0',
 
@@ -80,7 +80,8 @@ module.exports = function(grunt) {
                     'qtip2/<%= app.version.qtip2 %>/jquery.qtip.js',
                     'underscore.js/<%= app.version.underscore %>/underscore.js',
                     'webfont/<%= app.version.webfont %>/webfontloader.js',
-                    'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js'
+                    'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js',
+                    'd3/<%= app.version.d3 %>/d3.js'
                 ],
                 dest: '<%= app.dir %>/lib/js'
             },
@@ -258,6 +259,7 @@ module.exports = function(grunt) {
 
         jshint: {
             options: {
+                jshintrc: '.jshintrc',
                 reporter: require('jshint-stylish-ex')
             },
 
