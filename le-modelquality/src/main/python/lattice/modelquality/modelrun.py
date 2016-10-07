@@ -6,51 +6,72 @@
 #
 
 
-try:
-    import requests
-    from requests.packages import urllib3
-    urllib3.disable_warnings()
-except ImportError as ie:
-    print ''
-    print 'Module \'requests\' must be installed.'
-    print ''
-    raise ie
+from .entitybase import EntityBase
+from .modelrunresource import ModelRunResource
 
-from .envconfig import EnvConfig
-
-class ModelRun(object):
+class ModelRun(EntityBase):
 
     @classmethod
     def getAll(cls):
-        url = EnvConfig().getEndpoint() + '/modelruns'
-        header_get = {"Accept": "application/json"}
-        response = requests.get(url, headers=header_get, verify=EnvConfig().doVerify())
-        if response.status_code != 200:
-            raise RuntimeError('HTTP GET request failed for resource \"modelruns\" with code {0}: {1}'.format(response.status_code, str(response.json()['Errors'])))
-        return response.json()
+        modelruns = []
+        modelrundefs = ModelRunResource().getAll()
+        for modelrundef in modelrundefs:
+            modelruns.append(cls.createFromConfig(modelrundef))
+        return modelruns
 
     @classmethod
-    def run(cls, name, description, algorithm, dataflow, pipeline, propdata, sampling, dataset, \
-                tenant, username, password):
-        
-        selectedConfig = {}
-        selectedConfig['algorithm'] = algorithm.getConfig();
-        selectedConfig['data_flow'] = dataflow.getConfig();
-        selectedConfig['data_set'] = dataset.getConfig();
-        selectedConfig['pipeline'] = pipeline.getConfig();
-        selectedConfig['prop_data'] = propdata.getConfig();
-        selectedConfig['sampling'] = sampling.getConfig();
-        
-        body = {}
-        body['name'] = name
-        body['description'] = description
-        body['selectedConfig'] = selectedConfig
-        
-        header_post = {"Content-Type": "application/json", "Accept": "application/json"}
-        apiHostPort = EnvConfig().getApiHostPort()
-        url = EnvConfig().getEndpoint() + '/modelruns' + '?tenant={0}&username={1}&password={2}&apiHostPort={3}'.format(tenant, username, password, apiHostPort)
+    def getAllNames(cls):
+        return ModelRunResource().getAllNames()
 
-        response = requests.post(url, json=body, headers=header_post, verify=EnvConfig().doVerify())
-        if response.status_code != 200:
-            raise RuntimeError('HTTP POST request failed for resource \"modelruns\" with code {0}: {1}'.format(response.status_code, str(response.json()['Errors'])))
-        return response.json()
+    @classmethod
+    def getByName(cls, name):
+        modelrundef = ModelRunResource().getByName(name)
+        return cls.createFromConfig(modelrundef)
+
+    @classmethod
+    def createFromConfig(cls, config):
+        modelrun = ModelRun(config['name'])
+        modelrun.setDescription(config['description'])
+        modelrun.setAnalyticPipelineName(config['analytic_pipeline_name'])
+        modelrun.setDatasetName(config['dataset_name'])
+        return modelrun
+
+    def __init__(self, name):
+        super(ModelRun, self).__init__('modelruns/')
+        self._config['name'] = name
+        self._config['description'] = name
+        self._config['analytic_pipeline_name'] = ''
+        self._config['dataset_name'] = ''
+
+    def setName(self, name):
+        self._config['name'] = name
+
+    def getName(self):
+        return self._config['name']
+
+    def setDescription(self, description):
+        self._config['description'] = description
+
+    def getDescription(self):
+        return self._config['description']
+
+    def setAnalyticPipelineName(self, analytic_pipeline_name):
+        self._config['analytic_pipeline_name'] = analytic_pipeline_name
+
+    def getAnalyticPipelineName(self):
+        return self._config['analytic_pipeline_name']
+
+    def setDatasetName(self, name):
+        self._config['dataset_name'] = name
+
+    def getDatasetName(self):
+        return self._config['dataset_name']
+
+    def getStatus(self):
+        return ModelRunResource().getStatus(self.getName())
+
+    def install(self):
+        raise RuntimeError('Not implemented; run \"execute\" method with authentication arguments')
+
+    def execute(self, tenant, username, password):
+        return ModelRunResource().create(self._config, tenant, username, password)

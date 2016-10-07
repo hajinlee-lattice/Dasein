@@ -35,8 +35,12 @@ class EntityResource(object):
             self._resource = 'samplingconfigs/'
         elif re.search('algorithm', resource.lower()):
             self._resource = 'algorithms/'
+        elif re.search('analyticpipeline', resource.lower()):
+            self._resource = 'analyticpipelines/'
         elif re.search('pipeline', resource.lower()):
             self._resource = 'pipelines/'
+        elif re.search('modelrun', resource.lower()):
+            self._resource = 'modelruns/'
         self._url = EnvConfig().getEndpoint() + '/' + self._resource
 
     def getAll(self):
