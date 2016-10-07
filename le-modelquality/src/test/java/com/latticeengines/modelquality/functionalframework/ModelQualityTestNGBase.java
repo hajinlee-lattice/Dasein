@@ -27,7 +27,7 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Value("${modelquality.file.upload.hdfs.dir}")
     protected String hdfsDir;
-    
+
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -52,14 +52,17 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
     @Autowired
     protected SamplingEntityMgr samplingEntityMgr;
     @Autowired
-    protected AnalyticPipelineEntityMgr  analyticPipelineEntityMgr;
-    
+    protected AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
+
     protected void cleanupHdfs() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/steps");
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/pipelines");
     }
 
     protected void cleanupDb() {
+        modelRunEntityMgr.deleteAll();
+        modelConfigEntityMgr.deleteAll();
+        analyticPipelineEntityMgr.deleteAll();
         algorithmEntityMgr.deleteAll();
         dataFlowEntityMgr.deleteAll();
         dataSetEntityMgr.deleteAll();
@@ -68,12 +71,6 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
         pipelineEntityMgr.deleteAll();
         propDataEntityMgr.deleteAll();
         samplingEntityMgr.deleteAll();
-        modelRunEntityMgr.deleteAll();
-        modelConfigEntityMgr.deleteAll();
-        analyticPipelineEntityMgr.deleteAll();
-       
     }
-
-
 
 }

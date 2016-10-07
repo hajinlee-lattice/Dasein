@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -57,7 +58,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     @RequestMapping(value = "/{modelRunName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get ModelRun by name")
-    public ModelRunEntityNames getModelRunByName(String modelRunName) {
+    public ModelRunEntityNames getModelRunByName(@PathVariable String modelRunName) {
         return getByName(modelRunName);
     }
 
@@ -65,7 +66,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     @RequestMapping(value = "/status/{modelRunName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get ModelRun Status by name")
-    public String getModelRunStatusByName(String modelRunName) {
+    public String getModelRunStatusByName(@PathVariable String modelRunName) {
         return getStatusByName(modelRunName).toString();
     }
 

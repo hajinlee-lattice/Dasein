@@ -15,16 +15,16 @@ import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
-    
+
     private Algorithm algorithm;
-    
+
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        algorithmEntityMgr.deleteAll();
-        
+        cleanupDb();
+
         algorithm = new Algorithm();
         algorithm.setName("Random Forest");
         algorithm.setScript("/app/dataplatform/scripts/random_forest.py");
@@ -41,18 +41,18 @@ public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBa
     @Test(groups = "functional")
     public void create() {
         algorithmEntityMgr.create(algorithm);
-        
+
         List<Algorithm> retrievedAlgorithms = algorithmEntityMgr.findAll();
         assertEquals(retrievedAlgorithms.size(), 1);
         Algorithm retrievedAlgorithm = retrievedAlgorithms.get(0);
-        
+
         assertEquals(retrievedAlgorithm.getName(), algorithm.getName());
         assertEquals(retrievedAlgorithm.getScript(), algorithm.getScript());
-        
+
         List<AlgorithmPropertyDef> retrievedPropertyDefs = algorithm.getAlgorithmPropertyDefs();
         assertEquals(retrievedPropertyDefs.size(), 1);
         AlgorithmPropertyDef retrievedPropertyDef = retrievedPropertyDefs.get(0);
-        
+
         List<AlgorithmPropertyValue> retrievedPropertyValues = retrievedPropertyDef.getAlgorithmPropertyValues();
         assertEquals(retrievedPropertyValues.size(), 3);
     }

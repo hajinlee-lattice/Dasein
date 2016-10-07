@@ -39,8 +39,12 @@ import com.latticeengines.modelquality.service.DataFlowService;
 import com.latticeengines.modelquality.service.PipelineService;
 import com.latticeengines.modelquality.service.PropDataService;
 import com.latticeengines.modelquality.service.SamplingService;
+import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 
 public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
+
+    @Autowired
+    protected ModelQualityProxy modelQualityProxy;
 
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
@@ -88,16 +92,7 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        modelRunEntityMgr.deleteAll();
-        analyticPipelineEntityMgr.deleteAll();
-        algorithmEntityMgr.deleteAll();
-        dataFlowEntityMgr.deleteAll();
-        dataSetEntityMgr.deleteAll();
-        pipelineToPipelineStepsEntityMgr.deleteAll();
-        pipelineStepEntityMgr.deleteAll();
-        pipelineEntityMgr.deleteAll();
-        propDataEntityMgr.deleteAll();
-        samplingEntityMgr.deleteAll();
+        cleanupDb();
 
         Algorithm algorithm = algorithmService.createLatestProductionAlgorithm();
         DataFlow dataflow = dataFlowService.createLatestProductionDataFlow();
@@ -123,6 +118,13 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         analyticPipelineEntityNames.setSampling(sampling.getName());
 
         AnalyticPipeline analyticPipeline = analyticPipelineService.createAnalyticPipeline(analyticPipelineEntityNames);
+        AnalyticPipeline ap = analyticPipelineEntityMgr.findByName("analyticPipeline1");
+        if (ap == null) {
+            throw new RuntimeException(
+                    String.format("AnalyticPipeline with name %s does not exist", "analyticPipeline1"));
+        }
+
+        AnalyticPipelineEntityNames apen = modelQualityProxy.getAnalyticPipelineByName("analyticPipeline1");
 
         modelRun = new ModelRun();
         modelRun.setName("modelRun1");
