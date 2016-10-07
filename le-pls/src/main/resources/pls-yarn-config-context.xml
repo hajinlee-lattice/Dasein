@@ -12,8 +12,8 @@
         dfs.namenode.rpc-address.${pls.dfs.nameservices}.nn1=${pls.dfs.namenode.rpc-address.nn1}
         dfs.namenode.rpc-address.${pls.dfs.nameservices}.nn2=${pls.dfs.namenode.rpc-address.nn2}
         fs.defaultFS=${pls.fs.defaultFS}
-        hadoop.security.key.provider.path=${dataplatform.hadoop.security.key.provider.path}
-        dfs.encryption.key.provider.uri=${dataplatform.dfs.encryption.key.provider.uri}
+        hadoop.security.key.provider.path=${pls.hadoop.security.key.provider.path}
+        dfs.encryption.key.provider.uri=${pls.dfs.encryption.key.provider.uri}
     </yarn:configuration>
 
     <import resource="classpath:common-threadpool-context.xml"/>
