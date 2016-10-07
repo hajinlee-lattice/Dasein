@@ -137,6 +137,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
 
     @Override
     public void setDefinition(final String id, final FeatureFlagDefinition definition) {
+        log.info(String.format("Setting definition for Flag %s in Pod %s Division %s", id,
+                CamilleEnvironment.getPodId(), CamilleEnvironment.getDivision()));
         SafeUpserter upserter = new SafeUpserter();
         upserter.upsert(new PodDivisionScope(), new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE),
                 new Function<FeatureFlagDefinitionMap, FeatureFlagDefinitionMap>() {
