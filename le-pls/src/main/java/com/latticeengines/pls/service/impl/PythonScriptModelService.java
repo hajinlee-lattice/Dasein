@@ -2,8 +2,9 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -64,8 +65,31 @@ public class PythonScriptModelService extends ModelServiceBase {
                 }
             }
         }
-        log.info("The required columns are : " + Arrays.toString(requiredColumns.toArray()));
+        log.info("The required columns are : " + requiredColumns);
         return requiredColumns;
+    }
+
+    @Override
+    public Set<String> getLatticeAttributeNames(String modelId) {
+        Set<String> attrNameSet = new HashSet<>();
+        Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
+        List<Attribute> attributes = eventTable.getAttributes();
+        if (attributes == null) {
+            log.error(String.format("Model %s does not have attributes in the event tableName", modelId));
+            throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
+        }
+        for (Attribute attribute : attributes) {
+            List<String> tags = attribute.getTags();
+            if (!(tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString()))){
+                LogicalDataType logicalDataType = attribute.getLogicalDataType();
+                if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
+                        && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
+                    attrNameSet.add(attribute.getName());
+                }
+            }
+        }
+        log.info("The column names are : " + attrNameSet);
+        return attrNameSet;
     }
 
     @Override

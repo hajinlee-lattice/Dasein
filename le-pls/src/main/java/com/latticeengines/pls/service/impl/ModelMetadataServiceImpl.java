@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +69,11 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
         return getRequiredColumnsExtractor(modelId).getRequiredColumns(modelId);
+    }
+    
+    @Override
+    public Set<String> getLatticeAttributeNames(String modelId){
+        return getRequiredColumnsExtractor(modelId).getLatticeAttributeNames(modelId);
     }
 
     @Override

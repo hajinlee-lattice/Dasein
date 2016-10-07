@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -99,7 +100,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         table.addAttribute(duplicateAttribute2);
         table.addAttribute(duplicateAttribute3);
         table.deduplicateAttributeNames();
-        List<Attribute> attributes = table.getAttributes();
+
         final List<String> expectedNames = new ArrayList<String>();
         expectedNames.add("avro_1_200");
         expectedNames.add("avro_1_200_1");
@@ -107,7 +108,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         boolean allExpectedNamesAreAvroFriendly = Iterables.all(expectedNames, new Predicate<String>() {
             @Override
             public boolean apply(String input) {
-                return ValidateFileHeaderUtils.isAvroFriendlyFieldName(input);
+                return AvroUtils.isAvroFriendlyFieldName(input);
             }
         });
         assertTrue(allExpectedNamesAreAvroFriendly);
@@ -124,8 +125,8 @@ public class ValidateFileHeaderUtilsUnitTestNG {
     @Test(groups = "unit")
     public void testisAvroFriendlyFieldName() {
         String malformedName = "2name?*wer23";
-        assertFalse(ValidateFileHeaderUtils.isAvroFriendlyFieldName(malformedName));
+        assertFalse(AvroUtils.isAvroFriendlyFieldName(malformedName));
         String correctformedName = "avro_2name_23";
-        assertTrue(ValidateFileHeaderUtils.isAvroFriendlyFieldName(correctformedName));
+        assertTrue(AvroUtils.isAvroFriendlyFieldName(correctformedName));
     }
 }

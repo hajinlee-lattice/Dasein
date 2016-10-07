@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -14,6 +16,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -111,6 +114,11 @@ public class PmmlModelService extends ModelServiceBase {
                     targetTenantId });
         }
         return true;
+    }
+
+    @Override
+    public Set<String> getLatticeAttributeNames(String modelId) {
+        return null;
     }
 
 }

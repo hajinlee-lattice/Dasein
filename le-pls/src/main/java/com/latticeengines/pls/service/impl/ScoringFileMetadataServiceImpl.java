@@ -198,17 +198,19 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     }
 
     @Override
-    public void saveFieldMappingDocument(String csvFileName, String modelId, FieldMappingDocument fieldMappingDocument) {
+    public Table saveFieldMappingDocument(String csvFileName, String modelId, FieldMappingDocument fieldMappingDocument) {
         List<Attribute> modelAttributes = modelMetadataService.getRequiredColumns(modelId);
 
         SourceFile sourceFile = sourceFileService.findByName(csvFileName);
         resolveModelAttributeBasedOnFieldMapping(modelAttributes, fieldMappingDocument);
         Table table = createTableFromMetadata(modelAttributes, sourceFile);
+        table.deduplicateAttributeNames(modelMetadataService.getLatticeAttributeNames(modelId));
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
 
         sourceFile.setTableName(table.getName());
         sourceFileService.update(sourceFile);
+        return table;
     }
 
     @Override
@@ -261,7 +263,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         attribute.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldName));
         attribute.setPhysicalDataType(FieldType.STRING.toString().toLowerCase());
         attribute.setDisplayName(fieldName);
-        attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+        attribute.setApprovedUsage(ApprovedUsage.NONE.name());
         attribute.setCategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION);
         attribute.setFundamentalType(ModelingMetadata.FT_ALPHA);
         attribute.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);

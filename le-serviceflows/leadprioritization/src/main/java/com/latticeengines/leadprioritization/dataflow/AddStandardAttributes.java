@@ -35,6 +35,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         TransformationPipeline.stdLengthDomain.arguments.put("column", domainSourceName);
 
         for (TransformDefinition definition : definitions) {
+            resolveDuplicateName(eventTable, definition);
             last = addFunction(last, eventTable, definition);
         }
 
@@ -43,6 +44,17 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
 
         return last;
+    }
+
+    private void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
+        int version = 1;
+        while (eventTable.getSourceAttribute(definition.output) != null) {
+            definition.output = String.format(definition.output + "_%d", version++);
+        }
+        version = 1;
+        while (eventTable.getSourceSchema().getAttributeFromDisplayName(definition.outputDisplayName) != null) {
+            definition.outputDisplayName = String.format(definition.outputDisplayName + " %d", version++);
+        }
     }
 
     private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {

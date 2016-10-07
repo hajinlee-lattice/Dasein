@@ -154,7 +154,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-
+        ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         return stream;
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,8 @@ public enum ApprovedUsage {
 
     private final String name;
     private static Map<String, ApprovedUsage> nameMap;
+    private static final EnumSet<ApprovedUsage> MODELING_APPROVEDUSAGE = EnumSet.of(MODEL, MODEL_ALLINSIGHTS,
+            MODEL_MODELINSIGHTS);
 
     static {
         nameMap = new HashMap<>();
@@ -36,6 +39,8 @@ public enum ApprovedUsage {
             return ApprovedUsage.NONE;
         }
     }
+
+    public static boolean isUsedByModeling(String name){
+        return MODELING_APPROVEDUSAGE.contains(ApprovedUsage.fromName(name));
+    }
 }
-
-

@@ -203,6 +203,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonIgnore
     public void deduplicateAttributeNames() {
         Set<String> nameSet = new HashSet<String>();
+        deduplicateAttributeNames(nameSet);
+    }
+
+    @JsonIgnore
+    public void deduplicateAttributeNames(Set<String> nameSet) {
         for (int i = 0; i < attributes.size(); i++) {
             Attribute attribute = attributes.get(i);
             String rootAttributeName = attribute.getName();

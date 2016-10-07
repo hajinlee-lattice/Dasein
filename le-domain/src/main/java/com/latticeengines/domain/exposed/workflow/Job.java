@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 public class Job implements HasId<Long>, HasName {
 
     public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED, JobStatus.CANCELLED,
-            JobStatus.FAILED);
+            JobStatus.FAILED, JobStatus.SKIPPED);
 
     private Long id;
     private String name;

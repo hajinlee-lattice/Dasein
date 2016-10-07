@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -20,4 +21,6 @@ public interface ModelMetadataService {
     List<String> getRequiredColumnDisplayNames(String modelId);
 
     List<Attribute> getRequiredColumns(String modelId);
+
+    Set<String> getLatticeAttributeNames(String modelId);
 }

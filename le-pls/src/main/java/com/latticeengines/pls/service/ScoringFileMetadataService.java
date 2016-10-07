@@ -19,7 +19,7 @@ public interface ScoringFileMetadataService {
 
     FieldMappingDocument mapRequiredFieldsWithFileHeaders(String csvFileName, String modelId);
 
-    void saveFieldMappingDocument(String csvFileName, String modelId,
+    Table saveFieldMappingDocument(String csvFileName, String modelId,
             FieldMappingDocument fieldMappingDocument);
 
     Set<String> getHeaderFields(String csvFileName);
