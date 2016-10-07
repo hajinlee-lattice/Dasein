@@ -327,7 +327,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .getCounter(TaskCounter.MAP_INPUT_RECORDS.name()).getValue() > 0);
     }
 
-    // @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional", "functional.production" }, enabled = false)
     public void testSubmitMRJobWithBadCustomerName() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
