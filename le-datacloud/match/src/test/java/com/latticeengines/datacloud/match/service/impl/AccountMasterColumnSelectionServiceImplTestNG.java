@@ -1,3 +1,4 @@
+
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
 
     private int getBitPosition(String columnName) {
         try {
-            AccountMasterColumn column = columnEntityMgr.findById(columnName);
+            AccountMasterColumn column = columnEntityMgr.findById(columnName, "2.0.0");
             String decodeStrategy = column.getDecodeStrategy();
             JsonNode jsonNode = objectMapper.readTree(decodeStrategy);
             return jsonNode.get("BitPosition").asInt();

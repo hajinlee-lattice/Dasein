@@ -21,7 +21,7 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ExternalColumn> findByTag(String tag) {
+    public List<ExternalColumn> findByTag(String tag, String dataCloudVersion) {
         List<ExternalColumn> columns = externalColumnDao.findByTag(tag);
         List<ExternalColumn> toReturn = new ArrayList<>();
         for (ExternalColumn column: columns) {
@@ -40,7 +40,7 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ExternalColumn findById(String externalColumnId) {
+    public ExternalColumn findById(String externalColumnId, String dataCloudVersion) {
         return externalColumnDao.findByField("ExternalColumnID", externalColumnId);
     }
 

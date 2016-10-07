@@ -8,9 +8,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public interface MetadataColumnService<E extends MetadataColumn> extends HasDataCloudVersion {
 
-    List<E> findByColumnSelection(Predefined selectName);
+    List<E> findByColumnSelection(Predefined selectName, String dataCloudVersion);
 
-    E getMetadataColumn(String columnId);
+    E getMetadataColumn(String columnId, String dataCloudVersion);
 
     List<E> scan(String dataCloudVersion);
 

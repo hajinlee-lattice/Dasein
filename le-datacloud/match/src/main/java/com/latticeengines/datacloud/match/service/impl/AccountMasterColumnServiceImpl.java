@@ -28,7 +28,6 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
     }
 
-
     @Override
     protected MetadataColumnEntityMgr<AccountMasterColumn> getMetadataColumnEntityMgr() {
         return metadataColumnEntityMgr;
@@ -45,7 +44,7 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
     }
 
     @Override
-    public List<AccountMasterColumn> findByColumnSelection(Predefined selectName) {
-        return getMetadataColumnEntityMgr().findByTag(selectName.getName());
+    public List<AccountMasterColumn> findByColumnSelection(Predefined selectName, String dataCloudVersion) {
+        return getMetadataColumnEntityMgr().findByTag(selectName.getName(), dataCloudVersion);
     }
 }

@@ -21,8 +21,9 @@ public class ColumnSelectionMgrImpl implements ColumnSelectionMgr {
     private MetadataColumnEntityMgr<ExternalColumn> externalColumnEntityMgr;
 
     @Override
-    public ColumnSelection getPredefined(Predefined predefined) {
-        List<ExternalColumn> externalColumns = externalColumnEntityMgr.findByTag(predefined.getName());
+    public ColumnSelection getPredefined(Predefined predefined, String dataCloudVersion) {
+        List<ExternalColumn> externalColumns = externalColumnEntityMgr
+                .findByTag(predefined.getName(), dataCloudVersion);
         ColumnSelection columnSelection = new ColumnSelection();
         columnSelection.setName(predefined.getName());
         columnSelection.setVersion(getCurrentVersionOfPredefined(predefined));

@@ -11,8 +11,8 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryI
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 
 @Component("accountMasterColumnDao")
-public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<AccountMasterColumn>
-        implements AccountMasterColumnDao {
+public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<AccountMasterColumn> implements
+        AccountMasterColumnDao {
 
     @Override
     protected Class<AccountMasterColumn> getEntityClass() {
@@ -21,12 +21,27 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AccountMasterColumn> findByTag(String tag) {
+    public List<AccountMasterColumn> findByTag(String tag, String dataCloudVersion) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("from %s where groups like :tag", getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where groups like :tag and dataCloudVersion = :dataCloudVersion",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
+        query.setParameter("dataCloudVersion", dataCloudVersion);
         return query.list();
+
+    }
+
+    @Override
+    public AccountMasterColumn findById(String amColumnId, String dataCloudVersion) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format(
+                "from %s where amColumnId = :amColumnId and dataCloudVersion = :dataCloudVersion", getEntityClass()
+                        .getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("amColumnId", amColumnId);
+        query.setParameter("dataCloudVersion", dataCloudVersion);
+        return (AccountMasterColumn) query.uniqueResult();
 
     }
 

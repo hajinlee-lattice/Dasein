@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
@@ -88,8 +88,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
-                MetadataColumn metadataColumn = (MetadataColumn) metadataColumnService
-                        .getMetadataColumn(column.getExternalColumnId());
+                MetadataColumn metadataColumn = (MetadataColumn) metadataColumnService.getMetadataColumn(
+                        column.getExternalColumnId(), matchContext.getInput().getDataCloudVersion());
 
                 String field = (metadataColumn != null) ? metadataColumn.getColumnId() : column.getColumnName();
 

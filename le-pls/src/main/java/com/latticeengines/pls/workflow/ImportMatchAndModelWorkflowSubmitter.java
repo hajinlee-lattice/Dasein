@@ -71,6 +71,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    private String latestDataCloudVersion;
+
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
 
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
@@ -130,42 +133,71 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         }
         log.info("Modeling parameters: " + parameters.toString());
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
-                .microServiceHostPort(microserviceHostPort) //
-                .customer(getCustomerSpace()) //
-                .sourceFileName(sourceFile.getName()) //
-                .sourceType(SourceType.FILE) //
-                .internalResourceHostPort(internalResourceHostPort) //
-                .importReportNamePrefix(sourceFile.getName() + "_Report") //
-                .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
+                .microServiceHostPort(microserviceHostPort)
+                //
+                .customer(getCustomerSpace())
+                //
+                .sourceFileName(sourceFile.getName())
+                //
+                .sourceType(SourceType.FILE)
+                //
+                .internalResourceHostPort(internalResourceHostPort)
+                //
+                .importReportNamePrefix(sourceFile.getName() + "_Report")
+                //
+                .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport")
+                //
                 .dedupDataFlowBeanName("dedupEventTable")
                 .dedupDataFlowParams( //
                         new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain", parameters
-                                .getDeduplicationType())) //
-                .dedupFlowExtraSources(extraSources) //
-                .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
-                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .skipMatchingStep(parameters.getExcludePropDataColumns()) //
-                .matchClientDocument(matchClientDocument) //
-                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
-                .matchDestTables("DerivedColumnsCache") //
-                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) // null
-                                                                                            // means
-                                                                                            // latest
-                .dataCloudVersion(getDataCloudVersion(parameters)) //
-                .modelName(parameters.getName()) //
-                .displayName(parameters.getDisplayName()) //
-                .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
-                .trainingTableName(trainingTableName) //
-                .inputProperties(inputProperties) //
-                .minDedupedRows(minDedupedRows) //
-                .minPositiveEvents(minPositiveEvents) //
-                .transformationGroup(parameters.getTransformationGroup()) //
-                .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                                .getDeduplicationType()))
+                //
+                .dedupFlowExtraSources(extraSources)
+                //
+                .dedupTargetTableName(sourceFile.getTableName() + "_deduped")
+                //
+                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
+                //
+                .skipMatchingStep(parameters.getExcludePropDataColumns())
+                //
+                .matchClientDocument(matchClientDocument)
+                //
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
+                //
+                .matchDestTables("DerivedColumnsCache")
+                //
+                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
+                // null
+                // means
+                // latest
+                .dataCloudVersion(getDataCloudVersion(parameters))
+                //
+                .modelName(parameters.getName())
+                //
+                .displayName(parameters.getDisplayName())
+                //
+                .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString())
+                //
+                .trainingTableName(trainingTableName)
+                //
+                .inputProperties(inputProperties)
+                //
+                .minDedupedRows(minDedupedRows)
+                //
+                .minPositiveEvents(minPositiveEvents)
+                //
+                .transformationGroup(parameters.getTransformationGroup())
+                //
+                .excludePublicDomains(parameters.isExcludePublicDomains())
+                //
                 .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
-                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains()) //
+                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN)
+                //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains())
+                //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
-                        parameters.getExcludePropDataColumns()) //
+                        parameters.getExcludePropDataColumns())
+                //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName != null ? moduleName : null) //
@@ -181,7 +213,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             return parameters.getDataCloudVersion();
         }
         if (useDnBFlagFromZK()) {
-            return "2.0.0";
+            return latestDataCloudVersion;
         }
         return null;
     }

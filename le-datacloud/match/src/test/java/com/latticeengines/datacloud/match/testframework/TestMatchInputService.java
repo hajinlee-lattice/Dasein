@@ -20,7 +20,7 @@ public class TestMatchInputService {
     public ColumnSelection enrichmentSelection() {
         List<ExternalColumn> columns = new ArrayList<>();
         for (String id : Arrays.asList("TechIndicator_AddThis", "TechIndicator_AdobeCreativeSuite")) {
-            columns.add(externalColumnService.getMetadataColumn(id));
+            columns.add(externalColumnService.getMetadataColumn(id, "1.0"));
         }
 
         ColumnSelection cs = new ColumnSelection();

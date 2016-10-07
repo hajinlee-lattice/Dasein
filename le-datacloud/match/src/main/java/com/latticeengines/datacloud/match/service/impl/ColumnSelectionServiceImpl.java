@@ -76,7 +76,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     public List<String> getMatchedColumns(ColumnSelection selection) {
         List<String> columnNames = new ArrayList<>();
         for (Column column : selection.getColumns()) {
-            ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId());
+            ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId(),
+                    getCurrentVersion(null));
             if (externalColumn != null) {
                 columnNames.add(externalColumn.getDefaultColumnName());
             } else {
@@ -91,7 +92,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         Map<String, Set<String>> partitionColumnMap = new HashMap<>();
         for (Column column : selection.getColumns()) {
             String colId = column.getExternalColumnId();
-            ExternalColumn col = externalColumnService.getMetadataColumn(colId);
+            ExternalColumn col = externalColumnService.getMetadataColumn(colId, getCurrentVersion(null));
             String partition = col.getTablePartition();
             if (partitionColumnMap.containsKey(partition)) {
                 partitionColumnMap.get(partition).add(col.getDefaultColumnName());
@@ -119,12 +120,13 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private void loadCaches() {
         for (Predefined selection : Predefined.supportedSelections) {
             try {
-                List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection(selection);
+                List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection(selection,
+                        getCurrentVersion(null));
                 ColumnSelection cs = new ColumnSelection();
                 cs.createColumnSelection(externalColumns);
                 predefinedSelectionMap.put(selection, cs);
             } catch (Exception e) {
-                log.error(e);
+                log.error("Failed to load Cache!", e);
             }
         }
     }

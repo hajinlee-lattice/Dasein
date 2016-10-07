@@ -86,7 +86,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         List<String> columnNames = new ArrayList<>();
         for (Column column : selection.getColumns()) {
             AccountMasterColumn externalColumn = accountMasterColumnService
-                    .getMetadataColumn(column.getExternalColumnId());
+                    .getMetadataColumn(column.getExternalColumnId(), getCurrentVersion(null));
             if (externalColumn != null) {
                 columnNames.add(externalColumn.getAmColumnId());
             } else {
@@ -201,7 +201,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
         for (Predefined selection : Predefined.supportedSelections) {
             try {
-                List<AccountMasterColumn> externalColumns = accountMasterColumnService.findByColumnSelection(selection);
+                List<AccountMasterColumn> externalColumns = accountMasterColumnService.findByColumnSelection(selection, cachedVersion);
                 ColumnSelection cs = new ColumnSelection();
                 cs.createAccountMasterColumnSelection(externalColumns);
                 predefinedSelectionMap.put(selection, cs);

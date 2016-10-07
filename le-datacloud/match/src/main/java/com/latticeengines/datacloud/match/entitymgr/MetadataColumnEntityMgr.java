@@ -4,12 +4,10 @@ import java.util.List;
 
 public interface MetadataColumnEntityMgr<E> {
 
-    List<E> findByTag(String tag);
+    List<E> findByTag(String tag, String dataCloudVersion);
 
     List<E> findAll(String dataCloudVersion);
 
-    E findById(String columnId);
-
-
+    E findById(String columnId, String dataCloudVersion);
 
 }

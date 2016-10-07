@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -24,6 +25,9 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
+    
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    private String latestDataCloudVersion;
 
     @PostConstruct
     private void postConstruct() {
@@ -31,8 +35,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<E> findByColumnSelection(Predefined selectName) {
-        return getMetadataColumnEntityMgr().findByTag(selectName.getName());
+    public List<E> findByColumnSelection(Predefined selectName, String dataCloudVersion) {
+        return getMetadataColumnEntityMgr().findByTag(selectName.getName(), dataCloudVersion);
     }
 
     @Override
@@ -43,30 +47,33 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     @Override
     @Trace
     @MatchStep(threshold = 500)
-    public E getMetadataColumn(String columnId) {
+    public E getMetadataColumn(String columnId, String dataCloudVersion) {
+        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
+        if (!latestVersion.equals(dataCloudVersion)) {
+            return getMetadataColumnEntityMgr().findById(columnId, dataCloudVersion);
+        }
         if (getBlackColumnCache().contains(columnId)) {
             return null;
         }
-
         if (!getWhiteColumnCache().containsKey(columnId)) {
-            return loadColumnMetadataById(columnId);
+            return loadColumnMetadataById(columnId, dataCloudVersion);
         } else {
             return getWhiteColumnCache().get(columnId);
         }
     }
 
     @Trace
-    private E loadColumnMetadataById(String columnId) {
+    private E loadColumnMetadataById(String columnId, String dataCloudVersion) {
         synchronized (getWhiteColumnCache()) {
-            return performThreadSafeColumnMetadataLoading(columnId);
+            return performThreadSafeColumnMetadataLoading(columnId, dataCloudVersion);
         }
     }
 
     @Trace
-    private E performThreadSafeColumnMetadataLoading(String columnId) {
+    private E performThreadSafeColumnMetadataLoading(String columnId, String dataCloudVersion) {
         E column;
         try {
-            column = getMetadataColumnEntityMgr().findById(columnId);
+            column = getMetadataColumnEntityMgr().findById(columnId, dataCloudVersion);
             log.debug("Loaded metadata from DB for columnId = " + columnId);
         } catch (Exception e) {
             log.error(String.format("Failed to retrieve column information for [%s]", columnId), e);
@@ -82,7 +89,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     private void loadCache() {
-        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
         log.info("Start loading black and white column caches for version " + latestVersion);
         getBlackColumnCache().clear();
         getWhiteColumnCache().clear();

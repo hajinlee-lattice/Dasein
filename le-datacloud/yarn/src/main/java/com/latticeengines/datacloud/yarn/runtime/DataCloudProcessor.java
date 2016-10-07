@@ -73,7 +73,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private static final String FLOAT = Float.class.getSimpleName();
     private static final String DOUBLE = Double.class.getSimpleName();
 
-
     @Autowired
     private ApplicationContext appContext;
 
@@ -292,7 +291,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                     value = ((Timestamp) value).getTime();
                 }
                 if (MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
-                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
+                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""), dataCloudVersion);
                 }
                 builder.set(fields.get(i), value);
             }
@@ -306,11 +305,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         log.info("Write " + records.size() + " generic records to " + outputAvro);
     }
 
-    private Object matchDeclaredType(Object value, String columnId) {
+    private Object matchDeclaredType(Object value, String columnId, String dataCloudVersion) {
         if (value == null || fieldsWithNoMetadata.contains(columnId)) {
             return value;
         }
-        AccountMasterColumn metadataColumn = columnService.getMetadataColumn(columnId);
+        AccountMasterColumn metadataColumn = columnService.getMetadataColumn(columnId, dataCloudVersion);
         if (metadataColumn == null) {
             fieldsWithNoMetadata.add(columnId);
             return value;
@@ -354,8 +353,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
             if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
-                throw new RuntimeException(String
-                        .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
+                throw new RuntimeException(String.format(
+                        "Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }
         } else {
             // check matched rows

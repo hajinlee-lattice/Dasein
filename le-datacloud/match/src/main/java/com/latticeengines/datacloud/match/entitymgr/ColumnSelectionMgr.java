@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public interface ColumnSelectionMgr {
 
-    ColumnSelection getPredefined(Predefined predefined);
+    ColumnSelection getPredefined(Predefined predefined, String dataCloudVersion);
 
     ColumnSelection getPredefinedAtVersion(Predefined predefined, String version);
 
