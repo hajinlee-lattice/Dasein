@@ -70,11 +70,11 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private static final int TOTAL_TRAINING_LINES = 1126;
 
-    private static final int TOTAL_TESTING_LINES = 400;
+    private static final int TOTAL_TESTING_LINES = 1126;
 
     private static final String TRAINING_CSV_FILE = "Lattice_Relaunch_Small.csv";
 
-    private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small_Testing.csv";
+    private static final String TESTING_CSV_FILE = "Lattice_Relaunch_Small.csv";
 
     private static final double DIFFERENCE_THRESHOLD = 0.5;
 
