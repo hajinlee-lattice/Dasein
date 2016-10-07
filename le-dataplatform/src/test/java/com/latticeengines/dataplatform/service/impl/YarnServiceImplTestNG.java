@@ -29,20 +29,20 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private YarnService yarnService;
 
-    @Test(groups = { "functional", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
 
     }
 
-    @Test(groups = { "functional", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApps() {
         AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
     }
 
-    @Test(groups = { "functional", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(),
@@ -63,7 +63,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = { "functional", "functional.production" })
+    @Test(groups = { "functional.platform", "functional.production" })
     public void getApplicationReportAndKillJob() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(),
