@@ -47,6 +47,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
             } catch (Exception e) {
                 log.error("Could not upsert pod division path", e);
             }
+        } else {
+            log.info("CamilleEnvironment division is empty");
         }
     }
 
