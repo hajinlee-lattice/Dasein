@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +69,12 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Value("${datacloud.match.cascading.rows.threshold:10000}")
     private Integer cascadingBulkRowsThreshold;
 
+    @Value("${datacloud.match.cascading.container.size:1024}")
+    private String cascadingContainerSize;
+    
+    @Value("${datacloud.match.cascading.queue.name:Modeling}")
+    private String matchQueueName;
+    
     @Autowired
     private AccountMaster accountMaster;
 
@@ -107,6 +114,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         propDataTenantService.bootstrapServiceTenant();
         String targetPath = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         CascadingBulkMatchWorkflowConfiguration.Builder builder = new CascadingBulkMatchWorkflowConfiguration.Builder();
+        String queueName = StringUtils.isEmpty(matchQueueName) ? LedpQueueAssigner.getModelingQueueNameForSubmission() : matchQueueName;
         builder = builder //
                 .matchInput(input) //
                 .hdfsPodId(hdfsPodId) //
@@ -118,7 +126,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .partitions(cascadingPartitions) //
                 .jobProperties(getJobProperties()) //
                 .engine("MR") //
-                .queue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
+                .queue(queueName) //
                 .setBeanName("cascadingBulkMatchDataflow");
 
         Schema outputSchema = constructOutputSchema(input, rootOperationUid);
@@ -137,8 +145,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         jobProperties.put("mapred.reduce.tasks", "1");
         jobProperties.put("cascading.spill.map.threshold", "100000");
         jobProperties.put("mapreduce.job.running.map.limit", "100");
-        jobProperties.put("mapreduce.map.memory.mb", "1024");
-        jobProperties.put("mapreduce.reduce.memory.mb", "1024");
+        jobProperties.put("mapreduce.map.memory.mb", cascadingContainerSize);
+        jobProperties.put("mapreduce.reduce.memory.mb", cascadingContainerSize);
         return jobProperties;
     }
 
