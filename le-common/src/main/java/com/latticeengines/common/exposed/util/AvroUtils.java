@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
@@ -193,7 +193,7 @@ public class AvroUtils {
                 futures.put(match, future);
             }
 
-            for (Map.Entry<String, Future<Long>> entry: futures.entrySet()) {
+            for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
                 String file = entry.getKey();
                 Long partialCount;
                 try {
@@ -457,10 +457,9 @@ public class AvroUtils {
                 return Type.FLOAT;
             case Types.FLOAT:
             case Types.DOUBLE:
-                return Type.DOUBLE;
             case Types.NUMERIC:
             case Types.DECIMAL:
-                return Type.STRING;
+                return Type.DOUBLE;
             case Types.CHAR:
             case Types.VARCHAR:
             case Types.LONGVARCHAR:
@@ -502,24 +501,24 @@ public class AvroUtils {
             return null;
         }
         switch (javaClassName) {
-            case "Double":
-                return Type.DOUBLE;
-            case "Float":
-                return Type.FLOAT;
-            case "Integer":
-                return Type.INT;
-            case "Long":
-                return Type.LONG;
-            case "String":
-                return Type.STRING;
-            case "Boolean":
-                return Type.BOOLEAN;
-            case "Date":
-                return Type.LONG;
-            case "Timestamp":
-                return Type.LONG;
-            default:
-                throw new RuntimeException("Unknown avro type for java type " + javaClassName);
+        case "Double":
+            return Type.DOUBLE;
+        case "Float":
+            return Type.FLOAT;
+        case "Integer":
+            return Type.INT;
+        case "Long":
+            return Type.LONG;
+        case "String":
+            return Type.STRING;
+        case "Boolean":
+            return Type.BOOLEAN;
+        case "Date":
+            return Type.LONG;
+        case "Timestamp":
+            return Type.LONG;
+        default:
+            throw new RuntimeException("Unknown avro type for java type " + javaClassName);
         }
 
     }
