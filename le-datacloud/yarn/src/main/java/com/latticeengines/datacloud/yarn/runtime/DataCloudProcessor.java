@@ -339,12 +339,12 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
     private void loadAccountMasterColumnMap() {
         accountMasterColumnMap = new HashMap<>();
-        List<AccountMasterColumn> amColumns = columnService.getMetadataColumns(customizedSelection.getColumnIds(), dataCloudVersion);
+        List<AccountMasterColumn> amColumns = columnService.scan(dataCloudVersion);
         for (AccountMasterColumn column: amColumns) {
             accountMasterColumnMap.put(column.getColumnId(), column);
         }
     }
-    
+
     @MatchStep
     private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
         Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
