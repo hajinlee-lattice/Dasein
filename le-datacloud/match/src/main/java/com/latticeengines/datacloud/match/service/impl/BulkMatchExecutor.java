@@ -19,7 +19,7 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     @Override
     public MatchContext execute(MatchContext matchContext) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
-        matchContext = dbHelper.fetch(matchContext);
+        matchContext = dbHelper.fetchSync(matchContext);
         matchContext = complete(matchContext);
         return matchContext;
     }

@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
-import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -83,17 +82,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @Override
     public List<String> getMatchedColumns(ColumnSelection selection) {
-        List<String> columnNames = new ArrayList<>();
-        for (Column column : selection.getColumns()) {
-            AccountMasterColumn externalColumn = accountMasterColumnService
-                    .getMetadataColumn(column.getExternalColumnId(), getCurrentVersion(null));
-            if (externalColumn != null) {
-                columnNames.add(externalColumn.getAmColumnId());
-            } else {
-                columnNames.add(column.getColumnName());
-            }
-        }
-        return columnNames;
+        return selection.getColumnNames();
     }
 
     @Override

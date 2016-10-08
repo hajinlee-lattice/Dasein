@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -129,6 +130,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Boolean returnUnmatched;
     private Boolean excludePublicDomains;
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
+    private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
 
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
@@ -291,7 +293,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                     value = ((Timestamp) value).getTime();
                 }
                 if (MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
-                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""), dataCloudVersion);
+                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
                 }
                 builder.set(fields.get(i), value);
             }
@@ -305,11 +307,16 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         log.info("Write " + records.size() + " generic records to " + outputAvro);
     }
 
-    private Object matchDeclaredType(Object value, String columnId, String dataCloudVersion) {
+    private Object matchDeclaredType(Object value, String columnId) {
         if (value == null || fieldsWithNoMetadata.contains(columnId)) {
             return value;
         }
-        AccountMasterColumn metadataColumn = columnService.getMetadataColumn(columnId, dataCloudVersion);
+
+        if (accountMasterColumnMap == null) {
+            loadAccountMasterColumnMap();
+        }
+
+        AccountMasterColumn metadataColumn = accountMasterColumnMap.get(columnId);
         if (metadataColumn == null) {
             fieldsWithNoMetadata.add(columnId);
             return value;
@@ -330,6 +337,14 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         return value;
     }
 
+    private void loadAccountMasterColumnMap() {
+        accountMasterColumnMap = new HashMap<>();
+        List<AccountMasterColumn> amColumns = columnService.getMetadataColumns(customizedSelection.getColumnIds(), dataCloudVersion);
+        for (AccountMasterColumn column: amColumns) {
+            accountMasterColumnMap.put(column.getColumnId(), column);
+        }
+    }
+    
     @MatchStep
     private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
         Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);

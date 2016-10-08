@@ -74,17 +74,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @Override
     public List<String> getMatchedColumns(ColumnSelection selection) {
-        List<String> columnNames = new ArrayList<>();
-        for (Column column : selection.getColumns()) {
-            ExternalColumn externalColumn = externalColumnService.getMetadataColumn(column.getExternalColumnId(),
-                    getCurrentVersion(null));
-            if (externalColumn != null) {
-                columnNames.add(externalColumn.getDefaultColumnName());
-            } else {
-                columnNames.add(column.getColumnName());
-            }
-        }
-        return columnNames;
+        return selection.getColumnIds();
     }
 
     @Override

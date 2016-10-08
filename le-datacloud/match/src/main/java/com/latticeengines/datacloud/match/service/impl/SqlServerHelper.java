@@ -116,11 +116,6 @@ public class SqlServerHelper implements DbHelper {
     }
 
     @Override
-    public int getGroupSize(int queueSize) {
-        return Math.min(groupSize, Math.max(queueSize / 4, 4));
-    }
-
-    @Override
     public void populateMatchHints(MatchContext context) {
     }
 
@@ -143,7 +138,8 @@ public class SqlServerHelper implements DbHelper {
         }
     }
 
-    private MatchContext fetchSync(MatchContext context) {
+    @Override
+    public MatchContext fetchSync(MatchContext context) {
         if (context.getDomains().isEmpty() && context.getNameLocations().isEmpty()) {
             log.info("Noting to fetch.");
             context.setResultSet(new ArrayList<Map<String, Object>>());

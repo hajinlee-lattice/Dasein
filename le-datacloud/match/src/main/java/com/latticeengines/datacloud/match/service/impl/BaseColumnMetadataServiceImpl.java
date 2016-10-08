@@ -38,6 +38,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     private ThreadPoolTaskScheduler scheduler;
 
     protected abstract boolean isLatestVersion(String dataCloudVersion);
+
     protected abstract String getLatestVersion();
 
     @PostConstruct
@@ -63,11 +64,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Override
     @Trace
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
-        List<E> metadataColumns = new ArrayList<>();
-        for (Column column : selection.getColumns()) {
-            metadataColumns.add(getMetadataColumnService().getMetadataColumn(column.getExternalColumnId(),
-                    dataCloudVersion));
-        }
+        List<E> metadataColumns = getMetadataColumnService().getMetadataColumns(selection.getColumnIds(),
+                dataCloudVersion);
+
         List<ColumnMetadata> metadatas = toColumnMetadata(metadataColumns);
         for (int i = 0; i < metadatas.size(); i++) {
             ColumnMetadata metadata = metadatas.get(i);
@@ -95,8 +94,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 ColumnMetadata columnMetadata = column.toColumnMetadata();
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to extract metadata from MetadataColumn [" + column.getColumnId()
-                        + "]", e);
+                throw new RuntimeException(
+                        "Failed to extract metadata from MetadataColumn [" + column.getColumnId() + "]", e);
             }
         }
         return columnMetadataList;

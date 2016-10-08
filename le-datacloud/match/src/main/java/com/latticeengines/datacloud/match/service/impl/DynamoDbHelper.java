@@ -48,11 +48,6 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     @Override
-    public int getGroupSize(int queueSize) {
-        return queueSize;
-    }
-
-    @Override
     public void populateMatchHints(MatchContext context) {
         List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets = new ArrayList<>();
         AccountLookupRequest request = createLookupRequest(context, lookupRequestTriplets);
@@ -71,6 +66,11 @@ public class DynamoDbHelper implements DbHelper {
 
     @Override
     public MatchContext fetch(MatchContext context) {
+        return fetchSync(context);
+    }
+
+    @Override
+    public MatchContext fetchSync(MatchContext context) {
         AccountLookupRequest request = context.getAccountLookupRequest();
         if (request == null) {
             throw new NullPointerException("Cannot find AccountLookupRequest in the MatchContext");

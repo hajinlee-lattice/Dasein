@@ -7,13 +7,13 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 
 public interface DbHelper extends HasDataCloudVersion {
 
-    int getGroupSize(int queueSize);
-
     void populateMatchHints(MatchContext context);
 
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning);
 
     MatchContext fetch(MatchContext context);
+
+    MatchContext fetchSync(MatchContext context);
 
     List<MatchContext> fetch(List<MatchContext> contexts);
 

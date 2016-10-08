@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         return matchContext;
     }
 
+    @SuppressWarnings("unchecked")
     @VisibleForTesting
     @MatchStep
     @Trace
@@ -85,12 +87,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
             boolean matchedAnyColumn = false;
+
+            List<MetadataColumn> metadataColumns = metadataColumnService.getMetadataColumns(columnNames,
+                    matchContext.getInput().getDataCloudVersion());
+            Map<String, MetadataColumn> metadataColumnMap = new HashMap<>();
+            for (MetadataColumn column : metadataColumns) {
+                metadataColumnMap.put(column.getColumnId(), column);
+            }
+
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
-                MetadataColumn metadataColumn = (MetadataColumn) metadataColumnService.getMetadataColumn(
-                        column.getExternalColumnId(), matchContext.getInput().getDataCloudVersion());
-
+                MetadataColumn metadataColumn = metadataColumnMap.get(column.getExternalColumnId());
                 String field = (metadataColumn != null) ? metadataColumn.getColumnId() : column.getColumnName();
 
                 Object value = null;

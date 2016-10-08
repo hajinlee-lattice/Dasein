@@ -1,6 +1,9 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -8,22 +11,17 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.newrelic.api.agent.Trace;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
-
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
 
     protected abstract boolean isLatestVersion(String dataCloudVersion);
     protected abstract String getLatestVersion();
@@ -43,9 +41,42 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
     }
 
+
     @Override
     @Trace
-    @MatchStep(threshold = 500)
+    @MatchStep(threshold = 500L)
+    public List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion) {
+        List<E> toReturn = new ArrayList<>();
+        if (!isLatestVersion(dataCloudVersion)) {
+            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            Map<String, E> columnMap = new HashMap<>();
+            for (E column: columns) {
+                columnMap.put(column.getColumnId(), column);
+            }
+            for (String columnId: columnIds) {
+                if (columnMap.containsKey(columnId)) {
+                    toReturn.add(columnMap.get(columnId));
+                } else {
+                    toReturn.add(null);
+                }
+            }
+        } else {
+            for (String columnId: columnIds) {
+                if (getBlackColumnCache().contains(columnId)) {
+                    toReturn.add(null);
+                } else if (!getWhiteColumnCache().containsKey(columnId)) {
+                    toReturn.add(loadColumnMetadataById(columnId, dataCloudVersion));
+                } else {
+                    toReturn.add(getWhiteColumnCache().get(columnId));
+                }
+            }
+        }
+        return toReturn;
+    }
+
+    @Override
+    @Trace
+    @MatchStep(threshold = 100L)
     public E getMetadataColumn(String columnId, String dataCloudVersion) {
         if (!isLatestVersion(dataCloudVersion)) {
             return getMetadataColumnEntityMgr().findById(columnId, dataCloudVersion);

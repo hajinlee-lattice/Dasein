@@ -12,6 +12,8 @@ public interface MetadataColumnService<E extends MetadataColumn> extends HasData
 
     E getMetadataColumn(String columnId, String dataCloudVersion);
 
+    List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion);
+
     List<E> scan(String dataCloudVersion);
 
 }
