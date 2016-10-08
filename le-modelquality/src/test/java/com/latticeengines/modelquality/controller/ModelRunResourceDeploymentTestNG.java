@@ -34,7 +34,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
                 modelRun.getDataSet() //
                         .setTrainingSetHdfsPath( //
                                 "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
-
+                dataSetEntityMgr.create(modelRun.getDataSet());
                 ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
                 String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //
@@ -55,7 +55,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             modelRun.getDataSet().setName("Alfresco");
             modelRun.getDataSet().setTrainingSetHdfsPath(
                     "/Pods/Default/Services/ModelQuality/Alfresco_SFDC_LP3_ModelingLead_ReducedRows_20160712_125241.csv");
-
+            dataSetEntityMgr.create(modelRun.getDataSet());
             ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
             String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //
@@ -76,7 +76,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             modelRun.getDataSet().setName("NGINX");
             modelRun.getDataSet().setTrainingSetHdfsPath(
                     "/Pods/Default/Services/ModelQuality/NGINX_PLS_LP3_ModelingLead_ReducedRows_20160712_125224.csv");
-
+            dataSetEntityMgr.create(modelRun.getDataSet());
             ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
             String modelName = modelQualityProxy.createModelRun(modelRunEntityNames, //

@@ -74,8 +74,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         this.deploymentTestBed = testBed;
     }
 
-    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)
-            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws NoSuchAlgorithmException,
+            KeyManagementException, IOException {
         deploymentTestBed.bootstrapForProduct(product);
         mainTestTenant = deploymentTestBed.getMainTestTenant();
         switchToSuperAdmin();
@@ -104,7 +104,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         analyticPipelineEntityNames1.setSampling(sampling.getName());
 
         AnalyticPipelineEntityNames analyticPipelineEntityNames2 = new AnalyticPipelineEntityNames();
-        analyticPipelineEntityNames2.setName("analyticPipeline1");
+        analyticPipelineEntityNames2.setName("analyticPipeline2");
         analyticPipelineEntityNames2.setPipeline(pipeline2.getName());
         analyticPipelineEntityNames2.setAlgorithm(algo.getName());
         analyticPipelineEntityNames2.setPropData(propData.getName());
@@ -244,8 +244,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         dataSet.setTenant(new Tenant("Model_Quality_Test.Model_Quality_Test.Production"));
         dataSet.setDataSetType(DataSetType.FILE);
         dataSet.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
-        dataSet.setTrainingSetHdfsPath(
-                "/Pods/Default/Services/ModelQuality/Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv");
+        dataSet.setTrainingSetHdfsPath("/Pods/Default/Services/ModelQuality/Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv");
         ScoringDataSet scoringDataSet = new ScoringDataSet();
         scoringDataSet.setName("ScoringDataSet1");
         scoringDataSet.setDataHdfsPath("ScoringDataSetPath1");
@@ -272,8 +271,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                 Assert.fail("Failed due to= " + modelRun.getErrorMessage());
                 break;
             }
-            System.out.println(
-                    "Waiting for modelRun name \"" + modelName + "\": Status is " + modelRun.getStatus().toString());
+            System.out.println("Waiting for modelRun name \"" + modelName + "\": Status is "
+                    + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
             if ((end - start) > 10 * 3_600_000) { // 10 hours max
                 Assert.fail("Timeout for modelRun name \"" + modelName + "\"");
