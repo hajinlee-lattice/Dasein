@@ -83,7 +83,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAccountMasterRTSMatch() {
         testAccountMasterRTSMatch(true, "a@fb.com", true, false, null);
         testAccountMasterRTSMatch(true, "a@salesforce.com", false, true, "null");
@@ -110,7 +110,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAccountMasterRTSBulkMatch() throws IOException {
         int size = 200;
         List<MatchInput> inputList = prepareBulkMatchInput(size, "2.0.0", true);
@@ -136,18 +136,16 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (MatchOutput outputRecord : output.getOutputList()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getResult().size() > 0);
-            if (domains.get(idx % domains.size()) == "yahoo.com" //
-                    || domains.get(idx % domains.size()) == "gmail.com") {
-                Assert.assertFalse(outputRecord.getResult().get(0).isMatched());
-            } else {
-                Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
+            Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
+            if ("yahoo.com".equals(domains.get(idx % domains.size()))  //
+                    || "gmail.com".equals(domains.get(idx % domains.size()))) {
+                Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
             }
-
             idx++;
         }
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testAccountMasterRTSMatchWithMultipleRecords() throws IOException {
         int size = 200;
         MatchInput matchInput = prepareMatchInputWithMultipleRecords(size);
@@ -166,8 +164,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         for (OutputRecord outputRecord : output.getResult()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getOutput().size() > 0);
-            if (domains.get(idx % domains.size()) == "yahoo.com" //
-                    || domains.get(idx % domains.size()) == "gmail.com") {
+            if ("yahoo.com".equals(domains.get(idx % domains.size())) //
+                    || "gmail.com".equals(domains.get(idx % domains.size())) ) {
                 Assert.assertFalse(outputRecord.isMatched());
             } else {
                 Assert.assertTrue(outputRecord.isMatched());

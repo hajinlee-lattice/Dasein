@@ -121,8 +121,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
 
         MatchOutput matchOutput = null;
         if (shouldShortcircuitPropdata) {
-            matchOutput = getRealTimeMatchService(//
-                    matchInput.getDataCloudVersion()).match(matchInput);
+            matchOutput = realTimeMatchService.match(matchInput);
         } else {
             matchOutput = matchProxy.matchRealTime(matchInput);
         }

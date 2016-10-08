@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 
 public interface RealTimeMatchService {
-    boolean accept(String version);
 
     MatchOutput match(MatchInput input);
 

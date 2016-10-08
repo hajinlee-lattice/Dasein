@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -17,6 +18,9 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
 
     @Resource(name = "externalColumnEntityMgr")
     private MetadataColumnEntityMgr<ExternalColumn> externalColumnEntityMgr;
+
+    @Value("${datacloud.match.latest.rts.cache.version:1.0.0}")
+    private String latstRtsCache;
 
     private final ConcurrentMap<String, ExternalColumn> whiteColumnCache = new ConcurrentHashMap<>();
     private final ConcurrentSkipListSet<String> blackColumnCache = new ConcurrentSkipListSet<>();
@@ -41,4 +45,13 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
         return blackColumnCache;
     }
 
+    @Override
+    protected boolean isLatestVersion(String dataCloudVersion) {
+        return true;
+    }
+
+    @Override
+    protected String getLatestVersion() {
+        return latstRtsCache;
+    }
 }

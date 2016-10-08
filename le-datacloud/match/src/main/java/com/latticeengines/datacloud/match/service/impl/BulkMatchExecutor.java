@@ -3,23 +3,23 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
+import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
-import com.latticeengines.datacloud.match.service.MatchFetcher;
 
 
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     @Autowired
-    @Qualifier(value = "bulkMatchFetcher")
-    private MatchFetcher fetcher;
+    private BeanDispatcher beanDispatcher;
 
     @Override
     public MatchContext execute(MatchContext matchContext) {
-        matchContext = fetcher.fetch(matchContext);
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        matchContext = dbHelper.fetch(matchContext);
         matchContext = complete(matchContext);
         return matchContext;
     }

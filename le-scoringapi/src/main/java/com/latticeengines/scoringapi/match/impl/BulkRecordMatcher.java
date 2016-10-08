@@ -137,8 +137,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
         BulkMatchOutput matchOutput = null;
 
         if (shouldShortcircuitPropdata) {
-            matchOutput = getRealTimeMatchService(matchInput.getInputList().get(0).getDataCloudVersion())
-                    .matchBulk(matchInput);
+            matchOutput = realTimeMatchService.matchBulk(matchInput);
         } else {
             matchOutput = matchProxy.matchRealTime(matchInput);
         }

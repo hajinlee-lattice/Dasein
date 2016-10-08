@@ -38,7 +38,7 @@ import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 @Component("accountMasterColumnSelectionService")
 public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionService {
 
-    private Log log = LogFactory.getLog(ColumnSelectionServiceImpl.class);
+    private Log log = LogFactory.getLog(AccountMasterColumnSelectionServiceImpl.class);
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
@@ -64,7 +64,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             public void run() {
                 loadCaches();
             }
-        }, TimeUnit.MINUTES.toMillis(1));
+        }, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override

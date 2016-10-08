@@ -6,8 +6,10 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -16,7 +18,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
-public abstract class RealTimeMatchServiceBase {
+@Component("realTimeMatchService")
+public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
     @Autowired
     @Qualifier("realTimeMatchPlanner")
@@ -25,8 +28,6 @@ public abstract class RealTimeMatchServiceBase {
     @Autowired
     @Qualifier("realTimeMatchExecutor")
     private MatchExecutor matchExecutor;
-
-    public abstract boolean accept(String version);
 
     @MatchStep(threshold = 0L)
     public MatchOutput match(MatchInput input) {

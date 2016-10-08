@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -26,16 +25,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 import com.newrelic.api.agent.Trace;
 
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> implements ColumnMetadataService {
-
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
-
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
-    private String latestDataCloudVersion;
 
     private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
 
@@ -45,6 +37,9 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
+    protected abstract boolean isLatestVersion(String dataCloudVersion);
+    protected abstract String getLatestVersion();
+
     @PostConstruct
     private void postConstruct() {
         loadCache();
@@ -53,13 +48,12 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(1));
+        }, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override
     public List<ColumnMetadata> fromPredefinedSelection(Predefined predefined, String dataCloudVersion) {
-        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
-        if (latestVersion.equals(dataCloudVersion)) {
+        if (isLatestVersion(dataCloudVersion)) {
             return predefinedMetaDataCache.get(predefined);
         } else {
             return fromMetadataColumnService(predefined, dataCloudVersion);
@@ -173,12 +167,11 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     private void loadCache() {
-        String latestVersion = versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
-        log.info("Start loading black and white column caches for version " + latestVersion);
+        log.info("Start loading black and white column caches for version " + getLatestVersion());
 
         for (Predefined selection : Predefined.values()) {
             try {
-                predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection, latestVersion));
+                predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection, getLatestVersion()));
             } catch (Exception e) {
                 log.error("Failed to load Cache! Type=" + selection, e);
             }

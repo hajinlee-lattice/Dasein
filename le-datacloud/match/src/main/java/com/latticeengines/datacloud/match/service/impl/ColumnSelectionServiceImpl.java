@@ -55,7 +55,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
             public void run() {
                 loadCaches();
             }
-        }, TimeUnit.MINUTES.toMillis(1));
+        }, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override

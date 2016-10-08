@@ -10,13 +10,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
-import com.latticeengines.datacloud.match.service.impl.RealTimeMatchFetcher;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -49,13 +50,14 @@ public abstract class AbstractMatcher implements Matcher {
     protected Warnings warnings;
 
     @Autowired
-    private RealTimeMatchFetcher realTimeMatchFetcher;
+    @Qualifier("sqlServerHelper")
+    private DbHelper dbHelper;
 
     @Value("${scoringapi.propdata.shortcircuit:false}")
     protected boolean shouldShortcircuitPropdata;
 
     @Autowired
-    private List<RealTimeMatchService> realTimeMatchServiceList;
+    protected RealTimeMatchService realTimeMatchService;
 
     @Autowired
     protected MatchProxy matchProxy;
@@ -70,7 +72,7 @@ public abstract class AbstractMatcher implements Matcher {
     public void initialize() throws Exception {
         if (shouldShortcircuitPropdata) {
             log.info("Initialize propdata fetcher executors as scoringapi-propdata shortcircuit is on.");
-            realTimeMatchFetcher.initExecutors();
+            dbHelper.initExecutors();
         } else {
             log.info("Skip initialization of propdata fetcher executors "
                     + "via scoringapi as scoringapi-propdata shortcircuit is off.");
@@ -85,15 +87,6 @@ public abstract class AbstractMatcher implements Matcher {
         for (MatchInputBuilder builder : matchInputBuilders) {
             if (builder.accept(matchVersion)) {
                 return builder;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
-    }
-
-    protected RealTimeMatchService getRealTimeMatchService(String matchVersion) {
-        for (RealTimeMatchService handler : realTimeMatchServiceList) {
-            if (handler.accept(matchVersion)) {
-                return handler;
             }
         }
         throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });

@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.datacloud.match.exposed.service.BulkMatchService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 
 import io.swagger.annotations.Api;
@@ -36,7 +36,7 @@ public class MatchResource implements MatchInterface {
     private static final Log log = LogFactory.getLog(MatchResource.class);
 
     @Autowired
-    private List<RealTimeMatchService> realTimeMatchServiceList;
+    private RealTimeMatchService realTimeMatchService;
 
     @Autowired
     private List<BulkMatchService> bulkMatchServiceList;
@@ -55,7 +55,6 @@ public class MatchResource implements MatchInterface {
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
             String matchVersion = input.getDataCloudVersion();
-            RealTimeMatchService realTimeMatchService = getRealTimeMatchService(matchVersion);
             return realTimeMatchService.match(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
@@ -77,7 +76,6 @@ public class MatchResource implements MatchInterface {
             if (!CollectionUtils.isEmpty(input.getInputList())) {
                 matchVersion = input.getInputList().get(0).getDataCloudVersion();
             }
-            RealTimeMatchService realTimeMatchService = getRealTimeMatchService(matchVersion);
             return realTimeMatchService.matchBulk(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
@@ -116,15 +114,6 @@ public class MatchResource implements MatchInterface {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
-    }
-
-    private RealTimeMatchService getRealTimeMatchService(String matchVersion) {
-        for (RealTimeMatchService handler : realTimeMatchServiceList) {
-            if (handler.accept(matchVersion)) {
-                return handler;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
     }
 
     private BulkMatchService getBulkMatchService(String matchVersion) {

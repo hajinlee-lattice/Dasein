@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,11 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     @Override
+    public int getGroupSize(int queueSize) {
+        return queueSize;
+    }
+
+    @Override
     public void populateMatchHints(MatchContext context) {
         List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets = new ArrayList<>();
         AccountLookupRequest request = createLookupRequest(context, lookupRequestTriplets);
@@ -56,6 +62,11 @@ public class DynamoDbHelper implements DbHelper {
     @Override
     public MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
         return matchContext;
+    }
+
+
+    @Override
+    public void initExecutors() {
     }
 
     @Override
@@ -70,6 +81,23 @@ public class DynamoDbHelper implements DbHelper {
         log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
                 System.currentTimeMillis() - startTime, accounts.size()));
         return context;
+    }
+
+    @Override
+    public List<MatchContext> fetch(List<MatchContext> contexts) {
+        if (contexts.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        log.info("Enter executeBulk for " + contexts.size() + " match contexts.");
+
+        String dataCloudVersion = contexts.get(0).getInput().getDataCloudVersion();
+        MatchContext mergedContext = mergeContexts(contexts, dataCloudVersion);
+
+        mergedContext = fetch(mergedContext);
+        splitContext(mergedContext, contexts);
+
+        return contexts;
     }
 
     @Override
@@ -113,13 +141,19 @@ public class DynamoDbHelper implements DbHelper {
     public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
         Map<String, LatticeAccount> allAccounts = new HashMap<>();
         for (LatticeAccount account : mergedContext.getMatchedAccounts()) {
-            allAccounts.put(account.getId(), account);
+            if (account != null) {
+                allAccounts.put(account.getId(), account);
+            }
         }
         for (MatchContext context : matchContextList) {
             List<String> idsInOrder = context.getAccountLookupRequest().getIds();
             List<LatticeAccount> accountsInOrder = new ArrayList<>();
             for (String id : idsInOrder) {
-                accountsInOrder.add(allAccounts.get(id));
+                if (allAccounts.containsKey(id)) {
+                    accountsInOrder.add(allAccounts.get(id));
+                } else {
+                    accountsInOrder.add(null);
+                }
             }
             context.setMatchedAccounts(accountsInOrder);
         }
