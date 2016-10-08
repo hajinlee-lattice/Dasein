@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +39,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
+    private static final String SPACE_DELIM = " ";
+
     private static final Log log = LogFactory.getLog(SelectedAttrServiceImpl.class);
 
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
@@ -238,6 +241,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
 
         List<LeadEnrichmentAttribute> superimposedList = new ArrayList<>();
+        List<String> searchTokens = getSearchTokens(attributeDisplayNameFilter);
 
         for (ColumnMetadata column : allColumns) {
             if (onlySelectedAttributes == Boolean.TRUE) {
@@ -260,16 +264,46 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
                 }
             }
 
-            if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
-                if (!column.getDisplayName().toUpperCase().contains(attributeDisplayNameFilter.toUpperCase())) {
-                    continue;
-                }
+            if (!isMatchingSearchTokens(searchTokens, column)) {
+                continue;
             }
 
             addAttrInFinalList(selectedAttributeNames, superimposedList, column);
         }
 
         return extractPage(superimposedList, offset, max);
+    }
+
+    private List<String> getSearchTokens(String attributeDisplayNameFilter) {
+        Set<String> searchTokens = new HashSet<>();
+
+        // tokenize and find set of unique tokens from search string
+        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+            StringTokenizer st = new StringTokenizer(attributeDisplayNameFilter.trim(), SPACE_DELIM);
+            while (st.hasMoreTokens()) {
+                searchTokens.add(st.nextToken().toUpperCase());
+            }
+        }
+
+        return new ArrayList<String>(searchTokens);
+    }
+
+    private boolean isMatchingSearchTokens(List<String> searchTokens, ColumnMetadata column) {
+        // if column's display name does not contain any of the search tokens
+        // then return false otherwise retrun true
+        //
+        // note that good searching result comes if order of search tokens is
+        // not important. Otherwise search becomes very restrictive
+
+        if (!CollectionUtils.isEmpty(searchTokens)) {
+            String displayName = column.getDisplayName().toUpperCase();
+            for (String token : searchTokens) {
+                if (!displayName.contains(token)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private List<LeadEnrichmentAttribute> extractPage(List<LeadEnrichmentAttribute> superimposedList, Integer offset,
