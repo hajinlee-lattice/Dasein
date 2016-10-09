@@ -1,5 +1,6 @@
 package com.latticeengines.monitor.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -61,6 +62,12 @@ public final class EmailUtils {
             message.setContent(content);
 
             log.info("Begining to send multi part email before calling transport.");
+            if (bccRecipients != null) {
+                log.info(String.format("Recipients: %s, BCC recipients: %s", Arrays.toString(recipients.toArray()),
+                        Arrays.toString(bccRecipients.toArray())));
+            } else {
+                log.info(String.format("Recipients: %s", Arrays.toString(recipients.toArray())));
+            }
             Transport.send(message);
             log.info("Send multi part email complete.");
         } catch (MessagingException e) {
