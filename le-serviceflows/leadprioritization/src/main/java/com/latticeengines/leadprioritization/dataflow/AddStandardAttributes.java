@@ -10,8 +10,11 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.transform.TransformationMetadata;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
 @Component("addStandardAttributes")
@@ -24,15 +27,10 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         Node eventTable = addSource(parameters.eventTable);
         Node last = eventTable;
 
-        String domainSourceName = "";
-        if (eventTable.getSourceAttribute(InterfaceName.Website) != null) {
-            domainSourceName = InterfaceName.Website.name();
-        } else if (eventTable.getSourceAttribute(InterfaceName.Email) != null) {
-            domainSourceName = InterfaceName.Email.name();
-        }
+        fixTransformArgumentsAndMetadata(eventTable);
 
         Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
-        TransformationPipeline.stdLengthDomain.arguments.put("column", domainSourceName);
+
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
@@ -45,6 +43,41 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
 
         return last;
     }
+
+    private void fixTransformArgumentsAndMetadata(Node eventTable) {
+        fixStdLengthDomainArgs(eventTable);
+        fixStdVisidbDsIndustryGroupArgs(eventTable);
+    }
+    
+    private void fixStdLengthDomainArgs(Node eventTable) {
+        Attribute emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Email);
+        
+        if (emailOrWebsite == null) {
+            emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Website); 
+        }
+        TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+    }
+    
+    private void fixStdVisidbDsIndustryGroupArgs(Node eventTable) {
+        Attribute industryOrDataCloudIndustry = eventTable.getSourceAttribute(InterfaceName.Industry);
+        
+        if (industryOrDataCloudIndustry == null) {
+            industryOrDataCloudIndustry = eventTable.getSourceAttribute("ConsolidatedIndustry");
+        } else {
+            return;
+        }
+        
+        if (industryOrDataCloudIndustry == null) {
+            return;
+        }
+
+        TransformationPipeline.stdVisidbDsIndustryGroup.arguments.put("column", industryOrDataCloudIndustry.getName());
+        TransformationMetadata metadata = new TransformationMetadata();
+        metadata.setTags(Tag.EXTERNAL_TRANSFORM);
+        metadata.setCategory(Category.FIRMOGRAPHICS);
+        TransformationPipeline.stdVisidbDsIndustryGroup.transformationMetadata = metadata;
+    }
+
 
     private void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
         int version = 1;
