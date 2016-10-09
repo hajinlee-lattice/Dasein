@@ -13,6 +13,4 @@ public interface GlobalAuthUserDao extends BaseDao<GlobalAuthUser> {
 
     List<GlobalAuthUser> findByEmailJoinUserTenantRight(String email);
 
-    List<GlobalAuthUser> findByTenantIdJoinAuthenticationJoinUserTenantRight(Long tenantId);
-
 }

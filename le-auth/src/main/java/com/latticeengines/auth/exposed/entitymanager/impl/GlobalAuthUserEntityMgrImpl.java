@@ -47,12 +47,6 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUser> findByTenantIdJoinAuthenticationJoinUserTenantRight(Long tenantId) {
-        return gaUserDao.findByTenantIdJoinAuthenticationJoinUserTenantRight(tenantId);
-    }
-
-    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthUser gaUser) {
         super.create(gaUser);
