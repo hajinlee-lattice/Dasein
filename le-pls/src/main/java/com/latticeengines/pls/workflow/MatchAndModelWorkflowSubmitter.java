@@ -14,6 +14,8 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -45,17 +47,13 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     public ApplicationId submit(String cloneTableName, CloneModelingParameters parameters,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
-        String modelSummaryId = modelSummary.getId();
-
         TransformationGroup transformationGroup;
-        String originalTransformationGroup = modelSummary.getModelSummaryConfiguration()
-                .getString(ProvenancePropertyName.TransformationGroupName);
-        if (parameters.enableTransformation()
-                && originalTransformationGroup == "none") {
+        String originalTransformationGroup = getTransformationGroupNameForModelSummary(
+                modelSummary);
+        if (parameters.enableTransformation() && originalTransformationGroup.equals("none")) {
             transformationGroup = getTransformationGroupFromZK();
         } else if (parameters.enableTransformation()) {
-            transformationGroup = TransformationGroup
-                    .fromName(originalTransformationGroup);
+            transformationGroup = TransformationGroup.fromName(originalTransformationGroup);
         } else {
             transformationGroup = TransformationGroup.NONE;
         }
@@ -131,6 +129,19 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             builder.dedupTargetTableName(cloneTableName);
         }
         return builder.build();
+    }
+
+    private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
+        String transformationGroupName = modelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null);
+        if (transformationGroupName == null) {
+            transformationGroupName = modelSummary.getTransformationGroupName();
+        }
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
+        }
+
+        return transformationGroupName;
     }
 
 }

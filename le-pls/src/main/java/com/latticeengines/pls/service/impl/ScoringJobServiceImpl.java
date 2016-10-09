@@ -215,8 +215,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
         String transformationGroupName = modelSummary.getModelSummaryConfiguration()
-                .getString(ProvenancePropertyName.TransformationGroupName, "");
-        if (transformationGroupName == "") {
+                .getString(ProvenancePropertyName.TransformationGroupName, null);
+        if (transformationGroupName == null) {
             transformationGroupName = modelSummary.getTransformationGroupName();
         }
         if (transformationGroupName == null) {
