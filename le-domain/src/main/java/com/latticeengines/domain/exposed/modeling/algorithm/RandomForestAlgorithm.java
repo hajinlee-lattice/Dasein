@@ -34,11 +34,11 @@ public class RandomForestAlgorithm extends AlgorithmBase {
     private String[] getAlgorithmPropertyArray() {
         return new String[] { //
                 "criterion=gini", //
-                "n_estimators=100", //
+                "n_estimators=200", //
                 "n_jobs=5", //
-                "min_samples_split=25",//
-                "min_samples_leaf=10", //
-                "max_depth=8", //
+                "min_samples_split=25", //
+                "min_samples_leaf=20", // Should use percentage when it's available
+                "max_depth=6", //
                 "bootstrap=True", //
                 "random_state=" + new Random().nextInt(100000)
         };

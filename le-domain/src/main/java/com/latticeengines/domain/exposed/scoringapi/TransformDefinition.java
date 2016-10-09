@@ -2,10 +2,13 @@ package com.latticeengines.domain.exposed.scoringapi;
 
 import java.io.Serializable;
 import java.util.Map;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.domain.exposed.transform.TransformationMetadata;
 
 public class TransformDefinition implements Serializable {
 
@@ -36,6 +39,9 @@ public class TransformDefinition implements Serializable {
 
     @JsonIgnore
     public String outputDisplayName;
+    
+    @JsonIgnore
+    public TransformationMetadata transformationMetadata; 
 
     @Override
     public int hashCode() {
