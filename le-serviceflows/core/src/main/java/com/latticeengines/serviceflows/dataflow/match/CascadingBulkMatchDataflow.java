@@ -74,7 +74,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         List<String> resultFields = outputList.get(0);
         log.info("output fields=" + resultFields);
         List<FieldMetadata> fieldMetadata = getOutputMetadata(inputMetadata, parameters, resultFields);
-        accountMasterSource.setSchema(fieldMetadata);
+        matchedLookupNode.setSchema(fieldMetadata);
         matchedLookupNode = matchedLookupNode.retain(new FieldList(resultFields.toArray(new String[0])));
 
         return matchedLookupNode;
