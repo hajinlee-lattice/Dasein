@@ -45,17 +45,15 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private String dnbIsPrimaryDomainColumn;
     private String dnbIsPrimaryLocationColumn;
     private String dnbNumberOfLocationColumn;
-    private AccountMasterSeedRebuildFlowParameter parameters;
-    
+
     /*
-        The detailed description of implementation of PD-1196 to build AccountMasterSeed is at the bottom of this java file 
+        The detailed description of implementation of PD-1196 to build AccountMasterSeed is at the bottom of this java file
     */
 
 
     @Override
     public Node construct(AccountMasterSeedRebuildFlowParameter parameters) {
         try {
-            this.parameters = parameters;
             getColumnMapping(parameters.getColumns());
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);
@@ -65,66 +63,53 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         Node le = addSource(parameters.getBaseTables().get(1));
         le = retainLeColumns(le);
 
+        Node dnbDunsDomain = dnb.filter(dnbDunsColumn + " != null && " + dnbDomainColumn + " != null",
+                new FieldList(dnbDunsColumn, dnbDomainColumn));
+        Node leOnlyDomain = le.filter(leDunsColumn + " == null", new FieldList(leDunsColumn));
+        Node leDunsDomain = le.filter(leDunsColumn + " != null && " + leDomainColumn + " != null",
+                new FieldList(leDunsColumn, leDomainColumn));
+
         // Step A
         List<String> dnbJoinFields = new ArrayList<String>();
         dnbJoinFields.add(dnbDunsColumn);
-        dnbJoinFields.add(dnbDomainColumn);
         List<String> leJoinFields = new ArrayList<String>();
         leJoinFields.add(leDunsColumn);
-        leJoinFields.add(leDomainColumn);
-        Node joinedA = join(dnb, dnbJoinFields, le, leJoinFields, JoinType.OUTER);
-        Node res1 = processA(joinedA); // Step A.1
-        
+        Node resA = join(dnbDunsDomain, dnbJoinFields, le.limit(0), leJoinFields, JoinType.LEFT);
+        resA = processA(resA);
+
         // Step B
-        Node dnbRefined = joinedA.filter(leDunsColumn + " == null && " + leDomainColumn + " == null",
-                new FieldList(leDunsColumn, leDomainColumn));
-        dnbRefined = retainDnBColumns(dnbRefined);
-        dnbRefined = dnbRefined.renamePipe("DnbCacheSeedRefined");
-        
-        Node leDunsDomain = joinedA.filter(
-                dnbDunsColumn + " == null && " + dnbDomainColumn + " == null && " + leDunsColumn + " != null && "
-                        + leDomainColumn + " != null",
-                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
-        leDunsDomain = retainLeColumns(leDunsDomain);
-        Node leOnlyDomain = joinedA.filter(
-                dnbDunsColumn + " == null && " + dnbDomainColumn + " == null && " + leDunsColumn + " == null && "
-                        + leDomainColumn + " != null",
-                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
-        leOnlyDomain = retainLeColumns(leOnlyDomain);
+        dnbJoinFields = new ArrayList<String>();
+        dnbJoinFields.add(dnbDomainColumn);
+        leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDomainColumn);
+        Node resB = join(dnbDunsDomain, dnbJoinFields, leOnlyDomain, leJoinFields, JoinType.RIGHT);
+        resB = processB(resB);
 
         // Step C
         dnbJoinFields = new ArrayList<String>();
         dnbJoinFields.add(dnbDunsColumn);
-        leJoinFields = new ArrayList<String>();
-        leJoinFields.add(leDunsColumn);
-        Node joinedC = join(dnbRefined, dnbJoinFields, leDunsDomain, leJoinFields,
-                JoinType.LEFT);
-        Node joinedCWithLeDuns = joinedC.filter(leDunsColumn + " != null", new FieldList(leDunsColumn));
-        Node joinedCWithoutLeDuns = joinedC.filter(leDunsColumn + " == null", new FieldList(leDunsColumn));
-        Node res2 = processC1(joinedCWithLeDuns);
-        String filterExpression = dnbDomainColumn + " != null && " + leDomainColumn + " != null && !(" + dnbDomainColumn
-                + ".equals(" + leDomainColumn + "))";
-        Node joinedCWithLeDunsWithDiffDomain = joinedCWithLeDuns.filter(filterExpression,
-                new FieldList(dnbDomainColumn, leDomainColumn));
-        Node res3 = processC2Part1(joinedCWithLeDunsWithDiffDomain);
-        Node res4 = processC2Part2(joinedCWithLeDunsWithDiffDomain);
-        Node res5 = processC3(joinedCWithoutLeDuns);
-
-        // Step D
-        dnbJoinFields = new ArrayList<String>();
         dnbJoinFields.add(dnbDomainColumn);
         leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDunsColumn);
         leJoinFields.add(leDomainColumn);
-        Node res6 = join(dnbRefined, dnbJoinFields, leOnlyDomain, leJoinFields, JoinType.RIGHT);
-        res6 = processD(res6);
+        Node leDunsDomainRefined = join(dnb, dnbJoinFields, leDunsDomain, leJoinFields, JoinType.RIGHT);
+        leDunsDomainRefined = leDunsDomainRefined.filter(dnbDunsColumn + " == null", new FieldList(dnbDunsColumn));
+        leDunsDomainRefined = retainLeColumns(leDunsDomainRefined);
+        Node dnbRefined = dnb.groupByAndLimit(new FieldList(dnbDunsColumn), new FieldList(dnbDomainColumn), 1, true,
+                true);
+        dnbJoinFields = new ArrayList<String>();
+        dnbJoinFields.add(dnbDunsColumn);
+        leJoinFields = new ArrayList<String>();
+        leJoinFields.add(leDunsColumn);
+        Node joinedC = join(dnbRefined, dnbJoinFields, leDunsDomainRefined, leJoinFields, JoinType.LEFT);
+        Node resC1 = processC1(joinedC);
+        Node resC2 = processC2(joinedC);
+        Node resC3 = processC3(joinedC);
 
-        // Step E
-        Node accountMasterSeed = res1.merge(res2).merge(res3).merge(res4).merge(res5).merge(res6);
-        /*
+        Node accountMasterSeed = resA.merge(resB).merge(resC1).merge(resC2).merge(resC3);
         accountMasterSeed = retainAccountMasterSeedColumnNode(accountMasterSeed);
         accountMasterSeed = renameAccountMasterSeedColumnNode(accountMasterSeed);
         accountMasterSeed = addColumnNode(accountMasterSeed, parameters.getColumns());
-        */
         return accountMasterSeed;
     }
 
@@ -145,54 +130,48 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     }
 
     private Node processA(Node node) {
-        String filterExpression = dnbDunsColumn + " != null && " + leDunsColumn + " != null && " + dnbDomainColumn
-                + " != null && " + leDomainColumn + " != null";
-        Node res = node.filter(filterExpression,
-                new FieldList(dnbDunsColumn, leDunsColumn, dnbDomainColumn, leDomainColumn));
-        res = callAccountMasterSeedFunction(res, true, new HashSet<String>(), new HashMap<String, Object>());
-        return res;
+        node = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
+        return node;
     }
 
-    private Node processC1(Node node) {
-        Node res = node.filter(dnbDomainColumn + " == null", new FieldList(dnbDomainColumn));
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(dnbIsPrimaryDomainColumn, "Y");
-        Set<String> set = new HashSet<String>();
-        set.add(leDomainColumn);
-        res = callAccountMasterSeedFunction(res, true, set, map);
-        return res;
-    }
-
-    private Node processC2Part1(Node node) {
-        Node res3 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
-        return res3;
-    }
-
-    private Node processC2Part2(Node node) {
-        Node res4 = node.groupByAndLimit(new FieldList(leDunsColumn, leDomainColumn), new FieldList(dnbDomainColumn), 1,
-                true, true);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(dnbIsPrimaryDomainColumn, "N");
-        Set<String> set = new HashSet<String>();
-        set.add(leDomainColumn);
-        res4 = callAccountMasterSeedFunction(res4, true, set, map);
-        return res4;
-    }
-
-    private Node processC3(Node node) {
-        Node res5 = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
-        return res5;
-    }
-
-    private Node processD(Node node) {
-        String filterExpression = dnbDomainColumn + " == null";
-        Node res = node.filter(filterExpression, new FieldList(dnbDomainColumn));
+    private Node processB(Node node) {
+        String filterExpression = dnbDunsColumn + " == null";
+        node = node.filter(filterExpression, new FieldList(dnbDunsColumn));
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(dnbIsPrimaryDomainColumn, "Y");
         map.put(dnbIsPrimaryLocationColumn, "Y");
         map.put(dnbNumberOfLocationColumn, 1);
-        res = callAccountMasterSeedFunction(res, false, new HashSet<String>(), map);
-        return res;
+        node = callAccountMasterSeedFunction(node, false, new HashSet<String>(), map);
+        return node;
+    }
+
+    private Node processC1(Node node) {
+        String filterExpression = leDunsColumn + " != null && " + dnbDomainColumn + " != null";
+        node = node.filter(filterExpression, new FieldList(leDunsColumn, dnbDomainColumn));
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(dnbIsPrimaryDomainColumn, "N");
+        Set<String> set = new HashSet<String>();
+        set.add(leDomainColumn);
+        node = callAccountMasterSeedFunction(node, true, set, map);
+        return node;
+    }
+
+    private Node processC2(Node node) {
+        String filterExpression = leDunsColumn + " != null && " + dnbDomainColumn + " == null";
+        node = node.filter(filterExpression, new FieldList(leDunsColumn, dnbDomainColumn));
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(dnbIsPrimaryDomainColumn, "Y");
+        Set<String> set = new HashSet<String>();
+        set.add(leDomainColumn);
+        node = callAccountMasterSeedFunction(node, true, set, map);
+        return node;
+    }
+
+    private Node processC3(Node node) {
+        String filterExpression = leDunsColumn + " == null && " + dnbDomainColumn + " == null";
+        node = node.filter(filterExpression, new FieldList(leDunsColumn, dnbDomainColumn));
+        node = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
+        return node;
     }
 
     private Node callAccountMasterSeedFunction(Node node, boolean takeAllFromDnB, Set<String> exceptColumns,
@@ -216,10 +195,6 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
                                 entry.getKey().equals(dnbNumberOfLocationColumn) ? Integer.class : String.class));
             }
         }
-        node = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
-        node = retainAccountMasterSeedColumnNode(node);
-        node = renameAccountMasterSeedColumnNode(node);
-        node = addColumnNode(node, parameters.getColumns());
         return node;
     }
 
@@ -302,165 +277,5 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         }
     }
 
-    /*
-        Implementation for PD-1196
-        Preprocessing on DnBCacheSeed (in dataflow to generate DnBCacheSeed):
-        1. Removed all the rows without DUNS (Actually there is no row without DUNS)
-        2. Pair of DUNS && URL is unique
-        
-        Preprocessing on LatticeCacheSeed (in SP CacheSeedManagement_CreateLatticeCacheSeed_Final of sql script file CacheSeedManagement_Scripts):
-        1. Removed all the rows without URL
-        2. Pair of DUNS && URL is unique
-        
-        A) Node joinedA = dnb OUTER JOIN le by DUNS && URL
-        1. Node res1 = Select rows from joinedA with LE_DUNS = DnB_DUNS (not NULL), LE_URL = DnB_URL (not NULL) 
-                   and choose values for name/location/etc from DnB columns
-            (Req 3.A if DUNS x URL exists - do nothing)
-        
-        B) Node dnbRefined = Select rows from joinedA with LE_DUNS NULL && LE_URL NULL, retain only DnB columns
-           Node leDunsDomain = Select rows from joinedA with DnB_DUNS NULL && DnB_URL NULL && LE_DUNS not NULL && LE_URL not NULL, retain only LE columns
-           Node leOnlyDomain = Select rows from joinedA with DnB_DUNS NULL && DnB_URL NULL && LE_DUNS NULL && LE_URL not NULL, retain only LE columns
-        
-        C) Node joinedC = dnbRefined LEFT JOIN leDunsDomain by DUNS
-           Node joinedCWithLeDuns = Select rows from joinedC with LE_DUNS not NULL
-           Node joinedCWithoutLeDuns = Select rows from joinedC with LE_DUNS NULL
-        1. Node res2 = Select rows from joinedCWithLeDuns with DnB_URL NULL
-                   and choose LE_URL, set IS_PRIMARY_DOMAIN = Y and choose values for name/location/etc from DnB columns
-            (Req 3.B if DUNS exist but URL is empty/NULL 
-                - Update the URL for all rows where it is empty; 
-                - Set IS_PRIMARY_DOMAIN = Y if there are no other URLs associated with this DUNS)
-            (Have verified that there is no such condition in DnB that for one DUNS, some rows have URL but some rows don't, so set IS_PRIMARY_DOMAIN = Y directly)
-        2. Node joinedCWithLeDunsWithDiffDomain = Select rows from joinedCWithLeDuns with DnB_URL not NULL (LE_DUNS = DnB_DUNS not NULL, LE_URL != DnB_URL not NULL)
-            Node res3 = Select all the rows from joinedCWithLeDunsWithDiffDomain
-                    and choose values for name/location/etc from DnB columns
-            Node res4 = Group by LE_DUNS && LE_URL on joinedCWithLeDunsWithDiffDomain and choose only 1 row for each pair of LE_DUNS && LE_URL,
-                    and choose LE_URL, set IS_PRIMARY_DOMAIN = N and choose values for name/location/etc from DnB columns
-            (Req 3.C if DUNS exist but URL is NOT NULL
-                - Add new DUNS x URL row
-                - Copy DnB location & LE_* columns from the existing DUNS row where the DUNS is the same
-                - Set IS_PRIMARY_DOMAIN = N)
-        3. Node res5 = Select all the rows from joinedCWithoutLeDuns
-                   and choose values for name/location/etc from DnB columns
-        
-        D) Node joinedD = dnbRefined RIGHT JOIN le(URL) by URL
-        1. Node res6 = Select rows from joinedD with DnB_URL NULL
-                   and choose LE_URL, set IS_PRIMARY_DOMAIN = Y, IS_PRIMARY_LOCATION = Y, NUMBER_OF_LOCATIONS = 1
-                   and choose values for name/location/etc from LE columns
-            
-        E) Node AccountMasterSeed = Merge res1, res2, res3, res4, res5 and res6
-        
-        F) Retain columns for AccountMasterSeed, remove prefix "TMP_" in column names ("TMP_" is used to avoid conflicts in previous steps), and add Timestamp column
-        
-        Example:
-        dnb:
-        DUNS    URL
-        01      a.com
-        01      c.com
-        03      a.com
-        02
-        04
-        
-        le:
-        DUNS    URL
-        01      a.com
-        01      b.com
-        02      a.com
-                c.com
-                d.com
-                
-        joinedA:
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          a.com       01          a.com
-        01          c.com
-        03          a.com
-        02
-        04
-                                01          b.com
-                                02          a.com
-                                            c.com
-                                            d.com
-                                            
-        Temp result for A1:
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          a.com       01          a.com
-        
-        res1:
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        01      a.com   from DnB                from DnB                    from DnB                from DnB
-        
-        dnbRefined:
-        DnB_DUNS    DnB_URL
-        01          c.com
-        03          a.com
-        02
-        04
-        
-        leDunsDomain
-        LE_DUNS     LE_URL
-        01          b.com
-        02          a.com
-        
-        leOnlyDomain
-        LE_DUNS     LE_URL
-                    c.com
-                    d.com
-                    
-        joinedC
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          c.com       01          b.com
-        03          a.com
-        02                      02          a.com
-        04
-        
-        joinedCWithLeDuns
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          c.com       01          b.com
-        02                      02          a.com
-        
-        joinedCWithoutLeDuns
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        03          a.com
-        04
-        
-        res2
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        02      a.com   Y                       from DnB                    from DnB                from DnB
-        
-        joinedCWithLeDunsWithDiffDomain
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          c.com       01          b.com
-        
-        res3
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        01      c.com   from DnB                from DnB                    from DnB                from DnB
-        
-        res4
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        01      b.com   N                       from DnB                    from DnB                from DnB
-        
-        res5
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        03      a.com   from DnB                from DnB                    from DnB                from DnB
-        04              from DnB                from DnB                    from DnB                from DnB
-        
-        joinedD
-        DnB_DUNS    DnB_URL     LE_DUNS     LE_URL
-        01          c.com                   c.com
-                                            d.com
-        
-        res6
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-                d.com   Y                       Y                           1                       from LE
-                
-        Temp AccountMasterSeed (Merge res1, res2, res3, res4, res5, res6)
-        DUNS    URL     LE_IS_PRIMARY_DOMAIN    LE_IS_PRIMARY_LOCATION      LE_NUMBER_OF_LOCATION   etc
-        01      a.com   from DnB                from DnB                    from DnB                from DnB
-        01      c.com   from DnB                from DnB                    from DnB                from DnB
-        01      b.com   N                       from DnB                    from DnB                from DnB
-        02      a.com   Y                       from DnB                    from DnB                from DnB
-        03      a.com   from DnB                from DnB                    from DnB                from DnB
-        04              from DnB                from DnB                    from DnB                from DnB
-                d.com   Y                       Y                           1                       from LE    
-     */
 
 }
