@@ -56,11 +56,9 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         Node joined = seed;
         if (firstSource != null) {
             log.info("Join first source");
-            String joinKey = joinKeyMap.get(firstSource);
-            joined = joined.join(new FieldList(dunsKey), firstSource, new FieldList(joinKey), JoinType.LEFT);
-            String secondKey = joinKey + SECOND_KEY_SUFFIX;
-            String filterFunc = secondKey + " == null || " + secondKey + ".equals(" + domainKey +")";
-            joined = joined.filter(filterFunc, new FieldList(secondKey, domainKey));
+            FieldList joinField = new FieldList(joinKeyMap.get(firstSource));
+            Node deduped = firstSource.groupByAndLimit(joinField, 1); 
+            joined = joined.join(new FieldList(dunsKey), deduped, joinField, JoinType.LEFT);
         }
 
         String id = parameters.getId().get(0);
