@@ -6,9 +6,17 @@ public class TestPredefinedJobCallable implements Callable<Boolean> {
 
     private String outputMsg;
 
+    private static int concurrentNum = 0;
+
     @Override
     public Boolean call() throws Exception {
-        System.out.println(outputMsg);
+        if (concurrentNum > 0) {
+            throw new Exception("Can't run concurrent job!");
+        }
+        concurrentNum++;
+        System.out.println(String.format("%s, concurrent num: %d", outputMsg, concurrentNum));
+        Thread.sleep(1000);
+        concurrentNum--;
         return true;
     }
 
