@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -40,6 +41,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.core.io.Resource;
@@ -66,6 +68,18 @@ public class AvroUtils {
             throw new RuntimeException("Getting avro file reader from path: " + path.toString(), e);
         }
         return reader;
+    }
+
+    public static DataFileStream<GenericRecord> getAvroFileStream(Configuration config, Path path) {
+        DataFileStream<GenericRecord> streamReader;
+        try {
+            FSDataInputStream input = new FSDataInputStream(HdfsUtils.getInputStream(config, path.toString()));
+            GenericDatumReader<GenericRecord> reader = new GenericDatumReader<>();
+            streamReader = new DataFileStream<>(input, reader);
+        } catch (IOException e) {
+            throw new RuntimeException("Getting avro file reader from path: " + path.toString(), e);
+        }
+        return streamReader;
     }
 
     public static Schema alignFields(Schema shuffled, Schema ordered) {
@@ -213,11 +227,19 @@ public class AvroUtils {
     private static Long countOneFile(Configuration configuration, String path) {
         log.info("Counting number of records in " + path);
         Long count = 0L;
-        FileReader<GenericRecord> reader = getAvroFileReader(configuration, new Path(path));
-        while (reader.hasNext()) {
-            reader.next();
-            count++;
+
+        try(DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path));) {
+            try {
+                while (stream.nextBlock() != null) {
+                    count += stream.getBlockCount();
+                }
+            } catch (NoSuchElementException e) {
+                log.info("Seems no next block in current stream.");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to count avro at " + path, e);
         }
+
         return count;
     }
 
