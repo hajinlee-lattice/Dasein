@@ -6,7 +6,7 @@ angular.module('mainApp.create.csvBulkUpload', [
 ])
 .controller('csvBulkUploadController', function(
     $state, $stateParams, ResourceUtility, ImportService, ImportStore, StringUtility, 
-    ScoreLeadEnrichmentModal, RequiredFields, Model, IsPmml
+    ScoreLeadEnrichmentModal, Model, IsPmml
 ) {
     var vm = this;
 
@@ -17,13 +17,12 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.showImportSuccess = false;
     vm.accountLeadCheck = false;
     vm.ResourceUtility = ResourceUtility;
-    vm.requiredFields = RequiredFields;
-    vm.schema = Model.ModelDetails.SourceSchemaInterpretation;
+    vm.schema = Model.ModelDetails.SourceSchemaInterpretation == 'SalesforceLead' ? 'Lead' : 'Account';
 
     vm.params = {
         url: '/pls/scores/fileuploads/new',
-        label: (vm.schema == 'SalesforceLead' ? 'Lead' : 'Account') + ' List',
-        infoTemplate: (vm.schema == 'SalesforceLead' ? 'Upload a CSV file with leads to score. The list of expected column headers is displayed below.' : 'Upload a CSV file with accounts to score. The list of expected column headers is displayed below.'),
+        label: vm.schema + ' List',
+        infoTemplate: (vm.schema == 'Lead' ? 'Upload a CSV file with leads to score. The list of expected column headers is displayed below.' : 'Upload a CSV file with accounts to score. The list of expected column headers is displayed below.'),
         defaultMessage: "Example: us-target-list.csv",
         modelId: $stateParams.modelId,
         compressed: true, 

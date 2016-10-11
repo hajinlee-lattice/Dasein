@@ -17,7 +17,7 @@ body {
   }
 
   &.not-initialized {
-    opacity: 0;
+    opacity: 0; 
     
     &.open-nav nav.primary-nav {
       -webkit-transition: none;

@@ -156,7 +156,6 @@ angular
             params: params,
             headers: { 'Content-Type': 'application/json' }
         }).then(function(data) {
-            console.log('GetSchemaToLatticeFields', csvFileName, data);
             deferred.resolve(data.data.Result);
         });
 
@@ -169,8 +168,6 @@ angular
         var metaData = ImportStore.Get(FileName);
         var schema = metaData.schemaInterpretation;
         var params = score ? { 'modelId': modelId, 'displayName': FileName } : { 'schema': schema };
-
-        console.log(modelId, metaData);
 
         $http({
             method: 'POST',
@@ -187,7 +184,6 @@ angular
             }
         })
         .success(function(data, status, headers, config) {
-            console.log('GetFieldDocument', score, modelId, params, data);
             if (data == null || !data.Success) {
                 if (data && data.Errors.length > 0) {
                     var errors = data.Errors.join('\n');

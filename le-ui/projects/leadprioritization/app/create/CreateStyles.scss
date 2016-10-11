@@ -1,6 +1,6 @@
 section.container.setup-import {
     font-size: 1.4em;
-    margin-top: 5em;
+    
     tooltip._bottom {
         position: absolute;
         margin-top: -2px;
@@ -542,11 +542,27 @@ Media Queries
 }
 
 /* score a file - field mapping */
-section.custom-fields.score-file {
+.columns.box-outline {
+    border-radius: 4px;
+    box-shadow: 0 0 10px 0 rgba(57,137,195,0.1);
+    border: solid 1px #d0d0d0;
+    padding: 0;
+    padding-bottom: 0;
+    margin-bottom: 1em;
+    
+    &.disabled {
+        background: #f1f1f1;
+        
+        h4 {
+            color: #bbb;
+        }
+    }
+
     .field-mapping-section-header {
         padding: 1.5em 2.75em;
         
         h4 {
+            font-size: 18pt;
             font-weight: bold;
             color: #666;
             
@@ -563,7 +579,8 @@ section.custom-fields.score-file {
             color: #666;
         }
     }
-    .field-mapping-actions {
+
+    .field-mapping-section-actions {
         border: none;
         padding: 0;
         margin: 2em 2.5em;
@@ -572,66 +589,55 @@ section.custom-fields.score-file {
             margin-right: 0.75em;
         }
     }
-    .columns.box-outline {
-        border-radius: 4px;
-        box-shadow: 0 0 10px 0 rgba(57,137,195,0.1);
-        border: solid 1px #d0d0d0;
-        padding: 0;
-        padding-bottom: 0;
-        margin-bottom: 1em;
+
+    .field-mapping-section-body {
+        margin-bottom: 0;
         
-        &.disabled {
-            background: #f1f1f1;
-            h4 {
-                color: #bbb;
+        &.form-group {
+            margin: 0em 2.5em;
+        }
+        
+        tr {
+            border-bottom: 1px solid #e9e9e9;
+
+            select {
+                width: auto;
+                max-width: 80%;
+            }
+
+            td {
+                border-right: 1px solid #e9e9e9;
+                width: 50%;
+                
+                &.field-mapping-inputs {
+                    padding: 0.5em 1em 0.5em;
+                }
+
+                &:last-child {
+                    border-right: none;
+                } 
             }
         }
 
-        table {
-            margin-bottom: 0;
-            
+        thead {
             tr {
-                border-bottom: 1px solid #e9e9e9;
-
-                select {
-                    width: auto;
-                    max-width: 80%;
+                th {
+                    border: none;
+                    padding: .5em 1em;
+                    color: #bbb;
                 }
+            }
+        }
 
+        tbody {
+            tr {
+                &:nth-child(odd) {
+                    background: #f9f9f9;
+                }
+                
                 td {
-                    border-right: 1px solid #e9e9e9;
-                    width: 50%;
-                    
-                    &.field-mapping-inputs {
-                        padding: 0.5em 1em 0.5em;
-                    }
-
-                    &:last-child {
-                        border-right: none;
-                    } 
-                }
-            }
-
-            thead {
-                tr {
-                    th {
-                        border: none;
-                        padding: .5em 1em;
-                        color: #bbb;
-                    }
-                }
-            }
-
-            tbody {
-                tr {
-                    &:nth-child(odd) {
-                        background: #f9f9f9;
-                    }
-                    
-                    td {
-                        &.field_mapping_label label {
-                            width: auto;
-                        }
+                    &.field_mapping_label label {
+                        width: auto;
                     }
                 }
             }

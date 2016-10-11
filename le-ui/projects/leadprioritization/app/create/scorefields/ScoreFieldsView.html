@@ -17,7 +17,7 @@
 				<h4>Required fields</h4>
 				<h5>Make sure all the required fields are mapped correctly.</h5>
 			</div>
-			<table class="unstyled">
+			<table class="field-mapping-section-body unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
@@ -60,7 +60,7 @@
 				</tbody>
 			</table>
 
-			<div 	class="container field-mapping-validation" 
+			<div 	class="container field-mapping-section-validation" 
 					ng-repeat="RequiredField in vm.requiredFields" 
 					ng-if="vm.FieldMap[RequiredField].userField == vm.ignoredFieldLabel">
 				<div class="ten columns offset-one has-error">
@@ -70,7 +70,7 @@
 		    	</div>
 		    </div>
 
-			<div 	class="container field-mapping-actions" ng-if="!vm.NextClicked">
+			<div 	class="container field-mapping-section-actions" ng-if="!vm.NextClicked">
 				<div class="pull-left">
 					<button data-ng-click="vm.clickReset()" class="button gray-button nav-button" type="button">
 						CANCEL
@@ -108,7 +108,7 @@
 					Check that all the fields you want mapped are mapped correctly.
 				</h5>
 			</div>
-			<table class="unstyled" ng-if="vm.NextClicked">
+			<table class="field-mapping-section-body unstyled" ng-if="vm.NextClicked">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>
@@ -150,7 +150,7 @@
 				</tbody>
 			</table>
 
-			<div 	class="container field-mapping-actions" ng-if="vm.NextClicked">
+			<div 	class="container field-mapping-section-actions" ng-if="vm.NextClicked">
 				<div class="pull-left">
 					<button data-ng-click="vm.clickReset()" class="button gray-button nav-button" type="button">
 						CANCEL

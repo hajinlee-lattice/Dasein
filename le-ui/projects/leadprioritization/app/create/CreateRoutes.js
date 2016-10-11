@@ -75,15 +75,10 @@ angular
             redirectto: 'model.scoring.import',
             views: {
                 "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'Import a Report to Score';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
+                    template: ''
                 },
                 "main@": {
+                    /*
                     resolve: {
                         RequiredFields: function($q, $http, $stateParams) {
                             var deferred = $q.defer(),
@@ -99,6 +94,7 @@ angular
                             return deferred.promise; 
                         }
                     },
+                    */
                     controller: 'csvBulkUploadController',
                     controllerAs: 'vm',
                     templateUrl: 'app/create/scorefile/ScoreFileView.html'

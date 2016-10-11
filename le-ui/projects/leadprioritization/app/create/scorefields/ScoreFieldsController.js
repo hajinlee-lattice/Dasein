@@ -31,7 +31,7 @@ angular
             }
         });
 
-        console.log('scorefields', vm);
+        vm.validateForm();
     }
 
     vm.refreshLatticeFields = function() {
@@ -60,7 +60,7 @@ angular
             if (vm.ignoredFields.indexOf(field) < 0 && 
                 vm.UserFields.indexOf(field) < 0 && 
                 vm.AvailableFields.indexOf(field) < 0) {
-                vm.AvailableFields.push(field);
+                    vm.AvailableFields.push(field);
             }
         });
     }
@@ -70,7 +70,6 @@ angular
 
         $timeout(function() {
             vm.validateForm();
-            $scope.$digest();
         }, 100);
     }
 

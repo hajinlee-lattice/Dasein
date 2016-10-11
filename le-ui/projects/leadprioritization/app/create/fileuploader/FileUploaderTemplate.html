@@ -1,4 +1,4 @@
-<label for="loadfile">
+<label for="loadfile" ng-if="vm_uploader_container.label || vm_uploader_container.infoTemplate">
   <span class="tooltip-label">{{ vm_uploader_container.label }} <span ng-if="vm_uploader.fileRequired == 'false'">(optional)</span></span>
   <span 
       ng-if="vm_uploader_container.infoTemplate"
