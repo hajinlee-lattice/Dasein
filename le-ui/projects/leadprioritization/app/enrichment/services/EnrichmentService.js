@@ -187,13 +187,15 @@ angular.module('lp.enrichment.leadenrichment')
         var deferred = $q.defer();
         var opts = opts || {},
             offset = opts.offset || 0,
-            max = opts.max || null;
+            max = opts.max || null,
+            onlySelectedAttributes = opts.onlySelectedAttributes || null;
         $http({
             method: 'get',
             url: '/pls/enrichment/lead',
             params: {
                 offset: offset,
-                max: max
+                max: max,
+                onlySelectedAttributes: onlySelectedAttributes
             }
         }).then(function(response){
             deferred.resolve(response);

@@ -58,11 +58,31 @@ angular.module('lp.enrichment.leadenrichment', [
     });
     
     var stopGetEnrichments = false;
-    $scope.$on('$locationChangeStart', function (event, newUrl, oldUrl, newState, oldState) {
-        if(oldUrl.endsWith('/enrichment')) {
-            stopGetEnrichments = true; // if you leave the page mid-chunking in of enrichments this will stop the promise
-        }
+    $scope.$on('$destroy', function () {
+        stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
     });
+
+    var fakeIncrement = false;
+    if(fakeIncrement) {
+        vm.placeholderTotal;
+        var numbersNumber = 0;
+        var numbersInterval = $interval(function(){
+            var query = angular.element('.subheader .query .ng-search input'),
+                filteredTotal = parseInt(query.attr('data-filteredTotal'));
+
+            if(numbersNumber < enrichment_chunk_size && filteredTotal >= 1000) {
+                numbersNumber = numbersNumber+1*10;
+            }
+            vm.placeholderTotal = filteredTotal + numbersNumber;
+        }, enrichment_chunk_size / 1000);
+    }
+
+    var stopNumbersInterval = function(){
+        if(numbersInterval) {
+            $interval.cancel(numbersInterval);
+            vm.placeholderTotal = null;
+        }
+    }
 
     var getEnrichmentData = function(opts) {
         var deferred = $q.defer(),
@@ -75,16 +95,20 @@ angular.module('lp.enrichment.leadenrichment', [
             if (result != null && result.status === 200) {
                 vm.enrichments_loaded = true;
                 vm.enrichments = vm.enrichments.concat(result.data);
+                numbersNumber = 0;
+
                 _store = result; // just a copy of the correct data strucuture and properties for later
                 if(stopGetEnrichments) {
                     vm.enrichments = []; // unset enrichments
-                    return false;  // stop getting enrichments
+                    stopNumbersInterval();
+                    return false; // stop getting enrichments
                 }
                 if(result.data.length === max) {
                     getEnrichmentData({max: max, offset: offset + max});
                 } else {
                     _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
                     EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
+                    stopNumbersInterval();
                     vm.enrichments_completed = true;
                 }
             }

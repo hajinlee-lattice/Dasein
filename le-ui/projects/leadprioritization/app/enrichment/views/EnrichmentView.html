@@ -14,7 +14,7 @@
                             <span class="fa fa-search" ng-show="!vm.query.length"></span>
                             <span class="fa fa-times" ng-show="vm.query.length"></span>
                         </a>
-                        <input type="text" class="form-control" placeholder="Search {{vm.enrichments.length > filteredList.length ? '' : 'all '}}{{filteredList.length|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
+                        <input type="text" class="form-control" data-filteredTotal="{{filteredList.length}}" placeholder="Search {{vm.enrichments.length > filteredList.length ? '' : 'all '}}{{(vm.placeholderTotal ? vm.placeholderTotal : filteredList.length)|number}} attributes" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
                     <div class="tags">
                         <div class="tag-type" ng-repeat="(key, value) in vm.selected_categories">

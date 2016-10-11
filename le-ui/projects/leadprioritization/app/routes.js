@@ -574,7 +574,7 @@ angular
                         EnrichmentData: function($q, EnrichmentStore) {
                             var deferred = $q.defer();
 
-                            EnrichmentStore.getEnrichments().then(function(result) {
+                            EnrichmentStore.getEnrichments({onlySelectedAttributes: true}).then(function(result) {
                                 deferred.resolve(result);
                             });
 
