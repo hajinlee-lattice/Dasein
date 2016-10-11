@@ -178,6 +178,14 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/tenants/directive/CamilleConfigDirective.js',
                         '<%= app.dir %>/app/tenants/controller/TenantListCtrl.js',
                         '<%= app.dir %>/app/tenants/controller/TenantConfigCtrl.js',
+                        '<%= app.dir %>/app/modelquality/controller/ModelQualityNavCtrl.js',
+                        '<%= app.dir %>/app/modelquality/controller/ModelQualityRootCtrl.js',
+                        '<%= app.dir %>/app/modelquality/directive/ModelQualityLineChart.js',
+                        '<%= app.dir %>/app/modelquality/service/InfluxDbService.js',
+                        '<%= app.dir %>/app/modelquality/service/ModelQualityService.js',
+                        '<%= app.dir %>/app/modelquality/dashboard/controller/ModelQualityDashboardCtrl.js',
+                        '<%= app.dir %>/app/modelquality/pipeline/controller/ModelQualityCreatePipelineCtrl.js',
+                        '<%= app.dir %>/app/modelquality/pipeline/controller/ModelQualityCreatePipelineStepCtrl.js',
                         '<%= app.dir %>/app/app.js'
                     ]
                 }
@@ -272,7 +280,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            css:     {
+            css: {
                 files: ['<%= app.dir %>/assets/less/**/*.less'],
                 tasks: ['less:dev']
             }
