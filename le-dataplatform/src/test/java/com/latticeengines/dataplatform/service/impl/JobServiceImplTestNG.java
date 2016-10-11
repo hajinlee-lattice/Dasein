@@ -88,7 +88,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private ApplicationId applicationId;
 
-    @BeforeClass(groups = { "functional", "functional.production" })
+    @BeforeClass(groups = { "functional.platform", "functional.production" })
     public void setupSamplingMRJob() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -119,7 +119,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @BeforeClass(groups = { "functional", "functional.production" })
+    @BeforeClass(groups = { "functional.platform", "functional.production" })
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -143,7 +143,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @AfterClass(groups = { "functional", "functional.production" })
+    @AfterClass(groups = { "functional.platform", "functional.production" })
     public void tearDown() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path("/functionalTests"), true);
@@ -164,13 +164,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         return containerProperties;
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testKillApplication() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
@@ -185,7 +185,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.KILLED);
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
@@ -215,7 +215,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         jobService.killJob(applicationId);
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testCheckJobName() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
@@ -232,7 +232,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
@@ -286,7 +286,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertFalse(new File(metadataFileName).exists());
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
@@ -314,7 +314,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(4, files.size());
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true, dependsOnMethods = { "testSubmitMRJob" })
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true, dependsOnMethods = { "testSubmitMRJob" })
     public void testGetMRJobCounter() throws Exception {
         Counters counters = jobService.getMRJobCounters(ConverterUtils.toString(applicationId));
         Map<String, CounterGroup> counterGroups = counters.getAllCounterGroups();
@@ -327,7 +327,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .getCounter(TaskCounter.MAP_INPUT_RECORDS.name()).getValue() > 0);
     }
 
-    @Test(groups = { "functional", "functional.production" }, enabled = false)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = false)
     public void testSubmitMRJobWithBadCustomerName() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
@@ -369,7 +369,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      *
      * @throws Exception
      */
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
