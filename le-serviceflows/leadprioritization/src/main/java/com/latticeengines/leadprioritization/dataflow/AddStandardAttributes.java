@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
@@ -79,7 +80,8 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         TransformationPipeline.stdVisidbDsIndustryGroup.transformationMetadata = metadata;
     }
 
-    private void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
+    @VisibleForTesting
+    void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
         int version = 1;
         while (eventTable.getSourceAttribute(definition.output) != null) {
             definition.output = String.format("%s_%d", definition.output, version++);
