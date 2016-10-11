@@ -517,6 +517,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         User user = globalAuthFindUserByUsername(username);
         List<GlobalAuthUser> userDatas = gaUserEntityMgr
                 .findByEmailJoinUserTenantRight(user.getEmail());
+        if (userDatas == null) {
+            return true;
+        }
         Set<String> distinctRights = new HashSet<String>();
         for (GlobalAuthUser userData : userDatas) {
             if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
