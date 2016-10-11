@@ -64,7 +64,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
 
     private SampleStat inputStat;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional.platform" })
     public void setup() throws Exception {
         setupDirPath();
         setupFileSystem();
@@ -312,7 +312,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         fs.delete(new Path(sampleDir), true);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "functional.platform" })
     public void cleanup() throws Exception {
         fs.delete(new Path(baseDir), true);
     }
