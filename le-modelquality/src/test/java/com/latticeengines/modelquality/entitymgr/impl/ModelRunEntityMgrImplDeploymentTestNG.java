@@ -41,7 +41,7 @@ import com.latticeengines.modelquality.service.PropDataService;
 import com.latticeengines.modelquality.service.SamplingService;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 
-public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
+public class ModelRunEntityMgrImplDeploymentTestNG extends ModelQualityFunctionalTestNGBase {
 
     @Autowired
     protected ModelQualityProxy modelQualityProxy;
@@ -90,7 +90,7 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
     private ModelRun modelRun;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         cleanupDb();
 
