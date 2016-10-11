@@ -353,7 +353,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         toReturn.push(columns);
 
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
-        var averageConversionRate = modelSummary.ModelDetails.TotalConversions/modelSummary.ModelDetails.TotalLeads;
+        var averageConversionRate = modelSummary.ModelDetails.TestingConversions/modelSummary.ModelDetails.TestingLeads;
 
         for (var x = 0; x < totalPredictors.length; x++) {
             var predictor = totalPredictors[x];
@@ -371,7 +371,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     }
                     percentTotal = percentTotal.toFixed(1);
                     var lift = element.Lift.toPrecision(2);
-                    var conversionRate = lift * averageConversionRate;
+                    var conversionRate = element.Lift * averageConversionRate;
                     var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                     var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
                     if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
