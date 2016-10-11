@@ -16,4 +16,6 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
     GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId, Long tenantId,
             String operationName);
 
+    List<GlobalAuthUserTenantRight> findByEmail(String email);
+
 }

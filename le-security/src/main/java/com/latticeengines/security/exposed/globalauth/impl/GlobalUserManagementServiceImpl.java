@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -506,29 +507,22 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Override
     public Boolean isRedundant(String username) {
         try {
-            log.info(String.format("Checking if user %s is redundant.", username));
-            return globalAuthIsRedundant(username);
+            List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(username);
+            boolean isRedundant = rights.isEmpty();
+            if (isRedundant) {
+                log.info(String.format("User %s is redundant.", username));
+            } else {
+                Set<String> tenantIds = new HashSet<>();
+                for (GlobalAuthUserTenantRight right: rights) {
+                    tenantIds.add(right.getGlobalAuthTenant().getId());
+                }
+                log.info("User " + username + " is not redundant: " + ArrayUtils.toString(tenantIds));
+            }
+            return isRedundant;
         } catch (Exception e) {
+            log.error("Failed to check if the user " + username + " is redundant.", e);
             return false;
         }
-    }
-
-    private Boolean globalAuthIsRedundant(String username) throws Exception {
-        User user = globalAuthFindUserByUsername(username);
-        List<GlobalAuthUser> userDatas = gaUserEntityMgr
-                .findByEmailJoinUserTenantRight(user.getEmail());
-        if (userDatas == null) {
-            return true;
-        }
-        Set<String> distinctRights = new HashSet<String>();
-        for (GlobalAuthUser userData : userDatas) {
-            if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
-                for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
-                    distinctRights.add(rightData.getOperationName());
-                }
-            }
-        }
-        return distinctRights.size() == 0;
     }
 
     @Override

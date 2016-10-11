@@ -1,18 +1,20 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
+import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
 import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthUserTenantRightEntityMgr")
 public class GlobalAuthUserTenantRightEntityMgrImpl extends
@@ -20,6 +22,9 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
 
     @Autowired
     private GlobalAuthUserTenantRightDao gaUserTenantRightDao;
+
+    @Autowired
+    private GlobalAuthUserDao gaUserDao;
 
     @Override
     public BaseDao<GlobalAuthUserTenantRight> getDao() {
@@ -56,6 +61,17 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthUserTenantRight gaUserTenantRight) {
         super.delete(gaUserTenantRight);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByEmail(String email) {
+        GlobalAuthUser user = gaUserDao.findByField("Email", email);
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        Long userId = user.getPid();
+        return gaUserTenantRightDao.findAllByField("User_ID", userId);
     }
 
 }
