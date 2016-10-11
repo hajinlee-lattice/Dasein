@@ -253,13 +253,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         JsonNode predictors = modelSummaryJson.get("Predictors");
         for (int i = 0; i < predictors.size(); ++i) {
             JsonNode predictor = predictors.get(i);
+            assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
             if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
                 if (predictor.get("Name").asText().equals("Some_Column")) {
                     JsonNode tags = predictor.get("Tags");
                     assertEquals(tags.size(), 1);
                     assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
                     assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-                    assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);
