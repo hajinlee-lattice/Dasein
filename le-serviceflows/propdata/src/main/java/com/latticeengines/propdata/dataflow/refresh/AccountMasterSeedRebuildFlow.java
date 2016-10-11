@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -31,7 +29,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("accountMasterSeedRebuildFlow")
 public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<AccountMasterSeedRebuildFlowParameter> {
-    private static Logger LOG = LogManager.getLogger(AccountMasterSeedRebuildFlow.class);
 
     private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
     // dnbCacheSeed columns -> accountMasterSeed columns
