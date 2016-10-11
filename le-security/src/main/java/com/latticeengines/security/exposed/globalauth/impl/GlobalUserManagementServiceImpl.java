@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -516,7 +515,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 for (GlobalAuthUserTenantRight right: rights) {
                     tenantIds.add(right.getGlobalAuthTenant().getId());
                 }
-                log.info("User " + username + " is not redundant: " + ArrayUtils.toString(tenantIds));
+                log.info("User " + username + " is not redundant, it is still used by " + tenantIds.size() + " tenants");
             }
             return isRedundant;
         } catch (Exception e) {
