@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
@@ -211,6 +211,7 @@ public class AvroUtils {
     }
 
     private static Long countOneFile(Configuration configuration, String path) {
+        log.info("Counting number of records in " + path);
         Long count = 0L;
         FileReader<GenericRecord> reader = getAvroFileReader(configuration, new Path(path));
         while (reader.hasNext()) {
