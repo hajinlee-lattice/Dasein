@@ -82,11 +82,11 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
     private void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
         int version = 1;
         while (eventTable.getSourceAttribute(definition.output) != null) {
-            definition.output = String.format(definition.output + "_%d", version++);
+            definition.output = String.format("%s_%d", definition.output, version++);
         }
         version = 1;
         while (eventTable.getSourceSchema().getAttributeFromDisplayName(definition.outputDisplayName) != null) {
-            definition.outputDisplayName = String.format(definition.outputDisplayName + " %d", version++);
+            definition.outputDisplayName = String.format("%s %d", definition.outputDisplayName, version++);
         }
     }
 
