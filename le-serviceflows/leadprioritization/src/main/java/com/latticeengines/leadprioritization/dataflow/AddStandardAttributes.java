@@ -31,7 +31,6 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
 
         Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
 
-
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
             last = addFunction(last, eventTable, definition);
@@ -48,25 +47,27 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         fixStdLengthDomainArgs(eventTable);
         fixStdVisidbDsIndustryGroupArgs(eventTable);
     }
-    
+
     private void fixStdLengthDomainArgs(Node eventTable) {
         Attribute emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Email);
-        
+
         if (emailOrWebsite == null) {
-            emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Website); 
+            emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Website);
         }
-        TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+        if (emailOrWebsite != null) {
+            TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+        }
     }
-    
+
     private void fixStdVisidbDsIndustryGroupArgs(Node eventTable) {
         Attribute industryOrDataCloudIndustry = eventTable.getSourceAttribute(InterfaceName.Industry);
-        
+
         if (industryOrDataCloudIndustry == null) {
             industryOrDataCloudIndustry = eventTable.getSourceAttribute("ConsolidatedIndustry");
         } else {
             return;
         }
-        
+
         if (industryOrDataCloudIndustry == null) {
             return;
         }
@@ -77,7 +78,6 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         metadata.setCategory(Category.FIRMOGRAPHICS);
         TransformationPipeline.stdVisidbDsIndustryGroup.transformationMetadata = metadata;
     }
-
 
     private void resolveDuplicateName(Node eventTable, TransformDefinition definition) {
         int version = 1;
