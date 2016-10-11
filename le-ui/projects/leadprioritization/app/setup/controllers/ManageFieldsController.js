@@ -402,9 +402,9 @@ angular.module('lp.managefields', [
     }
 
     function advancedSettingsFlagsChanged() {
-        if ($scope.oneLeadPerDomain != Model.EventTableProvenance.Is_One_Lead_Per_Domain ||
-            $scope.includePersonalEmailDomains == Model.EventTableProvenance.Exclude_Public_Domains ||
-            $scope.useLatticeAttributes == Model.EventTableProvenance.Exclude_Propdata_Columns) {
+        if ($scope.oneLeadPerDomain.toString() != Model.EventTableProvenance.Is_One_Lead_Per_Domain ||
+            $scope.includePersonalEmailDomains.toString() == Model.EventTableProvenance.Exclude_Public_Domains ||
+            $scope.useLatticeAttributes.toString() == Model.EventTableProvenance.Exclude_Propdata_Columns) {
             return true;
         }
         return false;
