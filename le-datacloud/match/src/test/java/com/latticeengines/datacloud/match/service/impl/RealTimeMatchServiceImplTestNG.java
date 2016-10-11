@@ -56,6 +56,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         BulkMatchOutput bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
         Assert.assertNotNull(bulkMatchOutput);
         Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
+
+        MatchOutput output = bulkMatchOutput.getOutputList().get(0);
+        Assert.assertNotNull(output.getResult());
+        Assert.assertEquals(output.getResult().size(), 1);
     }
 
     @Test(groups = "functional")
@@ -69,6 +73,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+
     }
 
     @Test(groups = "functional")
@@ -87,6 +92,18 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         BulkMatchOutput bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
         Assert.assertNotNull(bulkMatchOutput);
         Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
+
+        MatchOutput output = bulkMatchOutput.getOutputList().get(0);
+        Assert.assertNotNull(output.getResult());
+        Assert.assertEquals(output.getResult().size(), 1);
+        List<Object> objs = output.getResult().get(0).getOutput();
+        int notNulls = 0;
+        for (Object obj: objs) {
+            if (obj != null) {
+                notNulls++;
+            }
+        }
+        Assert.assertTrue(notNulls > 5);
     }
 
     @Test(groups = "functional")

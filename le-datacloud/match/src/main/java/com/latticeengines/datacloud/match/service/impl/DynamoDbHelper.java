@@ -76,8 +76,18 @@ public class DynamoDbHelper implements DbHelper {
             throw new NullPointerException("Cannot find AccountLookupRequest in the MatchContext");
         }
         Long startTime = System.currentTimeMillis();
+        List<String> lookupIdsInOrder = request.getIds();
         List<LatticeAccount> accounts = accountLookupService.batchLookup(request);
+        Map<String, String> latticeIdToLookupIdMap = new HashMap<>();
+        for (int i = 0; i < accounts.size(); i++) {
+            String lookupId = lookupIdsInOrder.get(i);
+            LatticeAccount account = accounts.get(i);
+            if (account != null) {
+                latticeIdToLookupIdMap.put(account.getId(), lookupId);
+            }
+        }
         context.setMatchedAccounts(accounts);
+        context.setLatticeIdToLookupIdMap(latticeIdToLookupIdMap);
         log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
                 System.currentTimeMillis() - startTime, accounts.size()));
         return context;
@@ -140,15 +150,17 @@ public class DynamoDbHelper implements DbHelper {
     @Override
     public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
         Map<String, LatticeAccount> allAccounts = new HashMap<>();
+        Map<String, String> latticeIdToLookupIdMap = mergedContext.getLatticeIdToLookupIdMap();
         for (LatticeAccount account : mergedContext.getMatchedAccounts()) {
             if (account != null) {
-                allAccounts.put(account.getId(), account);
+                String latticeId = latticeIdToLookupIdMap.get(account.getId());
+                allAccounts.put(latticeId, account);
             }
         }
         for (MatchContext context : matchContextList) {
-            List<String> idsInOrder = context.getAccountLookupRequest().getIds();
+            List<String> lookupIdsInOrder = context.getAccountLookupRequest().getIds();
             List<LatticeAccount> accountsInOrder = new ArrayList<>();
-            for (String id : idsInOrder) {
+            for (String id : lookupIdsInOrder) {
                 if (allAccounts.containsKey(id)) {
                     accountsInOrder.add(allAccounts.get(id));
                 } else {
