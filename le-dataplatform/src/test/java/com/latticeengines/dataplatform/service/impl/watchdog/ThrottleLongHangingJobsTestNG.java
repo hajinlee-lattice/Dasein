@@ -92,8 +92,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
         doCopy(fs, copyEntries);
 
-        // Timeout set to 5s
-        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 5000L);
+        // Timeout set to 10s
+        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
         throttleLongHangingJobs.setModelingJobService(modelingJobService);
         throttleLongHangingJobs.setYarnService(yarnService);
         throttleLongHangingJobs.setJobEntityMgr(jobEntityMgr);
