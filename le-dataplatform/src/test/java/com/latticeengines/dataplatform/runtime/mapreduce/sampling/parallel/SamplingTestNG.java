@@ -64,7 +64,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
 
     private SampleStat inputStat;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional.platform" })
     public void setup() throws Exception {
         setupDirPath();
         setupFileSystem();
@@ -119,7 +119,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         return samplingConfig;
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional.platform" })
     public void testDefaultSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         checkFinalApplicationStatusSucceeded(samplingConfig);
@@ -131,7 +131,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional.platform" })
     public void testBootstrapSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.BOOTSTRAP_SAMPLING);
@@ -147,7 +147,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional.platform" })
     public void testStratifiedSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.STRATIFIED_SAMPLING);
@@ -163,7 +163,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional.platform" })
     public void testUpSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.UP_SAMPLING);
@@ -181,7 +181,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         deleteSamples();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional.platform" })
     public void testDownSampling() throws Exception {
         SamplingConfiguration samplingConfig = getSamplingConfig();
         samplingConfig.setSamplingType(SamplingType.DOWN_SAMPLING);
@@ -312,7 +312,7 @@ public class SamplingTestNG extends DataPlatformFunctionalTestNGBase {
         fs.delete(new Path(sampleDir), true);
     }
 
-    @AfterClass(groups = { "functional" })
+    @AfterClass(groups = { "functional.platform" })
     public void cleanup() throws Exception {
         fs.delete(new Path(baseDir), true);
     }
