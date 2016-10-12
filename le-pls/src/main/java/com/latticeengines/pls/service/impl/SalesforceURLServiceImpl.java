@@ -50,8 +50,7 @@ public class SalesforceURLServiceImpl implements SalesforceURLService {
     }
 
     @Override
-    public String getSandboxURL(String url)
-    {
+    public String getSandboxURL(String url) {
         return url.replaceAll("login.", "test.");
     }
 }
