@@ -192,6 +192,10 @@ public abstract class BaseRestApiProxy {
         return StringUtils.join(toCombine, "/");
     }
 
+    public String getRootpath() {
+        return rootpath;
+    }
+
     public String getHostport() {
         return hostport;
     }

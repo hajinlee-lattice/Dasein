@@ -32,7 +32,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
     private static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
     private static ObjectMapper om = new ObjectMapper();
 
-    @Value("${scoringapi.score.ratelimit:1800}")
+    @Value("${scoringapi.ratelimit.bulk.requests.max:20}")
     private int ratelimit;
 
     @Test(groups = "deployment", enabled = true)
@@ -211,7 +211,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         runScoringTest(url, true, false);
     }
 
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "scoreRecords" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods={"scoreRecords" })
     public void testScoreLoadLimitReached() throws IOException, InterruptedException {
         final String url = apiHostPort + "/scoreinternal/records";
         runScoreLoadLimitTest(url, true, ratelimit);

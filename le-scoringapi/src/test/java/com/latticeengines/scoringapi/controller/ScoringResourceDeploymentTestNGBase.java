@@ -13,11 +13,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplate;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -27,6 +31,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDeploymentTestNGBase {
@@ -117,6 +122,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected long testScore(String url, int n, long maxTime,
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
             boolean isPmmlModel, CustomerSpace customerSpace) throws IOException {
+        return testScore(url, n, maxTime, modelList, isInternalScoring, isPmmlModel, customerSpace, false);
+    }
+
+    protected long testScore(String url, int n, long maxTime,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
+            boolean isPmmlModel, CustomerSpace customerSpace, boolean useNoRetry) throws IOException {
         try {
             BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList, isPmmlModel);
             bulkScoreRequest.setHomogeneous(true);
@@ -128,8 +139,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             ResponseEntity<List> response = null;
             List<?> resultObjList = null;
             if (isInternalScoring) {
-                resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
-                        customerSpace.toString());
+                if (useNoRetry) {
+                    resultObjList = scorePercentileRecords(bulkScoreRequest, customerSpace.toString());
+                } else {
+                    resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
+                            customerSpace.toString());
+                }
             } else {
                 response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
                 resultObjList = response.getBody();
@@ -204,6 +219,58 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             exception = ex;
             throw ex;
         }
+    }
+
+    private List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
+            String tenantIdentifier) {
+        String url = constructUrl("/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
+
+        RestTemplate restTemplate = new RestTemplate();
+        List<?> resultList = restTemplate.postForObject(url, scoreRequest, List.class);
+        List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
+        if (resultList != null) {
+
+            for (Object obj : resultList) {
+                String json = JsonUtils.serialize(obj);
+                RecordScoreResponse recordScoreResponse = JsonUtils.deserialize(json, RecordScoreResponse.class);
+                recordScoreResponseList.add(recordScoreResponse);
+            }
+        }
+        return recordScoreResponseList;
+    }
+
+    protected String constructUrl(Object path, Object... variables) {
+        InternalScoringApiProxy proxy = (InternalScoringApiProxy) internalScoringApiProxy;
+        if (proxy.getHostport() == null || proxy.getHostport().equals("")) {
+            throw new NullPointerException("hostport must be set");
+        }
+
+        String end = proxy.getRootpath();
+        if (path != null) {
+            String expandedPath = new UriTemplate(path.toString()).expand(variables).toString();
+            end = combine(proxy.getRootpath(), expandedPath);
+        }
+        return combine(proxy.getHostport(), end);
+    }
+
+    private String combine(Object... parts) {
+        List<String> toCombine = new ArrayList<>();
+        for (int i = 0; i < parts.length; ++i) {
+            String part = parts[i].toString();
+            if (i != 0) {
+                if (part.startsWith("/")) {
+                    part = part.substring(1);
+                }
+            }
+
+            if (i != parts.length - 1) {
+                if (part.endsWith("/")) {
+                    part = part.substring(0, part.length() - 2);
+                }
+            }
+            toCombine.add(part);
+        }
+        return StringUtils.join(toCombine, "/");
     }
 
     protected BulkRecordScoreRequest getBulkScoreRequest(int n,
@@ -363,7 +430,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
     protected void runScoreLoadLimitTest(final String url, final boolean isInternalScoring, int ratelimit)
             throws IOException, InterruptedException {
-        int numberOfThreads = ratelimit / 200 + 2;
+        exception = null;
+        int numberOfThreads = ratelimit + 2;
 
         Runnable runnable = createScoringLoadLimitRunnable(url, modelList, isInternalScoring, false);
 
@@ -382,7 +450,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
         Assert.assertNotNull(exception);
         Assert.assertNotNull(exception.getMessage());
-        Assert.assertTrue(exception.getMessage().contains("too_many_requests"));
+        Assert.assertTrue(exception.getMessage().contains("429 Too Many Requests"));
+        exception = null;
     }
 
     private Runnable createScoringLoadLimitRunnable(final String url,
@@ -393,7 +462,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             @Override
             public void run() {
                 try {
-                    testScore(url, 200, 500000, modelList, isInternalScoring, false, customerSpace);
+                    testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
