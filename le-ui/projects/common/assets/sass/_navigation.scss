@@ -310,6 +310,20 @@ nav.primary-nav {
     }
 }
 
+html.no-cssmask {
+    nav.primary-nav {
+        .menu {
+            & > li {
+                &:hover > a span:first-of-type {
+                    .ico:not(.no-svg) {
+                        background-color: transparent;
+                    }
+                }
+            }
+        }
+    }
+}
+
 html:not(.no-cssmask) {
     nav.primary-nav {
         .ico:not(.no-svg) {
