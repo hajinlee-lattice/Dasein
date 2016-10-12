@@ -227,7 +227,8 @@ public abstract class AbstractMatcher implements Matcher {
             Map<String, Object> record) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
-        if (matchFieldNames == null || (matchFieldValues!= null && matchFieldNames.size() != matchFieldValues.size())) {
+        if (matchFieldNames == null
+                || (matchFieldValues != null && matchFieldNames.size() != matchFieldValues.size())) {
             throw new LedpException(LedpCode.LEDP_31005,
                     new String[] { String.valueOf(matchFieldNames == null ? "0" : matchFieldNames.size()),
                             matchFieldValues == null ? "0" : String.valueOf(matchFieldValues.size()) });
@@ -238,9 +239,18 @@ public abstract class AbstractMatcher implements Matcher {
             FieldSchema schema = fieldSchemas.get(fieldName);
             if (schema == null || (schema != null && schema.source != FieldSource.REQUEST)) {
                 Object fieldValue = null;
-                Object unparsedFieldValue = matchFieldValues==null?null:matchFieldValues.get(i);
+                Object unparsedFieldValue = matchFieldValues == null ? null : matchFieldValues.get(i);
                 if (schema != null) {
-                    fieldValue = unparsedFieldValue == null? null:FieldType.parse(schema.type, unparsedFieldValue);
+                    try {
+                        fieldValue = unparsedFieldValue == null ? null
+                                : FieldType.parse(schema.type, unparsedFieldValue);
+                    } catch (Exception ex) {
+                        // to make it more resilient, if there is exception in
+                        // parsing field value then log that and set the value
+                        // to null
+                        log.error("Could not parse value for field: " + fieldName, ex);
+                        fieldValue = null;
+                    }
                 } else {
                     fieldValue = unparsedFieldValue;
                 }
