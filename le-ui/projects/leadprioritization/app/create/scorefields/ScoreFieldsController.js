@@ -22,51 +22,62 @@ angular
 
     vm.init = function() {
         vm.initialized = true;
-        
-        vm.refreshLatticeFields();
-
+''
         FileHeaders.forEach(function(field, index) {
             if (vm.ignoredFields.indexOf(field) < 0) {
                 vm.FileHeaders.push(field);
             }
         });
 
+        vm.refreshLatticeFields();
+
         vm.validateForm();
     }
 
-    vm.refreshLatticeFields = function() {
+    vm.refreshLatticeFields = function(current) {
         vm.FieldMap = {};
-        vm.UserFields = [];
-        vm.MappedFields = [];
+        vm.UserMap = {};
+        vm.FileFields = [];
+        vm.ModelFields = [];
         vm.AvailableFields = [];
 
-        for (var i=0; i < vm.fieldMappings.length; i++) {
-            var field = vm.fieldMappings[i];
+        vm.fieldMappings.forEach(function(mapping, index) {
+            if (current) {
+                if (mapping.mappedField != current.mappedField && mapping.userField == current.userField) {
+                    mapping.userField = vm.ignoredFieldLabel;
+                }
+            }
 
-            if (field.userField) {
-                vm.UserFields.push(field.userField);
+            if (mapping.userField && mapping.userField != vm.ignoredFieldLabel) {
+                vm.UserMap[mapping.userField] = mapping;
+                vm.FileFields.push(mapping.userField);
             } else {
-                field.userField = vm.ignoredFieldLabel;
+                mapping.userField = vm.ignoredFieldLabel;
             }
 
-            if (field.mappedField) {
-                vm.FieldMap[field.mappedField] = field;
-                vm.MappedFields.push(field.mappedField);
+            if (mapping.mappedField) {
+                vm.FieldMap[mapping.mappedField] = mapping;
+                vm.ModelFields.push(mapping.mappedField);
             }
-
-        }
+        });
         
-        vm.MappedFields.forEach(function(field, index) {
-            if (vm.ignoredFields.indexOf(field) < 0 && 
-                vm.UserFields.indexOf(field) < 0 && 
-                vm.AvailableFields.indexOf(field) < 0) {
-                    vm.AvailableFields.push(field);
+        vm.FileHeaders.forEach(function(field, index) {
+            var mapping = vm.UserMap[field];
+            
+            console.log(index, field, mapping);
+            
+            if (!mapping || !isIn(mapping.mappedField, vm.requiredFields)) {
+                vm.AvailableFields.push(field);
             }
         });
     }
 
+    var isIn = function(item, array) {
+        return array.indexOf(item) > -1;
+    }
+
     vm.changeLatticeField = function(mapping, field) {
-        vm.refreshLatticeFields();
+        vm.refreshLatticeFields(mapping);
 
         $timeout(function() {
             vm.validateForm();
@@ -90,7 +101,7 @@ angular
         
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Preparing Scoring Job...');
-            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName);
+            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.scoring');
         });
     }
 
@@ -98,7 +109,7 @@ angular
         vm.FormValidated = true;
 
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (vm.requiredFields.indexOf(fieldMapping.mappedField) > -1 && (!fieldMapping.userField || fieldMapping.userField == vm.ignoredFieldLabel)) {
+            if (isIn(fieldMapping.mappedField, vm.requiredFields) && (!fieldMapping.userField || fieldMapping.userField == vm.ignoredFieldLabel)) {
                 vm.FormValidated = false;
             }
         });

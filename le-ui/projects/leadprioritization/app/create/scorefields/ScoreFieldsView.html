@@ -50,9 +50,10 @@
 	                            		ng-selected="true">
 	                            	{{ field.userField }}
 	                            </option>
-	                            <option value="{{ UnmappedField }}"
-	                            		ng-repeat="UnmappedField in vm.AvailableFields">
-	                            	{{ UnmappedField }}
+	                            <option value="{{ AvailableField }}"
+	                            		ng-repeat="AvailableField in vm.AvailableFields"
+	                            		ng-if="AvailableField != field.userField">
+	                            	{{ AvailableField }}
 	                            </option>
                             </select>
 						</td>
@@ -140,9 +141,10 @@
 	                            		ng-selected="true">
 	                            	{{ field.userField }}
 	                            </option>
-	                            <option value="{{ UnmappedField }}"
-	                            		ng-repeat="UnmappedField in vm.AvailableFields">
-	                            	{{ UnmappedField }}
+	                            <option value="{{ AvailableField }}"
+	                            		ng-repeat="AvailableField in vm.AvailableFields"
+	                            		ng-if="AvailableField != field.userField">
+	                            	{{ AvailableField }}
 	                            </option>
                             </select>
 						</td>

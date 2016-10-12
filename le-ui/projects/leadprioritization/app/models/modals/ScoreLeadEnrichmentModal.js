@@ -25,12 +25,13 @@ angular.module('mainApp.models.leadenrichment', [
         });
     };
 
-    this.showFileScoreModal = function(modelId, fileName) {
+    this.showFileScoreModal = function(modelId, fileName, state) {
         $http.get('app/models/views/ScoreLeadEnrichmentView.html', { cache: $templateCache }).success(function(html) {
             var scope = $rootScope.$new();
             scope.rescore = false;
             scope.modelId = modelId;
             scope.fileName = fileName;
+            scope.state = state;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -49,7 +50,7 @@ angular.module('mainApp.models.leadenrichment', [
         });
     };
 })
-.controller('ScoreLeadEnrichmentController', function($scope, $rootScope, $state, $stateParams, ResourceUtility, JobsService, ImportService, EnrichmentService) {
+.controller('ScoreLeadEnrichmentController', function($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, JobsService, ImportService, EnrichmentService) {
     var vm = this;
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -58,6 +59,7 @@ angular.module('mainApp.models.leadenrichment', [
 
     angular.extend(vm, {
         rescore: $scope.rescore,
+        state: $scope.state,
         enableLeadEnrichment: false,
     });
 
@@ -97,6 +99,12 @@ angular.module('mainApp.models.leadenrichment', [
 
     $scope.cancelClicked = function() {
         $("#modalContainer").modal('hide');
+
+        if (vm.state) {
+            $timeout(function() {
+                $state.go(vm.state);
+            }, 1)
+        }
     };
 
     vm.init = function() {

@@ -54,7 +54,6 @@ angular.module('mainApp.create.csvBulkUpload', [
     }
 
     vm.clickNext = function() {
-        console.log(vm.Result);
         if (IsPmml) {
             ShowSpinner('Executing Scoring Job...');
 
@@ -72,7 +71,6 @@ angular.module('mainApp.create.csvBulkUpload', [
             metaData.description = vm.Result.description;
             metaData.schemaInterpretation = vm.Result.schema_interpretation;
 
-            console.log(metaData);
             ImportStore.Set(fileName, metaData);
 
             setTimeout(function() {
