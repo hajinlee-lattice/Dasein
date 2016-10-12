@@ -302,13 +302,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             builder.append("E.").append(field.get("Field")).append(", ");
             columnsInDb.add(field.get("Field").toString());
         }
-
-        String selectedColumns = getSelectedColumns(columns, columnsInDb);
-        if (StringUtils.isNotEmpty(selectedColumns)) {
-            return selectedColumns;
+        if (columns == null) {
+            return builder.toString();
         }
+        return getSelectedColumns(columns, columnsInDb);
 
-        return builder.toString();
     }
 
     private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb) {
@@ -326,7 +324,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (builder.length() > 0) {
             return builder.toString();
         }
-        return null;
+        return "";
     }
 
     @Override
