@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("hgDataTechIndicators")
-public class HGDataTechIndicators implements DerivedSource {
+public class HGDataTechIndicators implements DerivedSource, DomainBased {
 
     private static final long serialVersionUID = 603829385601451981L;
 
@@ -38,6 +39,11 @@ public class HGDataTechIndicators implements DerivedSource {
     @Override
     public String[] getPrimaryKey() {
         return new String[] { "Domain" };
+    }
+
+    @Override
+    public String getDomainField() {
+        return "Domain";
     }
 
     @Override
