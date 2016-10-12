@@ -21,23 +21,25 @@ public class WorkflowUtils {
     private static final Log log = LogFactory.getLog(WorkflowUtils.class);
 
     public static void updateJobFromYarn(Job job, WorkflowJob workflowJob, JobProxy jobProxy,
-            WorkflowJobEntityMgr workflowJobEntityMgr) {
-        YarnApplicationState jobState = null;
+                                         WorkflowJobEntityMgr workflowJobEntityMgr, boolean fromWorkflowCache) {
+        if (!fromWorkflowCache) {
+            YarnApplicationState jobState = null;
 
-        if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
-            try {
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
-                        .getApplicationId());
-                jobState = status.getState();
-                workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
-            } catch (Exception e) {
-                log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
+            if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
+                try {
+                    com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                            .getApplicationId());
+                    jobState = status.getState();
+                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+                } catch (Exception e) {
+                    log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
+                }
             }
-        }
-        // We only trust the WorkflowJob status if it is non-null
-        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
-        if (status != null) {
-            job.setJobStatus(status);
+            // We only trust the WorkflowJob status if it is non-null
+            JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
+            if (status != null) {
+                job.setJobStatus(status);
+            }
         }
     }
 

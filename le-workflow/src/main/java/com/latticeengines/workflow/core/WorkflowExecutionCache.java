@@ -119,7 +119,7 @@ public class WorkflowExecutionCache {
                     job.setErrorCode(errorDetails.getErrorCode());
                     job.setErrorMsg(errorDetails.getErrorMsg());
                 }
-                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr, true);
             }
 
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {

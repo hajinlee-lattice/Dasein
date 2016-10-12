@@ -200,7 +200,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
         } else {
-            WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+            WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr, false);
         }
         return job;
     }
