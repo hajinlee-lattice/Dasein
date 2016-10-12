@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +16,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterRebuildParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSourceParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
@@ -254,6 +254,8 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
             sourceParameters.setSourceType(AccountMasterSourceParameters.DomainBased);
             sourceParameters.setJoinKey(((DomainBased)source).getDomainField());
             log.info("Add Domain based source " + sourceName + " " + ((DomainBased)source).getDomainField());
+        } else {
+            log.info(sourceName + " is neither DUNS based nor Domain based, skip.")
         }
 
         return sourceParameters;
@@ -264,7 +266,7 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
         try {
             char beanName[] = sourceName.toCharArray();
             beanName[0] = Character.toLowerCase(beanName[0]);
-            if (sourceName.equals("HGDataPivoted")) {
+            if (sourceName.equals("HGDataPivoted") || sourceName.equals("HGDataTechIndicators")) {
                 beanName[1] = Character.toLowerCase(beanName[1]);
             } if (sourceName.equals("HPANewPivoted")) {
                 beanName[1] = Character.toLowerCase(beanName[1]);
