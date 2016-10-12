@@ -30,7 +30,7 @@
 
                 <li 
                         ui-sref="home.model.refine({ modelId: '{{ data.Id | escape }}' })" 
-                        data-ng-if="data.ModelType && showRefineAndClone && data.ModelFileType != 'PmmlModel'"
+                        data-ng-if="data.ModelType && showRefineAndClone && data.ModelFileType != 'PmmlModel' && !data.Uploaded"
                         data-ng-click="refineAndCloneClick($event)">
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
                     <i class="fa fa-copy"></i>
@@ -51,7 +51,7 @@
                     <i class="fa {{Deactivating ? 'fa-spinner fa-pulse fa-fw' : 'fa-stop-circle-o'}}"></i>
                 </li>
 
-                <li data-ng-if="showRefineAndClone" data-ng-click="showCopyModelToTenantModal($event, data)">
+                <li data-ng-if="showRefineAndClone && !data.Uploaded" data-ng-click="showCopyModelToTenantModal($event, data)">
                     <a href="javascript:void(0)">Copy to Another Tenant</a>
                     <i class="ico ico-lattice-dots"></i>
                 </li>

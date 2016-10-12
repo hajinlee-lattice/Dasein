@@ -166,6 +166,7 @@ angular
                     controller: function($scope, $rootScope, Model, IsPmml, FeatureFlagService) {
                         $scope.IsPmml = IsPmml;
                         $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
+                        $scope.Uploaded = Model.ModelDetails.Uploaded;
 
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();

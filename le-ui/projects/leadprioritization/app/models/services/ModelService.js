@@ -120,7 +120,8 @@ angular.module('mainApp.models.services.ModelService', [
                                 ModelFileType: rawObj.ModelType,
                                 Status      : rawObj.Status,
                                 Incomplete  : rawObj.Incomplete,
-                                ModelType   : rawObj.SourceSchemaInterpretation
+                                ModelType   : rawObj.SourceSchemaInterpretation,
+                                Uploaded    : rawObj.Uploaded
                             };}
                     );
 
