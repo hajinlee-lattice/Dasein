@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service;
+package com.latticeengines.datacloud.match.exposed.service;
 
 public interface HasDataCloudVersion {
 

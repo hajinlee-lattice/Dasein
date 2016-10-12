@@ -9,6 +9,7 @@
 
     <properties>
         <component-name>datacloud-match</component-name>
+        <module-name>match</module-name>
     </properties>
 
     <parent>

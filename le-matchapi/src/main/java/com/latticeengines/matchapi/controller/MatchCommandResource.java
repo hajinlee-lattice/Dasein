@@ -9,14 +9,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.datacloud.match.datasource.MatchClientContextHolder;
+import com.latticeengines.datacloud.match.exposed.datasource.MatchClientContextHolder;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandsService;
 import com.latticeengines.domain.exposed.datacloud.Commands;
 import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
 import com.latticeengines.domain.exposed.datacloud.MatchStatusResponse;
-import com.latticeengines.network.exposed.propdata.MatchCommandInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "matchcommands", description = "REST resource for match commands")
 @RestController
 @RequestMapping("/matchcommands")
-public class MatchCommandResource implements MatchCommandInterface {
+public class MatchCommandResource {
 
     @Autowired
     private MatchCommandsService matchCommandsService;
@@ -34,7 +33,6 @@ public class MatchCommandResource implements MatchCommandInterface {
     @ApiOperation(value = "Get the status of a match command on the specific client. "
             + "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. "
             + "PD130 should be used only in QA.")
-    @Override
     public MatchStatusResponse getMatchStatus(@PathVariable Long commandID,
             @RequestParam(value = "client", required = false, defaultValue = "Default") String clientName) {
         MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
@@ -47,7 +45,6 @@ public class MatchCommandResource implements MatchCommandInterface {
     @ApiOperation(value = "Create a match command on the specific client. "
             + "URL parameter matchClient can be PD126, PD127, PD128, PD131, or PD130. "
             + "PD130 should be used only in QA.")
-    @Override
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
             @RequestParam(value = "client", required = false, defaultValue = "Default") String clientName) {
         MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
@@ -58,7 +55,6 @@ public class MatchCommandResource implements MatchCommandInterface {
     @ResponseBody
     @ApiOperation(value = "Return the best matcher client to use. " +
             "Requires a query parameter \"rows\", which is the number of records to be matched.")
-    @Override
     public MatchClientDocument getBestMatchClient(@RequestParam(value = "rows", required = true) int numRows) {
         return matchCommandsService.getBestMatchClient(numRows);
     }

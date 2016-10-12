@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.exposed.service;
 
 import java.util.List;
 
-import com.latticeengines.datacloud.match.service.HasDataCloudVersion;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 
 public interface DbHelper extends HasDataCloudVersion {

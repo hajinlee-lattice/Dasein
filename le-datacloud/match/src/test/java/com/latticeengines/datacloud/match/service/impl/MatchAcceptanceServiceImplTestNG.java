@@ -21,8 +21,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.datasource.MatchClientContextHolder;
-import com.latticeengines.datacloud.match.datasource.MatchClientRoutingDataSource;
+import com.latticeengines.datacloud.match.exposed.datasource.MatchClientContextHolder;
+import com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandsService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.Commands;

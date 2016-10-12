@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.datasource;
+package com.latticeengines.datacloud.match.exposed.datasource;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 

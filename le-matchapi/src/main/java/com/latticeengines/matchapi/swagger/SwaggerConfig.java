@@ -9,11 +9,11 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.latticeengines.common.exposed.util.SwaggerUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseMessageBuilder;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
@@ -34,9 +34,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
-                .apis(SwaggerUtils.getApiSelector(
-                        "com.latticeengines.matchapi.controller.*",
-                        "com.latticeengines.propdata.api.controller.*")) //
+                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.matchapi.controller")) //
                 .paths(PathSelectors.any()) //
                 .build() //
                 .pathMapping("/match") //

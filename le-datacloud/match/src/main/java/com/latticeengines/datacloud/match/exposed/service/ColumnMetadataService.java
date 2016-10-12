@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 
-import com.latticeengines.datacloud.match.service.HasDataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;

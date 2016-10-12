@@ -9,6 +9,7 @@
 
     <properties>
         <component-name>datacloud-yarn</component-name>
+        <module-name>yarn</module-name>
     </properties>
 
     <parent>

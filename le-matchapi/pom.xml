@@ -115,16 +115,33 @@
             <artifactId>le-propdata</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datacloud-match</artifactId>
             <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-match</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-yarn</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datacloud-yarn</artifactId>
             <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datafabric</artifactId>
@@ -144,6 +161,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>

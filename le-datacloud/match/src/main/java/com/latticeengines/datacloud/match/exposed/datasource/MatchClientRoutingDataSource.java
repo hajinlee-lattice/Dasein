@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.datasource;
+package com.latticeengines.datacloud.match.exposed.datasource;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 

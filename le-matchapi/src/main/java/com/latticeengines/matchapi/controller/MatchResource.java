@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.network.exposed.propdata.MatchInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +31,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "match", description = "REST resource for propdata matches")
 @RestController
 @RequestMapping("/matches")
-public class MatchResource implements MatchInterface {
+public class MatchResource {
     private static final Log log = LogFactory.getLog(MatchResource.class);
 
     @Autowired

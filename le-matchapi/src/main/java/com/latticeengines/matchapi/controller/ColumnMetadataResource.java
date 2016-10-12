@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "columnmetadata", description = "REST resource for column metadata")
 @RestController
 @RequestMapping("/metadata")
-public class ColumnMetadataResource implements ColumnMetadataInterface {
+public class ColumnMetadataResource {
 
     @Autowired
     private BeanDispatcher beanDispatcher;
@@ -32,7 +31,6 @@ public class ColumnMetadataResource implements ColumnMetadataInterface {
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
-    @Override
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         try {

@@ -9,6 +9,7 @@
 
     <properties>
         <component-name>datacloud-etl</component-name>
+        <module-name>etl</module-name>
     </properties>
 
     <parent>

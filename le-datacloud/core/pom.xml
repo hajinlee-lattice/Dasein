@@ -9,6 +9,7 @@
 
     <properties>
         <component-name>datacloud-core</component-name>
+        <module-name>core</module-name>
     </properties>
 
     <parent>

@@ -50,6 +50,9 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "AccountLookupHdfsVersion", nullable = false)
     private String accountLookupHdfsVersion;
 
+    @Column(name = "DynamoTableSignature", length = 100)
+    private String dynamoTableSignature;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private Status status;
@@ -110,6 +113,14 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getDynamoTableSignature() {
+        return dynamoTableSignature;
+    }
+
+    public void setDynamoTableSignature(String dynamoTableSignature) {
+        this.dynamoTableSignature = dynamoTableSignature;
     }
 
     public enum Status {

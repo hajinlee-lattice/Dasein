@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,11 @@ import com.latticeengines.datacloud.match.entitymgr.impl.LatticeAccountMgrImpl;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
+import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 
 
 @Component("accountLookupService")
@@ -37,10 +40,12 @@ public class AccountLookupServiceImpl implements AccountLookupService {
     @Autowired
     private FabricDataService dataService;
 
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
 
     public AccountLookupServiceImpl() {
-        lookupMgrs = new HashMap<String, AccountLookupEntryMgr>();
-        accountMgrs = new HashMap<String, LatticeAccountMgr>();
+        lookupMgrs = new HashMap<>();
+        accountMgrs = new HashMap<>();
     }
 
 
@@ -53,15 +58,13 @@ public class AccountLookupServiceImpl implements AccountLookupService {
 
         List<AccountLookupEntry> lookupEntries =  lookupMgr.batchFindByKey(request.getIds());
 
-        List<String> accountIds = new ArrayList<String>();
+        List<String> accountIds = new ArrayList<>();
         for (AccountLookupEntry entry : lookupEntries) {
             String id = (entry == null) ? null : entry.getLatticeAccountId();
             accountIds.add(id);
         }
 
-        List<LatticeAccount> accounts = accountMgr.batchFindByKey(accountIds);
-
-        return accounts;
+        return accountMgr.batchFindByKey(accountIds);
     }
 
     public AccountLookupEntryMgr getLookupMgr(String version) {
@@ -75,7 +78,17 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         AccountLookupEntryMgr lookupMgr = lookupMgrs.get(version);
 
         if (lookupMgr == null) {
-            lookupMgr = new AccountLookupEntryMgrImpl(messageService, dataService, version);
+            DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(version);
+            if (dataCloudVersion == null) {
+                throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
+            }
+            String signature = dataCloudVersion.getDynamoTableSignature();
+            String fullVersion = version;
+            if (StringUtils.isNotEmpty(signature)) {
+                fullVersion += "_" + signature;
+            }
+            log.info("Use " + fullVersion + " as full version of AccountLookup for " + version);
+            lookupMgr = new AccountLookupEntryMgrImpl(messageService, dataService, fullVersion);
             lookupMgr.init();
             lookupMgrs.put(version, lookupMgr);
         }
@@ -94,9 +107,18 @@ public class AccountLookupServiceImpl implements AccountLookupService {
 
     private synchronized LatticeAccountMgr getAccountMgrSync(String version) {
         LatticeAccountMgr accountMgr = accountMgrs.get(version);
-
         if (accountMgr == null) {
-            accountMgr = new LatticeAccountMgrImpl(messageService, dataService, version);
+            DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(version);
+            if (dataCloudVersion == null) {
+                throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
+            }
+            String signature = dataCloudVersion.getDynamoTableSignature();
+            String fullVersion = version;
+            if (StringUtils.isNotEmpty(signature)) {
+                fullVersion += "_" + signature;
+            }
+            log.info("Use " + fullVersion + " as full version of LatticeAccount for " + version);
+            accountMgr = new LatticeAccountMgrImpl(messageService, dataService, fullVersion);
             accountMgr.init();
             accountMgrs.put(version, accountMgr);
         }
