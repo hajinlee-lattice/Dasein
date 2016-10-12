@@ -85,6 +85,7 @@
                                 <argument>PLS_MultiTenant</argument>
                                 <argument>com.latticeengines.domain.exposed.dataflow</argument>
                                 <argument>com.latticeengines.domain.exposed.dataplatform</argument>
+                                <argument>com.latticeengines.domain.exposed.dataplatform.metrics</argument>
                                 <argument>com.latticeengines.domain.exposed.eai</argument>
                                 <argument>com.latticeengines.domain.exposed.metadata</argument>
                                 <argument>com.latticeengines.domain.exposed.modeling</argument>

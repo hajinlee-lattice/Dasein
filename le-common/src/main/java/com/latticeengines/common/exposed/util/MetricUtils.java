@@ -94,11 +94,19 @@ public class MetricUtils {
     }
 
     public static String toLogMessage(Measurement<?, ?> measurement) {
+        return toLogMessage(measurement, null);
+    }
+
+    public static String toLogMessage(Measurement<?, ?> measurement, Map<String, Object> fieldMapArg) {
         Dimension dimension = measurement.getDimension();
         Map<String, String> tagMap = parseTags(dimension);
 
         Fact fact = measurement.getFact();
-        Map<String, Object> fieldMap = parseFields(fact);
+
+        Map<String, Object> fieldMap = fieldMapArg;
+        if (fieldMap == null) {
+            fieldMap = parseFields(fact);
+        }
 
         List<String> tokens = new ArrayList<>(Collections.singleton("Measurement="
                 + measurement.getClass().getSimpleName()));

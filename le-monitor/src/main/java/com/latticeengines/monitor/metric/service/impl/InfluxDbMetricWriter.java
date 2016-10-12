@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -111,12 +111,12 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
-        write(db, Collections.singleton(measurement));
+        write(db, Collections.singletonList(measurement), null);
     }
 
     @Override
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
-            Collection<? extends Measurement<F, D>> measurements) {
+            List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
         if (enabled) {
             boolean needToWrite = false;
             for (Measurement<F, D> measurement : measurements) {
@@ -127,7 +127,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
             }
             if (needToWrite) {
                 try {
-                    final BatchPoints batchPoints = generateBatchPoints(db, measurements);
+                    final BatchPoints batchPoints = generateBatchPoints(db, measurements, fieldMaps);
                     monitorExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -154,7 +154,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     }
 
     private <F extends Fact, D extends Dimension> BatchPoints generateBatchPoints(MetricDB db,
-            Collection<? extends Measurement<F, D>> measurements) {
+            List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
         builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
         builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
@@ -164,14 +164,20 @@ public class InfluxDbMetricWriter implements MetricWriter {
         RetentionPolicy policy = RetentionPolicyImpl.DEFAULT;
         List<Point> points = new ArrayList<>();
 
-        for (Measurement<F, D> measurement : measurements) {
+        for (int i = 0; i < measurements.size(); i++) {
+            Measurement<F, D> measurement  = measurements.get(i);
             Fact fact = measurement.getFact();
             Dimension dimension = measurement.getDimension();
             policy = measurement.getRetentionPolicy();
             Point.Builder pointBuilder = Point.measurement(measurement.getClass().getSimpleName());
             pointBuilder = pointBuilder.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
             pointBuilder.tag(MetricUtils.parseTags(dimension));
-            pointBuilder = pointBuilder.fields(MetricUtils.parseFields(fact));
+            if (fieldMaps != null) {
+                Map<String, Object> fieldMap = fieldMaps.get(i);
+                pointBuilder = pointBuilder.fields(fieldMap);
+            } else {
+                pointBuilder = pointBuilder.fields(MetricUtils.parseFields(fact));
+            }
             points.add(pointBuilder.build());
         }
 

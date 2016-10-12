@@ -2,7 +2,8 @@ package com.latticeengines.monitor.metric.service.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -39,25 +40,28 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
     @PostConstruct
     private void postConstruct() {
-        logPrefix = String.format("%s=\"%s\" ", MetricUtils.TAG_HOST,
-                getHostName() == null ? MetricUtils.NULL : getHostName());
+        logPrefix = String.format("%s=\"%s\" ", MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL
+                : getHostName());
         logPrefix += String.format("%s=\"%s\" ", MetricUtils.TAG_ENVIRONMENT, environment);
     }
 
     @Override
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
-            Collection<? extends Measurement<F, D>> measurements) {
+            List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
         if (enabled) {
-            monitorExecutor.submit(new MetricRunnable<>(db, measurements));
+            monitorExecutor.submit(new MetricRunnable<>(db, measurements, fieldMaps));
         }
     }
 
     private <F extends Fact, D extends Dimension> void writeInternal(MetricDB db,
-                                                                     Collection<? extends Measurement<F, D>> measurements) {
+            List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
         if (enabled) {
-            for (Measurement<F, D> measurement : measurements) {
+            for (int i = 0; i < measurements.size(); i++) {
+                Measurement<F, D> measurement = measurements.get(i);
+                Map<String, Object> fieldMap = fieldMaps.get(i);
+
                 if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement));
+                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement, fieldMap));
                 }
             }
         }
@@ -74,16 +78,19 @@ public class SplunkLogMetricWriter implements MetricWriter {
     private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
 
         private MetricDB metricDb;
-        private Collection<? extends Measurement<F, D>> measurements;
+        private List<? extends Measurement<F, D>> measurements;
+        private List<Map<String, Object>> fieldMaps;
 
-        MetricRunnable(MetricDB metricDb, Collection<? extends Measurement<F, D>> measurements) {
+        MetricRunnable(MetricDB metricDb, List<? extends Measurement<F, D>> measurements,
+                List<Map<String, Object>> fieldMaps) {
             this.metricDb = metricDb;
             this.measurements = measurements;
+            this.fieldMaps = fieldMaps;
         }
 
         @Override
         public void run() {
-            writeInternal(metricDb, measurements);
+            writeInternal(metricDb, measurements, fieldMaps);
         }
     }
 

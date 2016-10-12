@@ -10,6 +10,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
@@ -33,7 +34,12 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
+    }
 
+    @Test(groups = { "functional.platform", "functional.production" })
+    public void getCapacitySchedulerInfo() {
+        CapacitySchedulerInfo schedulerInfo = yarnService.getCapacitySchedulerInfo();
+        assertNotNull(schedulerInfo);
     }
 
     @Test(groups = { "functional.platform", "functional.production" })

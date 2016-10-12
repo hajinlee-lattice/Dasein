@@ -875,7 +875,7 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
             <version>${springfox.swagger.version}</version>
-        </dependency> 
+        </dependency>
 
         <dependency>
             <groupId>io.swagger</groupId>
@@ -995,12 +995,6 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons.io.version}</version>
         </dependency>
 
         <!-- TEST dependencies -->

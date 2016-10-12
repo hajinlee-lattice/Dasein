@@ -4,6 +4,7 @@ import com.latticeengines.common.exposed.metric.RetentionPolicy;
 
 public enum RetentionPolicyImpl implements RetentionPolicy {
     DEFAULT("default", "INF", 1), //
+    TWO_QUARTERS("TwoQuarters", "26w", 1), //
     ONE_MONTH("OneMonth", "4w", 1), //
     ONE_WEEK("OneWeek", "1w", 1), //
     ONE_DAY("OneDay", "24h", 1), //

@@ -44,6 +44,7 @@ public enum LedpCode {
     LEDP_12009("Failed to submit MapReduce job {0}"), //
     LEDP_12010("Failed to {0} data by using Sqoop"), //
     LEDP_12011("Failed to complete Python process due to {0}"), //
+    LEDP_12012("Failed to retrieve CapacitySchedulerInfo via reflection"), //
 
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //

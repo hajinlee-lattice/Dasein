@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.service.impl;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,14 +12,18 @@ import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.ComparisonChain;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("yarnService")
@@ -37,7 +42,7 @@ public class YarnServiceImpl implements YarnService {
         } else {
             String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS);
             return "http://" + rmHostPort + "/ws/v1/cluster";
-        }        
+        }
     }
 
     @Override
@@ -47,8 +52,23 @@ public class YarnServiceImpl implements YarnService {
             return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
         } catch (Exception e) {
             String rmRestEndpointBaseUrl = performFailover();
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class); 
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
         }
+    }
+
+    @Override
+    public CapacitySchedulerInfo getCapacitySchedulerInfo() {
+        SchedulerTypeInfo schedulerTypeInfo = this.getSchedulerInfo();
+
+        Field field = ReflectionUtils.findField(SchedulerTypeInfo.class, "schedulerInfo");
+        field.setAccessible(true);
+        CapacitySchedulerInfo capacitySchedulerInfo = null;
+        try {
+            capacitySchedulerInfo = (CapacitySchedulerInfo) field.get(schedulerTypeInfo);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_12012, e);
+        }
+        return capacitySchedulerInfo;
     }
 
     @Override
@@ -117,7 +137,7 @@ public class YarnServiceImpl implements YarnService {
             return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
         }
     }
-    
+
     private String performFailover() {
         Collection<String> rmIds = HAUtil.getRMHAIds(yarnConfiguration);
         String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
@@ -131,10 +151,13 @@ public class YarnServiceImpl implements YarnService {
         }
         currentIndex = (currentIndex + 1) % rmServiceIds.length;
         yarnConfiguration.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
-        String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
         String address = yarnConfiguration.get(YarnConfiguration.RM_ADDRESS + "." + rmServiceIds[currentIndex]);
-        String webappAddress = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
-        String schedulerAddress = yarnConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "." + rmServiceIds[currentIndex]);
+        String webappAddress = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
+        String schedulerAddress = yarnConfiguration.get(YarnConfiguration.RM_SCHEDULER_ADDRESS + "."
+                + rmServiceIds[currentIndex]);
         yarnConfiguration.set(YarnConfiguration.RM_ADDRESS, address);
         yarnConfiguration.set(YarnConfiguration.RM_WEBAPP_ADDRESS, webappAddress);
         yarnConfiguration.set(YarnConfiguration.RM_SCHEDULER_ADDRESS, schedulerAddress);

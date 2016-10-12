@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/context
       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <context:annotation-config/>
+    <context:annotation-config />
     <context:component-scan base-package="com.latticeengines.dataplatform">
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.controller.*" />
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.mbean.*" />
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.dataplatform.exposed.yarn.runtime.*" />
+        <context:exclude-filter type="aspectj"
+            expression="com.latticeengines.dataplatform.controller.*" />
+        <context:exclude-filter type="aspectj"
+            expression="com.latticeengines.dataplatform.mbean.*" />
+        <context:exclude-filter type="aspectj"
+            expression="com.latticeengines.dataplatform.exposed.yarn.runtime.*" />
     </context:component-scan>
 
-    <import resource="classpath:dataplatform-camille-context.xml"/>
-    <import resource="classpath:dataplatform-yarn-config-context.xml"/>
-    <import resource="classpath:dataplatform-yarn-client-context.xml"/>
+    <import resource="classpath:dataplatform-camille-context.xml" />
+    <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:dataplatform-yarn-client-context.xml" />
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     <import resource="classpath:sampling/dataplatform-parallel-mr-sampling-context.xml" />
     <import resource="classpath:python/dataplatform-mr-python-context.xml" />
@@ -24,8 +26,11 @@
     <import resource="classpath:dataplatform-persistence-context.xml" />
     <import resource="classpath:dataplatform-validation-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
-    <import resource="classpath:remote-context.xml"/>
-    <import resource="classpath:swlib-context.xml"/>
-    <import resource="classpath:common-component-context.xml"/>
-    <import resource="classpath:common-threadpool-context.xml"/>
+    <import resource="classpath:monitor-metric-context.xml" />
+    <import resource="classpath:monitor-aspects-context.xml" />
+    <import resource="classpath:proxy-context.xml" />
+    <import resource="classpath:remote-context.xml" />
+    <import resource="classpath:swlib-context.xml" />
+    <import resource="classpath:common-component-context.xml" />
+    <import resource="classpath:common-threadpool-context.xml" />
 </beans>

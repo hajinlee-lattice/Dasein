@@ -58,7 +58,7 @@ public class InfluxDbMetricWriterTestNG extends AbstractTestNGSpringContextTests
             return;
         }
         TestMeasurement measurement = new TestMeasurement();
-        influxDbMetricWriter.write(MetricDB.TEST_DB, Collections.singletonList(measurement));
+        influxDbMetricWriter.write(MetricDB.TEST_DB, Collections.singletonList(measurement), null);
 
         Thread.sleep(3000L);
     }
