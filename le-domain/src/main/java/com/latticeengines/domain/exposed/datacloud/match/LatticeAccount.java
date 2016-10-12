@@ -83,7 +83,12 @@ public class LatticeAccount implements FabricEntity<LatticeAccount> {
 
     @Override
     public LatticeAccount fromHdfsAvroRecord(GenericRecord record) {
-        setId(record.get(LATTICE_ACCOUNT_ID_HDFS).toString());
+        Object idObj = record.get(LATTICE_ACCOUNT_ID_HDFS);
+        if (idObj instanceof Utf8 || idObj instanceof String) {
+            setId(idObj.toString());
+        } else {
+            setId(String.valueOf(idObj));
+        }
         Map<String, Object> mapAttributes = new HashMap<>();
         for (Schema.Field field : record.getSchema().getFields()) {
             String key = field.name();

@@ -41,6 +41,8 @@ import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
@@ -50,8 +52,6 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
@@ -131,7 +131,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "aws", enabled = false)
+    @Test(groups = "aws")
     public void exportAccountLookup() throws Exception {
         setupMethod(ACCOUNT_LOOKUP_ENTRY);
 
@@ -212,7 +212,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.setName("LatticeAccount");
         Schema schema = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"LatticeAccount\",\"doc\":\"Testing data\"," + "\"fields\":["
-                        + "{\"name\":\"" + LatticeAccount.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"string\",\"null\"]},"
+                        + "{\"name\":\"" + LatticeAccount.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"long\",\"null\"]},"
                         + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                         + "{\"name\":\"DUNS\",\"type\":[\"string\",\"null\"]}" + "]}");
 
@@ -220,7 +220,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList((Object) String.valueOf(i), String.valueOf(i) + "@lattice-engines.com",
+            List<Object> tuple = Arrays.asList((Object) Long.valueOf(String.valueOf(i)), String.valueOf(i) + "@lattice-engines.com",
                     "123456789");
             data.add(tuple);
         }
@@ -236,7 +236,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         Attribute attribute = new Attribute();
         attribute.setName(LatticeAccount.LATTICE_ACCOUNT_ID_HDFS);
-        attribute.setDataType("String");
+        attribute.setDataType("Long");
         table.addAttribute(attribute);
 
         attribute = new Attribute();
@@ -257,14 +257,14 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.setName("LatticeAccount");
         Schema schema = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"AccountMasterLookup\",\"doc\":\"Testing data\"," + "\"fields\":["
-                        + "{\"name\":\"" + AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"string\",\"null\"]},"
+                        + "{\"name\":\"" + AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"long\",\"null\"]},"
                         + "{\"name\":\"Key\",\"type\":[\"string\",\"null\"]}" + "]}");
 
         List<GenericRecord> recordList = new ArrayList<>();
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList((Object) String.valueOf(i), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
+            List<Object> tuple = Arrays.asList((Object) Long.valueOf(String.valueOf(i)), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
             data.add(tuple);
         }
 
@@ -278,7 +278,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         Attribute attribute = new Attribute();
         attribute.setName(AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS);
-        attribute.setDataType("String");
+        attribute.setDataType("Long");
         table.addAttribute(attribute);
 
         attribute = new Attribute();

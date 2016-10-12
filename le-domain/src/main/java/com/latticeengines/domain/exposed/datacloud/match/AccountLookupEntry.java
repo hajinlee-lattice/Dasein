@@ -5,6 +5,7 @@ import javax.persistence.Id;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
@@ -123,7 +124,13 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
 
     @Override
     public AccountLookupEntry fromHdfsAvroRecord(GenericRecord record) {
-        String latticeAccountId = record.get(LATTICE_ACCOUNT_ID_HDFS).toString();
+        Object idObj = record.get(LATTICE_ACCOUNT_ID_HDFS);
+        String latticeAccountId;
+        if (idObj instanceof Utf8 || idObj instanceof String) {
+            latticeAccountId = idObj.toString();
+        } else {
+            latticeAccountId = String.valueOf(idObj);
+        }
         String key = record.get(KEY_HDFS).toString();
         return fromKey(latticeAccountId, key);
     }
