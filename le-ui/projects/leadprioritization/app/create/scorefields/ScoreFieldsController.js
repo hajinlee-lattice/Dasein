@@ -22,7 +22,7 @@ angular
 
     vm.init = function() {
         vm.initialized = true;
-''
+        
         FileHeaders.forEach(function(field, index) {
             if (vm.ignoredFields.indexOf(field) < 0) {
                 vm.FileHeaders.push(field);
@@ -63,8 +63,6 @@ angular
         
         vm.FileHeaders.forEach(function(field, index) {
             var mapping = vm.UserMap[field];
-            
-            console.log(index, field, mapping);
             
             if (!mapping || !isIn(mapping.mappedField, vm.requiredFields)) {
                 vm.AvailableFields.push(field);
