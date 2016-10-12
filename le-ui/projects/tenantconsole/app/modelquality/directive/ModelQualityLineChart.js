@@ -31,7 +31,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 .attr("width", width)
                 .attr("height", height);
 
-            var x = window.x = d3.scaleTime().range([0, width]),
+            var x = d3.scaleTime().range([0, width]),
                 x2 = d3.scaleTime().range([0, width]), // copy for zoom
                 y = d3.scaleLinear().range([height, 0]),
                 color = d3.scaleOrdinal(d3.schemeCategory10);
@@ -87,6 +87,17 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 .style("fill", "transparent");
 
             var bisectDate = d3.bisector(function(d) { return d; }).left;
+
+            var tooltipXDecorator = function (width) {
+                return function (mouseX) {
+                    if (mouseX + 230 > width) {
+                        return mouseX - 220 + "px";
+                    } else {
+                        return mouseX + 75 + "px";
+                    }
+                };
+            };
+            var tooltipX = tooltipXDecorator(width);
 
             var render = function () {
                 var seriesData = scope.data.data;
@@ -204,23 +215,18 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                         }
                     });
 
-
-                    var template = '';
-                    for (var key in tooltipData) {
-                        template += key + ': ' + tooltipData[key] + '<br>';
-                    }
-
                     if (showTooltip) {
+                        var template = date.toGMTString() + '<br>';
+                        for (var key in tooltipData) {
+                            template += key + ': ' + tooltipData[key] + '<br>';
+                        }
+
                         tooltip.transition()
                             .duration(200)
                             .style("opacity", 1);
                         tooltip.html(template)
                             .style("left", function () {
-                                if (mouse[0] + 230 > width) {
-                                    return mouse[0] - 220 + "px";
-                                } else {
-                                    return mouse[0] + 75 + "px";
-                                }
+                                return tooltipX(mouse[0]);
                             })
                             .style("top", mouse[1] + "px");
                     }
@@ -267,6 +273,8 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
                 zoom.translateExtent([[0, 0], [width, 0]])
                     .extent([[0, 0], [width, height]]);
+
+                tooltipX = tooltipXDecorator(width);
 
                 render();
             };
