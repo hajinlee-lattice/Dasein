@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -58,8 +60,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private String enviroment;
     private String plsApiHostPort;
     private String adminApiHostPort;
-    private Boolean involvedDL = false;
-    private Boolean involvedZK = false;
+    private boolean involvedDL = false;
+    private boolean involvedZK = false;
 
     @Autowired
     private DataLoaderService dataLoaderService;
@@ -98,7 +100,14 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void bootstrapForProduct(LatticeProduct product) {
-        bootstrapViaTenantConsole(product, enviroment);
+        bootstrapViaTenantConsole(product, enviroment, false);
+        involvedDL = (LatticeProduct.LPA.equals(product));
+        involvedZK = false;
+    }
+
+    @Override
+    public void bootstrapForProduct(LatticeProduct product, boolean encryptTenant) {
+        bootstrapViaTenantConsole(product, enviroment, encryptTenant);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
     }
@@ -129,7 +138,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         authHeaderInterceptor.setAuthValue(doc.getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { authHeaderInterceptor }));
 
-        UserDocument userDocument = restTemplate.postForObject(plsApiHostPort + "/pls/attach", tenant, UserDocument.class);
+        UserDocument userDocument = restTemplate.postForObject(plsApiHostPort + "/pls/attach", tenant,
+                UserDocument.class);
         log.info("Log in user " + username + " to tenant " + tenant.getId() + " through REST call.");
         return userDocument;
     }
@@ -159,13 +169,15 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         creds.setPassword(TestFrameworkUtils.GENERAL_PASSWORD_HASH);
         userRegistration.setUser(user);
         userRegistration.setCredentials(creds);
-        Boolean success = magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/users", userRegistrationWithTenant, Boolean.class);
+        Boolean success = magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/users",
+                userRegistrationWithTenant, Boolean.class);
         log.info("Create admin user " + username + ": success=" + success);
 
         if (!AccessLevel.SUPER_ADMIN.equals(accessLevel)) {
             UserUpdateData userUpdateData = new UserUpdateData();
             userUpdateData.setAccessLevel(accessLevel.name());
-            magicRestTemplate.put(plsApiHostPort + "/pls/admin/users?username=" + username + "&tenant=" + tenant.getId(),
+            magicRestTemplate.put(
+                    plsApiHostPort + "/pls/admin/users?username=" + username + "&tenant=" + tenant.getId(),
                     userUpdateData, new HashMap<String, Object>());
             log.info("Change user " + username + " access level to tenant " + tenant.getId() + " to " + accessLevel);
         }
@@ -186,13 +198,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     /**
      * bootstrap with one full tenant through tenant console
      */
-    public void bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment) {
+    public void bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment, boolean encryptTenant) {
         Tenant tenant = addBuiltInTestTenant();
-        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase())
-                .replace("{env}", environment);
+        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase()).replace(
+                "{env}", environment);
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         try {
-            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName);
+            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, encryptTenant);
         } catch (Exception e) {
             throw new RuntimeException("Failed to provision tenant via tenant console.", e);
         }
@@ -200,8 +212,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         waitForTenantConsoleInstallation(CustomerSpace.parse(tenant.getId()));
     }
 
-    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
-            throws IOException {
+    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson,
+            boolean encryptTenant) throws IOException {
         String url = "tenantconsole/" + tenantRegJson;
         log.info("Using tenant registration template " + url);
         List<BasicNameValuePair> adHeaders = loginAd();
@@ -212,13 +224,29 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         if (ins == null) {
             throw new IOException("Cannot find resource [" + url + "]");
         }
-        String payload = IOUtils.toString(ins, "UTF-8");
+        String payload = null;
+        if (encryptTenant) {
+            payload = overWriteEncrptionFeatureFlag(ins);
+        } else {
+            payload = IOUtils.toString(ins, "UTF-8");
+        }
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
-        HttpClientWithOptionalRetryUtils.sendPostRequest(
-                adminApiHostPort + "/admin/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders,
-                payload);
+        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/tenants/" + dlTenantName
+                + "?contractId=" + dlTenantName, false, adHeaders, payload);
+    }
+
+    private String overWriteEncrptionFeatureFlag(InputStream ins) throws IOException {
+        String input = IOUtils.toString(ins, "UTF-8");
+        Pattern pattern = Pattern.compile("(\\\\\"EnableDataEncryption\\\\\")(:false)");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer result = new StringBuffer();
+        if (matcher.find()) {
+            matcher.appendReplacement(result, "\\\\\"EnableDataEncryption\\\\\":true");
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
@@ -252,14 +280,14 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             if (involvedDL) {
                 // bardjams may fail, and it won't impact test
                 log.warn("The tenant state is not OK after " + timeout + " msec.");
-            } else  {
+            } else {
                 throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
             }
         }
     }
 
     private void cleanupTenantsInZK() {
-        for (Tenant tenant: testTenants) {
+        for (Tenant tenant : testTenants) {
             log.info("Clean up test tenant " + tenant.getId() + " from zk.");
             Camille camille = CamilleEnvironment.getCamille();
             String podId = CamilleEnvironment.getPodId();
@@ -274,9 +302,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void cleanupTenantsInDL() {
-        for (Tenant tenant: testTenants) {
+        for (Tenant tenant : testTenants) {
             log.info("Clean up test tenant " + tenant.getId() + " from DL.");
-            CustomerSpace customerSpace =CustomerSpace.parse(tenant.getId());
+            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
             String tenantName = customerSpace.getTenantId();
 
             try {
@@ -299,8 +327,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
                 log.info("Delete DL tenant " + tenantName + " result=" + JsonUtils.serialize(result));
             } catch (Exception e) {
-                log.error("Failed to clean up dl tenant " + tenantName + " : "
-                        + getErrorHandler().getStatusCode() + ", " + getErrorHandler().getResponseString());
+                log.error("Failed to clean up dl tenant " + tenantName + " : " + getErrorHandler().getStatusCode()
+                        + ", " + getErrorHandler().getResponseString());
             }
         }
     }

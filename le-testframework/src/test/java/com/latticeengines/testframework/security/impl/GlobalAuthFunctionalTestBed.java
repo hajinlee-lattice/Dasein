@@ -46,6 +46,11 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public void bootstrapForProduct(LatticeProduct product, boolean encryptTenant) {
+        throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
+    }
+
+    @Override
     public UserDocument loginAndAttach(String username, String password, Tenant tenant) {
         Credentials creds = new Credentials();
         creds.setUsername(username);

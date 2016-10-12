@@ -12,32 +12,51 @@ import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 public interface GlobalAuthTestBed {
 
     RestTemplate getMagicRestTemplate();
+
     RestTemplate getRestTemplate();
+
     LedpResponseErrorHandler getErrorHandler();
 
     void bootstrap(Integer numTenants);
+
     void bootstrapForProduct(LatticeProduct product);
 
+    void bootstrapForProduct(LatticeProduct product, boolean encryptTenant);
+
     List<Tenant> getTestTenants();
+
     Tenant addExtraTestTenant(String tenantName);
+
     Tenant getMainTestTenant();
+
     void setMainTestTenant(Tenant tenant);
 
     UserDocument loginAndAttach(String username, String password, Tenant tenant);
 
     UserDocument getCurrentUser();
+
     void switchToSuperAdmin();
+
     void switchToInternalAdmin();
+
     void switchToInternalUser();
+
     void switchToExternalAdmin();
+
     void switchToExternalUser();
+
     void switchToThirdPartyUser();
 
     void switchToSuperAdmin(Tenant tenant);
+
     void switchToInternalAdmin(Tenant tenant);
+
     void switchToInternalUser(Tenant tenant);
+
     void switchToExternalAdmin(Tenant tenant);
+
     void switchToExternalUser(Tenant tenant);
+
     void switchToThirdPartyUser(Tenant tenant);
 
     void cleanupDlZk();
