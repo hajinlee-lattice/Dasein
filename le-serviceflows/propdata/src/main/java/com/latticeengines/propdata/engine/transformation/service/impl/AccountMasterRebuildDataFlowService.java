@@ -255,7 +255,7 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
             sourceParameters.setJoinKey(((DomainBased)source).getDomainField());
             log.info("Add Domain based source " + sourceName + " " + ((DomainBased)source).getDomainField());
         } else {
-            log.info(sourceName + " is neither DUNS based nor Domain based, skip.")
+            log.info(sourceName + " is neither DUNS based nor Domain based, skip.");
         }
 
         return sourceParameters;
