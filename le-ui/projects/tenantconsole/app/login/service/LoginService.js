@@ -29,8 +29,9 @@ app.service('LoginService', function($q, $http, BrowserStorageUtility){
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            if (data.errorCode !== 'LEDP_18001')
+            if (data.errorCode !== 'LEDP_18001') {
                 result.errorMsg = data.errorMsg;
+            }
 
             deferred.resolve(result);
         });

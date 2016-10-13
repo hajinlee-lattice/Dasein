@@ -48,7 +48,9 @@ app.service('TenantUtility', function(_){
             result.ConfigDirectories = _.reject(result.ConfigDirectories, {"RootPath": "/Dante"});
         }
 
-        if (typeof(infos) === "undefined" || infos === null) infos = {};
+        if (typeof(infos) === "undefined" || infos === null) {
+            infos = {};
+        }
 
         if (infos.hasOwnProperty("CustomerSpaceInfo")) {
             result.CustomerSpaceInfo = infos.CustomerSpaceInfo;
@@ -188,7 +190,7 @@ app.service('TenantUtility', function(_){
 
     this.parseBootstrapErrorMsg = function(message) {
         var idx = message.indexOf("::");
-        if (idx != -1) {
+        if (idx !== -1) {
             return message.substring(0, idx);
         }
     };
@@ -201,7 +203,9 @@ app.service('TenantUtility', function(_){
             }
             if (node.hasOwnProperty("Children")) {
                 var nodeInChildren = selectNodeByPath(node.Children, path, rootPath + "/" + node.Node);
-                if (nodeInChildren !== null) return nodeInChildren;
+                if (nodeInChildren !== null) {
+                    return nodeInChildren;
+                }
             }
         }
         return null;

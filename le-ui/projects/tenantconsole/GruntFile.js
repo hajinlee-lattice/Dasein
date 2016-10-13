@@ -307,6 +307,13 @@ module.exports = function(grunt) {
         },
 
         watch: {
+            js: {
+                files: [
+                    '<%= app.dir %>/Gruntfile.js',
+                    '<%= app.dir %>/app/**/*.js'
+                ],
+                tasks: ['jshint']
+            },
             css: {
                 files: ['<%= app.dir %>/assets/less/**/*.less'],
                 tasks: ['less:dev']
@@ -469,6 +476,7 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         //'concurrent:test',
         'clean:dist',
+        'jshint',
         'uglify',
         'less:dist',
         'cssmin',
@@ -499,6 +507,7 @@ module.exports = function(grunt) {
 
     var sentryText = 'Watches for changes in any javascript file, and automatically re-runs linting and karma unit tests. If your computer can handle the strain, this should be running during active develpment';
     grunt.registerTask('sentry', sentryText, [
+        'watch:js',
         'watch:css'
     ]);
 

@@ -106,7 +106,9 @@ app.directive('configEntry', function(){
             }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
-            if ($scope.isBoolean) $scope.config.Data = ($scope.config.Data === "true" || $scope.config.Data === true);
+            if ($scope.isBoolean) {
+                $scope.config.Data = ($scope.config.Data === "true" || $scope.config.Data === true);
+            }
 
             $scope.isSelect = CamilleConfigUtility.isSelect($scope.type);
             $scope.isObject = CamilleConfigUtility.isObject($scope.type);
@@ -134,7 +136,7 @@ app.directive('configEntry', function(){
                         $scope.showError = true;
                         $scope.isValid.valid = false;
                         $scope.errorMsg = "no available choices.";
-                    } else if ($scope.options.indexOf($scope.config.Data) == -1) {
+                    } else if ($scope.options.indexOf($scope.config.Data) === -1) {
                         $scope.showError = true;
                         $scope.isValid.valid = false;
                         $scope.errorMsg = "not a valid choice.";
@@ -159,7 +161,7 @@ app.directive('configEntry', function(){
                     if ($scope.configform.$error.number) {
                         $scope.errorMsg = "must be a number.";
                     }
-                    if ($scope.isSelect && $scope.options.indexOf($scope.config.Data) == -1) {
+                    if ($scope.isSelect && $scope.options.indexOf($scope.config.Data) === -1) {
                         $scope.errorMsg = "not a valid choice.";
                     }
                 } else {

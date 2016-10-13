@@ -11,7 +11,8 @@ app.controller('LoginCtrl', function($scope, $state, BrowserStorageUtility, Logi
     $scope.loginInProgress = false;
 
     $scope.onLoginClick = function(){
-        if ($scope.loginInProgress) return;
+        if ($scope.loginInProgress) { return; }
+
         $scope.loginInProgress = true;
         $scope.showLoginError = false;
         BrowserStorageUtility.clear(false);
