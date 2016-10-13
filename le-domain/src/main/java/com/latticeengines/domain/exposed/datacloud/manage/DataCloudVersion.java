@@ -17,7 +17,9 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -29,30 +31,38 @@ public class DataCloudVersion implements HasPid, Serializable {
     private static final long serialVersionUID = -6472245305360293747L;
 
 	@Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("Version")
     @Index(name = "IX_VERSION")
     @Column(name = "Version", nullable = false, unique = true, length = 10)
     private String version;
 
+    @JsonProperty("MajorVersion")
     @Index(name = "IX_MAJOR")
     @Column(name = "MajorVersion", nullable = false, length = 10)
     private String majorVersion;
 
+    @JsonProperty("CreateDate")
     @Column(name = "CreateDate", nullable = false)
     private Date createDate;
 
+    @JsonIgnore
     @Column(name = "AccountMasterHdfsVersion", nullable = false)
     private String accountMasterHdfsVersion;
 
+    @JsonIgnore
     @Column(name = "AccountLookupHdfsVersion", nullable = false)
     private String accountLookupHdfsVersion;
 
+    @JsonIgnore
     @Column(name = "DynamoTableSignature", length = 100)
     private String dynamoTableSignature;
 
+    @JsonProperty("Status")
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private Status status;

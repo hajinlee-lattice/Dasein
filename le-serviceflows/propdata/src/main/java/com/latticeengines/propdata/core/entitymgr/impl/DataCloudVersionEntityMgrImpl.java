@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.core.entitymgr.impl;
 
+
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,12 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
         if (versionInDb != null) {
             dataCloudVersionDao.delete(versionInDb);
         }
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
+    public List<DataCloudVersion> allVerions() {
+        return dataCloudVersionDao.findAll();
     }
 
     private String parseMajorVersion(String version) {

@@ -11,6 +11,9 @@ app.service('MainNavService', function(){
         if (stateName.indexOf("MODELQUALITY") === 0) {
             return "ModelQuality";
         }
+        if (stateName.indexOf("DATACLOUD") === 0) {
+            return "DataCloud";
+        }
         return "unknown";
     };
 });

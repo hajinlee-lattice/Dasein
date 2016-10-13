@@ -18,6 +18,12 @@ module.exports = {
             'remote_path': '/modelquality',
             'type': 'pipe'
         },
+        '/match': {
+            'local_path': '/match',
+            'remote_host': process.env.API_MATCHAPI_URL || 'http://localhost:8076',
+            'remote_path': '/match',
+            'type': 'pipe'
+        },
         '/influxdb' : {
             'local_path': '/influxdb',
             'remote_host': process.env.API_INFLUXDB_URL || 'http://localhost:8086',

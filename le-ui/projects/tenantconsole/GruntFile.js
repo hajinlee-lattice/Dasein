@@ -8,10 +8,10 @@ module.exports = function(grunt) {
         versionString: grunt.option('versionString') || new Date().getTime(),
         version: {
             jquery: '2.1.3',
-            angular: '1.3.15',
+            angular: '1.5.8',
             "angular-local-storage": '0.1.5',
             "angular-ui-router": '0.2.13',
-            "angular-ui-bootstrap": '0.12.1',
+            "angular-ui-bootstrap": '2.2.0',
             qtip2: '2.2.1',
             underscore: '1.8.2',
             webfont: '1.5.16',
@@ -71,6 +71,7 @@ module.exports = function(grunt) {
                 src: [
                     'jquery/<%= app.version.jquery %>/jquery.js',
                     'angular.js/<%= app.version.angular %>/angular.js',
+                    'angular.js/<%= app.version.angular %>/angular-animate.js',
                     'angular.js/<%= app.version.angular %>/angular-sanitize.js',
                     'angular.js/<%= app.version.angular %>/angular-mocks.js',
                     'angular-local-storage/<%= app.version["angular-local-storage"] %>/angular-local-storage.js',
@@ -186,6 +187,9 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/modelquality/dashboard/controller/ModelQualityDashboardCtrl.js',
                         '<%= app.dir %>/app/modelquality/pipeline/controller/ModelQualityCreatePipelineCtrl.js',
                         '<%= app.dir %>/app/modelquality/pipeline/controller/ModelQualityCreatePipelineStepCtrl.js',
+                        '<%= app.dir %>/app/datacloud/controller/DataCloudRootCtrl.js',
+                        '<%= app.dir %>/app/datacloud/service/MetadataSrv.js',
+                        '<%= app.dir %>/app/datacloud/metadata/controller/MetadataCtrl.js',
                         '<%= app.dir %>/app/app.js'
                     ]
                 }

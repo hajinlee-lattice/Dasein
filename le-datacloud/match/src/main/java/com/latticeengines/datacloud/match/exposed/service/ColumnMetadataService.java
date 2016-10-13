@@ -16,4 +16,6 @@ public interface ColumnMetadataService extends HasDataCloudVersion {
     Schema getAvroSchema(Predefined selectionName, String recordName, String dataCloudVersion);
 
     Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName, String dataCloudVersion);
+
+    List<ColumnMetadata> findAll(String dataCloudVersion);
 }

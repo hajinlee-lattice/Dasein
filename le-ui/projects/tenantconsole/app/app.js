@@ -6,7 +6,8 @@ var app = angular.module('TenantConsoleApp', [
     'app.login.controller.LoginCtrl',
     'app.tenants.controller.TenantListCtrl',
     'app.tenants.controller.TenantConfigCtrl',
-    'app.modelquality'
+    'app.modelquality',
+    'app.datacloud'
 ]);
 
 app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
@@ -117,6 +118,24 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             resolve: {
                 Pipelines: function (ModelQualityService) {
                     return ModelQualityService.GetAllPipelines();
+                }
+            }
+        })
+        .state('DATACLOUD', {
+            url: '/datacloud',
+            views: {
+                '': {
+                    templateUrl: 'app/datacloud/view/DataCloudRootView.html',
+                    controller: 'DataCloudRootCtrl'
+                }
+            }
+        })
+        .state('DATACLOUD.METADATA', {
+            url: '/metadata',
+            views: {
+                'main@DATACLOUD': {
+                    templateUrl: 'app/datacloud/metadata/view/MetadataView.html',
+                    controller: 'MetadataCtrl'
                 }
             }
         })

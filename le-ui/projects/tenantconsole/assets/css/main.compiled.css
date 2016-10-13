@@ -1,3 +1,106 @@
+.create-pipeline-main > * {
+  transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+}
+.pipeline-list,
+.pipeline-step-list {
+  font-size: 13px;
+  line-height: 24px;
+}
+.pipeline-list {
+  padding-left: 1em;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+}
+.pipeline-list .selected {
+  background-color: #f5f5f5;
+}
+.pipeline-step-list {
+  padding: 0;
+}
+.pipeline-step-list li {
+  position: relative;
+  padding-right: 100px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.pipeline-step-list li:nth-child(even) {
+  background-color: #f5f5f5;
+}
+.list-bullet {
+  padding-right: 20px;
+}
+.pipeline-editor td {
+  min-width: 32px;
+  text-align: center;
+}
+.pipeline-editor i {
+  cursor: pointer;
+  color: #3d7fcd;
+}
+.pipeline-editor i :hover {
+  opacity: 0.8;
+}
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+.line {
+  fill: none;
+  stroke-width: 1.5px;
+}
+.chart-container {
+  display: block;
+  width: 100%;
+  height: 240px;
+  margin-bottom: 32px;
+}
+.chart-title {
+  text-anchor: middle;
+  font-size: 16px;
+}
+.chart-hover-line {
+  stroke-width: 1px;
+  stroke: #ccc;
+}
+.chart-tooltip {
+  display: inline;
+  position: absolute;
+  border-radius: 5px;
+  border: 1px solid black;
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: 3px;
+  font-weight: bold;
+  user-select: none;
+}
+.error {
+  color: red;
+}
+.success {
+  color: green;
+}
+.align-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.json-panel {
+  position: relative;
+  word-wrap: break-word;
+}
+.json-panel pre {
+  resize: both;
+}
+.json-panel i {
+  cursor: pointer;
+  position: absolute;
+  top: 2px;
+  left: 18px;
+}
 body {
   font-family: 'Open Sans', Verdana, Arial, sans-serif;
   color: black;
@@ -218,6 +321,24 @@ a.accordion-toggle {
 div.panel-heading:hover {
   background-color: #a3bedc;
 }
+/* extend bootstrap */
+li {
+  list-style-type: none;
+}
+.no-border.list-group .list-group-item {
+  border: none;
+}
+.no-gutter.row,
+.no-gutter.container,
+.no-gutter.container-fluid {
+  margin-left: 0;
+  margin-right: 0;
+}
+.no-gutter,
+.no-gutter > [class^="col-"] {
+  padding-left: 0;
+  padding-right: 0;
+}
 /*
 Spinner
 */
@@ -276,4 +397,11 @@ Spinner
     transform: rotate(360deg);
     box-shadow: -0.11em -0.83em 0 -0.4em #428bca, -0.11em -0.83em 0 -0.42em #428bca, -0.11em -0.83em 0 -0.44em #428bca, -0.11em -0.83em 0 -0.46em #428bca, -0.11em -0.83em 0 -0.477em #428bca;
   }
+}
+.metadata-grid {
+  font-size: 8pt;
+}
+.metadata-grid tr:hover {
+  background-color: #a3bedc;
+  cursor: pointer;
 }
