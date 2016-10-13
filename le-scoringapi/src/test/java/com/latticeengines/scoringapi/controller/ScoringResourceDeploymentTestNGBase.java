@@ -431,7 +431,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected void runScoreLoadLimitTest(final String url, final boolean isInternalScoring, int ratelimit)
             throws IOException, InterruptedException {
         exception = null;
-        int numberOfThreads = ratelimit + 2;
+        int numberOfThreads = ratelimit * 4;
 
         Runnable runnable = createScoringLoadLimitRunnable(url, modelList, isInternalScoring, false);
 
@@ -464,7 +464,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 try {
                     testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    // ignore
                 }
             }
         };
