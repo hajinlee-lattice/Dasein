@@ -18,7 +18,7 @@
             <a ui-sref="home.model.leads" data-ng-if='sourceType=="SalesforceLead"'><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}"><span class="ico ico-leads ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}</span></a>
             <a ui-sref="home.model.leads" data-ng-if='sourceType!="SalesforceLead"'><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ACCOUNTS')}}"><span class="ico ico-leads ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ACCOUNTS')}}</span></a>
         </li>
-        <li ng-if="showModelSummary" role="presentation" ui-sref-active="active">
+        <li ng-if="showModelSummary && !Uploaded" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.summary"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}"><span class="ico ico-datatable ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</span></a>
         </li>
         <li ng-if="showAlerts && !IsPmml" role="presentation" ui-sref-active="active">

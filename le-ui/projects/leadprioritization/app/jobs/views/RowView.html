@@ -63,13 +63,12 @@
                     </a>
                 </span>
             </span>
-
-            <span class="button orange-button" ng-if="jobRunning && !cancelClicked">
+            <span class="button orange-button" ng-if="jobRunning && !job.cancelling">
                 <a href="javascript:void(0)" data-ng-click="cancelJobClick($event)">
-                    <i class="fa fa-stop-circle"></i>Cancel Job
+                    <i class="fa fa-stop-circle"></i>Cancel Job 
                 </a>
             </span>
-            <span class="button white-button" ng-if="jobRunning && cancelClicked">
+            <span class="button white-button" ng-if="jobRunning && job.cancelling">
                 <span>
                     <i class="fa fa-stop-circle"></i>Cancelling...
                 </span>

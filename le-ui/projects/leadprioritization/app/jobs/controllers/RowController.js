@@ -25,6 +25,7 @@ angular
             $scope.jobRunning = false;
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
+            job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
 
             var reports = $scope.job.reports,
@@ -72,15 +73,14 @@ angular
                     $event.stopPropagation();
                 }
                 CancelJobModal.show(job.id);
-                console.log(job.id);
             };
 
             $scope.$on("updateAsCancelledJob", function(event, args){
-
-                console.log(args);
-
                 JobsService.cancelJob(args);
                 $scope.cancelClicked = true;
+                if(job.id === args) {
+                    job.cancelling = true;
+                }
                 $scope.cancelling[args] = true;
             });
 
