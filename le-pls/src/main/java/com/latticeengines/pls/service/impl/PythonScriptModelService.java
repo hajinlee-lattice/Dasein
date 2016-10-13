@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -42,7 +43,6 @@ public class PythonScriptModelService extends ModelServiceBase {
 
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
-        List<Attribute> requiredColumns = new ArrayList<>();
         Table eventTable = MetadataUtils.getEventTableFromModelId(modelId, modelSummaryEntityMgr, metadataProxy);
         List<Attribute> attributes = eventTable.getAttributes();
         if (attributes == null) {
@@ -50,14 +50,21 @@ public class PythonScriptModelService extends ModelServiceBase {
             throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
-        Table schema = SchemaRepository.instance().getSchema(
-                SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
+        List<Attribute> requiredColumns = getRequiredColumns(attributes, SchemaInterpretation.valueOf(summary.getSourceSchemaInterpretation()));
+        log.info("The required columns are : " + requiredColumns);
+        return requiredColumns;
+    }
+
+    @VisibleForTesting
+    List<Attribute> getRequiredColumns(List<Attribute> attributes, SchemaInterpretation schemaInterpretation) {
+        List<Attribute> requiredColumns = new ArrayList<>();
+        Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
         for (Attribute attribute : attributes) {
             List<String> tags = attribute.getTags();
-            if (schema.getAttribute(attribute.getName()) != null //
-                    || (tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString()) //
-                    && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty() || attribute
-                            .getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString())))) {
+            if (tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString())
+                    && (schema.getAttribute(attribute.getName()) != null || !(attribute.getApprovedUsage() == null
+                            || attribute.getApprovedUsage().isEmpty() || attribute.getApprovedUsage().get(0)
+                            .equals(ApprovedUsage.NONE.toString())))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
@@ -65,7 +72,6 @@ public class PythonScriptModelService extends ModelServiceBase {
                 }
             }
         }
-        log.info("The required columns are : " + requiredColumns);
         return requiredColumns;
     }
 
@@ -80,7 +86,7 @@ public class PythonScriptModelService extends ModelServiceBase {
         }
         for (Attribute attribute : attributes) {
             List<String> tags = attribute.getTags();
-            if (!(tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString()))){
+            if (!(tags != null && !tags.isEmpty() && tags.get(0).equals(Tag.INTERNAL.toString()))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
                 if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
                         && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
