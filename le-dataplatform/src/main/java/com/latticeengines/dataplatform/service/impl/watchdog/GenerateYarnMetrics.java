@@ -44,10 +44,20 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
     private static final Log log = LogFactory.getLog(GenerateYarnMetrics.class);
 
-    private static Set<String> workflowJobNames = Sets.newHashSet(/*"bulkMatchWorkflow",*/ "cascadingBulkMatchWorkflow",
-            "importAndRTSBulkScoreWorkflow", "importMatchAndModelWorkflow", "importMatchAndScoreWorkflow",
-            "ingestionWorkflow", "modelAndEmailWorkflow", "modelWorkflow", "pmmlModelWorkflow",
-            "propdataTransformationWorkflow", "publishWorkflow", "rtsBulkScoreWorkflow", "scoreWorkflow");
+    private static Set<String> workflowJobNames = Sets.newHashSet( //
+            "bulkMatchWorkflow", //
+            "cascadingBulkMatchWorkflow", //
+            "importAndRTSBulkScoreWorkflow", //
+            "importMatchAndModelWorkflow", //
+            "importMatchAndScoreWorkflow", //
+            "ingestionWorkflow", //
+            "modelAndEmailWorkflow", //
+            "modelWorkflow", //
+            "pmmlModelWorkflow", //
+            "propdataTransformationWorkflow", //
+            "publishWorkflow", //
+            "rtsBulkScoreWorkflow", //
+            "scoreWorkflow");
 
     private static Splitter nameSplitter = Splitter.on(JobNameServiceImpl.JOBNAME_DELIMITER).trimResults()
             .omitEmptyStrings();
@@ -101,9 +111,10 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         List<AppInfo> apps = appsInfo.getApps();
         log.info(String.format("Processing %d apps with %s status", apps.size(), finalAppStatus));
 
-        long finishTime = 0;
+        long finishTime = finishedTimeBegin;
         for (AppInfo app : apps) {
-            // Evaluate all (not just the workflow-driver) apps for the finishTime
+            // Evaluate all (not just the workflow-driver) apps for the
+            // finishTime
             finishTime = Math.max(finishTime, app.getFinishTime());
 
             List<String> splits = nameSplitter.splitToList(app.getName());
@@ -137,6 +148,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
         List<AppInfo> apps = runningAppsInfo.getApps();
 
+        log.info(String.format("Processing %d apps in progress", apps.size()));
         for (AppInfo app : apps) {
             List<String> splits = nameSplitter.splitToList(app.getName());
             String suffix = splits.get(splits.size() - 1);
@@ -152,14 +164,20 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
             jobMetric.setFinalAppStatus(FinalApplicationStatus.UNDEFINED.name());
 
+            String split = splits.get(0);
+            if (!split.contains("[") && !split.contains("]") && (split.endsWith(".Production") || split.toLowerCase().endsWith("playmaker"))) {
+                jobMetric.setTenantId(split);
+            } else {
+                log.info("Job does not contain proper tenant name:" + split + " split from: " + app.getName());
+                jobMetric.setTenantId("NA");
+            }
+
             if (workflowJobNames.contains(suffix)) {
                 jobMetric.setIsWorkflowDriver(true);
                 jobMetric.setJobName(suffix);
-                jobMetric.setTenantId(splits.get(0));
             } else {
                 jobMetric.setIsWorkflowDriver(false);
                 jobMetric.setJobName("NA");
-                jobMetric.setTenantId("NA");
             }
 
             if (app.getState().equalsIgnoreCase(YarnApplicationState.RUNNING.name())) {
@@ -204,6 +222,10 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         Job job = workflowProxy.getWorkflowJobFromApplicationId(app.getAppId());
         if (job != null && job.getSteps() != null) {
             for (JobStep step : job.getSteps()) {
+                if (step.getEndTimestamp() == null || step.getStartTimestamp() == null) {
+                    fieldMap.put(step.getJobStepType() + "Sec", 0);
+                    continue;
+                }
                 long elapsedMillis = step.getEndTimestamp().getTime() - step.getStartTimestamp().getTime();
                 int elapsedSec = 0;
                 if (elapsedMillis > 0) {
