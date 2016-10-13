@@ -7,7 +7,6 @@ import java.util.ListIterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
+import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.encryption.exposed.service.DataEncryptionService;
@@ -27,9 +27,6 @@ import com.latticeengines.encryption.exposed.service.KeyManagementService;
 public class DataEncryptionServiceImpl implements DataEncryptionService {
 
     private static final Logger log = Logger.getLogger(DataEncryptionServiceImpl.class);
-
-    @Value("${encryption.enabled}")
-    private boolean encryptionEnabled;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -53,7 +50,7 @@ public class DataEncryptionServiceImpl implements DataEncryptionService {
     public void encrypt(CustomerSpace space) {
         log.info(String.format("Setting up customer %s's data as encrypted", space));
         try {
-            if (!encryptionEnabled) {
+            if (!EncryptionGlobalState.isEnabled()) {
                 log.info("Encryption is not enabled");
                 return;
             }

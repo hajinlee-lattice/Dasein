@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -16,6 +15,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.encryption.exposed.service.DataEncryptionService;
 import com.latticeengines.encryption.exposed.service.KeyManagementService;
@@ -48,12 +48,9 @@ public class EncryptionTestNGBase extends AbstractTestNGSpringContextTests {
         magicRestTemplate = testBed.getMagicRestTemplate();
     }
 
-    @Value("${encryption.enabled}")
-    protected boolean encryptionEnabled;
-
     @BeforeClass(groups = "functional")
     private void setup() {
-        assertTrue(encryptionEnabled, "Encryption is not enabled (encryption.enabled is false)");
+        assertTrue(EncryptionGlobalState.isEnabled(), "Encryption is not enabled (encryption.enabled is false)");
     }
 
     protected Tenant createEncryptedTenant(CustomerSpace space) {

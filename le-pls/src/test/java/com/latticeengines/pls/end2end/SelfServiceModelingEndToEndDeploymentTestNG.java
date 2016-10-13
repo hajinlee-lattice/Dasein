@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,6 +45,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
@@ -88,9 +88,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Autowired
     private TenantService tenantService;
 
-    @Value("${encryption.enabled}")
-    private boolean encryptionEnabled;
-
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
@@ -108,7 +105,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         tenantToAttach = testBed.getMainTestTenant();
 
-        if (encryptionEnabled) {
+        if (EncryptionGlobalState.isEnabled()) {
             ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
                     .construct(new CustomerSpaceScope(CustomerSpace.parse(tenantToAttach.getId())));
             assertTrue(controller.exists(new Path("/EncryptionKey")));
