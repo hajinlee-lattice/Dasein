@@ -153,11 +153,11 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
 
-        fieldMappingDocument.getRequiredFields().add("Id");
+        fieldMappingDocument.getRequiredFields().add(InterfaceName.Id.name());
         if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            fieldMappingDocument.getRequiredFields().add("Website");
+            fieldMappingDocument.getRequiredFields().add(InterfaceName.Website.name());
         } else {
-            fieldMappingDocument.getRequiredFields().add("Email");
+            fieldMappingDocument.getRequiredFields().add(InterfaceName.Email.name());
         }
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);
@@ -188,10 +188,6 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             fieldMapping.setMappedField(requiredAttribute.getName());
             fieldMapping.setMappedToLatticeField(true);
             fieldMappingDocument.getFieldMappings().add(fieldMapping);
-        }
-
-        for (String scoringHeaderField : scoringHeaderFields) {
-            fieldMappingDocument.getIgnoredFields().add(scoringHeaderField);
         }
 
         return fieldMappingDocument;

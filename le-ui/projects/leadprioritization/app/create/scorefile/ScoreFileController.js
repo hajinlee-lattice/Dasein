@@ -20,7 +20,7 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.schema = Model.ModelDetails.SourceSchemaInterpretation == 'SalesforceLead' ? 'Lead' : 'Account';
 
     vm.params = {
-        url: '/pls/scores/fileuploads/new',
+        url: '/pls/scores/fileuploads',
         label: vm.schema + ' List',
         infoTemplate: (vm.schema == 'Lead' ? 'Upload a CSV file with leads to score. The list of expected column headers is displayed below.' : 'Upload a CSV file with accounts to score. The list of expected column headers is displayed below.'),
         defaultMessage: "Example: us-target-list.csv",

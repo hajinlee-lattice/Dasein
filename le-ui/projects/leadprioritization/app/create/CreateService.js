@@ -146,7 +146,7 @@ angular
 
     this.GetSchemaToLatticeFields = function(csvFileName) {
         var deferred = $q.defer();
-        var params = csvFileName ? { 'displayName': csvFileName } : { 'excludeLatticeDataAttributes': ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true };
+        var params = csvFileName ? { 'csvFileName': csvFileName } : { 'excludeLatticeDataAttributes': ImportStore.GetAdvancedSetting('useLatticeAttributes') ? false : true };
 
         $http({
             method: 'GET',
@@ -167,7 +167,7 @@ angular
         var modelId = $stateParams.modelId;
         var metaData = ImportStore.Get(FileName);
         var schema = metaData.schemaInterpretation;
-        var params = score ? { 'modelId': modelId, 'displayName': FileName } : { 'schema': schema };
+        var params = score ? { 'modelId': modelId, 'csvFileName': FileName } : { 'schema': schema };
 
         $http({
             method: 'POST',
@@ -219,7 +219,7 @@ angular
         var deferred = $q.defer();
         var result;
         var modelId = $stateParams.modelId;
-        var params = score ? { 'modelId': modelId, 'displayName': FileName } : { 'displayName': FileName };
+        var params = score ? { 'modelId': modelId, 'csvFileName': FileName } : { 'displayName': FileName };
 
         $http({
             method: 'POST',
