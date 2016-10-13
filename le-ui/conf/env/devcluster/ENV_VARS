@@ -6,6 +6,7 @@ export HTTP_PORT=3000
 export HTTPS_PORT=false
 export API_ADMIN_URL=http://localhost:8085
 export API_MCSVC_URL=http://localhost:8080
+export API_MATCHAPI_URL=http://localhost:8076
 export API_INFLUXDB_URL=http://10.41.1.188:8086
 export ADMIN_HTTP_PORT=3003
 export ADMIN_HTTPS_PORT=false
