@@ -232,7 +232,7 @@ module.exports = function(grunt) {
             ],
             postDist: [
                 '<%= app.dir %>/assets/css/*.compiled.css'
-            ],
+            ]
         },
 
         copy: {
@@ -261,6 +261,16 @@ module.exports = function(grunt) {
                 }, {
                     src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.js'],
                     dest: '<%= app.dir %>/lib/js/ng-prettyjson.min.js'
+                }]
+            },
+
+            prettyjsondist: {
+                files: [{
+                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.css'],
+                    dest: '<%= app.dist %>/lib/css/ng-prettyjson.min.css'
+                }, {
+                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.js'],
+                    dest: '<%= app.dist %>/lib/js/ng-prettyjson.min.js'
                 }]
             }
         },
@@ -464,7 +474,8 @@ module.exports = function(grunt) {
         'cssmin',
         'processhtml:dist',
         'clean:postDist',
-        'copy:assets'
+        'copy:assets',
+        'copy:prettyjsondist'
     ]);
 
     // download vendor javascript and css
