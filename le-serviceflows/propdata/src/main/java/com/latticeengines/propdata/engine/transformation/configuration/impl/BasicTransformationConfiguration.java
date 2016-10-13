@@ -13,7 +13,7 @@ public class BasicTransformationConfiguration implements TransformationConfigura
     private String sourceName;
     private String serviceBeanName;
     private String version;
-    private String baseVersions;
+    private List<String> baseVersions;
     private Map<String, String> sourceConfigurations;
     private String rootOperationId;
     private List<SourceColumn> sourceColumns = new ArrayList<SourceColumn>();
@@ -54,12 +54,12 @@ public class BasicTransformationConfiguration implements TransformationConfigura
     }
 
     @Override
-    public String getBaseVersions() {
+    public List<String> getBaseVersions() {
         return baseVersions;
     }
 
     @Override
-    public void setBaseVersions(String baseVersions) {
+    public void setBaseVersions(List<String> baseVersions) {
         this.baseVersions = baseVersions;
     }
 

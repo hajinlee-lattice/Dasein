@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +29,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
     private static final Log log = LogFactory.getLog(SimpleTransformationDataFlowService.class);
 
     public <P extends TransformationFlowParameters> void executeDataFlow(Source source, String workflowDir,
-            Map<Source, String> baseSourceVersions, String flowBean, P parameters) {
+            Map<Source, List<String>> baseSourceVersions, String flowBean, P parameters) {
 
         if (StringUtils.isEmpty(flowBean)) {
             throw new LedpException(LedpCode.LEDP_25012,
@@ -43,23 +44,27 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 
-    private Map<String, Table> setupSourceTables(Map<Source, String> baseSourceVersions) {
+    private Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
-        for (Map.Entry<Source, String> entry : baseSourceVersions.entrySet()) {
+        for (Map.Entry<Source, List<String>> entry : baseSourceVersions.entrySet()) {
             Source baseSource = entry.getKey();
-            String baseSourceVersion = entry.getValue();
+            List<String> baseSourceVersion = entry.getValue();
             log.info("Add base source " + baseSource.getSourceName());
             addSource(sourceTables, baseSource, baseSourceVersion);
         }
         return sourceTables;
     }
 
-    private boolean addSource(Map<String, Table> sourceTables, Source source, String version) {
+    private boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
         String sourceName = source.getSourceName();
         Table sourceTable = null;
         try {
-            sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, version);
-            log.info("Select source " + sourceName + "@version " + version);
+            if (versions.size() == 1) {
+                sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));
+            } else {
+                sourceTable = hdfsSourceEntityMgr.getTableAtVersions(source, versions);
+            }
+            log.info("Select source " + sourceName + "@versions " + StringUtils.join(versions, ","));
         } catch (Exception e) {
             log.info("Source " + sourceName + " is not initiated in HDFS");
             e.printStackTrace();

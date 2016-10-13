@@ -2,6 +2,7 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -23,10 +24,11 @@ import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.impl.BasicTransformationConfiguration;
 
+import reactor.util.CollectionUtils;
 
 /**
  * This is the base implementation of the transformatin service
- * for simpliest sources: single base source, single dataflow.
+ * For simpliest sources: single dataflow.
  */
 public abstract class SimpleTransformationServiceBase<T extends TransformationConfiguration, P extends TransformationFlowParameters>
         extends AbstractTransformationService<T> {
@@ -49,6 +51,13 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
     @SuppressWarnings("unchecked")
     public Class<T> getConfigurationClass() {
         return (Class<T>) BasicTransformationConfiguration.class;
+    }
+
+    //!! override this if there are multiple base versions for one base source
+    protected List<String> parseBaseVersions(String baseVersions) {
+        List<String> baseVersionList = new ArrayList<String>();
+        baseVersionList.add(baseVersions);
+        return baseVersionList;
     }
 
     @Override
@@ -107,7 +116,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         configuration.setSourceName(getSource().getSourceName());
         configuration.setServiceBeanName(getServiceBeanName());
         configuration.setVersion(targetVersion);
-        configuration.setBaseVersions(baseVersionsToProcess.get(0));
+        configuration.setBaseVersions(baseVersionsToProcess);
         configuration.setSourceColumns(sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
         return configuration;
     }
@@ -120,22 +129,30 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
             return null;
         }
         try {
-            Map<Source, String> baseSourceVersionMap = new HashMap<>();
-            Source baseSource = ((DerivedSource) getSource()).getBaseSources()[0];
-
-            // first try to get base version from progress
-            String baseSourceVersion = progress.getBaseSourceVersions();
-
-            // then try transformation configuration
-            if (StringUtils.isEmpty(baseSourceVersion)) {
-                baseSourceVersion = transConf.getBaseVersions();
+            // The order of base sources in the source object should match with
+            // the order of base versions in the configuration
+            if (transConf.getBaseVersions() != null
+                    && transConf.getBaseVersions().size() != ((DerivedSource) getSource()).getBaseSources().length) {
+                updateStatusToFailed(progress, "Number of base versions is different with number of base sources.",
+                        null);
+                return null;
             }
-            // finally get current version as default
-            if (StringUtils.isEmpty(baseSourceVersion)) {
-                baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
-            }
+            Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
+            for (int i = 0; i < ((DerivedSource) getSource()).getBaseSources().length; i++) {
+                Source baseSource = ((DerivedSource) getSource()).getBaseSources()[i];
 
-            baseSourceVersionMap.put(baseSource, baseSourceVersion);
+                String baseSourceVersion = null;
+                // first try transformation configuration
+                if (!CollectionUtils.isEmpty(transConf.getBaseVersions()))
+                    baseSourceVersion = transConf.getBaseVersions().get(i);
+
+                // then get current version as default
+                if (StringUtils.isEmpty(baseSourceVersion)) {
+                    baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
+                }
+                List<String> baseSourceVersionList = parseBaseVersions(baseSourceVersion);
+                baseSourceVersionMap.put(baseSource, baseSourceVersionList);
+            }
 
             P parameters = getDataFlowParameters(progress, transConf);
 

@@ -36,10 +36,12 @@ public class TableUtils {
             extractList.add(extract);
         }
         table.setExtracts(extractList);
-        PrimaryKey pk = new PrimaryKey();
-        pk.setAttributes(Arrays.asList(primaryKey));
-        pk.setTable(table);
-        table.setPrimaryKey(pk);
+        if (primaryKey != null) {
+            PrimaryKey pk = new PrimaryKey();
+            pk.setAttributes(Arrays.asList(primaryKey));
+            pk.setTable(table);
+            table.setPrimaryKey(pk);
+        }
         return table;
     }
 

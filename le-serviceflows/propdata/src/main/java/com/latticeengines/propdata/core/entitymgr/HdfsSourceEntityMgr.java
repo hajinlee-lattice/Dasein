@@ -19,6 +19,8 @@ public interface HdfsSourceEntityMgr {
 
     Table getTableAtVersion(Source source, String version);
 
+    public Table getTableAtVersions(Source source, List<String> versions);
+
     Table getCollectedTableSince(IngestedRawSource source, Date earliest);
 
     Long count(Source source, String version);

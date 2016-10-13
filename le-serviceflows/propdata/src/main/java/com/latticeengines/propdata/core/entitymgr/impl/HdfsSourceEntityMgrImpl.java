@@ -154,6 +154,35 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public Table getTableAtVersions(Source source, List<String> versions) {
+        if (source instanceof CollectedSource) {
+            throw new UnsupportedOperationException(
+                    "Do not know how to extract versioned table for " + CollectedSource.class);
+        }
+        List<String> paths = new ArrayList<String>();
+        for (String version : versions) {
+            if (source instanceof TransformedToAvroSource) {
+                log.info(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
+                        + WILD_CARD + AVRO_FILE_EXTENSION);
+                paths.add(hdfsPathBuilder.constructRawDir(source).append(version).toString() + HDFS_PATH_SEPARATOR
+                        + WILD_CARD + AVRO_FILE_EXTENSION);
+            } else {
+                log.info(hdfsPathBuilder.constructSnapshotDir(source, version).toString() + HDFS_PATH_SEPARATOR
+                        + WILD_CARD + AVRO_FILE_EXTENSION);
+                paths.add(hdfsPathBuilder.constructSnapshotDir(source, version).toString() + HDFS_PATH_SEPARATOR
+                        + WILD_CARD + AVRO_FILE_EXTENSION);
+            }
+        }
+        if (source instanceof HasSqlPresence) {
+            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(),
+                    paths.toArray(new String[paths.size()]), source.getPrimaryKey());
+        } else {
+            return TableUtils.createTable(source.getSourceName(), paths.toArray(new String[paths.size()]),
+                    source.getPrimaryKey());
+        }
+    }
+
+    @Override
     public List<String> getVersions(Source source) {
         String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source).toString();
         List<String> versions = new ArrayList<>();

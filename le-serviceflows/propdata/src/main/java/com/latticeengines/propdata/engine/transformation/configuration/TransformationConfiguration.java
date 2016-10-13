@@ -19,9 +19,9 @@ public interface TransformationConfiguration {
 
     void setVersion(String newLatestVersion);
 
-    String getBaseVersions();
+    List<String> getBaseVersions();
 
-    void setBaseVersions(String baseVersions);
+    void setBaseVersions(List<String> baseVersions);
 
     String getServiceBeanName();
 
