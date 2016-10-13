@@ -10,7 +10,7 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
     'ngSanitize'
 ]);
 
-app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility, ServiceService) {
+app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state, $stateParams, $uibModal, $interval, _, TenantService, TenantUtility, ServiceService) {
     //==================================================
     // initialize flags
     //==================================================
@@ -336,7 +336,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
 
     function popInstallConfirmationModal() {
-        $modal.open({
+        $uibModal.open({
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">About to bootstrap a new tenant.</h3></div>' +
             '<div class="modal-body">' +
@@ -347,7 +347,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             '<button class="btn btn-primary" ng-hide="showErrorMsg" ng-click="submit()">OK</button>' +
             '<button class="btn btn-default" ng-click="cancel()">CANCEL</button>' +
             '</div>',
-            controller: function($scope, $modalInstance, data, contractId, tenantId, TenantService){
+            controller: function($scope, $uibModalInstance, data, contractId, tenantId, TenantService){
                 $scope.data = data;
                 $scope.tenantId = tenantId;
                 $scope.contractId = contractId;
@@ -358,7 +358,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                     TenantService.CreateTenant($scope.tenantId, $scope.contractId, $scope.data).then(
                         function(result) {
                             if (result.success) {
-                                $modalInstance.dismiss();
+                                $uibModalInstance.dismiss();
                                 $state.go('TENANT.LIST');
                             } else {
                                 $scope.errorMsg = "Adding tenant failed.";
@@ -369,7 +369,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             },
             resolve: {
@@ -399,7 +399,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
 
     function popDeleteConfirmationModal() {
-        $modal.open({
+        $uibModal.open({
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">Delete tenant</h3></div>' +
             '<div class="modal-body"> </div>' +
@@ -412,14 +412,14 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             '<button class="btn btn-primary" ng-click="ok()">YES</button>' +
             '<button class="btn btn-default" ng-click="cancel()">NO</button>' +
             '</div>',
-            controller: function($scope, $state, $modalInstance, tenantId, contractId, TenantService){
+            controller: function($scope, $state, $uibModalInstance, tenantId, contractId, TenantService){
                 $scope.tenantId = tenantId;
                 $scope.contractId = contractId;
 
                 $scope.ok = function() {
                     TenantService.DeleteTenant(tenantId, contractId).then(function(result){
                         if (result.success) {
-                            $modalInstance.dismiss();
+                            $uibModalInstance.dismiss();
                             $state.go('TENANT.LIST');
                         } else {
                             //handle error
@@ -428,7 +428,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss();
+                    $uibModalInstance.dismiss();
                 };
             },
             resolve: {
