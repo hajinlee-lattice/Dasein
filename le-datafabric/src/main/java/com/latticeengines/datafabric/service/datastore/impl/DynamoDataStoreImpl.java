@@ -22,6 +22,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xerial.snappy.Snappy;
@@ -53,6 +54,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private static final String REPO = "_REPO_";
     private static final String RECORD = "_RECORD_";
     private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
+    private static final int DYNAMODB_BATCH_LIMIT = 100;
 
     // Default attributes for every table
     public final String ID = "Id";
@@ -203,8 +205,41 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
-
         Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+
+        if (CollectionUtils.isEmpty(idList)) {
+            return records;
+        }
+
+        // DynamoDB batch API has a limit on number of records that can be
+        // passed in a single request. Due to this we need to make chunks of
+        // idList if it is more than max size. Each chunk should be less than or
+        // equal to the upper limit.
+
+        // find total number of full record loops
+        int totalFullLoops = idList.size() / DYNAMODB_BATCH_LIMIT;
+        int startIdx = 0;
+
+        for (int idx = 0; idx < totalFullLoops; idx++) {
+            // for each full loop iteration call batchFindRecord with
+            // DYNAMODB_BATCH_LIMIT records starting from startIdx
+            List<String> subList = idList.subList(startIdx, startIdx + DYNAMODB_BATCH_LIMIT);
+
+            batchFindRecord(subList, records);
+
+            // increment startIdx
+            startIdx += DYNAMODB_BATCH_LIMIT;
+        }
+
+        if (startIdx < idList.size()) {
+            // for remaining records call batchFindRecord
+            batchFindRecord(idList.subList(startIdx, idList.size()), records);
+        }
+
+        return records;
+    }
+
+    private void batchFindRecord(List<String> idList, Map<String, GenericRecord> records) {
 
         DynamoDB dynamoDB = new DynamoDB(client);
         TableKeysAndAttributes keys = new TableKeysAndAttributes(tableName);
@@ -218,7 +253,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         List<PrimaryKey> pKs = keys.getPrimaryKeys();
 
         if ((pKs == null) || (pKs.size() == 0)) {
-            return records;
+            return;
         }
 
         try {
@@ -250,7 +285,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         } catch (Exception e) {
             log.error("Unable to batch get records " + tableName, e);
         }
-        return records;
     }
 
     public List<GenericRecord> findRecords(Map<String, String> properties) {
