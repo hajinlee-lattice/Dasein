@@ -40,7 +40,7 @@
 
 <list-entry ng-if="isList" is-valid="isValid" readonly="readonly" config="config"></list-entry>
 
-<div uib-accordion-group ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
+<div uib-accordion-group class="panel-default" ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
     <uib-accordion-heading class="accordion-heading" is-open="isOpen">
         <p class="readonly-config-entry">
             <i class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>

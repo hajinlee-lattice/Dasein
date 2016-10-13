@@ -2,7 +2,7 @@
               is-valid="isValid" expandable="false" readonly="readonly"
               class="config-entry" config="config"></config-entry>
 
-<div uib-accordion-group ng-if="hasChildren" ng-init="isOpen = !readonly" is-open="isOpen">
+<div uib-accordion-group class="panel-default" ng-if="hasChildren" ng-init="isOpen = !readonly" is-open="isOpen">
     <uib-accordion-heading class="accordion-heading" is-open="isOpen">
         <config-entry expandable="true" is-valid="isValid" is-open="isOpen" readonly="readonly" config="config"></config-entry>
     </uib-accordion-heading>

@@ -1,5 +1,5 @@
 <uib-accordion ng-if="!loading" close-others="oneAtATime" class="tenant-config">
-    <div uib-accordion-group ng-hide="component.Invisible" ng-repeat="component in data" ng-init="accordion[component.Component].open = !readonly" is-open="accordion[component.Component].open">
+    <div uib-accordion-group  class="panel-default" ng-hide="component.Invisible" ng-repeat="component in data" ng-init="accordion[component.Component].open = !readonly" is-open="accordion[component.Component].open">
         <uib-accordion-heading>
             <i class="fa" ng-class="{'fa-caret-down': accordion[component.Component].open, 'fa-caret-right': !accordion[component.Component].open}"></i>
             {{component.Component}}
