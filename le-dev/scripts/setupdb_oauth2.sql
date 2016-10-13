@@ -1,6 +1,6 @@
-DROP SCHEMA IF EXISTS oauth2_dev;
+DROP SCHEMA IF EXISTS oauth2;
 
-CREATE SCHEMA IF NOT EXISTS oauth2_dev;
+CREATE SCHEMA IF NOT EXISTS oauth2;
 
 source WSHOME/le-oauth2db/src/main/schema/schema_mysql.sql
 
