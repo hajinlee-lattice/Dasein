@@ -114,8 +114,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             jobConfiguration.setAvroPath(targetFile);
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid()).getApplicationId();
-            jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block[%d/%d]~%s",
-                    appId, blockIdx, blocks.length, getConfiguration().getCustomerSpace().toString()));
+            jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]",
+                    getConfiguration().getCustomerSpace().toString(), appId, blockIdx, blocks.length));
             configurations.add(jobConfiguration);
 
             List<GenericRecord> data = new ArrayList<>();
