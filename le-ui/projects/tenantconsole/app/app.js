@@ -39,7 +39,7 @@ app.factory('jsonInterceptor', function () {
     };
 });
 
-app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStorageServiceProvider) {
+app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStorageServiceProvider, JSONFormatterConfigProvider) {
 
     $httpProvider.interceptors.push('authInterceptor');
     $httpProvider.interceptors.push('jsonInterceptor');
@@ -148,4 +148,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
         .setPrefix('lattice-engines')
         .setStorageType('sessionStorage')
         .setNotify(true, true);
+
+    // Enable the hover preview feature
+    JSONFormatterConfigProvider.hoverPreviewEnabled = true;
 });

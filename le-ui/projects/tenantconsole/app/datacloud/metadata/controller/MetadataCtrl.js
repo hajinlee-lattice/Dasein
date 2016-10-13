@@ -2,10 +2,11 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
     'kendo.directives',
     'ngAnimate',
     'ngSanitize',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'jsonFormatter'
 ])
 .controller('AttributeDetailModalCtrl', function($uibModalInstance, data){
-    this.data = data;
+    this.data = JSON.parse(JSON.stringify(data));
     this.close = function () {
         $uibModalInstance.dismiss();
     };
@@ -96,7 +97,6 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
             templateUrl: 'attributeDetailModal.html',
             controller: 'AttributeDetailModalCtrl',
             controllerAs: '$ctrl',
-            // size: 'lg',
             resolve: {
                 data: function () {
                     return $scope.dataForDetail;

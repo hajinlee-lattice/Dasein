@@ -18,6 +18,7 @@ module.exports = function(grunt) {
             d3: '4.2.5',
             bootstrap: '3.3.4',
             "font-awesome": '4.3.0',
+            "json-formatter": '0.6.0',
 
             kendo: '2015.1.408'
         },
@@ -82,7 +83,8 @@ module.exports = function(grunt) {
                     'underscore.js/<%= app.version.underscore %>/underscore.js',
                     'webfont/<%= app.version.webfont %>/webfontloader.js',
                     'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js',
-                    'd3/<%= app.version.d3 %>/d3.js'
+                    'd3/<%= app.version.d3 %>/d3.js',
+                    'json-formatter/<%= app.version["json-formatter"] %>/json-formatter.js'
                 ],
                 dest: '<%= app.dir %>/lib/js'
             },
@@ -95,7 +97,8 @@ module.exports = function(grunt) {
                     'bootswatch/<%= app.version.bootstrap %>/simplex/bootstrap.css',
                     'qtip2/<%= app.version.qtip2 %>/jquery.qtip.css',
                     'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css',
-                    'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css.map'
+                    'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css.map',
+                    'json-formatter/<%= app.version["json-formatter"] %>/json-formatter.css'
                 ],
                 dest: '<%= app.dir %>/lib/css'
             },
