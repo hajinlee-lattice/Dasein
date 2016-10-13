@@ -99,7 +99,7 @@ angular
         
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Preparing Scoring Job...');
-            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.scoring');
+            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.jobs');
         });
     }
 

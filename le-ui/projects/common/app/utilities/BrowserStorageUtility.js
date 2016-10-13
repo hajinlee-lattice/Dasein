@@ -141,6 +141,10 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
         return this._getProperty("_OAuthAccessToken", "_OAuthAccessTokenStorageKey");
     };
 
+    this.clearOAuthAccessToken = function (successHandler) {
+        this._setProperty(null, successHandler, "_OAuthAccessToken", "_OAuthAccessTokenStorageKey");
+    };
+
     // Helper method to set a property
     // by adding it to local storage and then calling a success handler.
     this._setProperty = function (data, successHandler, propStorageObjName, propStorageKeyName) {

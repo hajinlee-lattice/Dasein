@@ -14,6 +14,8 @@ angular.module('lp.apiconsole.ScoringRequestController', [
             $scope.showScoringRequestError = false;
             initValues();
 
+            BrowserStorageUtility.clearOAuthAccessToken();
+
             var ClientSession = BrowserStorageUtility.getClientSession(),
                 Tenant = ClientSession ? ClientSession.Tenant : {},
                 tenantId = (Tenant.Identifier || '').split('.')[0];

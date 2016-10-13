@@ -18,12 +18,12 @@ angular.module('login.tenants', [
         SortDirection: '-',
         deactivated: false,
         selected: null,
-        visible: false,
+        visible: true,
+        initialize: false,
         version: '3.0'
     });
 
     vm.init = function() {
-        
         var ClientSession = BrowserStorageUtility.getClientSession();
         
         LoginStore.set(LoginDocument, ClientSession);
@@ -48,14 +48,11 @@ angular.module('login.tenants', [
         }
 
         SessionTimeoutUtility.init();
-
-        vm.visible = true;
         
-        setTimeout(function() {
-            $('[autofocus]').focus();
-        },100);
-    }
+        vm.initialize = true;
 
+        vm.focus();
+    }
 
     vm.select = function (tenant) {
         vm.deactivated = true;
@@ -80,6 +77,20 @@ angular.module('login.tenants', [
         }
 
         vm.SortProperty = value;
+    };
+
+    vm.toggle = function() {
+        vm.visible = !vm.visible
+        
+        vm.SearchValue = '';
+
+        vm.focus();
+    }
+
+    vm.focus = function (tenant) {
+        setTimeout(function() {
+            $('[autofocus]').focus();
+        }, 100);
     };
 
     function showError(message) {
