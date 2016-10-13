@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -13,8 +15,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
-import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
@@ -169,6 +169,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder matchDestTables(String destTables) {
             match.setDestTables(destTables);
+            return this;
+        }
+        
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            match.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 

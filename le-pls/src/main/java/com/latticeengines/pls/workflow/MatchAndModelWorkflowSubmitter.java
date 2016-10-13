@@ -42,6 +42,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    private String latestDataCloudVersion;
+    
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
@@ -117,6 +120,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
+                .dataCloudVersion(getDataCloudVersion())
                 .matchColumnSelection(Predefined.getDefaultSelection(), null)
                 .moduleName(modelSummary.getModuleName()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
@@ -129,6 +133,13 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             builder.dedupTargetTableName(cloneTableName);
         }
         return builder.build();
+    }
+    
+    private String getDataCloudVersion() {
+        if (useDnBFlagFromZK()) {
+            return latestDataCloudVersion;
+        }
+        return null;
     }
 
     private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
