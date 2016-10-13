@@ -10,7 +10,6 @@ import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.service.impl.JobNameServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -42,7 +41,7 @@ public class CamelRouteJobService {
 
     private EaiJob createJob(ImportConfiguration importConfig) {
         EaiJob eaiJob = new EaiJob();
-        String customerSpace = importConfig.getCustomerSpace().toString() + JobNameServiceImpl.JOBNAME_DELIMITER
+        String customerSpace = importConfig.getCustomerSpace().toString() + "~"
                 + CustomerSpace.parse(this.getClass().getSimpleName()).toString();
 
         eaiJob.setClient("eaiClient");
