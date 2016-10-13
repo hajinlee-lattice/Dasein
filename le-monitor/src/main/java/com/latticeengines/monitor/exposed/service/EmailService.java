@@ -20,11 +20,11 @@ public interface EmailService {
 
     void sendPlsNewInternalUserEmail(Tenant tenant, User user, String password, String hostport);
 
-    void sendPlsNewExternalUserEmail(User user, String password, String hostport);
+    void sendPlsNewExternalUserEmail(User user, String password, String hostport, boolean bccEmail);
 
     void sendPlsExistingInternalUserEmail(Tenant tenant, User user, String hostport);
 
-    void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport);
+    void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail);
 
     void sendPdNewExternalUserEmail(User user, String password, String hostport);
 

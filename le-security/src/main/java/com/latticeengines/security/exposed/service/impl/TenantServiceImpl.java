@@ -56,6 +56,15 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public void updateTenantEmailFlag(String tenantId, boolean emailSent) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant != null) {
+            tenant.setEmailSent(emailSent);
+            tenantEntityMgr.update(tenant);
+        }
+    }
+
+    @Override
     public void discardTenant(Tenant tenant) {
         try {
             tenantEntityMgr.delete(tenant);
@@ -79,6 +88,15 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public List<Tenant> getAllTenants() {
         return tenantEntityMgr.findAll();
+    }
+
+    @Override
+    public boolean getTenantEmailFlag(String tenantId) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant != null) {
+            return tenant.getEmailSent();
+        }
+        return false;
     }
 
     @Override

@@ -6,6 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.service.TenantService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +60,9 @@ public class UserResource {
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String apiPublicUrl;
+
+    @Autowired
+    private TenantService tenantService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -128,7 +133,9 @@ public class UserResource {
 
         String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiPublicUrl);
+            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiPublicUrl,
+                    !tenantService.getTenantEmailFlag(tenant.getId()));
+            tenantService.updateTenantEmailFlag(tenant.getId(), true);
         } else {
             emailService.sendPlsNewInternalUserEmail(tenant, user, tempPass, apiPublicUrl);
         }
@@ -204,7 +211,9 @@ public class UserResource {
             if (newUser && user != null) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
                         targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiPublicUrl);
+                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiPublicUrl,
+                            !tenantService.getTenantEmailFlag(tenant.getId()));
+                    tenantService.updateTenantEmailFlag(tenant.getId(), true);
                 } else {
                     emailService.sendPlsExistingInternalUserEmail(tenant, user, apiPublicUrl);
                 }

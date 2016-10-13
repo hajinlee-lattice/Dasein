@@ -10,9 +10,13 @@ public interface TenantService {
 
     void updateTenant(Tenant tenant);
 
+    void updateTenantEmailFlag(String tenantId, boolean emailSent);
+
     void discardTenant(Tenant tenant);
     
     List<Tenant> getAllTenants();
+
+    boolean getTenantEmailFlag(String tenantId);
 
     boolean hasTenantId(String tenantId);
 

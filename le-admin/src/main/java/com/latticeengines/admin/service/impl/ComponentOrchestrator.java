@@ -38,6 +38,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
 public class ComponentOrchestrator {
@@ -50,6 +51,9 @@ public class ComponentOrchestrator {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TenantService tenantService;
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
@@ -163,10 +167,10 @@ public class ComponentOrchestrator {
             }
         }
         sendExistingEmails(existingEmailList, tenantId, products);
-        sendNewEmails(newEmailList, products);
+        sendNewEmails(newEmailList, tenantId, products);
     }
 
-    private void sendNewEmails(List<String> emailList, List<LatticeProduct> products) {
+    private void sendNewEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -191,7 +195,8 @@ public class ComponentOrchestrator {
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
                 emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
+                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
+                tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
             }
@@ -211,7 +216,8 @@ public class ComponentOrchestrator {
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
                 emailService.sendPdExistingExternalUserEmail(tenant, user, appPublicUrl);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsExistingExternalUserEmail(tenant, user, appPublicUrl);
+                emailService.sendPlsExistingExternalUserEmail(tenant, user, appPublicUrl, true);
+                tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
             }

@@ -85,7 +85,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsNewExternalUserEmail(User user, String password, String hostport) {
+    public void sendPlsNewExternalUserEmail(User user, String password, String hostport, boolean bccEmail) {
         try {
             log.info("Sending new PLS external user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(EmailTemplateBuilder.Template.PLS_NEW_EXTERNAL_USER);
@@ -99,8 +99,12 @@ public class EmailServiceImpl implements EmailService {
 
             Multipart mp = builder.buildMultipart();
             log.info("Sending email to " + user.getUsername());
-            sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()),
-                    Collections.singleton(businessOpsEmail));
+            if (bccEmail) {
+                sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()),
+                        Collections.singleton(businessOpsEmail));
+            } else {
+                sendMultiPartEmail(EmailSettings.PLS_NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()));
+            }
             log.info("Sending new PLS external user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send new PLS external user email to " + user.getEmail() + " " + e.getMessage());
@@ -129,7 +133,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport) {
+    public void sendPlsExistingExternalUserEmail(Tenant tenant, User user, String hostport, boolean bccEmail) {
         try {
             log.info("Sending existing PLS external user email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -141,8 +145,13 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{apppublicurl}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(String.format(EmailSettings.PLS_EXISTING_USER_SUBJECT, tenant.getName()), mp,
-                    Collections.singleton(user.getEmail()), Collections.singleton(businessOpsEmail));
+            if (bccEmail) {
+                sendMultiPartEmail(String.format(EmailSettings.PLS_EXISTING_USER_SUBJECT, tenant.getName()), mp,
+                        Collections.singleton(user.getEmail()), Collections.singleton(businessOpsEmail));
+            } else {
+                sendMultiPartEmail(String.format(EmailSettings.PLS_EXISTING_USER_SUBJECT, tenant.getName()), mp,
+                        Collections.singleton(user.getEmail()));
+            }
             log.info("Sending PLS existing external user email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send existing PLS external user email to " + user.getEmail() + " " + e.getMessage());

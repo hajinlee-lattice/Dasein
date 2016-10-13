@@ -49,6 +49,10 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     @Column(name = "UI_VERSION", nullable = false, unique = false)
     private String uiVersion = "2.0";
 
+    @Column(name = "EXTERNAL_USER_EMAIL_SENT")
+    private Boolean emailSent = false;
+
+
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     private List<TargetMarket> targetMarkets;
 
@@ -130,6 +134,16 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     @JsonProperty("UIVersion")
     public void setUiVersion(String uiVersion) {
         this.uiVersion = uiVersion;
+    }
+
+    @JsonIgnore
+    public Boolean getEmailSent() {
+        return emailSent;
+    }
+
+    @JsonIgnore
+    public void setEmailSent(Boolean emailSent) {
+        this.emailSent = emailSent;
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243
