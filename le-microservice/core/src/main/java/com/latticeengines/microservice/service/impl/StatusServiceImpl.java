@@ -46,6 +46,9 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.scoringapi.health.url}")
     private String scoringapiHealthUrl;
 
+    @Value("${microservice.matchapi.health.url}")
+    private String matchapiHealthUrl;
+
     @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
@@ -60,6 +63,7 @@ public class StatusServiceImpl implements StatusService {
         healthUrls.put("admin", adminHealthUrl);
         healthUrls.put("pls", plsHealthUrl);
         healthUrls.put("scoringapi", scoringapiHealthUrl);
+        healthUrls.put("matchapi", matchapiHealthUrl);
         healthUrls.put("microservice", microserviceHealthUrl);
     }
 
