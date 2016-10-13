@@ -43,7 +43,7 @@ import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
 
-    private static final int MAX_CACHE_SIZE = 1000;
+    private static final int MAX_CACHE_SIZE = 100000;
     private static final Log log = LogFactory.getLog(WorkflowExecutionCache.class);
 
     @Value("${workflow.jobs.numthreads}")
@@ -119,7 +119,6 @@ public class WorkflowExecutionCache {
                     job.setErrorCode(errorDetails.getErrorCode());
                     job.setErrorMsg(errorDetails.getErrorMsg());
                 }
-                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr, true);
             }
 
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {

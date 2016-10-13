@@ -3,6 +3,7 @@ package com.latticeengines.workflow.exposed.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -10,7 +11,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
 public class WorkflowUtils {
     /**
@@ -21,25 +21,23 @@ public class WorkflowUtils {
     private static final Log log = LogFactory.getLog(WorkflowUtils.class);
 
     public static void updateJobFromYarn(Job job, WorkflowJob workflowJob, JobProxy jobProxy,
-                                         WorkflowJobEntityMgr workflowJobEntityMgr, boolean fromWorkflowCache) {
-        if (!fromWorkflowCache) {
-            YarnApplicationState jobState = null;
+                                         WorkflowJobEntityMgr workflowJobEntityMgr) {
+        YarnApplicationState jobState = null;
 
-            if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
-                try {
-                    com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
-                            .getApplicationId());
-                    jobState = status.getState();
-                    workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
-                } catch (Exception e) {
-                    log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
-                }
+        if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
+            try {
+                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
+                        .getApplicationId());
+                jobState = status.getState();
+                workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
+            } catch (Exception e) {
+                log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
             }
-            // We only trust the WorkflowJob status if it is non-null
-            JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
-            if (status != null) {
-                job.setJobStatus(status);
-            }
+        }
+        // We only trust the WorkflowJob status if it is non-null
+        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
+        if (status != null) {
+            job.setJobStatus(status);
         }
     }
 
