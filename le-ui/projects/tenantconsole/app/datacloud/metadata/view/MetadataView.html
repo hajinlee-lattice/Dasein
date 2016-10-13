@@ -23,7 +23,9 @@
             <h3 class="modal-title" id="modal-title">{{$ctrl.data.ColumnId}}</h3>
         </div>
         <div class="modal-body" id="modal-body">
-            <json-formatter json="$ctrl.data" open="2"></json-formatter>
+            <pre pretty-json="$ctrl.data" />
+            <br/>
+            <p class="text-muted">If you don't like the json viewer above, you can copy paste it to your favorate json formatter for a better view.</p>
         </div>
         <div class="modal-footer">
             <button class="btn btn-warning" type="button" ng-click="$ctrl.close()">Close</button>

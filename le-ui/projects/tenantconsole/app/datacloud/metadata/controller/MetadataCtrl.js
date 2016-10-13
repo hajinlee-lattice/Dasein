@@ -2,8 +2,8 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
     'kendo.directives',
     'ngAnimate',
     'ngSanitize',
-    'ui.bootstrap',
-    'jsonFormatter'
+    'ngPrettyJson',
+    'ui.bootstrap'
 ])
 .controller('AttributeDetailModalCtrl', function($uibModalInstance, data){
     this.data = JSON.parse(JSON.stringify(data));
@@ -88,7 +88,6 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
     };
 
     $scope.openAttributeDetail = function(data) {
-        console.log(data);
         $scope.dataForDetail = data;
         var modalInstance = $uibModal.open({
             animation: true,

@@ -252,6 +252,16 @@ module.exports = function(grunt) {
                     src: ['<%= app.dir %>/assets/img/**/*', '<%= app.dir %>/lib/css/**/*', '<%= app.dir %>/app/**/*.html'],
                     dest: '<%= app.dist %>'
                 }]
+            },
+
+            prettyjson: {
+                files: [{
+                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.css'],
+                    dest: '<%= app.dir %>/lib/css/ng-prettyjson.min.css'
+                }, {
+                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.js'],
+                    dest: '<%= app.dir %>/lib/js/ng-prettyjson.min.js'
+                }]
             }
         },
 
@@ -461,6 +471,7 @@ module.exports = function(grunt) {
     grunt.registerTask('init', [
         'clean:vendor',
         'concurrent:wget',
+        'copy:prettyjson',
         'less:dev']);
 
     var instrumentJsText = 'Instrument javascript code for code coverage';

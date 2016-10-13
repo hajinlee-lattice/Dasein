@@ -5,7 +5,7 @@ var app = angular.module("app.tenants.controller.TenantListCtrl", [
     'ui.bootstrap'
 ]);
 
-app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantService, TenantUtility) {
+app.controller('TenantListCtrl', function($scope, $state, _, $uibModal, TenantService, TenantUtility) {
     $scope.loading = true;
 
     TenantService.GetAllTenants().then(function(result){
@@ -102,13 +102,13 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
     };
 
     $scope.onAddClick = function(){
-        var modalInstance = $modal.open({
+        var modalInstance = $uibModal.open({
             templateUrl: 'addNewTenantModal.html',
             resolve: {
                 TenantUtility: function () { return TenantUtility; },
                 tenants: function () { return $scope.tenants; }
             },
-            controller: function($scope, $modalInstance, _, tenants, TenantUtility){
+            controller: function($scope, $uibModalInstance, _, tenants, TenantUtility){
                 $scope.tenants = tenants;
 
                 $scope.tenantInfo = {};
@@ -148,12 +148,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         if (!$scope.tenantInfo.hasOwnProperty("contractId") || $scope.tenantInfo.contractId === '') {
                             $scope.tenantInfo.contractId = $scope.tenantInfo.tenantId;
                         }
-                        $modalInstance.close($scope.tenantInfo);
+                        $uibModalInstance.close($scope.tenantInfo);
                     }
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
                 };
             }
         });
