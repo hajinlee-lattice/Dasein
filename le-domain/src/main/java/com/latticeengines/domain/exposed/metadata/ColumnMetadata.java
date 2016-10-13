@@ -29,6 +29,21 @@ public class ColumnMetadata {
     private String matchDestination;
     private Boolean isPremium = Boolean.FALSE;
 
+    @JsonProperty("CanModel")
+    private boolean canModel;
+
+    @JsonProperty("CanEnrich")
+    private boolean canEnrich;
+
+    @JsonProperty("CanInternalEnrich")
+    private boolean canInternalEnrich;
+
+    @JsonProperty("CanInsights")
+    private boolean canInsights;
+
+    @JsonProperty("CanBIS")
+    private boolean canBis;
+
     @JsonProperty("ColumnId")
     public String getColumnId() {
         return columnId;
@@ -147,6 +162,46 @@ public class ColumnMetadata {
     @JsonProperty("IsPremium")
     public void setIsPremium(Boolean isPremium) {
         this.isPremium = isPremium;
+    }
+
+    public boolean isCanModel() {
+        return canModel;
+    }
+
+    public void setCanModel(boolean canModel) {
+        this.canModel = canModel;
+    }
+
+    public boolean isCanEnrich() {
+        return canEnrich;
+    }
+
+    public void setCanEnrich(boolean canEnrich) {
+        this.canEnrich = canEnrich;
+    }
+
+    public boolean isCanInternalEnrich() {
+        return canInternalEnrich;
+    }
+
+    public void setCanInternalEnrich(boolean canInternalEnrich) {
+        this.canInternalEnrich = canInternalEnrich;
+    }
+
+    public boolean isCanInsights() {
+        return canInsights;
+    }
+
+    public void setCanInsights(boolean canInsights) {
+        this.canInsights = canInsights;
+    }
+
+    public boolean isCanBis() {
+        return canBis;
+    }
+
+    public void setCanBis(boolean canBis) {
+        this.canBis = canBis;
     }
 
     @JsonProperty("FundamentalType")

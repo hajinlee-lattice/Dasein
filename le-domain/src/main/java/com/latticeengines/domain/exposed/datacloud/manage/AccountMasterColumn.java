@@ -305,6 +305,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
     @Override
     public ColumnMetadata toColumnMetadata() {
+        List<ApprovedUsage> approvedUsages = getApprovedUsageList();
+
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setColumnId(getAmColumnId());
         metadata.setColumnName(getAmColumnId());
@@ -318,11 +320,32 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setSubcategory(getSubcategory());
         metadata.setStatisticalType(getStatisticalType());
         metadata.setFundamentalType(getFundamentalType());
-        metadata.setApprovedUsageList(getApprovedUsageList());
+        metadata.setApprovedUsageList(approvedUsages);
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setIsPremium(isPremium());
         metadata.setMatchDestination(getMatchDestination());
+
+        if (approvedUsages != null) {
+            if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
+                    || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
+                metadata.setCanModel(true);
+                if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
+                        || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
+                    metadata.setCanBis(true);
+                    if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)) {
+                        metadata.setCanBis(true);
+                    }
+                }
+            }
+        }
+
+        String groups = getGroups();
+        if (groups != null && groups.contains(ColumnSelection.Predefined.Enrichment.name())
+                && !groups.contains(ColumnSelection.Predefined.LeadEnrichment.name())) {
+            metadata.setCanEnrich(true);
+        }
+
         return metadata;
     }
 

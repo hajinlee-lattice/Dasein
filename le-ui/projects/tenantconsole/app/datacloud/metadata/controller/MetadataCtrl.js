@@ -46,6 +46,7 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
                         FundamentalType: { type: "string" },
                         StatisticalType: { type: "string" },
                         ApprovedUsage: { type: "string" },
+                        CanEnrich: {type: "boolean"},
                         IsPremium: {type: "boolean"}
                     }
                 }
@@ -77,9 +78,10 @@ angular.module("app.datacloud.controller.MetadataCtrl", [
                 "Category",
                 "Subcategory",
                 "ApprovedUsage",
-                "FundamentalType",
-                "StatisticalType",
-                {field: "IsPremium", filterable: true}
+                {field: "FundamentalType", title: "FundType"},
+                {field: "StatisticalType", title: "StatType"},
+                {field: "CanEnrich", title: "Can Enrich", filterable: true},
+                {field: "IsPremium", title: "Is Premium", filterable: true}
             ]
         };
     };
