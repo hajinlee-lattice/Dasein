@@ -22,9 +22,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     //==================================================
     // parse state parameters flags
     //==================================================
-    if ($stateParams.new) $scope.new = $stateParams.new === "true";
-    if ($stateParams.readonly) $scope.readonly = $stateParams.readonly === "true";
-    if ($stateParams.listenState) $scope.listenState = $stateParams.listenState === "true";
+    if ($stateParams.new) { $scope.new = $stateParams.new === "true"; }
+    if ($stateParams.readonly) { $scope.readonly = $stateParams.readonly === "true"; }
+    if ($stateParams.listenState) { $scope.listenState = $stateParams.listenState === "true"; }
 
     //==================================================
     // setup customer space ==> 3 IDs
@@ -150,7 +150,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 $scope.LPA3isSelected = true;
             }
         }
-        if (selectedLPAnum == 2) {
+        if (selectedLPAnum === 2) {
             $scope.twoLPsAreSelected = true;
         }
         return LPASelected;
@@ -227,7 +227,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                                 var component = result.resultObj;
                                 $scope.components.push(component);
                             }
-                            if ($scope.defaultConfigScaned == $scope.services.length) {
+                            if ($scope.defaultConfigScaned === $scope.services.length) {
                                 $scope.loading = false;
                                 if ($state.current.name !== "TENANT.CONFIG") {
                                     $timeout(function () {
@@ -289,7 +289,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                                     }
                                     $scope.selectedComponents.push(component);
                                     if ($scope.componentsToScan <= 0) {
-                                        if ($scope.listenState) updateServiceStatus();
+                                        if ($scope.listenState) { updateServiceStatus(); }
                                         $scope.loading = false;
                                     }
                                 }
