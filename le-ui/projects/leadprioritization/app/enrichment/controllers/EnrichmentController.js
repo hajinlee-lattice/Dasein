@@ -118,7 +118,9 @@ angular.module('lp.enrichment.leadenrichment', [
     var getEnrichmentSubcategories = function(category) {
         if(category) {
             EnrichmentStore.getSubcategories(category).then(function(result) {
-                vm.subcategories[category] = result.data;
+                if(result.data.length > 1){
+                    vm.subcategories[category] = result.data;
+                }
             });
         }
     }

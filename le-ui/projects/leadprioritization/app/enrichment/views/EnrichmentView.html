@@ -35,7 +35,7 @@
                                         {{value}}
                                     </span>
                                     <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event});  vm.metadata.current = 1;" ng-class="{active: vm.inCategory({Category: value})}"></span>
-                                </div>                                
+                                </div>
                                 <ul ng-if="vm.subcategories[value]">
                                     <li ng-repeat="(subcategory_key, subcategory_value) in vm.subcategories[value]" ng-click="vm.changeSubcategory({category: value, subcategory: subcategory_value, event: $event}); vm.metadata.current = 1;" ng-class="{active: vm.inSubcategory({Category: value, Subcategory: subcategory_value})}">
                                         <span class="subcategory-name">{{subcategory_value}}</span>
