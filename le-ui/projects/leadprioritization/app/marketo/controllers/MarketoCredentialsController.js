@@ -105,6 +105,9 @@ angular.module('lp.marketo', [
     });
 
 	vm.saveCredentialClicked = function() {
+
+		vm.saveInProgress = true;
+		
 		var credential = {
             credentialName: vm.credentialName,
             soapEndpoint: vm.soapEndpoint,
