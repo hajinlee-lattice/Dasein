@@ -80,7 +80,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             if (!$scope.loading) {
                 updateServiceStatus();
             }
-        }, 5000);
+        }, 10000);
     }
 
     //==================================================
