@@ -11,14 +11,11 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Test(groups = {"functional.platform"})
+    @Test(groups = { "functional.platform" })
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
-        assertEquals(registry.size(), 4);
-        assertTrue(registry.keySet().contains("ResubmitPreemptedJobsWithThrottling")
-                && registry.keySet().contains("ConvertSuccessfulJobsToPMML")
-                && registry.keySet().contains("GenerateYarnMetrics")
+        assertEquals(registry.size(), 2);
+        assertTrue(registry.keySet().contains("GenerateYarnMetrics")
                 && registry.keySet().contains("ThrottleLongHangingJobs"));
-
     }
 }

@@ -39,7 +39,8 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     private String hdfsJobBaseDir;
 
     public ResubmitPreemptedJobsWithThrottling() {
-        register(this);
+        // Disable for now
+        // register(this);
     }
 
     @Override
