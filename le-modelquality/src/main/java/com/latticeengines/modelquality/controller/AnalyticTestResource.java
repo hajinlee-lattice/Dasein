@@ -47,7 +47,7 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
-    @RequestMapping(value = "/{analyticTestName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{analyticTestName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get AnalyticTest by name")
     public AnalyticTestEntityNames getAnalyticTestByName(String analyticTestName) {

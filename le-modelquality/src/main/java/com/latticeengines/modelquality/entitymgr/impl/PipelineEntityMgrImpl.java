@@ -37,11 +37,13 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(Pipeline pipeline) {
+        pipeline.setName(pipeline.getName().replace('/', '_'));
         for (PipelineStep step : pipeline.getPipelineSteps()) {
+            step.setName(step.getName().replace('/', '_'));
             pipelineStepDao.create(step);
         }
 
-        super.create(pipeline);
+        pipelineDao.create(pipeline);
         setPipelineStepOrder(pipeline);
     }
 

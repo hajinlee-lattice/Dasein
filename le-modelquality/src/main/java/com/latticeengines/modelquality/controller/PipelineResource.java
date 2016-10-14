@@ -66,7 +66,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{pipelineName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{pipelineName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get pipeline by name")
     public Pipeline getPipelineByName(@PathVariable String pipelineName) {

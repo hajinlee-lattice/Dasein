@@ -26,8 +26,16 @@ public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void create(DataFlow dataflow) {
+        dataflow.setName(dataflow.getName().replace('/', '_'));
+        dataFlowDao.create(dataflow);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void createDataFlows(List<DataFlow> dataflows) {
         for (DataFlow dataflow : dataflows) {
+            dataflow.setName(dataflow.getName().replace('/', '_'));
             dataFlowDao.create(dataflow);
         }
     }

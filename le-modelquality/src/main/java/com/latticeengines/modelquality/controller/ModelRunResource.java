@@ -55,7 +55,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{modelRunName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{modelRunName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get ModelRun by name")
     public ModelRunEntityNames getModelRunByName(@PathVariable String modelRunName) {
@@ -63,7 +63,7 @@ public class ModelRunResource implements ModelQualityModelRunInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/status/{modelRunName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/status/{modelRunName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get ModelRun Status by name")
     public String getModelRunStatusByName(@PathVariable String modelRunName) {

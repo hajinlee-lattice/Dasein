@@ -26,8 +26,16 @@ public class PropDataEntityMgrImpl extends BaseEntityMgrImpl<PropData> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void create(PropData propdata) {
+        propdata.setName(propdata.getName().replace('/', '_'));
+        propDataDao.create(propdata);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void createPropDatas(List<PropData> propDatas) {
         for (PropData propData : propDatas) {
+            propData.setName(propData.getName().replace('/', '_'));
             propDataDao.create(propData);
         }
     }

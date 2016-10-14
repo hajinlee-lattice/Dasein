@@ -25,6 +25,7 @@ public class AnalyticTestEntityMgrImpl extends BaseEntityMgrImpl<AnalyticTest> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(AnalyticTest analyticTest) {
+        analyticTest.setName(analyticTest.getName().replace('/', '_'));
         analyticTestDao.create(analyticTest);
     }
 

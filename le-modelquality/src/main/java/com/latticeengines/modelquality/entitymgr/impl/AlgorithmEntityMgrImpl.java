@@ -35,6 +35,7 @@ public class AlgorithmEntityMgrImpl extends BaseEntityMgrImpl<Algorithm> impleme
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(Algorithm algorithm) {
+        algorithm.setName(algorithm.getName().replace('/', '_'));
         algorithmDao.create(algorithm);
         for (AlgorithmPropertyDef propertyDef : algorithm.getAlgorithmPropertyDefs()) {
             algorithmPropertyDefDao.create(propertyDef);

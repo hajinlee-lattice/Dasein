@@ -59,7 +59,7 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{propDataConfigName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{propDataConfigName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get PropData configuration by name")
     public PropData getPropDataConfigByName(@PathVariable String propDataConfigName) {

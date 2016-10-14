@@ -59,7 +59,7 @@ public class AnalyticPipelineResource
     }
 
     @Override
-    @RequestMapping(value = "/{analyticPipelineName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{analyticPipelineName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get AnalyticPipeline by name")
     public AnalyticPipelineEntityNames getAnalyticPipelineByName(@PathVariable String analyticPipelineName) {

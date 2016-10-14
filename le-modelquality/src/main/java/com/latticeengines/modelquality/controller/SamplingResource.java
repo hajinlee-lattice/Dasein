@@ -41,7 +41,7 @@ public class SamplingResource implements ModelQualitySamplingInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/samplingconfigs/{samplingConfigName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/samplingconfigs/{samplingConfigName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get list of sampling configurations")
     public Sampling getSamplingConfigByName(@PathVariable String samplingConfigName) {

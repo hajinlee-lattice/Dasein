@@ -47,7 +47,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
-    @RequestMapping(value = "/{dataSetName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{dataSetName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get DataSet by name")
     public DataSet getDataSetByName(@PathVariable String dataSetName) {

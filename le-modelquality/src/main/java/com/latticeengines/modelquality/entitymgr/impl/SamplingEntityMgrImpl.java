@@ -35,6 +35,7 @@ public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(Sampling sampling) {
+        sampling.setName(sampling.getName().replace('/', '_'));
         samplingDao.create(sampling);
 
         for (SamplingPropertyDef propertyDef : sampling.getSamplingPropertyDefs()) {

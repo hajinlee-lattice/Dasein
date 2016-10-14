@@ -54,7 +54,7 @@ public class AlgorithmResource implements ModelQualityAlgorithmInterface, CrudIn
     }
 
     @Override
-    @RequestMapping(value = "/{algorithmName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{algorithmName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Algorithm by name")
     public Algorithm getAlgorithmByName(@PathVariable String algorithmName) {

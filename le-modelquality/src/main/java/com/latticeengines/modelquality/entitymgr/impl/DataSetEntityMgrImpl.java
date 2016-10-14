@@ -26,10 +26,11 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void create(DataSet dataSet) {
+        dataSet.setName(dataSet.getName().replace('/', '_'));
         for (ScoringDataSet scoringDataSet : dataSet.getScoringDataSets()) {
             scoringDataSet.setDataSet(dataSet);
         }
-        super.create(dataSet);
+        dataSetDao.create(dataSet);
     }
 
     @Override

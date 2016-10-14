@@ -51,7 +51,7 @@ public class DataFlowResource implements ModelQualityDataFlowInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/{dataFlowName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{dataFlowName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get DataFlows")
     public DataFlow getDataFlowByName(@PathVariable String dataFlowName) {

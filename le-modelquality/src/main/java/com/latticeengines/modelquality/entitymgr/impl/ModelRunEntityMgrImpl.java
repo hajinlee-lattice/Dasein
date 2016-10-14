@@ -25,6 +25,7 @@ public class ModelRunEntityMgrImpl extends BaseEntityMgrImpl<ModelRun> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(ModelRun modelRun) {
+        modelRun.setName(modelRun.getName().replace('/', '_'));
         modelRunDao.create(modelRun);
     }
 

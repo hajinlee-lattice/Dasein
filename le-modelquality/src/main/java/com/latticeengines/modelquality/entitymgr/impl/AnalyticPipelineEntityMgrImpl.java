@@ -26,6 +26,7 @@ public class AnalyticPipelineEntityMgrImpl extends BaseEntityMgrImpl<AnalyticPip
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(AnalyticPipeline analyticPipeline) {
+        analyticPipeline.setName(analyticPipeline.getName().replace('/', '_'));
         analyticPipelineDao.create(analyticPipeline);
     }
 

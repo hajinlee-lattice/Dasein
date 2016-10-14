@@ -23,6 +23,13 @@ public class PipelineStepEntityMgrImpl extends BaseEntityMgrImpl<PipelineStep> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(PipelineStep step) {
+        step.setName(step.getName().replace('/', '_'));
+        pipelineStepDao.create(step);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PipelineStep findByName(String stepName) {
         return pipelineStepDao.findByField("NAME", stepName);
