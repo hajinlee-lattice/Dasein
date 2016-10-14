@@ -1,0 +1,85 @@
+package com.latticeengines.propdata.engine.transformation.service.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.core.source.impl.BomboraWeeklyAgg;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.propdata.engine.transformation.service.TransformationService;
+
+@Component("bomboraWeeklyAggService")
+public class BomboraWeeklyAggService
+        extends SimpleTransformationServiceBase<BasicTransformationConfiguration, TransformationFlowParameters>
+        implements TransformationService<BasicTransformationConfiguration> {
+
+    private static final Log log = LogFactory.getLog(BomboraWeeklyAggService.class);
+
+    @Autowired
+    private BomboraWeeklyAgg source;
+
+    @Override
+    public Source getSource() {
+        return source;
+    }
+
+    @Override
+    protected Log getLogger() {
+        return log;
+    }
+
+    @Override
+    protected String getDataFlowBeanName() {
+        return "bomboraWeeklyAggFlow";
+    }
+
+    @Override
+    protected String getServiceBeanName() {
+        return "bomboraWeeklyAggService";
+    }
+
+    @Override
+    public List<String> findUnprocessedBaseVersions() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    protected List<String> parseBaseVersions(Source baseSource, String baseVersion) {
+        String sourceDir = hdfsPathBuilder.constructSnapshotRootDir(baseSource).toString();
+        List<String> baseVersionList = new ArrayList<>();
+        try {
+            List<String> versionPaths = HdfsUtils.getFilesForDir(yarnConfiguration, sourceDir);
+            Collections.sort(versionPaths, Collections.reverseOrder());
+            int num = 0;
+            for (String versionPath : versionPaths) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, versionPath)) {
+                    versionPath = versionPath.substring(versionPath.indexOf(sourceDir.toString()));
+                    String version = new Path(versionPath).getName();
+                    Path success = new Path(versionPath, HdfsPathBuilder.SUCCESS_FILE);
+                    if (version.compareTo(baseVersion) <= 0
+                            && HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                        baseVersionList.add(version);
+                        num++;
+                        if (num >= 7) {
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to find avro paths for " + source.getSourceName() + " before " + baseVersion);
+        }
+        return baseVersionList;
+    }
+}

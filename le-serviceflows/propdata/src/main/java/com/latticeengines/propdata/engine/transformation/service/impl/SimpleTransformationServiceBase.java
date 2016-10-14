@@ -54,9 +54,9 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
     }
 
     //!! override this if there are multiple base versions for one base source
-    protected List<String> parseBaseVersions(String baseVersions) {
+    protected List<String> parseBaseVersions(Source baseSource, String baseVersion) {
         List<String> baseVersionList = new ArrayList<String>();
-        baseVersionList.add(baseVersions);
+        baseVersionList.add(baseVersion);
         return baseVersionList;
     }
 
@@ -95,7 +95,15 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(getSource().getSourceName()));
 
         DerivedSource derivedSource = (DerivedSource) getSource();
-        parameters.setBaseTables(Collections.singletonList(derivedSource.getBaseSources()[0].getSourceName()));
+        if (derivedSource.getBaseSources().length == 1) {
+            parameters.setBaseTables(Collections.singletonList(derivedSource.getBaseSources()[0].getSourceName()));
+        } else {
+            List<String> baseTables = new ArrayList<String>();
+            for (Source baseSource : derivedSource.getBaseSources()) {
+                baseTables.add(baseSource.getSourceName());
+            }
+            parameters.setBaseTables(baseTables);
+        }
         parameters.setPrimaryKeys(Arrays.asList(getSource().getPrimaryKey()));
         return parameters;
     }
@@ -150,7 +158,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
                 if (StringUtils.isEmpty(baseSourceVersion)) {
                     baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
                 }
-                List<String> baseSourceVersionList = parseBaseVersions(baseSourceVersion);
+                List<String> baseSourceVersionList = parseBaseVersions(baseSource, baseSourceVersion);
                 baseSourceVersionMap.put(baseSource, baseSourceVersionList);
             }
 
