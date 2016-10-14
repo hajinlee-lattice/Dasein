@@ -41,14 +41,17 @@ public class CamelRouteJobService {
 
     private EaiJob createJob(ImportConfiguration importConfig) {
         EaiJob eaiJob = new EaiJob();
-        String customerSpace = importConfig.getCustomerSpace().toString() + "~"
-                + CustomerSpace.parse(this.getClass().getSimpleName()).toString();
+        StringBuilder customerSpace = new StringBuilder("");
+        if (importConfig.getCustomerSpace() != null) {
+            customerSpace.append(importConfig.getCustomerSpace().toString() + "~");
+        }
+        customerSpace.append(CustomerSpace.parse(this.getClass().getSimpleName()).toString());
 
         eaiJob.setClient("eaiClient");
-        eaiJob.setCustomer(customerSpace);
+        eaiJob.setCustomer(customerSpace.toString());
 
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace.toString());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getEaiQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
