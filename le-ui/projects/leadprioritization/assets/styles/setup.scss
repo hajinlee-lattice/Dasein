@@ -49,7 +49,6 @@
   */
   padding: 10px;
   background: white;
-  overflow: auto;
 }
 
 #setup .setup-main-panel .manage-fields {
@@ -126,13 +125,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-#setup .fields-panel {
-  overflow: hidden;
-}
-
 #setup .fields-grid {
   padding: 0;
-  overflow: auto;
   border: none;
 }
 
