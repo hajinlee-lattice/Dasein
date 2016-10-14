@@ -15,7 +15,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
         $http({
             method: 'GET',
-            url: '/modelquality/analyticpipelines' + (analyticPipelineName || '')
+            url: '/modelquality/analyticpipelines/' + (analyticPipelineName || '')
         }).success(function(data){
             result.resultObj = data;
             defer.resolve(result);
@@ -258,6 +258,8 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 defer.resolve(result);
             } else {
                 result.errMsg = JSON.parse(xhr.responseText);
+                // resolve instead of reject
+                // we want to catch all in $q.all
                 defer.resolve(result);
             }
         });

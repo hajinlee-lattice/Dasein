@@ -49,7 +49,23 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
     };
 
     vm.addStep = function (step) {
-        vm.pipeline.pipeline_steps.push(step);
+        var indexOfStep = vm.pipelineIndexOfStep(step.Name);
+
+        if (indexOfStep > 0) {
+            vm.pipeline[indexOfStep] = step;
+        } else {
+            vm.pipeline.pipeline_steps.push(step);
+        }
+    };
+
+    vm.pipelineIndexOfStep = function (stepName) {
+        for (var i = 0; i < vm.pipeline.length; i++) {
+            if (vm.pipeline[i].Name === stepName) {
+                return i;
+            }
+        }
+
+        return -1;
     };
 
     vm.createStep = function () {
@@ -69,10 +85,15 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
         vm.errorMsg = null;
         vm.successMsg = null;
         var newPipeline = vm.pipeline.pipeline_steps.map(function (step) {
-            return {
-                pipeline_step: step.Name,
-                pipeline_step_dir: null
-            };
+            if (step.isNewStep) {
+                return {
+                    pipeline_step_dir: step.pipeline_step_dir
+                };
+            } else {
+                return {
+                    pipeline_step: step.Name
+                };
+            }
         });
 
         vm.loading = true;

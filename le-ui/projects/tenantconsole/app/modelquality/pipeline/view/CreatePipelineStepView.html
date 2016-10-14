@@ -5,7 +5,6 @@
 <form ng-show="!vm_createPipelineStep.loading" name="pipelineStep">
   <div class="form-group">
     <label for="pipelineName">{{::vm_createPipelineStep.labels.STEP_NAME}}:
-      <span class="error" ng-if="vm_createPipelineStep.stepNameRequired">{{vm_createPipelineStep.stepNameRequired}}</span>
       <input
         type="text"
         name="pipelineName"
@@ -17,7 +16,7 @@
   <div class="form-group">
     <label for="pythonFile">{{::vm_createPipelineStep.labels.PYTHON}}:
       <span class="success" ng-if="vm_createPipelineStep.pythonSuccess">{{vm_createPipelineStep.pythonSuccess}}</span>
-      <span class="error" ng-if="vm_createPipelineStep.pythonError">{{vm_createPipelineStep.pythonSuccess}}</span>
+      <span class="error" ng-if="vm_createPipelineStep.pythonError">{{vm_createPipelineStep.pythonError}}</span>
       <input
         type="file"
         name="pythonFile"
@@ -28,7 +27,7 @@
     </label>
     <label for="metadataFile">{{::vm_createPipelineStep.labels.METADATA}}:
       <span class="success" ng-if="vm_createPipelineStep.metadataSuccess">{{vm_createPipelineStep.metadataSuccess}}</span>
-      <span class="error" ng-if="vm_createPipelineStep.metadataError">{{vm_createPipelineStep.metadataSuccess}}</span>
+      <span class="error" ng-if="vm_createPipelineStep.metadataError">{{vm_createPipelineStep.metadataError}}</span>
       <input
         type="file"
         ng-model="metadataFile"
@@ -40,5 +39,5 @@
   </div>
   <button class="btn btn-default" ng-click="vm_createPipelineStep.createStep()">{{::vm_createPipelineStep.labels.CREATE}}</button>
   <button class="btn" ng-click="vm_createPipeline.cancelAddStep()">{{::vm_createPipelineStep.labels.CANCEL}}</button>
-  <span class="error" ng-if="errorMsg">{{errorMsg}}</span>
+  <span class="error" ng-if="vm_createPipelineStep.errorMsg">{{vm_createPipelineStep.errorMsg}}</span>
 </form>
