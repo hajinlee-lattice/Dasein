@@ -6,7 +6,7 @@
     </div>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.models"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
+            <a ui-sref="home.models" ui-sref-opts="{reload: true}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span> <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
         </li>
         <li ng-if="showUserManagement" role="presentation" ui-sref-active="active">
             <a ui-sref="home.users"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>
