@@ -15,6 +15,9 @@ angular.module('lp.jobs', [
     $scope.isInternalAdmin = false;
     $scope.auth = BrowserStorageUtility.getTokenDocument();
 
+    var clientSession = BrowserStorageUtility.getClientSession();
+    $scope.TenantId = clientSession.Tenant.Identifier;
+    
     $scope.init = function() {
         if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
             && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {

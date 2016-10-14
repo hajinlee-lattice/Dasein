@@ -56,7 +56,7 @@
                 </span>
                 <span class="button {{job.status == 'Failed' ? 'orange' : 'blue'}}-button" 
                       ng-if="isScoringJob && job.status != 'Failed'">
-                    <a href="/files/scores/jobs/{{job.id}}/results?Authorization={{auth}}">
+                    <a href="/files/scores/jobs/{{job.id}}/results?Authorization={{auth}}&TenantId={{TenantId}}">
                         <i data-ng-show="!showProgress" class="fa fa-download"></i>
                         <i data-ng-show="showProgress" class="fa fa-spinner fa-spin fa-inverse fa-fw"></i>
                         Download
@@ -224,7 +224,7 @@
                 <ul>
                     <li><strong>User:</strong> {{job.user || 'Unknown'}}</li>
                     <li data-ng-if="admin && showFileName"><strong>Filename:</strong>
-                        <a data-ng-if="job.sourceFileExists" href="/files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}">{{job.source}}</a>
+                        <a data-ng-if="job.sourceFileExists" href="/files/datafiles/sourcefilecsv/{{job.applicationId}}?fileName={{job.source}}&Authorization={{auth}}&TenantId={{TenantId}}">{{job.source}}</a>
                         <span data-ng-if="!job.sourceFileExists">N/A</span>
                     </li>
                     <li data-ng-if="admin && job.applicationId != null">
@@ -236,9 +236,11 @@
                 <div class="download-error-report">
                     <strong>Report:</strong>
                     <p>{{data.ignored_records == null ? 0 : data.ignored_records|number}} records with errors.</p>
-                    <button type="button" data-ng-click="clickDownloadErrorReport()" ng-if="data.ignored_records && data.ignored_records != 0" class="button blue-button block-button">
-                        <i class="fa fa-download"></i> Error CSV
-                    </button>
+                    <a href="{{errorlog}}?Authorization={{auth}}&TenantId={{TenantId}}" ng-if="data.ignored_records && data.ignored_records != 0">
+                        <button type="button" class="button blue-button block-button">
+                            <i class="fa fa-download"></i> Error CSV
+                        </button>
+                    </a>
                 </div>
             </div>
         </div><!-- End .row -->

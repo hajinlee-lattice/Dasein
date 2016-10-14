@@ -28,6 +28,9 @@ angular
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
 
+            var clientSession = BrowserStorageUtility.getClientSession();
+            $scope.TenantId = clientSession.Tenant.Identifier;
+
             var reports = $scope.job.reports,
                 JobReport = null;
 
@@ -35,6 +38,13 @@ angular
                 reports.forEach(function(item) {
                     if (item.purpose == "IMPORT_DATA_SUMMARY") {
                         $scope.data = data = JSON.parse(item.json.Payload);
+                        JobReport = item;
+
+                        JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
+                        
+                        $scope.report = JobReport;
+                        $scope.data.total_records = data.imported_records + data.ignored_records;
+                        $scope.errorlog = '/files/fileuploads/' + JobReport.name + '/import/errors';
                     }
                 });
             }
@@ -164,8 +174,9 @@ angular
                         }
                     }
                 );
-            } */
-
+            } 
+            */
+            /*
             $scope.clickDownloadErrorReport = function($event) {
 
                 console.log(reports);
@@ -175,19 +186,16 @@ angular
                         JobReport = item;
                     }
                 });
+  
+                if (JobReport) {
+                    JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
+                    
+                    $scope.report = JobReport;
+                    $scope.data.total_records = data.imported_records + data.ignored_records;
+                    $scope.errorlog = '/pls/fileuploads/' + JobReport.name + '/import/errors';
 
-                if (!JobReport) {
-                    return;
+                    $scope.showProgress = true;
                 }
-                
-                JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
-
-                $scope.report = JobReport;
-                $scope.data = data = JSON.parse(JobReport.json.Payload);
-                $scope.data.total_records = data.imported_records + data.ignored_records;
-                $scope.errorlog = '/pls/fileuploads/' + JobReport.name + '/import/errors';
-
-                $scope.showProgress = true;
 
                 JobsService.getErrorLog(JobReport, $scope.job.jobType).then(function(result) {
                     var blob = new Blob([ result ], { type: "application/csv" }),
@@ -204,7 +212,7 @@ angular
 
                 }, function(reason) {});
             };
-
+            */
             $scope.clickGetScoringResults = function($event) {
 
                 $scope.showProgress = true;

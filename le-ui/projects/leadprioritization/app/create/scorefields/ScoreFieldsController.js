@@ -24,9 +24,7 @@ angular
         vm.initialized = true;
         
         FileHeaders.forEach(function(field, index) {
-            if (vm.ignoredFields.indexOf(field) < 0) {
-                vm.FileHeaders.push(field);
-            }
+            vm.FileHeaders.push(field);
         });
 
         vm.refreshLatticeFields();
