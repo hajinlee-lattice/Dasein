@@ -38,7 +38,8 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
     private Map<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
 
     public ThrottleLongHangingJobs() {
-        register(this);
+        // Disable this job.
+        // register(this);
     }
 
     @Override

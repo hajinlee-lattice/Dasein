@@ -14,8 +14,7 @@ public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional.platform" })
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
-        assertEquals(registry.size(), 2);
-        assertTrue(registry.keySet().contains("GenerateYarnMetrics")
-                && registry.keySet().contains("ThrottleLongHangingJobs"));
+        assertEquals(registry.size(), 1);
+        assertTrue(registry.keySet().contains("GenerateYarnMetrics"));
     }
 }
