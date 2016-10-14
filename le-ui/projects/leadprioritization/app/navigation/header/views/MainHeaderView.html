@@ -21,12 +21,12 @@
                 </a>
                 <ul ng-show="showProfileNav" ng-click="headerClicked($event)">
                     <li ng-if="tenants.length > 1">
-                        <a href="/login/#/tenants">
+                        <a href="/login/#/tenants" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}">
                             {{ResourceUtility.getString('HEADER_SWITCH_TENANT')}}
                         </a>
                     </li>
                     <li>
-                        <a ui-sref="home.updatepassword" data-ng-hide="mandatePasswordChange">
+                        <a ui-sref="home.updatepassword" data-ng-hide="mandatePasswordChange" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}">
                             {{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}
                         </a>
                     </li>
@@ -39,7 +39,7 @@
                     <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
                     <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
                     -->
-                    <li><a ui-sref="home.signout">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
+                    <li><a ui-sref="home.signout" analytics-on="click" analytics-event="{{ResourceUtility.getString('HEADER_LOGOUT')}}">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
                 </ul>
             </div>
         </div>
