@@ -294,6 +294,14 @@
                 }
             }
         }
+        position: relative;
+        .loading-enrichments {
+            position: absolute;
+            right: 3px;
+            bottom: -24px;
+            font-weight: bold;
+            font-size: 10px;
+        }
     }
     .filters-enrichments {
         @include flex-container;

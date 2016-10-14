@@ -7,6 +7,7 @@
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
         <div class="subheader-container">
+            <div class="loading-enrichments" ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i> Loading enrichments...</div>
             <ul class="subheader">
                 <li class="query">
                     <div class="ng-search">
