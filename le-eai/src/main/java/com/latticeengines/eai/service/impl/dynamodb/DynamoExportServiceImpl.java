@@ -94,7 +94,7 @@ public class DynamoExportServiceImpl extends ExportService {
     private Properties getProperties(ExportContext ctx, Table table) {
 
         Properties props = new Properties();
-        props.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getEaiQueueNameForSubmission());
+        props.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
         String customer = ctx.getProperty(ExportProperty.CUSTOMER, String.class);
         props.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
