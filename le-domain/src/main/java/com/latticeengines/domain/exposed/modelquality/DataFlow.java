@@ -93,6 +93,7 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     }
 
     @Override
+    @MetricTag(tag = "DataflowName")
     public String getName() {
         return name;
     }

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.modeling.factory.PropDataFactory;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -60,6 +61,8 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         AnalyticPipeline analyticPipeline = modelRun.getAnalyticPipeline();
         DataSet dataset = modelRun.getDataSet();
 
+        ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
+
         SelectedConfig selectedConfig = new SelectedConfig();
         selectedConfig.setPipeline(analyticPipeline.getPipeline());
         selectedConfig.setAlgorithm(analyticPipeline.getAlgorithm());
@@ -81,7 +84,8 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         createModel(parameters);
         ModelSummary modelSummary = retrieveModelSummary(modelRun.getName());
         log.info(String.format("ModelSummaryID: %s", modelSummary.getId()));
-        saveMetricsToReportDB(modelSummary, selectedConfig);
+        modelRun.setModelId(modelSummary.getId());
+        saveMetricsToReportDB(modelSummary, selectedConfig, modelRunEntityNames);
     }
 
     public SourceFile uploadFile(DataSet dataSet) {
@@ -228,10 +232,11 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         }
     }
 
-    private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config) {
+    private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config,
+            ModelRunEntityNames modelRunEntityNames) {
         modelSummary.setDetails(null);
         log.info("Model Summary=\n" + modelSummary.toString());
-        ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config);
+        ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config, modelRunEntityNames);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
     }

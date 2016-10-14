@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -64,6 +65,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
     private List<PipelineToPipelineSteps> pipelineSteps = new ArrayList<>();
 
     @Override
+    @MetricTag(tag = "PipelineName")
     public String getName() {
         return name;
     }

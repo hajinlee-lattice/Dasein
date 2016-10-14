@@ -65,6 +65,8 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
         modelRun.setDataSet(dataset);
         modelRun.setStatus(ModelRunStatus.PROGRESS);
         modelRun.setDescription(modelRunEntityNames.getDescription());
+        modelRun.setAnalyticTestName(modelRunEntityNames.getAnalyticTestName());
+        modelRun.setAnalyticTestTag(modelRunEntityNames.getAnalyticTestTag());
         modelRunEntityMgr.create(modelRun);
         runAsync(modelRun);
         return modelRun;

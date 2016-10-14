@@ -50,6 +50,7 @@ public class PropData implements HasName, HasPid, Fact, Dimension {
     private boolean excludePublicDomains;
 
     @Override
+    @MetricTag(tag = "PropDataConfigName")
     public String getName() {
         return name;
     }

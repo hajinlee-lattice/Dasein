@@ -43,6 +43,9 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
+    @Column(name = "MODEL_ID", unique = true, nullable = true)
+    private String modelId;
+
     @ManyToOne
     @JoinColumn(name = "FK_ANALYTIC_PIPELINE_ID", nullable = false)
     @JsonIgnore
@@ -52,6 +55,12 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
     @JoinColumn(name = "FK_DATASET_ID", nullable = false)
     @JsonIgnore
     private DataSet dataSet;
+
+    @Column(name = "ANALYTIC_TEST_NAME", nullable = true)
+    private String analyticTestName;
+
+    @Column(name = "ANALYTIC_TEST_TAG", nullable = true)
+    private String analyticTestTag;
 
     @Column(name = "STATUS", nullable = false)
     private ModelRunStatus status;
@@ -90,6 +99,14 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
         this.name = name;
     }
 
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
     public AnalyticPipeline getAnalyticPipeline() {
         return analyticPipeline;
     }
@@ -104,6 +121,22 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
 
     public void setDataSet(DataSet dataSet) {
         this.dataSet = dataSet;
+    }
+
+    public void setAnalyticTestName(String analyticTestName) {
+        this.analyticTestName = analyticTestName;
+    }
+
+    public String getAnalyticTestName() {
+        return analyticTestName;
+    }
+
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
+    }
+
+    public String getAnalyticTestTag() {
+        return analyticTestTag;
     }
 
     public ModelRunStatus getStatus() {
