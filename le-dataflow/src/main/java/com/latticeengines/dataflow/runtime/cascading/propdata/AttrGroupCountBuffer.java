@@ -31,11 +31,14 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
 
     private float totalRecords;
     private String version;
-    private String versionField;
-    private String attrField;
-    private String countField;
-    private String categoryField;
-    private String percentField;
+    private Integer attrLoc;
+    private Integer countLoc;
+    private Integer categoryLoc;
+    private Integer percentLoc;
+    private Integer versionLoc;
+
+    private Map<Comparable, Integer> attrLocMap;
+
 
     public AttrGroupCountBuffer(String[] attrs, String[] categories, Fields fieldDeclaration, String version, long totalRecords,
                                 String versionField, String attrField, String categoryField, String countField, String percentField) {
@@ -44,12 +47,17 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
         this.categories = categories;
         this.version = version;
         this.totalRecords = (float)totalRecords;
-        this.versionField = versionField;
-        this.attrField = attrField;
-        this.countField = countField;
-        this.categoryField = categoryField;
-        this.percentField = percentField;
         this.namePositionMap = getPositionMap(fieldDeclaration);
+        this.attrLoc = namePositionMap.get(attrField);
+        this.countLoc = namePositionMap.get(countField);
+        this.categoryLoc = namePositionMap.get(categoryField);
+        this.percentLoc = namePositionMap.get(percentField);
+        this.versionLoc = namePositionMap.get(versionField);
+        attrLocMap = new HashMap<Comparable, Integer>();
+
+        for (int i = 0; i < attrs.length; i++) {
+             attrLocMap.put(attrs[i], i);
+        }
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
@@ -71,19 +79,8 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
         setupTupleForGroup(result, group);
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         long[] attrCount = new long[attrs.length];
-        for (int i = 0; i< attrs.length; i++) {
-            attrCount[i] = 0;
-        }
 
         long totalCount = countAttrsForArgument(attrCount, arguments);
-
-        Integer attrLoc = namePositionMap.get(attrField);
-        Integer countLoc = namePositionMap.get(countField);
-        Integer categoryLoc = namePositionMap.get(categoryField);
-        Integer percentLoc = namePositionMap.get(percentField);
-        Integer versionLoc = namePositionMap.get(versionField);
-
-        log.info("Version " + version + " " + versionLoc);
 
         for (int i = 0; i < attrs.length; i++) {
             long count = attrCount[i];
@@ -122,24 +119,17 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
 
     private long countAttrsForArgument(long[] attrCount, Iterator<TupleEntry> argumentsInGroup) {
         int totalCount = 0;
-        int records = 0;
         while (argumentsInGroup.hasNext()) {
-            if (records % 2056 == 0) {
-                System.out.println("Pocessed " + records);
-            }
-            records++;
             TupleEntry arguments = argumentsInGroup.next();
+            Fields fields = arguments.getFields();
+            int size = fields.size();
 
-            for (int i = 0; i < attrs.length; i++) {
-                String attr = attrs[i];
-                Object value = null;
-                try {
-                    value = arguments.getObject(attr);
-                } catch (Exception e) {
-                    continue;
-                }
-                if (value != null) {
-                    attrCount[i]++;
+            for (int i = 0; i < size; i++) {
+                if (arguments.getObject(i) != null) {
+                    Integer attrLoc = attrLocMap.get(fields.get(i));
+                    if (attrLoc != null) {
+                        attrCount[attrLoc]++;
+                    }
                 }
             }
             totalCount += 1;
