@@ -86,10 +86,14 @@ angular.module('lp.enrichment.leadenrichment', [
 
     var getEnrichmentData = function(opts) {
         var deferred = $q.defer(),
-            opts = opts || {},
-            max = opts.max || 100,
+            opts = opts || {};
+
+        opts.max = (vm.enrichments.length ? enrichment_chunk_size : 100);
+
+        var max = opts.max,
             offset = opts.offset || 0,
             _store;
+
 
         EnrichmentStore.getEnrichments(opts).then(function(result) {
             if (result != null && result.status === 200) {
@@ -416,7 +420,7 @@ angular.module('lp.enrichment.leadenrichment', [
 
     vm.init = function() {
         _resized();
-        getEnrichmentData({max: enrichment_chunk_size});
+        getEnrichmentData();
         vm.categories = EnrichmentCategories.data;
         _.each(vm.categories, function(value, key){
             getEnrichmentSubcategories(value);

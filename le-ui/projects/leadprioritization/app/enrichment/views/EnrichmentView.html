@@ -47,8 +47,8 @@
                     </div>
                 </li>
                 <li class="menu" ng-click="vm.clickPaginate()">
-                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'FieldName' ? '-FieldName' : 'FieldName'); vm.metadata.current = 1;" ng-init="SortOrder = 'FieldName';">
-                        <span class="fa fa-sort-alpha-{{ SortOrder == 'FieldName' ? 'asc' : 'desc' }}"></span>
+                    <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'DisplayName' ? '-DisplayName' : 'DisplayName'); vm.metadata.current = 1;" ng-init="SortOrder = 'DisplayName';">
+                        <span class="fa fa-sort-alpha-{{ SortOrder == 'DisplayName' ? 'asc' : 'desc' }}"></span>
                     </a>
                     <a ng-if="vm.enable_grid" class="button icon-button white-button" ng-click="vm.view = (vm.view === 'list' ? 'grid' : 'list')">
                         <span class="fa {{(vm.view === 'list' ? 'fa-th-large' : 'fa-th-list')}}"></span>
@@ -122,11 +122,11 @@
                             <div class="header">
                                 <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
                                 <ul class="categories">
-                                    <li ng-if="enrichment.Category">{{::enrichment.Category}}</li>
-                                    <li ng-if="enrichment.Subcategory">{{::enrichment.Subcategory}}</li>
+                                    <li ng-if="::enrichment.Category">{{::enrichment.Category}}</li>
+                                    <li ng-if="::enrichment.Subcategory">{{::enrichment.Subcategory}}</li>
                                 </ul>
                                 <ul class="tags">
-                                    <li ng-if="enrichment.IsPremium" class="premium">premium</li>
+                                    <li ng-if="::enrichment.IsPremium" class="premium">premium</li>
                                 </ul>
                                 <h2>
                                     <strong>{{::enrichment.DisplayName}}</strong>
