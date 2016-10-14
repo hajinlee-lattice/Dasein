@@ -103,15 +103,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return result;
     }
 
-    protected void waitForAppId(String appId, String microServiceHostPort) {
+    protected void waitForAppId(String appId) {
         log.info(String.format("Waiting for appId: %s", appId));
 
         JobStatus status;
         int maxTries = 17280; // Wait maximum 24 hours
         int i = 0;
         do {
-            String url = String.format(microServiceHostPort + "/modeling/jobs/%s", appId);
-            status = restTemplate.getForObject(url, JobStatus.class);
+            status = jobProxy.getJobStatus(appId);
             try {
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {

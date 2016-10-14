@@ -42,7 +42,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         Map.Entry<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
         ScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
         AppSubmission submission = scoringProxy.createScoringJob(scoringConfig);
-        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0));
         copyImportErrors(scoringConfig.getTargetResultDir());
 
         if (configuration.isRegisterScoredTable()) {

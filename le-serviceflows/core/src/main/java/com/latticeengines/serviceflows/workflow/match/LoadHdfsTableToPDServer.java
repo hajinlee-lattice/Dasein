@@ -72,7 +72,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         exportConfig.setCreds(creds);
 
         AppSubmission submission = modelProxy.exportData(exportConfig);
-        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0));
 
         return new AbstractMap.SimpleEntry<Table, DbCreds>(prematchFlowTable, creds);
     }

@@ -42,7 +42,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     private void runDataFlow() {
         DataFlowConfiguration dataFlowConfig = setupDataFlow();
         AppSubmission submission = dataFlowApiProxy.submitDataFlowExecution(dataFlowConfig);
-        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0));
     }
 
     private DataFlowConfiguration setupDataFlow() {

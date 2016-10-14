@@ -119,7 +119,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         config.setTargetHdfsDir(hdfsTargetPath);
 
         AppSubmission submission = modelProxy.loadData(config);
-        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0));
         Table eventTable = MetadataConverter.getTable(yarnConfiguration, hdfsTargetPath, null, null);
         eventTable.setName(matchTableName);
 

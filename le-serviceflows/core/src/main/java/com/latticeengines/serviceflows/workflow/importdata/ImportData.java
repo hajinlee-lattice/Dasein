@@ -43,7 +43,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         ImportConfiguration importConfig = setupImportConfig();
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         putStringValueInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
-        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0));
         if (getConfiguration().getSourceType() == SourceType.FILE) {
             updateSourceFile();
         }

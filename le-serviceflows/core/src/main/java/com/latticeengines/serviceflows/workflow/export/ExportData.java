@@ -40,7 +40,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
         ExportConfiguration exportConfig = setupExportConfig();
         AppSubmission submission = eaiProxy.createExportDataJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
-        waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
+        waitForAppId(submission.getApplicationIds().get(0).toString());
         saveToContext();
     }
 

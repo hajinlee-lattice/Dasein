@@ -43,7 +43,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         Map.Entry<RTSBulkScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
         RTSBulkScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
         String appId = scoringProxy.submitBulkScoreJob(scoringConfig).getApplicationIds().get(0);
-        waitForAppId(appId, configuration.getMicroServiceHostPort());
+        waitForAppId(appId);
 
         saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
                 scoringConfig.getTargetResultDir() + "/error.csv");
