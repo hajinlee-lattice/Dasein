@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -190,6 +191,14 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             fieldMappingDocument.getFieldMappings().add(fieldMapping);
         }
 
+        for (String scoringHeaderField : scoringHeaderFields) {
+            FieldMapping fieldMapping = new FieldMapping();
+            fieldMapping.setUserField(scoringHeaderField);
+            fieldMapping.setMappedToLatticeField(false);
+            fieldMapping.setFieldType(UserDefinedType.TEXT);
+            fieldMappingDocument.getFieldMappings().add(fieldMapping);
+        }
+
         return fieldMappingDocument;
     }
 
@@ -243,13 +252,19 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             }
         }
 
-        for (String unmappedScoringHeader : fieldMappingDocument.getIgnoredFields()) {
-            for (Attribute modelAttribute : modelAttributes) {
-                if (modelAttribute.getName().equals(unmappedScoringHeader) || modelAttribute.getDisplayName().equals(unmappedScoringHeader)) {
-                    unmappedScoringHeader = unmappedScoringHeader.concat("_1");
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                if (fieldMapping.getUserField() == null) {
+                    continue;
                 }
+                String unmappedScoringHeader = fieldMapping.getUserField();
+                for (Attribute modelAttribute : modelAttributes) {
+                    if (modelAttribute.getName().equals(unmappedScoringHeader) || modelAttribute.getDisplayName().equals(unmappedScoringHeader)) {
+                        unmappedScoringHeader = unmappedScoringHeader.concat("_1");
+                    }
+                }
+                modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader));
             }
-            modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader));
         }
     }
 

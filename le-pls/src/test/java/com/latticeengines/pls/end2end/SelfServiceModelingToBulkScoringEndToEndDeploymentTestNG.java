@@ -332,7 +332,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG
                 .convertValue(response.getResult(), FieldMappingDocument.class);
         List<FieldMapping> fieldMappings = new ArrayList<>();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() != null) {
+            if (fieldMapping.getUserField() != null) {
                 fieldMappings.add(fieldMapping);
             }
         }
@@ -346,7 +346,21 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG
                 fieldMappingDocument, Void.class);
     }
 
-    private void assertRequiredFieldsMapped(List<FieldMapping> fieldMappings, List<String> requiredFields) {
+    @SuppressWarnings("unchecked")
+    private void assertAllHeaderFieldsIncludedInFieldMappings(List<FieldMapping> fieldMappings) {
+        List<String> fileHeaders = selfServiceModeling.getRestTemplate()
+                .getForObject(String.format("%s/pls/scores/fileuploads/headerfields?csvFileName=%s",
+                        getRestAPIHostPort(), sourceFile.getName()), List.class);
+        for (FieldMapping fieldMapping : fieldMappings) {
+            assertTrue(fileHeaders.contains(fieldMapping.getUserField()));
+            fileHeaders.remove(fieldMapping.getUserField());
+        }
+
+        assertTrue(fileHeaders.isEmpty());
+    }
+
+    private void assertRequiredFieldsMapped(List<FieldMapping> fieldMappings,
+            List<String> requiredFields) {
         for (String requiredField : requiredFields) {
             boolean foundRequiredField = false;
             for (FieldMapping fieldMapping : fieldMappings) {

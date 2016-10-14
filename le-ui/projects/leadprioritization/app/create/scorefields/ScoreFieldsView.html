@@ -118,9 +118,7 @@
 				</thead>
 
 				<tbody>
-                    <tr ng-repeat="field in vm.fieldMappings" 
-                    	ng-if="vm.requiredFields.indexOf(field.mappedField) < 0 && vm.ignoredFields.indexOf(field.mappedField) < 0"
-                    >
+                    <tr ng-repeat="field in vm.fieldMappings" ng-if="vm.requiredFields.indexOf(field.mappedField) < 0 && field.mappedField != null">
 						<td class="field_mapping_label">
 							<label 	for="fieldType_{{ field.mappedField }}"
 									ng-class="{ 'required': vm.requiredFields.indexOf(field.mappedField) > -1 }">
