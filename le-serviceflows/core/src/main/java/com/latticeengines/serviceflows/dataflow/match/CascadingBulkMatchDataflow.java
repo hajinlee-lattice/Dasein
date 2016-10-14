@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -16,6 +17,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CheckAndMapDatatypeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
@@ -40,21 +43,48 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {
         FieldList latticeIdField = new FieldList(LATTICE_ID_FIELDNAME);
-
         Node inputSource = addSource(parameters.getInputAvro());
         List<FieldMetadata> inputMetadata = inputSource.getSchema();
 
         Node accountMasterLookupSource = addSource(parameters.getAccountMasterLookup());
         Node matchedLookupNode = matchLookup(parameters, inputSource, accountMasterLookupSource);
-        Node matchedNode = matchAccountMaster(parameters, latticeIdField, inputMetadata, matchedLookupNode);
-        return matchedNode;
-
-    }
-
-    private Node matchAccountMaster(CascadingBulkMatchDataflowParameters parameters, FieldList latticeIdField,
-            List<FieldMetadata> inputMetadata, Node matchedLookupNode) {
 
         Node accountMasterSource = addSource(parameters.getAccountMaster());
+        List<FieldMetadata> accountMasterMetadatas = accountMasterSource.getSchema();
+        Node matchedNode = matchAccountMaster(accountMasterSource, parameters, latticeIdField, inputMetadata,
+                matchedLookupNode);
+        matchedNode = checkAndConvertDataType(matchedNode, inputMetadata, accountMasterMetadatas);
+        return matchedNode;
+    }
+
+    private Node checkAndConvertDataType(Node matchedNode, List<FieldMetadata> inputMetadata,
+            List<FieldMetadata> accountMasterMetadatas) {
+        List<FieldMetadata> metadatas = matchedNode.getSchema();
+        List<String> inputFields = DataFlowUtils.getFieldNames(inputMetadata);
+        Map<String, FieldMetadata> amMetadataMap = DataFlowUtils.getFieldMetadataMap(accountMasterMetadatas);
+        for (FieldMetadata metadata : metadatas) {
+            String fieldName = metadata.getFieldName();
+            if (inputFields.contains(fieldName) || !amMetadataMap.containsKey(fieldName)) {
+                continue;
+            }
+            Type avroTypeInSchema = metadata.getAvroType();
+            Type avroTypeInFile = amMetadataMap.get(fieldName).getAvroType();
+            if (avroTypeInSchema.equals(avroTypeInFile)) {
+                continue;
+            }
+            log.warn("Data type mismatch. data type in data file=" + avroTypeInFile + " data type in schema="
+                    + avroTypeInSchema + " for the field=" + fieldName);
+            FieldList outputFieldList = new FieldList(fieldName);
+            matchedNode = matchedNode.apply(new CheckAndMapDatatypeFunction(fieldName, avroTypeInSchema),
+                    outputFieldList, new FieldMetadata(metadata));
+        }
+
+        return matchedNode;
+    }
+
+    private Node matchAccountMaster(Node accountMasterSource, CascadingBulkMatchDataflowParameters parameters,
+            FieldList latticeIdField, List<FieldMetadata> inputMetadata, Node matchedLookupNode) {
+
         List<List<String>> outputList = buildOutputFieldList(inputMetadata, parameters, accountMasterSource);
         List<String> predefinedFields = outputList.get(1);
         predefinedFields.addAll(outputList.get(2));
