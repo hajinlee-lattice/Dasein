@@ -40,9 +40,8 @@ public class AnalyticTest implements HasName, HasPid {
 
     @JsonProperty("data_sets")
     @ManyToMany(cascade = { CascadeType.MERGE })
-    @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET",
-            joinColumns = { @JoinColumn(name = "AP_TEST_ID") },
-            inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
+    @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", joinColumns = {
+            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
     private List<DataSet> dataSets = new ArrayList<>();
 
     @JsonProperty("match_type")
@@ -51,9 +50,8 @@ public class AnalyticTest implements HasName, HasPid {
 
     @JsonProperty("analytic_pipelines")
     @ManyToMany(cascade = { CascadeType.MERGE })
-    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", 
-            joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, 
-            inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", joinColumns = {
+            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
     private List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
 
     @Override

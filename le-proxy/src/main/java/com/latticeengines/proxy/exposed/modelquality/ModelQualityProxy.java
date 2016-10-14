@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAlgorithmInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticPipelineInterface;
+import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticTestInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataFlowInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataSetInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityModelRunInterface;
@@ -29,15 +31,10 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("modelQualityProxy")
 @SuppressWarnings("unchecked")
-public class ModelQualityProxy extends MicroserviceRestApiProxy 
-        implements ModelQualitySamplingInterface, 
-        ModelQualityDataSetInterface, 
-        ModelQualityDataFlowInterface, 
-        ModelQualityAlgorithmInterface, 
-        ModelQualityPropDataInterface, 
-        ModelQualityModelRunInterface, 
-        ModelQualityPipelineInterface,
-        ModelQualityAnalyticPipelineInterface{
+public class ModelQualityProxy extends MicroserviceRestApiProxy
+        implements ModelQualitySamplingInterface, ModelQualityDataSetInterface, ModelQualityDataFlowInterface,
+        ModelQualityAlgorithmInterface, ModelQualityPropDataInterface, ModelQualityModelRunInterface,
+        ModelQualityPipelineInterface, ModelQualityAnalyticPipelineInterface, ModelQualityAnalyticTestInterface {
 
     public ModelQualityProxy() {
         super("modelquality");
@@ -241,29 +238,45 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
-    public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction()
-    {
+    public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
         String url = constructUrl("/analyticpipelines/latest");
-        return new AnalyticPipelineEntityNames(post("createAnalyticPipelineFromProduction", url, null, AnalyticPipeline.class));
+        return new AnalyticPipelineEntityNames(
+                post("createAnalyticPipelineFromProduction", url, null, AnalyticPipeline.class));
     }
-    
+
     @Override
-    public List<AnalyticPipelineEntityNames> getAnalyticPipelines(){
+    public List<AnalyticPipelineEntityNames> getAnalyticPipelines() {
         String url = constructUrl("/analyticpipelines/");
         return get("getAnalyticPipelines", url, List.class);
     }
 
     @Override
-    public String createAnalyticPipeline(AnalyticPipelineEntityNames analyticPipelineEntityNames)
-    {
+    public String createAnalyticPipeline(AnalyticPipelineEntityNames analyticPipelineEntityNames) {
         String url = constructUrl("/analyticpipelines/");
-        return post("createAnalyticPipeline", url, analyticPipelineEntityNames, String.class);   
+        return post("createAnalyticPipeline", url, analyticPipelineEntityNames, String.class);
     }
 
     @Override
-    public AnalyticPipelineEntityNames getAnalyticPipelineByName(String analyticPipelineName)
-    {
+    public AnalyticPipelineEntityNames getAnalyticPipelineByName(String analyticPipelineName) {
         String url = constructUrl("/analyticpipelines/{analyticPipelineName}", analyticPipelineName);
         return get("getAnalyticPipelineByName", url, AnalyticPipelineEntityNames.class);
+    }
+
+    @Override
+    public String createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames) {
+        String url = constructUrl("/analytictests/");
+        return post("createAnalyticTest", url, analyticTestEntityNames, String.class);
+    }
+
+    @Override
+    public List<AnalyticTestEntityNames> getAnalyticTests() {
+        String url = constructUrl("/analytictests/");
+        return get("getAnalyticTests", url, List.class);
+    }
+
+    @Override
+    public AnalyticTestEntityNames getAnalyticTestByName(String analyticTestName) {
+        String url = constructUrl("/analytictests/{analyticTestName}", analyticTestName);
+        return get("getAnalyticTestByName", url, AnalyticTestEntityNames.class);
     }
 }

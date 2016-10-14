@@ -22,9 +22,9 @@ public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFun
 
     @Autowired
     private AnalyticPipelineService analyticPipelineService;
-    
+
     private InternalResourceRestApiProxy proxy = null;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         super.cleanupDb();
@@ -36,7 +36,7 @@ public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFun
         when(proxy.getActiveStack()).thenReturn(activeStack);
         ReflectionTestUtils.setField(analyticPipelineService, "internalResourceRestApiProxy", proxy);
     }
-    
+
     @Test(groups = "functional")
     public void createLatestProductionPipeline() {
         AnalyticPipeline ap = analyticPipelineService.createLatestProductionAnalyticPipeline();

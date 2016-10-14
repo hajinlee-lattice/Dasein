@@ -65,10 +65,10 @@ public class AnalyticPipeline implements HasName, HasPid {
     @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private Sampling sampling;
 
-    @ManyToMany(cascade = { CascadeType.MERGE}, mappedBy = "analyticPipelines")
+    @ManyToMany(cascade = { CascadeType.MERGE }, mappedBy = "analyticPipelines")
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
-    
+
     @Override
     public Long getPid() {
         return pid;

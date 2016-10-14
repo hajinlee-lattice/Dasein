@@ -22,72 +22,57 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
     @Autowired
     private DataSetEntityMgr dataSetEntityMgr;
-    
+
     @Autowired
-    private  AnalyticTestEntityMgr analyticTestEntityMgr; 
-    
+    private AnalyticTestEntityMgr analyticTestEntityMgr;
+
     @Override
     public AnalyticTest createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames) {
-        
+
         AnalyticTest analyticTest = new AnalyticTest();
         if (analyticTestEntityNames.getName() == null || analyticTestEntityNames.getName().trim().isEmpty()) {
             throw new RuntimeException("AnalyticTest Name cannot be empty");
         }
         analyticTest.setName(analyticTestEntityNames.getName());
-        
 
-        if(analyticTestEntityNames.getPropDataMatchType() == null)
-        {
+        if (analyticTestEntityNames.getPropDataMatchType() == null) {
             throw new RuntimeException("Need to specify a Propdata match type");
         }
         analyticTest.setPropDataMatchType(analyticTestEntityNames.getPropDataMatchType());
-        
-        if(analyticTestEntityNames.getAnalyticPipelineNames() == null || analyticTestEntityNames.getAnalyticPipelineNames().isEmpty())
-        {
+
+        if (analyticTestEntityNames.getAnalyticPipelineNames() == null
+                || analyticTestEntityNames.getAnalyticPipelineNames().isEmpty()) {
             throw new RuntimeException("Need to provide atleast one AnalyticPipeline");
-        }
-        else
-        {
+        } else {
             ArrayList<AnalyticPipeline> analyticPipelines = new ArrayList<AnalyticPipeline>();
-            for(String analyticPipelineName : analyticTestEntityNames.getAnalyticPipelineNames())
-            {
+            for (String analyticPipelineName : analyticTestEntityNames.getAnalyticPipelineNames()) {
                 AnalyticPipeline ap = analyticPipelineEntityMgr.findByName(analyticPipelineName);
-                if(ap != null)
-                {
+                if (ap != null) {
                     analyticPipelines.add(ap);
-                }
-                else
-                {
+                } else {
                     throw new RuntimeException("No AnalyticPipeline with name " + analyticPipelineName + " not found");
                 }
             }
             analyticTest.setAnalyticPipelines(analyticPipelines);
         }
-        
-        if(analyticTestEntityNames.getDataSetNames() == null || analyticTestEntityNames.getDataSetNames().isEmpty())
-        {
+
+        if (analyticTestEntityNames.getDataSetNames() == null || analyticTestEntityNames.getDataSetNames().isEmpty()) {
             throw new RuntimeException("Need to provide atleast one Dataset");
-        }
-        else
-        {
+        } else {
             ArrayList<DataSet> dataSets = new ArrayList<DataSet>();
-            for(String datasetName : analyticTestEntityNames.getDataSetNames())
-            {
+            for (String datasetName : analyticTestEntityNames.getDataSetNames()) {
                 DataSet ds = dataSetEntityMgr.findByName(datasetName);
-                if(ds != null)
-                {
+                if (ds != null) {
                     dataSets.add(ds);
-                }
-                else
-                {
+                } else {
                     throw new RuntimeException("No Dataset with name " + datasetName + " not found");
                 }
             }
             analyticTest.setDataSets(dataSets);
         }
-        
+
         analyticTestEntityMgr.create(analyticTest);
-        
+
         return analyticTest;
     }
 }

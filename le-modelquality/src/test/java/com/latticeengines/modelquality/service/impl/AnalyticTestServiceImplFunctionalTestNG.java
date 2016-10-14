@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -21,83 +22,81 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
 
     @Autowired
     private AnalyticTestService analyticTestService;
-    
+
     @Autowired
     private AnalyticTestEntityMgr analyticTestEntityMgr;
-    
+
     @BeforeClass(groups = "functional")
-    public void setup()
-    {
+    public void setup() {
         AnalyticTest at = analyticTestEntityMgr.findByName("BadAnalyticTest");
-        
-        if(at != null)
-        {
+
+        if (at != null) {
             analyticTestEntityMgr.delete(at);
         }
     }
-    
+
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
-    public void createAnalyticTestFailure() throws RuntimeException
-    {
+    public void createAnalyticTestFailure() throws RuntimeException {
         AnalyticTestEntityNames analyticTestEntityNames = new AnalyticTestEntityNames();
         analyticTestEntityNames.setName("BadAnalyticTest");
-        
-        ArrayList<String> datasets = new ArrayList<String>(); 
+
+        ArrayList<String> datasets = new ArrayList<String>();
         datasets.add("BadDatasetName");
         analyticTestEntityNames.setDataSetNames(datasets);
-        
-        ArrayList<String> analyticPipelines = new ArrayList<String>(); 
+
+        ArrayList<String> analyticPipelines = new ArrayList<String>();
         analyticPipelines.add("BadPipelineName");
         analyticTestEntityNames.setAnalyticPipelineNames(analyticPipelines);
-        
+
         analyticTestEntityNames.setPropDataMatchType(PropDataMatchType.DNB);
-        
+
         AnalyticTest at = analyticTestService.createAnalyticTest(analyticTestEntityNames);
-        
+
         at = analyticTestEntityMgr.findByName("BadAnalyticTest");
-        Assert.assertNull(at);   
+        Assert.assertNull(at);
     }
-    
+
     @Test(groups = "functional")
-    public void createAnalyticTest()
-    {
+    public void createAnalyticTest() {
         AnalyticTestEntityNames analyticTestEntityNames = new AnalyticTestEntityNames();
         analyticTestEntityNames.setName("SrvImplTestAnalyticTest");
-        
+
         analyticTestEntityNames.setDataSetNames(getTestDatasets());
-        
+
         analyticTestEntityNames.setAnalyticPipelineNames(getTestAnalyticPipelines());
-        
+
         analyticTestEntityNames.setPropDataMatchType(PropDataMatchType.DNB);
-        
+
         AnalyticTest at = analyticTestService.createAnalyticTest(analyticTestEntityNames);
-        
+
         at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
-        Assert.assertNotNull(at);   
-        
-        // Clean up
-        analyticTestEntityMgr.delete(at);
-        analyticTestEntityMgr.deleteAll();
+        Assert.assertNotNull(at);
     }
-    
+
+    @AfterMethod(groups = "functional", dependsOnMethods = "createAnalyticTest")
+    public void cleanUp() {
+        AnalyticTest at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
+        if (at != null) {
+            analyticTestEntityMgr.delete(at);
+        }
+    }
+
     private List<String> getTestAnalyticPipelines() {
         // this should create a test analytic pipeline
         List<String> aps = new ArrayList<String>();
-        for (AnalyticPipeline ap : analyticPipelineEntityMgr.findAll())
-        {
+        for (AnalyticPipeline ap : analyticPipelineEntityMgr.findAll()) {
             aps.add(ap.getName());
         }
-        return aps;   
+        return aps;
     }
 
     private List<String> getTestDatasets() {
         // this should create a test dataset
         List<String> datasets = new ArrayList<String>();
-        for (DataSet ds : dataSetEntityMgr.findAll())
-        {
+        for (DataSet ds : dataSetEntityMgr.findAll()) {
             datasets.add(ds.getName());
         }
         return datasets;
     }
-    
+
 }

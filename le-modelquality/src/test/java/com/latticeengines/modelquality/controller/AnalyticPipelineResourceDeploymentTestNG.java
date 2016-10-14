@@ -11,18 +11,17 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class AnalyticPipelineResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase{
+public class AnalyticPipelineResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-       super.cleanupDb();
-    }    
-    
+        super.cleanupDb();
+    }
 
     @Test(groups = "deployment")
     public void createAnalyticPipelineFromProduction() {
-         AnalyticPipelineEntityNames analyticPipeline = modelQualityProxy.createAnalyticPipelineFromProduction();
-         Assert.assertNotNull(analyticPipeline);
+        AnalyticPipelineEntityNames analyticPipeline = modelQualityProxy.createAnalyticPipelineFromProduction();
+        Assert.assertNotNull(analyticPipeline);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createAnalyticPipelineFromProduction")
