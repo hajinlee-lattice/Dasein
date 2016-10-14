@@ -8,7 +8,7 @@ angular
     $interval(function() {
         var modelId = $stateParams.modelId || '';
         JobsStore.getJobs(null, modelId);
-    }, 15 * 1000); // 15 seconds
+    }, 60 * 1000); // 15 seconds
 })
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;
