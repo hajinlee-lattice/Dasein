@@ -107,7 +107,7 @@ angular.module('lp.marketo', [
 	vm.saveCredentialClicked = function() {
 
 		vm.saveInProgress = true;
-		
+
 		var credential = {
             credentialName: vm.credentialName,
             soapEndpoint: vm.soapEndpoint,
@@ -148,21 +148,5 @@ angular.module('lp.marketo', [
 	vm.deleteCredentialClicked = function(credentialId) {
         DeleteCredentialModal.show(credentialId);
 	}
-
-	vm.init = function() {
-        _.each(vm.credentials, function(value, key){
-
-        	vm.credential = value;
-
-			if(value.enrichment.marketo_match_fields[0].marketoFieldName == null){
-				vm.credentialIsSetup = false;
-			} else {
-				vm.credentialIsSetup = true;
-			}
-
-	   	});
-    }
-
-    vm.init();
 
 }]);
