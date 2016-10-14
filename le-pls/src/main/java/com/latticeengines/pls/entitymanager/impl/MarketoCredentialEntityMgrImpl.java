@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.MarketoCredentialDao;
@@ -45,7 +48,12 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     public void create(MarketoCredential marketoCredential) {
         populateMarketoCredentialWithTenant(marketoCredential);
         marketoCredential.setEnrichment(enrichmentEntityMgr.createEnrichment());
-        marketoCredentialDao.create(marketoCredential);
+        try {
+            marketoCredentialDao.create(marketoCredential);
+        } catch (ConstraintViolationException e) {
+            throw new LedpException(LedpCode.LEDP_18119,
+                    new String[] { marketoCredential.getName() });
+        }
     }
 
     @Override

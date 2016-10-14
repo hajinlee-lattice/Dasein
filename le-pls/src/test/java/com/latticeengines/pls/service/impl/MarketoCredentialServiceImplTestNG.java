@@ -172,6 +172,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
                     "create marketo credential with same name should have thrown exception");
         } catch (Exception e) {
             assertTrue(true, "");
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18119);
         }
     }
 
