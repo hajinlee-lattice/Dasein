@@ -11,6 +11,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
+import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
 import com.latticeengines.modelquality.entitymgr.DataFlowEntityMgr;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.entitymgr.ModelConfigEntityMgr;
@@ -53,6 +54,8 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
     protected SamplingEntityMgr samplingEntityMgr;
     @Autowired
     protected AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
+    @Autowired
+    protected AnalyticTestEntityMgr analyticTestEntityMgr;
 
     protected void cleanupHdfs() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/steps");
@@ -62,6 +65,7 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
     protected void cleanupDb() {
         modelRunEntityMgr.deleteAll();
         modelConfigEntityMgr.deleteAll();
+        analyticTestEntityMgr.deleteAll();
         analyticPipelineEntityMgr.deleteAll();
         algorithmEntityMgr.deleteAll();
         dataFlowEntityMgr.deleteAll();

@@ -74,7 +74,7 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ScoringDataSet> scoringDataSets = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "dataSets")
+    @ManyToMany(cascade = { CascadeType.MERGE }, mappedBy = "dataSets")
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
 

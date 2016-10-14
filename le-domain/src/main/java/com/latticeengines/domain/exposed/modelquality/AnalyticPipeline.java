@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.modelquality;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -61,6 +65,10 @@ public class AnalyticPipeline implements HasName, HasPid {
     @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
     private Sampling sampling;
 
+    @ManyToMany(cascade = { CascadeType.MERGE}, mappedBy = "analyticPipelines")
+    @JsonIgnore
+    private List<AnalyticTest> analyticTests = new ArrayList<>();
+    
     @Override
     public Long getPid() {
         return pid;

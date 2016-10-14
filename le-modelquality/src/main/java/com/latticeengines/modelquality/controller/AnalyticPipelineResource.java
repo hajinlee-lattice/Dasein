@@ -45,7 +45,9 @@ public class AnalyticPipelineResource
     @ResponseBody
     @ApiOperation(value = "Create analytic pipeline for production")
     public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
-        return createForProduction();
+        AnalyticPipeline ap = analyticPipelineService.createLatestProductionAnalyticPipeline();
+        AnalyticPipelineEntityNames apnames = new AnalyticPipelineEntityNames(ap);
+        return apnames;
     }
 
     @Override
@@ -62,12 +64,6 @@ public class AnalyticPipelineResource
     @ApiOperation(value = "Get AnalyticPipeline by name")
     public AnalyticPipelineEntityNames getAnalyticPipelineByName(@PathVariable String analyticPipelineName) {
         return getByName(analyticPipelineName);
-    }
-
-    public AnalyticPipelineEntityNames createForProduction() {
-        AnalyticPipeline ap = analyticPipelineService.createLatestProductionAnalyticPipeline();
-        AnalyticPipelineEntityNames apnames = new AnalyticPipelineEntityNames(ap);
-        return apnames;
     }
 
     @Override

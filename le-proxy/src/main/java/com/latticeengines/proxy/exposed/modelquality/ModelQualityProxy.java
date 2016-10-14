@@ -8,6 +8,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
+import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
@@ -28,15 +29,15 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("modelQualityProxy")
 @SuppressWarnings("unchecked")
-public class ModelQualityProxy extends MicroserviceRestApiProxy //
-        implements ModelQualitySamplingInterface, //
-        ModelQualityAnalyticPipelineInterface, //
-        ModelQualityDataSetInterface, //
-        ModelQualityDataFlowInterface, //
-        ModelQualityAlgorithmInterface, //
-        ModelQualityPropDataInterface, //
-        ModelQualityModelRunInterface, //
-        ModelQualityPipelineInterface {
+public class ModelQualityProxy extends MicroserviceRestApiProxy 
+        implements ModelQualitySamplingInterface, 
+        ModelQualityDataSetInterface, 
+        ModelQualityDataFlowInterface, 
+        ModelQualityAlgorithmInterface, 
+        ModelQualityPropDataInterface, 
+        ModelQualityModelRunInterface, 
+        ModelQualityPipelineInterface,
+        ModelQualityAnalyticPipelineInterface{
 
     public ModelQualityProxy() {
         super("modelquality");
@@ -67,30 +68,6 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
     public String getModelRunStatusByName(String modelRunName) {
         String url = constructUrl("/modelruns/status/{modelRunName}", modelRunName);
         return get("getModelRunStatusByName", url, String.class);
-    }
-
-    @Override
-    public List<AnalyticPipelineEntityNames> getAnalyticPipelines() {
-        String url = constructUrl("/analyticpipelines/");
-        return get("getAnalyticPipelines", url, List.class);
-    }
-
-    @Override
-    public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
-        String url = constructUrl("/analyticpipelines/latest");
-        return post("createAnalyticPipelineFromProduction", url, null, AnalyticPipelineEntityNames.class);
-    }
-
-    @Override
-    public String createAnalyticPipeline(AnalyticPipelineEntityNames analyticPipelineNames) {
-        String url = constructUrl("/analyticpipelines/");
-        return post("createAnalyticPipeline", url, analyticPipelineNames, String.class);
-    }
-
-    @Override
-    public AnalyticPipelineEntityNames getAnalyticPipelineByName(String analyticPipelineName) {
-        String url = constructUrl("/analyticpipelines/{analyticPipelineName}", analyticPipelineName);
-        return get("getAnalyticPipelineByName", url, AnalyticPipelineEntityNames.class);
     }
 
     @Override
@@ -263,4 +240,30 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy //
         return get("getPropDataConfigs", url, PropData.class);
     }
 
+    @Override
+    public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction()
+    {
+        String url = constructUrl("/analyticpipelines/latest");
+        return new AnalyticPipelineEntityNames(post("createAnalyticPipelineFromProduction", url, null, AnalyticPipeline.class));
+    }
+    
+    @Override
+    public List<AnalyticPipelineEntityNames> getAnalyticPipelines(){
+        String url = constructUrl("/analyticpipelines/");
+        return get("getAnalyticPipelines", url, List.class);
+    }
+
+    @Override
+    public String createAnalyticPipeline(AnalyticPipelineEntityNames analyticPipelineEntityNames)
+    {
+        String url = constructUrl("/analyticpipelines/");
+        return post("createAnalyticPipeline", url, analyticPipelineEntityNames, String.class);   
+    }
+
+    @Override
+    public AnalyticPipelineEntityNames getAnalyticPipelineByName(String analyticPipelineName)
+    {
+        String url = constructUrl("/analyticpipelines/{analyticPipelineName}", analyticPipelineName);
+        return get("getAnalyticPipelineByName", url, AnalyticPipelineEntityNames.class);
+    }
 }
