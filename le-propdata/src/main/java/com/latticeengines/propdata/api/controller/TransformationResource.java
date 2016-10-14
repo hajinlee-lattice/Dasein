@@ -1,8 +1,5 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -103,32 +100,8 @@ public class TransformationResource extends InternalResourceBase implements Tran
             if (StringUtils.isEmpty(transformationRequest.getTargetVersion())) {
                 throw new IllegalArgumentException("Please provide aggregation date in TargetVersion field");
             }
-            if (CollectionUtils.isEmpty(transformationRequest.getBaseVersions())
-                    || transformationRequest.getBaseVersions().size() != 2) {
-                throw new IllegalArgumentException(
-                        "Please provide BaseVersion for both BomboraDomain and BomboraDepivoted. Use | as version separator for BomboraDepivoted");
-            }
-        }
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
-        if (transformationRequest.getTargetVersion() != null) {
-            try {
-                df.parse(transformationRequest.getTargetVersion());
-            } catch (ParseException e) {
-                throw new IllegalArgumentException(
-                        "TargetVersion is invalid. Please use the format yyyy-MM-dd_HH-mm-ss_z. Eg. 2016-01-01_00-00-00_UTC");
-            }
-        }
-        if (!CollectionUtils.isEmpty(transformationRequest.getBaseVersions())) {
-            for (String baseVersion : transformationRequest.getBaseVersions()) {
-                String[] bvs = baseVersion.split("|");
-                for (String bv : bvs) {
-                    try {
-                        df.parse(bv);
-                    } catch (ParseException e) {
-                        throw new IllegalArgumentException("BaseVersion " + bv
-                                + " is invalid. Please use the format yyyy-MM-dd_HH-mm-ss_z. Eg. 2016-01-01_00-00-00_UTC.");
-                    }
-                }
+            if (CollectionUtils.isEmpty(transformationRequest.getBaseVersions())) {
+                throw new IllegalArgumentException("Please provide BaseVersion for BomboraDepivoted");
             }
         }
     }

@@ -78,7 +78,8 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
         Node discarded = joined.discard(joinFields);
         Node stamped = discarded.addTimestamp(parameters.getTimestampField());
 
-        return stamped;
+        Node renamed = renameColumns(stamped);
+        return renamed;
     }
 
     private Node convergeSources(Node seed, List<Node> nodes, String joinKey, String id, Map<Node, String> joinKeyMap) {
@@ -174,5 +175,32 @@ public class AccountMasterRebuildFlow extends TypesafeDataFlowBuilder<AccountMas
             }
         }
         return new FieldList(joinList);
+    }
+
+    @SuppressWarnings("serial")
+    private Node renameColumns(Node node) {
+        Map<String, String> renamedColumns = new HashMap<String, String>() {
+            {
+                put("Domain", "LDC_Domain");
+                put("Name", "LDC_Name");
+                put("City", "LDC_City");
+                put("State", "LDC_State");
+                put("Country", "LDC_Country");
+                put("DUNS", "LDC_DUNS");
+                put("Street", "LDC_Street");
+                put("ZipCode", "LDC_ZipCode");
+            }
+        };
+        List<String> oldNames = node.getFieldNames();
+        List<String> newNames = new ArrayList<String>();
+        for (String oldName : oldNames) {
+            if (!renamedColumns.containsKey(oldName)) {
+                newNames.add(oldName);
+            } else {
+                newNames.add(renamedColumns.get(oldName));
+            }
+        }
+        node = node.rename(new FieldList(oldNames), new FieldList(newNames));
+        return node;
     }
 }
