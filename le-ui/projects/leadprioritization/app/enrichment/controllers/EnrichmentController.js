@@ -9,7 +9,7 @@ angular.module('lp.enrichment.leadenrichment', [
         across = 3, // how many across in grid view
         approximate_pagesize = 25,
         pagesize = Math.round(approximate_pagesize / across) * across,
-        enrichment_chunk_size = 1000;
+        enrichment_chunk_size = 5000;
 
     var flags = FeatureFlagService.Flags();
 

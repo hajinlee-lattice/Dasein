@@ -743,3 +743,33 @@
         }
     }
 }
+
+html.no-cssmask {
+    .enrichment-container {
+        .subheader-container {
+            ul.subheader {
+                li.categories {
+                    .dropdown-categories {
+                        & > ul {
+                            & > li {
+                                & > .category  {
+                                    .category-name {
+                                        .ico {
+                                            position: relative;
+                                            top: -2px;
+                                            height: 15px;
+                                            width: 15px;
+                                            background-color: transparent;
+                                            opacity: 1;
+                                            background-size: contain;
+                                        }
+                                    }
+                                }
+                            } 
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
