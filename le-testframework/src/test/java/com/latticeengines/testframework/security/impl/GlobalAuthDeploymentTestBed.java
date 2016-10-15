@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -22,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -99,15 +99,23 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public void overwriteFeatureFlag(String featureFlagName, boolean value) {
+        log.info("overwriting the feature flag for " + featureFlagName);
+        Tenant tenant = getMainTestTenant();
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        FeatureFlagClient.setEnabled(space, featureFlagName, value);
+    }
+
+    @Override
     public void bootstrapForProduct(LatticeProduct product) {
-        bootstrapViaTenantConsole(product, enviroment, false);
+        bootstrapViaTenantConsole(product, enviroment, null);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
     }
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product, boolean encryptTenant) {
-        bootstrapViaTenantConsole(product, enviroment, encryptTenant);
+    public void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
     }
@@ -198,22 +206,30 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     /**
      * bootstrap with one full tenant through tenant console
      */
-    public void bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment, boolean encryptTenant) {
+    public void bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
+            Map<String, Boolean> featureFlagMap) {
         Tenant tenant = addBuiltInTestTenant();
-        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase()).replace(
-                "{env}", environment);
+        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase())
+                .replace("{env}", environment);
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         try {
-            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, encryptTenant);
+            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to provision tenant via tenant console.", e);
         }
         testCustomerSpaces.add(customerSpace.toString());
         waitForTenantConsoleInstallation(CustomerSpace.parse(tenant.getId()));
+
+        if (featureFlagMap != null) {
+            log.info("Overwrite featureFlags " + featureFlagMap);
+            for (String featureFlagId : featureFlagMap.keySet()) {
+                overwriteFeatureFlag(featureFlagId, featureFlagMap.get(featureFlagId).booleanValue());
+            }
+        }
     }
 
-    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson,
-            boolean encryptTenant) throws IOException {
+    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
+            throws IOException {
         String url = "tenantconsole/" + tenantRegJson;
         log.info("Using tenant registration template " + url);
         List<BasicNameValuePair> adHeaders = loginAd();
@@ -225,28 +241,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             throw new IOException("Cannot find resource [" + url + "]");
         }
         String payload = null;
-        if (encryptTenant) {
-            payload = overWriteEncrptionFeatureFlag(ins);
-        } else {
-            payload = IOUtils.toString(ins, "UTF-8");
-        }
+        payload = IOUtils.toString(ins, "UTF-8");
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
-        HttpClientWithOptionalRetryUtils.sendPostRequest(adminApiHostPort + "/admin/tenants/" + dlTenantName
-                + "?contractId=" + dlTenantName, false, adHeaders, payload);
-    }
-
-    private String overWriteEncrptionFeatureFlag(InputStream ins) throws IOException {
-        String input = IOUtils.toString(ins, "UTF-8");
-        Pattern pattern = Pattern.compile("(\\\\\"EnableDataEncryption\\\\\")(:false)");
-        Matcher matcher = pattern.matcher(input);
-        StringBuffer result = new StringBuffer();
-        if (matcher.find()) {
-            matcher.appendReplacement(result, "\\\\\"EnableDataEncryption\\\\\":true");
-        }
-        matcher.appendTail(result);
-        return result.toString();
+        HttpClientWithOptionalRetryUtils.sendPostRequest(
+                adminApiHostPort + "/admin/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders,
+                payload);
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {

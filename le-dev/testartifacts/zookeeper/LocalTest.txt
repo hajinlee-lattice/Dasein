@@ -65,6 +65,7 @@
             EnableInternalEnrichmentAttributes = False
             EnableLatticeMarketoCredentialPage = False
             EnablePocTransform = False
+            EnableDataEncryption = False
             Quota = True
             TargetMarket = True
             UseAccountMaster = True

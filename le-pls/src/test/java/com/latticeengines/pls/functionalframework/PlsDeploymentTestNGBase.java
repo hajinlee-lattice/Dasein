@@ -3,6 +3,7 @@ package com.latticeengines.pls.functionalframework;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -49,6 +50,14 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
             throws NoSuchAlgorithmException, KeyManagementException, IOException {
         turnOffSslChecking();
         testBed.bootstrapForProduct(product);
+        mainTestTenant = testBed.getMainTestTenant();
+        switchToSuperAdmin();
+    }
+
+    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product,
+            Map<String, Boolean> featureFlagMap) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        turnOffSslChecking();
+        testBed.bootstrapForProduct(product, featureFlagMap);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
     }

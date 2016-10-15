@@ -3,6 +3,8 @@ package com.latticeengines.encryption.exposed.service;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -19,7 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.encryption.functionalframework.EncryptionTestNGBase;
@@ -55,7 +57,9 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product, boolean encryptTenant)
             throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        testBed.bootstrapForProduct(product, encryptTenant);
+        Map<String, Boolean> encryptionFeatureFlagMap = new HashMap<String, Boolean>();
+        encryptionFeatureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(encryptTenant));
+        testBed.bootstrapForProduct(product, encryptionFeatureFlagMap);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
     }
@@ -66,7 +70,10 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
                 + enableEncryptionTenant.toString());
         try {
             setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, enableEncryptionTenant.booleanValue());
-        } catch (KeyManagementException | NoSuchAlgorithmException | IOException e) {
+            if (enableEncryptionTenant.booleanValue()) {
+                Assert.assertTrue(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         customerSpace = CustomerSpace.parse(mainTestTenant.getId());
@@ -77,7 +84,6 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         testDirectoryCreation();
         testUpdateDirectoryName();
         testDeleteDirectory();
-        cleanup();
     }
 
     protected void testDirectoryCreation() {
@@ -107,14 +113,6 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         }
     }
 
-    protected void cleanup() {
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildPodPath(mainTestTenant.getId()).toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     protected void readDirectory(String hdfsDir) {
         log.info("Start reading directory in Hdfs: " + hdfsDir);
         ResponseEntity<String> response = restTemplate
@@ -123,7 +121,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
     }
 
     @DataProvider(name = "provider")
-    private Object[][] getOpetions() {
+    private Object[][] getOptions() {
         return new Object[][] { new Object[] { Boolean.FALSE }, new Object[] { Boolean.TRUE } };
     }
 

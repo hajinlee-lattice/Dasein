@@ -1,6 +1,7 @@
 package com.latticeengines.testframework.security;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.client.RestTemplate;
 
@@ -21,7 +22,7 @@ public interface GlobalAuthTestBed {
 
     void bootstrapForProduct(LatticeProduct product);
 
-    void bootstrapForProduct(LatticeProduct product, boolean encryptTenant);
+    void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap);
 
     List<Tenant> getTestTenants();
 
@@ -62,5 +63,7 @@ public interface GlobalAuthTestBed {
     void cleanupDlZk();
 
     void cleanupPlsHdfs();
+
+    void overwriteFeatureFlag(String featureFlagName, boolean value);
 
 }

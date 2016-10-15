@@ -9,7 +9,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -19,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +43,7 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -69,7 +73,6 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -85,8 +88,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Autowired
     private ScoreCorrectnessService scoreCompareService;
 
-    @Autowired
-    private TenantService tenantService;
+    @Value("${pls.ff.enableDnBFeatureFlag}")
+    private boolean enableDnBFeatureFlag;
 
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
@@ -102,7 +105,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        Map<String, Boolean> featureFlagMap = new HashMap<String, Boolean>();
+        if (EncryptionGlobalState.isEnabled()) {
+            featureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(true));
+        }
+        if (enableDnBFeatureFlag) {
+            featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), new Boolean(true));
+        }
+        log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);
         tenantToAttach = testBed.getMainTestTenant();
 
         if (EncryptionGlobalState.isEnabled()) {
@@ -168,7 +179,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.postForObject(
                 String.format("%s/pls/models/uploadfile/%s/fieldmappings?schema=%s", getRestAPIHostPort(),
-                        sourceFile.getName(), schemaInterpretation.name()), parameters, ResponseDocument.class);
+                        sourceFile.getName(), schemaInterpretation.name()),
+                parameters, ResponseDocument.class);
         FieldMappingDocument mappings = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
 
@@ -188,9 +200,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("the fieldmappings are: " + mappings.getFieldMappings());
         log.info("the ignored fields are: " + mappings.getIgnoredFields());
-        restTemplate.postForObject(
-                String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s", getRestAPIHostPort(),
-                        sourceFile.getName()), mappings, Void.class);
+        restTemplate.postForObject(String.format("%s/pls/models/uploadfile/fieldmappings?displayName=%s",
+                getRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -384,7 +395,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceLead.toString());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -431,8 +443,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = getRestTemplate()
+                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -582,15 +594,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void assertJobExistsWithModelIdAndModelName(final String jobModelId) {
         log.info(String.format("The model_id is: %s", jobModelId));
         @SuppressWarnings("unchecked")
-        List<Object> rawJobs = restTemplate
-                .getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()), List.class);
+        List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
+                List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
-                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
-                                .equals(MODEL_DISPLAY_NAME);
+                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
+                        .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
             }
         }));
     }

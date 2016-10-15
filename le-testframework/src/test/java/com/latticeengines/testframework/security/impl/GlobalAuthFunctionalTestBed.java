@@ -2,6 +2,7 @@ package com.latticeengines.testframework.security.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -46,7 +47,12 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product, boolean encryptTenant) {
+    public void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
+    }
+
+    @Override
+    public void overwriteFeatureFlag(String featureFlagName, boolean value) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }
 
@@ -113,5 +119,4 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     public void deleteTenant(Tenant tenant) {
         tenantService.discardTenant(tenant);
     }
-
 }
