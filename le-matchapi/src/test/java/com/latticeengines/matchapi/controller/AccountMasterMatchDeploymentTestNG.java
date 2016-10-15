@@ -118,7 +118,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
 
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
-        Assert.assertEquals(fields.size(), 10);
+        Assert.assertEquals(fields.size(), 11);
 
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(outputFiles.get(0)));
         Assert.assertEquals(records.size(), 14);
