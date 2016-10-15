@@ -84,9 +84,6 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
 
         for (int i = 0; i < attrs.length; i++) {
             long count = attrCount[i];
-            if (count == 0) {
-                continue;
-            }
             Tuple attrResult = new Tuple(result);
             attrResult.set(versionLoc, version);
             attrResult.set(attrLoc, attrs[i]);
