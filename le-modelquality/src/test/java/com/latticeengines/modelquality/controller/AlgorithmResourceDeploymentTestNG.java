@@ -13,7 +13,8 @@ public class AlgorithmResourceDeploymentTestNG extends ModelQualityDeploymentTes
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        algorithmEntityMgr.deleteAll();
+        // algorithmEntityMgr.deleteAll();
+    	super.cleanupDb();
     }
 
     @Test(groups = "deployment")
