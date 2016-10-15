@@ -130,14 +130,23 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         mapping.setFieldType(UserDefinedType.NUMBER);
 
         FieldMapping mapping2 = new FieldMapping();
-        mapping.setUserField("SomeStr");
-        mapping.setMappedField("B");
-        mapping.setMappedToLatticeField(false);
-        mapping.setFieldType(UserDefinedType.TEXT);
+        mapping2.setUserField("SomeStr");
+        mapping2.setMappedField("B");
+        mapping2.setMappedToLatticeField(true);
+        mapping2.setFieldType(UserDefinedType.TEXT);
+
+        FieldMapping mapping3 = new FieldMapping();
+        mapping3.setUserField("C_1");
+        mapping3.setMappedToLatticeField(false);
+        mapping3.setFieldType(UserDefinedType.TEXT);
+
+        FieldMapping mapping4 = new FieldMapping();
+        mapping4.setUserField("C");
+        mapping4.setMappedToLatticeField(false);
+        mapping4.setFieldType(UserDefinedType.TEXT);
 
         fieldMappingDocument.setRequiredFields(Arrays.asList(new String[] { "A" }));
-        fieldMappingDocument.setFieldMappings(Arrays.asList(new FieldMapping[] { mapping, mapping2 }));
-        fieldMappingDocument.setIgnoredFields(Arrays.asList(new String[] { "C", "C_1" }));
+        fieldMappingDocument.setFieldMappings(Arrays.asList(new FieldMapping[] { mapping, mapping2, mapping3, mapping4 }));
 
         Tenant t = new Tenant();
         t.setId("t1");
@@ -145,8 +154,8 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", "modelid", fieldMappingDocument);
 
         assertEquals(table.getAttributes().size(), 4);
-        assertNotNull(table.getAttribute("C_2") != null );
-        assertNotNull(table.getAttribute("C_1_1") != null );
+        assertNotNull(table.getAttribute("C_2"));
+        assertNotNull(table.getAttribute("C_1_1"));
     }
 
     private Table createTableWithSufficientColumns() {
