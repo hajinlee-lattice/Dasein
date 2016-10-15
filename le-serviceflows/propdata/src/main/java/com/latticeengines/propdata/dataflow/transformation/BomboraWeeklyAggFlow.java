@@ -82,7 +82,7 @@ public class BomboraWeeklyAggFlow
                         "HighlyRelevantSources", "MostRelevantSources",
                         "TotalAggregatedScore_HighlyRelevant", "TotalAggregatedScore_MostRelevant"));
 
-        bombora7Days.addTimestamp("Date", parameters.getTimestamp());
+        bombora7Days = bombora7Days.addTimestamp("Date", parameters.getTimestamp());
         return bombora7Days;
     }
 }
