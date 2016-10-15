@@ -29,6 +29,8 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {
+    private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+
     private static final Log log = LogFactory.getLog(CascadingBulkMatchDataflow.class);
 
     public static final String MATCH_ID_KEY = "__MATCH_ID__";
@@ -39,6 +41,7 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
     private String LATTICE_ID_FIELDNAME = "LatticeID";
     private String PUBLIC_DOMAIN_FIELDNAME = "Domain";
     private String PUBLIC_DOMAIN_NEW_FIELDNAME = "__Public_Domain__";
+    private String PUBLIC_DOMAIN_ROW_ID = "__Row_Id__";
 
     @Override
     public Node construct(CascadingBulkMatchDataflowParameters parameters) {
@@ -158,13 +161,15 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
         Set<String> decodedColumnSet = getDecodedColumns(parameters, accountMasterFieldSet, encodedColumns);
         for (String predefinedField : predefinedFieldList.getFields()) {
             if (!inputputFieldSet.contains(predefinedField.toLowerCase())
-                    && (accountMasterFieldSet.contains(predefinedField) || decodedColumnSet.contains(predefinedField))) {
+                    && (accountMasterFieldSet.contains(predefinedField) || decodedColumnSet.contains(predefinedField))
+                    || predefinedField.equals(IS_PUBLIC_DOMAIN)) {
                 if (accountMasterFieldSet.contains(predefinedField)) {
                     predefinedFields.add(predefinedField);
                 }
                 outputFields.add(predefinedField);
             }
-            if (!accountMasterFieldSet.contains(predefinedField) && !decodedColumnSet.contains(predefinedField)) {
+            if (!accountMasterFieldSet.contains(predefinedField) && !decodedColumnSet.contains(predefinedField)
+                    && !predefinedField.equals(IS_PUBLIC_DOMAIN)) {
                 log.warn("Missing predefined field in Account Master file or Encoded columns:" + predefinedField);
             }
         }
@@ -241,13 +246,26 @@ public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<Cascadin
             parsedDomainNode = parsedDomainNode.apply(new DomainMergeAndCleanFunction(domainFieldNames, PARSED_DOMAIN),
                     new FieldList(domainFieldNames), new FieldMetadata(PARSED_DOMAIN, String.class));
 
-            if (parameters.getExcludePublicDomains() && StringUtils.isNotBlank(parameters.getPublicDomainPath())) {
+            if (StringUtils.isNotBlank(parameters.getPublicDomainPath())) {
                 log.info("Starting to exclude public domain. file =" + parameters.getPublicDomainPath());
                 Node publicDomainSource = addSource(parameters.getPublicDomainPath());
                 publicDomainSource = publicDomainSource.rename(new FieldList(PUBLIC_DOMAIN_FIELDNAME), new FieldList(
                         PUBLIC_DOMAIN_NEW_FIELDNAME));
-                parsedDomainNode = parsedDomainNode.stopList(publicDomainSource, PARSED_DOMAIN,
+
+                parsedDomainNode = parsedDomainNode.addRowID(PUBLIC_DOMAIN_ROW_ID);
+                Node publicDomainNode = parsedDomainNode.stopList(publicDomainSource, PARSED_DOMAIN,
                         PUBLIC_DOMAIN_NEW_FIELDNAME);
+                publicDomainNode = publicDomainNode.addFunction("false", new FieldList(), new FieldMetadata(
+                        IS_PUBLIC_DOMAIN, Boolean.class));
+                if (parameters.getExcludePublicDomains()) {
+                    return publicDomainNode;
+                }
+
+                parsedDomainNode = parsedDomainNode.join(new FieldList(PUBLIC_DOMAIN_ROW_ID), publicDomainNode,
+                        new FieldList(PUBLIC_DOMAIN_ROW_ID), JoinType.LEFT);
+                parsedDomainNode = parsedDomainNode.addFunction("IsPublicDomain == null ? true : false", new FieldList(
+                        IS_PUBLIC_DOMAIN), new FieldMetadata(IS_PUBLIC_DOMAIN, Boolean.class));
+
             }
         }
         return parsedDomainNode;
