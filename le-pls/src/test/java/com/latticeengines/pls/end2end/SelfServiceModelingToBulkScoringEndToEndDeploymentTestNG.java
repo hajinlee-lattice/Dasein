@@ -364,7 +364,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG
         for (String requiredField : requiredFields) {
             boolean foundRequiredField = false;
             for (FieldMapping fieldMapping : fieldMappings) {
-                if (fieldMapping.getUserField() != null
+                if (fieldMapping.getMappedField() != null
                         && fieldMapping.getMappedField().equals(requiredField)) {
                     foundRequiredField = true;
                     assertNotNull(fieldMapping.getUserField());
