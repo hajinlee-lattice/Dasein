@@ -10,30 +10,30 @@
     <properties>
         <component-name>workflowapi</component-name>
         <spring.security.oauth.version>2.0.10.RELEASE</spring.security.oauth.version>
-        <le.baton.version>2.0.43-SNAPSHOT</le.baton.version>
-        <le.common.version>2.0.43-SNAPSHOT</le.common.version>
-        <le.dataplatform.version>2.0.43-SNAPSHOT</le.dataplatform.version>
-        <le.microservice.version>2.0.43-SNAPSHOT</le.microservice.version>
-        <le.security.version>2.0.43-SNAPSHOT</le.security.version>
-        <le.serviceflows.core.version>2.0.43-SNAPSHOT</le.serviceflows.core.version>
-        <le.serviceflows.prospectdiscovery.version>2.0.43-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
-        <le.serviceflows.leadprioritization.version>2.0.43-SNAPSHOT</le.serviceflows.leadprioritization.version>
-        <le.serviceflows.propdata.version>2.0.43-SNAPSHOT</le.serviceflows.propdata.version>
-        <le.workflow.version>2.0.43-SNAPSHOT</le.workflow.version>
-        <le.oauth2.db.version>2.0.43-SNAPSHOT</le.oauth2.db.version>
-        <le.scoringapi.version>2.0.43-SNAPSHOT</le.scoringapi.version>
-        <le.network.version>2.0.43-SNAPSHOT</le.network.version>
-        <le.metadata.version>2.0.43-SNAPSHOT</le.metadata.version>
-        <le.dataflow.version>2.0.43-SNAPSHOT</le.dataflow.version>
-        <le.proxy.version>2.0.43-SNAPSHOT</le.proxy.version>
-        <le.pls.version>2.0.43-SNAPSHOT</le.pls.version>
-        <le.testframework.version>2.0.43-SNAPSHOT</le.testframework.version>
+        <le.baton.version>2.0.44-SNAPSHOT</le.baton.version>
+        <le.common.version>2.0.44-SNAPSHOT</le.common.version>
+        <le.dataplatform.version>2.0.44-SNAPSHOT</le.dataplatform.version>
+        <le.microservice.version>2.0.44-SNAPSHOT</le.microservice.version>
+        <le.security.version>2.0.44-SNAPSHOT</le.security.version>
+        <le.serviceflows.core.version>2.0.44-SNAPSHOT</le.serviceflows.core.version>
+        <le.serviceflows.prospectdiscovery.version>2.0.44-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
+        <le.serviceflows.leadprioritization.version>2.0.44-SNAPSHOT</le.serviceflows.leadprioritization.version>
+        <le.serviceflows.propdata.version>2.0.44-SNAPSHOT</le.serviceflows.propdata.version>
+        <le.workflow.version>2.0.44-SNAPSHOT</le.workflow.version>
+        <le.oauth2.db.version>2.0.44-SNAPSHOT</le.oauth2.db.version>
+        <le.scoringapi.version>2.0.44-SNAPSHOT</le.scoringapi.version>
+        <le.network.version>2.0.44-SNAPSHOT</le.network.version>
+        <le.metadata.version>2.0.44-SNAPSHOT</le.metadata.version>
+        <le.dataflow.version>2.0.44-SNAPSHOT</le.dataflow.version>
+        <le.proxy.version>2.0.44-SNAPSHOT</le.proxy.version>
+        <le.pls.version>2.0.44-SNAPSHOT</le.pls.version>
+        <le.testframework.version>2.0.44-SNAPSHOT</le.testframework.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.43-SNAPSHOT</version>
+        <version>2.0.44-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
