@@ -38,7 +38,7 @@
 
     <bean name="dataplatformJobWatchdog" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="jobWatchdog" />
-        <property name="cronTrigger" value="* 0/1 * * * ?" />
+        <property name="cronTrigger" value="0/20 * * * * ?" />
         <property name="destUrl" value="${quartz.dataplatform.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dataplatform.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dataplatform.predefined.job.query.api:}" />
