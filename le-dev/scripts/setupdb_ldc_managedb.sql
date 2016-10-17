@@ -34,10 +34,10 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
 
-INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, Status)
+INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, Status)
 VALUES
-  ('2.0.0', '2016-08-28', '2.0', '2016-10-06_17-17-47_UTC', '2016-10-06_21-46-16_UTC', 'APPROVED'),
-  ('2.0.1', '2016-09-01', '2.0', '2016-09-01_13-52-03_UTC', '2016-09-01_21-41-25_UTC', 'NEW');
+  ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', 'APPROVED'),
+  ('2.0.1', '2016-09-01', '2.0', '2016-09-01_13-52-03_UTC', '2016-09-01_21-41-25_UTC', '', 'NEW');
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/Ingestion.csv' INTO TABLE `Ingestion`
 FIELDS TERMINATED BY ','
