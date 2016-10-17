@@ -14,7 +14,7 @@ ADD_DEFAULT_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[DF.+\]"
 ADD_UNIQUE_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[UQ.+\]"
 NUMBER = 'number'
 CONTENT = "contents"
-DELIMITER = "GO\n"
+DELIMITER = "GO\r\n"
 
 
 def main(argv):
