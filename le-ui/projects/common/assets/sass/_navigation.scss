@@ -488,6 +488,7 @@ html.no-cssmask {
     .profile-nav {
         float: right;
         max-width: 250px;
+        z-index: 30;
         & > a {
             padding: 16px 20px 16px 20px;
             display: block;
