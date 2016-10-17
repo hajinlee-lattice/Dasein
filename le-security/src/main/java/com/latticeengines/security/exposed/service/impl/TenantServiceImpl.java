@@ -93,7 +93,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public boolean getTenantEmailFlag(String tenantId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
-        if (tenant != null) {
+        if (tenant != null && tenant.getEmailSent() != null) {
             return tenant.getEmailSent();
         }
         return false;
