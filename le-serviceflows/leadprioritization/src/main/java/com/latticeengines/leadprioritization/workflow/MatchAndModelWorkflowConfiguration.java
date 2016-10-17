@@ -174,6 +174,8 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
+            matchResult.setDataCloudVersion(dataCloudVersion);
+            model.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
