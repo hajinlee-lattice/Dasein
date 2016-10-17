@@ -63,7 +63,7 @@ angular.module('lp.jobs', [
                 items: [
                     { label: 'Timestamp',   icon: 'numeric', property: 'timestamp' },
                     { label: 'Model Name',  icon: 'alpha',   property: 'modelName' },
-                    { label: 'Job Type',    icon: 'alpha',   property: '-jobType' },
+                    { label: 'Job Type',    icon: 'alpha',   property: 'displayName' },
                     { label: 'Job Status',  icon: 'alpha',   property: 'status' }
                 ]
             },
