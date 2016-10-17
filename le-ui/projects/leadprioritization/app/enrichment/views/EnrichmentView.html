@@ -107,7 +107,7 @@
                 <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
                     <li class="box category-{{vm.categoryClass(enrichment.Category)}} ngAnimate" 
                     ng-repeat="enrichment in (filteredList = (vm.enrichments 
-                    | filter: vm.query
+                    | filter: vm.searchFields
                     | orderBy: SortOrder
                     | filter: vm.inCategory
                     | filter: vm.inSubcategory

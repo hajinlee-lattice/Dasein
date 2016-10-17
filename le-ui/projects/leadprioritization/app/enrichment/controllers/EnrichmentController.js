@@ -128,6 +128,19 @@ angular.module('lp.enrichment.leadenrichment', [
             });
         }
     }
+
+    vm.searchFields = function(enrichment){
+        if(vm.query) {
+            if(enrichment.DisplayName.includes(vm.query)) {
+                return true;
+            } else if(enrichment.Description.includes(vm.query)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
     
     vm.changeCategory = function(opts){
         var opts = opts || {},
