@@ -165,7 +165,8 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             jobMetric.setFinalAppStatus(FinalApplicationStatus.UNDEFINED.name());
 
             String split = splits.get(0);
-            if (!split.contains("[") && !split.contains("]") && (split.endsWith(".Production") || split.toLowerCase().endsWith("playmaker"))) {
+            if (!split.contains("[") && !split.contains("]")
+                    && (split.endsWith(".Production") || split.toLowerCase().endsWith("playmaker"))) {
                 jobMetric.setTenantId(split);
             } else {
                 log.info("Job does not contain proper tenant name:" + split + " split from: " + app.getName());
@@ -219,7 +220,12 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         fieldMap.put("VcoreSec", app.getVcoreSeconds());
         fieldMap.put("ElapsedTimeSec", Integer.valueOf((int) app.getElapsedTime() / 1000));
 
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(app.getAppId());
+        Job job = null;
+        try {
+            job = workflowProxy.getWorkflowJobFromApplicationId(app.getAppId());
+        } catch (Exception e) {
+            // do nothing
+        }
         if (job != null && job.getSteps() != null) {
             for (JobStep step : job.getSteps()) {
                 if (step.getEndTimestamp() == null || step.getStartTimestamp() == null) {
