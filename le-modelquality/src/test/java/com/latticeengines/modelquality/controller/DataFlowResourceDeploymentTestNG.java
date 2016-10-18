@@ -14,7 +14,7 @@ public class DataFlowResourceDeploymentTestNG extends ModelQualityDeploymentTest
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        dataFlowEntityMgr.deleteAll();
+        super.cleanupDb();
     }
 
     @Test(groups = "deployment")
@@ -31,5 +31,5 @@ public class DataFlowResourceDeploymentTestNG extends ModelQualityDeploymentTest
         String name = ((Map<String, String>) dataFlows.get(0)).get("name");
         Assert.assertTrue(name.startsWith("PRODUCTION-"));
     }
-    
+
 }

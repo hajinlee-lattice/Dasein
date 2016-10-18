@@ -75,7 +75,6 @@ public class ModelRunEntityNames implements Dimension {
         this.dataSetName = dataSetName;
     }
 
-    @MetricTag(tag = "DatasetName")
     public String getDataSetName() {
         return dataSetName;
     }

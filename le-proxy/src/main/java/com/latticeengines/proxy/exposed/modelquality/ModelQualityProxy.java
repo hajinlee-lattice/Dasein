@@ -8,7 +8,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
-import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
@@ -240,8 +239,7 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     @Override
     public AnalyticPipelineEntityNames createAnalyticPipelineFromProduction() {
         String url = constructUrl("/analyticpipelines/latest");
-        return new AnalyticPipelineEntityNames(
-                post("createAnalyticPipelineFromProduction", url, null, AnalyticPipeline.class));
+        return post("createAnalyticPipelineFromProduction", url, null, AnalyticPipelineEntityNames.class);
     }
 
     @Override
