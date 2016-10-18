@@ -87,6 +87,7 @@ public class AvroUtilsUnitTestNG {
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("date"), Type.LONG);
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("BINARY"), Type.BYTES);
         Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("INT"), Type.INT);
+        Assert.assertEquals(AvroUtils.convertSqlTypeToAvro("LONG"), Type.LONG);
     }
 
     @Test(groups = "unit")

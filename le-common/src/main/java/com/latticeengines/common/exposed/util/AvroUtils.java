@@ -21,9 +21,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
@@ -55,6 +55,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class AvroUtils {
 
     private static final String SQLSERVER_TYPE_INT = "int";
+    private static final String SQLSERVER_TYPE_LONG = "long";
     private static Log log = LogFactory.getLog(AvroUtils.class);
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
@@ -228,7 +229,7 @@ public class AvroUtils {
         log.info("Counting number of records in " + path);
         Long count = 0L;
 
-        try(DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path));) {
+        try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path));) {
             try {
                 while (stream.nextBlock() != null) {
                     count += stream.getBlockCount();
@@ -507,6 +508,8 @@ public class AvroUtils {
             // covered by java.sql.Types
             if (SQLSERVER_TYPE_INT.equalsIgnoreCase(typeStr)) {
                 return Type.INT;
+            } else if (SQLSERVER_TYPE_LONG.equalsIgnoreCase(typeStr)) {
+                return Type.LONG;
             }
             throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
         }
