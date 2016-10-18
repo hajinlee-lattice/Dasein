@@ -25,7 +25,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "runModelAlfresco", enabled = false)
     public void runModelMuleSoft() {
         try {
             List<ModelRun> modelRuns = createModelRuns();
@@ -48,7 +48,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "runModelMuleSoft", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "runModelNGINX", enabled = false)
     public void runModelAlfresco() {
         try {
             ModelRun modelRun = createModelRuns().get(0);
@@ -69,7 +69,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "runModelAlfresco", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void runModelNGINX() {
         try {
             ModelRun modelRun = createModelRuns().get(0);
@@ -90,7 +90,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "runModelMuleSoft", enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = "runModelNGINX", enabled = true)
     public void getModelRuns() {
         try {
             List<ModelRunEntityNames> response = modelQualityProxy.getModelRuns();
