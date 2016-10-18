@@ -30,23 +30,23 @@ angular.module('lp.marketo.enrichment', [
     vm.custom_header_value = 'application/json';
 
     vm.match_fields = {
-        email_or_website: {
+        Domain: {
             label: 'Email or Website',
             required: true,
             data: vm.marketoEnrichments.marketo_match_fields[0],
             options: vm.marketoMatchFields
         },
-        company: {
+        Company: {
             label: 'Company',
             data: vm.marketoEnrichments.marketo_match_fields[1],
             options: vm.marketoMatchFields
         },
-        state: {
+        State: {
             label: 'State',
             data: vm.marketoEnrichments.marketo_match_fields[2],
             options: vm.marketoMatchFields
         },
-        country: {
+        Country: {
             label: 'Country',
             data: vm.marketoEnrichments.marketo_match_fields[3],
             options: vm.marketoMatchFields
