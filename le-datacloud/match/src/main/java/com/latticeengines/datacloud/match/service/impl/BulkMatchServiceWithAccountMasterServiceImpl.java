@@ -71,10 +71,10 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Value("${datacloud.match.cascading.container.size:1024}")
     private String cascadingContainerSize;
-    
+
     @Value("${datacloud.match.cascading.queue.name:Modeling}")
     private String matchQueueName;
-    
+
     @Autowired
     private AccountMaster accountMaster;
 
@@ -114,7 +114,8 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         propDataTenantService.bootstrapServiceTenant();
         String targetPath = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         CascadingBulkMatchWorkflowConfiguration.Builder builder = new CascadingBulkMatchWorkflowConfiguration.Builder();
-        String queueName = StringUtils.isEmpty(matchQueueName) ? LedpQueueAssigner.getModelingQueueNameForSubmission() : matchQueueName;
+        String queueName = StringUtils.isEmpty(matchQueueName) ? LedpQueueAssigner.getModelingQueueNameForSubmission()
+                : matchQueueName;
         builder = builder //
                 .matchInput(input) //
                 .hdfsPodId(hdfsPodId) //
@@ -145,6 +146,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         jobProperties.put("mapred.reduce.tasks", "1");
         jobProperties.put("cascading.spill.map.threshold", "100000");
         jobProperties.put("mapreduce.job.running.map.limit", "100");
+        jobProperties.put("yarn.scheduler.minimum-allocation-mb", cascadingContainerSize);
         jobProperties.put("mapreduce.map.memory.mb", cascadingContainerSize);
         jobProperties.put("mapreduce.reduce.memory.mb", cascadingContainerSize);
         return jobProperties;
