@@ -25,8 +25,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
     @Override
     public void defineFlag(String id, FeatureFlagDefinition definition) {
         if (FeatureFlagClient.getDefinition(id) != null) {
-            throw new LedpException(LedpCode.LEDP_19106, new RuntimeException(String.format(
-                    "The definition of %s already exists.", id)));
+            throw new LedpException(LedpCode.LEDP_19106,
+                    new RuntimeException(String.format("The definition of %s already exists.", id)));
         }
         FeatureFlagClient.setDefinition(id, definition);
     }
@@ -137,7 +137,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 targetMarketProdSet, false);
         FeatureFlagDefinition verifySourceCredentialFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(),
-                LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getDocumentation(), verifySourceCredentialProdSet, false);
+                LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getDocumentation(), verifySourceCredentialProdSet,
+                false);
         FeatureFlagDefinition enablePocTransformFeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName(),
                 LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getDocumentation(), enablePocTransformProdSet, true);
@@ -173,7 +174,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getDocumentation(), enableDataProfilingV2ProdSet, true);
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(),
-                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, true);
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, false);
         enableDataEncryption.setModifiableAfterProvisioning(false);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
