@@ -33,9 +33,8 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
+import com.latticeengines.eai.util.HdfsUriGenerator;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
-import util.HdfsUriGenerator;
 
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {

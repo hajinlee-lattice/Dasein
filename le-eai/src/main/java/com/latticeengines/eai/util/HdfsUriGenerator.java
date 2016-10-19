@@ -1,4 +1,4 @@
-package util;
+package com.latticeengines.eai.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

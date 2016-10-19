@@ -10,7 +10,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
-import util.HdfsUriGenerator;
+import com.latticeengines.eai.util.HdfsUriGenerator;
 
 public class XmlHandlerProcessor implements Processor {
 

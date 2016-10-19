@@ -8,7 +8,7 @@ import org.apache.camel.Processor;
 
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
-import util.HdfsUriGenerator;
+import com.latticeengines.eai.util.HdfsUriGenerator;
 
 public class DataContainerToHdfsProcessor implements Processor {
 
