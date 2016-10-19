@@ -196,10 +196,8 @@ public class ModelingServiceExecutor {
         }
         return enabledRulesProp;
     }
-
-    public String model() throws Exception {
-        Algorithm algorithm = getAlgorithm();
-
+    
+    void setPipelineProperties(Algorithm algorithm) {
         String enabledRulesProp = getEnabledRulesAsPipelineProp(builder.getDataRules());
         if (StringUtils.isNotEmpty(enabledRulesProp)) {
             if (!algorithm.getPipelineProperties().isEmpty()) {
@@ -209,10 +207,24 @@ public class ModelingServiceExecutor {
                 algorithm.setPipelineProperties(enabledRulesProp);
             }
         }
+        
+        if (builder.dataCloudVersion != null && builder.dataCloudVersion.startsWith("2")) {
+            if (!algorithm.getPipelineProperties().isEmpty()) {
+                algorithm.setPipelineProperties(algorithm.getPipelineProperties() + " featureselectionstep.enabled=true");
+            } else {
+                algorithm.setPipelineProperties("featureselectionstep.enabled=true");
+            }
+        }
+    }
+
+    public String model() throws Exception {
+        Algorithm algorithm = getAlgorithm();
+        
+        setPipelineProperties(algorithm);
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
-        modelDef.addAlgorithms(Collections.singletonList((Algorithm) algorithm));
+        modelDef.addAlgorithms(Collections.singletonList(algorithm));
 
         Model model = new Model();
         model.setModelDefinition(modelDef);
