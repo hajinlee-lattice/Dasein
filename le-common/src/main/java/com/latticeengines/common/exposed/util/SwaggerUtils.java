@@ -2,9 +2,9 @@ package com.latticeengines.common.exposed.util;
 
 import javax.annotation.Nullable;
 
-import springfox.documentation.RequestHandler;
-
 import com.google.common.base.Predicate;
+
+import springfox.documentation.RequestHandler;
 
 public class SwaggerUtils {
 

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.python.core.PyBoolean;
+import org.python.core.PyCode;
 import org.python.core.PyDictionary;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -20,7 +21,7 @@ import org.python.util.PythonInterpreter;
 public class JythonEngine {
 
     private PythonInterpreter interpreter;
-    private Map<String, String> functionScriptMap = new HashMap<>();
+    private Map<String, PyCode> functionScriptMap = new HashMap<>();
 
     public JythonEngine(String modelPath) {
         if (modelPath == null) {
@@ -38,22 +39,23 @@ public class JythonEngine {
     }
 
     public Object invoke(String packageName, String module, String function, Object[] params, Class<?> returnType) {
-        String script = functionScriptMap.get(packageName + "." + module + "." + function);
-        if (script == null) {
+        PyCode pyCode = functionScriptMap.get(packageName + "." + module + "." + function);
+        if (pyCode == null) {
             List<String> l = new ArrayList<>();
             for (int i = 1; i <= params.length; i++) {
                 l.add("p" + i);
             }
 
-            script = String.format("from %s import %s; x = %s.%s(%s)", //
-                    packageName, module, module, function, StringUtils.join(l, ","));
-            functionScriptMap.put(packageName + "." + module + "." + function, script);
+            String script = String.format("from %s import %s; x = %s.%s(%s)", //
+                    packageName,module, module, function, StringUtils.join(l, ","));
+            pyCode = interpreter.compile(script);
+            functionScriptMap.put(packageName + "." + module + "." + function, pyCode);
         }
 
         for (int i = 1; i <= params.length; i++) {
             interpreter.set("p" + i, params[i - 1]);
         }
-        interpreter.exec(script);
+        interpreter.exec(pyCode);
         PyObject x = interpreter.get("x");
         if (x instanceof PyFloat) {
             return ((PyFloat) x).getValue();
@@ -83,17 +85,17 @@ public class JythonEngine {
     }
 
     public <T> T invoke(String function, Map<String, Object> arguments, Map<String, Object> record, Class<T> returnType) {
-        
         String threadId = "x" + Thread.currentThread().getId();
-        String script = functionScriptMap.get(function + "-" + threadId);
+        PyCode pyCode = functionScriptMap.get(function + "-" + threadId);
 
-        if (script == null) {
-            script = String.format("import %s; %s = %s.transform(args, record)", function, threadId, function);
-            functionScriptMap.put(function + "-" + threadId, script);
+        if (pyCode == null) {
+            String script = String.format("import %s; %s = %s.transform(args, record)", function, threadId, function);
+            pyCode = interpreter.compile(script);
+            functionScriptMap.put(function + "-" + threadId, pyCode);
         }
         interpreter.set("args", arguments);
         interpreter.set("record", record);
-        interpreter.exec(script);
+        interpreter.exec(pyCode);
         PyObject x = interpreter.get(threadId);
         if (x instanceof PyFloat) {
             return returnType.cast(((PyFloat) x).getValue());
@@ -105,7 +107,7 @@ public class JythonEngine {
                 return returnType.cast(Long.valueOf(value));
             }
             if (returnType == Double.class) {
-                return returnType.cast(Double.valueOf((double) value));
+                return returnType.cast(Double.valueOf(value));
             }
             if (returnType == Boolean.class) {
                 return returnType.cast(value == 1);
@@ -114,7 +116,7 @@ public class JythonEngine {
         } else if (x instanceof PyLong) {
             Long value = ((PyLong) x).getValue().longValue();
             if (returnType == Double.class) {
-                return returnType.cast(Double.valueOf((double) value));
+                return returnType.cast(Double.valueOf(value));
             }
             return returnType.cast(value);
         }

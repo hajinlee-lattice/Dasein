@@ -5,8 +5,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.exception.AnnotationValidationError;
-
 public class AnnotationValidationErrorUnitTestNG {
 
     @Test(groups = "unit")
