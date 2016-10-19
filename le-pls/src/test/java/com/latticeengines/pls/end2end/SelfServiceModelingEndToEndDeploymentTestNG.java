@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,7 +106,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         if (EncryptionGlobalState.isEnabled()) {
             featureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(true));
         }
-        if (enableDnBFeatureFlag) {
+        if (enableDnBFeatureFlag && !BooleanUtils.toBoolean(System.getenv("DNB_RTS_AND_MODELING_DISABLED"))) {
             featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), new Boolean(true));
         }
         log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
