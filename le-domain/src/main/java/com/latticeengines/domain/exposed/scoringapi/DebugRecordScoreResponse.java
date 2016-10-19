@@ -1,10 +1,10 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class DebugRecordScoreResponse extends RecordScoreResponse {
 

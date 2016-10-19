@@ -3,12 +3,12 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.StringUtils;
 
 public class AvroInputBuffer extends InputBuffer {
 

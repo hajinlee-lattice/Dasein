@@ -2,8 +2,8 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 public class PivotDataFlowParameters extends DataFlowParameters {
 

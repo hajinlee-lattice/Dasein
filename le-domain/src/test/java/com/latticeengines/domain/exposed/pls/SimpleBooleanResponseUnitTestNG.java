@@ -7,11 +7,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 
 public class SimpleBooleanResponseUnitTestNG {
     

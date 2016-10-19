@@ -1,11 +1,18 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Date;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-
-import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 @Table(name = "MODEL_SUMMARY_DOWNLOAD_FLAGS")

@@ -6,9 +6,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.security.User;
 
 public class RegistrationResultUnitTestNG {

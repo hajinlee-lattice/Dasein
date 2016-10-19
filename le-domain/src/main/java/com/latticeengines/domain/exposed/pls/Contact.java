@@ -13,8 +13,8 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "AccountMaster_Contacts")

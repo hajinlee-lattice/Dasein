@@ -26,8 +26,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 
 @Entity

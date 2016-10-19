@@ -4,12 +4,12 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 
-import com.latticeengines.domain.exposed.workflow.KeyValue;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 public class KeyValueUnitTestNG {
     

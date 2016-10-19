@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
+import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
@@ -23,8 +25,6 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
-import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //

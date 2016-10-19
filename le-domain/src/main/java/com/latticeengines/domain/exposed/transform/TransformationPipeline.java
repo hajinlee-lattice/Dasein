@@ -126,6 +126,18 @@ public class TransformationPipeline {
     public static TransformDefinition stdVisidbStateIsInSouthWest = new TransformDefinition(
             "StdVisidbDsStateIsInSouthWest", "StateIsInSouthWest", FieldType.BOOLEAN,
             new LinkedHashMap<String, Object>());
+    
+    public static TransformDefinition dnbNaicsSector = new TransformDefinition(
+            "DnBNaicsSector", "NaicsSector", FieldType.STRING, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition dnbNaicsSubsector = new TransformDefinition(
+            "DnBNaicsSubsector", "NaicsSubsector", FieldType.STRING, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition dnbNaicsIndustryGroup = new TransformDefinition(
+            "DnBNaicsIndustryGroup", "NaicsIndustryGroup", FieldType.STRING, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition dnbSicCategory = new TransformDefinition(
+            "DnBSicCategory", "SicCategory", FieldType.STRING, new LinkedHashMap<String, Object>());
 
     static {
         setArguments();
@@ -144,6 +156,7 @@ public class TransformationPipeline {
         stdVisidbDsPdAlexaRelatedlinksCount.arguments.put("column", "AlexaRelatedLinks");
 
         stdPhoneEntropy.arguments.put("column", InterfaceName.PhoneNumber.name());
+
 
         stdVisidbAlexaMonthssinceonline.arguments.put("column", "AlexaOnlineSince");
         stdVisidbDsPdModelactionOrdered.arguments.put("column", "ModelAction");
@@ -190,6 +203,13 @@ public class TransformationPipeline {
         stdVisidbStateIsInRockyMountain.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthEast.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthWest.arguments.put("column", InterfaceName.State.name());
+        
+        // DnB transforms
+        
+        dnbNaicsSector.arguments.put("column", "LE_NAICS_CODE");
+        dnbNaicsSubsector.arguments.put("column", "LE_NAICS_CODE");
+        dnbNaicsIndustryGroup.arguments.put("column", "LE_NAICS_CODE");
+        dnbSicCategory.arguments.put("column", "LE_SIC_CODE");
     }
 
     public static void setDisplayName() {
@@ -236,6 +256,10 @@ public class TransformationPipeline {
                 .add(stdVisidbDsTitleIsacademic) //
                 .add(stdVisidbDsFirstnameSameasLastname) //
                 .add(stdVisidbDsIndustryGroup) //
+                .add(dnbNaicsSector) //
+                .add(dnbNaicsSubsector) //
+                .add(dnbNaicsIndustryGroup) //
+                .add(dnbSicCategory) //
                 .build();
         return stdTransformDefinitions;
     }

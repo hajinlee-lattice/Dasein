@@ -7,8 +7,9 @@ import static org.testng.Assert.assertNull;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.ResponseDocument;
 
 public class DeleteUsersResultUnitTestNG {
     

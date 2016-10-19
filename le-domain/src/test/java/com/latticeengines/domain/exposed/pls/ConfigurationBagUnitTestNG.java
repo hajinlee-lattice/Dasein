@@ -3,11 +3,12 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.db.ConfigurationBag;
-import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.db.ConfigurationBag;
+import com.latticeengines.domain.exposed.db.HasOptionAndValue;
 
 public class ConfigurationBagUnitTestNG {
     public enum OptionName {

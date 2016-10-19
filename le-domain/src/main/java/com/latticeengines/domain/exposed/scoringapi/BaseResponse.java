@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class BaseResponse {
 

@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class AvroInputBufferUnitTestNG {
 
