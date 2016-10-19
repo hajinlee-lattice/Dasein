@@ -62,6 +62,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_QUOTAS //
     ) //
     ), //
