@@ -367,15 +367,6 @@ angular
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',
             resolve: { 
-                FeatureFlags: function($q, FeatureFlagService) {
-                    var deferred = $q.defer();
-                    
-                    FeatureFlagService.GetAllFlags().then(function() {
-                        deferred.resolve();
-                    });
-                    
-                    return deferred.promise;
-                },
                 urls: function($q, $http) { 
                     var deferred = $q.defer();
 
@@ -399,6 +390,24 @@ angular
 
                     return deferred.promise; 
                 }
+            }
+        })
+        .state('home.marketosettings.apikey', {
+            url: '/apikey',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Settings'
+            },
+            resolve: {
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
+                    
+                    FeatureFlagService.GetAllFlags().then(function() {
+                        deferred.resolve();
+                    });
+                    
+                    return deferred.promise;
+                }
             },
             views: {
                 "navigation@": {
@@ -419,21 +428,6 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'                    
                 },
                 "summary@": {
-                    template: ''
-                },
-                "main@": {
-                    template: ''
-                }
-            }
-        })
-        .state('home.marketosettings.apikey', {
-            url: '/apikey',
-            params: {
-                pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings'
-            },
-            views: {
-                "summary@": {
                     resolve: { 
                         ResourceString: function() {
                             return 'SUMMARY_MARKETO_APIKEY';
@@ -451,7 +445,6 @@ angular
 
                             MarketoService.GetMarketoCredentials().then(function(result) {
                                 deferred.resolve(result);
-                                console.log(result);
                             });
 
                             return deferred.promise;
