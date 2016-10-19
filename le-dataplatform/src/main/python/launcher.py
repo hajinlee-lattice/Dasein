@@ -58,6 +58,9 @@ class Launcher(object):
     def getNewFeatures(self, allColumnsPreTransform, allColumnsPostTransform):
         return list(set(allColumnsPostTransform) - set(allColumnsPreTransform))
 
+    def getRemovedFeatures(self, allColumnsPreTransform, allColumnsPostTransform):
+        return list(set(allColumnsPreTransform) - set(allColumnsPostTransform))
+
     def updatedFields(self, fields, newFeatures, trainingData, testData):
         chosenDataset = trainingData
         if isinstance(testData, DataFrame):
@@ -166,9 +169,14 @@ class Launcher(object):
 
         allColumnsPostTransform = self.getColumnNames(self.training, self.test)
         newFeatures = self.getNewFeatures(allColumnsPreTransform, allColumnsPostTransform)
+        removedFeatures = set(self.getRemovedFeatures(allColumnsPreTransform, allColumnsPostTransform))
         if len(newFeatures) > 0:
             params["schema"]["features"] = params["schema"]["features"] + newFeatures
             parser.fields = self.updatedFields(parser.fields, newFeatures, self.training, self.test)
+            
+        if len(removedFeatures) > 0:
+            params["schema"]["features"] = [ x for x in params["schema"]["features"] if x not in removedFeatures ]
+            
 
         if self.training is not None:
             dataFrameColumns = set(self.training.columns.values.tolist())

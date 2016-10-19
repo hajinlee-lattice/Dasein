@@ -34,7 +34,7 @@ class Pipeline(object):
             try:
                 transformed = step.transform(transformed, configMetadata, test)
             except Exception as e:
-                logger.exception("Caught Exception while applying Transfrom. Stack trace below" + str(e))
+                logger.exception("Caught Exception while applying Transform. Stack trace below" + str(e))
 
         return transformed
     
@@ -55,6 +55,9 @@ class PipelineStep(object):
 
     def __init__(self, props):
         self.props = props
+        
+    def includeInScoringPipeline(self):
+        return True
 
     def isModelStep(self):
         return self.modelStep

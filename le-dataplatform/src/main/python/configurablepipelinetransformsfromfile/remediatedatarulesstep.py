@@ -137,4 +137,8 @@ class RemediateDataRulesStep(PipelineStep):
 
     def stripPath(self, fileName):
         return fileName[fileName.rfind("/") + 1:len(fileName)]
+    
+    def includeInScoringPipeline(self):
+        return False
+
 

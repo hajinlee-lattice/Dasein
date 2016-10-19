@@ -24,3 +24,6 @@ class ExportDataFrameStep(PipelineStep):
         logger.info('Exporting these columns to exportdfstep.csv: [ "' + '", "'.join(columns) + '" ]')
         dataFrame.to_csv("exportdfstep.csv", sep=',', encoding='utf-8', cols=columns, index=False)
         return dataFrame
+    
+    def includeInScoringPipeline(self):
+        return False

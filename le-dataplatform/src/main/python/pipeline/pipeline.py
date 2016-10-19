@@ -1,11 +1,12 @@
+import json
 import logging
 
 import columntransform
 import encoder
-import json
 from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
 from rulefwk import DataRulePipeline
+
 
 logger = logging.getLogger(name='pipeline')
 
@@ -111,7 +112,8 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
 
     pipeline = Pipeline(steps)
 
-    scoringSteps = steps + [ModelStep()]
+    scoringSteps = [x for x in steps if x.includeInScoringPipeline()]
+    scoringSteps.append(ModelStep())
     scoringPipeline = Pipeline(scoringSteps)
 
     return pipeline, scoringPipeline

@@ -45,7 +45,9 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
              ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
     pipeline = Pipeline(steps)
 
-    scoringSteps = steps + [ModelStep(), EVModelStep()]
+    scoringSteps = [x for x in steps if x.includeInScoringPipeline()]
+
+    scoringSteps.extend([ModelStep(), EVModelStep()])
     scoringPipeline = Pipeline(scoringSteps)
 
     return pipeline, scoringPipeline

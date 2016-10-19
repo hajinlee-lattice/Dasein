@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import math
 import re
 
 from sklearn.decomposition import PCA
