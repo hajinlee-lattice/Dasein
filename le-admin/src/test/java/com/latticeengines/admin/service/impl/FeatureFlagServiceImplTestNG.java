@@ -41,16 +41,17 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         System.out.println(defaultFeatureFlagMap.keySet());
         Assert.assertTrue(defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags");
-        Assert.assertTrue(defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length
-                + PlsFeatureFlag.values().length, "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
+        Assert.assertTrue(
+                defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length + PlsFeatureFlag.values().length,
+                "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
         FeatureFlagDefinition danteFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.DANTE.getName());
         Assert.assertNotNull(danteFeatureFlag);
 
         FeatureFlagDefinition quotaFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.QUOTA.getName());
         Assert.assertNotNull(quotaFeatureFlag);
 
-        FeatureFlagDefinition targetMarketFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.TARGET_MARKET
-                .getName());
+        FeatureFlagDefinition targetMarketFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.TARGET_MARKET.getName());
         Assert.assertNotNull(targetMarketFeatureFlag);
 
         FeatureFlagDefinition createDefaultFeatureFlag = defaultFeatureFlagMap
@@ -73,8 +74,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName());
         Assert.assertNotNull(useEloquaSettingsFeatureFlag);
 
-        FeatureFlagDefinition allowPivotFileFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.ALLOW_PIVOT_FILE
-                .getName());
+        FeatureFlagDefinition allowPivotFileFeatureFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName());
         Assert.assertNotNull(allowPivotFileFeatureFlag);
 
         FeatureFlagDefinition useAccountMasterFeatureFlag = defaultFeatureFlagMap
@@ -158,7 +159,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
 
-        Assert.assertTrue(enableDataEncryptionFeatureFlag.getConfigurable()
+        Assert.assertTrue(!enableDataEncryptionFeatureFlag.getConfigurable()
                 && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.CG)
                 && enableDataEncryptionFeatureFlag.getDisplayName() != null
