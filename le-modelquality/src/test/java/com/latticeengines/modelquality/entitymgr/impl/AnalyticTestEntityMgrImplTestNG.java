@@ -3,9 +3,9 @@ package com.latticeengines.modelquality.entitymgr.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;

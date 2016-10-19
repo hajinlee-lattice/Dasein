@@ -6,8 +6,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.modelquality.Algorithm;
-import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 

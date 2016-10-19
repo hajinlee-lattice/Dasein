@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
-import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
 import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;

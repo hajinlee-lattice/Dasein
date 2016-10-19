@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -15,8 +16,6 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-
-import org.testng.Assert;
 
 public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
 
