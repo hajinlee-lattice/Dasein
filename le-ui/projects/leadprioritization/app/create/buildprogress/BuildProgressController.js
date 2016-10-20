@@ -31,6 +31,7 @@ angular.module('lp.create.import.job', [
     };
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
+    $scope.isPMMLCompleted = false;
     $scope.compress_percent = 0;
 
     $scope.create_new_sref = ($scope.isPMMLJob ? 'home.models.pmml' : 'home.models.import');
@@ -82,6 +83,8 @@ angular.module('lp.create.import.job', [
                     ceiling = 100;
                 }
 
+                $scope.isPMMLCompleted = ($scope.isPMMLJob && ($scope.jobStepsCompletedStates && $scope.jobStepsCompletedStates.create_global_target_market));
+
                 if (initialized) {
                     value = ceiling;
                 } else if (up == true && value <= ceiling){
@@ -103,8 +106,6 @@ angular.module('lp.create.import.job', [
     REFRESH_PERFORM_CALC_ID = $interval(performCalc, TIME_BETWEEN_JOB_REFRESH);
 
     function updateStatesBasedOnJobStatus(job) {
-        console.log('running:', $scope.jobStepsRunningStates)
-        console.log('completed:', $scope.jobStepsCompletedStates)
         $scope.startTimestamp = job.startTimestamp;
         for (var i = 0; i < job.stepsCompleted.length; i++) {
             $scope.jobStepsCompletedStates[job.stepsCompleted[i]] = true;

@@ -32,13 +32,15 @@
                                 <div class="category" ng-class="{active: vm.inCategory({Category: value})}">
                                     <span class="subcategory-arrow" ng-class="{'subcategory-toggle': vm.subcategories[value]}"></span>
                                     <span class="category-name" ng-class="{'subcategory-toggle': vm.subcategories[value]}">
+                                        <!-- <img ng-src="{{vm.subcategoryIcon(value)}}" /> -->
                                         <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{vm.categoryClass(value)}}"></div>
-                                        {{value}}
+                                        <span class="category-label">{{value}}</span>
                                     </span>
                                     <span class="change-category" ng-click="vm.changeCategory({category: value, event: $event});  vm.metadata.current = 1;" ng-class="{active: vm.inCategory({Category: value})}"></span>
                                 </div>
                                 <ul ng-if="vm.subcategories[value]">
                                     <li ng-repeat="(subcategory_key, subcategory_value) in vm.subcategories[value] | orderBy : subcategory_value" ng-click="vm.changeSubcategory({category: value, subcategory: subcategory_value, event: $event}); vm.metadata.current = 1;" ng-class="{active: vm.inSubcategory({Category: value, Subcategory: subcategory_value})}">
+                                        <img ng-src="{{vm.subcategoryIcon(value, subcategory_value)}}" />
                                         <span class="subcategory-name">{{subcategory_value}}</span>
                                         <span class="change-category"></span>
                                     </li>

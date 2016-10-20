@@ -124,12 +124,17 @@
                                 }
                                 .category-name {
                                     cursor: pointer;
+                                    & > img {
+                                        vertical-align: middle;
+                                    }
+                                    .category-label {
+                                        vertical-align: middle;
+                                    }
                                     .ico {
-                                        position: relative;
-                                        top: -2px;
                                         height: 15px;
                                         width: 15px;
                                         background-color: #222;
+                                        vertical-align: middle;
                                     }
                                     &.show-subcategory {
                                         font-weight: bold;
@@ -189,6 +194,12 @@
                                     position: relative;
                                     cursor: pointer;
                                     padding-right: 27px;
+                                    .subcategory-name {
+                                        vertical-align: middle;
+                                    }
+                                    img {
+                                        vertical-align: middle;
+                                    }
                                     .change-category {
                                         cursor: pointer;
                                         position: absolute;

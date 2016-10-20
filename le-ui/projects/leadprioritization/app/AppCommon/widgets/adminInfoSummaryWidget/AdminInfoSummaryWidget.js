@@ -18,6 +18,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     var data = $scope.data;
 
     $scope.ModelId = data.ModelId;
+    $scope.DataCloudVersion = data.EventTableProvenance.Data_Cloud_Version;
     $scope.TenantId = clientSession.Tenant.Identifier;
     $scope.TenantName = clientSession.Tenant.DisplayName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;

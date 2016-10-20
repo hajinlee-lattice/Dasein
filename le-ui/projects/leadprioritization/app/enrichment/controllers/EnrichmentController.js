@@ -386,6 +386,23 @@ angular.module('lp.enrichment.leadenrichment', [
         }
     }
 
+    var subcategoryRenamer = function(string){
+        if(string) {
+            return string.toLowerCase().replace(/\W+/g, '');
+        }
+        return '';
+
+    }
+
+    vm.subcategoryIcon = function(category, subcategory){
+        var path = '/assets/images/enrichments/subcategories/',
+            category = subcategoryRenamer(category),
+            subcategory = subcategoryRenamer(subcategory),
+            icon = category + (subcategory ? '-'+subcategory : '') + '.png';
+
+        return path + icon;
+    }
+
     var _scrolled = function() {
         var el = document.querySelector('.subheader-container'),
             $el = angular.element(el),
@@ -434,6 +451,7 @@ angular.module('lp.enrichment.leadenrichment', [
     vm.init = function() {
         _resized();
         getEnrichmentData();
+
         vm.categories = EnrichmentCategories.data;
         _.each(vm.categories, function(value, key){
             getEnrichmentSubcategories(value);
