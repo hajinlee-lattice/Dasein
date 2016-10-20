@@ -98,7 +98,7 @@ public class CXSelfServiceModelingEndToEndDeploymentTestNG extends PlsDeployment
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    @Value("${pls.fs.defaultFS}")
+    @Value("${hadoop.fs.defaultFS}")
     private String plsHdfsPath;
 
     @Autowired

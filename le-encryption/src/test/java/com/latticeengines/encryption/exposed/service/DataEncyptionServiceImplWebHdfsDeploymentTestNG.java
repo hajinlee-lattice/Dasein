@@ -46,7 +46,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     private String directory;
 
-    @Value("${dataplatform.fs.web.defaultFS}")
+    @Value("${hadoop.fs.web.defaultFS}")
     private String hdfsUrl;
 
     private String hdfsDir;

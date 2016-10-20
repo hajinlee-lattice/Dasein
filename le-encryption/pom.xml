@@ -10,7 +10,7 @@
     <properties>
         <component-name>encryption</component-name>
         <le.common.version>2.0.44-SNAPSHOT</le.common.version>
-        <le.dataplatform.version>2.0.44-SNAPSHOT</le.dataplatform.version>
+        <le.hadoop.version>2.0.44-SNAPSHOT</le.hadoop.version>
         <le.domain.version>2.0.44-SNAPSHOT</le.domain.version>
         <le.camille.version>2.0.44-SNAPSHOT</le.camille.version>
         <le.baton.version>2.0.44-SNAPSHOT</le.baton.version>
@@ -35,14 +35,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <artifactId>le-hadoop</artifactId>
+            <version>${le.hadoop.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

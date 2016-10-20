@@ -50,7 +50,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
     private static final String INSERT_OUTPUT_TABLE_SQL = "(Id, CommandId, SampleSize, Algorithm, JsonPath, Timestamp) values (?, ?, ?, ?, ?, ?)";
 
-    @Value("${dataplatform.fs.web.defaultFS}")
+    @Value("${hadoop.fs.web.defaultFS}")
     private String httpFsPrefix;
 
     @Value("${dataplatform.customer.basedir}")

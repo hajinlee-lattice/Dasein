@@ -20,7 +20,7 @@ public class EaiClientCustomization extends SingleContainerClientCustomization {
     public EaiClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             @Value("${dataplatform.hdfs.stack:}") String stackname,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
-            @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+            @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackname, hdfsJobBaseDir, webHdfs);
         yarnConfiguration.setBoolean("mapreduce.job.user.classpath.first", true);
     }

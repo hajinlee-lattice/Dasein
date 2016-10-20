@@ -38,9 +38,7 @@ def main():
                        and 'le-config' not in dir_name \
                        and 'le-docker' not in dir_name \
                        and 'le-awsenvironment' not in dir_name \
-                       and 'le-dataplatform' not in dir_name \
-                       and 'le-pls' not in dir_name \
-                       and 'le-scoringapi' not in dir_name \
+                       and 'le-hadoop' not in dir_name \
                        and 'le-encryption' not in dir_name:
                     aggregated += aggregate_props(dir_name, keys)
         # END hack for qacluster2 #

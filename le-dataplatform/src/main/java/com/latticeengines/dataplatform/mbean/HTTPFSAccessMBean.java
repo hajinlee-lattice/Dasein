@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 @ManagedResource(objectName = "Diagnostics:name=HttpFSCheck")
 public class HTTPFSAccessMBean {
 
-    @Value("${dataplatform.fs.web.defaultFS}")
+    @Value("${hadoop.fs.web.defaultFS}")
     private String webHDFS;
 
     @Autowired

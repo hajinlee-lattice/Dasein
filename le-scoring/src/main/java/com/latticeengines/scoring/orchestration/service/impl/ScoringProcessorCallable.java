@@ -69,7 +69,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
     @SuppressWarnings("unused")
     private Configuration yarnConfiguration;
 
-    @Value("${dataplatform.yarn.timeline-service.webapp.address}")
+    @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
     private static final Log log = LogFactory.getLog(ScoringProcessorCallable.class);

@@ -23,7 +23,7 @@ public class DataFlowClientCustomization extends SingleContainerClientCustomizat
             VersionManager versionManager, //
             SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
-            @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+            @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackname, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 

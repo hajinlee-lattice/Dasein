@@ -28,6 +28,7 @@
         <le.proxy.version>2.0.44-SNAPSHOT</le.proxy.version>
         <le.quartzclient.version>2.0.44-SNAPSHOT</le.quartzclient.version>
         <le.encryption.version>2.0.44-SNAPSHOT</le.encryption.version>
+        <le.hadoop.version>2.0.44-SNAPSHOT</le.hadoop.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
@@ -567,6 +568,12 @@
             <groupId>com.newrelic.agent.java</groupId>
             <artifactId>newrelic-api</artifactId>
             <version>${newrelic.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-hadoop</artifactId>
+            <version>${le.hadoop.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

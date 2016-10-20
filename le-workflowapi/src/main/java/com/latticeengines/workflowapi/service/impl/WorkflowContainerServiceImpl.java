@@ -44,7 +44,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     private static final Log log = LogFactory.getLog(WorkflowContainerService.class);
 
-    @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
+    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
     private String resourceManagerUrl;
 
     @Autowired

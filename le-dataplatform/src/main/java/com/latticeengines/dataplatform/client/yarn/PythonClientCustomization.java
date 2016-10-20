@@ -45,7 +45,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             @Value("${dataplatform.hdfs.stack:}") String stackName,
             SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
-            @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+            @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 

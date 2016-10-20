@@ -24,7 +24,7 @@
         <constructor-arg value="${dataplatform.hdfs.stack:}"/>
         <constructor-arg ref="softwareLibraryService"/>
         <constructor-arg value="${dataplatform.yarn.job.basedir}"/>
-        <constructor-arg value="${dataplatform.fs.web.defaultFS}"/>
+        <constructor-arg value="${hadoop.fs.web.defaultFS}"/>
     </bean>
 
     <!-- This is for creating the default yarn client that will be used in the code -->        

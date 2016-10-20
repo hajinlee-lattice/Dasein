@@ -48,7 +48,7 @@ public class PythonMRJobUnitTestNG {
         property.put(PythonMRProperty.LINES_PER_MAP.name(), "1");
         property.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + tokens[tokens.length - 1]);
         property.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
-        property.put(PythonMRProperty.SHDP_HD_FSWEB.name(), "${dataplatform.fs.web.defaultFS}");
+        property.put(PythonMRProperty.SHDP_HD_FSWEB.name(), "${hadoop.fs.web.defaultFS}");
         property.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
 
         job = Job.getInstance();

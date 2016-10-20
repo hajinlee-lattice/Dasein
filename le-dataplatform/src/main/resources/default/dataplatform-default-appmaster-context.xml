@@ -17,7 +17,7 @@
 
     <yarn:environment>
         <yarn:classpath />
-        SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
+        SHDP_HD_FSWEB=${hadoop.fs.web.defaultFS}
     </yarn:environment>
 
     <yarn:localresources />

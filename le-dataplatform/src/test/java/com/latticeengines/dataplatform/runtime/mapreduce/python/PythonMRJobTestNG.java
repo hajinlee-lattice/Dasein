@@ -44,7 +44,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Resource(name = "parallelModelingJobService")
     ModelingJobService modelingJobService;
 
-    @Value("${dataplatform.fs.web.defaultFS}")
+    @Value("${hadoop.fs.web.defaultFS}")
     private String webFS;
 
     @Value("${dataplatform.debug:false}")

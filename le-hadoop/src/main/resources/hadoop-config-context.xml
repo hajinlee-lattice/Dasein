@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:yarn="http://www.springframework.org/schema/yarn"
+       xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <yarn:configuration id="baseConfiguration">
+        dfs.client.failover.proxy.provider.${hadoop.dfs.nameservices}=${hadoop.dfs.client.failover.proxy.provider}
+        dfs.nameservices=${hadoop.dfs.nameservices}
+        dfs.ha.namenodes.${hadoop.dfs.nameservices}=nn1,nn2
+        dfs.namenode.rpc-address.${hadoop.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
+        dfs.namenode.rpc-address.${hadoop.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
+        fs.defaultFS=${hadoop.fs.defaultFS}
+        hadoop.security.key.provider.path=${hadoop.hadoop.security.key.provider.path}
+        dfs.encryption.key.provider.uri=${hadoop.dfs.encryption.key.provider.uri}
+        yarn.resourcemanager.ha.enabled=${hadoop.yarn.resourcemanager.ha.enabled}
+        yarn.resourcemanager.ha.rm-ids=${hadoop.yarn.resourcemanager.ha.rm-ids}
+        yarn.resourcemanager.ha.id=${hadoop.yarn.resourcemanager.ha.id}
+        yarn.resourcemanager.address.rm1=${hadoop.yarn.resourcemanager.address.rm1}
+        yarn.resourcemanager.scheduler.address.rm1=${hadoop.yarn.resourcemanager.scheduler.address.rm1}
+        yarn.resourcemanager.webapp.address.rm1=${hadoop.yarn.resourcemanager.webapp.address.rm1}
+        yarn.resourcemanager.address.rm2=${hadoop.yarn.resourcemanager.address.rm2}
+        yarn.resourcemanager.scheduler.address.rm2=${hadoop.yarn.resourcemanager.scheduler.address.rm2}
+        yarn.resourcemanager.webapp.address.rm2=${hadoop.yarn.resourcemanager.webapp.address.rm2}
+        yarn.resourcemanager.address=${hadoop.yarn.resourcemanager.address}
+        yarn.resourcemanager.scheduler.address=${hadoop.yarn.resourcemanager.scheduler.address}
+        yarn.resourcemanager.webapp.address=${hadoop.yarn.resourcemanager.webapp.address}
+        yarn.nodemanager.remote-app-log-dir=${hadoop.yarn.nodemanager.remote-app-log-dir}
+        yarn.client.failover-sleep-base-ms=${hadoop.yarn.client.failover-sleep-base-ms}
+        yarn.client.failover-sleep-max-ms=${hadoop.yarn.client.failover-sleep-max-ms}
+        mapred.job.tracker=${hadoop.mapred.job.tracker}
+    </yarn:configuration>
+
+</beans>

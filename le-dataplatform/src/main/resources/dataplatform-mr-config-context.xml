@@ -7,18 +7,9 @@
        http://www.springframework.org/schema/hadoop
        http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
-    <hdp:configuration id="hadoopConfiguration">
-        dfs.client.failover.proxy.provider.${dataplatform.dfs.nameservices}=${dataplatform.dfs.client.failover.proxy.provider}
-        dfs.nameservices=${dataplatform.dfs.nameservices}
-        dfs.ha.namenodes.${dataplatform.dfs.nameservices}=nn1,nn2
-        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
-        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
-        fs.defaultFS=${dataplatform.fs.defaultFS}
-        hadoop.security.key.provider.path=${dataplatform.hadoop.security.key.provider.path}
-        dfs.encryption.key.provider.uri=${dataplatform.dfs.encryption.key.provider.uri}
-        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
-        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
-        mapred.job.tracker=${dataplatform.mapred.job.tracker}
+    <import resource="classpath:hadoop-config-context.xml"/>
+
+    <hdp:configuration id="hadoopConfiguration" configuration-ref="baseConfiguration">
         yarn.app.mapreduce.am.resource.cpu-vcores=1
         mapreduce.map.memory.mb=${dataplatform.container.mapreduce.memory}
         mapreduce.reduce.memory.mb=${dataplatform.container.mapreduce.memory}
@@ -29,21 +20,6 @@
         mapreduce.job.user.classpath.first=true
         yarn.resourcemanager.system-metrics-publisher.enabled=true
         yarn.timeline-service.enabled=true
-        yarn.resourcemanager.ha.enabled=${dataplatform.yarn.resourcemanager.ha.enabled}
-        yarn.resourcemanager.ha.rm-ids=${dataplatform.yarn.resourcemanager.ha.rm-ids}
-        yarn.resourcemanager.ha.id=${dataplatform.yarn.resourcemanager.ha.id}
-        yarn.resourcemanager.address.rm1=${dataplatform.yarn.resourcemanager.address.rm1}
-        yarn.resourcemanager.scheduler.address.rm1=${dataplatform.yarn.resourcemanager.scheduler.address.rm1}
-        yarn.resourcemanager.webapp.address.rm1=${dataplatform.yarn.resourcemanager.webapp.address.rm1}
-        yarn.resourcemanager.address.rm2=${dataplatform.yarn.resourcemanager.address.rm2}
-        yarn.resourcemanager.scheduler.address.rm2=${dataplatform.yarn.resourcemanager.scheduler.address.rm2}
-        yarn.resourcemanager.webapp.address.rm2=${dataplatform.yarn.resourcemanager.webapp.address.rm2}
-        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
-        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
-        yarn.resourcemanager.webapp.address=${dataplatform.yarn.resourcemanager.webapp.address}
-        yarn.nodemanager.remote-app-log-dir=${dataplatform.yarn.nodemanager.remote-app-log-dir}
-        yarn.client.failover-sleep-base-ms=${dataplatform.yarn.client.failover-sleep-base-ms}
-        yarn.client.failover-sleep-max-ms=${dataplatform.yarn.client.failover-sleep-max-ms}
     </hdp:configuration>
 
 </beans>

@@ -5,23 +5,15 @@
        xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <yarn:configuration>
-        dfs.client.failover.proxy.provider.${pls.dfs.nameservices}=${pls.dfs.client.failover.proxy.provider}
-        dfs.nameservices=${pls.dfs.nameservices}
-        dfs.ha.namenodes.${pls.dfs.nameservices}=nn1,nn2
-        dfs.namenode.rpc-address.${pls.dfs.nameservices}.nn1=${pls.dfs.namenode.rpc-address.nn1}
-        dfs.namenode.rpc-address.${pls.dfs.nameservices}.nn2=${pls.dfs.namenode.rpc-address.nn2}
-        fs.defaultFS=${pls.fs.defaultFS}
-        hadoop.security.key.provider.path=${pls.hadoop.security.key.provider.path}
-        dfs.encryption.key.provider.uri=${pls.dfs.encryption.key.provider.uri}
-    </yarn:configuration>
+    <import resource="classpath:hadoop-config-context.xml"/>
+    <yarn:configuration configuration-ref="baseConfiguration"/>
 
     <import resource="classpath:common-threadpool-context.xml"/>
 
     <bean id="yarnEventPublisher"
-          class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
+          class="org.springframework.yarn.event.DefaultYarnEventPublisher"/>
     <bean class="org.springframework.yarn.event.LoggingListener">
-        <constructor-arg value="debug" />
+        <constructor-arg value="debug"/>
     </bean>
 
 </beans>

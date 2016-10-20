@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 @Component("parallelModelingJobService")
 public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
-    @Value("${dataplatform.fs.web.defaultFS}")
+    @Value("${hadoop.fs.web.defaultFS}")
     private String webFS;
 
     @Value("${dataplatform.container.parallel.map.memory}")

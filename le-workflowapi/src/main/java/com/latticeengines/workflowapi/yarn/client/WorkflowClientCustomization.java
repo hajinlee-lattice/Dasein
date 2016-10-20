@@ -22,7 +22,7 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
             @Value("${dataplatform.hdfs.stack:}") String stackname,
             SoftwareLibraryService softwareLibraryService,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
-            @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+            @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackname, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 

@@ -67,10 +67,10 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Autowired
     private AlertService alertService;
 
-    @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
+    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;
 
-    @Value("${dataplatform.yarn.timeline-service.webapp.address}")
+    @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
     @Value("${dataplatform.dlorchestrationjob.row.fail.threshold}")

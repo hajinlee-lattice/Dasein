@@ -33,7 +33,7 @@
 
     <yarn:environment>
         <yarn:classpath />
-        SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
+        SHDP_HD_FSWEB=${hadoop.fs.web.defaultFS}
         PYTHONIOENCODING=UTF-8
         PYTHONPATH=.:leframework.tar.gz:$$PYTHONPIPELINELIB$$
         DEBUG=${dataplatform.debug:false}

@@ -20,7 +20,7 @@ public class DataCloudClientCustomization extends SingleContainerClientCustomiza
     public DataCloudClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
                                         @Value("${dataplatform.hdfs.stack:}") String stackName,
                                         @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
-                                        @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+                                        @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackName, hdfsJobBaseDir, webHdfs);
     }
 

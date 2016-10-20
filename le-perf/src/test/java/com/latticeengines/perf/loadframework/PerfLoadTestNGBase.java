@@ -111,23 +111,23 @@ public class PerfLoadTestNGBase {
 
     protected YarnConfiguration createYarnConfiguration(Properties prop) {
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
-        yarnConfiguration.set("fs.defaultFS", prop.getProperty("dataplatform.fs.defaultFS"));
+        yarnConfiguration.set("fs.defaultFS", prop.getProperty("hadoop.fs.defaultFS"));
         yarnConfiguration.set("yarn.resourcemanager.address",
-                prop.getProperty("dataplatform.yarn.resourcemanager.address"));
+                prop.getProperty("hadoop.yarn.resourcemanager.address"));
         yarnConfiguration.set("yarn.resourcemanager.scheduler.address",
-                prop.getProperty("dataplatform.yarn.resourcemanager.scheduler.address"));
+                prop.getProperty("hadoop.yarn.resourcemanager.scheduler.address"));
         yarnConfiguration.set("yarn.resourcemanager.webapp.address",
-                prop.getProperty("dataplatform.yarn.resourcemanager.webapp.address"));
+                prop.getProperty("hadoop.yarn.resourcemanager.webapp.address"));
         yarnConfiguration.set("yarn.nodemanager.remote-app-log-dir",
-                prop.getProperty("dataplatform.yarn.nodemanager.remote-app-log-dir"));
-        yarnConfiguration.set("dfs.nameservices", prop.getProperty("dataplatform.dfs.nameservices"));
+                prop.getProperty("hadoop.yarn.nodemanager.remote-app-log-dir"));
+        yarnConfiguration.set("dfs.nameservices", prop.getProperty("hadoop.dfs.nameservices"));
         yarnConfiguration.set(
-                "dfs.client.failover.proxy.provider." + prop.getProperty("dataplatform.dfs.nameservices"),
-                prop.getProperty("dataplatform.dfs.client.failover.proxy.provider"));
-        yarnConfiguration.set("dfs.ha.namenodes." + prop.getProperty("dataplatform.dfs.nameservices"), "nn1,nn2");
-        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn1",
+                "dfs.client.failover.proxy.provider." + prop.getProperty("hadoop.dfs.nameservices"),
+                prop.getProperty("hadoop.dfs.client.failover.proxy.provider"));
+        yarnConfiguration.set("dfs.ha.namenodes." + prop.getProperty("hadoop.dfs.nameservices"), "nn1,nn2");
+        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("hadoop.dfs.nameservices") + ".nn1",
                 prop.getProperty("dfs.namenode.rpc-address.nn1"));
-        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn2",
+        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("hadoop.dfs.nameservices") + ".nn2",
                 prop.getProperty("dfs.namenode.rpc-address.nn2"));
         return yarnConfiguration;
     }

@@ -72,10 +72,10 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
+    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;
 
-    @Value("${dataplatform.yarn.timeline-service.webapp.address}")
+    @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
     @Value("${dataplatform.dlorchestrationjob.row.fail.threshold}")

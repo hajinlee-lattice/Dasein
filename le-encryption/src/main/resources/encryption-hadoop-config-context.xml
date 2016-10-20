@@ -6,7 +6,5 @@
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="classpath:hadoop-config-context.xml"/>
-
-    <yarn:configuration id="yarnConfiguration" configuration-ref="baseConfiguration"/>
-
+    <yarn:configuration configuration-ref="baseConfiguration"/>
 </beans>
