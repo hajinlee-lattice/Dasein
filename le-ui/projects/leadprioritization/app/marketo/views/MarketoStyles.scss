@@ -4,41 +4,31 @@
 // 	}
 // }
 
-.credentials-table {
+
+.table table.credentials-table {
+	tr td, tr th {
+		padding: 15px;
+	}
+	tbody tr td:nth-child(3) {
+		padding-right: 15px;
+	}
+	button.button.icon-button {
+		padding: 0;
+	}
+
+	.credential-name, .credential-endpoint {
+		max-width:100px;
+	}
 	.credential-name span, .credential-endpoint span {
 		display: block;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.credential-name span {
-		text-align: left;
-		width: 100px;
-	}
-	.credential-endpoint span {
-		width: 302px;
-	}
 }
 
-
-@media only screen and (min-width: 1120px) {
-	.credentials-table {
-		.credential-name span {
-			width: 194px;
-		}
-		.credential-endpoint span {
-			width: 400px;
-		}
-	}
-}
-
-@media only screen and (min-width: 1200px) {
-	.credentials-table {
-		.credential-name span {
-			width: 270px;
-		}
-		.credential-endpoint span {
-			width: 416px;
-		}
+@media only screen and (min-width: 1000px) {
+	.credential-name, .credential-endpoint {
+		max-width:300px;
 	}
 }
