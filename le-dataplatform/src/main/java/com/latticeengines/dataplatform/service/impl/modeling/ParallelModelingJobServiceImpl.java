@@ -38,10 +38,13 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
     @Value("${dataplatform.container.parallel.map.memory}")
     private String mapMemorySize;
-    
+
     @Value("${dataplatform.container.parallel.reduce.memory}")
     private String reduceMemorySize;
-    
+
+    @Value("${dataplatform.container.mapreduce.memory}")
+    private String profilingMapReduceMemorySize;
+
     @Value("${dataplatform.debug:false}")
     private String debug;
 
@@ -50,7 +53,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
     @Autowired
     private VersionManager versionManager;
-    
+
     private void setDefaultValues(Classifier classifier) {
         RandomForestAlgorithm rf = new RandomForestAlgorithm();
         rf.resetAlgorithmProperties();
@@ -69,13 +72,16 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         setDefaultValues(classifier);
 
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
-        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersionInStack(stackName));
+        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier,
+                versionManager.getCurrentVersionInStack(stackName));
 
         Properties properties = new Properties();
         String inputDir = classifier.getModelHdfsDir() + "/" + classifier.getName();
         int mapperSize = Integer.parseInt(appMasterProperties.getProperty(PythonMRProperty.MAPPER_SIZE.name()));
-        properties.put(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
+        properties.put(
+                MapReduceProperty.CACHE_FILE_PATH.name(),
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
+                        versionManager.getCurrentVersionInStack(stackName)));
         try {
             if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);
@@ -114,12 +120,14 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         }
         String linesPerMap = String.valueOf((featureSize + mapperSize - 1) / mapperSize); // round
                                                                                           // up
-        String cacheFilePath = PythonMRUtils
-                .setupProfilingCacheFiles(classifier, properties.get(MapReduceProperty.CACHE_FILE_PATH.name())
-                        .toString(), versionManager.getCurrentVersionInStack(stackName));
+        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier,
+                properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
+                versionManager.getCurrentVersionInStack(stackName));
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
+
+        setProfilingMapReduceMemory(properties);
 
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.PROFILING_JOB.configName(),
                 StringUtils.join(features, System.lineSeparator()));
@@ -136,21 +144,25 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         for (String path : trainingPaths) {
             trainingFiles.add(StringUtils.substringAfterLast(path, "/"));
         }
-        String cacheFilePath = PythonMRUtils
-                .setupModelingCacheFiles(classifier, trainingFiles,
-                        properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
-                        versionManager.getCurrentVersionInStack(stackName));
+        String cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingFiles,
+                properties.get(MapReduceProperty.CACHE_FILE_PATH.name()).toString(),
+                versionManager.getCurrentVersionInStack(stackName));
 
         properties.put(PythonMRProperty.LINES_PER_MAP.name(), linesPerMap);
         properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
 
-        setMapReduceMemory(properties);
+        setModelingMapReduceMemory(properties);
 
         HdfsUtils.writeToFile(yarnConfiguration, inputDir + "/" + PythonMRJobType.MODELING_JOB.configName(),
                 StringUtils.join(trainingFiles, System.lineSeparator()));
     }
 
-    private void setMapReduceMemory(Properties properties) {
+    private void setProfilingMapReduceMemory(Properties properties) {
+        properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), profilingMapReduceMemorySize);
+        properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), profilingMapReduceMemorySize);
+    }
+
+    private void setModelingMapReduceMemory(Properties properties) {
         properties.put(MapReduceProperty.MAP_MEMORY_SIZE.name(), mapMemorySize);
         properties.put(MapReduceProperty.REDUCE_MEMORY_SIZE.name(), reduceMemorySize);
     }
