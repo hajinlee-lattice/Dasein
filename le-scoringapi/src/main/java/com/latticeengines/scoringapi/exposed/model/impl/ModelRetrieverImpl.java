@@ -330,8 +330,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (keepTransform) {
                 transformsToKeep.add(transformDefinition);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Removing this transform:" + JsonUtils.serialize(transformDefinition));
+                if (log.isInfoEnabled()) {
+                    log.info("Removing this transform:" + JsonUtils.serialize(transformDefinition));
                 }
             }
 
