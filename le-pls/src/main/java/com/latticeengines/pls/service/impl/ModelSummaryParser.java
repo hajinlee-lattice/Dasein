@@ -71,7 +71,6 @@ public class ModelSummaryParser {
     private int defaultBiPredictorNum;
 
     public ModelSummary parse(String hdfsPath, String fileContents) {
-        log.info(String.format("The file content for model summary is: %s", fileContents));
 
         if (fileContents == null) {
             return null;
