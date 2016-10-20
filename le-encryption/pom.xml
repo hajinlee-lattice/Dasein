@@ -15,7 +15,7 @@
         <le.camille.version>2.0.44-SNAPSHOT</le.camille.version>
         <le.baton.version>2.0.44-SNAPSHOT</le.baton.version>
         <le.testfwk.version>2.0.44-SNAPSHOT</le.testfwk.version>
-        <le.proxy.version>2.0.43-SNAPSHOT</le.proxy.version>
+        <le.proxy.version>2.0.44-SNAPSHOT</le.proxy.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
