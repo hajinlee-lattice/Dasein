@@ -256,10 +256,11 @@ public class TransformationPipeline {
                 .add(stdVisidbDsTitleIsacademic) //
                 .add(stdVisidbDsFirstnameSameasLastname) //
                 .add(stdVisidbDsIndustryGroup) //
+                /*
                 .add(dnbNaicsSector) //
                 .add(dnbNaicsSubsector) //
                 .add(dnbNaicsIndustryGroup) //
-                .add(dnbSicCategory) //
+                .add(dnbSicCategory) //*/
                 .build();
         return stdTransformDefinitions;
     }
