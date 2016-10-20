@@ -32,7 +32,7 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     return {
         restrict:    'E',
         templateUrl: 'app/AppCommon/widgets/leadsTabWidget/LeadsTableTemplate.html',
-        scope:       {leads: '=', title: '@'},
+        scope:       {leads: '=', title: '@', source: '='},
         controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', function ($scope, $attrs, $http, ResourceUtility) {
             $scope.ResourceUtility = ResourceUtility;
         }]
