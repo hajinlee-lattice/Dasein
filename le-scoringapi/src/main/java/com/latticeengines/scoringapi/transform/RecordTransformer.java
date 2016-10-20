@@ -22,11 +22,15 @@ public class RecordTransformer {
 
     @Autowired
     private TransformRetriever transformRetriever;
+    
+    @Autowired
+    private JythonEngineRetriever jythonEngineRetriever;
 
     public Map<String, Object> transform(String modelPath, //
             List<TransformDefinition> definitions, //
             Map<String, Object> record) {
 
+        JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
         Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
         result.putAll(record);
 
@@ -34,7 +38,12 @@ public class RecordTransformer {
             TransformId id = new TransformId(modelPath, entry.name, null);
             try {
                 RealTimeTransform transform = transformRetriever.getTransform(id);
-                Object value = transform.transform(entry.arguments, result);
+                Object value = null;
+                if (transform != null) {
+                    value = transform.transform(entry.arguments, result);
+                } else {
+                    value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
+                }
 
                 if (value == null) {
                     value = null;
@@ -65,34 +74,23 @@ public class RecordTransformer {
         return result;
     }
 
-    public Map<String, Object> transformOld(String modelPath, List<TransformDefinition> definitions,
+    public Map<String, Object> transformJython(String modelPath, List<TransformDefinition> definitions,
+            Map<String, Object> record) {
+        JythonEngine engine = jythonEngineRetriever.getEngine(modelPath);
+        return transformJython(engine, definitions, record);
+    }
+
+    public Map<String, Object> transformJython(JythonEngine engine, List<TransformDefinition> definitions,
             Map<String, Object> record) {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
-        JythonEngine engine = new JythonEngine(modelPath);
 
         for (TransformDefinition entry : definitions) {
-            Object value = null;
-            boolean successfulInvocation = false;
-            Exception failedInvocationException = null;
-            for (int numTries = 1; numTries < 3; numTries++) {
-                try {
-                    value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
-                    successfulInvocation = true;
-                    if (numTries > 1) {
-                        log.warn(String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
-                    }
-                    break;
-                } catch (Exception e) {
-                    failedInvocationException = e;
-                }
-            }
-            if (successfulInvocation) {
+            try {
+                Object value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                 result.put(entry.output, value);
-            } else {
-                if (log.isWarnEnabled()) {
-                    log.warn(String.format("Problem invoking %s", entry.name), failedInvocationException);
-                }
+            } catch (Exception e) {
+                log.warn(String.format("Problem invoking %s", entry.name), e);
             }
         }
 

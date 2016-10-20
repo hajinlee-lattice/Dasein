@@ -273,7 +273,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                 }
                 Double key = record.getKey();
                 try {
-                    Map<String, Object> transformedFast = recordTransformer.transform(modelPath, transforms,
+                    Map<String, Object> transformedFast = recordTransformer.transformJython(modelPath, transforms,
                             record.getValue());
 
                     Map<ScoreType, Object> evaluationFast = null;
