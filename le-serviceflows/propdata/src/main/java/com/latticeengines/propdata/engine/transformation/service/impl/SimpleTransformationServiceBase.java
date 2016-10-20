@@ -65,6 +65,7 @@ public abstract class SimpleTransformationServiceBase<T extends TransformationCo
         return true;
     }
 
+    //! override this if there are multiple base versions for one base source
     @Override
     public List<String> findUnprocessedBaseVersions() {
         DerivedSource source = (DerivedSource) getSource();

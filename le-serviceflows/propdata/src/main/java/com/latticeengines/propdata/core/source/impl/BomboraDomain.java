@@ -3,21 +3,21 @@ package com.latticeengines.propdata.core.source.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
+import com.latticeengines.propdata.core.source.RefreshedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("bomboraDomain")
-public class BomboraDomain implements DerivedSource {
+public class BomboraDomain implements RefreshedSource {
 
     private static final long serialVersionUID = 8295321788746751057L;
 
     @Autowired
-    private BomboraFirehose bomboraFirehose;
+    private BomboraDepivoted bomboraDepivoted;
 
     @Override
     public Source[] getBaseSources() {
-        return new Source[] { bomboraFirehose };
+        return new Source[] { bomboraDepivoted };
     }
 
     @Override

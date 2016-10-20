@@ -75,7 +75,7 @@ public abstract class AbstractTransformationDataFlowService {
 
     private Properties getJobProperties() {
         Properties jobProperties = new Properties();
-        jobProperties.put("mapreduce.job.reduces", String.valueOf(Math.min(cascadingPartitions, 8)));
+        jobProperties.put("mapreduce.job.reduces", String.valueOf(Math.min(cascadingPartitions, 16)));
         jobProperties.put("mapreduce.job.running.map.limit", "64");
         jobProperties.put("mapreduce.output.fileoutputformat.compress", "true");
         jobProperties.put("mapreduce.output.fileoutputformat.compress.type", "BLOCK");

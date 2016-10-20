@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.propdata.core.source.RefreshedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 /**
@@ -38,6 +39,17 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
 
         String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
         Map<String, Table> sourceTables = setupSourceTables(baseSourceVersions);
+
+        if (source instanceof RefreshedSource) {
+            try {
+                String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+                sourceTables.put(source.getSourceName(), hdfsSourceEntityMgr.getTableAtVersion(source, currentVersion));
+                log.info("Select source " + source.getSourceName() + "@versions " + currentVersion);
+            } catch (Exception e) {
+                log.info("Source " + source.getSourceName() + " is not initiated in HDFS");
+                e.printStackTrace();
+            }
+        }
 
         DataFlowContext ctx = dataFlowContext(source, sourceTables, parameters, workflowDir);
         ctx.setProperty(DataFlowProperty.FLOWNAME, source.getSourceName() + HIPHEN + flowName);

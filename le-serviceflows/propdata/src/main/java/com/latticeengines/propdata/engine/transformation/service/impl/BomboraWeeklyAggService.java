@@ -1,8 +1,11 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,21 +61,26 @@ public class BomboraWeeklyAggService
         String sourceDir = hdfsPathBuilder.constructSnapshotRootDir(baseSource).toString();
         List<String> baseVersionList = new ArrayList<>();
         try {
+            Date baseVersionDate = HdfsPathBuilder.dateFormat.parse(baseVersion);
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.setTime(baseVersionDate);
+            cal.add(Calendar.DATE, -6);
+            String cufOffVersion = HdfsPathBuilder.dateFormat.format(cal.getTime());
+            log.info("zdd" + cufOffVersion);
+
             List<String> versionPaths = HdfsUtils.getFilesForDir(yarnConfiguration, sourceDir);
             Collections.sort(versionPaths, Collections.reverseOrder());
-            int num = 0;
             for (String versionPath : versionPaths) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, versionPath)) {
                     versionPath = versionPath.substring(versionPath.indexOf(sourceDir.toString()));
                     String version = new Path(versionPath).getName();
                     Path success = new Path(versionPath, HdfsPathBuilder.SUCCESS_FILE);
-                    if (version.compareTo(baseVersion) <= 0
+                    if (version.compareTo(baseVersion) <= 0 && version.compareTo(cufOffVersion) >= 0
                             && HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
                         baseVersionList.add(version);
-                        num++;
-                        if (num >= 7) {
-                            break;
-                        }
+                    }
+                    if (version.compareTo(cufOffVersion) < 0) {
+                        break;
                     }
                 }
             }

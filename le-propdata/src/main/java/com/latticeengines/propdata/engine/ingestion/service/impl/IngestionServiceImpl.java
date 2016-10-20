@@ -40,7 +40,6 @@ import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.engine.common.SftpUtils;
 import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionNewProgressValidator;
@@ -171,14 +170,25 @@ public class IngestionServiceImpl implements IngestionService {
         }
     }
 
+    @SuppressWarnings("static-access")
     private void checkCompleteVersionFromSftp(String ingestionName, String version,
             SftpConfiguration sftpConfig) {
+        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder.constructIngestionDir(ingestionName,
+                version);
+        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                return;
+            }
+        } catch (IOException e1) {
+            throw new RuntimeException("Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS");
+        }
+
         String fileNamePattern = ingestionVersionService.getFileNamePattern(version,
                 sftpConfig.getFileNamePrefix(), sftpConfig.getFileNamePostfix(),
                 sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
         List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
-        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder
-                .constructIngestionDir(ingestionName, version);
+
         List<String> hdfsFiles = getHdfsFileNames(hdfsDir.toString(),
                 sftpConfig.getFileExtension());
         if (sftpFiles.size() > hdfsFiles.size()) {
@@ -190,14 +200,13 @@ public class IngestionServiceImpl implements IngestionService {
                 return;
             }
         }
-        Path success = new Path(hdfsDir.toString(), EngineConstants.INGESTION_SUCCESS);
+
         try {
             if (!HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
                 HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
             }
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to create " + EngineConstants.INGESTION_SUCCESS + " in HDFS");
+            throw new RuntimeException("Failed to create " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS");
         }
     }
 

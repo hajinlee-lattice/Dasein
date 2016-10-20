@@ -7,6 +7,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -18,6 +21,8 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 
 public class SftpUtils {
 
+    private static Log log = LogFactory.getLog(SftpUtils.class);
+
     public interface SftpFilenameFilter {
         boolean accept(String filename);
     }
@@ -26,6 +31,7 @@ public class SftpUtils {
     public static final List<String> getFileNames(SftpConfiguration config,
             final String fileNamePattern) {
         try {
+            log.info("Connecting to SFTP...");
             Pattern pattern = fileNamePattern != null ? Pattern.compile(fileNamePattern) : null;
             JSch jsch = new JSch();
             Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
@@ -57,6 +63,7 @@ public class SftpUtils {
     public static final boolean ifFileExists(SftpConfiguration config, String fileName) {
         boolean res = false;
         try {
+            log.info("Connecting to SFTP...");
             JSch jsch = new JSch();
             Session session = jsch.getSession(config.getSftpUserName(), config.getSftpHost(),
                     config.getSftpPort());
