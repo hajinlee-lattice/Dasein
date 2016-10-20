@@ -15,8 +15,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-import org.apache.commons.lang3.BooleanUtils;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -131,6 +132,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
+        log.info("uploading file for modeling...");
         if (schemaInterpretation == null) {
             schemaInterpretation = SchemaInterpretation.SalesforceLead;
         }
@@ -167,6 +169,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
+        log.info("Resolving metadata for modeling ...");
         parameters = new ModelingParameters();
         parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDisplayName(MODEL_DISPLAY_NAME);
@@ -211,6 +214,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @SuppressWarnings("rawtypes")
     private void model(ModelingParameters parameters) {
+        log.info("Start modeling ...");
         ResponseDocument response;
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/%s", getRestAPIHostPort(), parameters.getName()), parameters,
@@ -237,6 +241,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = true)
     public void retrieveReport() {
+        log.info("Retrieving report for modeling ...");
         Job job = restTemplate.getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), modelingWorkflowApplicationId), //
                 Job.class);
@@ -247,6 +252,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
     public void retrieveModelSummary() throws InterruptedException {
+        log.info("Retrieving model summary for modeling ...");
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
@@ -278,6 +284,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
+        log.info("Retrieving the error file ...");
         // Relies on error in Account.csv
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
         HttpHeaders headers = new HttpHeaders();
@@ -294,6 +301,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void copyModel() {
+        log.info("Copy the model that is created ...");
         ResponseDocument response = getRestTemplate().postForObject(
                 String.format("%s/pls/models/copymodel/%s?targetTenantId=%s", getRestAPIHostPort(),
                         originalModelSummary.getId(), testBed.getTestTenants().get(1).getId()), //
@@ -304,6 +312,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "copyModel", timeOut = 1200000, enabled = true)
     public void retrieveModelSummaryForCopiedModel() throws InterruptedException, IOException {
+        log.info("Retriving the copied model summary ...");
         tenantToAttach = testBed.getTestTenants().get(1);
         testBed.switchToSuperAdmin(tenantToAttach);
         copiedModelSummary = getModelSummary(modelName);
@@ -339,6 +348,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForCopiedModel" })
     public void cloneAndRemodel() {
+        log.info("Cloning and remodel the model summary ...");
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), copiedModelSummary.getId()),
@@ -382,6 +392,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException, IOException {
+        log.info("Retrieve the model summary after cloning and remodeling ...");
         clonedModelSummary = getModelSummary(modelName);
         assertNotNull(clonedModelSummary);
         assertJobExistsWithModelIdAndModelName(clonedModelSummary.getId());
@@ -426,6 +437,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
     public void scoreTrainingDataOfClonedModel() throws InterruptedException, IOException {
+        log.info("Scoring the training data of the cloned model summary ...");
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
                 getRestAPIHostPort(), clonedModelSummary.getId()));
         String applicationId = getRestTemplate().postForObject(
