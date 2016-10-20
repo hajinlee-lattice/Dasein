@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.encryption.functionalframework.EncryptionTestNGBase;
-import com.latticeengines.proxy.exposed.encryption.EncryptionWebHdfsProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
 public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionTestNGBase {
@@ -64,8 +63,8 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
-    @Autowired
-    private EncryptionWebHdfsProxy encryptionWebHdfsProxy;
+    // @Autowired
+    // private EncryptionWebHdfsProxy encryptionWebHdfsProxy;
 
     @PostConstruct
     private void postConstruct() {
