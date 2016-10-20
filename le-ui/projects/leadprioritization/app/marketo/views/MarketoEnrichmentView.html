@@ -54,7 +54,14 @@
                             <li class="webhook-template">
                                 <div class="attribute">{{vm.webhook_request_type}}</div>
                                 <h5>Template:</h5>
-                                <div class="attribute dashed"><pre>{{vm.selected_fields | json}}</pre></div>
+                                <div class="attribute dashed">
+<!-- leave as is, can not be done with | json because can't have quotes around values and needs to be to the left because of <pre> -->
+<pre>
+{
+<span ng-repeat="(key, value) in vm.selected_fields">  "{{key}}": {{value || 'null'}}<span ng-if="!$last">,</span>
+</span>}
+</pre>
+                                </div>
                             </li>
                             <li class="request-token">
                                 <h5>Request Token Encodeing:</h5>
