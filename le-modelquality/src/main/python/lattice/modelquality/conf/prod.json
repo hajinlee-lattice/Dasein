@@ -1,0 +1,15 @@
+{
+    "currentStackEndpoint":"https://app.lattice-engines.com/pls/internal/currentstack",
+    "endpoint": {
+        "a":"https://10.51.1.227:8080/modelquality",
+        "b":"https://10.51.1.223:8080/modelquality"
+    },
+    "apiHostPort": {
+        "a":"https://10.51.51.111:8081",
+        "b":"https://10.51.51.112:8081"
+    },
+    "influxEndpoint":"http://10.51.1.204:8086/query",
+    "hdfsHostPortList":["http://10.51.1.197:50070"],
+    "hdfsBasePath":"/Pods/Production/Services/ModelQuality/datasets",
+    "verify":"False"
+}

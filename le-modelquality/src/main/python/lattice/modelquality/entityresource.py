@@ -56,7 +56,7 @@ class EntityResource(object):
         url = self._url + name
         response = requests.get(url, headers=self.header_get, verify=EnvConfig().doVerify())
         if response.status_code != 200:
-            raise RuntimeError('HTTP GET request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.json()['errorMsg']))
+            raise RuntimeError('HTTP GET request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.text))
         try:
             return response.json()
         except:

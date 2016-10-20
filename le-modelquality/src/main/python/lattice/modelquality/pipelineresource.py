@@ -49,3 +49,10 @@ class PipelineResource(EntityResource):
             if response.status_code != 200:
                 raise RuntimeError('HTTP POST request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.json()['errorMsg']))
             return response.text
+
+    def create(self, pipelineName, dfpars):
+        url = self._url + '?pipelineName={}'.format(pipelineName)
+        response = requests.post(url, json=dfpars, headers=self.header_post, verify=EnvConfig().doVerify())
+        if response.status_code != 200:
+            raise RuntimeError('HTTP POST request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.json()['errorMsg']))
+        return response.text

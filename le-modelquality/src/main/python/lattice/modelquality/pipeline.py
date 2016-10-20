@@ -97,4 +97,4 @@ class Pipeline(EntityBase):
                 stepOrFile.append({'pipeline_step_dir':step.getHDFSPath()})
             else:
                 stepOrFile.append({'pipeline_step':step.getName()})
-        return self.getEntityResource().create(stepOrFile)
+        return PipelineResource().create(self.getName(), stepOrFile)

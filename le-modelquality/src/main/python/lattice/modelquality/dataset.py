@@ -37,8 +37,9 @@ class Dataset(EntityBase):
         ds.setIndustry(config['industry'])
         ds.setDatasetType(config['dataSetType'])
         ds.setSchemaInterpretation(config['schemaInterpretation'])
-        for scoring_data_set in config['scoring_data_sets']:
-            ds.appendScoringDataset(scoring_data_set)
+        if 'scoring_data_sets' in config:
+            for scoring_data_set in config['scoring_data_sets']:
+                ds.appendScoringDataset(scoring_data_set)
         ds.setTrainingHDFSPath(config['training_hdfs_path'])
         if 'test_hdfs_path' in config:
             ds.setTestHDFSPath(config['test_hdfs_path'])

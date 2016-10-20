@@ -38,7 +38,6 @@ class ModelRunResource(EntityResource):
 
         apiHostPort = EnvConfig().getApiHostPort()
         url = self._url + '?tenant={0}&username={1}&password={2}&apiHostPort={3}'.format(tenant, username, password, apiHostPort)
-        print url
         response = requests.post(url, json=dfpars, headers=self.header_post, verify=EnvConfig().doVerify())
         if response.status_code != 200:
             raise RuntimeError('HTTP POST request failed for resource \"{0}\" with code {1}: {2}'.format(self._resource, response.status_code, response.json()['errorMsg']))

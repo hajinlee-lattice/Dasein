@@ -5,7 +5,7 @@
 # $Rev$
 #
 
-import argparse, datetime, json, sys, os
+import argparse, datetime, json, shutil, sys, os
 
 from . import *
 
@@ -15,7 +15,9 @@ ENTITIES = { \
     'pipeline' : Pipeline, \
     'propdata' : PropData, \
     'sampling' : Sampling, \
-    'dataset' : Dataset \
+    'dataset' : Dataset, \
+    'analyticpipeline' : AnalyticPipeline, \
+    'modelrun' : ModelRun \
 }
 
 def main():
@@ -24,6 +26,8 @@ def main():
     parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa'], default='qa', help='select environment (devel, qa)')
 
     subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
+
+    parser_getexamples = subparsers.add_parser('get-examples', help='copy a file with examples of using the package to the current directory')
 
     parser_initworkspace = subparsers.add_parser('init-workspace', help='initialize a local workspace for working with .json configuration files')
     parser_initworkspace.add_argument('name')
@@ -37,33 +41,40 @@ def main():
     parser_install_latest = subparsers.add_parser('install-latest', help='install the latest standard configurations to the model quality framework')
 
     parser_list = subparsers.add_parser('list', help='list all the configurations for a given entity')
-    parser_list.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_list.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
 
     parser_print = subparsers.add_parser('print', help='print to STDOUT a named configuration for a given entity')
-    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
     parser_print.add_argument('name')
 
     parser_retrieve = subparsers.add_parser('retrieve', help='retrieve a named configuration for a given entity and write to the local workspace')
-    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_retrieve.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
     parser_retrieve.add_argument('name')
 
     parser_print = subparsers.add_parser('new', help='create a new named configuration for a given entity and write to the local workspace')
-    parser_print.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_print.add_argument('module', choices=['modelrun', 'analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
     parser_print.add_argument('name')
 
-    parser_retrieve = subparsers.add_parser('install', help='install the named configuration for a given entity')
-    parser_retrieve.add_argument('module', choices=['algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
-    parser_retrieve.add_argument('name')
+    parser_install = subparsers.add_parser('install', help='install the named configuration for a given entity')
+    parser_install.add_argument('-t', '--timestamp', help='add a timestamp to the end of the name', action='store_true')
+    parser_install.add_argument('module', choices=['analyticpipeline', 'algorithm', 'dataflow', 'pipeline', 'propdata', 'sampling', 'dataset'])
+    parser_install.add_argument('name')
 
-    parser_print = subparsers.add_parser('model', help="submit a job to create a model with the configurations in the local workspace")
-    parser_print.add_argument('name')
-    parser_print.add_argument('description')
-    
+    parser_model = subparsers.add_parser('model', help="submit a job to create a model (modelRun)")
+    parser_model.add_argument('-t', '--timestamp', help='add a timestamp to the end of the name', action='store_true')
+    parser_model.add_argument('name')
+    parser_model.add_argument('description')
+
+    parser_modelstatus = subparsers.add_parser('model-status', help="get the status of a modelRun")
+    parser_modelstatus.add_argument('name')
+
     args = parser.parse_args()
 
     EnvConfig(args.env, verbose=args.verbose)
 
-    if args.subcommand == 'init-workspace':
+    if args.subcommand == 'get-examples':
+        get_examples()
+    elif args.subcommand == 'init-workspace':
         workspace_initialize(args.name, args.tenant, args.username, args.password)
     elif args.subcommand == 'use-workspace':
         workspace_use(args.name)
@@ -78,13 +89,18 @@ def main():
     elif args.subcommand == 'new':
         createnew(args.module, ENTITIES[args.module], args.name)
     elif args.subcommand == 'model':
-        model(args.name, args.description)
+        model(args.name, args.description, args.timestamp)
     elif args.subcommand == 'install':
-        install(args.module, ENTITIES[args.module], args.name)
+        install(args.module, ENTITIES[args.module], args.name, args.timestamp)
+    elif args.subcommand == 'model-status':
+        model_status(args.name)
 
+
+def get_examples():
+    shutil.copyfile(os.path.join(os.path.dirname(__file__),'examples.py'), 'examples.py')
 
 def workspace_initialize(name, tenant, username, password):
-    
+
     env = EnvConfig().getName()
     pathname = os.path.join('modelquality-'+env,name)
 
@@ -104,7 +120,8 @@ def workspace_initialize(name, tenant, username, password):
 
 def workspace_use(name):
 
-    with open('.modelquality_workspace', mode='wb') as config:
+    env = EnvConfig().getName()
+    with open('.modelquality_{}_workspace'.format(env), mode='wb') as config:
         config.write(name)
 
 def retrieve(entitytype, entitycls, name):
@@ -154,6 +171,14 @@ def install_latest():
         if EnvConfig().isVerbose():
             print 'Latest standard Sampling already installed'
 
+    try:
+        EntityResource('analyticpipeline').createForProduction()
+        if EnvConfig().isVerbose():
+            print 'Installed latest standard AnalyticPipeline'
+    except:
+        if EnvConfig().isVerbose():
+            print 'Latest standard AnalyticPipeline already installed'
+
 def list(entitycls):
 
     for name in entitycls.getAllNames():
@@ -169,33 +194,34 @@ def createnew(entitytype, entitycls, name):
     entity = entitycls(name)
     _write_entity(entitytype, entity)
 
-def install(entitytype, entitycls, name):
+def install(entitytype, entitycls, name, addTimestamp):
 
     env = EnvConfig().getName()
-    name = name + '_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    
+    if addTimestamp:
+        name = name + '_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
     entity = _read_entity(entitytype, entitycls)
     entity.setName(name)
     _write_entity(entitytype, entity)
     entity.install()
 
-def model(name, description):
+def model(name, description, addTimestamp):
 
-    name = name + '_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    if addTimestamp:
+        name = name + '_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    algorithm = _read_entity('algorithm', Algorithm)
-    dataflow = _read_entity('dataflow', Dataflow)
-    pipeline = _read_entity('pipeline', Pipeline)
-    propdata = _read_entity('propdata', PropData)
-    sampling = _read_entity('sampling', Sampling)
-    dataset = _read_entity('dataset', Dataset)
-
-    workspace = ''
-    with open('.modelquality_workspace', mode='rb') as workspace_config:
-        workspace = workspace_config.read()
+    modelRun = _read_entity('modelrun', ModelRun)
+    modelRun.setName(name)
+    modelRun.setDescription(description)
+    print 'Submitting modelRun:'
+    modelRun.printConfig()
 
     env = EnvConfig().getName()
-    
+
+    workspace = ''
+    with open('.modelquality_{}_workspace'.format(env), mode='rb') as workspace_config:
+        workspace = workspace_config.read()
+
     modelconfig = {}
     with open(os.path.join('modelquality-'+env, workspace, 'modelconfig.json')) as modelconfigfile:
         modelconfig = json.loads(modelconfigfile.read())
@@ -204,24 +230,25 @@ def model(name, description):
     username = modelconfig['username']
     password = modelconfig['password']
 
-    print ModelRun.run(name, description, algorithm, dataflow, pipeline, propdata, sampling, dataset, \
-        tenant, username, password)
+    modelRun.execute(tenant, username, password)
 
-    #print 'All Model Runs'
-    #print ModelRun.getAll()
+def model_status(name):
+
+    modelRun = ModelRun.getByName(name)
+    print 'Status of model \"{0}\": {1}'.format(name, modelRun.getStatus())
 
 def _write_entity(entitytype, entity):
 
     config = entity.getConfig()
+    env = EnvConfig().getName()
     workspace = ''
     try:
-        with open('.modelquality_workspace', mode='rb') as workspace_config:
+        with open('.modelquality_{}_workspace'.format(env), mode='rb') as workspace_config:
             workspace = workspace_config.read()
     except IOError:
         print 'No workspace set; run \"init-workspace\"'
         return
 
-    env = EnvConfig().getName()
     entitypath = os.path.join('modelquality-'+env, workspace, entitytype+'.json')
     try:
         with open(entitypath, mode='wb') as outfile:
@@ -233,14 +260,14 @@ def _write_entity(entitytype, entity):
 def _read_entity(entitytype, entitycls):
 
     workspace = ''
+    env = EnvConfig().getName()
     try:
-        with open('.modelquality_workspace', mode='rb') as workspace_config:
+        with open('.modelquality_{}_workspace'.format(env), mode='rb') as workspace_config:
             workspace = workspace_config.read()
     except IOError:
         print 'No workspace set; run \"init-workspace\"'
         return None
 
-    env = EnvConfig().getName()
     entitypath = os.path.join('modelquality-'+env, workspace, entitytype+'.json')
     config = '{}'
     try:
