@@ -145,7 +145,7 @@ angular.module('lp.marketo.enrichment', [
         var saved_marketoMatchFields = [];
         console.log(vm.marketo_field);
         _.each(vm.match_fields, function(value, key){
-            vm.selected_fields[key] = vm.marketo_field[key] || null;
+            vm.selected_fields[key] = addBrackets(vm.marketo_field[key]) || null;
             saved_marketoMatchFields.push({
                 marketoFieldName: vm.marketo_field[key],
                 marketo_match_field_name: value.data.marketo_match_field_name,
@@ -190,12 +190,19 @@ angular.module('lp.marketo.enrichment', [
         }
     }, 1000);
 
+    var addBrackets = function(string){
+        if(string) {
+            return '{{' + string + '}}';
+        }
+        return null;
+    }
+
     vm.init = function() {
         _.each(vm.match_fields, function(value, key){
             if(value.required && vm.required_fields.indexOf(key) == -1) {
                 vm.required_fields.push(key);
             }
-            vm.selected_fields[key] = value.data.marketoFieldName || null;
+            vm.selected_fields[key] = addBrackets(value.data.marketoFieldName) || null;
             if(value.data.marketoFieldName) {
                 vm.saved = true;
             }
