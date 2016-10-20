@@ -135,6 +135,7 @@ public class ModelResource {
                 modelSummary.getEventTableName());
         List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
                 parentModelEventTable.getAttributes(), parameters.getAttributes());
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
@@ -155,6 +156,7 @@ public class ModelResource {
             log.error(message);
             throw new RuntimeException(message);
         }
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         String appId = pmmlModelWorkflowSubmitter.submit(modelName, modelDisplayName, moduleName, pivotFileName,
                 pmmlFileName, schemaInterpretation).toString();
         return ResponseDocument.successResponse(appId);
@@ -166,6 +168,7 @@ public class ModelResource {
     @ApiOperation(value = "Copy a model from current tenant to target tenant.")
     public ResponseDocument<Boolean> copyModel(@PathVariable String modelId,
             @RequestParam(value = "targetTenantId") String targetTenantId) {
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
         return ResponseDocument.successResponse( //
                 modelCopyService.copyModel(targetTenantId, modelId));
     }
@@ -176,6 +179,7 @@ public class ModelResource {
     public ResponseDocument<Boolean> replaceModel(@PathVariable String sourceModelId,
             @RequestParam(value = "targetTenantId") String targetTenantId,
             @RequestParam(value = "targetModelId") String targetModelId) {
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(targetTenantId);
         return ResponseDocument.successResponse( //
                 modelReplaceService.replaceModel(sourceModelId, targetTenantId, targetModelId));
     }
