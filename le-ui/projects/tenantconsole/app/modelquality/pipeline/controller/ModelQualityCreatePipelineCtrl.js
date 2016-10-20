@@ -24,7 +24,8 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
         isCreatingStep: false,
         errorMsg: null,
         loading: false,
-        stepMetadata: null
+        stepMetadata: null,
+        successMsg: null
     });
 
     vm.selectPipeline = function (pipeline) {
@@ -59,8 +60,8 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
     };
 
     vm.pipelineIndexOfStep = function (stepName) {
-        for (var i = 0; i < vm.pipeline.length; i++) {
-            if (vm.pipeline[i].Name === stepName) {
+        for (var i = 0; i < vm.pipeline.pipeline_steps.length; i++) {
+            if (vm.pipeline.pipeline_steps[i].Name === stepName) {
                 return i;
             }
         }
@@ -152,7 +153,11 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
     };
 
     vm.deleteStep = function (index) {
-        vm.pipeline.pipeline_steps.splice(index, 1);
+        var deleted = vm.pipeline.pipeline_steps.splice(index, 1);
+
+        if (vm.stepMetadata === deleted[0]) {
+            vm.clearStepMetadata();
+        }
     };
 
 });
