@@ -3,7 +3,7 @@ angular.module('lp.enrichment.leadenrichment')
     var EnrichmentStore = this;
     this.enrichments = null;
     this.categories = null;
-    this.subcategories = null;
+    this.subcategories = {};
     this.selectedCount = null;
     this.premiumSelectMaximum = null;
     this.metadata = {
@@ -89,19 +89,19 @@ angular.module('lp.enrichment.leadenrichment')
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
-        if (this.subcategories) {
-            deferred.resolve(this.categories);
+        if (this.subcategories[category]) {
+            deferred.resolve(this.subcategories[category]);
         } else {
             EnrichmentService.getSubcategories(category).then(function(response){
-                EnrichmentStore.setSubcategories(response);
+                EnrichmentStore.setSubcategories(category, response);
                 deferred.resolve(response);
             });
         }
         return deferred.promise;
     }
 
-    this.setSubcategories = function(item){
-        this.subcategories = item;
+    this.setSubcategories = function(category, item){
+        this.subcategories[category] = item;
     }
 
     this.getEnrichments = function(opts){
