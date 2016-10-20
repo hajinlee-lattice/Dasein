@@ -7,13 +7,12 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -42,27 +41,27 @@ public class AnalyticPipeline implements HasName, HasPid {
 
     @JsonProperty("pipeline")
     @JoinColumn(name = "FK_PIPELINE_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne
     private Pipeline pipeline;
 
     @JsonProperty("algorithm")
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne
     private Algorithm algorithm;
 
     @JsonProperty("prop_data")
     @JoinColumn(name = "FK_PROPDATA_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne
     private PropData propData;
 
     @JsonProperty("data_flow")
     @JoinColumn(name = "FK_DATAFLOW_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne
     private DataFlow dataFlow;
 
     @JsonProperty("sampling")
     @JoinColumn(name = "FK_SAMPLING_ID", nullable = false)
-    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne
     private Sampling sampling;
 
     @ManyToMany(cascade = { CascadeType.MERGE }, mappedBy = "analyticPipelines")
