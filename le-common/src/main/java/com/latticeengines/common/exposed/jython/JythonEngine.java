@@ -98,7 +98,18 @@ public class JythonEngine {
         interpreter.exec(pyCode);
         PyObject x = interpreter.get(threadId);
         if (x instanceof PyFloat) {
+            Double value = ((PyFloat) x).getValue();
+            if (returnType == Long.class) {
+                return returnType.cast(value.longValue());
+            }
+            if (returnType == Double.class) {
+                return returnType.cast(Double.valueOf(value));
+            }
+            if (returnType == Boolean.class) {
+                return returnType.cast(value == 1);
+            }
             return returnType.cast(((PyFloat) x).getValue());
+
         } else if (x instanceof PyString) {
             return returnType.cast(x.toString());
         } else if (x instanceof PyInteger) {
