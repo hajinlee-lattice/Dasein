@@ -93,7 +93,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
                 .microServiceHostPort(microserviceHostPort) //
-                .internalResourcePort(internalResourceHostPort) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName(tableToScore) //
                 .skipMatchingStep(summary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //

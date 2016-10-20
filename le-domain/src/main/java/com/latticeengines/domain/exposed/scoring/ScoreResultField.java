@@ -9,9 +9,9 @@ public enum ScoreResultField {
 
     public String physicalDataType;
 
-    public String sourceLogicalDataType;
-
     public String displayName;
+
+    public String sourceLogicalDataType;
 
     ScoreResultField(String physicalDataType, String displayName, String sourceLogicalDataType) {
         this.physicalDataType = physicalDataType;
