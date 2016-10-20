@@ -1,5 +1,44 @@
-.apikey-form {
-	.button {
-		padding: 0.75em 2em;
+// .apikey-form {
+// 	.button {
+// 		padding: 0.75em 2em;
+// 	}
+// }
+
+.credentials-table {
+	.credential-name span, .credential-endpoint span {
+		display: block;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.credential-name span {
+		text-align: left;
+		width: 100px;
+	}
+	.credential-endpoint span {
+		width: 302px;
+	}
+}
+
+
+@media only screen and (min-width: 1120px) {
+	.credentials-table {
+		.credential-name span {
+			width: 194px;
+		}
+		.credential-endpoint span {
+			width: 400px;
+		}
+	}
+}
+
+@media only screen and (min-width: 1200px) {
+	.credentials-table {
+		.credential-name span {
+			width: 270px;
+		}
+		.credential-endpoint span {
+			width: 416px;
+		}
 	}
 }
