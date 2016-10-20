@@ -100,10 +100,11 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void overwriteFeatureFlag(String featureFlagName, boolean value) {
-        log.info("overwriting the feature flag for " + featureFlagName);
+        log.info(String.format("Overwriting the feature flag for %s to be %s", featureFlagName, String.valueOf(value)));
         Tenant tenant = getMainTestTenant();
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         FeatureFlagClient.setEnabled(space, featureFlagName, value);
+        assert (FeatureFlagClient.getFlags(space).get(featureFlagName).booleanValue() == value);
     }
 
     @Override

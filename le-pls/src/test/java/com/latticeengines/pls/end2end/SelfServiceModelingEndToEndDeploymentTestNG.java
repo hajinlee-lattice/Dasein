@@ -40,11 +40,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -103,9 +106,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
         Map<String, Boolean> featureFlagMap = new HashMap<String, Boolean>();
-        if (EncryptionGlobalState.isEnabled()) {
-            featureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(true));
-        }
+
         if (enableDnBFeatureFlag && !BooleanUtils.toBoolean(System.getenv("DNB_RTS_AND_MODELING_DISABLED"))) {
             featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), new Boolean(true));
         }
@@ -113,13 +114,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);
         tenantToAttach = testBed.getMainTestTenant();
 
-        // if (EncryptionGlobalState.isEnabled()) {
-        // ConfigurationController<CustomerSpaceScope> controller =
-        // ConfigurationController
-        // .construct(new
-        // CustomerSpaceScope(CustomerSpace.parse(tenantToAttach.getId())));
-        // assertTrue(controller.exists(new Path("/EncryptionKey")));
-        // }
+        if (EncryptionGlobalState.isEnabled()) {
+            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
+                    .construct(new CustomerSpaceScope(CustomerSpace.parse(tenantToAttach.getId())));
+            assertTrue(controller.exists(new Path("/EncryptionKey")));
+        }
+
         // Create second tenant for copy model use case
         testBed.bootstrapForProduct(LatticeProduct.LPA3);
         log.info("Test environment setup finished.");
