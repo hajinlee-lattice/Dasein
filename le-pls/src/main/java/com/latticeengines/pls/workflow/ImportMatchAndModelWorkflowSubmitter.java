@@ -160,6 +160,10 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .skipMatchingStep(parameters.getExcludePropDataColumns())
                 //
+                .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
+                //
+                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
+                //
                 .matchClientDocument(matchClientDocument)
                 //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE)

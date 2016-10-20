@@ -22,10 +22,12 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -38,6 +40,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private MetadataProxy metadataProxy;
+    
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
@@ -71,11 +76,13 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         String sourceSchemaInterpretation = modelSummary.getSourceSchemaInterpretation();
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
+        SourceFile sourceFile = sourceFileService.findByTableName(cloneTableName);
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "modelAndEmailWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
                 parameters.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
@@ -110,7 +117,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
+                .skipStandardTransform(parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
                         parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,

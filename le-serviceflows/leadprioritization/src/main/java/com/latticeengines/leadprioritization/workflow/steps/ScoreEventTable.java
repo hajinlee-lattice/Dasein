@@ -1,6 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
@@ -18,7 +20,8 @@ public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
     public void onConfigurationInitialized() {
         configuration.setRegisterScoredTable(true);
         Table table = getObjectFromContext(EVENT_TABLE, Table.class);
-        putStringValueInContext(SCORING_SOURCE_DIR, table.getExtracts().get(0).getPath());
+        putStringValueInContext(SCORING_SOURCE_DIR,
+                StringUtils.substringBeforeLast(table.getExtracts().get(0).getPath(), "*.avro"));
 
         Attribute id;
         PrimaryKey primaryKey = table.getPrimaryKey();

@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -197,16 +198,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return bldr;
     }
 
-    @SuppressWarnings("unchecked")
-    private void putOutputValue(String key, String val) {
-        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
-        if (map == null) {
-            map = new HashMap<>();
-        }
-        map.put(key, val);
-        putObjectInContext(WorkflowContextConstants.OUTPUTS, map);
-    }
-
     protected void saveOutputValue(String key, String val) {
         putOutputValue(key, val);
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
@@ -220,37 +211,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             workflowJob.setReportName(entry.getKey(), entry.getValue());
         }
         workflowJobEntityMgr.updateWorkflowJob(workflowJob);
-    }
-
-    protected <V> V getObjectFromContext(String key, Class<V> clazz) {
-        String strValue = getStringValueFromContext(key);
-        return JsonUtils.deserialize(strValue, clazz);
-    }
-
-    protected <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
-        List<?> list = getObjectFromContext(key, List.class);
-        return JsonUtils.convertList(list, clazz);
-    }
-
-    protected <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
-        Map<?, ?> map = getObjectFromContext(key, Map.class);
-        return JsonUtils.convertMap(map, keyClazz, valueClazz);
-    }
-
-    protected <V> void putObjectInContext(String key, V val) {
-        executionContext.putString(key, JsonUtils.serialize(val));
-    }
-
-    protected void putStringValueInContext(String key, String val) {
-        executionContext.put(key, val);
-    }
-
-    protected String getStringValueFromContext(String key) {
-        try {
-            return executionContext.getString(key);
-        } catch (ClassCastException e) {
-            return null;
-        }
     }
 
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
@@ -301,28 +261,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return proxy.findReportByName(name, space.toString());
     }
 
-    protected Double getDoubleValueFromContext(String key) {
-        try {
-            return executionContext.getDouble(key);
-        } catch (ClassCastException e) {
-            return null;
+    protected Map<String, String> retrieveModelIds(Map<String, ModelSummary> eventToModelSummary) {
+        Map<String, String> eventToModelId = new HashMap<>();
+        for (String event : eventToModelSummary.keySet()) {
+            eventToModelId.put(event, eventToModelSummary.get(event).getId());
         }
-    }
-
-    protected void putDoubleValueInContext(String key, Double val) {
-        executionContext.putDouble(key, val);
-    }
-
-    protected Long getLongValueFromContext(String key) {
-        try {
-            return executionContext.getLong(key);
-        } catch (ClassCastException e) {
-            return null;
-        }
-    }
-
-    protected void putLongValueInContext(String key, Long val) {
-        executionContext.putLong(key, val);
+        return eventToModelId;
     }
 
 }

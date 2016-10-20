@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelAndEmailWorkflow;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
@@ -68,6 +70,9 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @Autowired
     private MatchAndModelAndEmailWorkflow modelAndEmailWorkflow;
+
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -141,9 +146,11 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         parameters.setName("testWorkflowAccount_clone");
         parameters.setDisplayName("clone");
         parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
-        parameters.setExcludePropDataAttributes(true);
+        parameters.setExcludePropDataAttributes(new Random().nextBoolean());
+        parameters.setEnableTransformations(new Random().nextBoolean());
         MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         WorkflowExecutionId workflowId = workflowService.start(modelAndEmailWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

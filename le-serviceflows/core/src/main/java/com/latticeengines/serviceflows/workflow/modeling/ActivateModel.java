@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
@@ -34,8 +35,8 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
             if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
-            modelIds = waitForDownloadedModelSummaries.retrieveModelIds(configuration, modelApplicationIdToEventColumn)
-                    .values();
+            Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration, modelApplicationIdToEventColumn);
+            modelIds = retrieveModelIds(eventToModelSummary).values();
         } else {
             modelIds = getObjectFromContext(ACTIVATE_MODEL_IDS, List.class);
         }

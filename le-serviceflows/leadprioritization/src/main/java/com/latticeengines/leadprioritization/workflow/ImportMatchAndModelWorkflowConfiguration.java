@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -17,8 +18,11 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
@@ -26,6 +30,7 @@ import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
+import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
@@ -39,6 +44,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
+        private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
+        private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
@@ -50,6 +59,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
+            setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
+            score.setMicroServiceHostPort(microServiceHostPort);
+            combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -65,6 +78,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             addStandardAttributes.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
+            setConfigForScoring.setCustomerSpace(customerSpace);
+            score.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -104,6 +121,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             match.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
+            score.setInternalResourceHostPort(internalResourceHostPort);
+            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -134,6 +155,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
@@ -153,6 +175,16 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
+            return this;
+        }
+
+        public Builder skipDedupStep(boolean skipDedupStep) {
+            dedupEventTable.setSkipStep(skipDedupStep);
+            return this;
+        }
+
+        public Builder skipStandardTransform(boolean skipTransform) {
+            addStandardAttributes.setSkipStep(true);
             return this;
         }
 
@@ -207,6 +239,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder trainingTableName(String trainingTableName) {
             model.setTrainingTableName(trainingTableName);
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, trainingTableName));
             return this;
         }
 
@@ -221,6 +254,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         }
 
         public Builder inputProperties(Map<String, String> inputProperties) {
+            setConfigForScoring.setInputProperties(inputProperties);
             configuration.setInputProperties(inputProperties);
             return this;
         }
@@ -276,6 +310,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             configuration.add(addStandardAttributes);
             configuration.add(matchResult);
             configuration.add(export);
+            configuration.add(setConfigForScoring);
+            configuration.add(score);
+            configuration.add(combineInputWithScores);
+            configuration.add(pivotScoreAndEvent);
 
             return configuration;
         }

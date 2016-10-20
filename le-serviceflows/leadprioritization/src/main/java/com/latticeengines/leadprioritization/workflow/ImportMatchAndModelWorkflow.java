@@ -9,6 +9,9 @@ import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterMo
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
+import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEvent;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -39,6 +42,18 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private ModelWorkflow modelWorkflow;
 
     @Autowired
+    private SetConfigurationForScoring setConfigurationForScoring;
+
+    @Autowired
+    private ScoreWorkflow scoreWorkflow;
+
+    @Autowired
+    private PivotScoreAndEvent pivotScoreAndEvent;
+
+    @Autowired
+    private ExportData exportData;
+
+    @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Bean
@@ -55,6 +70,10 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributes) //
                 .next(modelWorkflow) //
+                .next(setConfigurationForScoring) //
+                .next(scoreWorkflow) //
+                .next(pivotScoreAndEvent) //
+                .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

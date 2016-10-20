@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -36,8 +37,9 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
         }
-        Map<String, String> eventToModelId = waitForDownloadedModelSummaries.retrieveModelIds(configuration,
+        Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration,
                 modelApplicationIdToEventColumn);
+        Map<String, String> eventToModelId = retrieveModelIds(eventToModelSummary);
 
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
@@ -45,9 +47,15 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             proxy.updateModelSummary(modelId, attrMap);
 
             saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID.toString(), modelId);
-
+            putStringValueInContext(SCORING_MODEL_ID, modelId);
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);
+
+        for (ModelSummary modelSummary : eventToModelSummary.values()) {
+            double avgProbability = (double) modelSummary.getTotalConversionCount()
+                    / (double) modelSummary.getTotalRowCount();
+            putDoubleValueInContext(MODEL_AVG_PROBABILITY, avgProbability);
+        }
     }
 }

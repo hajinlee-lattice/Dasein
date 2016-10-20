@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSumm
 import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
@@ -37,6 +38,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
         @JsonSubTypes.Type(value = CreateReportParameters.class, name = "createReportParameters"), //
         @JsonSubTypes.Type(value = ParseMatchResultParameters.class, name = "parseMatchResultParameters"), //
         @JsonSubTypes.Type(value = CascadingBulkMatchDataflowParameters.class, name = "cascadingBulkMatchDataflowParameters"), //
+        @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
 })
 public class DataFlowParameters {
 

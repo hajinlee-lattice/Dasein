@@ -51,16 +51,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder internalResourcePort(String internalResourceHostPort) {
-            match.setInternalResourceHostPort(internalResourceHostPort);
-            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
-            score.setInternalResourceHostPort(internalResourceHostPort);
-            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
-            export.setInternalResourceHostPort(internalResourceHostPort);
-            configuration.setInternalResourceHostPort(internalResourceHostPort);
-            return this;
-        }
-
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
@@ -68,7 +58,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
+            match.setInternalResourceHostPort(internalResourceHostPort);
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
+            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            export.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }

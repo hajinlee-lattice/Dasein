@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -18,13 +19,17 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
@@ -36,6 +41,10 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
         private ResolveMetadataFromUserRefinedAttributesConfiguration resolveAttributes = new ResolveMetadataFromUserRefinedAttributesConfiguration();
+        private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
+        private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
@@ -45,6 +54,10 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             matchResult.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             resolveAttributes.setMicroServiceHostPort(microServiceHostPort);
+            setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
+            score.setMicroServiceHostPort(microServiceHostPort);
+            combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -56,6 +69,10 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             resolveAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
+            score.setInternalResourceHostPort(internalResourceHostPort);
+            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -68,6 +85,10 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             resolveAttributes.setCustomerSpace(customerSpace);
+            setConfigForScoring.setCustomerSpace(customerSpace);
+            score.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -79,6 +100,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
@@ -99,11 +121,13 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder trainingTableName(String trainingTableName) {
             model.setTrainingTableName(trainingTableName);
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, trainingTableName));
             return this;
         }
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            setConfigForScoring.setInputProperties(inputProperties);
             return this;
         }
 
@@ -144,6 +168,16 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder skipDedupStep(boolean skipDedupStep) {
+            dedupEventTable.setSkipStep(skipDedupStep);
+            return this;
+        }
+
+        public Builder skipStandardTransform(boolean skipTransform) {
+            addStandardAttributes.setSkipStep(true);
+            return this;
+        }
+
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             match.setDbUrl(matchClientDocument.getUrl());
             match.setDbUser(matchClientDocument.getUsername());
@@ -171,7 +205,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             match.setDestTables(destTables);
             return this;
         }
-        
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
@@ -244,6 +278,10 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             configuration.add(matchResult);
             configuration.add(addStandardAttributes);
             configuration.add(resolveAttributes);
+            configuration.add(setConfigForScoring);
+            configuration.add(score);
+            configuration.add(combineInputWithScores);
+            configuration.add(pivotScoreAndEvent);
 
             return configuration;
         }

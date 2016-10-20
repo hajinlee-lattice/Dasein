@@ -1,6 +1,9 @@
 package com.latticeengines.workflow.exposed.build;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -12,6 +15,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @StepScope
 public abstract class AbstractStep<T> extends AbstractNameAwareBean {
@@ -36,6 +40,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public boolean setup() {
+        T configuration = getObjectFromContext(configurationClass.getName(), configurationClass);
+        if (configuration != null) {
+            setConfiguration(configuration);
+            return true;
+        }
         String stepStringConfig = jobParameters.getString(configurationClass.getName());
         if (stepStringConfig != null) {
             setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
@@ -105,6 +114,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         this.runAgainWhenComplete = runAgainWhenComplete;
     }
 
+    public <V> V getConfigurationFromJobParameters(Class<V> configurationClass) {
+        String stepStringConfig = jobParameters.getString(configurationClass.getName());
+        return JsonUtils.deserialize(stepStringConfig, configurationClass);
+    }
+
     public void setJobParameters(JobParameters jobParameters) {
         this.jobParameters = jobParameters;
     }
@@ -115,5 +129,70 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     public void setJobId(Long jobId) {
         this.jobId = jobId;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void putOutputValue(String key, String val) {
+        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
+        if (map == null) {
+            map = new HashMap<>();
+        }
+        map.put(key, val);
+        putObjectInContext(WorkflowContextConstants.OUTPUTS, map);
+    }
+
+    protected <V> V getObjectFromContext(String key, Class<V> clazz) {
+        String strValue = getStringValueFromContext(key);
+        return JsonUtils.deserialize(strValue, clazz);
+    }
+
+    protected <V> List<V> getListObjectFromContext(String key, Class<V> clazz) {
+        List<?> list = getObjectFromContext(key, List.class);
+        return JsonUtils.convertList(list, clazz);
+    }
+
+    protected <K, V> Map<K, V> getMapObjectFromContext(String key, Class<K> keyClazz, Class<V> valueClazz) {
+        Map<?, ?> map = getObjectFromContext(key, Map.class);
+        return JsonUtils.convertMap(map, keyClazz, valueClazz);
+    }
+
+    protected <V> void putObjectInContext(String key, V val) {
+        executionContext.putString(key, JsonUtils.serialize(val));
+    }
+
+    protected void putStringValueInContext(String key, String val) {
+        executionContext.put(key, val);
+    }
+
+    protected String getStringValueFromContext(String key) {
+        try {
+            return executionContext.getString(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    protected Double getDoubleValueFromContext(String key) {
+        try {
+            return executionContext.getDouble(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    protected void putDoubleValueInContext(String key, Double val) {
+        executionContext.putDouble(key, val);
+    }
+
+    protected Long getLongValueFromContext(String key) {
+        try {
+            return executionContext.getLong(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    protected void putLongValueInContext(String key, Long val) {
+        executionContext.putLong(key, val);
     }
 }

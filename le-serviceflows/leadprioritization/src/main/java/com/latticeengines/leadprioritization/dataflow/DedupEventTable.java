@@ -14,14 +14,12 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
-import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("dedupEventTable")
 public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTableParameters> {
-    private static final Logger log = Logger.getLogger(DedupEventTable.class);
 
     private static final String DOMAIN = "__Domain";
     private static final String SORT = "__Sort";
@@ -30,11 +28,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
     @Override
     public Node construct(DedupEventTableParameters parameters) {
         Node eventTable = addSource(parameters.eventTable);
-        if (parameters.deduplicationType == DedupType.MULTIPLELEADSPERDOMAIN) {
-            log.info(String.format("Not performing dedup because deduplication type is %s",
-                    parameters.deduplicationType));
-            return eventTable;
-        }
 
         List<String> outputColumns = eventTable.getFieldNames();
 

@@ -71,14 +71,4 @@ public class WaitForDownloadedModelSummaries {
         return eventToModelSummary;
     }
 
-    public <T extends MicroserviceStepConfiguration> Map<String, String> retrieveModelIds(T configuration,
-            Map<String, String> modelApplicationIdToEventColumn) {
-        Map<String, ModelSummary> eventToModelSummary = wait(configuration, modelApplicationIdToEventColumn);
-        Map<String, String> eventToModelId = new HashMap<>();
-        for (String event : eventToModelSummary.keySet()) {
-            eventToModelId.put(event, eventToModelSummary.get(event).getId());
-        }
-        return eventToModelId;
-    }
-
 }

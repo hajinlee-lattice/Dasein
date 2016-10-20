@@ -32,4 +32,10 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         putStringValueInContext(TRANSFORMATION_GROUP_NAME, configuration.getTransformationGroup().getName());
     }
 
+    @Override
+    public void skipStep() {
+        super.skipStep();
+        putStringValueInContext(TRANSFORMATION_GROUP_NAME, configuration.getTransformationGroup().getName());
+    }
+
 }
