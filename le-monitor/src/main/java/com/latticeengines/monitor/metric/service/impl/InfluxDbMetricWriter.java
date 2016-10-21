@@ -85,7 +85,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 List<String> dbNames = listDatabases();
                 for (MetricDB db : MetricDB.values()) {
                     if (!dbNames.contains(db.getDbName())) {
-                        getInfluxDB().createDatabase(db.getDbName());
+                        createDatabaseIfNotExists(db);
                         log.info("Creating MetricDB " + db.getDbName() + " because it is not in the influxDB.");
                     }
 
@@ -228,6 +228,15 @@ public class InfluxDbMetricWriter implements MetricWriter {
         if (jsonNode.get("results").get(0).has("error")) {
             throw new RuntimeException(
                     "Failed to create retention policy: " + jsonNode.get("results").get(0).get("error"));
+        }
+    }
+
+    private void createDatabaseIfNotExists(MetricDB db) {
+        String queryString = String.format("CREATE DATABASE \"%s\"", db.getDbName());
+        JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
+        if (jsonNode.get("results").get(0).has("error")) {
+            throw new RuntimeException(
+                    "Failed to create database: " + jsonNode.get("results").get(0).get("error"));
         }
     }
 
