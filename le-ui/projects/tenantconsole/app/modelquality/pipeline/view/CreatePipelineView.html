@@ -68,7 +68,7 @@
         ng-click="vm_createPipeline.createStep()">{{::vm_createPipeline.labels.ADD_STEP}}</button>
       <div ng-if="vm_createPipeline.isCreatingStep" ui-view="createPipelineStep"></div>
     </div>
-    <div ng-if="vm_createPipeline.pipeline">
+    <div ng-if="vm_createPipeline.pipeline && !vm_createPipeline.loading">
       <hr>
       <div class="pull-right">
         <span class="error" ng-if="vm_createPipeline.errorMsg">{{vm_createPipeline.errorMsg}}</span>
@@ -78,7 +78,7 @@
       </div>
     </div>
   </div>
-  <div class="json-panel" ng-class="vm_createPipeline.stepMetadata ? 'col-xs-4' : 'hidden'">
+  <div ng-if="vm_createPipeline.stepMetadata" class="json-panel col-xs-4">
     <i class="fa fa-times" ng-click="vm_createPipeline.clearStepMetadata()"></i>
     <pre>{{vm_createPipeline.stepMetadata | json:2 }}</pre>
   </div>

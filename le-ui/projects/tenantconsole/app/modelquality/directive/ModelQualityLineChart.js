@@ -1,27 +1,41 @@
 angular.module('app.modelquality.directive.ModelQualityLineChart', [
 ])
-.directive('modelQualityLineChart', function ($window) {
+.directive('modelQualityLineChart', function ($window, $timeout) {
     return {
         restrict: 'AE',
         scope: {
             data: '='
         },
         link: function (scope, element, attr, ModelQualityLineChartVm) {
+            scope.$on('resize', function () {
+                resize();
+            });
+
+            scope.$on('$destroy', function () {
+                $timeout.cancel(tooltipTimer);
+            });
+
             var chartId = new Date().getTime();
 
             var container = element[0];
             $(container).empty();
+            var d3container = d3.select(container);
 
-            var tooltip = d3.select(container)
+            var tooltipTimer = null;
+            var tooltip = d3container
                 .append("div")
                 .attr("class", "chart-tooltip")
                 .style("opacity", 0);
+
+            var title = d3container.append("div")
+                .attr("class", "chart-title")
+                .text(scope.data.title);
 
             var margin = {top: 20, right: 0, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
                 height = container.clientHeight - margin.top - margin.bottom;
 
-            var svg = d3.select(container).append("svg")
+            var svg = d3container.append("svg")
                 .attr("width", container.clientWidth)
                 .attr("height", container.clientHeight);
 
@@ -34,7 +48,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             var x = d3.scaleTime().range([0, width]),
                 x2 = d3.scaleTime().range([0, width]), // copy for zoom
                 y = d3.scaleLinear().range([height, 0]),
-                color = d3.scaleOrdinal(d3.schemeCategory10);
+                color = d3.scaleOrdinal(d3.schemeCategory20);
 
             var xAxis = d3.axisBottom(x),
                 yAxis = d3.axisLeft(y);
@@ -67,12 +81,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             var chart = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            svg.append("text")
-                .attr("x", scope.data.title.length*5)
-                .attr("y", 16)
-                .attr("class", "chart-title")
-                .text(scope.data.title);
-
             var hoverVerticalLine = chart.append("line")
                 .attr("class", "chart-hover-line")
                 .attr("x1", 0)
@@ -98,12 +106,23 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 };
             };
             var tooltipX = tooltipXDecorator(width);
+            var hideTooltip = function () {
+                tooltip.style("opacity", 0);
+            };
+
+            var showTooltip = function () {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", 1);
+            };
 
             var render = function () {
                 var seriesData = scope.data.data;
+                var extents = getExtents(seriesData);
 
-                x.domain(scope.data.xExtent);
-                y.domain(scope.data.yExtent);
+                x.domain(extents.xExtent);
+                y.domain(extents.yExtent);
+
                 color.domain(seriesData.map(function(c) { return c.key; }));
                 x2.domain(x.domain());
 
@@ -186,13 +205,19 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
                 focus.on("mouseover", function() {
                     hoverVerticalLine.style("display", null);
+                    showTooltip();
                 })
                 .on("mouseout", function() {
-                    tooltip.style("opacity", 0);
+                    hideTooltip();
                     hoverVerticalLine.style("display", "none");
                     dots.style("r", "0px");
                 })
                 .on("mousemove", function () {
+                    // edges not triggering mouseout
+                    // workaround for closing tooltip
+                    $timeout.cancel(tooltipTimer);
+                    tooltipTimer = $timeout(hideTooltip, 1500);
+
                     var mouse = d3.mouse(this);
                     var mouseDate = x.invert(mouse[0]);
                     var i = bisectDate(dateSet, mouseDate);
@@ -206,7 +231,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     var showTooltip = false;
 
                     dots.style("r", function (d, i) {
-                        if (date === d.date) {
+                        if (date - d.date === 0) {
                             showTooltip = true;
                             tooltipData[d.key] = d.value;
                             return '3px';
@@ -217,13 +242,11 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
                     if (showTooltip) {
                         var template = date.toGMTString() + '<br>';
+
                         for (var key in tooltipData) {
                             template += key + ': ' + tooltipData[key] + '<br>';
                         }
 
-                        tooltip.transition()
-                            .duration(200)
-                            .style("opacity", 1);
                         tooltip.html(template)
                             .style("left", function () {
                                 return tooltipX(mouse[0]);
@@ -279,26 +302,26 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 render();
             };
 
-            var _window = angular.element($window);
-            var _windowWidth = function () {
-                return _window.width();
+            var getExtents = function (series) {
+                var minDate = new Date(),
+                    maxDate = new Date(0),
+                    maxValue = Number.NEGATIVE_INFINITY,
+                    minValue = 0;
+
+                series.forEach(function (serie) {
+                    serie.values.forEach(function (d) {
+                        maxDate = Math.max(maxDate, d.date);
+                        minDate = Math.min(minDate, d.date);
+                        maxValue = Math.max(maxValue, d.value);
+                        //minValue = Math.min(minValue, d.value);
+                    });
+                });
+
+                return {
+                    xExtent: [new Date(minDate), new Date(maxDate)],
+                    yExtent: [minValue, maxValue * 1.05]
+                };
             };
-
-            scope.$watch(_windowWidth, function (newWidth, oldWidth) {
-                if (newWidth !== oldWidth) {
-                    resize();
-                }
-            });
-
-            var bindResize = function () {
-                scope.$digest();
-            };
-
-            _window.bind('resize', bindResize);
-
-            scope.$on('$destroy', function () {
-                _window.unbind('resize', bindResize);
-            });
 
         },
         controller: 'ModelQualityLineChartCtrl',

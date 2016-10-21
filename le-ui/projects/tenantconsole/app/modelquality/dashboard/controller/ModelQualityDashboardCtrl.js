@@ -1,73 +1,174 @@
 angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 ])
-.controller('ModelQualityDashboardCtrl', function ($scope, $state, MeasurementData, $timeout, ModelQualityService) {
+.controller('ModelQualityDashboardCtrl', function ($scope, $state, MeasurementData, $window, $rootScope) {
 
-    // TODO
-        // fetch all metrics
-        // bucket by: production, pipeline, dataset, etc
-        // create a service to process data, return array of chartdata
-        // 1 chart (line or bar) for each set of data
+    var stateChangeStart = $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+        _window.unbind('resize', bindResize);
+    });
 
-    //NOTE: "boolean" and "null" values are strings
-    var data = MeasurementData.resultObj.results[0].series[0];
+    var _window = angular.element($window);
 
-    var columns = data.columns;
-    var rows = data.values;
-
-    var timeColumnIndex = columns.indexOf('time');
-    var columnIndexes = {
-        RocScore: columns.indexOf('RocScore'),
-        Top10PercentLift: columns.indexOf('Top10PercentLift'),
-        Top20PercentLift: columns.indexOf('Top20PercentLift'),
-        Top30PercentLift: columns.indexOf('Top30PercentLift')
+    var bindResize = function () {
+        $scope.$broadcast('resize');
+        $scope.$digest();
     };
 
-    /*
-    series {
-        set: [(x,y),...],
-    }
-    */
-    var series = {};
+    _window.bind('resize', bindResize);
 
-    for (var metric in columnIndexes) {
-        series[metric] = [];
-    }
+    $scope.$on('$destroy', function () {
+        typeof stateChangeStart === 'function' ? stateChangeStart() : null;
+    });
 
-    var minDate = new Date(),
-        maxDate = new Date(0),
-        maxValue = Number.NEGATIVE_INFINITY,
-        minValue = 0;
 
+    var data = MeasurementData.resultObj.results[0].series[0],
+        columns = data.columns,
+        rows = data.values;
+
+    var columnToIndexMap = {};
+    columns.forEach(function(column, index) {
+        columnToIndexMap[column] = index;
+    });
+
+    var timeColumnIndex = columnToIndexMap.time,
+        analyticPipelineNameIndex = columnToIndexMap.AnalyticPipelineName,
+        analyticTestNameIndex = columnToIndexMap.AnalyticTestName,
+        analyticTestTagIndex = columnToIndexMap.AnalyticTestTag,
+        dataSetNameIndex = columnToIndexMap.DataSetName,
+        pipelineNameIndex = columnToIndexMap.PipelineName,
+        samplingNameIndex = columnToIndexMap.SamplingName,
+        propDataNameIndex = columnToIndexMap.PropDataConfigName,
+        metricsColIndex = {
+            RocScore: columnToIndexMap.RocScore,
+            Top10PercentLift: columnToIndexMap.Top10PercentLift,
+            Top20PercentLift: columnToIndexMap.Top20PercentLift,
+            Top30PercentLift: columnToIndexMap.Top30PercentLift
+        };
+
+    var lineBuckets = {},
+        barBuckets = {};
     rows.forEach(function (row) {
-        var date = new Date(row[timeColumnIndex]);
-        maxDate = Math.max(maxDate, date);
-        minDate = Math.min(minDate, date);
 
-        for (var metric in columnIndexes) {
-            var value = row[columnIndexes[metric]];
-            maxValue = Math.max(maxValue, value);
+        var at = row[analyticTestNameIndex];
+        var ap = row[analyticPipelineNameIndex];
+        var p = row[pipelineNameIndex];
+        var ds = row[dataSetNameIndex];
+        var date = row[timeColumnIndex];
 
-            series[metric].push({
+        // if (!at || at === 'null' ||
+        //     !ap || ap === 'null' ||
+        //     !p  || p === 'null' ||
+        //     !ds || ds === 'null') {
+        //     return;
+        // }
+
+        // line charts
+        var key = [at,ap,p,ds].join(':');
+        if (!lineBuckets[key]) {
+            lineBuckets[key] = {
+                description: {
+                    analyticTest: at,
+                    analyticPipeline: ap,
+                    pipeline: p,
+                    dataset: ds
+                },
+                key: key,
+                data: {}
+            };
+        }
+
+        var bucket = lineBuckets[key].data;
+        for (var metric in metricsColIndex) {
+            if (!bucket[metric]) {
+                bucket[metric] = [];
+            }
+
+            bucket[metric].push({
                 key: metric,
-                date: date,
-                value: value
+                date: new Date(date),
+                value: row[metricsColIndex[metric]]
             });
+        }
+
+        // bar charts
+        if (!barBuckets[at]) {
+            barBuckets[at] = {};
+        }
+
+        var atBucket = barBuckets[at];
+        if (!atBucket[ds]) {
+            atBucket[ds] = {
+                dataset: ds,
+                description: {
+                    analyticTest: at,
+                    dataset: ds
+                },
+                pipelines: {}
+            };
+        }
+
+        var dsBucket = atBucket[ds];
+        var pBucketPipelines = dsBucket.pipelines;
+        var pKey = [ap, p].join(':');
+        if (!pBucketPipelines[pKey]) {
+            pBucketPipelines[pKey] = {};
+        }
+
+        var pBucket = pBucketPipelines[pKey];
+        if (!pBucket.date || pBucket.date < date) { 
+            var value = {};
+            for (var m in metricsColIndex) {
+                value[m] = row[metricsColIndex[m]];
+            }
+
+            pBucket.description = {
+                analyticTest: at,
+                dataset: ds,
+                analyticPipeline: ap,
+                pipeline: p
+            };
+            pBucket.date = date;
+            pBucket.value = value;
         }
 
     });
 
-    series = Object.keys(series).map(function (metric) {
+    $scope.lineCharts = Object.keys(lineBuckets).map(function(key) {
+        var bucket = lineBuckets[key];
         return {
-            key: metric,
-            values: series[metric]
+            data: {
+                data: Object.keys(bucket.data).map(function (metric) {
+                    return {
+                        key: metric,
+                        values: bucket.data[metric]
+                    };
+                }),
+                title: key
+            },
+            type: 'line'
         };
     });
 
-    $scope.lineChartData = {
-        title: "",
-        data: series,
-        xExtent: [new Date(minDate), new Date(maxDate)],
-        yExtent: [minValue, maxValue]
-    };
+
+    $scope.barCharts = Object.keys(barBuckets).map(function (barBucket) {
+        var bucketData = barBuckets[barBucket];
+
+        return {
+            data: Object.keys(bucketData).map(function (dataset) {
+                var dsBucket = bucketData[dataset];
+                return {
+                    dataset: dataset,
+                    categories: Object.keys(dsBucket.pipelines).map(function(pipeline) {
+                        var pipelineData = dsBucket.pipelines[pipeline];
+                        return {
+                            category: pipeline,
+                            value: pipelineData.value,
+                            description: pipelineData.description
+                        };
+                    })
+                };
+            }),
+            title: barBucket
+        };
+    });
 
 });

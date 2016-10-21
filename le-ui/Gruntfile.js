@@ -34,17 +34,12 @@ module.exports = function (grunt) {
             dev_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
-                API_URL: 'https://testapp.lattice-engines.com',
-                //API_URL: 'https://10.41.0.13:8081',
                 API_ADMIN_URL: 'https://10.41.0.25:8085',
-                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
                 API_MCSVC_URL: 'https://10.41.0.25:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.25:8076',
                 API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
-                HTTP_PORT: 3001,
-                HTTPS_PORT: 3000,
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -64,6 +59,21 @@ module.exports = function (grunt) {
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
                 HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
+            devb_admin: {
+                NODE_APPS: 'leadmin',
+                NODE_ENV: 'development',
+                API_ADMIN_URL: 'https://10.41.0.26:8085',
+                API_MCSVC_URL: 'https://10.41.0.26:8080',
+                API_MATCHAPI_URL: 'https://10.41.0.26:8076',
+                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -133,7 +143,7 @@ module.exports = function (grunt) {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
-                API_ADMIN_URL: ' https://admin.prod.lattice.local:8085/',
+                API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
                 COMPRESSED: true,
                 LOGGING: './server/log',
@@ -220,6 +230,12 @@ module.exports = function (grunt) {
     var devText = 'Run Express Server using external API (52?)';
     grunt.registerTask('devb', devText, [
         'env:devb',
+        'run:node'
+    ]);
+
+    var devText = 'Run Express Server using external API (52?)';
+    grunt.registerTask('devb_admin', devText, [
+        'env:devb_admin',
         'run:node'
     ]);
 

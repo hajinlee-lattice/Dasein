@@ -4,7 +4,8 @@ angular.module('app.modelquality', [
     'app.modelquality.controller.ModelQualityNavigationCtrl',
     'app.modelquality.controller.ModelQualityDashboardCtrl',
     'app.modelquality.controller.ModelQualityCreatePipelineCtrl',
-    'app.modelquality.directive.ModelQualityLineChart'
+    'app.modelquality.directive.ModelQualityLineChart',
+    'app.modelquality.directive.ModelQualityGroupBarChart'
 ])
 .controller('ModelQualityRootCtrl', function ($scope, $state, $rootScope) {
 

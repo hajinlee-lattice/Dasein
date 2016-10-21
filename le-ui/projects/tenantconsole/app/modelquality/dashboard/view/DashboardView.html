@@ -1,3 +1,4 @@
-<div class="col-md-12 col-sm-12">
-  <model-quality-line-chart data="lineChartData" class="chart-container"></model-quality-line-chart>
-</div>
+<section class="mq-dashboard">
+  <model-quality-group-bar-chart ng-repeat="chart in barCharts" data="chart" class="chart-container"></model-quality-group-bar-chart>
+  <model-quality-line-chart  ng-repeat="chart in lineCharts" ng-if="chart.type==='line'" data="chart.data" class="chart-container"></model-quality-line-chart>
+</section>

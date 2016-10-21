@@ -185,6 +185,7 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/modelquality/controller/ModelQualityNavCtrl.js',
                         '<%= app.dir %>/app/modelquality/controller/ModelQualityRootCtrl.js',
                         '<%= app.dir %>/app/modelquality/directive/ModelQualityLineChart.js',
+                        '<%= app.dir %>/app/modelquality/directive/ModelQualityGroupBarChart.js',
                         '<%= app.dir %>/app/modelquality/service/InfluxDbService.js',
                         '<%= app.dir %>/app/modelquality/service/ModelQualityService.js',
                         '<%= app.dir %>/app/modelquality/dashboard/controller/ModelQualityDashboardCtrl.js',
@@ -507,8 +508,8 @@ module.exports = function(grunt) {
 
     var sentryText = 'Watches for changes in any javascript file, and automatically re-runs linting and karma unit tests. If your computer can handle the strain, this should be running during active develpment';
     grunt.registerTask('sentry', sentryText, [
-        'watch:js',
-        'watch:css'
+        'watch:css',
+        'watch:js'
     ]);
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';

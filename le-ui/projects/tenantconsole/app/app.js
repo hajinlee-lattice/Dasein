@@ -94,8 +94,24 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             },
             resolve: {
                 MeasurementData: function (InfluxDbService) {
+                    var cols = [
+                        'time',
+                        'AlgorithmName',
+                        'AnalyticPipelineName',
+                        'AnalyticTestName',
+                        'AnalyticTestTag',
+                        'DataSetName',
+                        'ModelID',
+                        'PipelineName',
+                        'PropDataConfigName',
+                        'RocScore',
+                        'SamplingName',
+                        'Top10PercentLift',
+                        'Top20PercentLift',
+                        'Top30PercentLift'
+                    ].join(',');
                     return InfluxDbService.Query({
-                        q: 'SELECT * FROM ModelingMeasurement',
+                        q: 'SELECT ' + cols + ' FROM ModelingMeasurement',
                         db: 'ModelQuality'
                     });
                 }

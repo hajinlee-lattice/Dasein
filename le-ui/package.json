@@ -58,6 +58,7 @@
     "dev_login": "npm run commonsass && npm run loginsass && concurrent -kr \"grunt dev\" \"npm run commonsentry\" \"npm run loginsentry\"",
     "dev_pd": "npm run commonsass && npm run pdsass && concurrent -kr \"grunt dev\" \"npm run commonsentry\" \"npm run pdsentry\"",
     "dev_admin": "npm run adminless && concurrent -kr \"grunt dev_admin\" \"npm run adminsentry\"",
+    "devb_admin": "npm run adminless && concurrent -kr \"grunt devb_admin\" \"npm run adminsentry\"",
     "devb": "npm run sass && concurrent -kr \"grunt devb\" \"npm run sentry\"",
     "local": "npm run sass && concurrent -kr \"grunt local\" \"npm run sentry\"",
     "local_admin": "npm run adminless && concurrent -kr \"grunt local_admin\" \"npm run adminsentry\"",
