@@ -45,8 +45,7 @@ public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
         for (int i = 0; i < jobs.size(); i++) {
             WorkflowJob job = jobs.get(i);
             Long workflowId = job.getWorkflowId();
-            // 20122
-            if (workflowId == null || job.getUserId().equals("DEFAULT_USER")
+            if (workflowId == null || job.getPid() < 10093 || job.getUserId().equals("DEFAULT_USER")
                     || StringUtils.isNotEmpty(job.getOutputContextString())
                     || StringUtils.isNotEmpty(job.getReportContextString())) {
                 log.info("No workflowId, so skipping: " + job.getPid());
