@@ -110,7 +110,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "1096");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         job.setAppMasterPropertiesObject(appMasterProperties);
