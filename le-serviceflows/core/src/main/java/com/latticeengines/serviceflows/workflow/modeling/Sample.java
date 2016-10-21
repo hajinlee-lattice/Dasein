@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
@@ -37,6 +38,8 @@ public class Sample extends BaseModelStep<ModelStepConfiguration> {
         String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
                 + eventTable.getName() + "/csv_files/postMatchEventTable";
         putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
+        saveOutputValue(WorkflowContextConstants.Outputs.POST_MATCH_EVENT_TABLE_EXPORT_PATH,
+                getStringValueFromContext(EXPORT_OUTPUT_PATH));
     }
 
     private void sample(Table eventTable) throws Exception {

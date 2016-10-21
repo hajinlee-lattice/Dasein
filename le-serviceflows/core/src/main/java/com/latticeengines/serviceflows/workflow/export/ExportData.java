@@ -77,10 +77,7 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
     }
 
     private void saveToContext() {
-        if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
-            saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
-                    getStringValueFromContext(EXPORT_OUTPUT_PATH));
-        } else {
+        if (StringUtils.isEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
             Map<String, String> properties = configuration.getProperties();
             if (properties.containsKey(ExportProperty.TARGET_FILE_NAME)) {
                 saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, PathBuilder
