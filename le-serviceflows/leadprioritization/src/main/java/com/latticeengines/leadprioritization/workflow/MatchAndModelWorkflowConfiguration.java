@@ -174,7 +174,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder skipStandardTransform(boolean skipTransform) {
-            addStandardAttributes.setSkipStep(true);
+            addStandardAttributes.setSkipStep(skipTransform);
             return this;
         }
 
