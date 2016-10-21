@@ -238,6 +238,28 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    public void updateCredentialName_assertAllMatchFieldsPersisted() {
+        MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
+                .get(0);
+
+        marketoCredential.setName(NAME);
+
+        marketoCredentialService.updateMarketoCredentialById(Long.toString(marketoCredential.getPid()), marketoCredential);
+        MarketoCredential marketoCredential1 = marketoCredentialService.findAllMarketoCredentials()
+                .get(0);
+        assertEquals(marketoCredential1.getName(), NAME);
+        assertEquals(marketoCredential1.getSoapEndpoint(), SOAP_ENDPOINT_1);
+        assertEquals(marketoCredential1.getRestClientId(), REST_CLIENT_ID_1);
+        assertEquals(marketoCredential1.getEnrichment().getPid(), marketoCredential.getEnrichment().getPid());
+        assertEquals(marketoCredential1.getEnrichment().getMarketoMatchFields().size(), 4);
+        for (MarketoMatchField marketoMatchField : marketoCredential1.getEnrichment()
+                .getMarketoMatchFields()) {
+            MARKETO_MATCH_FIELD_NAMES.contains(marketoMatchField.getMarketoMatchFieldName());
+            TEST_FIELD_VALUES.contains(marketoMatchField.getMarketoFieldName());
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialName_assertAllMatchFieldsPersisted")
     public void updateCredential_restValidationFailed_assertCorrectErrorReturned() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
                 .get(0);
@@ -256,7 +278,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialName_assertAllMatchFieldsPersisted")
     public void updateCredential_soapValidationFailed_assertCorrectErrorReturned() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
                 .get(0);
@@ -274,7 +296,7 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "updateCredentialMatchFields_assertUpdated")
+    @Test(groups = "functional", dependsOnMethods = "updateCredentialName_assertAllMatchFieldsPersisted")
     public void findMarketoCredentialById_assertTheRightCredentialIsReturned() {
         MarketoCredential marketoCredential = marketoCredentialService.findAllMarketoCredentials()
                 .get(0);

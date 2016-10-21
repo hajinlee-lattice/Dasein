@@ -14,6 +14,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.Enrichment;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.MarketoCredentialDao;
@@ -60,10 +61,18 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateMarketoCredentialById(String credentialId,
             MarketoCredential marketoCredential) {
-        if (marketoCredentialDao.findMarketoCredentialById(credentialId) != null) {
-            deleteMarketoCredentialById(credentialId);
-        }
-        create(marketoCredential);
+        MarketoCredential marketoCredential1 = marketoCredentialDao.findMarketoCredentialById(credentialId);
+
+        marketoCredential1.setName(marketoCredential.getName());
+        marketoCredential1.setRestClientId(marketoCredential.getRestClientId());
+        marketoCredential1.setRestClientSecret(marketoCredential.getRestClientSecret());
+        marketoCredential1.setRestIdentityEnpoint(marketoCredential.getRestIdentityEnpoint());
+        marketoCredential1.setRestEndpoint(marketoCredential.getRestEndpoint());
+        marketoCredential1.setSoapEndpoint(marketoCredential.getSoapEndpoint());
+        marketoCredential1.setSoapUserId(marketoCredential.getSoapUserId());
+        marketoCredential1.setSoapEncryptionKey(marketoCredential.getSoapEncryptionKey());
+
+        marketoCredentialDao.update(marketoCredential1);
     }
 
     @Override
