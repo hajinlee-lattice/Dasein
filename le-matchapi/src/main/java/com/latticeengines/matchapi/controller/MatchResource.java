@@ -1,8 +1,12 @@
 package com.latticeengines.matchapi.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.match.exposed.service.BulkMatchService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -34,6 +39,8 @@ import io.swagger.annotations.ApiOperation;
 public class MatchResource {
     private static final Log log = LogFactory.getLog(MatchResource.class);
 
+    private static final ObjectMapper OM = new ObjectMapper();
+
     @Autowired
     private RealTimeMatchService realTimeMatchService;
 
@@ -51,10 +58,10 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
 
     )
-    public MatchOutput matchRealTime(@RequestBody MatchInput input) {
+    public void matchRealTime(@RequestBody MatchInput input, HttpServletResponse response) {
         try {
-            String matchVersion = input.getDataCloudVersion();
-            return realTimeMatchService.match(input);
+            MatchOutput output = realTimeMatchService.match(input);
+            writeToGzipStream(response, output);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData match failed: " + e.getMessage(), e);
         }
@@ -68,14 +75,11 @@ public class MatchResource {
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
 
     )
-    public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
+    public void bulkMatchRealTime(@RequestBody BulkMatchInput input, HttpServletResponse response) {
         long time = System.currentTimeMillis();
         try {
-            String matchVersion = null;
-            if (!CollectionUtils.isEmpty(input.getInputList())) {
-                matchVersion = input.getInputList().get(0).getDataCloudVersion();
-            }
-            return realTimeMatchService.matchBulk(input);
+            BulkMatchOutput output = realTimeMatchService.matchBulk(input);
+            writeToGzipStream(response, output);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed.", e);
         } finally {
@@ -107,12 +111,21 @@ public class MatchResource {
     @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
     public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {
         try {
-            String matchVersion = null;
-            BulkMatchService bulkMatchService = getBulkMatchService(matchVersion);
+            BulkMatchService bulkMatchService = getBulkMatchService(null);
             return bulkMatchService.status(rootuid.toUpperCase());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25008, e, new String[] { rootuid });
         }
+    }
+
+    private void writeToGzipStream(HttpServletResponse response, Object output) throws IOException {
+        OutputStream os = response.getOutputStream();
+        response.setHeader("Content-Encoding", "gzip");
+        response.setHeader("Content-Type", "application/json");
+        GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
+        OM.writeValue(gzipOs, output);
+        gzipOs.flush();
+        gzipOs.close();
     }
 
     private BulkMatchService getBulkMatchService(String matchVersion) {
