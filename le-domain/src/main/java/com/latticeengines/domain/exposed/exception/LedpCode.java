@@ -492,8 +492,11 @@ public enum LedpCode {
             + "empty or non-existent data directories.  Try a different customer id"), //
     LEDP_34001("Could not create key for customer {0}"), //
     LEDP_34002("Could not delete key for customer {0}"), //
-    LEDP_34003("Could not locate tenant with name {0}"); //
+    LEDP_34003("Could not locate tenant with name {0}"), //
 
+    // le-modelquality
+    LEDP_35000("No {0} with name {1} found"); // No {Entity} with name {Name} found, for eg "No AnalyticTest with name AnalyticTest1 found"
+    
     private String message;
 
     private String externalCode;
