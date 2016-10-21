@@ -48,7 +48,7 @@
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../target/le-ui.tar.gz"
+                                <copy file="${project.basedir}/../le-ui.tar.gz"
                                       tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
                                       overwrite="true" />
                             </tasks>

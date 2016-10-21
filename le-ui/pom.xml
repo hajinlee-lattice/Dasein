@@ -32,7 +32,7 @@
                             <workingDirectory>..</workingDirectory>
                             <arguments>
                                 <argument>czf</argument>
-                                <argument>target/le-ui.tar.gz</argument>
+                                <argument>le-ui.tar.gz</argument>
                                 <argument>--exclude='*tests*'</argument>
                                 <argument>--exclude='le-ui/target'</argument>
                                 <argument>--exclude='le-ui/src'</argument>
