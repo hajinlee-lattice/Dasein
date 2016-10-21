@@ -11,7 +11,7 @@ const env_vars = {
     HTTPS_PASS: process.env.HTTPS_PASS  || false,
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || false,
-    LOGGING:    process.env.LOGGING     || './server/log',
+    LOGGING:    process.env.LOGGING,
     LOG_LEVEL:  process.env.LOG_LEVEL   || 'verbose',
     TIMESTAMP:  DateUtil.getTimeStamp(),
     APP_ROOT:   path.join(__dirname, '../..'),

@@ -12,6 +12,7 @@
         <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/resources/tomcat/le-tomcat</tomcat.docker.context>
         <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
+        <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
     </properties>
 
     <parent>
@@ -46,6 +47,9 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../target/le-ui.tar.gz"
+                                      tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
                                       overwrite="true" />
                             </tasks>
                         </configuration>

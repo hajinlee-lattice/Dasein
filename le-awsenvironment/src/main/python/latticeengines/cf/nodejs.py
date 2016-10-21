@@ -7,14 +7,14 @@ import boto3
 import os
 
 from .module.ec2 import ec2_defn
-from .module.ecs import ContainerDefinition, TaskDefinition, Volume
+from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
-PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
+PARAM_INSTALL_MODE=Parameter("InstallMode", "INTERNAL or EXTERNAL")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -37,50 +37,42 @@ def template(environment, stackname, profile, upload=False):
         stack.validate()
 
 def create_template(profile):
-    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.")
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS])
+    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.")
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = tomcat_task(profile_vars)
+    task = express_task(profile_vars)
     stack.add_resource(task)
-    stack.add_service("tomcat", task)
+    stack.add_service("express", task)
     return stack
 
-def tomcat_task(profile_vars):
+def express_task(profile_vars):
     container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
-        "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
+        "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
-        .publish_port(8080, 80) \
-        .publish_port(8443, 443) \
-        .publish_port(1099, 1099) \
+        .publish_port(3000, 3000) \
+        .publish_port(3002, 3002) \
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
             "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
             "awslogs-region": { "Ref": "AWS::Region" }
         }}) \
-        .set_env("LE_SWLIB_DISABLED", "true")
+        .set_env("INSTALL_MODE", PARAM_INSTALL_MODE.ref())
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
 
-    ledp = Volume("ledp", "/etc/ledp")
-    scoringcache = Volume("scoringcache", "/var/cache/scoringapi")
-
-    container = container.mount("/etc/ledp", ledp).mount("/var/cache/scoringapi", scoringcache)
-
-    task = TaskDefinition("tomcattask")
+    task = TaskDefinition("expresstask")
     task.add_container(container)
-    task.add_volume(ledp)
-    task.add_volume(scoringcache)
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
+    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
 
 
-def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
+def provision(environment, app, stackname, tgrp, profile, instance_type, mode, tag="latest", init_cap=2, max_cap=8, public=False):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -88,12 +80,9 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
     extra_params.append(PARAM_MEM.config(str(max_mem)))
 
-    opts=update_xmx_by_type("", instance_type)
-    print "set %s to %s" % ('CATALINA_OPTS', opts)
-    extra_params.append(PARAM_ENV_CATALINA_OPTS.config(opts))
-
     extra_params.append(PARAM_DOCKER_IMAGE.config(app))
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
+    extra_params.append(PARAM_INSTALL_MODE.config(mode))
 
     tgrp_arn = find_tgrp_arn(tgrp)
 
@@ -143,22 +132,6 @@ def find_tgrp_arn(name):
     raise Exception("Cannot find target group named "+ name)
 
 
-def update_xmx_by_type(catalina_opts, instance_type):
-    max_mem = TYPE_DEF[instance_type]['mem_gb'] * 1024 - 300
-    opt = '-Xmx%dm' % max_mem
-    opts = ''
-    tokens = catalina_opts.split(' ')
-    replaced = False
-    for token in tokens:
-        if '-Xmx' in token:
-            opts = catalina_opts.replace(token, opt)
-            replaced = True
-
-    if not replaced:
-       opts = (opt + " " + catalina_opts).strip()
-
-    return opts
-
 def s3_path(stackname):
     return os.path.join(_S3_CF_PATH, stackname)
 
@@ -181,7 +154,7 @@ def parse_args():
     parser1.add_argument('-g', dest='tgrp', type=str, required=True, help='name of the target group for load balancer')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
-    parser1.add_argument('--catalina-opts', dest='copts', type=str, default='', help='CATALINA_OPTS')
+    parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity')

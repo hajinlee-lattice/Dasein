@@ -131,3 +131,6 @@ alias dkrmc='docker rm $(docker ps -a -q) && docker ps -a 2>/dev/null'
 alias dkps='docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}"'
 alias dkpull='bash $WSHOME/le-dev/scripts/docker_pull.sh'
 alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
+
+alias dkrunui='docker run -itd --name le-ui --net=host -e LE_ENVIRONMENT=dev latticeengines/express'
+alias dkstopui='docker stop le-ui; dkrmc'
