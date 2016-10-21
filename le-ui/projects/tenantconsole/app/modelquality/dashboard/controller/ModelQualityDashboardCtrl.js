@@ -160,7 +160,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
                     categories: Object.keys(dsBucket.pipelines).map(function(pipeline) {
                         var pipelineData = dsBucket.pipelines[pipeline];
                         return {
-                            category: pipeline,
+                            category: pipelineData.description.pipeline,
                             value: pipelineData.value,
                             description: pipelineData.description
                         };

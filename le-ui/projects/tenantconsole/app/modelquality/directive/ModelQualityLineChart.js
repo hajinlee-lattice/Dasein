@@ -125,7 +125,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
                 color.domain(seriesData.map(function(c) { return c.key; }));
                 x2.domain(x.domain());
-
                 // should not need to remove, use .enter() or .update()
                 chart.selectAll("g").remove(); // empty all except zoom
 
@@ -203,11 +202,11 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     }
                 });
 
-                focus.on("mouseover", function() {
+                focus.on("mouseenter", function() {
                     hoverVerticalLine.style("display", null);
                     showTooltip();
                 })
-                .on("mouseout", function() {
+                .on("mouseleave", function() {
                     hideTooltip();
                     hoverVerticalLine.style("display", "none");
                     dots.style("r", "0px");
@@ -241,7 +240,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     });
 
                     if (showTooltip) {
-                        var template = date.toGMTString() + '<br>';
+                        var template = date.toLocaleString() + '<br>';
 
                         for (var key in tooltipData) {
                             template += key + ': ' + tooltipData[key] + '<br>';
@@ -288,7 +287,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 x = d3.scaleTime().range([0, width]);
                 x2 = d3.scaleTime().range([0, width]);
 
-                xAxis = d3.axisBottom(x);
+                xAxis.scale(x);
 
                 svg.select("clipPath rect")
                     .attr("width", width)
