@@ -11,5 +11,7 @@ public interface ModelQualityAnalyticTestInterface {
     String createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames);
 
     AnalyticTestEntityNames getAnalyticTestByName(String analyticTestName);
+    
+    List<String> executeAnalyticTestByName(String analyticTestName);
 
 }

@@ -28,16 +28,6 @@ public class AnalyticTestEntityNames {
     public AnalyticTestEntityNames() {
     }
 
-    public AnalyticTestEntityNames(AnalyticTest atest) {
-        this.name = atest.getName();
-        this.propDataMatchType = atest.getPropDataMatchType();
-        for (DataSet dataset : atest.getDataSets()) {
-            this.dataSetNames.add(dataset.getName());
-        }
-        for (AnalyticPipeline analyticPipeline : atest.getAnalyticPipelines())
-            this.analyticPipelineNames.add(analyticPipeline.getName());
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -69,5 +59,4 @@ public class AnalyticTestEntityNames {
     public List<String> getAnalyticPipelineNames() {
         return analyticPipelineNames;
     }
-
 }

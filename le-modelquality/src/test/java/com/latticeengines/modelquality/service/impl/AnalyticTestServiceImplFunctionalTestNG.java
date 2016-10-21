@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -25,15 +25,8 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
 
     @Autowired
     private AnalyticTestEntityMgr analyticTestEntityMgr;
-
-    @BeforeClass(groups = "functional")
-    public void setup() {
-        AnalyticTest at = analyticTestEntityMgr.findByName("BadAnalyticTest");
-
-        if (at != null) {
-            analyticTestEntityMgr.delete(at);
-        }
-    }
+    
+    private String createdModelRunName = null;
 
     @Test(groups = "functional", expectedExceptions = RuntimeException.class)
     public void createAnalyticTestFailure() throws RuntimeException {
@@ -72,15 +65,53 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
         Assert.assertNotNull(at);
     }
+    
+    @Test(groups = "functional", dependsOnMethods = { "createAnalyticTest" })
+    public void getAnalyticTest(){
+        AnalyticTestEntityNames atn = analyticTestService.getByName("SrvImplTestAnalyticTest");
+        Assert.assertNotNull(atn);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "getAnalyticTest" })
+    public void executeAnalyticTest(){
+        List<String> results = analyticTestService.executeByName("SrvImplTestAnalyticTest");
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), 1);
+        createdModelRunName = results.get(0);
+    }
+    
+    @AfterTest(groups = "functional")
+    public void cleanUp(){
+        AnalyticTest at = analyticTestEntityMgr.findByName("BadAnalyticTest");
 
-    @AfterMethod(groups = "functional", dependsOnMethods = "createAnalyticTest")
-    public void cleanUp() {
-        AnalyticTest at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
+        if (at != null) {
+            analyticTestEntityMgr.delete(at);
+        }
+
+        modelRunEntityMgr.delete(modelRunEntityMgr.findByName(createdModelRunName));
+        at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
+
         if (at != null) {
             analyticTestEntityMgr.delete(at);
         }
     }
 
+
+    @BeforeClass(groups = "functional")
+    public void setUp(){
+        AnalyticTest at = analyticTestEntityMgr.findByName("BadAnalyticTest");
+
+        if (at != null) {
+            analyticTestEntityMgr.delete(at);
+        }
+
+        at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
+        if (at != null) {
+            analyticTestEntityMgr.delete(at);
+        }
+    }
+
+    
     private List<String> getTestAnalyticPipelines() {
         // this should create a test analytic pipeline
         List<String> aps = new ArrayList<String>();

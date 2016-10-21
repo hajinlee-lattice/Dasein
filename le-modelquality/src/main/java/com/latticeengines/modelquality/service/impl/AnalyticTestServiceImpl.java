@@ -1,18 +1,26 @@
 package com.latticeengines.modelquality.service.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
+import com.latticeengines.domain.exposed.modelquality.Environment;
+import com.latticeengines.domain.exposed.modelquality.ModelRun;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
 import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.service.AnalyticTestService;
+import com.latticeengines.modelquality.service.ModelRunService;
 
 @Component("analyticTestService")
 public class AnalyticTestServiceImpl extends BaseServiceImpl implements AnalyticTestService {
@@ -25,6 +33,9 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
     @Autowired
     private AnalyticTestEntityMgr analyticTestEntityMgr;
+
+    @Autowired
+    private ModelRunService modelRunService;
 
     @Override
     public AnalyticTest createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames) {
@@ -50,7 +61,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 if (ap != null) {
                     analyticPipelines.add(ap);
                 } else {
-                    throw new RuntimeException("No AnalyticPipeline with name " + analyticPipelineName + " not found");
+                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic pipeline", analyticPipelineName});
                 }
             }
             analyticTest.setAnalyticPipelines(analyticPipelines);
@@ -65,7 +76,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 if (ds != null) {
                     dataSets.add(ds);
                 } else {
-                    throw new RuntimeException("No Dataset with name " + datasetName + " not found");
+                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataset", datasetName});
                 }
             }
             analyticTest.setDataSets(dataSets);
@@ -74,5 +85,65 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         analyticTestEntityMgr.create(analyticTest);
 
         return analyticTest;
+    }
+
+    @Override
+    public List<String> executeByName(String analyticTestName) {
+        ArrayList<String> resultSet = new ArrayList<String>();
+        AnalyticTest analyticTest = analyticTestEntityMgr.findByName(analyticTestName);
+        if (analyticTest == null) {
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic Test", analyticTestName });
+        }
+        for (AnalyticPipeline ap : analyticTest.getAnalyticPipelines()) {
+            for (DataSet ds : analyticTest.getDataSets()) {
+                ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
+                modelRunEntityNames.setAnalyticPipelineName(ap.getName());
+                modelRunEntityNames.setDataSetName(ds.getName());
+                modelRunEntityNames.setName(analyticTestName + "_" + ap.getName() + "_" + ds.getName());
+                modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
+                ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames,
+                        Environment.getCurrentEnvironment());
+                resultSet.add(modelRun.getName());
+            }
+        }
+        return resultSet;
+    }
+
+    @Transactional
+    public AnalyticTestEntityNames getByName(String analyticTestName) {
+        AnalyticTest atest = analyticTestEntityMgr.findByName(analyticTestName);
+        AnalyticTestEntityNames result = new AnalyticTestEntityNames();
+        result.setName(atest.getName());
+        result.setPropDataMatchType(atest.getPropDataMatchType());
+
+        for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
+            result.getAnalyticPipelineNames().add(ap.getName());
+        }
+        
+        for (DataSet ds : atest.getDataSets()) {
+            result.getDataSetNames().add(ds.getName());
+        }
+        return result;
+    }
+    
+    @Transactional
+    public List<AnalyticTestEntityNames> getAll() {
+
+        List<AnalyticTestEntityNames> result = new ArrayList<>();
+        for (AnalyticTest atest : analyticTestEntityMgr.findAll()) {
+            AnalyticTestEntityNames atestName = new AnalyticTestEntityNames();
+            atestName.setName(atest.getName());
+            atestName.setPropDataMatchType(atest.getPropDataMatchType());
+
+            for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
+                atestName.getAnalyticPipelineNames().add(ap.getName());
+            }
+            for (DataSet ds : atest.getDataSets()) {
+                atestName.getDataSetNames().add(ds.getName());
+            }
+
+            result.add(atestName);
+        }
+        return result;
     }
 }

@@ -277,4 +277,10 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
         String url = constructUrl("/analytictests/{analyticTestName}", analyticTestName);
         return get("getAnalyticTestByName", url, AnalyticTestEntityNames.class);
     }
+    
+    @Override
+    public List<String> executeAnalyticTestByName(String analyticTestName) {
+        String url = constructUrl("/analytictests/execute/{analyticTestName}");
+        return post("executeAnalyticTestByName", url, analyticTestName, List.class);
+    }
 }

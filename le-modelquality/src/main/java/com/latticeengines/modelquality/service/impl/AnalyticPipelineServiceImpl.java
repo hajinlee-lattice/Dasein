@@ -1,10 +1,10 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
@@ -23,8 +23,6 @@ import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 
 @Component("analyticPipelineService")
 public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements AnalyticPipelineService {
-
-    private static final Log log = LogFactory.getLog(AnalyticPipelineServiceImpl.class);
 
     @Autowired
     private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
@@ -60,36 +58,31 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
 
         Pipeline pipeline = pipelineEntityMgr.findByName(analyticPipelineEntityNames.getPipeline());
         if (pipeline == null) {
-            throw new RuntimeException(
-                    String.format("Pipeline with name %s does not exist", analyticPipelineEntityNames.getPipeline()));
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Pipeline", analyticPipelineEntityNames.getPipeline() });
         }
         analyticPipeline.setPipeline(pipeline);
 
         Algorithm algorithm = algorithmEntityMgr.findByName(analyticPipelineEntityNames.getAlgorithm());
         if (algorithm == null) {
-            throw new RuntimeException(
-                    String.format("Algorithm with name %s does not exist", analyticPipelineEntityNames.getAlgorithm()));
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Algorithm", analyticPipelineEntityNames.getAlgorithm() });
         }
         analyticPipeline.setAlgorithm(algorithm);
 
         PropData propdata = propdataEntityMgr.findByName(analyticPipelineEntityNames.getPropData());
         if (propdata == null) {
-            throw new RuntimeException(String.format("A Propdata match with name %s does not exist",
-                    analyticPipelineEntityNames.getPropData()));
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Propdata", analyticPipelineEntityNames.getPropData() });
         }
         analyticPipeline.setPropData(propdata);
 
         DataFlow dataFlow = dataflowEntityMgr.findByName(analyticPipelineEntityNames.getDataFlow());
         if (dataFlow == null) {
-            throw new RuntimeException(
-                    String.format("Dataflow with name %s does not exist", analyticPipelineEntityNames.getDataFlow()));
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataflow", analyticPipelineEntityNames.getDataFlow() });
         }
         analyticPipeline.setDataFlow(dataFlow);
 
         Sampling sampling = samplingEntityMgr.findByName(analyticPipelineEntityNames.getSampling());
         if (sampling == null) {
-            throw new RuntimeException(
-                    String.format("Sampling type named %s does not exist", analyticPipelineEntityNames.getSampling()));
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Sampling", analyticPipelineEntityNames.getSampling() });
         }
         analyticPipeline.setSampling(sampling);
 
@@ -101,18 +94,24 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
     @Override
     public AnalyticPipeline createLatestProductionAnalyticPipeline() {
         String version = getVersion();
-
+        String analyticPipelineName = production + "-" + version;
+        AnalyticPipeline analyticPipeline = analyticPipelineEntityMgr.findByName(analyticPipelineName);
+        
+        if(analyticPipeline != null)
+        {
+            return analyticPipeline;
+        }
+        
         AnalyticPipelineEntityNames analyticPipelineEntityNames = new AnalyticPipelineEntityNames();
-        analyticPipelineEntityNames.setName(production + "-" + version);
+        analyticPipelineEntityNames.setName(analyticPipelineName);
         analyticPipelineEntityNames.setAlgorithm(modelQualityProxy.createAlgorithmFromProduction().getName());
         analyticPipelineEntityNames.setDataFlow(modelQualityProxy.createDataFlowFromProduction().getName());
         analyticPipelineEntityNames.setPipeline(modelQualityProxy.createPipelineFromProduction().getName());
         analyticPipelineEntityNames.setPropData(modelQualityProxy.createPropDataConfigFromProduction().getName());
         analyticPipelineEntityNames.setSampling(modelQualityProxy.createSamplingFromProduction().getName());
 
-        AnalyticPipeline analyticPipeline = createAnalyticPipeline(analyticPipelineEntityNames);
+        analyticPipeline = createAnalyticPipeline(analyticPipelineEntityNames);
 
         return analyticPipeline;
     }
-
 }

@@ -1,9 +1,9 @@
 package com.latticeengines.modelquality.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
-import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
 import com.latticeengines.modelquality.service.AnalyticTestService;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticTestInterface;
 
@@ -26,9 +25,6 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
 
     @Autowired
     private AnalyticTestService analyticTestService;
-
-    @Autowired
-    private AnalyticTestEntityMgr analyticTestEntityMgr;
 
     @Override
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -50,15 +46,21 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     @RequestMapping(value = "/{analyticTestName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get AnalyticTest by name")
-    public AnalyticTestEntityNames getAnalyticTestByName(String analyticTestName) {
+    public AnalyticTestEntityNames getAnalyticTestByName(@PathVariable String analyticTestName) {
         return getByName(analyticTestName);
+    }
+    
+    @Override
+    @RequestMapping(value = "/execute/{analyticTestName:.*}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Execute AnalyticTest by name")
+    public List<String> executeAnalyticTestByName(@PathVariable String analyticTestName) {
+        return analyticTestService.executeByName(analyticTestName);
     }
 
     @Override
     public AnalyticTestEntityNames getByName(String name) {
-        AnalyticTest atest = analyticTestEntityMgr.findByName(name);
-        AnalyticTestEntityNames anames = new AnalyticTestEntityNames(atest);
-        return anames;
+        return analyticTestService.getByName(name);
     }
 
     @Override
@@ -69,12 +71,6 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
 
     @Override
     public List<AnalyticTestEntityNames> getAll() {
-        List<AnalyticTestEntityNames> result = new ArrayList<>();
-        for (AnalyticTest atest : analyticTestEntityMgr.findAll()) {
-            AnalyticTestEntityNames anames = new AnalyticTestEntityNames(atest);
-            result.add(anames);
-        }
-        return result;
+        return analyticTestService.getAll();
     }
-
 }

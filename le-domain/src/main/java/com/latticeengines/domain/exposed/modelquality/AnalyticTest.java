@@ -7,6 +7,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +16,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,9 +43,10 @@ public class AnalyticTest implements HasName, HasPid {
     private String name;
 
     @JsonProperty("data_sets")
-    @ManyToMany(cascade = { CascadeType.MERGE })
+    @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", joinColumns = {
             @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
+    @Fetch(value=FetchMode.SUBSELECT)
     private List<DataSet> dataSets = new ArrayList<>();
 
     @JsonProperty("match_type")
@@ -49,9 +54,11 @@ public class AnalyticTest implements HasName, HasPid {
     private PropDataMatchType propDataMatchType;
 
     @JsonProperty("analytic_pipelines")
-    @ManyToMany(cascade = { CascadeType.MERGE })
-    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", joinColumns = {
-            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+    @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", 
+               joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, 
+               inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+    @Fetch(value=FetchMode.SUBSELECT)
     private List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
 
     @Override
