@@ -404,7 +404,20 @@ angular.module('lp.managefields', [
     function advancedSettingsFlagsChanged() {
         if ($scope.oneLeadPerDomain.toString() != Model.EventTableProvenance.Is_One_Lead_Per_Domain ||
             $scope.includePersonalEmailDomains.toString() == Model.EventTableProvenance.Exclude_Public_Domains ||
-            $scope.useLatticeAttributes.toString() == Model.EventTableProvenance.Exclude_Propdata_Columns) {
+            $scope.useLatticeAttributes.toString() == Model.EventTableProvenance.Exclude_Propdata_Columns ||
+            enableTransformationsChanged()) {
+            return true;
+        }
+        return false;
+    }
+
+    function enableTransformationsChanged() {
+        var transformationGroupName = Model.EventTableProvenance.Transformation_Group_Name ?
+            Model.EventTableProvenance.Transformation_Group_Name : Model.ModelDetails.TransformationGroupName;
+
+        if (transformationGroupName == "none" && $scope.enableTransformations) {
+            return true;
+        } else if (transformationGroupName != "none" && !$scope.enableTransformations) {
             return true;
         }
         return false;
@@ -430,9 +443,12 @@ angular.module('lp.managefields', [
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
-        $scope.oneLeadPerDomain = Model.EventTableProvenance.Is_One_Lead_Per_Domain;
-        $scope.includePersonalEmailDomains = !Model.EventTableProvenance.Exclude_Public_Domains;
-        $scope.useLatticeAttributes = !Model.EventTableProvenance.Exclude_Propdata_Columns;
+        $scope.oneLeadPerDomain = Model.EventTableProvenance.Is_One_Lead_Per_Domain == null ? false :
+            Model.EventTableProvenance.Is_One_Lead_Per_Domain == "true";
+        $scope.includePersonalEmailDomains = Model.EventTableProvenance.Exclude_Public_Domains == null ? true :
+            Model.EventTableProvenance.Exclude_Public_Domains == "false";
+        $scope.useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns == null ? true :
+            Model.EventTableProvenance.Exclude_Propdata_Columns == "false";
         $scope.enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name == "none" ||
             Model.ModelDetails.TransformationGroupName == "none") ? false : true;
         $scope.dirtyRows = {};
