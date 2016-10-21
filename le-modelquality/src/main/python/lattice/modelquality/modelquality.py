@@ -23,7 +23,7 @@ ENTITIES = { \
 def main():
     parser = argparse.ArgumentParser(description='Command-line interface to the Lattice model quality framework')
     parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa'], default='qa', help='select environment (devel, qa)')
+    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa','prod'], default='prod', help='select environment (prod, qa, devel)')
 
     subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
 

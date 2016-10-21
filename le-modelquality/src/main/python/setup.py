@@ -3,7 +3,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 from distutils.util import convert_path
 
-version = '1.0.0'
+version = '1.0.1'
 
 with open("README.txt", "rb") as f:
     long_descr = f.read()
