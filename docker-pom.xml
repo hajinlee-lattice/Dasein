@@ -18,6 +18,6 @@
         <module>le-config</module>
         <module>le-datafabric/pom-connect-shaded.xml</module>
         <module>le-matchapi</module>
-        <module>le-ui</module>
+        <module>le-ui/pom.xml</module>
     </modules>
 </project>
