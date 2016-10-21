@@ -119,7 +119,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
-                .skipStandardTransform(parameters.enableTransformation()) //
+                .skipStandardTransform(!parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
                         parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
