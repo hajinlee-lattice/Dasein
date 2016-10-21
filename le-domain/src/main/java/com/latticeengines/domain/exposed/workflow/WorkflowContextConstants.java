@@ -8,6 +8,8 @@ public class WorkflowContextConstants {
         public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
         public static final Object ERROR_OUTPUT_PATH = "ERROR_OUTPUT_PATH";
         public static final String YARN_LOG_LINK_PATH = "YARN_LOG_LINK_PATH";
+        public static final String POST_MATCH_EVENT_TABLE_EXPORT_PATH = "POST_MATCH_EVENT_TABLE_EXPORT_PATH";
+        public static final String PIVOT_SCORE_EVENT_EXPORT_PATH = "PIVOT_SCORE_EVENT_EXPORT_PATH";
     }
 
     public static class Inputs {

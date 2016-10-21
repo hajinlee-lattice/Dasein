@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
@@ -47,5 +47,7 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         String outputPath = String.format("%s/%s",
                 StringUtils.substringBeforeLast(getStringValueFromContext(EXPORT_OUTPUT_PATH), "/"), targetFileName);
         putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
+        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH,
+                getStringValueFromContext(EXPORT_OUTPUT_PATH));
     }
 }

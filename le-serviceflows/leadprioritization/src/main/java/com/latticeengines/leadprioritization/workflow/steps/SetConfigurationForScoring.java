@@ -40,8 +40,11 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         putStringValueInContext(EXPORT_INPUT_PATH, "");
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         String outputPath = String.format("%s/%s/data/%s/csv_files/score_event_table_output/%s",
-                configuration.getModelingServiceHdfsBaseDir(), configuration.getCustomerSpace(), eventTable.getName(), targetFileName);
+                configuration.getModelingServiceHdfsBaseDir(), configuration.getCustomerSpace(), eventTable.getName(),
+                targetFileName);
         putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
+        saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
+                getStringValueFromContext(EXPORT_OUTPUT_PATH));
     }
 
 }
