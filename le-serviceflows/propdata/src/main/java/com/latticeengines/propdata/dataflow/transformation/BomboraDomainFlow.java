@@ -40,8 +40,6 @@ public class BomboraDomainFlow
 
         Node currentBomboraDomain = addSource(parameters.getSourceName());
         Node bomboraDepivoted = addSource(parameters.getBaseTables().get(0));
-
-        //currentBomboraDomain = currentBomboraDomain.retain(new FieldList(id, domain));
         
         bomboraDepivoted = bomboraDepivoted.groupByAndLimit(new FieldList(bomboraDepivotedDomain),
                 new FieldList(bomboraDepivotedDomain), 1, true, true);
