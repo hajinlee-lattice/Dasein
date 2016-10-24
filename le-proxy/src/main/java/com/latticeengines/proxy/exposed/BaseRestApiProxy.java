@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -22,7 +24,9 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 
 public abstract class BaseRestApiProxy {
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+            HttpClientBuilder.create().build());
+    private RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
     private String hostport;
     private String rootpath;
