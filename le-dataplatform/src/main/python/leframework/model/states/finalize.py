@@ -42,9 +42,11 @@ class Finalize(State):
         # add the key data and append the scored data
         keyData = mediator.data[mediator.schema["keys"]].as_matrix().astype(str)
         eventData = mediator.data[mediator.schema["target"]].as_matrix().astype(str)
-        scored = numpy.insert(keyData, len(keyData[0]), scored, axis=1)
         # write the scored data to file
-        numpy.savetxt(mediator.modelLocalDir + mediator.name + "_scored.txt", scored, delimiter=",", fmt="%s")
+        with open(mediator.modelLocalDir + mediator.name + "_scored.txt", 'wb') as scoredFile:
+            scoredWriter = csv.writer(scoredFile)
+            for i in range(0,keyData.size):
+                scoredWriter.writerow([keyData[i][0], '{:.8f}'.format(scored[i])])
         # write the target data to file
         numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
 
