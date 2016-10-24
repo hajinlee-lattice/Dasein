@@ -106,6 +106,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 workflowConfig.getWorkflowName().replace(" ", "_"));
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), "2048");
 
         Properties containerProperties = new Properties();
         containerProperties.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
