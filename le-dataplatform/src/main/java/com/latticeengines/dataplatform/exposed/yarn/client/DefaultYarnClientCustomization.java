@@ -113,13 +113,13 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public int getMemory(Properties properties) {
-        String memory = properties.getProperty(AppMasterProperty.MEMORY.name(), "-1");
+        String memory = properties.getProperty(ContainerProperty.MEMORY.name(), "-1");
         return Integer.parseInt(memory);
     }
 
     @Override
     public int getPriority(Properties properties) {
-        String priority = properties.getProperty(AppMasterProperty.PRIORITY.name(), "-1");
+        String priority = properties.getProperty(ContainerProperty.PRIORITY.name(), "-1");
         return Integer.parseInt(priority);
     }
 
@@ -130,7 +130,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public int getVirtualcores(Properties properties) {
-        String virtualCores = properties.getProperty(AppMasterProperty.VIRTUALCORES.name(), "-1");
+        String virtualCores = properties.getProperty(ContainerProperty.VIRTUALCORES.name(), "-1");
         return Integer.parseInt(virtualCores);
     }
 
