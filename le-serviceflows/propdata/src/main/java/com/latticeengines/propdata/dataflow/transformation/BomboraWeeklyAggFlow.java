@@ -24,6 +24,25 @@ import cascading.tuple.Fields;
 public class BomboraWeeklyAggFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
 
+    private final static String ID = "ID";
+    private final static String DOMAIN = "Domain";
+    private final static String TOTAL_VIEWS = "TotalViews";
+    private final static String TOPIC_SCORE = "TopicScore";
+    private final static String TOTAL_AGGREGATED_SCORE = "TotalAggregatedScore";
+    private final static String TOPIC = "Topic";
+    private final static String POSTAL_CODE = "PostalCode";
+    private final static String CONTENT_SOURCES = "ContentSources";
+    private final static String UNIQUE_USERS = "UniqueUsers";
+    private final static String ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE = "ZipCodeOfHighestAggregatedScore";
+    private final static String HIGHLY_RELEVANT_SOURCES = "HighlyRelevantSources";
+    private final static String MOST_RELEVANT_SOURCES = "MostRelevantSources";
+    private final static String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
+    private final static String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
+    private final static String SOURCE_ID = "SourceID";
+    private final static String HASHED_EMAIL_ID = "HashedEmailIDBase64";
+    private final static String DATE = "Date";
+
+
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
@@ -32,69 +51,69 @@ public class BomboraWeeklyAggFlow
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node bombora7Days = addSource(parameters.getBaseTables().get(0));
-        bombora7Days = bombora7Days.addRowID("ID");
+        bombora7Days = bombora7Days.addRowID(ID);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("ID", "TotalViews", AggregationType.COUNT));
-        aggregations.add(new Aggregation("TopicScore", "TotalAggregatedScore", AggregationType.SUM));
-        Node bomboraWeeklyAgg = bombora7Days.groupBy(new FieldList("Domain", "Topic", "PostalCode"), aggregations);
+        aggregations.add(new Aggregation(ID, TOTAL_VIEWS, AggregationType.COUNT));
+        aggregations.add(new Aggregation(TOPIC_SCORE, TOTAL_AGGREGATED_SCORE, AggregationType.SUM));
+        Node bomboraWeeklyAgg = bombora7Days.groupBy(new FieldList(DOMAIN, TOPIC, POSTAL_CODE), aggregations);
         bomboraWeeklyAgg = bomboraWeeklyAgg
-                .retain(new FieldList("Domain", "Topic", "PostalCode", "TotalViews", "TotalAggregatedScore"));
-        bomboraWeeklyAgg = bomboraWeeklyAgg.groupByAndLimit(new FieldList("Domain", "Topic"),
-                new FieldList("TotalAggregatedScore"), 1, true, true);
+                .retain(new FieldList(DOMAIN, TOPIC, POSTAL_CODE, TOTAL_VIEWS, TOTAL_AGGREGATED_SCORE));
+        bomboraWeeklyAgg = bomboraWeeklyAgg.groupByAndLimit(new FieldList(DOMAIN, TOPIC),
+                new FieldList(TOTAL_AGGREGATED_SCORE), 1, true, true);
 
         List<FieldMetadata> bomboraWeeklyAggMetadata = new ArrayList<FieldMetadata>();
-        bomboraWeeklyAggMetadata.add(new FieldMetadata("Domain", String.class));
-        bomboraWeeklyAggMetadata.add(new FieldMetadata("Topic", String.class));
-        bomboraWeeklyAggMetadata.add(new FieldMetadata("PostalCode", String.class));
-        bomboraWeeklyAggMetadata.add(new FieldMetadata("TotalViews", Long.class));
-        bomboraWeeklyAggMetadata.add(new FieldMetadata("TotalAggregatedScore", Double.class));
+        bomboraWeeklyAggMetadata.add(new FieldMetadata(DOMAIN, String.class));
+        bomboraWeeklyAggMetadata.add(new FieldMetadata(TOPIC, String.class));
+        bomboraWeeklyAggMetadata.add(new FieldMetadata(POSTAL_CODE, String.class));
+        bomboraWeeklyAggMetadata.add(new FieldMetadata(TOTAL_VIEWS, Long.class));
+        bomboraWeeklyAggMetadata.add(new FieldMetadata(TOTAL_AGGREGATED_SCORE, Double.class));
         bomboraWeeklyAgg.setSchema(bomboraWeeklyAggMetadata);
 
         bombora7Days = bombora7Days.renamePipe("BomboraDepivoted7Days");
         bombora7Days = renameBomboraDepivotedColumn(bombora7Days);
 
-        bomboraWeeklyAgg = bomboraWeeklyAgg.join(new FieldList("Domain", "Topic", "PostalCode"), bombora7Days,
-                new FieldList("Daily_Domain", "Daily_Topic", "Daily_PostalCode"), JoinType.INNER);
+        bomboraWeeklyAgg = bomboraWeeklyAgg.join(new FieldList(DOMAIN, TOPIC, POSTAL_CODE), bombora7Days,
+                new FieldList("Daily_" + DOMAIN, "Daily_" + TOPIC, "Daily_" + POSTAL_CODE), JoinType.INNER);
 
         List<FieldMetadata> bomboraWeeklyAggMetadataUpdated = new ArrayList<FieldMetadata>();
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("Domain", String.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("Topic", String.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("PostalCode", String.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("TotalViews", Long.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("TotalAggregatedScore", Double.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("ContentSources", Integer.class));
-        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata("UniqueUsers", Integer.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(DOMAIN, String.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(TOPIC, String.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(POSTAL_CODE, String.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(TOTAL_VIEWS, Long.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(TOTAL_AGGREGATED_SCORE, Double.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(CONTENT_SOURCES, Integer.class));
+        bomboraWeeklyAggMetadataUpdated.add(new FieldMetadata(UNIQUE_USERS, Integer.class));
 
-        Fields bomboraWeeklyAggFields = new Fields("Domain", "Topic", "PostalCode", "TotalViews",
-                "TotalAggregatedScore", "ContentSources", "UniqueUsers");
+        Fields bomboraWeeklyAggFields = new Fields(DOMAIN, TOPIC, POSTAL_CODE, TOTAL_VIEWS, TOTAL_AGGREGATED_SCORE,
+                CONTENT_SOURCES, UNIQUE_USERS);
         bomboraWeeklyAgg = bomboraWeeklyAgg.groupByAndBuffer(
-                new FieldList("Domain", "Topic", "PostalCode", "TotalViews", "TotalAggregatedScore"),
-                new BomboraWeeklyAggBuffer(bomboraWeeklyAggFields, "ContentSources", "Daily_SourceID", "UniqueUsers",
-                        "Daily_HashedEmailIDBase64"),
+                new FieldList(DOMAIN, TOPIC, POSTAL_CODE, TOTAL_VIEWS, TOTAL_AGGREGATED_SCORE),
+                new BomboraWeeklyAggBuffer(bomboraWeeklyAggFields, CONTENT_SOURCES, "Daily_" + SOURCE_ID, UNIQUE_USERS,
+                        "Daily_" + HASHED_EMAIL_ID),
                 bomboraWeeklyAggMetadataUpdated);
 
 
-        bomboraWeeklyAgg = bomboraWeeklyAgg.rename(new FieldList("PostalCode"),
-                new FieldList("ZipCodeOfHighestAggregatedScore"));
-        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Long.valueOf(TotalViews).intValue()",
-                new FieldList("TotalViews"), new FieldMetadata("TotalViews", Integer.class));
-        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Double.valueOf(TotalAggregatedScore).floatValue()",
-                new FieldList("TotalAggregatedScore"), new FieldMetadata("TotalAggregatedScore", Float.class));
+        bomboraWeeklyAgg = bomboraWeeklyAgg.rename(new FieldList(POSTAL_CODE),
+                new FieldList(ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE));
+        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Long.valueOf(" + TOTAL_VIEWS + ").intValue()",
+                new FieldList(TOTAL_VIEWS), new FieldMetadata(TOTAL_VIEWS, Integer.class));
+        bomboraWeeklyAgg = bomboraWeeklyAgg.addFunction("Double.valueOf(" + TOTAL_AGGREGATED_SCORE + ").floatValue()",
+                new FieldList(TOTAL_AGGREGATED_SCORE), new FieldMetadata(TOTAL_AGGREGATED_SCORE, Float.class));
 
         bomboraWeeklyAgg = bomboraWeeklyAgg.apply(
-                new AddNullColumns(new Fields("HighlyRelevantSources", "MostRelevantSources",
-                        "TotalAggregatedScore_HighlyRelevant", "TotalAggregatedScore_MostRelevant")),
-                new FieldList("Domain"),
-                Arrays.asList(new FieldMetadata("HighlyRelevantSources", Integer.class),
-                        new FieldMetadata("MostRelevantSources", Integer.class),
-                        new FieldMetadata("TotalAggregatedScore_HighlyRelevant", Float.class),
-                        new FieldMetadata("TotalAggregatedScore_MostRelevant", Float.class)),
-                new FieldList("Domain", "Topic", "ZipCodeOfHighestAggregatedScore", "ContentSources", "TotalViews",
-                        "UniqueUsers", "TotalAggregatedScore", "HighlyRelevantSources", "MostRelevantSources",
-                        "TotalAggregatedScore_HighlyRelevant", "TotalAggregatedScore_MostRelevant"));
+                new AddNullColumns(new Fields(HIGHLY_RELEVANT_SOURCES, MOST_RELEVANT_SOURCES,
+                        TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT, TOTAL_AGGREGATED_SCORE_MOST_RELEVANT)),
+                new FieldList(DOMAIN),
+                Arrays.asList(new FieldMetadata(HIGHLY_RELEVANT_SOURCES, Integer.class),
+                        new FieldMetadata(MOST_RELEVANT_SOURCES, Integer.class),
+                        new FieldMetadata(TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT, Float.class),
+                        new FieldMetadata(TOTAL_AGGREGATED_SCORE_MOST_RELEVANT, Float.class)),
+                new FieldList(DOMAIN, TOPIC, ZIP_CODE_OF_HIGHEST_AGGREGATED_SCORE, CONTENT_SOURCES, TOTAL_VIEWS,
+                        UNIQUE_USERS, TOTAL_AGGREGATED_SCORE, HIGHLY_RELEVANT_SOURCES, MOST_RELEVANT_SOURCES,
+                        TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT, TOTAL_AGGREGATED_SCORE_MOST_RELEVANT));
 
-        bomboraWeeklyAgg = bomboraWeeklyAgg.addTimestamp("Date", parameters.getTimestamp());
+        bomboraWeeklyAgg = bomboraWeeklyAgg.addTimestamp(DATE, parameters.getTimestamp());
         return bomboraWeeklyAgg;
     }
 

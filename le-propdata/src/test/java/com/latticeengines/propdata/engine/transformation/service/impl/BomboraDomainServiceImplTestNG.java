@@ -87,6 +87,6 @@ public class BomboraDomainServiceImplTestNG
 
             rowNum++;
         }
-        Assert.assertEquals(3, rowNum);
+        Assert.assertEquals(rowNum, 3);
     }
 }
