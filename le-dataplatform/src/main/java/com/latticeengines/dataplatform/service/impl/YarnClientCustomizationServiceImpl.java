@@ -81,10 +81,9 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),
                 appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()));
         ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
-        
-        int memory = customization.getMemory(containerProperties);
-        int virtualCores = customization.getVirtualcores(containerProperties);
-        int priority = customization.getPriority(containerProperties);
+        int memory = customization.getMemory(appMasterProperties);
+        int virtualCores = customization.getVirtualcores(appMasterProperties);
+        int priority = customization.getPriority(appMasterProperties);
         String queue = customization.getQueue(appMasterProperties);
 
         customization.afterCreateLocalLauncherContextFile(containerProperties);
