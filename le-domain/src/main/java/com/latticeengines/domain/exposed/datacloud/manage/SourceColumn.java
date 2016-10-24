@@ -68,6 +68,9 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "Groups", nullable = false)
     private String groups = "";
 
+    @Column(name = "CharAttrId")
+    private Integer charAttrId;
+
     @Column(name = "Categories", length = 1000)
     private String categories;
 
@@ -172,6 +175,14 @@ public class SourceColumn implements HasPid, Serializable {
 
     public void setGroups(String groups) {
         this.groups = groups == null ? "" : groups;
+    }
+
+    public Integer getCharAttrId() {
+        return charAttrId;
+    }
+
+    public void setCharAttrId(Integer charAttrId) {
+        this.charAttrId = charAttrId;
     }
 
     private String getCategories() {
