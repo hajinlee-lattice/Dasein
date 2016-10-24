@@ -69,7 +69,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Value("${datacloud.match.cascading.rows.threshold:10000}")
     private Integer cascadingBulkRowsThreshold;
 
-    @Value("${datacloud.match.cascading.container.size:1024}")
+    @Value("${datacloud.match.cascading.container.size:2048}")
     private String cascadingContainerSize;
 
     @Value("${datacloud.match.cascading.queue.name:Modeling}")
