@@ -117,10 +117,10 @@ public class DataFileResource {
         response.setHeader("Content-Encoding", "gzip");
         if (eventTableType.equalsIgnoreCase("training")) {
             dataFileProviderService.downloadFile(request, response, modelId,
-                    MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Training.*.csv");
+                    MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*allTraining.*.csv");
         } else if (eventTableType.equalsIgnoreCase("test")) {
             dataFileProviderService.downloadFile(request, response, modelId,
-                    MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*Test.*.csv");
+                    MediaType.APPLICATION_OCTET_STREAM, "postMatchEventTable.*allTest.*.csv");
         }
     }
 
