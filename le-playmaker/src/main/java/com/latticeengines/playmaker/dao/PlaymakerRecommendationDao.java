@@ -47,4 +47,7 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     int getContactExtensionColumnCount();
 
+    List<Map<String, Object>> getAccountExtensionsWithContacts(long start, int offset, int maximum,
+            List<Integer> accountIds, String filterBy, Long recStart, String columns);
+
 }

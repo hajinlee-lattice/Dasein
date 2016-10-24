@@ -288,6 +288,44 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return result;
     }
 
+    @Override
+    public List<Map<String, Object>> getAccountExtensionsWithContacts(long start, int offset, int maximum,
+            List<Integer> accountIds, String filterBy, Long recStart, String columns) {
+        String extensionColumns = getAccountExtensionColumns(columns);
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
+                + "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '001%' THEN A.External_ID ELSE NULL END AS SfdcAccountID, "
+                + "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '003%' THEN A.External_ID ELSE NULL END AS SfdcContactID, "
+                + "A.External_ID AS LEAccountExternalID, " + extensionColumns + " "
+                + "DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
+                + ") AS LastModificationDate, " + "ROW_NUMBER() OVER ( ORDER BY "
+                + getAccountExtensionLastModificationDate() + ", [Item_ID]) RowNum "
+                + getAccountExtensionFromWhereClause(accountIds, filterBy)
+                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        if (StringUtils.isNotEmpty(filterBy)
+                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals(
+                        "NORECOMMENDATIONS"))) {
+            if (recStart == null) {
+                throw new RuntimeException("Missng recStart when filterBy is used.");
+            }
+            source.addValue("recStart", recStart);
+        }
+        source.addValue("start", start);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
+        if (!CollectionUtils.isEmpty(accountIds)) {
+            source.addValue("accountIds", accountIds);
+        }
+
+        List<Map<String, Object>> result = queryForListOfMap(sql, source);
+        if (result != null) {
+            for (Map<String, Object> map : result) {
+                map.remove("Item_ID");
+            }
+        }
+        return result;
+    }
+
     private String getAccountExtensionColumns(String columns) {
         if (columns != null) {
             columns = StringUtils.strip(columns);

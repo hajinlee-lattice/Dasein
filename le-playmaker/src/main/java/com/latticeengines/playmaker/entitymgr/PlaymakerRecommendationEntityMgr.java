@@ -54,4 +54,7 @@ public interface PlaymakerRecommendationEntityMgr {
     Map<String, Object> getContactExtensions(String tenantName, long start, int offset, int maximum,
             List<Integer> accountIds);
 
+    Map<String, Object> getAccountExtensionsWithContacts(String tenantName, long start, int offset, int maximum,
+            List<Integer> accountIds, String filterBy, Long recStart, String columns);
+
 }

@@ -161,6 +161,21 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     }
 
     @Test(groups = "functional", enabled = true)
+    public void getAccountExtensionsWithContacts() throws Exception {
+
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensionsWithContacts(tenant.getTenantName(),
+                1000, 1, 100, null, null, 0L, null);
+
+        Assert.assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> plays = (List<Map<String, Object>>) result
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertTrue(plays.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
+        Assert.assertTrue(plays.size() > 0);
+    }
+
+    
+    @Test(groups = "functional", enabled = true)
     public void getContacts() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), 1000, 0, 100,
