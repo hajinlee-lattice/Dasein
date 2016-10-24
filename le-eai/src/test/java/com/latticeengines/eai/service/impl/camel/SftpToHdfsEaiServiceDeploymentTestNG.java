@@ -40,6 +40,7 @@ public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBas
         assertNotEquals(submission.getApplicationIds().size(), 0);
         String appId = submission.getApplicationIds().get(0);
         assertNotNull(appId);
+        System.out.println(String.format("Waiting on application id %s", appId));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, WORKFLOW_WAIT_TIME_IN_MILLIS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
