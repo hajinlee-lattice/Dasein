@@ -95,7 +95,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             yarnMetricGeneratorInfoEntityMgr.create(yarnMetricGeneratorInfo);
         }
 
-        long finishedTimeBegin = yarnMetricGeneratorInfo.getFinishedTimeBegin();
+        long finishedTimeBegin = yarnMetricGeneratorInfo.getFinishedTimeBegin() + 1;
         long newFinishedTimeBegin = generateCompletedJobMetrics(finishedTimeBegin, FinalApplicationStatus.SUCCEEDED);
         generateCompletedJobMetrics(finishedTimeBegin, FinalApplicationStatus.FAILED);
         generateCompletedJobMetrics(finishedTimeBegin, FinalApplicationStatus.KILLED);
