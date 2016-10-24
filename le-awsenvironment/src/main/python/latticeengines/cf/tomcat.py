@@ -10,6 +10,7 @@ from .module.ec2 import ec2_defn
 from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
+from ..conf import AwsEnvironment
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
@@ -96,8 +97,10 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
 
     tgrp_arn = find_tgrp_arn(tgrp)
+    config = AwsEnvironment(environment)
+    sg = config.tomcat_sg() if public else config.tomcat_internal_sg()
 
-    ECSStack.provision(environment, s3_path(stackname), stackname, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
+    ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
 def teardown_cli(args):
     teardown(args.stackname)

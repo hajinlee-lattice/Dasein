@@ -287,7 +287,7 @@ class ECSStack(Stack):
         }
 
     @staticmethod
-    def provision(environment, s3cfpath, stackname, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
+    def provision(environment, s3cfpath, stackname, security_group, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
         #if not elb_not_busy(elb):
         #    return
 
@@ -299,12 +299,10 @@ class ECSStack(Stack):
             subnet1 = config.public_subnet_1()
             subnet2 = config.public_subnet_2()
             subnet3 = config.public_subnet_3()
-            tomcat_sg = config.tomcat_sg()
         else:
             subnet1 = config.private_subnet_1()
             subnet2 = config.private_subnet_2()
             subnet3 = config.private_subnet_3()
-            tomcat_sg = config.tomcat_internal_sg()
 
         params = [
             PARAM_VPC_ID.config(config.vpc()),
@@ -312,7 +310,7 @@ class ECSStack(Stack):
             PARAM_SUBNET_2.config(subnet2),
             PARAM_SUBNET_3.config(subnet3),
             PARAM_KEY_NAME.config(config.ec2_key()),
-            PARAM_SECURITY_GROUP.config(tomcat_sg),
+            PARAM_SECURITY_GROUP.config(security_group),
             PARAM_INSTANCE_TYPE.config(instance_type),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile_arn()),
