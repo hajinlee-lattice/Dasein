@@ -142,12 +142,11 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
                         values: bucket.data[metric]
                     };
                 }),
-                title: key
+                title: bucket.description.analyticTest
             },
             type: 'line'
         };
     });
-
 
     $scope.barCharts = Object.keys(barBuckets).map(function (barBucket) {
         var bucketData = barBuckets[barBucket];

@@ -76,10 +76,10 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 .extent([[0, 0], [width, height]])
                 .on("zoom", zoomed);
 
-            svg.call(zoom);
-
             var chart = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            chart.call(zoom);
 
             var hoverVerticalLine = chart.append("line")
                 .attr("class", "chart-hover-line")
@@ -128,21 +128,17 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 // should not need to remove, use .enter() or .update()
                 chart.selectAll("g").remove(); // empty all except zoom
 
-                var legendRectSize = 18, legendSpacing = 4, charSize = 8;
-                var prevOffset = 0;
+                var legendRectSize = 18,
+                    legendSpacing = 4,
+                    charSize = 8,
+                    vert = height + margin.bottom,
+                    prevOffset = 0;
+
                 var legend = svg.selectAll('.legend')
                     .data(color.domain())
                     .enter()
                     .append('g')
-                    .attr('class', 'legend')
-                    .attr('transform', function (d, i) {
-                        var offset = d.length * charSize + legendSpacing * 2;
-                        var horz = prevOffset + offset;
-                        var vert = height + margin.bottom;
-                        prevOffset = horz + legendRectSize;
-
-                        return 'translate(' + horz + ',' + vert + ')';
-                    });
+                    .attr('class', 'legend');
 
                 legend.append('rect')
                     .attr('width', legendRectSize)
@@ -151,11 +147,18 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     .style('stroke', color);
 
                 legend.append("text")
-                    .attr("x", -legendSpacing)
+                    .attr("x", legendRectSize + legendSpacing)
                     .attr("y", 9)
                     .attr("dy", ".35em")
-                    .attr("text-anchor", "end")
+                    .attr("text-anchor", "start")
                     .text(function(d) { return d.toUpperCase(); });
+
+                legend.each(function(d, i) {
+                    var self = d3.select(this);
+                    self.attr("transform", "translate(" + prevOffset + "," + vert + ")");
+
+                    prevOffset += self.node().getBBox().width + legendSpacing;
+                });
 
                 var series = chart.selectAll(".series")
                     .data(seriesData)
@@ -312,7 +315,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                         maxDate = Math.max(maxDate, d.date);
                         minDate = Math.min(minDate, d.date);
                         maxValue = Math.max(maxValue, d.value);
-                        //minValue = Math.min(minValue, d.value);
                     });
                 });
 

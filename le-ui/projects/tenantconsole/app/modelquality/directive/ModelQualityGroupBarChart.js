@@ -44,7 +44,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
             var key = options[0];
 
-            var margin = {top: 20, right: 150, bottom: 20, left: 40},
+            var margin = {top: 20, right: 0, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
                 height = container.clientHeight - margin.top - margin.bottom;
 
@@ -91,33 +91,37 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
                 chart.selectAll("g").remove();
 
-                var legendRectSize = 18, legendSpacing = 4, charSize = 8;
-                var prevOffset = 0;
-                var legend = svg.selectAll('.legend')
+                var legendRectSize = 18,
+                    legendSpacing = 4,
+                    charSize = 8,
+                    vert = height + margin.bottom,
+                    prevOffset = 0;
+
+                var legend = svg.selectAll(".legend")
                     .data(color.domain())
                     .enter()
-                    .append('g')
-                    .attr('class', 'legend')
-                    .attr('transform', function (d, i) {
-                        var legendHeight = legendRectSize + legendSpacing;
-                        var offset =  legendHeight * color.domain().length / 2;
-                        var horz = -2 * legendRectSize;
-                        var vert = height  - i * legendHeight - offset;
-                        return 'translate(' + (width + margin.right) + ',' + (vert + margin.bottom)  + ')';
-                    });
+                    .append("g")
+                    .attr("class", "legend");
 
-                legend.append('rect')
-                    .attr('width', legendRectSize)
-                    .attr('height', legendRectSize)
-                    .style('fill', color)
-                    .style('stroke', color);
+                legend.append("rect")
+                    .attr("width", legendRectSize)
+                    .attr("height", legendRectSize)
+                    .style("fill", color)
+                    .style("stroke", color);
 
                 legend.append("text")
-                    .attr("x", -legendSpacing)
+                    .attr("x", legendRectSize + legendSpacing)
                     .attr("y", 9)
                     .attr("dy", ".35em")
-                    .attr("text-anchor", "end")
+                    .attr("text-anchor", "start")
                     .text(function(d) { return d.toUpperCase(); });
+
+                legend.each(function(d, i) {
+                    var self = d3.select(this);
+                    self.attr("transform", "translate(" + prevOffset + "," + vert + ")");
+
+                    prevOffset += self.node().getBBox().width + legendSpacing;
+                });
 
                 chart.append("g")
                     .attr("class", "x axis")
@@ -154,11 +158,18 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                         return metric + ': ' + d.value[metric];
                     }).join('<br>');
 
-                    tooltip.html(template)
-                        .style("right", "0px")
-                        .style("top", "0px");
+                    tooltip.html(template);
+
+                    var tooltipWidth = tooltip.nodes()[0].offsetWidth;
+                    if (d3.event.offsetX < tooltipWidth || d3.event.offsetX < 250) {
+                        tooltip.style("right", width - (d3.event.offsetX + tooltipWidth) + "px");
+
+                    } else {
+                        tooltip.style("right", width - d3.event.offsetX + 30 + "px");
+                    }
 
                     showTooltip();
+
                     $timeout.cancel(tooltipTimer);
                     tooltipTimer = $timeout(hideTooltip, 1500);
                 })
@@ -166,6 +177,8 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     hideTooltip();
                 })
                 .on("mousemove", function () {
+                    tooltip.style("top", d3.event.offsetY + "px");
+
                     $timeout.cancel(tooltipTimer);
                     tooltipTimer = $timeout(hideTooltip, 1500);
                 });
@@ -188,10 +201,10 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     });
             };
 
-            var _skipFirst = true;
+            var ignoreFirst = true;
             var resize = function () {
-                if (_skipFirst) {
-                    _skipFirst = false;
+                if (ignoreFirst) {
+                    ignoreFirst = false;
                     return;
                 }
                 width = container.clientWidth - margin.left - margin.right;

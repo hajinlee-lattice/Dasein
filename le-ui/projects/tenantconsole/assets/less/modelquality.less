@@ -83,8 +83,10 @@
 }
 
 .chart-title {
-  text-anchor: middle;
   font-size: 16px;
+  text-anchor: middle;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .chart-hover-line {
@@ -102,10 +104,15 @@
   font-weight: bold;
   pointer-events: none;
   z-index: 99;
-  user-select: none;
+          user-select: none;
+      -ms-user-select: none;
+     -moz-user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+          transition: all 0.2s ease;
+       -o-transition: all 0.2s ease;
+      -ms-transition: all 0.2s ease;
+     -moz-transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
 }
 
 .error {
