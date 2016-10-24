@@ -72,6 +72,12 @@
                 .dropdown-categories {
                     color: #222;
                     position: relative;
+                    pointer-events: none;
+                    opacity: .5;
+                    &.ready {
+                        pointer-events: auto;
+                        opacity: 1;
+                    }
                     & > h4 {
                         @include user-select(none);
                         position: relative;

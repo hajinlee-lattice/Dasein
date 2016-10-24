@@ -25,7 +25,7 @@
                     </div>
                 </li>
                 <li class="categories">
-                    <div class="dropdown-categories" ng-class="{active: vm.show_categories}">
+                    <div class="dropdown-categories" ng-class="{active: vm.show_categories, ready: vm.enable_category_dropdown}">
                         <h4 ng-click="vm.categoriesDropdown($event)">Search and browse by category</h4>
                         <ul ng-class="{active: vm.show_categories}">
                             <li ng-repeat="(key, value) in vm.categories">

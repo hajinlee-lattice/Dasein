@@ -1003,6 +1003,7 @@ angular
                 "main@": {
                     resolve: {
                         EnrichmentCategories: function($q, EnrichmentStore) {
+                            return false;
                             var deferred = $q.defer();
 
                             EnrichmentStore.getCategories().then(function(result) {

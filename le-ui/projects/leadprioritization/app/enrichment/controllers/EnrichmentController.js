@@ -52,6 +52,7 @@ angular.module('lp.enrichment.leadenrichment', [
         subcategories: [],
         categories: [],
         selected_categories: {},
+        enable_category_dropdown: false,
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
         view: 'list'
@@ -119,6 +120,17 @@ angular.module('lp.enrichment.leadenrichment', [
         });
     }
 
+    var getEnrichmentCategories = function() {
+        EnrichmentStore.getCategories().then(function(result) {
+            vm.categories = result.data;
+            _.each(vm.categories, function(value, key){
+                getEnrichmentSubcategories(value);
+            });
+            vm.enable_category_dropdown = true;
+            console.log(vm.enable_category_dropdown);
+        });
+    }
+
     var getEnrichmentSubcategories = function(category) {
         if(category) {
             EnrichmentStore.getSubcategories(category).then(function(result) {
@@ -129,17 +141,36 @@ angular.module('lp.enrichment.leadenrichment', [
         }
     }
 
+    var textSearch = function(haystack, needle, case_insensitive) {
+        var case_insensitive = (case_insensitive === false ? false : true);
+        if(case_insensitive) {
+            var haystack = haystack.toUpperCase(),
+            needle = needle.toUpperCase();
+        }
+        return haystack.includes(needle);
+    }
+
     vm.searchFields = function(enrichment){
         if(vm.query) {
-            if(enrichment.DisplayName.includes(vm.query)) {
+            if(textSearch(enrichment.DisplayName, vm.query)) {
                 return true;
-            } else if(enrichment.Description.includes(vm.query)) {
+            } else if(textSearch(enrichment.Description, vm.query)) {
                 return true;
             } else {
                 return false;
             }
         }
         return true;
+    }
+
+    vm.wrapText = function(string, search, tag) { 
+        var tag = tag || 'em',
+            tag = '<' + tag + '>',
+            endtag = '</' + tag + '>';
+        if(!search) {
+            return string;
+        }
+        return '<span class="highlight">' + string.split(new RegExp(search, "i")).join(tag+search+endtag) + '</span>'; // this won't work as is, but leaving in here for future reference, make a filter or something
     }
     
     vm.changeCategory = function(opts){
@@ -452,10 +483,7 @@ angular.module('lp.enrichment.leadenrichment', [
         _resized();
         getEnrichmentData();
 
-        vm.categories = EnrichmentCategories.data;
-        _.each(vm.categories, function(value, key){
-            getEnrichmentSubcategories(value);
-        });
+        getEnrichmentCategories();
 
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
