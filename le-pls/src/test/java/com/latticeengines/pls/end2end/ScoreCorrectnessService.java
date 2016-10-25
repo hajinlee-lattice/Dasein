@@ -324,11 +324,6 @@ public class ScoreCorrectnessService {
             double doubleScoreApi = Double.parseDouble(scoreApi);
             parsedExpected = doubleExpected;
             parsedScoreApi = doubleScoreApi;
-            double difference = Math.abs(doubleExpected - doubleScoreApi);
-            if (difference < THRESHOLD) {
-                // difference is so minor just count these two as the same
-                parsedScoreApi = parsedExpected;
-            }
         } catch (NumberFormatException edouble) {
             try {
                 parsedExpected = Long.parseLong(expected);
