@@ -19,7 +19,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedRebuildFlowParameter;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 
 @Component("accountMasterSeedRebuildFlow")
-public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<AccountMasterSeedRebuildFlowParameter> {
+public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<TransformationFlowParameters> {
 
     private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
     // dnbCacheSeed columns -> accountMasterSeed columns
@@ -49,7 +49,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
 
 
     @Override
-    public Node construct(AccountMasterSeedRebuildFlowParameter parameters) {
+    public Node construct(TransformationFlowParameters parameters) {
         try {
             getColumnMapping(parameters.getColumns());
         } catch (IOException e) {
