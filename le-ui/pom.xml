@@ -23,7 +23,21 @@
                 <executions>
                     <execution>
                         <id>uibuild</id>
-                        <phase>generate-sources</phase>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>.</workingDirectory>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>uipackage</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
