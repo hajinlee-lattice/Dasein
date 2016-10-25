@@ -100,9 +100,16 @@
                 </div>
             </form>
             <br>
-            <h4>Feature Flags</h4>
+            <h4>Feature Flags
+                <span ng-if="!new && !isEditingFeatureFlag" ng-click="editFeatureFlags()" class="header-btn">Edit</span>
+                <span ng-if="isEditingFeatureFlag">
+                    <span ng-click="saveFeatureFlags()" class="header-btn">Save</span>
+                    <span ng-click="cancelEditFeatureFlags()" class="header-btn">Cancel</span>
+                </span>
+            </h4>
+            <p ng-if="featureFlagUpdateError" class="alert alert-danger">{{featureFlagUpdateError}}</p>
             <div ng-repeat="featureFlag in selectedFeatureFlags | orderBy:'-DisplayName'">
-                <feature-flag show={{!featureFlag.Configurable}} flag="featureFlag.Value" name={{featureFlag.DisplayName}} readonly="readonly"></feature-flag>
+                <feature-flag ng-if="featureFlag.Configurable" flag="featureFlag" readonly="readonly" editing="isEditingFeatureFlag"></feature-flag>
             </div>
 
         </div>

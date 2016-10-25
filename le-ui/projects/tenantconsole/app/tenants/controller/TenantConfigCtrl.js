@@ -581,6 +581,70 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         return component;
     }
 
+    //==================================================
+    // edit feature flags
+    //==================================================
+    var featureFlagsBackup = null;
+    $scope.isEditingFeatureFlag = false;
+
+    $scope.editFeatureFlags = function () {
+        backupFeatureFlags();
+        $scope.isEditingFeatureFlag = true;
+    };
+
+    $scope.saveFeatureFlags = function () {
+        $scope.featureFlagUpdateError = null;
+
+        var flagsToUpdate = {};
+        if (featureFlagsBackup) {
+            _.each($scope.selectedFeatureFlags, function (featureFlag) {
+                if (featureFlagsBackup[featureFlag.DisplayName] !== undefined) {
+                    if (featureFlag.Value !== featureFlagsBackup[featureFlag.DisplayName]) {
+                        flagsToUpdate[featureFlag.DisplayName] = featureFlag.Value;
+                    }
+                }
+            });
+        }
+
+        TenantService.UpdateFeatureFlags($scope.tenantId, flagsToUpdate)
+            .then(function(results) {
+               $scope.isEditingFeatureFlag = false;
+               featureFlagsBackup = null;
+            }).catch(function(error) {
+                if (error && error.errorMsg) {
+                    $scope.featureFlagUpdateError = 'Error updating feature flag. ' + error.errMsg.errorCode + ': '+ error.errMsg.ErrorMsg;
+                } else {
+                    $scope.featureFlagUpdateError = 'Error updating feature flag';
+                }
+            });
+    };
+
+    $scope.cancelEditFeatureFlags = function () {
+        undoFeatureFlagChanges();
+        $scope.isEditingFeatureFlag = false;
+        $scope.featureFlagUpdateError = null;
+    };
+
+    function backupFeatureFlags() {
+        featureFlagsBackup = {};
+        _.each($scope.selectedFeatureFlags, function (featureFlag) {
+            if (featureFlag.Configurable === true) {
+                featureFlagsBackup[featureFlag.DisplayName] = featureFlag.Value;
+            }
+        });
+    }
+
+    function undoFeatureFlagChanges() {
+        if (featureFlagsBackup) {
+            _.each($scope.selectedFeatureFlags, function (featureFlag) {
+                if (featureFlagsBackup[featureFlag.DisplayName] !== undefined) {
+                    featureFlag.Value = featureFlagsBackup[featureFlag.DisplayName];
+                }
+            });
+            featureFlagsBackup = null;
+        }
+    }
+
 });
 
 

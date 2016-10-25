@@ -6,7 +6,7 @@ var app = angular.module("app.tenants.service.TenantService", [
 
 app.service('TenantService', function($q, $http, $interval, _, TenantUtility, SessionUtility){
 
-    this.CreateTenant = function(tenantId, contractId, tenantRegisration) {
+    this.CreateTenant = function(tenantId, contractId, tenantRegistration) {
         var defer = $q.defer();
 
         var result = {
@@ -18,7 +18,7 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
         $http({
             method: 'POST',
             url: '/admin/tenants/' + tenantId + '?contractId=' + contractId,
-            data: tenantRegisration
+            data: tenantRegistration
         }).success(function(data) {
             result.success = (data === "true" || data === true);
             defer.resolve(result);
@@ -218,6 +218,38 @@ app.service('TenantService', function($q, $http, $interval, _, TenantUtility, Se
         }
 
         return defer.promise;
+    };
+
+    this.PostFeatureFlags = function (tenantId, featureFlags) {
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/admin/tenants/'+tenantId+'/featureflags',
+            data: featureFlags
+        }).success(function (data) {
+            result.success = true;
+            result.resultObj = data;
+
+            defer.resolve(result);
+        }).error(function (err, status) {
+            SessionUtility.handleAJAXError(err, status);
+
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
+    this.UpdateFeatureFlags = function (tenantId, featureFlags) {
+        return this.PostFeatureFlags(tenantId, featureFlags);
     };
 
 });
