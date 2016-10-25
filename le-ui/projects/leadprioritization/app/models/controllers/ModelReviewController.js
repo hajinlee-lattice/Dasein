@@ -53,7 +53,7 @@ angular.module('mainApp.models.review', [
     });
 })
 .controller('ModelReviewColumnController', function($scope, _, $stateParams, ModelService, MetadataService, ModelReviewStore,
-    ReviewData, MetadataStore) {
+    ReviewData) {
         var vm = this,
             ruleNameToDataRules = {},
             modelId = $stateParams.modelId;
@@ -80,8 +80,8 @@ angular.module('mainApp.models.review', [
             columnNameToColumnDisplayName: {}
         });
 
-        MetadataStore.GetMetadataForModel(modelId).then(function(modelMetadata) {
-            vm.modelMetadata = modelMetadata;
+        MetadataService.GetMetadataForModel(modelId).then(function(modelMetadata) {
+            vm.modelMetadata = modelMetadata.ResultObj;
             vm.allColumnWarnings.forEach(function(columnWarning) {
                 vm.totalWarnedColumnCount += columnWarning.flaggedItemCount;
 
@@ -209,8 +209,8 @@ angular.module('mainApp.models.review', [
             data: '=',
             interface: '='
         },
-        controller: ['$scope', '$stateParams', 'ModelService', 'ModelReviewStore', 'MetadataStore',
-            function($scope, $stateParams, ModelService, ModelReviewStore, MetadataStore) {
+        controller: ['$scope', '$stateParams', 'ModelService', 'ModelReviewStore',
+            function($scope, $stateParams, ModelService, ModelReviewStore) {
 
             $scope.modelId = $stateParams.modelId;
             $scope.columnWarning = $scope.column;
