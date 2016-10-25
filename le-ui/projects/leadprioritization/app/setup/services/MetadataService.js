@@ -112,7 +112,7 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.GetMetadataForModelId = function (modelId) {
+    this.GetMetadataForModel = function (modelId) {
         var deferred = $q.defer();
 
         $http({

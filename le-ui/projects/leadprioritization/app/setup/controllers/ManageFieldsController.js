@@ -10,7 +10,7 @@ angular.module('lp.managefields', [
 ])
 .controller('ManageFieldsController', function (
     $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility, NavUtility, MetadataService,
-    MetadataStore, DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal, Model) {
+    DiscardEditFieldsModel, UpdateFieldsModal, FieldMappingSettingsModal, Model) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -76,8 +76,8 @@ angular.module('lp.managefields', [
 
     function loadFields() {
         $scope.loading = true;
-        MetadataStore.GetMetadataForModel($scope.modelId).then(function(result) {
-            $scope.fields = getFieldsToDisplay(result);
+        MetadataService.GetMetadataForModel($scope.modelId).then(function(result) {
+            $scope.fields = getFieldsToDisplay(result.ResultObj);
             renderSelects($scope.fields);
             renderGrid($scope.fields);
 
@@ -427,16 +427,9 @@ angular.module('lp.managefields', [
         if ($scope.saveInProgress) { return; }
         $scope.showEditFieldsError = false;
 
-        var editedData = getAllEditedData();
-        if ((editedData != null && editedData.length > 0) || advancedSettingsFlagsChanged()) {
-            UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations, $scope.modelId,
-                $scope.fields.concat($scope.fieldsNotDisplayed), Model.ModelDetails.DisplayName);
-
-            $scope.saveInProgress = false;
-        } else {
-            $scope.showEditFieldsError = true;
-            $scope.editFieldsErrorMessage = "No fields changed. Please update fields before cloning";
-        }
+        UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations, $scope.modelId,
+            $scope.fields.concat($scope.fieldsNotDisplayed), Model.ModelDetails.DisplayName);
+        $scope.saveInProgress = false;
     };
 
     function discardChangesOnPage() {
