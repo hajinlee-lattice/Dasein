@@ -18,18 +18,18 @@ logger = logging.getLogger(name='columntransform')
 class ColumnTransform(object):
 
     pipelineFileAsJson = ""
-    columnTransformKey = u"columnTransformFiles"
+    columnTransformKey = "columnTransformFiles"
 
-    uniqueColumnTransformKey = u"Name"
-    mainMethodNameKey = u"MainMethodName"
-    uniqueColumnTransformNameKey = u"UniqueColumnTransformName"
-    columnTransformFilePathKey = u"ColumnTransformFilePath"
-    loadedModuleKey = u"LoadedModule"
-    mainClassNameKey = u"MainClassName"
-    namedParameterListToInitKey = u"NamedParameterListToInit"
-    loadedObjectKey = u"LoadedObject"
-    resultOfCallingMainMethodNameKey = u"ResultOfCallingMainMethodName"
-    sortingKey = u'KeyWhenSortingByAscending'
+    uniqueColumnTransformKey = "Name"
+    mainMethodNameKey = "MainMethodName"
+    uniqueColumnTransformNameKey = "UniqueColumnTransformName"
+    columnTransformFilePathKey = "ColumnTransformFilePath"
+    loadedModuleKey = "LoadedModule"
+    mainClassNameKey = "MainClassName"
+    namedParameterListToInitKey = "NamedParameterListToInit"
+    loadedObjectKey = "LoadedObject"
+    resultOfCallingMainMethodNameKey = "ResultOfCallingMainMethodName"
+    sortingKey = "KeyWhenSortingByAscending"
 
     def __init__(self, pathToPipelineFiles=None):
         if pathToPipelineFiles is not None:
@@ -128,6 +128,11 @@ class ColumnTransform(object):
                     f = value["ColumnTransformFilePath"]
                     f = self.stripPath(f)
                     hdfs.copyToLocal(value["ColumnTransformFilePath"], "./%s" % f)
+                    rtsFile = value["RTSFilePath"] if "RTSFilePath" in value else None
+                    
+                    if rtsFile is not None:
+                        rtsFile = self.stripPath(rtsFile)
+                        hdfs.copyToLocal(value["RTSFilePath"], "./%s" % rtsFile)
 
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 

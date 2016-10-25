@@ -23,8 +23,16 @@ public interface ModelQualityPipelineInterface {
     
     String uploadPipelineStepMetadata(String fileName, String stepName, MultipartFile file);
 
+    String uploadPipelineStepRTSPythonScript(String fileName, String stepName, MultipartFile file);
+    
+    String uploadPipelineStepRTSPythonScript(String fileName, String stepName, HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity);
+    
     String createPipeline(String pipelineName, List<PipelineStepOrFile> pipelineSteps);
 
     Pipeline getPipelineByName(String pipelineName);
+
+    
+
+
 
 }

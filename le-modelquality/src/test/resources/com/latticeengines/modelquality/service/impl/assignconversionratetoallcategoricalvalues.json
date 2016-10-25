@@ -6,8 +6,9 @@
     "Categorical"
   ],
   "NamedParameterListToInit": {
-    "columnsToTransform": "categoricalColumns",
-    "targetColumn": "targetColumn"
+    "columnsToTransform": "categoricalColumns", 
+    "targetColumn": "targetColumn",
+    "totalPositiveThreshold": 12
   },
   "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
 }

@@ -1,6 +1,6 @@
 {
   "columnTransformFiles": {
-    "enumeratedcolumntransformstep": {
+    "EnumeratedColumnTransformStep": {
         "KeyWhenSortingByAscending": "0",
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
@@ -9,7 +9,7 @@
         "NamedParameterListToInit": {"columns":"categoricalColumns"},
         "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
-    "columntypeconversionstep": {
+    "ColumnTypeConversionStep": {
         "KeyWhenSortingByAscending": "1",
         "Name": "columntypeconversionstep",
         "MainClassName": "ColumnTypeConversionStep",
@@ -18,16 +18,7 @@
         "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
         "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
-    "imputationstepevpipeline":{
-        "KeyWhenSortingByAscending": "3",
-        "Name": "imputationstepevpipeline",
-        "MainClassName": "ImputationStep",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Numerical"],
-        "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns", "imputationValues": "emptyDictionary", "scalingArray": "emptyList", "meanColumn": "emptyList", "componentMatrix": "emptyList", "targetCol":"targetColumn"},
-        "ColumnTransformFilePath": "imputationstepevpipeline.py"
-    },
-    "revenuecolumntransformstep": {
+    "RevenueColumnTransformStep": {
         "KeyWhenSortingByAscending": "2",
         "Name": "revenuecolumntransformstep",
         "MainClassName": "RevenueColumnTransformStep",
@@ -36,8 +27,17 @@
         "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns"},
         "ColumnTransformFilePath": "revenuecolumntransformstep.py"
     },
+    "ImputationStepEVPipeline":{
+        "KeyWhenSortingByAscending": "3",
+        "Name": "imputationstepevpipeline",
+        "MainClassName": "ImputationStep",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Numerical"],
+        "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns", "imputationValues": "emptyDictionary", "scalingArray": "emptyList", "meanColumn": "emptyList", "componentMatrix": "emptyList", "targetCol":"targetColumn"},
+        "ColumnTransformFilePath": "imputationstepevpipeline.py"
+    },
     "CleanCategoricalColumn":{
-        "KeyWhenSortingByAscending": "5",
+        "KeyWhenSortingByAscending": "4",
         "Name": "cleancategoricalcolumn",
         "MainClassName": "CleanCategoricalColumn",
         "UniqueColumnTransformName": "",
@@ -45,14 +45,18 @@
         "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
         "ColumnTransformFilePath": "cleancategoricalcolumn.py"
     }, 
-    "AssignConversionRateToCategoricalColumns":{
-        "KeyWhenSortingByAscending": "6",
-        "Name": "assignconversionratetocategoricalcolumns",
-        "MainClassName": "AssignConversionRateToCategoricalColumns",
+    "AssignConversionRateToAllCategoricalValues":{
+        "KeyWhenSortingByAscending": "5",
+        "Name": "assignconversionratetoallcategoricalvalues",
+        "MainClassName": "AssignConversionRateToAllCategoricalValues",
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
-        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
-        "ColumnTransformFilePath": "assignconversionratetocategoricalcolumns.py"
+        "NamedParameterListToInit": {
+            "columnsToTransform": "categoricalColumns", 
+            "targetColumn": "targetColumn",
+            "totalPositiveThreshold": 12
+        },
+        "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     }
   }
 }

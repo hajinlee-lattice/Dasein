@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.service.PipelineService;
+import com.latticeengines.modelquality.service.impl.PipelineStepType;
 import com.latticeengines.network.exposed.modelquality.ModelQualityPipelineInterface;
 
 import io.swagger.annotations.Api;
@@ -81,7 +82,8 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
             @RequestParam(value = "stepName", required = true) String stepName, //
             @RequestParam("file") MultipartFile file) {
         try {
-            return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), "json", true);
+            return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), //
+                    new String[] { stepName, "json" }, PipelineStepType.METADATA);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -95,7 +97,24 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
             @RequestParam(value = "stepName", required = true) String stepName, //
             @RequestParam("file") MultipartFile file) {
         try {
-            return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), "py", false);
+            return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), //
+                    new String[] { stepName, "py" }, PipelineStepType.PYTHONLEARNING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @RequestMapping(value = "/pipelinestepfiles/pythonrts", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Upload custom python RTS pipeline implementation file")
+    public String uploadPipelineStepRTSPythonScript(@RequestParam(value = "fileName", required = true) String fileName, //
+            @RequestParam(value = "stepName", required = true) String stepName, //
+            @RequestParam("file") MultipartFile file) {
+        try {
+            String moduleName = fileName.split("\\.")[0];
+            return pipelineService.uploadPipelineStepFile(stepName, file.getInputStream(), //
+                    new String [] { moduleName, "py" }, PipelineStepType.PYTHONRTS);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,6 +131,12 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
 
     @Override
     public String uploadPipelineStepMetadata(String fileName, String stepName,
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
+        return null;
+    }
+
+    @Override
+    public String uploadPipelineStepRTSPythonScript(String fileName, String stepName,
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
         return null;
     }
@@ -138,5 +163,6 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
         Pipeline p = pipelineService.createPipeline(pipelineName, pipelineSteps);
         return p.getName();
     }
+
 
 }

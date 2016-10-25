@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
+import com.latticeengines.modelquality.service.impl.PipelineStepType;
 
 public interface PipelineService {
 
@@ -12,6 +13,6 @@ public interface PipelineService {
 
     Pipeline createLatestProductionPipeline();
 
-    String uploadPipelineStepFile(String stepName, InputStream inputStream, String extension, boolean isMetadata);
+    String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names, PipelineStepType type);
 
 }

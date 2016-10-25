@@ -56,7 +56,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = { "createLatestProductionPipeline" })
     public void uploadPipelineStepFileForMetadata() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues.json");
-        String step = pipelineService.uploadPipelineStepFile("assigncategorical", is, "json", true);
+        String step = pipelineService.uploadPipelineStepFile("assigncategorical", is, new String[] { "", "json"}, PipelineStepType.METADATA);
         assertEquals(step, hdfsDir + "/steps/assigncategorical/metadata.json");
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
     }
@@ -64,7 +64,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = { "uploadPipelineStepFileForMetadata" })
     public void uploadPipelineStepFileForPython() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues.py");
-        String step = pipelineService.uploadPipelineStepFile("assigncategorical", is, "py", false);
+        String step = pipelineService.uploadPipelineStepFile("assigncategorical", is, new String[] { "", "py" }, PipelineStepType.PYTHONLEARNING);
         assertEquals(step, hdfsDir + "/steps/assigncategorical/assigncategorical.py");
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
 

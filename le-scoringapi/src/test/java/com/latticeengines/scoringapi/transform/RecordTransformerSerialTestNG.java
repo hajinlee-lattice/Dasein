@@ -178,8 +178,8 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
             long time9 = System.currentTimeMillis();
             
 //            Map<String, Object> transformedFast = recordTransformer.transformJython(engine, transforms, recordAsMap);
-            Map<String, Object> transformedFast = recordTransformer.transformJython(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
-//            Map<String, Object> transformedFast = recordTransformer.transform(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+//            Map<String, Object> transformedFast = recordTransformer.transformJython(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+            Map<String, Object> transformedFast = recordTransformer.transform(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
             long time10 = System.currentTimeMillis();
             totalFastTransformTime += (time10 - time9);
 

@@ -81,10 +81,26 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
+    public String uploadPipelineStepRTSPythonScript(String fileName, String stepName, MultipartFile file) {
+        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", //
+                fileName, stepName);
+        return post("uploadPipelineStepRTSPythonScript", url, file, String.class);
+    }
+
+    @Override
     public String uploadPipelineStepMetadata(String fileName, //
             String stepName, //
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
         String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}", //
+                fileName, stepName);
+        return post("uploadPipelineStepMetadata", url, requestEntity, String.class);
+    }
+
+    @Override
+    public String uploadPipelineStepRTSPythonScript(String fileName, //
+            String stepName, //
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
+        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", //
                 fileName, stepName);
         return post("uploadPipelineStepMetadata", url, requestEntity, String.class);
     }

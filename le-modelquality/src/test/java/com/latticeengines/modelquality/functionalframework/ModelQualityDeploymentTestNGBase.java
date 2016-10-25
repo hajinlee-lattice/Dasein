@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.modelquality.service.ModelRunService;
+import com.latticeengines.modelquality.service.impl.PipelineStepType;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
@@ -170,29 +171,44 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         return Arrays.asList(new SelectedConfig[] { selectedConfig1, selectedConfig2 });
     }
 
-    protected String uploadPipelineStepFile(String extension) throws Exception {
+    protected String uploadPipelineStepFile(PipelineStepType type) throws Exception {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-
         org.springframework.core.io.Resource resource = new ClassPathResource(
-                "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues." + extension);
+                "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues." //
+                + type.getFileExtension());;
+        switch (type) {
+        case PYTHONRTS:
+            resource = new ClassPathResource("com/latticeengines/modelquality/service/impl/assignconversionrate.py");
+            break;
+        default:
+            break; 
+        }
+            
         map.add("file", resource);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        String fileName = "assignconversionratetoallcategoricalvalues" + extension;
+        String fileName = "assignconversionratetoallcategoricalvalues." + type.getFileExtension();
 
-        if (extension.equals("py")) {
+        switch (type) {
+        case PYTHONRTS:
+            fileName = "assignconversionrate.py";
+            return modelQualityProxy.uploadPipelineStepRTSPythonScript(fileName, "assigncategorical", requestEntity);
+        case PYTHONLEARNING:
             return modelQualityProxy.uploadPipelineStepPythonScript(fileName, "assigncategorical", requestEntity);
-        } else if (extension.equals("json")) {
+        case METADATA:
             return modelQualityProxy.uploadPipelineStepMetadata(fileName, "assigncategorical", requestEntity);
+        default:
+            return null; 
         }
-        return null;
+
     }
 
     protected Pipeline createNewDataPipeline(Pipeline sourcePipeline) {
         try {
-            uploadPipelineStepFile("py");
-            uploadPipelineStepFile("json");
+            uploadPipelineStepFile(PipelineStepType.PYTHONLEARNING);
+            uploadPipelineStepFile(PipelineStepType.PYTHONRTS);
+            uploadPipelineStepFile(PipelineStepType.METADATA);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -28,7 +28,12 @@ public class TransformRetriever implements InitializingBean {
     }
 
     public RealTimeTransform getTransform(TransformId key) {
-        return cache.getUnchecked(key);
+        try {
+            return cache.getUnchecked(key);
+        } catch (Exception e) {
+            return null;
+        }
+        
     }
 
     String getRTSClassFromPythonName(String version, String pythonModuleName) {
@@ -54,11 +59,10 @@ public class TransformRetriever implements InitializingBean {
                     @SuppressWarnings("unchecked")
                     @Override
                     public RealTimeTransform load(TransformId key) throws Exception {
-                        log.info("Loading transform " + key.moduleName);
-
                         Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class
                                 .forName(getRTSClassFromPythonName(key.version, key.moduleName));
                         Constructor<RealTimeTransform> ctor = c.getConstructor(String.class);
+                        log.info("Loading transform " + key.moduleName);
                         return ctor.newInstance(new Object[] { key.modelPath });
                     }
                 });

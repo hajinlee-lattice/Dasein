@@ -49,11 +49,11 @@ public class RecordTransformer {
                     value = null;
                 } else if (entry.type.type() == Double.class) {
                     try {
-                        if (value.toString().toLowerCase().equals("true") == true) {
+                        if (value.toString().toLowerCase().equals("true")) {
                             value = entry.type.type().cast(Double.valueOf("1.0"));
-                        } else if (value.toString().toLowerCase().equals("false") == true) {
+                        } else if (value.toString().toLowerCase().equals("false")) {
                             value = entry.type.type().cast(Double.valueOf("0.0"));
-                        } else if (value.toString().equals("null") == false && value.toString().equals("None") == false) {
+                        } else if (!value.toString().equals("null") && !value.toString().equals("None")) {
                             value = entry.type.type().cast(Double.valueOf(value.toString()));
                         } else {
                             value = null;
@@ -90,7 +90,7 @@ public class RecordTransformer {
                 Object value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                 result.put(entry.output, value);
             } catch (Exception e) {
-                log.warn(String.format("Problem invoking %s", entry.name), e);
+                log.warn(String.format("Problem invoking %s with args %s", entry.name, entry.arguments), e);
             }
         }
 

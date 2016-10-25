@@ -38,7 +38,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
-                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
+                , "assignconversionratetoallcategoricalvalues", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
 
@@ -170,4 +170,4 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
             if i == 4:
                 self.assertEquals(step.__class__.__name__ , "CleanCategoricalColumn")
             if i == 5:
-                self.assertEquals(step.__class__.__name__ , "AssignConversionRateToCategoricalColumns")
+                self.assertEquals(step.__class__.__name__ , "AssignConversionRateToAllCategoricalValues")

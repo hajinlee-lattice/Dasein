@@ -63,16 +63,21 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     }
     
     @Override
-    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String extension, boolean isMetadata) {
+    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names, PipelineStepType type) {
         try {
-            String fileName = "metadata";
-            
-            if (!isMetadata) {
-                fileName = stepName;
+            switch (type) {
+            case METADATA:
+                names[0] = "metadata";
+                break;
+            case PYTHONLEARNING:
+                names[0] = stepName;
+                break;
+            case PYTHONRTS:
+                break;
             }
             HdfsUtils.mkdir(yarnConfiguration, getHdfsDir() + "/steps/" + stepName);
             String tplPath = "%s/steps/%s/%s.%s";
-            String path = String.format(tplPath, getHdfsDir(), stepName, fileName, extension);
+            String path = String.format(tplPath, getHdfsDir(), stepName, names[0], names[1]);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, path);
             return path;
         } catch (Exception ex) {
@@ -101,9 +106,11 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                 try {
                     String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
                             psof.pipelineStepDir + "/metadata.json");
-                    String pipelineStepPythonScript = getPythonScript(psof.pipelineStepDir);
+                    
                     step = JsonUtils.deserialize(pipelineStepMetadata, PipelineStep.class);
-                    step.setScript(pipelineStepPythonScript);
+                    String[] pipelineStepPythonScripts = getPythonScripts(step.getName(), psof.pipelineStepDir);
+                    step.setScript(pipelineStepPythonScripts[0]);
+                    step.setRtsScript(pipelineStepPythonScripts[1]);
                     step.setLoadFromHdfs(true);
                     pipelineStepEntityMgr.create(step);
                 } catch (IOException e) {
@@ -154,7 +161,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         return path;
     }
     
-    private String getPythonScript(String hdfsPath) {
+    private String[] getPythonScripts(String stepName, String hdfsPath) {
         try {
             List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, new HdfsUtils.HdfsFilenameFilter() {
                 
@@ -163,11 +170,17 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                     return filename.endsWith(".py");
                 }
             });
+            String[] files = new String[2];
             
-            if (pythonFiles.size() != 1) {
-                throw new RuntimeException("Must have exactly one python file for a pipeline step.");
+            for (String pythonFile : pythonFiles) {
+                String pyHdfsPath = Path.getPathWithoutSchemeAndAuthority(new Path(pythonFile)).toString(); 
+                if (pythonFile.endsWith(stepName + ".py")) {
+                    files[0] = pyHdfsPath;
+                } else {
+                    files[1] = pyHdfsPath;
+                }
             }
-            return Path.getPathWithoutSchemeAndAuthority(new Path(pythonFiles.get(0))).toString();
+            return files;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

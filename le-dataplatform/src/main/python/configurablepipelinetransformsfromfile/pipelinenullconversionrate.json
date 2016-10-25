@@ -1,36 +1,64 @@
 {
   "columnTransformFiles": {
-    "EnumeratedColumnTransformStep": {
+    "RemediateDataRulesStep": {
       "KeyWhenSortingByAscending": "1",
-      "Name": "enumeratedcolumntransformstep",
-      "MainClassName": "EnumeratedColumnTransformStep",
-      "MainMethodName": "__init__",
+      "Name": "remediatedatarulesstep",
+      "MainClassName": "RemediateDataRulesStep",
       "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [
-        "Categorical"
-      ],
+      "OperatesOnColumns": [],
       "NamedParameterListToInit": {
-        "columns": "categoricalColumns"
+        "params": "params",
+        "enabledRules": {
+            "PopulatedRowCountDS": [],
+            "UniqueValueCountDS": []
+        }
       },
-      "ColumnTransformFilePath": "./lepipeline.tar.gz/enumeratedcolumntransformstep.py"
+      "ColumnTransformFilePath": "remediatedatarulesstep.py"
+    },
+    "PivotStep": {
+      "KeyWhenSortingByAscending": "2",
+      "Name": "pivotstep",
+      "MainClassName": "PivotStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columnsToPivot": "emptyDictionary",
+        "categoricalColumns": "categoricalColumns",
+        "dataprofile": "dataprofile",
+        "pvalueThreshold": 0.10,
+        "minCategoricalCount": 5,
+        "maxCategoricalCount": 10
+      },
+      "ColumnTransformFilePath": "pivotstep.py"
+    },
+    "AssignConversionRateToAllCategoricalValues":{
+        "KeyWhenSortingByAscending": "3",
+        "Name": "assignconversionratetoallcategoricalvalues",
+        "MainClassName": "AssignConversionRateToAllCategoricalValues",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {
+            "columnsToTransform": "categoricalColumns", 
+            "targetColumn": "targetColumn",
+            "totalPositiveThreshold": 12
+        },
+        "ColumnTransformFilePath": "assignconversionratetoallcategoricalvalues.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": "2",
+      "KeyWhenSortingByAscending": "5",
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
-      "MainMethodName": "__init__",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
         "columnsToConvert": "columnsToTransform"
       },
-      "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
+      "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": "3",
+      "KeyWhenSortingByAscending": "6",
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
-      "MainMethodName": "__init__",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [
         "Numerical"
@@ -40,37 +68,29 @@
         "imputationValues": "emptyDictionary",
         "targetCol": "targetColumn"
       },
-      "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstep.py"
+      "ColumnTransformFilePath": "imputationstep.py"
     },
-    "CleanCategoricalColumn":{
-        "KeyWhenSortingByAscending": "4",
-        "Name": "cleancategoricalcolumn",
-        "MainClassName": "CleanCategoricalColumn",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Categorical"],
-        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/cleancategoricalcolumn.py"
-    },
-    "AssignConversionRateToAllCategoricalValues":{
-        "KeyWhenSortingByAscending": "5",
-        "Name": "assignconversionratetoallcategoricalvalues",
-        "MainClassName": "AssignConversionRateToAllCategoricalValues",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Categorical"],
-        "NamedParameterListToInit": {"columnsToTransform": "categoricalColumns", "targetColumn": "targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/assignconversionratetoallcategoricalvalues.py"
+    "FeatureSelectionStep": {
+      "KeyWhenSortingByAscending": "7",
+      "Name": "featureselectionstep",
+      "MainClassName": "FeatureSelectionStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "params": "params",
+        "numFeatures": 50,
+        "enabled": "false"
+      },
+      "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": "6",
+      "KeyWhenSortingByAscending": "8",
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
-      "MainMethodName": "__init__",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {},
-      "ColumnTransformFilePath": "./lepipeline.tar.gz/exportdfstep.py"
+      "ColumnTransformFilePath": "exportdfstep.py"
     }
   }
 }

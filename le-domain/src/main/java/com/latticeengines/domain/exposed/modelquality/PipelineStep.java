@@ -68,6 +68,10 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     @Column(name = "SCRIPT", unique = true, nullable = false)
     private String script;
     
+    @JsonProperty("RTSFilePath")
+    @Column(name = "RTS_SCRIPT", unique = true, nullable = true)
+    private String rtsScript;
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.pipelineStep")
     private List<PipelineToPipelineSteps> pipelines = new ArrayList<>();
@@ -198,6 +202,14 @@ public class PipelineStep implements HasName, HasPid, Serializable {
 
     public void setLoadFromHdfs(boolean loadFromHdfs) {
         this.loadFromHdfs = loadFromHdfs;
+    }
+
+    public String getRtsScript() {
+        return rtsScript;
+    }
+
+    public void setRtsScript(String rtsScript) {
+        this.rtsScript = rtsScript;
     }
 
 }

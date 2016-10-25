@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
+import com.latticeengines.modelquality.service.impl.PipelineStepType;
 
 public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
@@ -53,14 +54,21 @@ public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTest
 
     @Test(groups = "deployment")
     public void uploadPipelineStepPythonFile() throws Exception {
-        String step = super.uploadPipelineStepFile("py");
+        String step = super.uploadPipelineStepFile(PipelineStepType.PYTHONLEARNING);
         assertEquals(step, hdfsDir + "/steps/assigncategorical/assigncategorical.py");
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "uploadPipelineStepPythonFile")
+    public void uploadPipelineStepPythonRTSFile() throws Exception {
+        String step = super.uploadPipelineStepFile(PipelineStepType.PYTHONRTS);
+        assertEquals(step, hdfsDir + "/steps/assigncategorical/assignconversionrate.py");
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "uploadPipelineStepPythonRTSFile")
     public void uploadPipelineStepMetadataFile() throws Exception {
-        String step = super.uploadPipelineStepFile("json");
+        String step = super.uploadPipelineStepFile(PipelineStepType.METADATA);
         assertEquals(step, hdfsDir + "/steps/assigncategorical/metadata.json");
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
     }    
