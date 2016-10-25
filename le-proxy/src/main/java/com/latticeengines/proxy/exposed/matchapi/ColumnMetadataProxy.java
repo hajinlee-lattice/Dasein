@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +33,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport"), "/match/metadata");
         enrichmentColumnsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<ColumnMetadata>>() {
+                    @Override
                     public List<ColumnMetadata> load(String dataCloudVersion) throws Exception {
                         if (DEFAULT.equals(dataCloudVersion)) {
                             dataCloudVersion = "";
