@@ -42,6 +42,8 @@ RUN mv /opt/node/le-ui /opt/node/app \
     && cd /opt/node/app \
     && npm install
 
+COPY server.key /etc/pki/tls/private/private.key
+COPY server.crt /etc/pki/tls/star.lattice.local.crt
 COPY start.sh /start.sh
 
 WORKDIR /opt/node/app
