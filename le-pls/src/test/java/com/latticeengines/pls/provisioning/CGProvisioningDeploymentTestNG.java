@@ -1,12 +1,9 @@
 package com.latticeengines.pls.provisioning;
 
-import static org.testng.AssertJUnit.assertTrue;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 
