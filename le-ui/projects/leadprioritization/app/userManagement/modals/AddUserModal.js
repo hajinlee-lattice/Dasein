@@ -59,7 +59,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
 
     function isLatticeEmail(email) {
         var domain = 'lattice-engines.com';
-        return email.substring(email.length - domain.length) === domain;
+        return email.substring(email.length - domain.length).toLowerCase() === domain;
     }
 
     function validateNewUser() {
