@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -55,7 +56,12 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     public void updateMarketoCredentialById(String credentialId,
             MarketoCredential marketoCredential) {
         validateRESTAndSOAPCredentials(marketoCredential);
-        marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
+        try {
+            marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
+        } catch (DataIntegrityViolationException e) {
+            throw new LedpException(LedpCode.LEDP_18119,
+                    new String[] { marketoCredential.getName() });
+        }
     }
 
     @Override

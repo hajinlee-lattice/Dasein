@@ -177,6 +177,25 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     }
 
     @Test(groups = "functional", dependsOnMethods = "createAnotherMarketoCredential_assertBothAreCreated")
+    public void updateOneCredentialToSameNameAsTheOther_assertErrorIsThrown() throws Exception {
+        List<MarketoCredential> marketoCredentials = marketoCredentialService
+                .findAllMarketoCredentials();
+        assertEquals(marketoCredentialService.findAllMarketoCredentials().size(), 2);
+
+        MarketoCredential marketoCredential = marketoCredentials.get(0);
+        marketoCredential.setName(marketoCredentials.get(1).getName());
+        try {
+            marketoCredentialService.updateMarketoCredentialById(
+                    Long.toString(marketoCredential.getPid()), marketoCredential);
+            assertFalse(true,
+                    "update marketo credential to same name as the other should have thrown exception");
+        } catch (Exception e) {
+            assertTrue(true, "");
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18119);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "updateOneCredentialToSameNameAsTheOther_assertErrorIsThrown")
     public void deleteCredential_assertCredentialDeleted() {
         List<MarketoCredential> marketoCredentials = marketoCredentialService
                 .findAllMarketoCredentials();
@@ -244,13 +263,15 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
 
         marketoCredential.setName(NAME);
 
-        marketoCredentialService.updateMarketoCredentialById(Long.toString(marketoCredential.getPid()), marketoCredential);
+        marketoCredentialService.updateMarketoCredentialById(
+                Long.toString(marketoCredential.getPid()), marketoCredential);
         MarketoCredential marketoCredential1 = marketoCredentialService.findAllMarketoCredentials()
                 .get(0);
         assertEquals(marketoCredential1.getName(), NAME);
         assertEquals(marketoCredential1.getSoapEndpoint(), SOAP_ENDPOINT_1);
         assertEquals(marketoCredential1.getRestClientId(), REST_CLIENT_ID_1);
-        assertEquals(marketoCredential1.getEnrichment().getPid(), marketoCredential.getEnrichment().getPid());
+        assertEquals(marketoCredential1.getEnrichment().getPid(),
+                marketoCredential.getEnrichment().getPid());
         assertEquals(marketoCredential1.getEnrichment().getMarketoMatchFields().size(), 4);
         for (MarketoMatchField marketoMatchField : marketoCredential1.getEnrichment()
                 .getMarketoMatchFields()) {
