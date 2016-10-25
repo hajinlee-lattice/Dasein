@@ -1,6 +1,6 @@
 {
   "name": "le-ui",
-  "description": "Converged Platform",
+  "description": "Converged Platform UI",
   "license": "ISC",
   "repository": {
     "type": "svn",
@@ -19,6 +19,7 @@
     "express-http-proxy": "0.10.0",
     "graceful-fs": "^4.1.6",
     "grunt": "^0.4.5",
+    "grunt-concurrent": "2.3.1",
     "grunt-contrib-sass": "1.0.0",
     "grunt-contrib-watch": "1.0.0",
     "grunt-env": "^0.4.4",
@@ -31,22 +32,9 @@
     "request": "^2.69.0"
   },
   "devDependencies": {
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jshint": "^1.0.0",
-    "grunt-contrib-sass": "^1.0.0",
-    "grunt-contrib-uglify": "^1.0.1",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-html2js": "^0.3.6",
-    "grunt-http": "^2.0.1",
-    "grunt-karma": "^0.12.2",
-    "grunt-ng-annotate": "^2.0.2",
-    "grunt-processhtml": "^0.3.13",
-    "grunt-rename": "^0.1.4",
-    "grunt-replace": "^1.0.1",
-    "grunt-usemin": "^3.1.1",
-    "karma": "^0.13.22"
+    "grunt-concurrent": "2.3.1",
+    "grunt-contrib-sass": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0"
   },
   "scripts": {
     "install": "npm run InstallDev",
@@ -62,10 +50,13 @@
     "devb": "npm run sass && concurrent -kr \"grunt devb\" \"npm run sentry\"",
     "local": "npm run sass && concurrent -kr \"grunt local\" \"npm run sentry\"",
     "local_admin": "npm run adminless && concurrent -kr \"grunt local_admin\" \"npm run adminsentry\"",
-    "proddev": "npm run sass && concurrent -kr \"grunt proddev\" \"npm run sentry\"",
+    "newdev": "grunt newdev",
+    "newdevb": "grunt newdevb",
     "qa": "grunt qa",
+    "qadev": "grunt qadev",
     "prod": "grunt prod",
-    "build":"concurrent \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run adminbuild\"",
+    "proddev": "grunt proddev",
+    "build": "concurrent \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run adminbuild\"",
     "sass": "concurrent \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\"",
     "sentry": "concurrent \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\"",
     "//": "individual projects",

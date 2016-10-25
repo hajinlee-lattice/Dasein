@@ -543,6 +543,7 @@ Media Queries
 
 /* score a file - field mapping */
 .columns.box-outline {
+    background-color: white;
     border-radius: 4px;
     box-shadow: 0 0 10px 0 rgba(57,137,195,0.1);
     border: solid 1px #d0d0d0;
@@ -558,7 +559,11 @@ Media Queries
         }
     }
 
-    .field-mapping-section-header {
+    &.with-padding {
+        padding: 1.5em 2.75em;
+    }
+
+    .section-header {
         padding: 1.5em 2.75em;
         
         h4 {
@@ -580,20 +585,30 @@ Media Queries
         }
     }
 
-    .field-mapping-section-actions {
+    .section-actions {
         border: none;
         padding: 0;
         margin: 2em 2.5em;
         
-        .field-mapping-actions-remap {
+        .section-actions-tertiary {
             margin-right: 0.75em;
         }
     }
 
-    .field-mapping-section-body {
+    .section-body {
         margin-bottom: 0;
         
-        &.form-group {
+        table {
+            margin-bottom: 0;
+            
+            tr {
+                td {
+                    width: auto;
+                }
+            }
+        }
+        
+        &.with-padding {
             margin: 0em 2.5em;
         }
         
@@ -602,7 +617,7 @@ Media Queries
 
             select {
                 width: auto;
-                max-width: 80%;
+                max-width: 90%;
             }
 
             td {

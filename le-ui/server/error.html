@@ -7,33 +7,7 @@
         <p>{{url}} - {{error}}</p>
         <hr>
         {{#if env}}
-            Config:
-            <table>
-                <thead><tr><td>Property</td><td>Value</td></tr></thead>
-                <tbody>
-                {{#each config}}
-                    <tr><td>{{@key}}</td><td>{{this}}</td></tr>
-                {{/each}}
-                </tbody>
-            </table>
-            Proxies:
-            <table>
-                <thead><tr><td>Property</td><td>Value</td></tr></thead>
-                <tbody>
-                {{#each config.proxies}}
-                    <tr><td>{{@key}}</td><td>{{this}}</td></tr>
-                {{/each}}
-                </tbody>
-            </table>
-            Routes:
-            <table>
-                <thead><tr><td>Property</td><td>Value</td></tr></thead>
-                <tbody>
-                {{#each routes}}
-                    <tr><td>{{@key}}</td><td>{{this}}</td></tr>
-                {{/each}}
-                </tbody>
-            </table>
+            <pre>"settings": {{options}}</pre>
         {{else}}
             <span>Lattice Engines</span>
         {{/if}}

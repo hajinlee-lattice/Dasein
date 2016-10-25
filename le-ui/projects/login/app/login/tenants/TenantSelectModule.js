@@ -12,6 +12,7 @@ angular.module('login.tenants', [
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         tenantList: TenantList,
+        tenantMap: {}, 
         isLoggedInWithTempPassword: LoginDocument.MustChangePassword,
         isPasswordOlderThanNinetyDays: TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified),
         SortProperty: 'RegisteredTime',
@@ -47,12 +48,18 @@ angular.module('login.tenants', [
             return;
         }
 
+        vm.tenantList.forEach(function(tenant) {
+            vm.tenantMap[tenant.Identifier] = tenant;
+        });
+
         SessionTimeoutUtility.init();
         
         vm.initialize = true;
 
+        $(document.body).click(function(event) { vm.focus(); });
+
         vm.focus();
-    }
+    };
 
     vm.select = function (tenant) {
         vm.deactivated = true;
@@ -85,13 +92,60 @@ angular.module('login.tenants', [
         vm.SearchValue = '';
 
         vm.focus();
-    }
+    };
 
     vm.focus = function (tenant) {
         setTimeout(function() {
             $('[autofocus]').focus();
         }, 100);
     };
+
+    vm.keyDown = function ($event) {
+        // convert html collection to array
+        var all = [].slice.call($('.tenant-list-item'));
+        var selected = [].slice.call($('.tenant-list-item.active,.tenant-list-item:hover'));
+
+        switch ($event.keyCode) {
+            case 38: // up
+                if (selected.length == 0) {
+                    $(all[0]).addClass('active');
+                } else {
+                    var index = all.indexOf(selected[0]);
+                    var n = index == 0 ? all.length - 1 : index - 1;
+                }
+
+                break;
+            case 40: // down
+                if (selected.length == 0) {
+                    $(all[0]).addClass('active');
+                } else {
+                    var index = all.indexOf(selected[0]);
+                    var n = index + 1 >= all.length ? 0 : index + 1;
+                }
+
+                break;
+            case 13: // enter
+                if (selected && selected.length > 0) {
+                    var tenant = vm.tenantMap[selected[0].id];
+                    console.log('enter', tenant, selected);
+                    if (tenant) {
+                        vm.select(tenant);
+                    }
+                }
+
+                break;
+        }
+        
+        if (typeof n == 'number' && n > -1) {
+            $(all[n]).addClass('active');
+            $(all[index]).removeClass('active');
+        }
+    }
+
+    vm.hover = function() {
+        // convert html collection to array
+        $('.tenant-list-item.active').removeClass('active');
+    }
 
     function showError(message) {
         if (message == null) {

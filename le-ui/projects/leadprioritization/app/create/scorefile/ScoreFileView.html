@@ -2,7 +2,7 @@
   <form name="uploadForm" novalidate>
     <div class="row">
         <div class="ten offset-one columns box-outline">
-          <div class="field-mapping-section-header">
+          <div class="section-header">
             <h4>{{ vm.schema }} File</h4>
             <h5>Upload a CSV file with {{ vm.schema | lowercase }}s to score.  After a file is uploaded you will have a chance to map it to the fields in the model.</h5>
           </div>
@@ -15,10 +15,10 @@
               file-load="vm.fileLoad(headers)"
               file-done="vm.fileDone(result)"
               file-cancel="vm.fileCancel()"
-              class="field-mapping-section-body form-group file-upload" 
+              class="section-body with-padding form-group file-upload" 
               ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
           </div>
-          <div class="container field-mapping-section-actions">
+          <div class="container section-actions">
             <div class="three columns pull-left">
               <button type="button" ui-sref="home.model.jobs" class="button gray-button block-button">{{vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
             </div>

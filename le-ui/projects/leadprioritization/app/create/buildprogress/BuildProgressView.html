@@ -1,113 +1,108 @@
 <section class="import-job-status ng-scope">
     <div class="row">
-        <div class="six columns offset-three">
-            <h2>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE')}}</h2>
-            <h3>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_SUPPORTING_TITLE')}}</h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="six columns offset-three">    
-
-            <dl>
-                <dt>Job Started</dt>
-                <dd>
-                    <div class="progress-icon"  data-ng-if="jobStatus != null">
-                        <span data-ng-if="!startTimestamp">
-                            <span class="loading-small"></span>
-                        </span>
-                        <span data-ng-if="startTimestamp">
-                            <i class="fa fa-check"></i>
-                        </span>
-                    </div>
-                    <div data-ng-if="startTimestamp">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
-                </dd>
-            </dl>
-
-            <div ng-if="!isPMMLJob">
+        <div class="columns eight offset-two box-outline">
+            <div class="section-header">
+                <h4>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE')}}</h4>
+                <h5>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_SUPPORTING_TITLE')}}</h5>
+            </div>
+            <div class="section-header text-right">
                 <dl>
-                    <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</dt>
-                    <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</dt>
+                    <dt>Job Started</dt>
                     <dd>
-                        <div class="progress-icon">
-                            <span data-ng-if="jobStepsRunningStates.load_data">
+                        <div class="progress-icon"  data-ng-if="jobStatus != null">
+                            <span data-ng-if="!startTimestamp">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="jobStepsCompletedStates.load_data">
+                            <span data-ng-if="startTimestamp">
                                 <i class="fa fa-check"></i>
                             </span>
-                            <span data-ng-if="stepFailed == 'load_data'">
+                        </div>
+                        <div data-ng-if="startTimestamp">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
+                    </dd>
+                </dl>
+
+                <div ng-if="!isPMMLJob">
+                    <dl>
+                        <dt data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</dt>
+                        <dt data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</dt>
+                        <dd>
+                            <div class="progress-icon">
+                                <span data-ng-if="jobStepsRunningStates.load_data">
+                                    <span class="loading-small"></span>
+                                </span>
+                                <span data-ng-if="jobStepsCompletedStates.load_data">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                                <span data-ng-if="stepFailed == 'load_data'">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </div>
+                            <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
+                        <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
+                        <dd>
+                            <div class="progress-icon">
+                                <span data-ng-if="jobStepsRunningStates.generate_insights">
+                                    <span class="loading-small"></span>
+                                </span>
+                                <span data-ng-if="jobStepsCompletedStates.generate_insights">
+                                    <i class="fa fa-check"></i>
+                                </span>
+                                <span data-ng-if="stepFailed == 'generate_insights'">
+                                    <i class="fa fa-warning"></i>
+                                </span>
+                            </div>
+                            <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
+                        </dd>
+                    </dl>
+                </div>
+                <dl>
+                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
+                    <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
+                    <dd>
+                        <div class="progress-icon">
+                            <span data-ng-if="jobStepsRunningStates.create_global_target_market">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.create_global_target_market">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span data-ng-if="stepFailed == 'create_global_target_market'">
                                 <i class="fa fa-warning"></i>
                             </span>
                         </div>
-                        <div data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</div>
-                    </dd>
-                </dl>
-                <dl>
-                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</dt>
-                    <dt data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</dt>
-                    <dd>
-                        <div class="progress-icon">
-                            <span data-ng-if="jobStepsRunningStates.generate_insights">
-                                <span class="loading-small"></span>
-                            </span>
-                            <span data-ng-if="jobStepsCompletedStates.generate_insights">
-                                <i class="fa fa-check"></i>
-                            </span>
-                            <span data-ng-if="stepFailed == 'generate_insights'">
-                                <i class="fa fa-warning"></i>
-                            </span>
-                        </div>
-                        <div data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</div>
+                        <div data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
                     </dd>
                 </dl>
             </div>
-            <dl>
-                <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</dt>
-                <dt data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</dt>
-                <dd>
-                    <div class="progress-icon">
-                        <span data-ng-if="jobStepsRunningStates.create_global_target_market">
-                            <span class="loading-small"></span>
-                        </span>
-                        <span data-ng-if="jobStepsCompletedStates.create_global_target_market">
-                            <i class="fa fa-check"></i>
-                        </span>
-                        <span data-ng-if="stepFailed == 'create_global_target_market'">
-                            <i class="fa fa-warning"></i>
-                        </span>
-                    </div>
-                    <div data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
-                </dd>
-            </dl>
-        </div>
-    </div>
-    <div class="row">
-        <div class="six columns offset-three">
-            <div class="meter bar" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
-                <span ng-style="{ width: (isPMMLCompleted ? 100 : compress_percent) + '%' }" class="indeterminate"></span>
+            <div class="section-header">
+                <div class="meter bar" data-ng-if="(jobStatus == 'Pending' || jobStatus == 'Running') && jobStatus != 'Completed'"> 
+                    <span ng-style="{ width: (isPMMLCompleted ? 100 : compress_percent) + '%' }" class="indeterminate"></span>
+                </div>
+                <div>
+                    <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> {{jobStatus}}</p>
+                    <a ui-sref="home.jobs.status.csv({jobId: jobId})" data-ng-if="jobStatus == 'Completed' && !isPMMLJob">View Report</a>
+                </div>
             </div>
-            <div>
-                <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> {{jobStatus}}</p>
-                <a ui-sref="home.jobs.status.csv({jobId: jobId})" data-ng-if="jobStatus == 'Completed' && !isPMMLJob">View Report</a>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="six columns offset-three field-mapping-actions">
-            <div class="pull-left">
-                <button ui-sref="{{create_new_sref}}" class="button white-button" type="button">
-                    {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_CREATE_ANOTHER')}}
-                </button>
-            </div>
-            <div class="pull-left" ng-show="jobStatus === 'Running'">
-                <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)">
-                    {{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}
-                </button>
-            </div>
-            <div class="pull-right">
-                <button ui-sref="home.models" ui-sref-opts="{reload: true}" class="button orange-button" type="button">
-                    {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST')}}
-                </button>
+            <div class="container section-actions">
+                <div class="pull-left section-actions-tertiary" ng-show="jobStatus === 'Running'">
+                    <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)">
+                        {{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}
+                    </button>
+                </div>
+                <div class="pull-left">
+                    <button ui-sref="{{create_new_sref}}" class="button white-button" type="button">
+                        {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_CREATE_ANOTHER')}}
+                    </button>
+                </div>
+                <div class="pull-right">
+                    <button ui-sref="home.models" ui-sref-opts="{reload: true}" class="button orange-button" type="button">
+                        {{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST')}}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

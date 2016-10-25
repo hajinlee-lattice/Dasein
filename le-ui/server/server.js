@@ -22,6 +22,9 @@ const DateUtil = require('./utilities/DateUtil');
 
 class Server {
     constructor(express, app, options) {
+        console.log(chalk.white('>') + ' SETTINGS', JSON.stringify(options, null, 4));
+        console.log('\n');
+
         this.options = options;
         this.express = express;
         this.app = app;
@@ -99,8 +102,8 @@ class Server {
             });
 
             const map = {
-                default:':datetime> :method :url :status :response-time ms - :res[content-length]',
-                verbose:':utctime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+                default:'dev',
+                verbose:'combined'
             };
 
             morgan.token("datetime", function getDateTime() {
@@ -112,14 +115,14 @@ class Server {
             });
 
             this.app.use(morgan(
-                map[this.options.config.LOGGING_LEVEL],
+                map[this.options.config.LOG_LEVEL],
                 {
                     stream: accessLogStream
                 }
             ));
 
             this.app.use(morgan(
-                map['default'],
+                'dev',
                 {
                     skip: function (req, res) {
                         return res.statusCode < 400;
@@ -172,7 +175,7 @@ class Server {
         if (API_URL) {
             API_PATH = API_PATH || '/pls';
 
-            console.log(chalk.white('>') + ' API PROXY:', API_LOCAL_PATH, ' -> ', API_URL+API_PATH);
+            console.log(chalk.white('>') + ' API PROXY\t', API_LOCAL_PATH, '\n\t' + API_URL+API_PATH);
 
             try {
                 this.app.use(API_LOCAL_PATH, (req, res) => {
@@ -211,7 +214,7 @@ class Server {
             API_PATH = API_PATH || '/files',
                 PATH = PATH || '/pls';
 
-            console.log(chalk.white('>') + ' FILE PROXY:', API_PATH, ' -> ', API_URL+PATH);
+            console.log(chalk.white('>') + ' FILE PROXY', API_PATH, '\n\t' + API_URL+PATH);
 
             this.app.use(API_PATH, (req, res) => {
                 // urls heading to /files/* will go to /pls/* with Auth token
@@ -257,8 +260,8 @@ class Server {
             }
 
             console.log(
-                chalk.white('>') + ' PATH:\t'+route.path.replace(this.options.SRC_PATH,""),
-                '[ '+displayString+' ]'
+                chalk.white('>') + ' ROUTE\t'+route.path.replace(this.options.SRC_PATH,""),
+                '\n\t[ '+displayString+' ]'
             );
 
             displayString = '';
@@ -274,6 +277,8 @@ class Server {
                     );
                 });
             }
+            
+            console.log('\n');
         });
     }
 
@@ -290,8 +295,7 @@ class Server {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('server/error', {
-                    config: this.options.config,
-                    routes: this.options.routes,
+                    options: JSON.stringify(this.options, null, "\t"),
                     url: req.originalUrl,
                     status: err.status,
                     message: err.message,
@@ -315,17 +319,15 @@ class Server {
     }
 
     start() {
-        const options = this.options.config;
-        const line = '-------------------------------------------------------------------------------';
+        const options = this.options;
+        const config = options.config;
+        const line = '----------------------------------------------------------------------------';
 
         //if (options.NODE_ENV == 'development') {
         //    console.log(chalk.yellow('> TLS:') + ' Allow Unauthorized in Development Mode')
             process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
         //}
 
-        console.log(chalk.white('>') + ' SERVER SETTINGS:');
-
-        console.log(JSON.stringify(options, null, 4));
         // Object.keys(options).forEach(key => {
         //     const value = options[key],
         //         ignore = ['TIMESTAMP'];
@@ -334,18 +336,17 @@ class Server {
         //         console.log(chalk.white('\t' + key + ':\t') + value + ' (' + typeof value + ')');
         //     }
         // });
-
-
+        console.log('\n');
         if (this.httpServer) {
-            this.httpServer.listen(options.protocols.http, () => {
-                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + options.protocols.http);
+            this.httpServer.listen(config.protocols.http, () => {
+                console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: http://localhost:' + config.protocols.http);
             });
         }
 
         if (this.httpsServer) {
-            this.httpsServer.listen(options.protocols.https, () => {
-                console.log(chalk.green(options.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + options.protocols.https);
-                console.log(line);
+            this.httpsServer.listen(config.protocols.https, () => {
+                console.log(chalk.green(config.TIMESTAMP + '>') + ' LISTENING: https://localhost:' + config.protocols.https);
+                console.log('\n');
             });
         }
 

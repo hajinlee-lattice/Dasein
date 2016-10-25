@@ -8,6 +8,14 @@ module.exports = function (grunt) {
     // Define the configuration for all the tasks
     grunt.initConfig({
         versionString: versionStringConfig,
+        dir: {
+            common: './projects/common',
+            lp: './projects/leadprioritization',
+            pd: './projects/prospectdiscovery',
+            login: './projects/login',
+            assets: 'assets',
+            app: 'app'
+        },
 
         // https://confluence.lattice-engines.com/pages/viewpage.action?pageId=16909888
         env: {
@@ -34,12 +42,17 @@ module.exports = function (grunt) {
             dev_admin: {
                 NODE_APPS: 'leadmin',
                 NODE_ENV: 'development',
+                API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://10.41.0.13:8081',
                 API_ADMIN_URL: 'https://10.41.0.25:8085',
+                API_CON_URL: 'https://testapi.lattice-engines.com:8073',
                 API_MCSVC_URL: 'https://10.41.0.25:8080',
                 API_MATCHAPI_URL: 'https://10.41.0.25:8076',
                 API_INFLUXDB_URL: 'http://10.41.1.188:8086',
                 COMPRESSED: false,
                 LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -59,21 +72,6 @@ module.exports = function (grunt) {
                 LOGGING: './server/log',
                 HTTP_PORT: 3001,
                 HTTPS_PORT: 3000,
-                ADMIN_HTTP_PORT: 3003,
-                ADMIN_HTTPS_PORT: 3002,
-                HTTPS_KEY: './server/certs/privatekey.key',
-                HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: false
-            },
-            devb_admin: {
-                NODE_APPS: 'leadmin',
-                NODE_ENV: 'development',
-                API_ADMIN_URL: 'https://10.41.0.26:8085',
-                API_MCSVC_URL: 'https://10.41.0.26:8080',
-                API_MATCHAPI_URL: 'https://10.41.0.26:8076',
-                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
-                COMPRESSED: false,
-                LOGGING: './server/log',
                 ADMIN_HTTP_PORT: 3003,
                 ADMIN_HTTPS_PORT: 3002,
                 HTTPS_KEY: './server/certs/privatekey.key',
@@ -139,11 +137,32 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false,
                 WHITELIST: '10.41.0.14, 10.41.0.16'
             },
+            qadev: {
+                NODE_APPS: 'leui,leadmin',
+                NODE_ENV: 'qa',
+                API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
+                API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
+                API_CON_URL: 'https://testapi.lattice-engines.com',
+                API_MCSVC_URL: 'https://admin-qa.lattice.local:8080',
+                API_MATCHAPI_URL: 'https://admin-qa.lattice.local:8076',
+                API_INFLUXDB_URL: 'http://localhost:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                HTTP_PORT: 3001,
+                HTTPS_PORT: 3000,
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false,
+                WHITELIST: '10.41.0.14, 10.41.0.16'
+            },
             production: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'production',
                 API_URL: 'https://app.lattice-engines.com',
-                API_ADMIN_URL: 'https://admin.prod.lattice.local:8085/',
+                API_ADMIN_URL: ' https://admin.prod.lattice.local:8085/',
                 API_CON_URL: 'https://api.lattice-engines.com',
                 COMPRESSED: true,
                 LOGGING: './server/log',
@@ -174,6 +193,7 @@ module.exports = function (grunt) {
                 WHITELIST: '10.51.12.109, 10.51.51.109'
             }
         },
+
         run: {
             node: {
                 args: [ './app.js' ]
@@ -194,115 +214,222 @@ module.exports = function (grunt) {
                     'node.exe'
                 ]
             }
+        },
+
+        sass: {
+            options: {
+                sourcemap: 'auto',
+                style:     'compressed'
+            },
+            common: {
+                files: {
+                    '<%= dir.common %>/<%= dir.assets %>/lattice.css' : [
+                        '<%= dir.common %>/<%= dir.assets %>/sass/lattice.scss'
+                    ]
+                }
+            },
+            login:     {
+                files: {
+                    '<%= dir.login %>/<%= dir.assets %>/css/production.css': [
+                        '<%= dir.login %>/<%= dir.app %>/app.scss'
+                    ]
+                }
+            },
+            lp:     {
+                files: {
+                    '<%= dir.lp %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.lp %>/<%= dir.assets %>/styles/main.scss'
+                    ]
+                }
+            },
+            pd:     {
+                files: {
+                    '<%= dir.pd %>/<%= dir.assets %>/styles/production.css': [
+                        '<%= dir.pd %>/<%= dir.app %>/app.scss'
+                    ]
+                }
+            }
+        },
+
+        watch: {
+            common: {
+                files: '<%= dir.common %>/<%= dir.assets %>/sass/*.scss',
+                tasks: ['sass:common']
+            },
+            login: {
+                files: [
+                    '<%= dir.login %>/<%= dir.app %>/**/*.scss'
+                ],
+                tasks: ['sass:login']
+            },
+            lp: {
+                files: [
+                    '<%= dir.lp %>/<%= dir.app %>/**/*.scss',
+                    '<%= dir.lp %>/<%= dir.assets %>/styles/**/*.scss'
+                ],
+                tasks: ['sass:lp']
+            },
+            pd: {
+                files: [
+                    '<%= dir.pd %>/<%= dir.assets %>/styles/**/*.scss'
+                ],
+                tasks: ['sass:pd']
+            }
+        },
+
+        concurrent: {
+            sass: {
+                tasks: [ 'sass:common', 'sass:login', 'sass:lp' ]
+            },
+            watch: {
+                tasks: [ 'watch:common', 'watch:login', 'watch:lp' ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
+            devWatchAndServe: {
+                tasks: [ 
+                    [ 'env:dev', 'run:node' ], 'concurrent:watch'
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
+            devbWatchAndServe: {
+                tasks: [ 
+                    [ 'env:devb', 'run:node' ], 'concurrent:watch'
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
+            localWatchAndServe: {
+                tasks: [ 
+                    [ 'env:local', 'run:node' ], 'concurrent:watch'
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
+            qaWatchAndServe: {
+                tasks: [ 
+                    [ 'env:qa', 'run:node' ], 'concurrent:watch'
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            },
+            prodWatchAndServe: {
+                tasks: [ 
+                    [ 'env:proddev', 'run:node' ], 'concurrent:watch'
+                ],
+                options: {
+                    logConcurrentOutput: true
+                }
+            }
         }
     });
 
+    grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-env');
 
-    var defaultText = 'Run Express Server in Production';
-    grunt.registerTask('default', defaultText, [
+    grunt.registerTask('default', [
         'env:production',
         'run:node'
     ]);
 
-    grunt.registerTask('prod', defaultText, [
-        'env:production',
-        'run:node'
-    ]);
-
-    grunt.registerTask('proddev', defaultText, [
-        'env:proddev',
-        'run:node'
-    ]);
-
-    grunt.registerTask('production', defaultText, [
-        'env:production',
-        'run:node'
-    ]);
-
-    var devText = 'Run Express Server using external API (52?)';
-    grunt.registerTask('dev', devText, [
+    grunt.registerTask('dev', [
         'env:dev',
         'run:node'
     ]);
 
-    var devText = 'Run Express Server using external API (52?)';
-    grunt.registerTask('devb', devText, [
+    grunt.registerTask('devb', [
         'env:devb',
         'run:node'
     ]);
 
-    var devText = 'Run Express Server using external API (52?)';
-    grunt.registerTask('devb_admin', devText, [
-        'env:devb_admin',
+    grunt.registerTask('qa', [
+        'env:qa',
         'run:node'
     ]);
 
-    grunt.registerTask('pm2dev', devText, [
-        'env:dev',
-        'run:pm2'
+    grunt.registerTask('prod', [
+        'env:production',
+        'run:node'
     ]);
 
-    grunt.registerTask('dev_admin', devText, [
+    grunt.registerTask('newdev', [
+        'concurrent:sass',
+        'concurrent:devWatchAndServe'
+    ]);
+
+    grunt.registerTask('newdevb', [
+        'concurrent:sass',
+        'concurrent:devbWatchAndServe'
+    ]);
+
+    grunt.registerTask('newlocal', [
+        'concurrent:sass',
+        'concurrent:localWatchAndServe'
+    ]);
+
+    grunt.registerTask('qadev', [
+        'concurrent:qaWatchAndServe'
+    ]);
+
+    grunt.registerTask('proddev', [
+        'concurrent:prodWatchAndServe'
+    ]);
+
+    grunt.registerTask('production', [
+        'env:production',
+        'run:node'
+    ]);
+
+    grunt.registerTask('dev_admin', [
         'env:dev_admin',
         'run:node'
     ]);
 
-    grunt.registerTask('local_admin', devText, [
+    grunt.registerTask('devb_admin', [
+        'env:devb_admin',
+        'run:node'
+    ]);
+
+    grunt.registerTask('local_admin', [
         'env:local_admin',
         'run:node'
     ]);
 
-    grunt.registerTask('pm2', devText, [
-        'env:qa',
-        'run:pm2'
-    ]);
-
-    var devText = 'Run Express Server, using Local API Endpoints';
-    grunt.registerTask('local', devText, [
+    grunt.registerTask('local', [
         'env:local',
         'run:node'
     ]);
 
-    var devText = 'Run Express Server, using Local API Endpoints';
-    grunt.registerTask('localmon', devText, [
+    grunt.registerTask('localmon', [
         'env:local',
         'run:nodemon'
     ]);
 
-    var integrationText = 'Run Express Server, using 53 API Endpoints';
-    grunt.registerTask('integration', integrationText, [
-        'env:integration',
-        'run:node'
-    ]);
-
-    var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('stage', qaText, [
-        'env:stage',
-        'run:node'
-    ]);
-
-    var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('qa', qaText, [
+    grunt.registerTask('qa', [
         'env:qa',
         'run:node'
     ]);
 
-    var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('qamon', qaText, [
+    grunt.registerTask('qamon', [
         'env:qa',
         'run:nodemon'
     ]);
 
-    var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('devmon', qaText, [
+    grunt.registerTask('devmon', [
         'env:dev',
         'run:nodemon'
     ]);
 
-    var text = 'Kill all node.exe on windows';
-    grunt.registerTask('killnode', text, [
+    grunt.registerTask('killnode', [
         'run:killnode'
     ]);
 };

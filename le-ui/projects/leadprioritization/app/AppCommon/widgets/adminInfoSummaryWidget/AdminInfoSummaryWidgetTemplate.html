@@ -1,29 +1,40 @@
 <div id="adminInfoSummaryTable" class="panel panel-default" data-ng-controller="AdminInfoSummaryWidgetController">
-    <div class="panel-body model-admin-info">
-        <table class="table">
+    <section id="userManagementContainer" class="container">
+    <div class="row">
+    <div class="columns ten offset-one box-outline model-admin-info">
+        <div class="section-header">
+            <h4>Model Summary</h4>
+        </div>
+        <table class="section-body">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
             <tbody>
                 <tr ng-if="!IsPmml">
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_HEALTH_SCORE_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_HEALTH_SCORE_LABEL')}}</td>
                     <td><health-score score="ModelHealthScore"></health-score></td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_DATA_CLOUD_VERSION')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_DATA_CLOUD_VERSION')}}</td>
                     <td>{{DataCloudVersion}}</td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_TENANT_ID_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_TENANT_ID_LABEL')}}</td>
                     <td>{{TenantId}}</td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_TENANT_NAME_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_TENANT_NAME_LABEL')}}</td>
                     <td>{{TenantName}}</td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_INTERNAL_ID_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_INTERNAL_ID_LABEL')}}</td>
                     <td>{{ModelId}}</td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</td>
                     <td>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/modeljson?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><br/></span>
@@ -39,8 +50,8 @@
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
-                    <th>{{sourceType=='SalesforceLead' ? ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')
-                            : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</th>
+                    <td>{{sourceType=='SalesforceLead' ? ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')
+                            : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</td>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
@@ -50,7 +61,7 @@
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</td>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_CSV_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="javascript:void(0)" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
@@ -60,14 +71,14 @@
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
-                    <th>{{ResourceUtility.getString('MODEL_POST_MATCH_EVENT_TABLE_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_POST_MATCH_EVENT_TABLE_LABEL')}}</td>
                     <td>
                         {{ResourceUtility.getString('MODEL_TRAINING_CSV')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/postmatcheventtablecsv/training?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr>
-                    <th>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_FILE_LABEL')}}</th>
+                    <td>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_FILE_LABEL')}}</td>
                     <td>
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
@@ -83,4 +94,6 @@
             <button class="close btn btn-link" data-ng-click="Error.ShowError = false;"><i class="fa fa-times fa-inverse"></i></button>
         </div>
     </div>
+    </div>
+    </section>
 </div>

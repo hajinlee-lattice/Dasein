@@ -1,18 +1,12 @@
 <section class="container custom-fields">
 	<form novalidate name="fieldMappingForm">
-	<div class="row">
-		<div class="ten columns offset-one">
-			<hgroup ng-if="vm.RequiredFields.length > 0">
-				<h3>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <br/>
-					<span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span>
-				</h3>
-			</hgroup>
-		</div>
-	</div>
-
 	<div class="row field-mapping-form">
-		<div class="ten offset-one columns">
-			<table class="unstyled">
+		<div class="ten offset-one columns box-outline">
+			<div class="section-header">
+				<h4>Required fields</h4>
+				<h5>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span></h5>
+			</div>
+			<table class="section-body unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
@@ -88,42 +82,40 @@
 				</tbody>
 			</table>
 
-		</div>
-	</div>
+			<div class="container section-validation">
+				<div class="ten columns offset-one" ng-class="{ 'has-error' : fieldMappingForm.$invalid }">
+		      		<p class="help-block">
+		      			* One or more of your columns is unmapped or is using a reserved name
+		      		</p>
+		    	</div>
+		  	</div>
 
-	<div class="row field-mapping-validation">
-		<div class="ten columns offset-one" ng-class="{ 'has-error' : fieldMappingForm.$invalid }">
-      		<p class="help-block">
-      			* One or more of your columns is unmapped or is using a reserved name
-      		</p>
-    	</div>
-  	</div>
+			<div class="container section-validation" ng-repeat="RequiredField in ::vm.RequiredFields" ng-if="!vm.fieldMappingsMapped[RequiredField]">
+				<div class="ten columns offset-one has-error">
+					<p class="help-block">
+				    	* Required column is missing: <i class="orange-text">{{::RequiredField}}</i>
+					</p>
+		    	</div>
+		    </div>
 
-	<div class="row field-mapping-validation" ng-repeat="RequiredField in ::vm.RequiredFields" ng-if="!vm.fieldMappingsMapped[RequiredField]">
-		<div class="ten columns offset-one has-error">
-			<p class="help-block">
-		    	* Required column is missing: <i class="orange-text">{{::RequiredField}}</i>
-			</p>
-    	</div>
-    </div>
-
-	<div class="row">
-		<div class="ten columns offset-one field-mapping-actions">
-			<div class="pull-left">
-				<button data-ng-click="vm.resetClicked()" class="button white-button" type="button">
-					{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
-				</button>
-			</div>
-			<div class="pull-right">
-				<button 
-						ng-click="vm.clickNext(); NextClicked = true;" 
-						ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
-						class="button orange-button" 
-						type="button">
-					{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
-				</button>
+			<div class="container section-actions">
+				<div class="pull-left">
+					<button data-ng-click="vm.resetClicked()" class="button white-button" type="button">
+						{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_RESET')}}
+					</button>
+				</div>
+				<div class="pull-right">
+					<button 
+							ng-click="vm.clickNext(); NextClicked = true;" 
+							ng-disabled="fieldMappingForm.$invalid || NextClicked || !vm.FormValidated" 
+							class="button orange-button" 
+							type="button">
+						{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
+
 	</form>
 </section>

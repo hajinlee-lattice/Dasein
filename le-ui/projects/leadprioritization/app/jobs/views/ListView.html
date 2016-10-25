@@ -20,6 +20,7 @@
     <div class="table-header">
         <div class="row list-header">
             <div class="pull-left">
+                <menu-dropdown config="header.maxperpage"></menu-dropdown>
                 <menu-filter-by config="header.filter"></menu-filter-by>
                 <menu-sort-by config="header.sort"></menu-sort-by>
                 <search-filter query="query"></search-filter>
@@ -38,7 +39,7 @@
         </div><!-- End .row -->
     </div><!-- End .table-header -->
 
-    <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+    <div class="row" ng-init="current = 1" ng-show="max > 1">
         <div class="twelve columns">
             <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
             </pd-pagination-controls>
@@ -46,45 +47,52 @@
     </div>
     
     <div class="row jobs-table">
-        <div class="columns twelve panel panel-default">
-            <div class="row panel-heading custom-heading">
-                <span class="columns two">Timestamp</span>
-                <span class="columns three" ng-if="state != 'model'">Model Name</span>
-                <span class="columns two" ng-if="state == 'model'">File Name</span>
-                <span class="columns two" ng-if="state != 'model'">Job Type</span>
-                <span class="columns two">Status</span>
-                <span class="columns two">&nbsp;</span>
-                <!-- <span class="columns three">User</span> -->
+        <div class="columns twelve panel panel-default box-outline">
+            <div class="section-body">
+                <table class="unstyled">
+                    <thead>
+                        <tr class="row">
+                            <th class="columns two">Timestamp</th>
+                            <th class="columns three" ng-if="state != 'model'">Model Name</th>
+                            <th class="columns two" ng-if="state == 'model'">File Name</th>
+                            <th class="columns two" ng-if="state != 'model'">Job Type</th>
+                            <th class="columns two">Status</th>
+                            <th class="columns two">&nbsp;</th>
+                            <!-- <span class="columns three">User</span> -->
+                        </tr>
+                    </thead>
+                </table>
+
+                <div class="jobs-table-content">
+                    <div 
+                        data-job-status-row 
+                        data-ng-repeat="job in header.filter.filtered | 
+                            filter: query | 
+                            orderBy: header.sort.order + header.sort.property | 
+                            startFrom: (current - 1) * pagesize |
+                            limitTo: pagesize" 
+                        job="job"
+                        state="state"
+                        statuses="statuses" 
+                        expanded="expanded"
+                        cancelling="cancelling"
+                        admin="isInternalAdmin"
+                        auth="auth"
+                        TenantId="TenantId"
+                        class="job-td-row ngAnimate">
+                    </div>
+                </div>
             </div>
-            <div class="jobs-table-content">
-                <div 
-                    data-job-status-row 
-                    data-ng-repeat="job in header.filter.filtered | 
-                        filter: query | 
-                        orderBy: header.sort.order + header.sort.property | 
-                        startFrom: (current - 1) * pagesize |
-                        limitTo: pagesize" 
-                    job="job"
-                    state="state"
-                    statuses="statuses" 
-                    expanded="expanded"
-                    cancelling="cancelling"
-                    admin="isInternalAdmin"
-                    auth="auth"
-                    TenantId="TenantId"
-                    class="job-td-row ngAnimate">
-                </div>
-                <div data-ng-show="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
-                    There are no jobs to show at the moment
-                </div>
-                <div data-ng-show="loadingJobs && header.filter.filtered.length == 0">
-                    Loading...
-                </div>
+            <div class="section-actions" ng-if="(header.filter.filtered | filter: query).length == 0 && ! loadingJobs">
+                There are no jobs to show at the moment
+            </div>
+            <div class="section-actions" ng-if="loadingJobs && header.filter.filtered.length == 0">
+                Loading...
             </div>
         </div>
     </div>
 
-    <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+    <div class="row" ng-init="current = 1" ng-show="max > 1">
         <div class="twelve columns">
             <pd-pagination-controls current="current" max="max = (header.filter.filtered | filter: query).length / pagesize">
             </pd-pagination-controls>

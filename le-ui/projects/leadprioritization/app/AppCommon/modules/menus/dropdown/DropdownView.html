@@ -1,6 +1,6 @@
 <div class="select-menu">
     <button 
-            if="label"
+            ng-if="label"
             type="button"
             class="button icon-button {{ class }}"
             ng-click="click()"
@@ -10,9 +10,10 @@
     </button
     ><button 
             type="button"
-            class="button icon-button {{ iconclass }}"
+            class="button {{ iconclass }}"
             ng-click="toggle($event)" 
             ng-class="{ 'open': visible }">
+            {{ iconlabel }}<span ng-if="iconlabel">&nbsp;&nbsp;</span>
         <span class="{{ icon || 'fa fa-chevron-down' }}" ng-class="{ 'fa-rotate-180': visible && iconrotate }"></span>
     </button>
     <ul class="model-menu" ng-show="visible" ng-click="visible = !visible">

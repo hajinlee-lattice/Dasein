@@ -14,6 +14,7 @@ angular.module('lp.jobs', [
     $scope.jobs = [];
     $scope.isInternalAdmin = false;
     $scope.auth = BrowserStorageUtility.getTokenDocument();
+    $scope.pagesize = 10;
 
     var clientSession = BrowserStorageUtility.getClientSession();
     $scope.TenantId = clientSession.Tenant.Identifier;
@@ -53,6 +54,21 @@ angular.module('lp.jobs', [
                     { label: "Pending", action: { jobStatus: 'Pending' } },
                     { label: "Running", action: { jobStatus: 'Running' } },
                     { label: "Failed", action: { jobStatus: "Failed" } }
+                ]
+            },
+            maxperpage: {
+                label: false, //'Page Size',
+                //click: false,
+                //class: 'white-button select-label',
+                icon: 'fa fa-chevron-down',
+                iconlabel: 'Page Size',
+                iconclass: 'white-button',
+                iconrotate: true,
+                items: [
+                    { label: '10 items',  icon: 'numeric', click: function() { $scope.pagesize = 10;  } },
+                    { label: '25 items',  icon: 'numeric', click: function() { $scope.pagesize = 25;  } },
+                    { label: '50 items',  icon: 'numeric', click: function() { $scope.pagesize = 50;  } },
+                    { label: '100 items', icon: 'numeric', click: function() { $scope.pagesize = 100; } }
                 ]
             },
             sort: {

@@ -30,7 +30,7 @@
 .user-info li.control {
     margin-top: 2em;
 }
-.user-info hr {
+.user-info hr { 
     margin: 2em 0;
 }
 .user-info button.white-button,
@@ -56,6 +56,7 @@ select#tenantSelectionInput option {
 select#tenantSelectionInput option:nth-child(odd) {
     background-color: #f5f5f5;
 }
+select#tenantSelectionInput option.active,
 select#tenantSelectionInput option:hover {
     background: #26639b;
     color: #fff;
@@ -129,6 +130,7 @@ div.panel-body .columns {
 .tenant-list-item * {
     transition: none;
 }
+.tenant-list-item.active,
 .tenant-list-item:hover {
     background: #65b7e5;
     cursor: pointer;
