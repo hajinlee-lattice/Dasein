@@ -14,14 +14,11 @@ public class CharacterizationParameters extends DataFlowParameters {
     private Date timestamp;
     private List<SourceColumn> sourceColumns;
     private String versionKey;
-    private String attrKey;
-    private String categoryKey;
-    private String countKey;
-    private String percentKey;
+    private String[] attrKey;
+    private String totalKey;
     private List<String> attrs;
-    private List<String> categories;
+    private List<Integer> attrIds;
     private List<String> groupKeys;
-    private Long totalRecords;
     private String version;
 
     public String getTimestampField() { return timestampField; }
@@ -44,17 +41,11 @@ public class CharacterizationParameters extends DataFlowParameters {
 
     public void setSourceColumns(List<SourceColumn> sourceColumns) { this.sourceColumns = sourceColumns; }
 
-    public String getAttrKey() { return attrKey; }
-    public void setAttrKey(String attrKey) { this.attrKey =  attrKey; }
+    public String[] getAttrKey() { return attrKey; }
+    public void setAttrKey(String[] attrKey) { this.attrKey =  attrKey; }
 
-    public String getCategoryKey() { return categoryKey; }
-    public void setCategoryKey(String categoryKey) { this.categoryKey =  categoryKey; }
-
-    public String getCountKey() { return countKey; }
-    public void setCountKey(String countKey) { this.countKey =  countKey; }
-
-    public String getPercentKey() { return percentKey; }
-    public void setPercentKey(String percentKey) { this.percentKey =  percentKey; }
+    public String getTotalKey() { return totalKey; }
+    public void setTotalKey(String totalKey) { this.totalKey =  totalKey; }
 
     public List<String> getGroupKeys() { return groupKeys; }
     public void setGroupKeys(List<String> groupKeys) { this.groupKeys =  groupKeys; }
@@ -62,11 +53,8 @@ public class CharacterizationParameters extends DataFlowParameters {
     public List<String> getAttrs() { return attrs; }
     public void setAttrs(List<String> attrs) { this.attrs =  attrs; }
 
-    public List<String> getCategories() { return categories; }
-    public void setCategories(List<String> categories) { this.categories =  categories; }
-
-    public Long getTotalRecords() { return totalRecords; }
-    public void setTotalRecords(Long totalRecords) { this.totalRecords =  totalRecords; }
+    public List<Integer> getAttrIds() { return attrIds; }
+    public void setAttrIds(List<Integer> attrIds) { this.attrIds =  attrIds; }
 
     public String getVersionKey() { return versionKey; }
     public void setVersionKey(String versionKey) { this.versionKey =  versionKey; }

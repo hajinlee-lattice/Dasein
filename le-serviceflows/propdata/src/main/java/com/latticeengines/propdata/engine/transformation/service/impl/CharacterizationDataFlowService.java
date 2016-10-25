@@ -57,11 +57,9 @@ public class CharacterizationDataFlowService extends AbstractTransformationDataF
 
         Table baseSourceTable = null;
         String baseSourceVersion = null;
-        Long totalRecords = null;
         try {
             baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
             baseSourceTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, baseSourceVersion);
-            totalRecords = hdfsSourceEntityMgr.count(baseSource, baseSourceVersion);
             log.info("Select base source " + baseSourceName + "@version " + baseSourceVersion);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25012,
@@ -80,9 +78,7 @@ public class CharacterizationDataFlowService extends AbstractTransformationDataF
 
         parameters.setVersionKey(report.getVersionKey());
         parameters.setAttrKey(report.getAttrKey());
-        parameters.setCategoryKey(report.getCategoryKey());
-        parameters.setCountKey(report.getCountKey());
-        parameters.setPercentKey(report.getPercentKey());
+        parameters.setTotalKey(report.getTotalKey());
         parameters.setGroupKeys(Arrays.asList(report.getGroupKeys()));
 
         HashSet<String> excludeCols = new HashSet<String>();
@@ -91,9 +87,8 @@ public class CharacterizationDataFlowService extends AbstractTransformationDataF
             excludeCols.add(excludeAttrs[i]);
         }
         List<String> attrs = new ArrayList<String>();
-        List<String> categories = new ArrayList<String>();
+        List<Integer> attrIds = new ArrayList<Integer>();
         List<SourceColumn> sourceColumns = sourceColumnEntityMgr.getSourceColumns(baseSourceName);
-        String defaultCategory = Category.DEFAULT.getName();
 
         for (int i = 0; i < sourceColumns.size(); i++) {
             SourceColumn col = sourceColumns.get(i);
@@ -101,15 +96,18 @@ public class CharacterizationDataFlowService extends AbstractTransformationDataF
             if (excludeCols.contains(attr)) {
                 continue;
             }
-            List<String> attrCategories = col.getCategoryList();
-            String category = (attrCategories.size() == 0) ? defaultCategory : attrCategories.get(0);
+            Integer attrId = col.getCharAttrId();
+            if (attrId == null) {
+                log.info("Skip attr " + attr + " without attr id");
+                continue;
+            }
+
             attrs.add(attr);
-            categories.add(category);
+            attrIds.add(attrId);
         }
         parameters.setAttrs(attrs);
-        parameters.setCategories(categories);
+        parameters.setAttrIds(attrIds);
 
-        parameters.setTotalRecords(totalRecords);
         parameters.setVersion(baseSourceVersion);
 
         DataFlowContext ctx = dataFlowContext(source, sourceTables, parameters, targetPath);

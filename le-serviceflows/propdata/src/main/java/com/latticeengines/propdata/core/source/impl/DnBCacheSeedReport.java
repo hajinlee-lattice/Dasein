@@ -33,7 +33,7 @@ public class DnBCacheSeedReport implements CharacterizationSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "LatticeID" };
+        return new String[] { "LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE", "LE_NUMBER_OF_LOCATIONS", "Version"};
     }
 
     @Override
@@ -86,32 +86,22 @@ public class DnBCacheSeedReport implements CharacterizationSource {
     }
 
     @Override
-    public String getAttrKey() {
-        return "AttrName";
+    public String[] getAttrKey() {
+        return new String[] {"AttrCount1", "AttrCount2", "AttrCount3", "AttrCount4"}; 
     }
 
     @Override
-    public String getCategoryKey() {
-        return "Category";
-    }
-
-    @Override
-    public String getCountKey() {
-        return "Count";
-    }
-
-    @Override
-    public String getPercentKey() {
-        return "Pcnt";
+    public String getTotalKey() {
+        return "GroupTotal";
     }
 
     @Override
     public String[] getGroupKeys() {
-        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE"};
+        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",  "LE_NUMBER_OF_LOCATIONS"};
     }
 
     @Override
     public String[] getExcludeAttrs() {
-        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE"};
+        return new String[] {"LE_COUNTRY", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",  "LE_NUMBER_OF_LOCATIONS"};
     }
 }

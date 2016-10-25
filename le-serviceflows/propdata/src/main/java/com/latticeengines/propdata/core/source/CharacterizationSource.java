@@ -4,13 +4,9 @@ public interface CharacterizationSource extends FixedIntervalSource {
 
     String getVersionKey();
 
-    String getAttrKey();
+    String[] getAttrKey();
 
-    String getCategoryKey();
-
-    String getCountKey();
-
-    String getPercentKey();
+    String getTotalKey();
 
     String[] getGroupKeys();
 

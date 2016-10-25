@@ -28,33 +28,34 @@ public class CharacterizationFlow extends TypesafeDataFlowBuilder<Characterizati
 
         List<String> groupKeys = parameters.getGroupKeys();
         String versionKey = parameters.getVersionKey();
-        String attrKey = parameters.getAttrKey();
-        String categoryKey = parameters.getCategoryKey();
-        String countKey = parameters.getCountKey();
-        String percentKey = parameters.getPercentKey();
-        Long totalRecords = parameters.getTotalRecords();
+        String[] attrKey = parameters.getAttrKey();
+        String totalKey = parameters.getTotalKey();
         String version = parameters.getVersion();
         List<String> attrList = parameters.getAttrs();
+        List<Integer> attrIdList = parameters.getAttrIds();
         String[] attrs = attrList.toArray(new String[attrList.size()]);
-        List<String> categoryList = parameters.getCategories();
-        String[] categories = categoryList.toArray(new String[categoryList.size()]);
+        Integer[] attrIds = attrIdList.toArray(new Integer[attrList.size()]);
+        for (int i = 0; i < attrs.length; i++) {
+            log.info(i + ". Attribute " + attrs[i] + " id " + attrIds[i]);
+        }
 
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(versionKey, String.class));
-        fms.add(new FieldMetadata(attrKey, String.class));
-        fms.add(new FieldMetadata(categoryKey, String.class));
-        fms.add(new FieldMetadata(countKey, Long.class));
-        fms.add(new FieldMetadata(percentKey, Float.class));
+        fms.add(new FieldMetadata(totalKey, Long.class));
+        Fields groupFields = new Fields(versionKey, totalKey);
+        for (int i = 0; i < attrKey.length; i++) {
+            fms.add(new FieldMetadata(attrKey[i], String.class));
+            groupFields = groupFields.append(new Fields(attrKey[i]));
+        }
 
-        Fields groupFields = new Fields(versionKey, attrKey, categoryKey, countKey, percentKey);
         for (int i = 0; i < groupKeys.size(); i++) {
             groupFields = groupFields.append(new Fields(groupKeys.get(i)));
             fms.add(new FieldMetadata(groupKeys.get(i), String.class));
         }
 
         Node accountMaster = addSource(parameters.getBaseTables().get(0));
-        AttrGroupCountBuffer buffer = new AttrGroupCountBuffer(attrs, categories, groupFields, version, totalRecords.longValue(),
-                                                               versionKey, attrKey, categoryKey, countKey, percentKey);
+        AttrGroupCountBuffer buffer = new AttrGroupCountBuffer(attrs, attrIds, groupFields, version,
+                                                               versionKey, attrKey, totalKey);
 
         Node grouped = accountMaster.groupByAndBuffer(new FieldList(groupKeys), buffer, fms);
 
