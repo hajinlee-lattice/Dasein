@@ -79,10 +79,12 @@ def ecs_metadata(ec2, ecscluster):
                             "#!/bin/bash\n",
                             "start ecs\n"
                             "yum install -y aws-cli jq\n"
-                            "instance_arn=$(curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}' )\n",
-                            "az=$(curl -s http://instance-data/latest/meta-data/placement/availability-zone)\n",
+                            "instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                            "az=`curl -s http://instance-data/latest/meta-data/placement/availability-zone`\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances $instance_arn --region $region\n"
+                            "echo $instance_arn",
+                            "echo $az",
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region $region\n"
                         ] ] }
                     }
                 },
