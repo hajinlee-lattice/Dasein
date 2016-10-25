@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -17,6 +18,8 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 public abstract class RegisterReport {
+    private static final Logger log = Logger.getLogger(RegisterReport.class);
+
     private Configuration yarnConfiguration = new Configuration();
     private TargetMarketStepConfiguration configuration;
     private RestTemplate restTemplate;
@@ -43,6 +46,7 @@ public abstract class RegisterReport {
     }
 
     protected List<GenericRecord> retrieveStats(String reportName) {
+        log.info(String.format("fs.defaultFS: %s", yarnConfiguration.get("fs.defaultFS")));
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), reportName);
         Table table = restTemplate.getForObject(url, Table.class);
