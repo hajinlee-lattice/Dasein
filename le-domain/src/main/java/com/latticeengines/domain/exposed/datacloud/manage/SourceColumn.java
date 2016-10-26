@@ -59,7 +59,7 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "Calculation", nullable = false, length = 50)
     private Calculation calculation;
 
-    @Column(name = "Arguments", length = 2000)
+    @Column(name = "Arguments", length = 3000)
     private String arguments;
 
     @Column(name = "Priority", nullable = false)

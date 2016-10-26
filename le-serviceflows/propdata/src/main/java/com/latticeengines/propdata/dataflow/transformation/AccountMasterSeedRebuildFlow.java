@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.refresh;
+package com.latticeengines.propdata.dataflow.transformation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculati
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.propdata.dataflow.refresh.SeedMergeFieldMapping;
 
 
 @Component("accountMasterSeedRebuildFlow")
