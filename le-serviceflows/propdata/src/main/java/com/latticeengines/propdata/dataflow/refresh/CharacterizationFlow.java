@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.dataflow.refresh;
 
-import cascading.tuple.Fields;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,13 +7,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AttrGroupCountBuffer;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CharacterizationParameters;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
 
 @Component("characterizationFlow")
 public class CharacterizationFlow extends TypesafeDataFlowBuilder<CharacterizationParameters> {

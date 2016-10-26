@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CharacterizationParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
@@ -23,9 +22,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.propdata.core.source.CharacterizationSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.source.CharacterizationSource;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 @Component("characterizationDataFlowService")
