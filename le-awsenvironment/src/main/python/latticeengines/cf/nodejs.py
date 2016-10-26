@@ -26,10 +26,13 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.profile, args.upload)
+    template(args.environment, args.stackname, args.mode, args.profile, args.upload)
 
-def template(environment, stackname, profile, upload=False):
-    stack = create_template(profile)
+def template(environment, stackname, mode, profile, upload=False):
+
+    port = 3000 if mode == "EXTERNAL" else 3002
+
+    stack = create_template(profile, port)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -37,23 +40,22 @@ def template(environment, stackname, profile, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile):
+def create_template(profile, port):
     stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.")
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = express_task(profile_vars)
+    task = express_task(profile_vars, port)
     stack.add_resource(task)
     stack.add_service("express", task)
     return stack
 
-def express_task(profile_vars):
-    container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
+def express_task(profile_vars, port):
+    container = ContainerDefinition("express", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
-        .publish_port(3000, 3000) \
-        .publish_port(3002, 3002) \
+        .publish_port(port, 443) \
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
@@ -145,6 +147,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
+    parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=template_cli)
 
