@@ -1,13 +1,5 @@
 package com.latticeengines.prospectdiscovery.workflow.steps;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
-import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -16,6 +8,13 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class RegisterReport {
     private static final Logger log = Logger.getLogger(RegisterReport.class);
@@ -47,6 +46,7 @@ public abstract class RegisterReport {
 
     protected List<GenericRecord> retrieveStats(String reportName) {
         log.info(String.format("fs.defaultFS: %s", yarnConfiguration.get("fs.defaultFS")));
+        log.info(String.format("HADOOP_CONF_DIR: %s", System.getenv("HADOOP_CONF_DIR")));
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), reportName);
         Table table = restTemplate.getForObject(url, Table.class);
