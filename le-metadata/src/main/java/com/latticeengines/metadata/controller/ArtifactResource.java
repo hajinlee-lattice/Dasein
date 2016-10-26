@@ -63,13 +63,13 @@ public class ArtifactResource {
         return ResponseDocument.failedResponse(new RuntimeException(error));
     }
 
-    @RequestMapping(value = "/artifactpath/{artifactPath}", //
+    @RequestMapping(value = "/artifactpath", //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Artifact By Path")
     public Artifact getArtifactByPath(@PathVariable String customerSpace, //
-            @PathVariable String artifactPath, //
+            @RequestParam("file") String artifactPath, //
             HttpServletRequest request) {
         return artifactService.getArtifactByPath(customerSpace, artifactPath);
     }

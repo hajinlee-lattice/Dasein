@@ -191,7 +191,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
 
     @Override
     public Artifact getArtifactByPath(String customerSpace, String artifactPath) {
-        String url = constructUrl("/customerspaces/{customerSpace}/artifactpath/{artifactPath}", //
+        String url = constructUrl("/customerspaces/{customerSpace}/artifactpath?file={artifactPath}", //
                 customerSpace, artifactPath);
         return get("getArtifactByPath", url, Artifact.class);
     }
