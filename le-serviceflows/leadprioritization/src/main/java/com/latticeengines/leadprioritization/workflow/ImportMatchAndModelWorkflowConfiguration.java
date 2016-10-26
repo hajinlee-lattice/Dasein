@@ -295,6 +295,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
+            model.setV2ProfilingEnabled(v2ProfilingEnabled);
+            return this;
+        }
+
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);

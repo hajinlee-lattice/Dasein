@@ -192,6 +192,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .transformationGroup(parameters.getTransformationGroup())
                 //
+                .enableV2Profiling(isV2ProfilingEnabled())
+                //
                 .excludePublicDomains(parameters.isExcludePublicDomains())
                 //
                 .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,

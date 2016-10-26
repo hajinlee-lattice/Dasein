@@ -110,6 +110,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
                 .transformationGroup(transformationGroup) //
+                .enableV2Profiling(isV2ProfilingEnabled()) //
                 .sourceModelSummary(modelSummary) //
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain",

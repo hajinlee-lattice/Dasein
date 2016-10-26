@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 
@@ -26,6 +27,9 @@ public class PythonProfilingMapper extends PythonMapperBase {
     public void writeToContext(Context context) throws IOException, InterruptedException {
         Text value = new Text(super.getHdfsOutputDir());
         context.write(new Text(FileAggregator.PROFILE_AVRO), value);
+        if (HdfsUtils.fileExists(context.getConfiguration(), value + "/" + FileAggregator.MODEL_PROFILE_AVRO)) {
+            context.write(new Text(FileAggregator.MODEL_PROFILE_AVRO), value);
+        }
         context.write(new Text(FileAggregator.DIAGNOSTICS_JSON), value);
     }
 }

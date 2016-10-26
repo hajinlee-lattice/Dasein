@@ -19,6 +19,7 @@ import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.Aggre
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.DiagnosticsJsonAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ModelPickleAggregator;
+import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ModelingProfileAvroAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ProfileAvroAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FeatureImportanceAggregator;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -44,11 +45,13 @@ public class PythonReducer extends Reducer<Text, Text, NullWritable, NullWritabl
         DiagnosticsJsonAggregator dAggregator = new DiagnosticsJsonAggregator();
         ModelPickleAggregator mAggregator = new ModelPickleAggregator();
         FeatureImportanceAggregator fAggregator = new FeatureImportanceAggregator();
+        ModelingProfileAvroAggregator mpAggregator = new ModelingProfileAvroAggregator();
 
         mappings.put(pAggregator.getName(), pAggregator);
         mappings.put(dAggregator.getName(), dAggregator);
         mappings.put(mAggregator.getName(), mAggregator);
         mappings.put(fAggregator.getName(), fAggregator);
+        mappings.put(mpAggregator.getName(), mpAggregator);
         return mappings;
     }
 

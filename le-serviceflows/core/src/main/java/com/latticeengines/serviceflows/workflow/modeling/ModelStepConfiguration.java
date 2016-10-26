@@ -51,6 +51,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String moduleName;
 
+    private boolean v2ProfilingEnabled;
+
     @JsonProperty
     public List<DataRule> getDataRules() {
         return dataRules;
@@ -200,5 +202,14 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    @JsonProperty
+    public boolean isV2ProfilingEnabled() {
+        return v2ProfilingEnabled;
+    }
+
+    public void setV2ProfilingEnabled(boolean v2ProfilingEnabled) {
+        this.v2ProfilingEnabled = v2ProfilingEnabled;
     }
 }

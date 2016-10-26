@@ -66,6 +66,13 @@ public abstract class WorkflowSubmitter {
         return transformationGroup;
     }
 
+    public boolean isV2ProfilingEnabled() {
+        FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()
+                .toString());
+        return flags.containsKey(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName())
+                && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName()));
+    }
+
     public boolean useDnBFlagFromZK() {
 
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(MultiTenantContext.getCustomerSpace()

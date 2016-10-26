@@ -5,7 +5,7 @@ import sys
 from bucketconsolidator import BucketConsolidator
 from geometricbucketer import GeometricBucketer
 import pkgutil as pkg
-
+import types
 
 class BucketerDispatcher(object):
 
@@ -31,7 +31,8 @@ class BucketerDispatcher(object):
                     try:
                         # Set the module name in the current global name space:
                         mod = __import__(name, fromlist=[className])
-                        globals()[className] = getattr(mod, className)
+                        if hasattr(mod, className):
+                            globals()[className] = getattr(mod, className)
                     finally:
                         # Restore
                         sys.path[:] = path

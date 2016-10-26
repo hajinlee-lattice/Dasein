@@ -265,6 +265,11 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
+            model.setV2ProfilingEnabled(v2ProfilingEnabled);
+            return this;
+        }
+
         public MatchAndModelWorkflowConfiguration build() {
             match.setMatchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission());
             export.setUsingDisplayName(Boolean.FALSE);
