@@ -92,6 +92,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             SourceFile sourceFile = new SourceFile();
             sourceFile.setTenant(tenant);
             sourceFile.setName(file.getName());
+            sourceFile.setDisplayName(file.getName());
             sourceFile.setPath(outputPath + "/" + file.getName());
             sourceFile.setSchemaInterpretation(schema);
             sourceFile.setState(SourceFileState.Uploaded);
