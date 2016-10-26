@@ -14,7 +14,7 @@ import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkf
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 
-public class ImportAndRTSBulkScoreWorkflowDeloymentTestNG extends ScoreWorkflowDeploymentTestNG {
+public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflow importAndRTSBulkScoreWorkflow;
