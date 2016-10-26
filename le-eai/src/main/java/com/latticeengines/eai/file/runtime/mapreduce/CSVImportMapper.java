@@ -215,41 +215,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         avroRecord.put(InterfaceName.InternalId.name(), lineNum);
         return avroRecord;
-        // for (final String header : headers) {
-        // Attribute attr = table.getAttributeFromDisplayName(header);
-        // if (attr == null) {
-        // LOG.info(String.format("Not found csv header %s from the table schema",
-        // header));
-        // continue;
-        // }
-        // Type avroType =
-        // schema.getField(attr.getName()).schema().getTypes().get(0).getType();
-        // String csvFieldValue = null;
-        // try {
-        // csvFieldValue = String.valueOf(csvRecord.get(header));
-        // } catch (Exception e) { // This catch is for the row error
-        // LOG.error(e);
-        // csvFieldValue = null;
-        // }
-        // Object avroFieldValue = null;
-        //
-        // List<InputValidator> validators = attr.getValidators();
-        // try {
-        // validateAttribute(validators, csvRecord, attr);
-        // if (attr.isNullable() && StringUtils.isEmpty(csvFieldValue)) {
-        // avroFieldValue = null;
-        // } else {
-        // avroFieldValue = toAvro(csvFieldValue, avroType, attr);
-        // if (attr.getName().equals(InterfaceName.Id.name())) {
-        // id = String.valueOf(avroFieldValue);
-        // }
-        // }
-        // avroRecord.put(attr.getName(), avroFieldValue);
-        // } catch (Exception e) {
-        // LOG.error(e);
-        // errorMap.put(header, e.getMessage());
-        // }
-        // }
 
     }
 
