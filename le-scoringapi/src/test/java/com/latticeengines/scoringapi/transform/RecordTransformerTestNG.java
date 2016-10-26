@@ -24,8 +24,8 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -184,7 +184,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         for (QueueEntry<Double, Double> entry : errorQueue) {
             System.out.println("Record id = " + entry.getKey() + " value = " + entry.getValue());
         }
-        Assert.assertTrue(errorQueue.size() < 7);
+        Assert.assertTrue(errorQueue.size() < 7, "Number of errors " + errorQueue.size() + " is greater than threshold 7.");
     }
 
     private Map<Double, Double> getExpectedScores(String expectedScoresPath) throws Exception {
