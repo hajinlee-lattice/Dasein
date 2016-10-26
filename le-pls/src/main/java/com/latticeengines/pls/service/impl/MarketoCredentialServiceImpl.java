@@ -56,12 +56,7 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     public void updateMarketoCredentialById(String credentialId,
             MarketoCredential marketoCredential) {
         validateRESTAndSOAPCredentials(marketoCredential);
-        try {
-            marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
-        } catch (DataIntegrityViolationException e) {
-            throw new LedpException(LedpCode.LEDP_18119,
-                    new String[] { marketoCredential.getName() });
-        }
+        marketoCredentialEntityMgr.updateMarketoCredentialById(credentialId, marketoCredential);
     }
 
     @Override

@@ -201,8 +201,12 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
                 .findAllMarketoCredentials();
         assertEquals(marketoCredentialService.findAllMarketoCredentials().size(), 2);
 
-        marketoCredentialService
-                .deleteMarketoCredentialById(Long.toString(marketoCredentials.get(0).getPid()));
+        for (MarketoCredential marketoCredential : marketoCredentials) {
+            if (marketoCredential.getName().equals(NAME_1)) {
+                marketoCredentialService
+                        .deleteMarketoCredentialById(Long.toString(marketoCredential.getPid()));
+            }
+        }
 
         assertEquals(marketoCredentialService.findAllMarketoCredentials().size(), 1);
     }
