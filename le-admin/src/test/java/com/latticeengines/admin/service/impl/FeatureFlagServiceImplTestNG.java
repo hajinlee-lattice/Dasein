@@ -159,7 +159,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
                 && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
 
-        Assert.assertTrue(!enableDataEncryptionFeatureFlag.getConfigurable()
+        Assert.assertTrue(enableDataEncryptionFeatureFlag.getConfigurable()
                 && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.CG)
                 && enableDataEncryptionFeatureFlag.getDisplayName() != null

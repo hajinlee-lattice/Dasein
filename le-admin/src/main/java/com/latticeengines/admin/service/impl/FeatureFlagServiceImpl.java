@@ -174,7 +174,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getDocumentation(), enableDataProfilingV2ProdSet, true);
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(),
-                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, false);
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getDocumentation(), enableDataEncryptionProdSet, true);
         enableDataEncryption.setModifiableAfterProvisioning(false);
 
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.DANTE.getName(), danteFeatureFlag);
