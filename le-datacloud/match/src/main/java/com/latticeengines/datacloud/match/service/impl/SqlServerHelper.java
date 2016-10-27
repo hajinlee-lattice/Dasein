@@ -35,6 +35,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
@@ -42,7 +43,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
-import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.newrelic.api.agent.Trace;
 
 @Component("sqlServerHelper")

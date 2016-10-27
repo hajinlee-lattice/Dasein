@@ -1,0 +1,34 @@
+Accounting & Financial Services|Financial Services|Business and Economy/Financial Services|
+Accounting & Financial Services|Insurance|Carriers/Life and Health|
+Accounting & Financial Services|Investment Management|Investing/Money Managers|
+Business Services|Management Consulting|Industrial/Manufacturing|
+Business Services|Market Research|Business and Economy/Advertising and Marketing|
+Business Services|Staffing and Recruiting|Access Providers/Cable|
+Civic & Social Organization|Individual & Family Services|Business and Economy/Industrial|
+Construction, Engineering & Mfg|Building Materials|Business and Economy/Business Services|
+Construction, Engineering & Mfg|Construction|Business and Economy/Construction and Maintenance|
+Design, Architecture & Planning|Design|Designers/Full Service|
+Design, Architecture & Planning|Graphic Design|Nutrition/Supplements|
+Education|Primary/Secondary Education|Education/School Districts|K-12/School Districts|
+Entertainment, Restaurant & Hospitality|Hospitality|Hotels and Motels/Chains|Lodging/Bed and Breakfast|Lodging/Hotel Casinos|Lodging/Hotels|Lodging/Hotels and Motels|Lodging/Resorts|Travel and Tourism/Lodging|
+Entertainment, Restaurant & Hospitality|Restaurants|Business and Economy/Restaurants and Bars|Restaurant Chains/Bakeries|Restaurant Chains/Family|Restaurant Chains/Italian|Restaurant Chains/Mexican|Restaurant Chains/Pizza|Restaurant Chains/Sandwich and Deli|Restaurants and Bars/American|Restaurants and Bars/Bakeries|Restaurants and Bars/Guides and Directories|Restaurants and Bars/Mexican|Restaurants and Bars/Pizza|Restaurants and Bars/Seafood|
+Food Services|Food & Beverages|Beverages/Wine|Coffee and Tea/Coffee|Coffee and Tea/Tea|Confectionery/Chocolate|Food/Specialty and Gourmet|
+Government|Political Organization|Education/K-12|
+Health, Wellness and Fitness|Health, Wellness and Fitness|Business and Economy/Beauty and Cosmetic Services|Health/Nutrition|
+Health, Wellness and Fitness|Hospital & Health Care|Health/Hospitals|
+Legal|Law Practice|Business and Economy/Legal Services|
+Leisure, Travel & Tourism|Leisure, Travel & Tourism|Travel and Tourism/Travel Guides|Travel and Tourism/Travel Services|Travel Services/Tour Operators|
+Leisure, Travel & Tourism|Recreational Facilities and Services|Society and Culture/Religion|
+Marketing and Advertising|Marketing and Advertising|Opportunities/Networking-MLM|
+Medical|Mental Health Care|Health/Dentistry|
+Other|Arts and Crafts|Crafts/Directories|
+Publishing|Publishing|Business and Economy/Publishing|
+Real Estate|Real Estate|Business and Economy/Real Estate|Real Estate/Agents and Agencies|Real Estate/Commercial|Real Estate/Real Estate Investment Trusts|Real Estate/Rentals|Real Estate/Residential|
+Retail/Wholesale|Retail|Baby/Varied Merchandise|Business and Economy/Home and Garden|Business and Economy/Shopping|Clothing/Casual|Clothing/Children's|Clothing/Footwear|Clothing/Women's|General Merchandise/Major Retailers|Hardware/Retailers|Home and Garden/Varied Merchandise|Retail Trade/Retailers|Shopping/Auctions|Shopping/Books|Shopping/Clothing|Shopping/Consumer Electronics|Shopping/Ecclesiastical Goods|Shopping/Flowers|Shopping/Flowers and Gifts|Shopping/Food|Shopping/Furniture|Shopping/General Merchandise|Shopping/Holidays|Shopping/Jewellery|Shopping/Jewelry|Shopping/Music|Shopping/Office Products|Shopping/Sex Toys and Supplies|Shopping/Sporting Goods|Shopping/Stores|Shopping/Tools|Shopping/Weddings|Sports/Apparel|Supplies/Children|Swimwear/Women's|Undergarments/Socks and Hosiery|Wedding/Rings|
+Safety|Public Safety|News and Media/Magazines and E-zines|
+Sports & Sporting Goods|Sports|Business and Economy/Employment|
+Technology|Computer & Network Security|Massive Multiplayer Online/Clans and Guilds|
+Technology|Computer Software|Construction and Maintenance/Builders|
+Technology|Information Technology and Services|Financial Services/Insurance|
+Technology|Internet|Business and Economy/Computers and Internet|Companies/Yahoo Inc.|Computers and Internet/Access Providers|Computers and Internet/Consultants|Computers and Internet/Software|Computers and Internet/Web Design and Development|E-Commerce/Shopping Carts|Internet Service Providers/DSL|On the Web/Web Portals|Tin h?c/Internet|Web Applications/Photo Sharing|Web Design and Development/Hosting|
+Transportation|Automotive|Automotive/Marketing and Advertising|Automotive/Parts and Accessories|Automotive/Parts and Supplies|Automotive/Sales|Business and Economy/Automotive|Parts and Accessories/Trucks|

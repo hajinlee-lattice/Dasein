@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.matchapi.service.impl;
 
 import java.util.UUID;
 
@@ -12,13 +12,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.datacloud.match.exposed.service.BulkMatchService;
+import com.latticeengines.datacloud.core.service.PropDataTenantService;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.datacloud.match.service.impl.MatchInputValidator;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
-import com.latticeengines.propdata.core.service.PropDataTenantService;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.matchapi.service.BulkMatchService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("bulkMatchServiceWithDerivedColumnCache")

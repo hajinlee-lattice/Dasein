@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.matchapi.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +17,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.impl.AccountMaster;
+import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
+import com.latticeengines.datacloud.match.service.impl.BulkMatchPlanner;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -30,11 +36,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.source.impl.AccountMaster;
-import com.latticeengines.propdata.core.source.impl.AccountMasterLookup;
 import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;

@@ -52,7 +52,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @Trace
-    ColumnSelection parseColumnSelection(MatchInput input) {
+    public ColumnSelection parseColumnSelection(MatchInput input) {
         ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input.getDataCloudVersion());
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection());
@@ -64,7 +64,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    ColumnSelection combineSelections(ColumnSelectionService columnSelectionService, UnionSelection unionSelection) {
+    public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService, UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
         for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
             Predefined predefined = entry.getKey();

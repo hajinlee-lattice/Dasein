@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
@@ -17,7 +18,6 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 
 @Component
 public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {

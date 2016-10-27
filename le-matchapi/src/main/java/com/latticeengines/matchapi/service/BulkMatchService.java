@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.exposed.service;
+package com.latticeengines.matchapi.service;
 
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;

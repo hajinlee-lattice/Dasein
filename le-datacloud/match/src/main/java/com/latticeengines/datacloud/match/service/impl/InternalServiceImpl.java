@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.InternalService;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
-import com.latticeengines.propdata.core.datasource.DataSourceService;
 
 @Component("internalService")
 public class InternalServiceImpl implements InternalService {

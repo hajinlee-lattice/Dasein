@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.AccountLookupEntryMgrImpl;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 
 
 @Component("accountLookupService")
