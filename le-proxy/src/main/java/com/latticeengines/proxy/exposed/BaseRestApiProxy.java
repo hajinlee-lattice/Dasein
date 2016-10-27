@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
@@ -24,10 +25,12 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 
 public abstract class BaseRestApiProxy {
 
-    private HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-            HttpClientBuilder.create().build());
-    private RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
+    private static final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+            HttpClientBuilder.create().setConnectionManager(new PoolingHttpClientConnectionManager()).build());
+
+    private RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
     private String hostport;
     private String rootpath;
 
@@ -48,7 +51,7 @@ public abstract class BaseRestApiProxy {
         this.hostport = hostport;
         this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
-        setErrorHandler(new GetResponseErrorHandler());
+        restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
     protected void setErrorHandler(ResponseErrorHandler handler) {
