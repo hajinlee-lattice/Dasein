@@ -12,5 +12,6 @@ RUN mkdir ROOT \
     && rm -rf /ROOT.war \
     && cp -f /log4j.properties ROOT/WEB-INF/classes/log4j.properties \
     && cp -r /META-INF ROOT \
+    && rm -r -f ${CATALINA_HOME}/webapps/ROOT* \
     && cp -r ROOT ${CATALINA_HOME}/webapps/ \
 

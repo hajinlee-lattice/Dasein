@@ -12,6 +12,9 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
     && apt-get install -y oracle-java8-installer \
     && rm -rf /etc/apt/sources.list.d/webupd8team-java.list
 
+RUN mkdir -p $CATALINA_HOME/webapps/ROOT \
+    && echo "<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><HTML><BODY><H1>It works!</H1></BODY></HTML>" > $CATALINA_HOME/webapps/ROOT/index.html
+
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
@@ -20,12 +23,11 @@ COPY server.xml $CATALINA_HOME/conf/server.xml
 COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 
 COPY cacerts /etc/pki/java/cacerts
-COPY server.key /etc/pki/java/server.key
-COPY server.crt /etc/pki/java/server.crt
+COPY tomcat.jks /etc/pki/java/tomcat.jks
 COPY log4j.properties /log4j.properties
 COPY conf/env/qacluster_aws/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties
 COPY conf/env/prodcluster_aws/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
 COPY start.sh /start.sh
 
-EXPOSE 8443 1099
+EXPOSE 8080 8443 1099
 CMD ["bash", "/start.sh"]
