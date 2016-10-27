@@ -436,57 +436,6 @@ def getKurtosisAndSkewness(columnData):
     except Exception:
         return None, None
 
-def writeCategoricalValuesToAvroOld(dataWriter, columnVector, eventVector, mode, colName, otherMetadata, index):
-    '''
-    Creates a datum for each unique value in the categorical column and writes to buffered writer
-    Args:
-        dataWriter: Buffered writer which appends each datum to the avro file
-        columnVector: A DataFrame vector of column data
-        eventVector: A DataFrame vector of event column
-        mode: Mode of all values in the column vector
-        colName: Name of given column
-        index: Current id of column in output file
-    Returns:
-        index: id of next column in output file
-    '''
-    mi, componentMi = calculateMutualInfo(columnVector, eventVector)
-    entropyValue = entropy(eventVector)
-
-    avgProbability = sum(eventVector) / float(len(eventVector))
-    for value in columnVector.unique():
-        if (value is None):
-            continue
-        valueVector = map(lambda x: 1 if x == value else 0, columnVector)
-        valueCount = sum(valueVector)
-        datum = {}
-        (numPosEvents, lift) = getLift(avgProbability, valueCount, valueVector, eventVector)
-        datum["id"] = index
-        datum["barecolumnname"] = colName
-        datum["displayname"] = otherMetadata[0]
-        datum["approvedusage"] = otherMetadata[1]
-        datum["category"] = otherMetadata[2]
-        datum["fundamentaltype"] = otherMetadata[3]
-        datum["columnvalue"] = value
-        datum["Dtype"] = "STR"
-        datum["minV"] = None
-        datum["maxV"] = None
-        datum["mean"] = None
-        datum["median"] = None
-        datum["mode"] = mode
-        datum["kurtosis"] = None
-        datum["skewness"] = None
-        datum["count"] = valueCount
-        datum["lift"] = lift
-        datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[value], entropyValue)
-        datum["discreteNullBucket"] = False
-        datum["continuousNullBucket"] = False
-        datum["positiveEventCount"] = numPosEvents
-        index = index + 1
-        dataWriter.append(datum)
-
-    # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False, componentMi, entropyValue)
-    return index, uncertaintyCoefficient(mi, entropyValue)
 
 def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherMetadata, index):
     '''
@@ -525,7 +474,7 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
         datum["count"] = value[0]
         datum["lift"] = value[2]
         datum["uncertaintyCoefficient"] = uncertaintyCoeffDict[key]
-        datum["discreteNullBucket"] = False
+        datum["discreteNullBucket"] = key is None
         datum["continuousNullBucket"] = False
         datum["positiveEventCount"] = int(value[1])
         index = index + 1
@@ -572,115 +521,6 @@ def writeBandsToAvro(dataWriter, bandsDict, mean, median, kurtosis, skewness, co
         dataWriter.append(datum)
     return index, uncertaintyCoefficient(bandsDict["mi"], bandsDict["entropyValue"])
 
-
-def writeBandsToAvroOld(dataWriter, columnVector, eventVector, bands, mean, median, kurtosis, skewness, colName, otherMetadata, index):
-    '''
-    Creates a datum for each band in the band column and writes to buffered writer
-    Args:
-        dataWriter: Buffered writer which appends each datum to the avro file
-        columnVector: A DataFrame vector of column data
-        eventVector: A DataFrame vector of event column
-        bands: A list of band boundries, i.e. band i = (band[i], band[i+1)
-        colName: Name of given column
-        index: Current id of column in output file
-    Returns:
-        index: id of next column in output file
-    '''
-    bucketsVector = mapToBands(columnVector, bands)
-    mi, componentMi = calculateMutualInfo(bucketsVector, eventVector)
-    entropyValue = entropy(eventVector)
-
-    avgProbability = sum(eventVector) / float(len(eventVector))
-    for i in range(len(bands) - 1):
-        bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
-        bandCount = sum(bandVector)
-        if bandCount == 0:
-            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i + 1]) + "] for column: " + colName)
-            continue
-
-        # Replace np.inf with None value
-        band = map(lambda x: None if np.isinf(x) else x, [bands[i], bands[i + 1]])
-        datum = {}
-        (numPosEvents, lift) = getLift(avgProbability, bandCount, bandVector, eventVector)
-        datum["id"] = index
-        datum["barecolumnname"] = colName
-        datum["displayname"] = otherMetadata[0]
-        datum["approvedusage"] = otherMetadata[1]
-        datum["category"] = otherMetadata[2]
-        datum["fundamentaltype"] = otherMetadata[3]
-        datum["columnvalue"] = None
-        datum["Dtype"] = "BND"
-        datum["minV"] = band[0]
-        datum["maxV"] = band[1]
-        datum["mean"] = mean
-        datum["median"] = median
-        datum["mode"] = None
-        datum["kurtosis"] = kurtosis
-        datum["skewness"] = skewness
-        datum["count"] = bandCount
-        datum["lift"] = lift
-        datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[bands[i]], entropyValue)
-        datum["discreteNullBucket"] = False
-        datum["continuousNullBucket"] = False
-        datum["positiveEventCount"] = numPosEvents
-        index = index + 1
-        dataWriter.append(datum)
-
-    # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, True, componentMi, entropyValue)
-    return index, uncertaintyCoefficient(mi, entropyValue)
-
-def mapToBands(columnVector, bands):
-    bucketsVector = []
-    for x in columnVector:
-        if (np.isnan(x) or x is None):
-            bucketsVector.append(None)
-            continue
-        for i in range(len(bands) - 1):
-            if x >= bands[i] and x < bands[i + 1]:
-                bucketsVector.append(bands[i])
-                break
-    return bucketsVector
-
-
-def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous, componentMi, entropyValue):
-    bandVector = []
-
-    if continuous:
-        bandVector = map(lambda x: 1 if np.isnan(x) else 0, columnVector)
-    else:
-        bandVector = map(lambda x: 1 if x is None else 0, columnVector)
-    bandCount = sum(bandVector)
-    if bandCount == 0:
-        return index
-
-    datum = {}
-    (numPosEvents, lift) = getLift(avgProbability, bandCount, bandVector, eventVector)
-    datum["id"] = index
-    datum["barecolumnname"] = colName
-    datum["displayname"] = otherMetadata[0]
-    datum["approvedusage"] = otherMetadata[1]
-    datum["category"] = otherMetadata[2]
-    datum["fundamentaltype"] = otherMetadata[3]
-    datum["columnvalue"] = None
-    datum["Dtype"] = "BND" if continuous else "STR"
-    datum["minV"] = None
-    datum["maxV"] = None
-    datum["mean"] = mean
-    datum["median"] = median
-    datum["mode"] = None
-    datum["kurtosis"] = None
-    datum["skewness"] = None
-    datum["count"] = bandCount
-    datum["lift"] = lift
-    datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[None], entropyValue) if None in componentMi else None
-    datum["discreteNullBucket"] = not continuous
-    datum["continuousNullBucket"] = continuous
-    datum["positiveEventCount"] = numPosEvents
-    index = index + 1
-    dataWriter.append(datum)
-    return index
-
 def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params, attributeStats):
     '''
     Writes all diagnostics to a json file
@@ -725,74 +565,7 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
         summary["HighUCColumns"] = ",".join(highUCColumns)
     return summary
 
-def getCountWhereEventIsOne(valueVector, eventVector):
-    '''
-    Finds the count of rows where value and event are both 1
-    Args:
-        valueVector: A DataFrame vector of boolean values where valueVector[i] = 1 means value = x for row i
-        eventVector: A DataFrame vector of event column
-    Returns:
-        The final count value
-    '''
-    counter = lambda x, y: 1 if x == 1 and y == 1 else 0
-    return sum(map(counter, valueVector, eventVector))
-
-def getLift(avgProbability, valueCount, valueVector, eventVector):
-    '''
-    Calculates the lift of a given value x of a given column based on the formula:
-    lift = P(Event = 1 | Value = x) / P(Event = 1)
-    Args:
-        avgProbability: A float value which is P(Event = 1)
-        valueCount: Count of rows where value = x for a given column
-        valueVector: A DataFrame vector of boolean values where valueVector[i] = 1 means value = x for row i
-        eventVector A DataFrame vector of event column
-    Returns:
-        Lift value
-    '''
-    if (avgProbability * valueCount) == 0:
-        return (0, None)
-    countWhereEventIsOne = getCountWhereEventIsOne(valueVector, eventVector)
-    return (countWhereEventIsOne, countWhereEventIsOne / float(avgProbability * valueCount))
-
 def uncertaintyCoefficient(mi, entropy):
     if mi == None or entropy == 0:
         return None
     return mi / entropy
-
-# correct MI calculation (http://en.wikipedia.org/wiki/Mutual_information)
-def calculateMutualInfo(values, truth):
-    total_mi = 0
-    mi_components = {}
-    for x_val in set(values):
-        mi_components[x_val] = 0
-        x_binary = [1 if x == x_val else 0 for x in values]
-        p_x = float(sum(x_binary)) / len(truth)
-        for y_val in set(truth):
-            y_binary = [1 if y == y_val else 0 for y in truth]
-            p_y = float(sum(y_binary)) / len(truth)
-
-            joint_prob = float(sum((n for n in itertools.imap(lambda x, y: x * y, x_binary, y_binary)))) / len(truth)
-            relative_dependence = joint_prob * math.log(joint_prob / (p_x * p_y)) if joint_prob != 0 else 0
-
-            total_mi += relative_dependence
-            mi_components[x_val] += relative_dependence
-    return total_mi, mi_components
-
-#the assumption is that data is based as a list of tuples
-#each tuple x contains
-#x[0]= value(some name defining the bucket)
-#x[1]=total count for that bucket
-#x[2]=total number of positives in that bucket
-def calculateMutualInfoBinary(vtuple):
-    totalLength,totalPositives=sum([x[1] for x in vtuple]),sum([x[2] for x in vtuple])
-    rate=[float(totalLength-totalPositives)/totalLength,float(totalPositives)/totalLength]
-    def relative_dep(x):
-         joint_prob=[float(x[1]-x[2])/totalLength,float(x[2])/totalLength]
-         p_x=float(x[1])/totalLength
-         returnVal=0.0
-         # iterate over true and false events
-         for yi in range(2):
-            returnVal += joint_prob[yi] * math.log(joint_prob[yi] / (p_x * rate[yi])) if joint_prob[yi] != 0.0 else 0.0
-         return returnVal
-    mi_components={x[0]:relative_dep(x) for x in vtuple}                                                          
-    return sum(mi_components.values()) , mi_components

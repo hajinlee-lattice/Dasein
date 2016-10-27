@@ -1,9 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 13 11:28:46 2015
+
+@author: jhu
+"""
+
 from collections import Counter
 import math
 import csv
 from sklearn.metrics.cluster.supervised import entropy
 
 def getSig(sub, overall):
+    """
+    input: (sub-population size, sub-population rate), (overall-population size, overall-population rate)
+    output: the significance difference between the subpopulation and the overall population
+    """
     subCnt, subRate = sub
     oaCnt, oaRate = overall
     r = (subCnt*subRate + oaCnt*oaRate)/(subCnt+oaCnt)
@@ -13,6 +24,12 @@ def getSig(sub, overall):
         return (subRate-oaRate)/(math.sqrt(r*(1.0-r)*(1.0/subCnt + 1.0/oaCnt)))
         
 def getTuple(xList, eventList, k = None):
+    """
+    input:  xList : feature column
+            eventList: event column
+            k : special value to look 
+    output: when k is None, return (overall-population size, overall-population rate); when k is not None, return (sub-population size, sub-population rate) with respect to the value of k
+    """
     if k is None:
         return (len(eventList), sum(eventList)*1.0/len(eventList))
     ind = [i for (i,x) in enumerate(xList) if x==k]
@@ -23,11 +40,12 @@ def getTuple(xList, eventList, k = None):
         rate = sum([eventList[i] for i in ind])*1.0/count    
     return (count, rate)    
 
-def getGroupingResults(xList, eventList):
-    
-    popCount = len(eventList)
-    popRate = sum(eventList)*1.0/len(eventList)
-    
+def getGroupingResults(xList, eventList, popCount, popRate):
+    """
+    input:  xList : feature column
+            eventList: event column
+    output: (population size, conversion rate, significance) with respect to each distinct value from xList
+    """
     fullValueSet=set(xList)
     output = {}
     for k in fullValueSet:
@@ -36,28 +54,28 @@ def getGroupingResults(xList, eventList):
         output.update({k: (count, rate, sig)})
     return output
     
-def groupCategoricalVarForModel(xList, eventList, thresholdError = 3, threshBinSize = 0.05):
-
-    popCount = len(eventList)
-    popRate = sum(eventList)*1.0/len(eventList)
+def groupCategoricalVarForModel(xList, eventList, popCount, popRate, thresholdError = 3, threshBinSize = 0.05):
+    '''
+    input:  xList : feature column
+            eventList: event column
+            thresholdError: threshold used to identify feature values that have significant conversion rate than the over all conversion rate
+            threshBinSize: threshold used to identify the feature values that have big population size
+            
+    output: the set of feature values that:
+        1. have significant conversion rate than the over all conversion rate
+        2. have big population size
+        3. have conversion rate close to the over all conversion rate
+        4. don't belong to any of the 3 above sets
+    '''
     
-    groupingResults = getGroupingResults(xList, eventList)
+    groupingResults = getGroupingResults(xList, eventList, popCount, popRate)
     
     featureValBigsize = dict([(x,y) for x,y in groupingResults.items() if y[0] >= popCount*threshBinSize])
     featureValSignificant = dict([(x,y) for x,y in groupingResults.items() if abs(y[2]) >= thresholdError and x not in featureValBigsize.keys()])
-    featureValCloseToMean = dict([(x,y) for x,y in groupingResults.items() if abs(y[2]) <= thresholdError*0.5 and x not in featureValBigsize.keys()])
-    featureValLeftOver = dict([(x,y) for x,y in groupingResults.items() if x not in featureValBigsize.keys() and x not in featureValSignificant and x not in featureValCloseToMean])
+    featureValClosetomean = dict([(x,y) for x,y in groupingResults.items() if abs(y[2]) <= thresholdError*0.5 and x not in featureValBigsize.keys()])
+    featureValLeftOver = dict([(x,y) for x,y in groupingResults.items() if x not in featureValBigsize.keys() and x not in featureValSignificant and x not in featureValClosetomean])
     
-    return (featureValBigsize, featureValSignificant, featureValCloseToMean, featureValLeftOver)
-    
-def mapValues(xList, featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver):
-
-    featureMappedVal = {x:x for x in featureValBigsize.keys()}
-    featureMappedVal.update({x:x for x in featureValSignificant.keys()})
-    featureMappedVal.update({x:'Close To Mean' for x in featureValClosetomean.keys()})
-    featureMappedVal.update({x:'Left Over' for x in featureValLeftOver.keys()})
-
-    return [featureMappedVal[x] for x in xList]
+    return (featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver)
 
 def uncertaintyCoeff(mi, entropy):
     if mi == None or entropy == 0:
@@ -65,6 +83,12 @@ def uncertaintyCoeff(mi, entropy):
     return mi / entropy    
 
 def calculateMutualInfoBinary(splCnts, posCnts):
+    """
+    Calculates mutual information from a list of buckets.
+    splCnts: sample counts in each bucket
+    poscnts: positive events in each bucket
+    returns: mutual information in each bucket
+    """
     totalLength, totalPositives=sum(splCnts), sum(posCnts)
     rate=[float(totalLength-totalPositives)/totalLength, float(totalPositives)/totalLength]
     def relative_dep(splCnt, posCnt):
@@ -78,11 +102,16 @@ def calculateMutualInfoBinary(splCnts, posCnts):
     return mi_components
     
 def getEntropy(totalCnt, totalEvent):
-    probPos = totalEvent*1.0/totalCnt
-    return - math.log(probPos)*probPos - math.log(1 - probPos)*(1 - probPos)
+    if totalCnt == totalEvent or totalEvent == 0 or totalCnt == 0:
+        return 0.0
+    else:    
+        probPos = totalEvent*1.0/totalCnt
+        return - math.log(probPos)*probPos - math.log(1 - probPos)*(1 - probPos)
     
 def getStats(groupingResults):
-    
+    '''
+    (population size, conversion rate, significance) with respect to each distinct value from the feature column, compute the statistics such as mutual information, entropy and  uncertainty coefficient
+    '''
     statsOutput = {}
 
     keys = groupingResults.keys()
@@ -104,14 +133,28 @@ def getStats(groupingResults):
     return statsOutput
     
 def getCatGroupingAndStatsForModel(xList, eventList, thresholdError = 3, threshBinSize = 0.05):
-    
+    '''
+    input:  xList : feature column
+            eventList: event column
+            thresholdError: threshold used to identify feature values that have significant conversion rate than the over all conversion rate
+            threshBinSize: threshold used to identify the feature values that have big population size
+    output: summary for the grouping results used for modeling        
+    '''
     output = {}
     
     groupingResults = {}
-    
-    featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver = groupCategoricalVarForModel(xList, eventList, thresholdError, threshBinSize)
-    
+    popCount = len(eventList)
     popRate = sum(eventList)*1.0/len(eventList)
+    nullIdx = set([x[0] for x in enumerate(xList) if x[1] is None])
+    if len(nullIdx) > 0:
+        eventListNull = [eventList[i] for i in xrange(popCount) if i in nullIdx]
+        
+        groupingResults.update({None: (len(nullIdx), sum(eventListNull), sum(eventListNull)*1.0/(len(nullIdx)*popRate))})
+    
+    xListNotNull = [xList[i] for i in xrange(popCount) if i not in nullIdx]
+    eventListNotNull = [eventList[i] for i in xrange(popCount) if i not in nullIdx]
+    
+    featureValBigsize, featureValSignificant, featureValClosetomean, featureValLeftOver = groupCategoricalVarForModel(xListNotNull, eventListNotNull, popCount, popRate, thresholdError, threshBinSize)
     
     groupingResults.update({k:(v[0], v[0]*v[1], v[1]/popRate) for k, v in featureValSignificant.items()})
     groupingResults.update({k:(v[0], v[0]*v[1], v[1]/popRate) for k, v in featureValBigsize.items()})
@@ -141,7 +184,11 @@ def getCatGroupingAndStatsForModel(xList, eventList, thresholdError = 3, threshB
     return output
 
 def getCatGroupingAndStatsForDisplay(groupingResultsModel, thresholdNumValDisplay = 8):
-    
+    '''
+    input:  summary for the grouping results used for modeling
+            thresholdNumValDisplay: maximum number of values allowed to be shown on UI
+    output: summary for the grouping results used for Displaying on UI        
+    '''
     groupedTuple = groupingResultsModel.items()
     
     popRate = sum(x[1] for k, x in groupedTuple)*1.0/sum(x[0] for k, x in groupedTuple)
@@ -186,8 +233,3 @@ def getCatGroupingAndStatsForDisplay(groupingResultsModel, thresholdNumValDispla
     output.update(getStats(groupingResultsDisp))
     
     return output
-    
-    
-
-    
-    

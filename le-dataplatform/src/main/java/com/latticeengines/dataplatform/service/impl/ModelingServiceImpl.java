@@ -482,7 +482,7 @@ public class ModelingServiceImpl implements ModelingService {
     private String getDataProfileAvroPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, HdfsFileFormat.AVRO_FILE);
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, "profile.avro");
         } catch (Exception e) {
             log.warn(e);
         }
@@ -645,7 +645,7 @@ public class ModelingServiceImpl implements ModelingService {
             dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
 
             List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath,
-                    HdfsFileFormat.AVRO_FILE);
+                    "profile.avro");
             if (avroMetadataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
