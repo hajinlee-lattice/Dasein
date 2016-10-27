@@ -12,24 +12,17 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FileStatus;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.common.exposed.util.WebHdfsUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -46,25 +39,15 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     private String directory;
 
-    @Value("${hadoop.fs.web.defaultFS}")
-    private String hdfsUrl;
+    @Value("${hadoop.fs.web.webhdfs}")
+    private String webHdfsUrl;
 
     private String hdfsDir;
     private String updatedHdfsDir;
-    private static final String BUILD_USER = System.getProperty("user.name");
-    private static final String MKDIRS = "MKDIRS";
-    private static final String GET_FILE_STATUS = "GETFILESTATUS";
-    private static final String CREATE = "CREATE";
-    private static final String RENAME = "RENAME";
-    private static final String DELETE = "DELETE";
-    private static final String OPEN = "OPEN";
 
     @Autowired
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
-
-    // @Autowired
-    // private EncryptionWebHdfsProxy encryptionWebHdfsProxy;
 
     @PostConstruct
     private void postConstruct() {
@@ -81,7 +64,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         switchToSuperAdmin();
     }
 
-    @Test(groups = "deployment", dataProvider = "provider", enabled = false)
+    @Test(groups = "deployment", dataProvider = "provider", enabled = true)
     public void testCrud(Boolean enableEncryptionTenant) {
         log.info("Bootstrapping test tenants using tenant console with enableEncryptionTenant: "
                 + enableEncryptionTenant.toString());
@@ -105,50 +88,48 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         testFileCreation();
         testFileReading();
         testUpdateDirectoryName();
-        // testDeleteFile();
-        // testDeleteDirectory();
+        testDeleteDirectory();
     }
 
     protected void testDirectoryCreation() {
         log.info("Start creating a directory in Hdfs: " + hdfsDir);
-        restTemplate.put(String.format("%s%s?user.name=%s&op=%s", hdfsUrl, hdfsDir, BUILD_USER, MKDIRS), String.class);
-        // encryptionWebHdfsProxy.createDirectory(hdfsDir, BUILD_USER);
+        try {
+            WebHdfsUtils.mkdir(webHdfsUrl, yarnConfiguration, hdfsDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error creating the directory .");
+        }
         readDirectory(hdfsDir);
     }
 
-    @SuppressWarnings("rawtypes")
     protected void testFileCreation() {
         log.info("Start creating a file in Hdfs: " + hdfsDir);
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + FILE_NAME));
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        String fileContents;
+        try {
+            fileContents = FileUtils.readFileToString(
+                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+            WebHdfsUtils.writeToFile(webHdfsUrl, yarnConfiguration, String.format("%s/%s", hdfsDir, FILE_NAME),
+                    fileContents);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error creating a file .");
+        }
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange( //
-                String.format("%s%s/%s?user.name=%s&op=%s", hdfsUrl, hdfsDir, FILE_NAME, BUILD_USER, CREATE),
-                HttpMethod.PUT, //
-                requestEntity, ResponseDocument.class);
-        log.info("location is " + response.getHeaders().getLocation());
-        String location = response.getHeaders().getLocation().toString();
-        Assert.assertEquals(response.getStatusCode(), HttpStatus.TEMPORARY_REDIRECT);
-
-        response = restTemplate.exchange(location, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        Assert.assertEquals(response.getStatusCode(), HttpStatus.CREATED);
     }
 
     protected void testFileReading() {
         log.info("Start reading the file created in Hdfs: " + hdfsDir);
-        ResponseEntity<String> response = restTemplate.getForEntity(
-                String.format("%s%s/%s?user.name=%s&op=%s", hdfsUrl, hdfsDir, FILE_NAME, BUILD_USER, OPEN),
-                String.class);
-        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
-        log.info("response is " + response.getBody());
         try {
-
-            String fileContents = FileUtils.readFileToString(
+            FileStatus fileStatus = WebHdfsUtils.getFileStatus(webHdfsUrl, yarnConfiguration,
+                    String.format("%s/%s", hdfsDir, FILE_NAME));
+            Assert.assertTrue(fileStatus.isFile());
+            Assert.assertTrue(fileStatus.isEncrypted());
+            String expectedFileContents = FileUtils.readFileToString(
                     new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
-            // Assert.assertEquals(fileContents, response);
+            log.info("file contents are: " + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                    String.format("%s/%s", hdfsDir, FILE_NAME)));
+            Assert.assertEquals(expectedFileContents, WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                    String.format("%s/%s", hdfsDir, FILE_NAME)));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading the file contents.");
@@ -157,34 +138,33 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     protected void testUpdateDirectoryName() {
         log.info("Start updating directory name in Hdfs...");
-        restTemplate.put(String.format("%s%s?user.name=%s&op=%s&destination=%s", hdfsUrl, hdfsDir, BUILD_USER, RENAME,
-                updatedHdfsDir), String.class);
+        try {
+            WebHdfsUtils.updateDirectoryName(webHdfsUrl, yarnConfiguration, hdfsDir, updatedHdfsDir);
+        } catch (IllegalArgumentException | IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error updating the directory name.");
+        }
         readDirectory(updatedHdfsDir);
-    }
-
-    protected void testDeleteFile() {
-        log.info("Start deleting the file created in Hdfs: " + hdfsDir);
     }
 
     protected void testDeleteDirectory() {
         log.info("Start deleting directory in Hdfs...");
-        restTemplate.delete(String.format("%s%s?user.name=%s&op=%s&destination=%s", hdfsUrl, updatedHdfsDir, BUILD_USER,
-                DELETE, updatedHdfsDir), String.class);
-
         try {
-            restTemplate.getForEntity(String.format("%s%s?op=%s", hdfsUrl, updatedHdfsDir, GET_FILE_STATUS),
-                    String.class);
-            Assert.fail("Should have thrown exception");
-        } catch (Exception e) {
-            // pass
+            WebHdfsUtils.rmdir(webHdfsUrl, yarnConfiguration, updatedHdfsDir);
+        } catch (IllegalArgumentException | IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error deleting the directory.");
         }
     }
 
     protected void readDirectory(String hdfsDir) {
         log.info("Start reading directory in Hdfs: " + hdfsDir);
-        ResponseEntity<String> response = restTemplate
-                .getForEntity(String.format("%s%s?op=%s", hdfsUrl, hdfsDir, GET_FILE_STATUS), String.class);
-        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+        try {
+            Assert.assertTrue(WebHdfsUtils.isDirectory(webHdfsUrl, yarnConfiguration, hdfsDir));
+        } catch (IllegalArgumentException | IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading the directory .");
+        }
     }
 
     @DataProvider(name = "provider")

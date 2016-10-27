@@ -15,7 +15,9 @@
         <le.camille.version>3.0.0-SNAPSHOT</le.camille.version>
         <le.baton.version>3.0.0-SNAPSHOT</le.baton.version>
         <le.testfwk.version>3.0.0-SNAPSHOT</le.testfwk.version>
-        <le.proxy.version>3.0.0-SNAPSHOT</le.proxy.version>
+        <le.security.version>3.0.0-SNAPSHOT</le.security.version>
+        <le.testfwk.version>3.0.0-SNAPSHOT</le.testfwk.version>
+        <le.remote.version>3.0.0-SNAPSHOT</le.remote.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
@@ -72,15 +74,21 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
