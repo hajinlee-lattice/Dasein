@@ -69,7 +69,7 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     private String script;
     
     @JsonProperty("RTSFilePath")
-    @Column(name = "RTS_SCRIPT", unique = true, nullable = true)
+    @Column(name = "RTS_SCRIPT", nullable = true)
     private String rtsScript;
 
     @JsonIgnore
