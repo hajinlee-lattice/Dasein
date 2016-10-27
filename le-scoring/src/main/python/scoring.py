@@ -12,72 +12,29 @@ PIPELINESTEPS_SCRIPT_NAME = "pipelinesteps.py"
 SCORING_INPUT_PREFIX = "scoringinputfile-"
 SCORING_OUTPUT_PREFIX = "scoringoutputfile-"
 
-IMPUTATION_STEP_SCRIPT_NAME = "imputationstep.py"
-IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME = "imputationstepevpipeline.py"
-MAKE_FLOAT_SCRIPT_NAME = "make_float.py"
-REPLACE_NULL_VALUE_SCRIPT_NAME = "replace_null_value.py"
-COLUMNTRANFORM_SCRIPT_NAME = "columntransform.py"
-REVENUE_COLUMN_SCRIPT_NAME = "revenuecolumntransformstep.py"
-CLEANCATEGORICAL_SCRIPT_NAME = "cleancategoricalcolumn.py"
-AGGREGATED_MODEL_SCRIPT_NAME = "aggregatedmodel.py"
-ENUMERATED_COLUMN_SCRIPT_NAME = "enumeratedcolumntransformstep.py"
-COLUMNTYPE_CONVERSION_SCRIPT_NAME = "columntypeconversionstep.py"
-PIVOT_SCRIPT_NAME = "pivotstep.py"
-EXPORT_DF_SCRIPT_NAME = "exportdfstep.py"
-ASSIGNCONVERSIONRATE_SCRIPT_NAME = "assignconversionratetocategoricalcolumns.py"
-REMEDIATEDATARULESSTEP_SCRIPT_NAME = "remediatedatarulesstep.py"
-WEBHDFS_SCRIPT_NAME = "webhdfs.py"
-CUSTOMPROXY_SCRIPT_NAME = "customproxystep.py"
-
 def main(argv):
-    scoringFiles = [SCORING_SCRIPT_NAME,
-                    PIPELINE_SCRIPT_NAME,
-                    PICKLE_FILE_NAME,
-                    PIPELINEFWK_SCRIPT_NAME,
-                    ENCODER_SCRIPT_NAME,
-                    PIPELINESTEPS_SCRIPT_NAME,
-                    IMPUTATION_STEP_SCRIPT_NAME,
-                    IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME,
-                    MAKE_FLOAT_SCRIPT_NAME,
-                    REPLACE_NULL_VALUE_SCRIPT_NAME,
-                    COLUMNTRANFORM_SCRIPT_NAME,
-                    REVENUE_COLUMN_SCRIPT_NAME,
-                    CLEANCATEGORICAL_SCRIPT_NAME,
-                    AGGREGATED_MODEL_SCRIPT_NAME,
-                    ENUMERATED_COLUMN_SCRIPT_NAME,
-                    COLUMNTYPE_CONVERSION_SCRIPT_NAME,
-                    PIVOT_SCRIPT_NAME,
-                    EXPORT_DF_SCRIPT_NAME,
-                    ASSIGNCONVERSIONRATE_SCRIPT_NAME,
-                    REMEDIATEDATARULESSTEP_SCRIPT_NAME,
-                    WEBHDFS_SCRIPT_NAME,
-                    CUSTOMPROXY_SCRIPT_NAME]
-    print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
+        scoringSupportedFiles = []
         if index == 0:
             continue
         # change the file name of supported files
         modelID = argv[index]
-        manipulateSupportedFiles(modelID, scoringFiles, leadFiles)
+        manipulateSupportedFiles(modelID, scoringSupportedFiles, leadFiles)
         # do scoring
-        print "leadFiles are:"
-        print leadFiles
+        print "leadFiles are: ", leadFiles
+        print "scoringSupportedFiles are: " ,scoringSupportedFiles
         if len(leadFiles) == 0:
             raise "leadFile is null"
         for leadFile in leadFiles:
             modelEvaluate(modelID, leadFile)
         # delete the supported files for the next round of scoring
-        deleteFiles(scoringFiles)
+        deleteFiles(scoringSupportedFiles)
         deleteFiles(leadFiles)
         deletePycFiles()
 
-def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
+def manipulateSupportedFiles(modelID, scoringSupportedFiles, leadFiles):
     s = modelID + "-"
-    curFiles = os.listdir(os.getcwd())
-    targetedFiles = []
-    for f in scoringFiles:
-        targetedFiles.append(modelID + f)
     # loop through all the files in the current directory
     files = os.listdir('.')
     for f in files:
@@ -86,16 +43,11 @@ def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
             os.rename(f, updatedLeadName)
             leadFiles.append(updatedLeadName)
             continue
-        for fileName in targetedFiles:
-            if f.startswith(fileName):
-                os.rename(f, fileName[len(modelID):])
-    # Rename any remaining files that end with PY or JSON
-    files = os.listdir('.')
-    for f in files:
-        if f.startswith(modelID) and (f.endswith('.json') or f.endswith('.py')):
+        if f.startswith(modelID) and (f.endswith('.json') or f.endswith('.py') or f.endswith('.p')):
             try:
                 os.rename(f, f[len(modelID):])
-                print "renaming ", f
+                print "renaming ", f, "to:", f[len(modelID):]
+                scoringSupportedFiles.append(f[len(modelID):])
             except:
                 print "scoring.py: error when trying to rename ", f
                 pass
@@ -122,8 +74,7 @@ def deletePycFiles():
     for f in dir:
         ext = '.pyc'
         if f.lower().endswith(ext):
-            print 'found file: '
-            print f
+            print 'found file:', f
             os.remove(f)
 
 if __name__ == "__main__":
