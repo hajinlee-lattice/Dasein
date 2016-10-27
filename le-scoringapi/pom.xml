@@ -23,7 +23,6 @@
         <le.datafabric.version>3.0.0-SNAPSHOT</le.datafabric.version>
         <le.monitor.version>3.0.0-SNAPSHOT</le.monitor.version>
         <le.oauth2.db.version>3.0.0-SNAPSHOT</le.oauth2.db.version>
-        <le.datacloud.version>3.0.0-SNAPSHOT</le.datacloud.version>
         <le.proxy.version>3.0.0-SNAPSHOT</le.proxy.version>
         <le.network.version>3.0.0-SNAPSHOT</le.network.version>
         <le.transform.version>3.0.0-SNAPSHOT</le.transform.version>
@@ -395,11 +394,6 @@
             <artifactId>le-network</artifactId>
             <version>${le.network.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-datacloud-match</artifactId>
-            <version>${le.datacloud.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

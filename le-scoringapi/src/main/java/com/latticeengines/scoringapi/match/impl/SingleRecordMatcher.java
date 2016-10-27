@@ -119,12 +119,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
     private MatchOutput callMatch(MatchInput matchInput) {
         logInDebugMode("matchInput:", matchInput);
 
-        MatchOutput matchOutput = null;
-        if (shouldShortcircuitPropdata) {
-            matchOutput = realTimeMatchService.match(matchInput);
-        } else {
-            matchOutput = matchProxy.matchRealTime(matchInput);
-        }
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
         logInDebugMode("matchOutput:", matchOutput);
 

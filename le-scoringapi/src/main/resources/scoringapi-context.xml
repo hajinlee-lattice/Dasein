@@ -11,7 +11,6 @@
     <import resource="classpath:proxy-context.xml" />
     <import resource="classpath:oauth2db-persistence-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
-    <import resource="classpath:datacloud-match-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />
     

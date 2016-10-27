@@ -134,13 +134,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
         }
 
-        BulkMatchOutput matchOutput = null;
-
-        if (shouldShortcircuitPropdata) {
-            matchOutput = realTimeMatchService.matchBulk(matchInput);
-        } else {
-            matchOutput = matchProxy.matchRealTime(matchInput);
-        }
+        BulkMatchOutput matchOutput =  matchProxy.matchRealTime(matchInput);
 
         logInDebugMode("matchOutput:", matchOutput);
 

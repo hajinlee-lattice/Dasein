@@ -4,20 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.match.exposed.service.DbHelper;
-import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -50,16 +44,6 @@ public abstract class AbstractMatcher implements Matcher {
     protected Warnings warnings;
 
     @Autowired
-    @Qualifier("sqlServerHelper")
-    private DbHelper dbHelper;
-
-    @Value("${scoringapi.propdata.shortcircuit:false}")
-    protected boolean shouldShortcircuitPropdata;
-
-    @Autowired
-    protected RealTimeMatchService realTimeMatchService;
-
-    @Autowired
     protected MatchProxy matchProxy;
 
     @Autowired
@@ -67,17 +51,6 @@ public abstract class AbstractMatcher implements Matcher {
 
     @Autowired
     protected EnrichmentMetadataCache enrichmentMetadataCache;
-
-    @PostConstruct
-    public void initialize() throws Exception {
-        if (shouldShortcircuitPropdata) {
-            log.info("Initialize propdata fetcher executors as scoringapi-propdata shortcircuit is on.");
-            dbHelper.initExecutors();
-        } else {
-            log.info("Skip initialization of propdata fetcher executors "
-                    + "via scoringapi as scoringapi-propdata shortcircuit is off.");
-        }
-    }
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");
