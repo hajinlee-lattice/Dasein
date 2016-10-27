@@ -50,9 +50,6 @@ class AwsEnvironment:
     def tomcat_sg(self):
         return self._props['tomcat.sg']
 
-    def tomcat_internal_sg(self):
-        return self._props['tomcat.internal.sg']
-
     def nodejs_sg(self):
         return self._props['nodejs.sg']
 

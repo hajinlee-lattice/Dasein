@@ -98,7 +98,7 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
 
     tgrp_arn = find_tgrp_arn(tgrp)
     config = AwsEnvironment(environment)
-    sg = config.tomcat_sg() if public else config.tomcat_internal_sg()
+    sg = config.tomcat_sg()
 
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
