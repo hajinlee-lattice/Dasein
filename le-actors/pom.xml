@@ -32,6 +32,16 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_${com.typesafe.akka-artifact-version}</artifactId>
             <version>${com.typesafe.akka-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion> 
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>
@@ -40,11 +50,11 @@
             <version>${spring.boot.version}</version>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring.boot.version}</version>
-        </dependency>
+        </dependency-->
         
         <!-- swagger -->
         <dependency>
