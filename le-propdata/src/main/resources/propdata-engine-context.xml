@@ -6,7 +6,6 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.engine"/>
 
-    <import resource="classpath:propdata-core-context.xml"/>
-    <import resource="classpath:serviceflows-propdata-dataflow-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-etl-context.xml"/>
 
 </beans>

@@ -21,11 +21,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.core.source.Source;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-api-context.xml" })

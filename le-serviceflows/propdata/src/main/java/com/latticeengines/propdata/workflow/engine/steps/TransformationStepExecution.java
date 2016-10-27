@@ -13,14 +13,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
+import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @SuppressWarnings("rawtypes")

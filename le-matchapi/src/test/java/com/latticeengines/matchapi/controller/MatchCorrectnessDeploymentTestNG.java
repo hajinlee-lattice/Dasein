@@ -36,25 +36,26 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
-import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 
 public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
@@ -77,14 +78,17 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Value("${propdata.test.correctness.rows}")
     private Integer numRecords;
 
-    @BeforeClass(groups = "deployment")
-    private void setUp() {
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    private String latestDataCloudVersion;
+
+    @BeforeMethod(groups = "deployment")
+    private void setUpMethod() {
         prepareCleanPod(HDFS_POD);
         loadAccountPool();
     }
 
-    @Test(groups = "deployment")
-    public void testMatchCorrectness() {
+    @Test(groups = "deployment", dataProvider = "versions")
+    public void testMatchCorrectness(String dataCloudVersion) {
         Integer numGoodAccounts = new Double(numRecords * 0.8).intValue();
         Integer numBadAccounts = numRecords - numGoodAccounts;
 
@@ -92,8 +96,8 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         data.addAll(getGarbageDomainAccounts(numBadAccounts));
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        Future<Boolean> bulkFuture = executor.submit(new BulkMatchCallable(data));
-        Future<Boolean> realtimeFuture = executor.submit(new RealtimeMatchCallable(data));
+        Future<Boolean> bulkFuture = executor.submit(new BulkMatchCallable(data, dataCloudVersion));
+        Future<Boolean> realtimeFuture = executor.submit(new RealtimeMatchCallable(data, dataCloudVersion));
 
         try {
             realtimeFuture.get(3600L, TimeUnit.SECONDS);
@@ -110,6 +114,11 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         executor.shutdown();
 
         compareResults();
+    }
+
+    @DataProvider(name = "versions")
+    public Object[][] versionsToTest() {
+        return new Object[][] { { null }, { latestDataCloudVersion } };
     }
 
     private void compareResults() {
@@ -215,11 +224,13 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         private Log log = LogFactory.getLog(RealtimeMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private ConcurrentLinkedDeque<Map<String, Object>> result = new ConcurrentLinkedDeque<>();
+        private final String dataCloudVersion;
 
-        RealtimeMatchCallable(List<List<Object>> data) {
+        RealtimeMatchCallable(List<List<Object>> data, String dataCloudVersion) {
             for (List<Object> row : data) {
                 this.data.add(new ArrayList<>(row));
             }
+            this.dataCloudVersion = dataCloudVersion;
         }
 
         @Override
@@ -257,6 +268,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
             input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
             input.setData(Collections.singletonList(row));
+            input.setDataCloudVersion(dataCloudVersion);
             return executor.submit(new SingleRun(input));
         }
 
@@ -306,11 +318,13 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private Log log = LogFactory.getLog(BulkMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
+        private final String dataCloudVersion;
 
-        BulkMatchCallable(List<List<Object>> data) {
+        BulkMatchCallable(List<List<Object>> data, String dataCloudVersion) {
             for (List<Object> row : data) {
                 this.data.add(new ArrayList<>(row));
             }
+            this.dataCloudVersion = dataCloudVersion;
         }
 
         @Override
@@ -338,6 +352,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
             AvroInputBuffer inputBuffer = new AvroInputBuffer();
             inputBuffer.setAvroDir(AVRO_DIR);
             matchInput.setInputBuffer(inputBuffer);
+            matchInput.setDataCloudVersion(dataCloudVersion);
             return matchInput;
         }
 

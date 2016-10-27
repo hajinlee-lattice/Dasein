@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
-import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;

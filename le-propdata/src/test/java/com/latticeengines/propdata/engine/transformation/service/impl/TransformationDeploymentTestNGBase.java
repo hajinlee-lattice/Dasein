@@ -18,15 +18,15 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
+import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.testframework.PropDataEngineDeploymentTestNGBase;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 public abstract class TransformationDeploymentTestNGBase<T extends TransformationConfiguration>
         extends PropDataEngineDeploymentTestNGBase {

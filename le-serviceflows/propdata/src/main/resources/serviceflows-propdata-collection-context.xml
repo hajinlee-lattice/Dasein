@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.latticeengines.propdata.collection"/>
+    <context:component-scan base-package="com.latticeengines.propdata.workflow.engine" />
 
-    <import resource="classpath:serviceflows-propdata-dataflow-context.xml"/>
-
-    <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
-    </bean>
-
-    <bean id="refreshProgressDao" class="com.latticeengines.propdata.collection.dao.impl.RefreshProgressDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
-    </bean>
+    <import resource="classpath:serviceflows-core-workflow-context.xml"/>
+    <import resource="classpath:datacloud-etl-collection-context.xml"/>
+    <import resource="classpath:datacloud-dataflow-context.xml"/>
 
 </beans>

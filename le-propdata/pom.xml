@@ -123,7 +123,8 @@
         </profile>
     </profiles>
 
-    <dependencies><dependency>
+    <dependencies>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${project.version}</version>
@@ -191,6 +192,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-propdata</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflow</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-workflow</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

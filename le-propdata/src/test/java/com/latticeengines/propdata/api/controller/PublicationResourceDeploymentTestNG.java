@@ -12,17 +12,17 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.impl.BuiltWithPivoted;
+import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
+import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
-import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
-import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
-import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.proxy.exposed.propdata.PublicationProxy;
 
 @Component

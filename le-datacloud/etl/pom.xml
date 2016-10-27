@@ -22,7 +22,22 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-propdata</artifactId>
+            <artifactId>le-datacloud-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-dataflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataplatform</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

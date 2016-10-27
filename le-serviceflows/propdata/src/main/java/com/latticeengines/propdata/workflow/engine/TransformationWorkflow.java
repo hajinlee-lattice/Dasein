@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.workflow.engine.steps.TransformationStepExecution;
-import com.latticeengines.propdata.workflow.match.listeners.UpdateFailedMatchListener;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,9 +16,6 @@ public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkf
     @Autowired
     private TransformationStepExecution transformationStepExecution;
 
-    @Autowired
-    private UpdateFailedMatchListener updateFailedMatchListener;
-
     @Bean
     public Job transformationWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -29,7 +25,6 @@ public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkf
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(transformationStepExecution) //
-                .listener(updateFailedMatchListener) //
                 .build();
     }
 }

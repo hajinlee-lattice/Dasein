@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 

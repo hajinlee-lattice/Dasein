@@ -10,7 +10,7 @@
 
     <mvc:annotation-driven/>
 
-    <import resource="classpath:test-propdata-collection-context.xml"/>
+    <import resource="classpath:test-propdata-engine-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
     

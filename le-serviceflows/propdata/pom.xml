@@ -35,7 +35,13 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datacloud-core</artifactId>
+            <artifactId>le-datacloud-etl</artifactId>
+            <version>${le.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datacloud-match</artifactId>
             <version>${le.version}</version>
         </dependency>
 

@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.propdata.core.entitymgr.DataCloudVersionEntityMgr;
 
 @Component
 public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestNGBase {

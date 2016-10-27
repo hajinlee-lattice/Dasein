@@ -22,13 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
-import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
-import com.latticeengines.propdata.core.source.DataImportedFromDB;
-import com.latticeengines.propdata.core.source.DerivedSource;
-import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.datacloud.collection.service.ArchiveService;
+import com.latticeengines.datacloud.collection.service.RefreshService;
+import com.latticeengines.datacloud.collection.service.impl.ProgressOrchestrator;
+import com.latticeengines.datacloud.core.source.DataImportedFromDB;
+import com.latticeengines.datacloud.core.source.DerivedSource;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.etl.service.ServiceFlowsZkConfigService;
+
 
 @Component("propDataScheduler")
 public class PropDataScheduler {

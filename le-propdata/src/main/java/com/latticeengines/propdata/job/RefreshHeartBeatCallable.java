@@ -2,7 +2,7 @@ package com.latticeengines.propdata.job;
 
 import java.util.concurrent.Callable;
 
-import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
+import com.latticeengines.datacloud.collection.service.impl.ProgressOrchestrator;
 import com.newrelic.api.agent.Trace;
 
 public class RefreshHeartBeatCallable implements Callable<Boolean> {

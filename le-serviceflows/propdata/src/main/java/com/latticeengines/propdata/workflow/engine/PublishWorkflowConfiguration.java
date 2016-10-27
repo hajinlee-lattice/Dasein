@@ -1,11 +1,11 @@
 package com.latticeengines.propdata.workflow.engine;
 
+import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.engine.common.EngineConstants;
 import com.latticeengines.propdata.workflow.engine.steps.PublishConfiguration;
 
 public class PublishWorkflowConfiguration extends WorkflowConfiguration {

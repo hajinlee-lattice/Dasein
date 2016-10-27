@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -36,10 +40,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
-import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.match.service.MatchCommandService;
 
 @Component
 public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {

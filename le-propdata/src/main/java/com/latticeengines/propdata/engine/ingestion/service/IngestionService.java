@@ -7,20 +7,20 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 
 public interface IngestionService {
-    public Ingestion getIngestionByName(String ingestionName);
+    Ingestion getIngestionByName(String ingestionName);
 
-    public IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
+    IngestionProgress ingestInternal(String ingestionName, IngestionRequest ingestionRequest,
             String hdfsPod);
 
-    public List<IngestionProgress> scan(String hdfsPod);
+    List<IngestionProgress> scan(String hdfsPod);
 
-    public void checkCompleteIngestions();
+    void checkCompleteIngestions();
 
-    public List<String> getMissingFiles(Ingestion ingestion);
+    List<String> getMissingFiles(Ingestion ingestion);
 
-    public List<String> getTargetFiles(Ingestion ingestion);
+    List<String> getTargetFiles(Ingestion ingestion);
 
-    public List<String> getExistingFiles(Ingestion ingestion);
+    List<String> getExistingFiles(Ingestion ingestion);
 
-    public void killFailedProgresses();
+    void killFailedProgresses();
 }

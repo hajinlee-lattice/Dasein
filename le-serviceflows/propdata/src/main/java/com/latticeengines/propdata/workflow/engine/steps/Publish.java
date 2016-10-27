@@ -17,8 +17,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
+import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
@@ -27,9 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestin
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration.PublicationStrategy;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
-import com.latticeengines.propdata.engine.publication.service.PublishConfigurationParser;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 

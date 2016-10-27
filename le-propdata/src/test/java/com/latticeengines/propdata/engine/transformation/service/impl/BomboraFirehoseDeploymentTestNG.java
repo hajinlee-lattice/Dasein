@@ -2,10 +2,11 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
-import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
-import com.latticeengines.propdata.engine.transformation.service.TransformationService;
+import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.BomboraFirehose;
+import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.BomboraFirehoseIngestionService;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BomboraFirehoseConfiguration;
 
 public class BomboraFirehoseDeploymentTestNG extends FirehoseTransformationDeploymentTestNGBase<BomboraFirehoseConfiguration> {
 

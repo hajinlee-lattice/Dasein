@@ -206,7 +206,11 @@ public class MetricUtils {
                 String key = metricField.name();
                 method.setAccessible(true);
                 Object value = method.invoke(Fact);
-                return new AbstractMap.SimpleEntry<>(key, value);
+                if (value != null) {
+                    return new AbstractMap.SimpleEntry<>(key, fieldType.getJavaClass().cast(value));
+                } else {
+                    return new AbstractMap.SimpleEntry<>(key, null);
+                }
             } else {
                 throw new RuntimeException("The annotated type " + fieldType.getJavaClass().getSimpleName()
                         + " does not match the true return type " + method.getReturnType().getSimpleName());

@@ -36,10 +36,13 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
@@ -59,9 +62,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("dataCloudProcessor")

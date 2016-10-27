@@ -2,8 +2,8 @@ package com.latticeengines.propdata.workflow.engine;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.workflow.engine.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.propdata.workflow.engine.steps.TransformationStepExecutionConfiguration;
 

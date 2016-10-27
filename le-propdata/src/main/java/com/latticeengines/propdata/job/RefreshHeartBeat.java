@@ -6,7 +6,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
+import com.latticeengines.datacloud.collection.service.impl.ProgressOrchestrator;
 
 @Component("refreshHeartBeat")
 @DisallowConcurrentExecution

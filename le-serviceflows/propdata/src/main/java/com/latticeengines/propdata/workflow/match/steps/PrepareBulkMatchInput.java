@@ -17,12 +17,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")

@@ -9,5 +9,6 @@
     </context:component-scan>
 
     <import resource="classpath:propdata-collection-context.xml" />
+    <import resource="classpath:propdata-engine-context.xml" />
 
 </beans>

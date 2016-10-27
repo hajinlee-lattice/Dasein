@@ -1,0 +1,44 @@
+package com.latticeengines.datacloud.etl.ingestion.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.latticeengines.datacloud.etl.ingestion.service.impl.IngestionProgressServiceImpl;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
+
+public interface IngestionProgressService {
+    List<IngestionProgress> getProgressesByField(Map<String, Object> fields);
+
+    IngestionProgress createPreprocessProgress(Ingestion ingestion, String triggeredBy,
+                                                      String file);
+
+    String constructSource(Ingestion ingestion, String fileName);
+
+    String constructDestination(Ingestion ingestion, String fileName);
+
+    void saveProgresses(List<IngestionProgress> progresses);
+
+    List<IngestionProgress> getNewIngestionProgresses();
+
+    List<IngestionProgress> getRetryFailedProgresses();
+
+    List<IngestionProgress> getProcessingProgresses();
+
+    CamelRouteConfiguration createCamelRouteConfiguration(IngestionProgress progress);
+
+    IngestionProgress saveProgress(IngestionProgress progress);
+
+    IngestionProgressServiceImpl.IngestionProgressUpdaterImpl updateProgress(IngestionProgress progress);
+
+    IngestionProgress updateSubmittedProgress(IngestionProgress progress,
+                                                     String applicationId);
+
+    IngestionProgress updateInvalidProgress(IngestionProgress progress, String message);
+
+    void deleteProgress(IngestionProgress progress);
+
+    void deleteProgressByField(Map<String, Object> fields);
+
+}

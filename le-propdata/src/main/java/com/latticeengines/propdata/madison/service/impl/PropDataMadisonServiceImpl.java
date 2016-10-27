@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
+import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
-import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
-import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;

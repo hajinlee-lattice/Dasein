@@ -26,26 +26,26 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.service.PropDataTenantService;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.datacloud.etl.SftpUtils;
+import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionNewProgressValidator;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.propdata.core.PropDataConstants;
-import com.latticeengines.propdata.core.service.PropDataTenantService;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.engine.common.SftpUtils;
-import com.latticeengines.propdata.engine.ingestion.entitymgr.IngestionEntityMgr;
-import com.latticeengines.propdata.engine.ingestion.service.IngestionNewProgressValidator;
-import com.latticeengines.propdata.engine.ingestion.service.IngestionProgressService;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
-import com.latticeengines.propdata.engine.ingestion.service.IngestionVersionService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")

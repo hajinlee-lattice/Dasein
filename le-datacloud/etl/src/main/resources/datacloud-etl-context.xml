@@ -7,4 +7,38 @@
 
     <context:component-scan base-package="com.latticeengines.datacloud.etl" />
 
+    <import resource="classpath:datacloud-core-context.xml" />
+    <import resource="classpath:datacloud-etl-aspect-context.xml" />
+    <import resource="classpath:datacloud-etl-persistence-legacy-context.xml" />
+    <import resource="classpath:dataflow-context.xml" />
+    <import resource="classpath:dataplatform-context.xml" />
+
+    <bean id="simpleCascadingExecutor" class="com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor">
+        <constructor-arg name="yarnConfiguration" ref="yarnConfiguration" />
+    </bean>
+
+    <bean id="sourceColumnDao" class="com.latticeengines.datacloud.etl.dao.impl.SourceColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="ingestionDao" class="com.latticeengines.datacloud.etl.ingestion.dao.impl.IngestionDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="ingestionProgressDao" class="com.latticeengines.datacloud.etl.ingestion.dao.impl.IngestionProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="publicationDao" class="com.latticeengines.datacloud.etl.publication.dao.impl.PublicationDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="publicationProgressDao" class="com.latticeengines.datacloud.etl.publication.dao.impl.PublicationProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="transformationProgressDao" class="com.latticeengines.datacloud.etl.transformation.dao.impl.TransformationProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

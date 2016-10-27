@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("cascadingBulkMatchStep")

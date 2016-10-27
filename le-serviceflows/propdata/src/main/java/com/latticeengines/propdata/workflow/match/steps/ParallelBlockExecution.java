@@ -29,14 +29,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
-import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
