@@ -29,6 +29,7 @@
         <le.testframework.version>3.0.0-SNAPSHOT</le.testframework.version>
         <le.transform.version>3.0.0-SNAPSHOT</le.transform.version>
         <le.hadoop.version>3.0.0-SNAPSHOT</le.hadoop.version>
+        <guava.version>19.0</guava.version>
         <jpmml.version>1.2.14</jpmml.version>
         <jackson.version>2.4.1</jackson.version>
     </properties>
@@ -205,7 +206,7 @@
                     <groupId>tomcat</groupId>
                     <artifactId>jasper-runtime</artifactId>
                 </exclusion>
-                <!-- <exclusion> <groupId>org.python</groupId> <artifactId>jython-standalone</artifactId> 
+                <!-- <exclusion> <groupId>org.python</groupId> <artifactId>jython-standalone</artifactId>
                     </exclusion> -->
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -327,6 +328,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
             <version>${le.transform.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
