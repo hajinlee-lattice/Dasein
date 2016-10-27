@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.UserDefinedType;
-import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
-import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -24,12 +21,15 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
@@ -48,7 +48,8 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
 
-    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
+    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace
+            .parse(ImportMatchAndModelWorkflowDeploymentTestNGBase.class.getSimpleName());
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -98,13 +99,14 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             sourceFile.setState(SourceFileState.Uploaded);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
-            MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(),
-                    yarnConfiguration, null) {
+            MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, null) {
             };
-            FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort(SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
+            FieldMappingDocument fieldMappingDocument = metadataResolver.getFieldMappingsDocumentBestEffort(
+                    SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
             mapFieldToCustomeFieldsWithSameName(fieldMappingDocument);
             metadataResolver.setFieldMappingDocument(fieldMappingDocument);
-            metadataResolver.calculateBasedOnFieldMappingDocument(SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
+            metadataResolver.calculateBasedOnFieldMappingDocument(
+                    SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation()));
 
             Table table = metadataResolver.getMetadata();
             System.out.println(table);

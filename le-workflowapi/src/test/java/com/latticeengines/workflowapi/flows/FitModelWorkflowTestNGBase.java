@@ -17,24 +17,25 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
 
-    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
+    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace
+            .parse(FitModelWorkflowTestNGBase.class.getSimpleName());
 
     @Value("${workflowapi.test.accountmaster.path}")
     private String accountMasterPath;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -80,9 +81,8 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .uniqueKeyColumn("LatticeAccountID") //
                 .directoryToScore(accountMasterPath) //
                 .registerScoredTable(true) //
-                .attributes(
-                        Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange",
-                                "BusinessEmployeesRange" })) //
+                .attributes(Arrays
+                        .asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                 .prematchFlowTableName("PrematchFlow") //
                 .modelName("Default Model") //
                 .build();
@@ -112,16 +112,17 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
             DateTime date = new DateTime();
             table.getLastModifiedKey().setLastModifiedTimestamp(date.minusYears(2).getMillis());
 
-            restTemplate.postForObject(microServiceHostPort
-                    + "/metadata/customerspaces/{customerSpace}/importtables/{tableName}", table, String.class,
-                    urlVariables);
+            restTemplate.postForObject(
+                    microServiceHostPort + "/metadata/customerspaces/{customerSpace}/importtables/{tableName}", table,
+                    String.class, urlVariables);
         }
     }
 
     private void copyStopListToHdfs() {
         // add the stop list to HDFS
-        String stoplist = ClassLoader.getSystemResource(
-                "com/latticeengines/workflowapi/flows/prospectdiscovery/Stoplist/Stoplist.avro").getPath();
+        String stoplist = ClassLoader
+                .getSystemResource("com/latticeengines/workflowapi/flows/prospectdiscovery/Stoplist/Stoplist.avro")
+                .getPath();
         try {
             HdfsUtils.mkdir(yarnConfiguration, "/tmp/Stoplist");
         } catch (Exception e) {
