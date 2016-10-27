@@ -1,5 +1,6 @@
 package com.latticeengines.microservice.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -25,8 +27,11 @@ public class StatusServiceImpl implements StatusService {
 
     private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
 
-    @Value("${microservices:modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}")
+    @Value("${microservice.modules:modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}")
     protected String microservicesStr;
+
+    @Value("${microservice.apps:microservice}")
+    protected String initApps;
 
     @Value("${microservice.rest.endpoint.hostport}")
     private String microserviceHostport;
@@ -65,6 +70,10 @@ public class StatusServiceImpl implements StatusService {
         healthUrls.put("scoringapi", scoringapiHealthUrl);
         healthUrls.put("matchapi", matchapiHealthUrl);
         healthUrls.put("microservice", microserviceHealthUrl);
+
+        if (StringUtils.isNotEmpty(initApps)) {
+            Collections.addAll(monitoredApps, initApps.split(","));
+        }
     }
 
     @Override
