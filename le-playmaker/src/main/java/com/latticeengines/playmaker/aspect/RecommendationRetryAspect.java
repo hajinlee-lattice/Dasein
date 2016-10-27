@@ -31,20 +31,20 @@ public class RecommendationRetryAspect {
         try {
             Object retVal = null;
             int retries = 2;
-            Exception exception = null;
+            Throwable t = null;
             while (retries > 0) {
                 try {
                     retVal = joinPoint.proceed();
                     return retVal;
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     log.warn("There's exception happening!, retries=" + retries, ex);
-                    exception = ex;
+                    t = ex;
                     templateFactory.removeTemplate(tenantName);
                     retries--;
                 }
             }
 
-            throw new LedpException(LedpCode.LEDP_22007, exception);
+            throw new LedpException(LedpCode.LEDP_22007, t);
 
         } finally {
             long endTime = System.currentTimeMillis();

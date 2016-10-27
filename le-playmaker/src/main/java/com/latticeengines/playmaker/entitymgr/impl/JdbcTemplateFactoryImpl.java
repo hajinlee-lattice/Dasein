@@ -6,6 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -20,6 +22,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Component("JdbcTempalteFactory")
 public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
+
+    private static final Log log = LogFactory.getLog(JdbcTemplateFactoryImpl.class);
 
     private Map<String, TemplateInfo> jdbcTempates = new ConcurrentHashMap<>();
 
@@ -62,6 +66,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
             if (!hasCreatedNew) {
                 synchronized (jdbcTempates) {
                     if (!hasCreatedNew) {
+                        removeTemplate(tenantName);
                         templateInfo = getTemplateInfo(tenant);
                         jdbcTempates.put(tenantName, templateInfo);
                         hasCreatedNew = true;
@@ -76,7 +81,14 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
     public void removeTemplate(String tenantName) {
 
         synchronized (jdbcTempates) {
-            jdbcTempates.remove(tenantName);
+            TemplateInfo tempInfo = jdbcTempates.remove(tenantName);
+            if (tempInfo != null) {
+                try {
+                    tempInfo.cpds.close();
+                } catch (Exception ex) {
+                    log.warn("Can not close the data source for tenant=" + tenantName, ex);
+                }
+            }
         }
     }
 
@@ -109,10 +121,10 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
             cpds.setMaxIdleTime(maxPoolIdleTime);
             cpds.setCheckoutTimeout(maxPoolCheckoutTime);
             cpds.setBreakAfterAcquireFailure(true);
-            
+
             NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(cpds);
             byte[] hash = getHash(tenant);
-            TemplateInfo templateInfo = new TemplateInfo(template, hash);
+            TemplateInfo templateInfo = new TemplateInfo(template, hash, cpds);
             return templateInfo;
 
         } catch (Exception ex) {
@@ -130,10 +142,12 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
 
         private NamedParameterJdbcTemplate template;
         private byte[] hash;
+        private ComboPooledDataSource cpds;
 
-        public TemplateInfo(NamedParameterJdbcTemplate template, byte[] hash) {
+        public TemplateInfo(NamedParameterJdbcTemplate template, byte[] hash, ComboPooledDataSource cpds) {
             this.template = template;
             this.hash = hash;
+            this.cpds = cpds;
         }
 
     }
