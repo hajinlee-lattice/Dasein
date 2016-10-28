@@ -39,14 +39,6 @@ class Stack(Template):
 
         # output info
         outputs = {
-            # name + "PublicUrl": {
-            #     "Description" : "Public URL for EC2 instance " + name,
-            #     "Value" : { "Fn::GetAtt" : [ name, "PublicDnsName" ]}
-            # },
-            # name + "PublicIp": {
-            #     "Description" : "Public IP for EC2 instance " + name,
-            #     "Value" : { "Fn::GetAtt" : [ name, "PublicIp" ]}
-            # },
             name + "Url": {
                 "Description" : "URL for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ name, "PrivateDnsName" ]}
@@ -120,7 +112,7 @@ class Stack(Template):
             try:
                 os.close(fi)
             except:
-                #assume here because file already closed
+                # assume here because file already closed
                 pass
 
 
@@ -133,15 +125,15 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, use_asgroup=True, instances=1, ips=()):
+    def __init__(self, description, use_asgroup=True, instances=1, efs=None, ips=()):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
 
         if use_asgroup:
-            self._ecscluster, self._asgroup = self._construct()
+            self._ecscluster, self._asgroup = self._construct(efs)
         else:
             self._asgroup = None
-            self._ecscluster, self._ec2s = self._construct_by_ec2(instances, ips=ips)
+            self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
 
     def add_service(self, service_name, task, capacity=None):
         if capacity is None:
@@ -158,18 +150,18 @@ class ECSStack(Stack):
 
         self.add_resource(service)
 
-    def _construct_by_ec2(self, instances, ips=()):
+    def _construct_by_ec2(self, instances, efs, ips=()):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        ec2s = self._create_ec2_instances(ecscluster, instances, ips=ips)
+        ec2s = self._create_ec2_instances(ecscluster, instances, efs, ips=ips)
         return ecscluster, ec2s
 
-    def _create_ec2_instances(self, ecscluster, instances, ips=()):
+    def _create_ec2_instances(self, ecscluster, instances, efs, ips=()):
         ec2s = []
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
             subnet = SUBNETS[n % 3]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster) \
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster, efs) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet)
 
@@ -181,18 +173,18 @@ class ECSStack(Stack):
         self.add_resources(ec2s)
         return ec2s
 
-    def _construct(self):
+    def _construct(self, efs):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        asgroup = self._create_asgroup(ecscluster, PARAM_ECS_INSTANCE_PROFILE)
+        asgroup = self._create_asgroup(ecscluster, PARAM_ECS_INSTANCE_PROFILE, efs)
         return ecscluster, asgroup
 
-    def _create_asgroup(self, ecscluster, instance_profile):
+    def _create_asgroup(self, ecscluster, instance_profile, efs):
         assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
 
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(instance_profile)
-        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster))
+        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)

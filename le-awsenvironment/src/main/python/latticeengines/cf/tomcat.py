@@ -39,7 +39,7 @@ def template(environment, stackname, profile, upload=False):
         stack.validate()
 
 def create_template(profile):
-    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.")
+    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", efs=PARAM_EFS)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())

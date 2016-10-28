@@ -13,7 +13,7 @@ def ec2_defn():
         return json.load(f)
 
 def ecs_metadata(ec2, ecscluster, efs):
-    return {
+    md = {
         "AWS::CloudFormation::Init" : {
             "configSets": {
                 "bootstrap": [ "install" ],
@@ -57,7 +57,7 @@ def ecs_metadata(ec2, ecscluster, efs):
                                 [ "#!/usr/bin/env bash \n",
                                   "mkdir -p /mnt/efs \n",
                                   "echo \"mount -t nfs4 -o nfsvers=4.1 $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
-                                  efs.ref() ,
+                                  efs.ref() if efs is not None else "none",
                                   ".efs.",
                                   { "Ref" : "AWS::Region" },
                                   ".amazonaws.com:/ /mnt/efs\" >> /etc/fstab \n",
@@ -122,6 +122,13 @@ def ecs_metadata(ec2, ecscluster, efs):
             }
         }
     }
+
+    if efs is None:
+        del md["AWS::CloudFormation::Init"]["install"]["packages"]
+        del md["AWS::CloudFormation::Init"]["install"]["files"]["/tmp/mount_efs.sh"]
+        del md["AWS::CloudFormation::Init"]["install"]["commands"]["30_mount_efs"]
+
+    return md
 
 
 class EC2Instance(Resource):
@@ -205,7 +212,7 @@ class EC2Instance(Resource):
 
 
 class ECSInstance(EC2Instance):
-    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster):
+    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster, efs):
         assert isinstance(instance_type, Parameter)
         assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
@@ -226,7 +233,7 @@ class ECSInstance(EC2Instance):
                 }
             }
         }
-        self.set_metadata(ecs_metadata(self, ecscluster))
+        self.set_metadata(ecs_metadata(self, ecscluster, efs))
         self.set_instanceprofile(instance_profile_name)
 
     def __ecs_userdata(self):
