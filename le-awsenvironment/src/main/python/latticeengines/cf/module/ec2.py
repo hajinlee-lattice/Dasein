@@ -114,7 +114,7 @@ def ecs_metadata(ec2, ecscluster, efs):
                     },
                     "30_mount_efs" : {
                         "command" : { "Fn::Join": [ "\n", [
-                            "bash /mount_efs.sh",
+                            "bash /tmp/mount_efs.sh",
                             "mount -a"
                         ] ] }
                     }
