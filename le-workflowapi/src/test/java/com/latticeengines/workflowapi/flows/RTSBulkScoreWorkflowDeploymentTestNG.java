@@ -48,7 +48,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
 
-    @Value("${scoring.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String plsApiHostPort;
 
     @Autowired

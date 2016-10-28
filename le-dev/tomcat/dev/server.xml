@@ -21,138 +21,106 @@
     </GlobalNamingResources>
 
     <Service name="MS">
-        <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
+        <Connector port="8080" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="MicroserviceEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/ms" unpackWARs="false" autoDeploy="true" undeployOldVersions="true"
-                  startStopThreads="8">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  startStopThreads="8"/>
         </Engine>
     </Service>
 
 
     <Service name="PLS">
-        <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
-
+        <Connector port="8081" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="PlsEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/pls" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="Admin">
-        <Connector port="8085" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
+        <Connector port="8085" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="AdminEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/admin" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="PlayMaker">
-        <Connector port="8071" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
-
+        <Connector port="8071" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="PlayMakerEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/playmaker" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="OAuth">
-        <Connector port="8072" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
+        <Connector port="8072" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="OAuthEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/oauth" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="ScoringAPI">
-        <Connector port="8073" protocol="HTTP/1.1" connectionTimeout="20000"/>
-
+        <Connector port="8073" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
         <Engine name="ScoringApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="SAML">
-        <Connector port="8087" protocol="HTTP/1.1" connectionTimeout="20000"/>
+        <Connector port="8087" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="SAMLEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/saml" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="API">
-        <Connector port="8074" protocol="HTTP/1.1" connectionTimeout="20000"/>
+        <Connector port="8074" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="ApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/api" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="Job">
-        <Connector port="8075" protocol="HTTP/1.1" connectionTimeout="20000"/>
+        <Connector port="8075" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="JobEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
@@ -161,25 +129,20 @@
             </Realm>
 
             <Host name="localhost" appBase="webapps/job" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 
     <Service name="MatchAPI">
-        <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000"/>
+        <Connector port="8076" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
 
         <Engine name="MatchApiEngine" defaultHost="localhost">
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
                        resourceName="UserDatabase"/>
             </Realm>
-
             <Host name="localhost" appBase="webapps/matchapi" unpackWARs="false" autoDeploy="true"
-                  undeployOldVersions="true">
-                <Valve className="org.apache.catalina.valves.StuckThreadDetectionValve" threshold="60"/>
-            </Host>
+                  undeployOldVersions="true"/>
         </Engine>
     </Service>
 

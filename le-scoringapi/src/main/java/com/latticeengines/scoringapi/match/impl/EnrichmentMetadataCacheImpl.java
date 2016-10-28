@@ -20,7 +20,7 @@ import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 
 @Component
 public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
-    @Value("${scoringapi.pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

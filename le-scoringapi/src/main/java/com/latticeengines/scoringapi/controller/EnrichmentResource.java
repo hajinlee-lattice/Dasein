@@ -37,7 +37,7 @@ public class EnrichmentResource {
     @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;
 
-    @Value("${scoringapi.pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

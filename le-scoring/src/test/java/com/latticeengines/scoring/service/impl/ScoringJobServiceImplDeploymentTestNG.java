@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 
 public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImplTestNG {
 
-    @Value("${scoring.test.microservice.url}")
-    private String scoringMicroserviceUrl;
+    @Value("${common.test.microservice.url}")
+    private String microserviceUrl;
 
     protected static String customer = "Mulesoft_Relaunch_Deployment";
 
@@ -48,7 +48,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn("ModelingID");
-        AppSubmission submission = restTemplate.postForObject(scoringMicroserviceUrl + "/scoringjobs", scoringConfig,
+        AppSubmission submission = restTemplate.postForObject(microserviceUrl + "/scoring/scoringjobs", scoringConfig,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = getApplicationId(submission.getApplicationIds().get(0));
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

@@ -31,7 +31,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
 
     private static final Log LOGGER = LogFactory.getLog(LeadPrioritizationEndToEndDeploymentTestNG.class);
 
-    @Value("${pls.modelingservice.rest.endpoint.hostport}")
+    @Value("${common.test.microservice.url}")
     private String modelingServiceHostPort;
 
     @Value("${pls.modelingservice.basedir}")

@@ -67,7 +67,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
     }
 
     public InternalScoringApiProxy() {
-        super(PropertyUtils.getProperty("proxy.scoringapi.rest.endpoint.hostport"), "/scoreinternal/score");
+        super(PropertyUtils.getProperty("common.scoringapi.url"), "/scoreinternal/score");
         setErrorHandler(new ScoringErrorHandler());
     }
 

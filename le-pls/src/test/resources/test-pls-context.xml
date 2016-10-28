@@ -7,16 +7,11 @@
 
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:test-testframework-context.xml"/>
+    <import resource="classpath:test-testframework-testbed-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:swlib-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.common.exposed, com.latticeengines.scoringapi.exposed"/>
-
-    <bean id="deploymentTestBed" class="com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed">
-        <constructor-arg name="plsApiHostPort" value="${pls.test.deployment.api}"/>
-        <constructor-arg name="adminApiHostPort" value="${pls.test.deployment.admin.api}"/>
-        <constructor-arg name="environment" value="${pls.test.env}"/>
-    </bean>
 
 </beans>

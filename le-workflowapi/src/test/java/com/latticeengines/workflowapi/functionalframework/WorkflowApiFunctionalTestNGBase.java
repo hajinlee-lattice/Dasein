@@ -71,13 +71,13 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
 
     private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);
 
-    @Value("${workflowapi.microservice.rest.endpoint.hostport}")
+    @Value("${common.test.microservice.url}")
     protected String microServiceHostPort;
 
     @Value("${workflowapi.modelingservice.basedir}")
     protected String modelingServiceHdfsBaseDir;
 
-    @Value("${security.test.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
 
     @Autowired

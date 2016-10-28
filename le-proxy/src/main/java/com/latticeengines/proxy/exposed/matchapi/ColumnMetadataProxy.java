@@ -30,7 +30,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private LoadingCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
 
     public ColumnMetadataProxy() {
-        super(PropertyUtils.getProperty("proxy.matchapi.rest.endpoint.hostport"), "/match/metadata");
+        super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
         enrichmentColumnsCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<ColumnMetadata>>() {
                     @Override

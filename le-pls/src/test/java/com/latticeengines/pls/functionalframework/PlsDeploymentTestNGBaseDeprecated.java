@@ -19,13 +19,13 @@ public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
 
     protected static final Log log = LogFactory.getLog(PlsDeploymentTestNGBaseDeprecated.class);
 
-    @Value("${pls.test.deployment.api}")
+    @Value("${common.test.pls.url}")
     private String deployedHostPort;
 
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
 
-    @Value("${pls.internal.admin.api}")
+    @Value("${common.test.admin.url}")
     private String adminApi;
 
     @Override

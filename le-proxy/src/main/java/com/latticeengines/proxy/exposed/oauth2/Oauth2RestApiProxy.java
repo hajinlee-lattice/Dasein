@@ -15,10 +15,10 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
 
     private static final String CLIENT_ID_LP = "lp";
 
-    @Value("${proxy.oauth.api.rest.endpoint.hostport}")
+    @Value("${common.playmaker.url}")
     private String oauth2ApiHostPort;
 
-    @Value("${proxy.oauth.auth.rest.endpoint.hostport}")
+    @Value("${common.oauth.url}")
     protected String oauth2AuthHostPort;
 
     protected OAuth2RestTemplate oAuth2RestTemplate = null;

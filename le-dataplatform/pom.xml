@@ -497,6 +497,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
             <version>${le.monitor.version}</version>
             <classifier>intf</classifier>

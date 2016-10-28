@@ -73,7 +73,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Value("${security.test.api.hostport}")
     private String hostPort;
 
-    @Value("${security.test.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String plsHostPort;
 
     @Autowired

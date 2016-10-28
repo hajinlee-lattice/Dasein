@@ -1,10 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +35,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelReplaceService;
@@ -51,6 +47,9 @@ import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
@@ -92,7 +91,7 @@ public class ModelResource {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Value("${pls.microservice.rest.endpoint.hostport}")
+    @Value("${common.test.microservice.url}")
     private String microserviceEndpoint;
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)

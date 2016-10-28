@@ -7,7 +7,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -45,17 +44,18 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImpl;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflowapi-context.xml" })
-public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${dataflowapi.test.api.hostport}")
+    @Value("${common.test.microservice.url}")
     private String hostPort;
 
     protected String getRestAPIHostPort() {
@@ -65,7 +65,7 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
     protected static final CustomerSpace CUSTOMERSPACE = CustomerSpace.parse("DFAPITests.DFAPITests.DFAPITests");
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(DataFlowApiFunctionalTestNGBase.class);
+    private static final Log log = LogFactory.getLog(DataFlowApiDeploymentTestNGBase.class);
 
     @Autowired
     private Configuration yarnConfiguration;

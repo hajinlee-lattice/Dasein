@@ -30,7 +30,7 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
 
-    @Value("${pls.scoringapi.rest.endpoint.hostport}")
+    @Value("${common.test.scoringapi.url}")
     private String scoringApiHostPort;
 
     @Autowired

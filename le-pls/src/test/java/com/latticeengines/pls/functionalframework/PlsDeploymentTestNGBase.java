@@ -20,7 +20,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
-    @Value("${pls.test.deployment.api}")
+    @Value("${common.test.pls.url}")
     private String deployedHostPort;
 
     @PostConstruct

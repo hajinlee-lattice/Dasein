@@ -80,7 +80,7 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private KeyManagementService keyManagementService;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String plsEndHost;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();

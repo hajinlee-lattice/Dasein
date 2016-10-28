@@ -51,10 +51,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     @Autowired
     protected ModelQualityProxy modelQualityProxy;
 
-    @Value("${modelquality.test.pls.deployment.api}")
+    @Value("${common.test.pls.url}")
     protected String plsDeployedHostPort;
 
-    @Value("${modelquality.test.admin.deployment.api}")
+    @Value("${common.test.admin.url}")
     protected String adminDeployedHostPort;
 
     @Autowired

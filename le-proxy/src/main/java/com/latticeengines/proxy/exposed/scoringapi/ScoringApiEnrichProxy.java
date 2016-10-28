@@ -51,7 +51,7 @@ public class ScoringApiEnrichProxy extends BaseRestApiProxy implements ScoringAp
     }
 
     public ScoringApiEnrichProxy() {
-        super(PropertyUtils.getProperty("proxy.scoringapi.rest.endpoint.hostport"), "/score/enrich");
+        super(PropertyUtils.getProperty("common.scoringapi.url"), "/score/enrich");
         setErrorHandler(new ScoringErrorHandler());
     }
 

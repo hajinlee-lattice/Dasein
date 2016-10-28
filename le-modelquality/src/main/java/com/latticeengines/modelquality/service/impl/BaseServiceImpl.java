@@ -17,7 +17,7 @@ public class BaseServiceImpl implements InitializingBean {
     @Value("${modelquality.file.upload.hdfs.dir}")
     private String hdfsDir;
     
-    @Value("${modelquality.pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String plsApiHostPort;
     
     private InternalResourceRestApiProxy internalResourceRestApiProxy;

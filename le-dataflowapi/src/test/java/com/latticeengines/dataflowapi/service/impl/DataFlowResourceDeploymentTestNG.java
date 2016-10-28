@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
+import com.latticeengines.dataflowapi.functionalframework.DataFlowApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
-public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestNGBase {
+public class DataFlowResourceDeploymentTestNG extends DataFlowApiDeploymentTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;

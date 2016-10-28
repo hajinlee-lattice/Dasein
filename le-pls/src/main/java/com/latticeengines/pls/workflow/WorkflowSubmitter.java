@@ -25,10 +25,10 @@ public abstract class WorkflowSubmitter {
     @Autowired
     protected TenantConfigServiceImpl tenantConfigService;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
 
-    @Value("${pls.microservice.rest.endpoint.hostport}")
+    @Value("${common.test.microservice.url}")
     protected String microserviceHostPort;
 
     protected CustomerSpace getCustomerSpace() {

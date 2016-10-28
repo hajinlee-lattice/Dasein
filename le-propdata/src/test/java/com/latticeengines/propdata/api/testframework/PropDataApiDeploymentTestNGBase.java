@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstractTestNGBase {
 
-    @Value("${propdata.api.deployment.hostport}")
+    @Value("${common.test.microservice.url}")
     private String hostPort;
 
     @Autowired

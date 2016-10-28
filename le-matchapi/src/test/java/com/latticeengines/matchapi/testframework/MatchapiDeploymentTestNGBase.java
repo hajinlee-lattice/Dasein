@@ -28,7 +28,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
-    @Value("${matchapi.test.deployment.hostport}")
+    @Value("${common.test.matchapi.url}")
     private String hostPort;
 
     @Autowired

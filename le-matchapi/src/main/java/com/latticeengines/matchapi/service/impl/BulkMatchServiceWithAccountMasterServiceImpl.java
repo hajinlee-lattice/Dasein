@@ -58,7 +58,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     @Qualifier("accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
-    @Value("${proxy.microservice.rest.endpoint.hostport}")
+    @Value("${common.microservice.url}")
     protected String microServiceHostPort;
 
     @Value("${datacloud.match.public_domain.path}")

@@ -16,7 +16,7 @@ public class QuartzSchedulerProxy extends BaseRestApiProxy implements
         QuartzSchedulerInterface {
 
     public QuartzSchedulerProxy() {
-        super(PropertyUtils.getProperty("proxy.quartz.rest.endpoint.hostport"), "quartz/scheduler");
+        super(PropertyUtils.getProperty("common.microservice.url"), "quartz/scheduler");
     }
 
     @Override

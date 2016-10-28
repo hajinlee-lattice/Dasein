@@ -46,7 +46,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${pls.microservice.rest.endpoint.hostport}")
+    @Value("${common.test.microservice.url}")
     private String microServiceHostPort;
 
     @Autowired

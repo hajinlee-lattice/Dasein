@@ -5,14 +5,8 @@
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
     <import resource="classpath:encryption-context.xml"/>
-    <import resource="classpath:test-encryption-camille-context.xml"/>
+    <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:test-testframework-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
-
-    <bean id="deploymentTestBed" class="com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed">
-        <constructor-arg name="plsApiHostPort" value="${encryption.test.deployment.api}"/>
-        <constructor-arg name="adminApiHostPort" value="${encryption.test.deployment.admin.api}"/>
-        <constructor-arg name="environment" value="${encryption.test.env}"/>
-    </bean>
 
 </beans>

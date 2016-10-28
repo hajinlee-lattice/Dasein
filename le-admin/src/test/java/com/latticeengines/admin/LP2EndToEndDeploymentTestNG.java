@@ -85,7 +85,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     @Value("${admin.test.contract}")
     private String testContract;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String plsHostPort;
 
     @Value("${admin.pls.dryrun}")

@@ -46,7 +46,7 @@ import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 
-    @Value("${scoring.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String plsApiHostPort;
 
     @Autowired

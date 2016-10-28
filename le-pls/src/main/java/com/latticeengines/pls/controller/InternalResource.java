@@ -157,10 +157,10 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.test.contract}")
     protected String contractId;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String hostPort;
 
-    @Value("${pls.internal.admin.api}")
+    @Value("${common.admin.url}")
     private String adminApi;
 
     @Value("${pls.test.tenant.reg.json}")

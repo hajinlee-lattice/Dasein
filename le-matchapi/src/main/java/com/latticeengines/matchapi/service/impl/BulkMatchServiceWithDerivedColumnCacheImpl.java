@@ -49,7 +49,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     @Value("${datacloud.match.bulk.group.size:20}")
     private Integer groupSize;
 
-    @Value("${proxy.microservice.rest.endpoint.hostport}")
+    @Value("${common.microservice.url}")
     protected String microserviceHostport;
 
     @Value("${datacloud.match.average.block.size:2500}")

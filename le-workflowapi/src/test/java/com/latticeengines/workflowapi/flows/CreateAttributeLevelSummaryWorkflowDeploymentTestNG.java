@@ -34,7 +34,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${security.test.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceProxy;

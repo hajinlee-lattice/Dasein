@@ -65,13 +65,13 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     private static final String CLIENT_ID_LP = "lp";
     private static final String DUMMY_APP_ID = "DUMMY_APP";
 
-    @Value("${scoringapi.hostport}")
+    @Value("${common.test.scoringapi.url}")
     protected String apiHostPort;
 
-    @Value("${scoringapi.auth.hostport}")
+    @Value("${common.test.oauth.url}")
     protected String authHostPort;
 
-    @Value("${scoringapi.pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     protected String plsApiHostPort;
 
     @Autowired

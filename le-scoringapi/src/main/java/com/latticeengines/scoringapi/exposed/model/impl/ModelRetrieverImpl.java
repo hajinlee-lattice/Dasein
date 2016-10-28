@@ -85,7 +85,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                                                                                             // modelId
     private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
 
-    @Value("${scoringapi.pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     @Value("${scoringapi.scoreartifact.cache.maxsize}")

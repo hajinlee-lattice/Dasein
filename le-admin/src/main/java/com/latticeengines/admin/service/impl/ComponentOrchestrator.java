@@ -58,7 +58,7 @@ public class ComponentOrchestrator {
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.pls.url}")
     private String plsEndHost;
 
     private static Map<String, LatticeComponent> componentMap;

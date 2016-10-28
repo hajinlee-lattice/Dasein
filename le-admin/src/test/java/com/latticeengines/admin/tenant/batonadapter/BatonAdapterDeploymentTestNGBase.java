@@ -26,7 +26,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     private static final long TIMEOUT = 180000L;
     private static final long WAIT_INTERVAL = 3000L;
 
-    @Value("${pls.api.hostport}")
+    @Value("${common.test.pls.url}")
     private String plsHostPort;
 
     @BeforeClass(groups = { "deployment", "functional", "deployment_lp2" })

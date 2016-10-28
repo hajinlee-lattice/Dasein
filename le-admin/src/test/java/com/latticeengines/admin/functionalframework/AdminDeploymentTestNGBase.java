@@ -13,7 +13,7 @@ import com.latticeengines.security.exposed.Constants;
 
 public class AdminDeploymentTestNGBase extends AdminAbstractTestNGBase {
 
-    @Value("${admin.test.deployment.api}")
+    @Value("${common.test.admin.url}")
     protected String remoteHostPort;
 
     @Override

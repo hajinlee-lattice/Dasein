@@ -2,7 +2,6 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -68,7 +68,7 @@ public class ScoreCorrectnessService {
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
-    @Value("${pls.scoringapi.rest.endpoint.hostport}")
+    @Value("${common.test.scoringapi.url}")
     private String scoreApiHostPort;
 
     @Autowired
