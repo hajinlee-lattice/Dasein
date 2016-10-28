@@ -85,8 +85,10 @@ public class ModelMetadataServiceImplUnitTestNG {
         List<Attribute> requiredColumns = pythonScriptModelService.getRequiredColumns(attributes,
                 SchemaInterpretation.SalesforceLead);
         System.out.println(requiredColumns);
-        assertEquals(requiredColumns.size(), 2);
+        assertEquals(requiredColumns.size(), 4);
         assertEquals(requiredColumns.get(0), a1);
-        assertEquals(requiredColumns.get(1), a9);
+        assertEquals(requiredColumns.get(1), a2);
+        assertEquals(requiredColumns.get(2), a7);
+        assertEquals(requiredColumns.get(3), a9);
     }
 }
