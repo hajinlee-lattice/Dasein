@@ -190,7 +190,7 @@ class ECSStack(Stack):
 
         asgroup.add_pool(launchconfig)
         asgroup.attach_tgrp(PARAM_TARGET_GROUP)
-        asgroup.add_tag("Name", { "Ref" : "AWS::StackName" })
+        asgroup.add_tag("Name", { "Ref" : "AWS::StackName" }, True)
 
         self.add_resources([asgroup, launchconfig])
         return asgroup
