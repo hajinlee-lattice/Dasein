@@ -12,8 +12,6 @@ public class ImportListOfEntitiesConfiguration extends MicroserviceStepConfigura
 
     private Map<String, ImportStepConfiguration> importConfigs;
     
-    protected ImportListOfEntitiesConfiguration() {}
-    
     public Map<String, ImportStepConfiguration> getImportConfigs() {
         return importConfigs;
     }

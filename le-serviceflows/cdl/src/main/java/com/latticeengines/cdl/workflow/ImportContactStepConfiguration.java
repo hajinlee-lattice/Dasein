@@ -4,4 +4,7 @@ import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfigurati
 
 public class ImportContactStepConfiguration extends ImportStepConfiguration {
 
+    public ImportContactStepConfiguration() {
+        setSkipStep(true);
+    }
 }

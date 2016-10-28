@@ -44,8 +44,6 @@ public class CDLImportWorkflowDeploymentTestNG extends ServiceFlowsWorkflowDeplo
         resolveMetadata(sourceFileMap.get("Account"), SchemaInterpretation.Account);
         resolveMetadata(sourceFileMap.get("Transaction"), SchemaInterpretation.TimeSeries);
         resolveMetadata(sourceFileMap.get("Product"), SchemaInterpretation.Category);
-        
-        
     }
     
     @Test(groups = "deployment")

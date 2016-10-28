@@ -57,21 +57,25 @@ public class CDLImportWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder accountSourceFileName(String sourceFileName) {
+            accountImportConfiguration.setSkipStep(false);
             accountImportConfiguration.setSourceFileName(sourceFileName);
             return this;
         }
 
         public Builder accountSourceType(SourceType sourceType) {
+            accountImportConfiguration.setSkipStep(false);
             accountImportConfiguration.setSourceType(sourceType);
             return this;
         }
 
         public Builder contactSourceFileName(String sourceFileName) {
+            contactImportConfiguration.setSkipStep(false);
             contactImportConfiguration.setSourceFileName(sourceFileName);
             return this;
         }
 
         public Builder contactSourceType(SourceType sourceType) {
+            contactImportConfiguration.setSkipStep(false);
             contactImportConfiguration.setSourceType(sourceType);
             return this;
         }
@@ -113,6 +117,14 @@ public class CDLImportWorkflowConfiguration extends WorkflowConfiguration {
             categoryConfig.setCustomerSpace(configuration.getCustomerSpace());
             categoryConfig.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
             categoryConfig.setMicroServiceHostPort(configuration.microServiceHostPort);
+            
+            if (timeSeriesConfig.getImportConfigs().size() == 0) {
+                timeSeriesConfig.setSkipStep(true);
+            }
+            
+            if (categoryConfig.getImportConfigs().size() == 0) {
+                categoryConfig.setSkipStep(true);
+            }
             
             configuration.add(timeSeriesConfig);
             configuration.add(categoryConfig);

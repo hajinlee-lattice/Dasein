@@ -33,7 +33,7 @@ public class CDLImportWorkflow extends AbstractWorkflow<CDLImportWorkflowConfigu
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(importAccountData) //
-                //.next(importContactData) //
+                .next(importContactData) //
                 .next(importTimeSeriesData) //
                 .next(importCategoryData) //
                 .build();
