@@ -236,7 +236,15 @@ angular
                             stepsCompleted: stepsCompleted,
                             stepFailed: stepFailed,
                             completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
-                            reports: job.reports
+                            reports: job.reports,
+                            applicationId: job.applicationId,
+                            source: job.inputs ? job.inputs.SOURCE_DISPLAY_NAME : null,
+                            modelName: job.inputs.MODEL_DISPLAY_NAME,
+                            modelId: (job.inputs && job.inputs.MODEL_ID ? job.inputs.MODEL_ID : (job.outputs && job.outputs.MODEL_ID ? job.outputs.MODEL_ID : null)),
+                            modelType: job.inputs ? job.inputs.MODEL_TYPE : null,
+                            sourceFileExists: job.inputs ? job.inputs.SOURCE_FILE_EXISTS == "true" : null,
+                            isDeleted: job.inputs ? job.inputs.MODEL_DELETED == "true": null,
+                            applicationLogUrl: job.outputs ? job.outputs.YARN_LOG_LINK_PATH : null
                         }
                 };
 

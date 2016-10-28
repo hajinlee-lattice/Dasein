@@ -21,27 +21,31 @@ public class WorkflowUtils {
     private static final Log log = LogFactory.getLog(WorkflowUtils.class);
 
     public static void updateJobFromYarn(Job job, WorkflowJob workflowJob, JobProxy jobProxy,
-                                         WorkflowJobEntityMgr workflowJobEntityMgr) {
+            WorkflowJobEntityMgr workflowJobEntityMgr) {
         YarnApplicationState jobState = null;
 
-        if (workflowJob.getStatus() == null || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED) {
+        if (workflowJob.getApplicationId() != null && (workflowJob.getStatus() == null
+                || workflowJob.getStatus() == FinalApplicationStatus.UNDEFINED)) {
             try {
-                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy.getJobStatus(job
-                        .getApplicationId());
+                com.latticeengines.domain.exposed.dataplatform.JobStatus status = jobProxy
+                        .getJobStatus(workflowJob.getApplicationId());
                 jobState = status.getState();
                 workflowJob = workflowJobEntityMgr.updateStatusFromYarn(workflowJob, status);
             } catch (Exception e) {
-                log.warn("Not able to find job status from yarn with applicationId:" + job.getApplicationId());
+                log.warn("Not able to find job status from yarn with applicationId:"
+                        + job.getApplicationId());
             }
         }
         // We only trust the WorkflowJob status if it is non-null
-        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(), jobState);
+        JobStatus status = getJobStatusFromFinalApplicationStatus(workflowJob.getStatus(),
+                jobState);
         if (status != null) {
             job.setJobStatus(status);
         }
     }
 
-    private static JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status, YarnApplicationState jobState) {
+    private static JobStatus getJobStatusFromFinalApplicationStatus(FinalApplicationStatus status,
+            YarnApplicationState jobState) {
         if (jobState == YarnApplicationState.RUNNING) {
             return JobStatus.RUNNING;
         }

@@ -78,7 +78,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public Job find(String jobId) {
-        return workflowProxy.getWorkflowExecution(jobId);
+        Job job = workflowProxy.getWorkflowExecution(jobId);
+        updateJobWithModelSummary(job);
+        return job;
     }
 
     @Override
@@ -90,43 +92,40 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
-        updateJobsWithModelSummeries(jobs);
         return jobs;
     }
 
-    private void updateJobsWithModelSummeries(List<Job> jobs) {
+    private void updateJobWithModelSummary(Job job) {
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
         for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
-        for (Job job : jobs) {
-            if (job.getInputs() == null) {
-                job.setInputs(new HashMap<String, String>());
-            }
-            job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
-                    getJobSourceFileExists(job.getApplicationId()).toString());
-
-            String modelId = null;
-            if (job.getInputs() != null
-                    && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
-                modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-            } else if (job.getOutputs() != null
-                    && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
-                modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-            }
-            if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
-                continue;
-            }
-
-            if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
-            }
-            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    modelIdToModelSummaries.get(modelId).getDisplayName());
-            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
-                    modelIdToModelSummaries.get(modelId).getModelType());
+        if (job.getInputs() == null) {
+            job.setInputs(new HashMap<String, String>());
         }
+        job.getInputs().put(WorkflowContextConstants.Inputs.SOURCE_FILE_EXISTS,
+                getJobSourceFileExists(job.getApplicationId()).toString());
+
+        String modelId = null;
+        if (job.getInputs() != null
+                && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+            modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+        } else if (job.getOutputs() != null
+                && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+            modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+        }
+        if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
+            return;
+        }
+
+        if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
+        }
+        job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                modelIdToModelSummaries.get(modelId).getDisplayName());
+        job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
+                modelIdToModelSummaries.get(modelId).getModelType());
     }
 
     @Override

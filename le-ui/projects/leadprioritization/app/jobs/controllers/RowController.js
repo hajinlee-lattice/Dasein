@@ -21,7 +21,6 @@ angular
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
-            $scope.isPMML = (['PmmlModel'].indexOf(job.modelType) > -1);
             $scope.jobRunning = false;
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
@@ -30,24 +29,6 @@ angular
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
-
-            var reports = $scope.job.reports,
-                JobReport = null;
-
-            if (reports != null) {
-                reports.forEach(function(item) {
-                    if (item.purpose == "IMPORT_DATA_SUMMARY") {
-                        $scope.data = data = JSON.parse(item.json.Payload);
-                        JobReport = item;
-
-                        JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
-                        
-                        $scope.report = JobReport;
-                        $scope.data.total_records = data.imported_records + data.ignored_records;
-                        $scope.errorlog = '/files/fileuploads/' + JobReport.name + '/import/errors';
-                    }
-                });
-            }
 
             switch ($scope.jobType.toLowerCase()) {
                 case "scoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
@@ -59,14 +40,6 @@ angular
                 case "modelandemailworkflow": $scope.job.displayName = "Create Model (Remodel)"; break;
                 case "pmmlmodelworkflow": $scope.job.displayName = "Create Model (PMML File)"; break;
                 default: $scope.job.displayName = "Create Model";
-            }
-
-            $scope.showFileName = false;
-            if ($scope.jobType.toLowerCase() == "importmatchandscoreworkflow" || $scope.jobType.toLowerCase() == "importandrtsbulkscoreworkflow"
-                    || $scope.jobType.toLowerCase() == "importmatchandmodelworkflow") {
-                if ($scope.job.applicationId != null && $scope.job.source != null) {
-                    $scope.showFileName = true;
-                }
             }
 
             if ($scope.job.displayName == "Bulk Scoring") {
@@ -132,11 +105,9 @@ angular
                 $scope.jobRowExpanded = true;
                 $scope.expanded[job.id] = true;
 
-                if (! isCompleted() && $scope.job.id != null) {
-                    JobsStore.getJob($scope.job.id).then(function(result) {
-                        updateStatesBasedOnJobStatus(job);
-                    });
-                }
+                JobsStore.getJob($scope.job.id).then(function(result) {
+                    updateStatesBasedOnJobStatus(result);
+                });
             };
 
             // Use this in JobStatusRow.html
@@ -256,8 +227,18 @@ angular
                 periodicQueryId = null;
             }
 
+            $scope.showFileName = false;
+            var JobReport = null;
+
             function updateStatesBasedOnJobStatus(jobStatus) {
                 $scope.job.status = jobStatus.jobStatus;
+                $scope.job.user = jobStatus.user;
+                $scope.job.sourceFileExists = jobStatus.sourceFileExists;
+                $scope.job.source = jobStatus.source;
+                $scope.job.applicationId = jobStatus.applicationId;
+                $scope.job.applicationLogUrl = jobStatus.applicationLogUrl;
+                $scope.job.timestamp = jobStatus.startTimestamp;
+                $scope.isPMML = (['PmmlModel'].indexOf(jobStatus.modelType) > -1);
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                     $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
@@ -268,6 +249,12 @@ angular
                     $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
                 }
                 
+                if ($scope.jobType.toLowerCase() == "importmatchandscoreworkflow" || $scope.jobType.toLowerCase() == "importandrtsbulkscoreworkflow"
+                        || $scope.jobType.toLowerCase() == "importmatchandmodelworkflow") {
+                    if (jobStatus.applicationId != null && jobStatus.source != null) {
+                        $scope.showFileName = true;
+                    }
+                }
                 $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                 var stepFailed = jobStatus.stepFailed;
@@ -291,6 +278,22 @@ angular
                     for (var jobState in $scope.jobStepsRunningStates) {
                         $scope.jobStepsRunningStates[jobState] = false;
                     }
+                }
+
+                var reports = jobStatus.reports;
+                if (reports != null) {
+                    reports.forEach(function(item) {
+                        if (item.purpose == "IMPORT_DATA_SUMMARY") {
+                            $scope.data = data = JSON.parse(item.json.Payload);
+                            JobReport = item;
+
+                            JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
+
+                            $scope.report = JobReport;
+                            $scope.data.total_records = data.imported_records + data.ignored_records;
+                            $scope.errorlog = '/files/fileuploads/' + JobReport.name + '/import/errors';
+                        }
+                    });
                 }
             }
 

@@ -21,16 +21,11 @@ angular
     };
 
     this.getJob = function(jobId) {
-        var deferred = $q.defer(),
-            job = this.data.jobsMap[jobId];
-        
-        if (typeof job == 'object') {
-            deferred.resolve(job);
-        } else {
-            JobsService.getJobStatus(jobId).then(function(response) {
-                deferred.resolve(response.resultObj);
-            });
-        }
+        var deferred = $q.defer();
+
+        JobsService.getJobStatus(jobId).then(function(response) {
+            deferred.resolve(response.resultObj);
+        });
 
         return deferred.promise;
     };
@@ -59,21 +54,25 @@ angular
                     }
                     
                     JobsStore.data.models[modelId].length = 0;
+
+                    for (var i=0; i<response.length; i++) {
+                        var job = response[i];
+
+                        JobsStore.addJobMap(job.id, job);
+                        JobsStore.addJob(job, modelId);
+                    }
                 } else {
                     JobsStore.data.jobs.length = 0;
+
+                    for (var i=0; i<response.length; i++) {
+                        var job = response[i];
+
+                        JobsStore.addJobMap(job.id, job);
+                        JobsStore.addJob(job, modelId);
+                    }
                 }
                 
-                for (var i=0; i<response.length; i++) {
-                    var job = response[i];
-
-                    JobsStore.addJobMap(job.id, job);
-                    JobsStore.addJob(job, modelId);
-                }
-                if(modelId){
-                    deferred.resolve(JobsStore.data.jobs);
-                } else {
-                    deferred.resolve(JobsStore.data.jobs);
-                }
+                deferred.resolve(JobsStore.data.jobs);
             });
         }
 

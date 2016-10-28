@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
@@ -85,7 +86,25 @@ public class WorkflowExecutionCache {
         }
 
         jobs.addAll(loadMissingJobs(missingJobIds));
-        return jobs;
+        return clearJobDetails(jobs);
+    }
+
+    private List<Job> clearJobDetails(List<Job> jobs) {
+        List<Job> nonDetailedJobs = new ArrayList<>();
+
+        for (Job job : jobs) {
+            Job nonDetailedJob = new Job();
+
+            nonDetailedJob.setId(job.getId());
+            nonDetailedJob.setJobStatus(job.getJobStatus());
+            nonDetailedJob.setStartTimestamp(job.getStartTimestamp());
+            nonDetailedJob.setJobType(job.getJobType());
+            nonDetailedJob.setInputs(job.getInputs());
+
+            nonDetailedJobs.add(nonDetailedJob);
+        }
+
+        return nonDetailedJobs;
     }
 
     public Job getJob(WorkflowExecutionId workflowId) {
@@ -93,7 +112,8 @@ public class WorkflowExecutionCache {
             return cache.getIfPresent(workflowId.getId());
         }
 
-        log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
+        log.info(String.format("Job with id: %s is not in the cache, reloading.",
+                workflowId.getId()));
 
         try {
             JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
@@ -126,7 +146,9 @@ public class WorkflowExecutionCache {
             }
             return job;
         } catch (Exception e) {
-            log.error(String.format("Getting job status for workflow: %d failed", workflowId.getId()), e);
+            log.error(
+                    String.format("Getting job status for workflow: %d failed", workflowId.getId()),
+                    e);
             throw e;
         }
     }
@@ -166,7 +188,7 @@ public class WorkflowExecutionCache {
             JobStep jobStep = new JobStep();
             jobStep.setJobStepType(stepExecution.getStepName());
             jobStep.setStepStatus(getJobStatusFromBatchStatus(stepExecution.getStatus()));
-            if(stepExecution.getExitStatus() == ExitStatus.NOOP) {
+            if (stepExecution.getExitStatus() == ExitStatus.NOOP) {
                 jobStep.setStepStatus(JobStatus.SKIPPED);
             }
             jobStep.setStartTimestamp(stepExecution.getStartTime());

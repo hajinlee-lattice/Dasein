@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -43,9 +43,6 @@ import com.latticeengines.workflowapi.service.WorkflowContainerService;
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     private static final Log log = LogFactory.getLog(WorkflowContainerService.class);
-
-    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
-    private String resourceManagerUrl;
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -102,7 +99,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getWorkflowQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
+                LedpQueueAssigner.getWorkflowQueueNameForSubmission());
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 workflowConfig.getWorkflowName().replace(" ", "_"));
@@ -129,7 +127,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobByApplicationId(String applicationId) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobByApplicationId(
+            String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
         if (workflowJob == null) {
             throw new LedpException(LedpCode.LEDP_28023, new String[] { applicationId });
@@ -137,7 +136,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
+            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(
+                    workflowJob);
             return job;
         }
         return workflowService.getJob(workflowId);
@@ -152,12 +152,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
+            if (workflowJob
+                    .getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-                if (workflowId == null
-                        || (workflowJob.getStatus() != null && workflowJob.getStatus().equals(
-                                FinalApplicationStatus.FAILED))) {
-                    com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
+                if (workflowId == null || (workflowJob.getStatus() != null
+                        && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED))) {
+                    com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(
+                            workflowJob);
                     jobs.add(job);
                 } else {
                     workflowIds.add(workflowId);
@@ -168,32 +169,25 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         try {
             jobs.addAll(workflowService.getJobs(workflowIds));
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
-                    e.getMessage()));
-        }
-        for (com.latticeengines.domain.exposed.workflow.Job job : jobs) {
-            if (job.getOutputs() != null && job.getApplicationId() != null) {
-                job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
-                        String.format("http://%s/cluster/app/%s", resourceManagerUrl, job.getApplicationId()));
-            }
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s",
+                    workflowIds.toString(), e.getMessage()));
         }
 
         return jobs;
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobFromWorkflowJobAndYarn(
+            WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         Map<String, String> inputProperties = workflowJob.getInputContext();
-        job.setInputs(inputProperties);
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
-        job.setUser(workflowJob.getUserId());
-
-        String applicationId = workflowJob.getApplicationId();
-        job.setApplicationId(applicationId);
+        job.setInputs(inputProperties);
+        job.setId(workflowJob.getPid());
 
         // get state first from database
-        if (workflowJob.getStatus() != null && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
+        if (workflowJob.getStatus() != null
+                && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
             job.setJobStatus(JobStatus.FAILED);
 
             if (workflowJob.getStartTimeInMillis() != null) {
@@ -206,7 +200,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid, String type) {
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid,
+            String type) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
         try {
@@ -220,8 +215,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 }
             }
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s", tenantPid,
-                    e.getMessage()));
+            log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s",
+                    tenantPid, e.getMessage()));
         }
 
         return jobs;

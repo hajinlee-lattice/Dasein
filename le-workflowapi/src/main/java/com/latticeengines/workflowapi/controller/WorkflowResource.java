@@ -47,9 +47,10 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Create a workflow execution in a Yarn container")
     @Override
-    public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig) {
-        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
-                .submitWorkFlow(workflowConfig) }));
+    public AppSubmission submitWorkflowExecution(
+            @RequestBody WorkflowConfiguration workflowConfig) {
+        return new AppSubmission(Arrays.<ApplicationId> asList(
+                new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
 
     @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -61,10 +62,11 @@ public class WorkflowResource implements WorkflowInterface {
         WorkflowStatus status = workflowService.getStatus(workflowExecutionId);
 
         if (status == null) {
-            throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
+            throw new LedpException(LedpCode.LEDP_28017,
+                    new String[] { String.valueOf(workflowId) });
         } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-            throw new LedpException(LedpCode.LEDP_28018, new String[] { String.valueOf(workflowId),
-                    status.getStatus().name() });
+            throw new LedpException(LedpCode.LEDP_28018,
+                    new String[] { String.valueOf(workflowId), status.getStatus().name() });
         }
 
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
@@ -73,8 +75,8 @@ public class WorkflowResource implements WorkflowInterface {
         workflowConfig.setWorkflowIdToRestart(workflowExecutionId);
         workflowConfig.setCustomerSpace(status.getCustomerSpace());
 
-        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
-                .submitWorkFlow(workflowConfig) }));
+        return new AppSubmission(Arrays.<ApplicationId> asList(
+                new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
 
     @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -103,7 +105,8 @@ public class WorkflowResource implements WorkflowInterface {
 
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        return workflowContainerService.getWorkflowId(ConverterUtils.toApplicationId(applicationId));
+        return workflowContainerService
+                .getWorkflowId(ConverterUtils.toApplicationId(applicationId));
     }
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -127,7 +130,8 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
-    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
+    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid,
+            @RequestParam("type") String type) {
         List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
         return jobs;
     }
