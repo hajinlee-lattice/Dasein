@@ -60,7 +60,7 @@ def ecs_metadata(ec2, ecscluster, efs):
                                   "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp2"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ2"]}, ".ip\n",
                                   "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp3"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ3"]}, ".ip\n",
                                   "az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)\n",
-                                  "efs_ip=`cat /tmp/${az}.ip`",
+                                  "efs_ip=`cat /tmp/${az}.ip`\n",
                                   "echo ${efs_ip}\n",
                                   "echo \"${efs_ip}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
                                   ]
