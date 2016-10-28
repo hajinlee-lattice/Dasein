@@ -2,7 +2,7 @@ import json
 import os
 
 from .iam import InstanceProfile
-from .parameter import Parameter
+from .parameter import Parameter, PARAM_ENVIRONMENT
 from .resource import Resource
 from .template import TEMPLATE_DIR
 
@@ -56,9 +56,9 @@ def ecs_metadata(ec2, ecscluster, efs):
                                 "",
                                 [ "#!/usr/bin/env bash \n",
                                   "mkdir -p /mnt/efs \n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", "LpiEfsIps", "1"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", "SubnetAZs", "1"]}, ".ip\n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", "LpiEfsIps", "2"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", "SubnetAZs", "2"]}, ".ip\n",
-                                  "echo \"", {"Fn::FindInMap": ["Environment2Props", "LpiEfsIps", "3"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", "SubnetAZs", "3"]}, ".ip\n",
+                                  "echo \"", {"Fn::Select": ["1", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIps"]}]}, "\" > /tmp/", {"Fn::Select": ["1", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZs"]}]}, ".ip\n",
+                                  "echo \"", {"Fn::Select": ["2", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIps"]}]}, "\" > /tmp/", {"Fn::Select": ["2", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZs"]}]}, ".ip\n",
+                                  "echo \"", {"Fn::Select": ["3", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIps"]}]}, "\" > /tmp/", {"Fn::Select": ["3", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZs"]}]}, ".ip\n",
                                   "az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)\n",
                                   "efs_ip=`cat /tmp/${az}.ip`",
                                   "echo ${efs_ip}\n",

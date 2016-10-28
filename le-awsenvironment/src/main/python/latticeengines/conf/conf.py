@@ -95,16 +95,16 @@ class AwsEnvironment:
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry(),
-            "SubnetAZs": {
-                "1": self.subnet_az_1(),
-                "2": self.subnet_az_2(),
-                "3": self.subnet_az_3()
-            },
-            "LpiEfsIps": {
-                "1": self.lpi_efs_ip_1(),
-                "2": self.lpi_efs_ip_1(),
-                "3": self.lpi_efs_ip_1()
-            }
+            "SubnetAZs": [
+                self.subnet_az_1(),
+                self.subnet_az_2(),
+                self.subnet_az_3()
+            ],
+            "LpiEfsIps": [
+                self.lpi_efs_ip_1(),
+                self.lpi_efs_ip_2(),
+                self.lpi_efs_ip_3()
+            ]
         }
 
     @staticmethod
