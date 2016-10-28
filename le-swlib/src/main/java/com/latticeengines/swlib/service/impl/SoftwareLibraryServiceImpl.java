@@ -1,6 +1,7 @@
 package com.latticeengines.swlib.service.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -121,7 +122,9 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
                     log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_27003, new String[] { file }), e);
                 }
             }
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            log.warn(e);
+        }catch (Exception e) {
             log.error(e);
         }
         return packages;

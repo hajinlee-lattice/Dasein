@@ -17,9 +17,15 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 public class SqoopImporter {
 
     private static List<String> defaultHadoopArgs = Arrays.asList(
-            "-Dmapreduce.task.timeout=600000",
-            "-Dmapreduce.job.running.map.limit=32",
+            "-Dmapreduce.task.timeout=600000", //
+            "-Dmapreduce.job.running.map.limit=32", //
             "-Dmapreduce.tasktracker.map.tasks.maximum=32"
+    );
+
+    private static List<String> defaultOptions = Arrays.asList(
+            "--relaxed-isolation", // 
+            "--as-avrodatafile", //
+            "--compress"
     );
 
     private String table;
@@ -218,9 +224,7 @@ public class SqoopImporter {
         private Configuration yarnConfiguration;
         private boolean sync = true;
         private List<String> hadoopArgs = new ArrayList<>();
-        private List<String> otherOptions = new ArrayList<>(Arrays.asList(
-                "--relaxed-isolation", "--as-avrodatafile", "--compress"
-        ));
+        private List<String> otherOptions = new ArrayList<>(defaultOptions);
 
         public SqoopImporter build() {
             validate();

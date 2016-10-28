@@ -87,13 +87,19 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         dropSqlTable();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testExport() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+        credsBuilder //
+                .jdbcUrl(jdbcUrl) //
+                .driverClass(dbDriver) //
+                .user(dbUser) //
                 .encryptedPassword(CipherUtils.encrypt(dbPassword));
-        SqoopExporter exporter = new SqoopExporter.Builder().setCustomer("PropDataTest")
-                .setNumMappers(4).setTable(sqlTable).setSourceDir(AVRO_DIR)
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setCustomer("PropDataTest") //
+                .setNumMappers(4) //
+                .setTable(sqlTable) //
+                .setSourceDir(AVRO_DIR) //
                 .setDbCreds(new DbCreds(credsBuilder)).build();
         AppSubmission submission = sqoopProxy.exportTable(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
@@ -102,15 +108,22 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testExport", enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = "testExport")
     public void testImport() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+        credsBuilder //
+                .jdbcUrl(jdbcUrl) //
+                .driverClass(dbDriver) //
+                .user(dbUser) //
                 .encryptedPassword(CipherUtils.encrypt(dbPassword));
         cleanupHdfsDir(AVRO_DIR);
-        SqoopImporter impoter = new SqoopImporter.Builder().setCustomer("PropDataTest")
-                .setNumMappers(4).setTable(sqlTable).setTargetDir(AVRO_DIR)
-                .setSplitColumn("LE_Last_Upload_Date").setDbCreds(new DbCreds(credsBuilder))
+        SqoopImporter impoter = new SqoopImporter.Builder() //
+                .setCustomer("PropDataTest") //
+                .setNumMappers(4) //
+                .setTable(sqlTable) //
+                .setTargetDir(AVRO_DIR) //
+                .setSplitColumn("LE_Last_Upload_Date") //
+                .setDbCreds(new DbCreds(credsBuilder)) //
                 .build();
         AppSubmission submission = sqoopProxy.importTable(impoter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
@@ -119,15 +132,23 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testExportCsv() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+        credsBuilder //
+                .jdbcUrl(jdbcUrl) //
+                .driverClass(dbDriver) //
+                .user(dbUser) //
                 .encryptedPassword(CipherUtils.encrypt(dbPassword));
-        SqoopExporter exporter = new SqoopExporter.Builder().setCustomer("PropDataTest")
-                .setNumMappers(1).setTable(sqlTableForCsv).setSourceDir(CSV_DIR)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .addExtraOption("--input-optionally-enclosed-by").addExtraOption("\"").build();
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setCustomer("PropDataTest") //
+                .setNumMappers(1) //
+                .setTable(sqlTableForCsv) //
+                .setSourceDir(CSV_DIR) //
+                .setDbCreds(new DbCreds(credsBuilder)) //
+                .addExtraOption("--input-optionally-enclosed-by") //
+                .addExtraOption("\"") //
+                .build();
         AppSubmission submission = sqoopProxy.exportTable(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
@@ -135,16 +156,25 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testExportCsv", enabled = true)
+    @Test(groups = "deployment", dependsOnMethods = "testExportCsv")
     public void testImportCsv() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+        credsBuilder //
+                .jdbcUrl(jdbcUrl) //
+                .driverClass(dbDriver) //
+                .user(dbUser) //
                 .encryptedPassword(CipherUtils.encrypt(dbPassword));
         cleanupHdfsDir(CSV_DIR);
-        SqoopImporter importer = new SqoopImporter.Builder().setCustomer("PropDataTest")
-                .setNumMappers(1).setTable(sqlTableForCsv).setTargetDir(CSV_DIR)
-                .setDbCreds(new DbCreds(credsBuilder)).setQuery(sqlQuery).setSplitColumn("SeedID")
-                .setMode(SqoopImporter.Mode.QUERY).setNumMappers(1)
+        SqoopImporter importer = new SqoopImporter.Builder() //
+                .setCustomer("PropDataTest") //
+                .setNumMappers(1) //
+                .setTable(sqlTableForCsv) //
+                .setTargetDir(CSV_DIR) //
+                .setDbCreds(new DbCreds(credsBuilder)) //
+                .setQuery(sqlQuery) //
+                .setSplitColumn("SeedID") //
+                .setMode(SqoopImporter.Mode.QUERY) //
+                .setNumMappers(1) //
                 .build();
         List<String> otherOptions = new ArrayList<>(
                 Arrays.asList("--relaxed-isolation", "--as-textfile"));
