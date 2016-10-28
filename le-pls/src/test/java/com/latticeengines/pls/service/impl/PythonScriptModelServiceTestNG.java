@@ -1,0 +1,128 @@
+package com.latticeengines.pls.service.impl;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.annotations.BeforeClass;
+
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.service.TenantService;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
+
+    private static final String TENANT1 = "TENANT1";
+    private static final Attribute ATTRIBUTE_1 = new Attribute();
+    private static final Attribute ATTRIBUTE_2 = new Attribute();
+    private static final Attribute ATTRIBUTE_3 = new Attribute();
+    private static final Table TABLE = new Table();
+    private static final String ATTRIBUTE_NAME_ID = "Id";
+    private static final String ATTRIBUTE_NAME_1 = "Name_1";
+    private static final String ATTRIBUTE_NAME_2 = "Name_2";
+    private static final ModelSummary MODEL_SUMMARY = new ModelSummary();
+    private static final String MODEL_ID = "MODEL_ID";
+    private static final String TABLE_NAME = "TABLE_NAME";
+
+    @Autowired
+    private PythonScriptModelService pythonScriptModelService;
+
+    @Autowired
+    private TenantService tenantService;
+
+    private ModelSummaryEntityMgr mockedModelSummaryEntityMgr = Mockito
+            .mock(ModelSummaryEntityMgr.class);
+    private MetadataProxy mockedMetadataProxy = Mockito.mock(MetadataProxy.class);
+
+    private void setupTenant(String t) throws Exception {
+        Tenant tenant = tenantService.findByTenantId(t);
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
+        tenant = new Tenant();
+        tenant.setId(t);
+        tenant.setName(t);
+        tenantService.registerTenant(tenant);
+
+        setupSecurityContext(tenant);
+    }
+
+    @BeforeClass(groups = { "functional" })
+    public void setup() throws Exception {
+        setupTenant(TENANT1);
+        ReflectionTestUtils.setField(pythonScriptModelService, "modelSummaryEntityMgr",
+                mockedModelSummaryEntityMgr);
+        ReflectionTestUtils.setField(pythonScriptModelService, "metadataProxy",
+                mockedMetadataProxy);
+        MODEL_SUMMARY.setEventTableName(TABLE_NAME);
+        MODEL_SUMMARY.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.toString());
+
+        ATTRIBUTE_1.setName(ATTRIBUTE_NAME_1);
+        ATTRIBUTE_1.setTags(Tag.INTERNAL.toString());
+        ATTRIBUTE_1.setApprovedUsage(ApprovedUsage.MODEL);
+        ATTRIBUTE_2.setName(ATTRIBUTE_NAME_2);
+        ATTRIBUTE_2.setTags(Tag.EXTERNAL.toString());
+        ATTRIBUTE_3.setName(ATTRIBUTE_NAME_ID);
+        TABLE.addAttribute(ATTRIBUTE_1);
+        TABLE.addAttribute(ATTRIBUTE_2);
+        TABLE.addAttribute(ATTRIBUTE_3);
+
+        when(mockedModelSummaryEntityMgr.findValidByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
+        when(mockedModelSummaryEntityMgr.getByModelId(MODEL_ID)).thenReturn(MODEL_SUMMARY);
+        when(mockedMetadataProxy.getTable(anyString(), eq(TABLE_NAME))).thenReturn(TABLE);
+    }
+
+    @Test(groups = "functional")
+    public void getRequiredColumns_assertCorrectFieldsReturned() {
+        List<Attribute> attributes = pythonScriptModelService.getRequiredColumns(MODEL_ID);
+
+        assertEquals(attributes.size(), 2);
+        Attribute foundAttribute = null;
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals(ATTRIBUTE_NAME_1)) {
+                foundAttribute = attribute;
+            }
+        }
+        assertNotNull(foundAttribute);
+        assertEquals(foundAttribute.getName(), ATTRIBUTE_NAME_1);
+        assertEquals(foundAttribute.getTags().get(0), Tag.INTERNAL.toString());
+
+        foundAttribute = null;
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals(ATTRIBUTE_NAME_ID)) {
+                foundAttribute = attribute;
+            }
+        }
+        assertNotNull(foundAttribute);
+        assertEquals(foundAttribute.getName(), ATTRIBUTE_NAME_ID);
+    }
+
+    @Test(groups = "functional")
+    public void getLatticeAttributeNames_assertCorrectFieldsReturned() {
+        Set<String> latticeAttributes = pythonScriptModelService.getLatticeAttributeNames(MODEL_ID);
+
+        assertEquals(latticeAttributes.size(), 1);
+        assertTrue(latticeAttributes.contains(ATTRIBUTE_NAME_2));
+    }
+
+}
