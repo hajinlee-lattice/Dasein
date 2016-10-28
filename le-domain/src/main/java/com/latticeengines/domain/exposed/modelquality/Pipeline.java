@@ -59,6 +59,10 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
     @Column(name = "PIPELINE_DRIVER", nullable = true)
     private String pipelineDriver;
 
+    @JsonProperty("description")
+    @Column(name = "DESCRIPTION", nullable = true)
+    private String description;
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pk.pipeline")
     @Fetch(FetchMode.SUBSELECT)
@@ -107,6 +111,14 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
 
     public void setPipelineDriver(String pipelineDriver) {
         this.pipelineDriver = pipelineDriver;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @JsonProperty("pipeline_steps")

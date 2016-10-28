@@ -121,8 +121,8 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
-    public String createPipeline(String pipelineName, List<PipelineStepOrFile> pipelineSteps) {
-        String url = constructUrl("/pipelines/?pipelineName={pipelineName}", pipelineName);
+    public String createPipeline(String pipelineName, String pipelineDescription, List<PipelineStepOrFile> pipelineSteps) {
+        String url = constructUrl("/pipelines/?pipelineName={pipelineName}/pipelineDescription={pipelineDescription}", pipelineName, pipelineDescription);
         return post("createPipeline", url, pipelineSteps, String.class);
     }
 

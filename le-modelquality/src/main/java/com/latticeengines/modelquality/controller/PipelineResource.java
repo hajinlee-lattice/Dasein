@@ -52,7 +52,7 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @Override
     @RequestMapping(value = "/latest", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Create the latest active production pipeline")
+    @ApiOperation(value = " the latest active production pipeline")
     public Pipeline createPipelineFromProduction() {
         return createForProduction();
     }
@@ -62,8 +62,9 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @ResponseBody
     @ApiOperation(value = "Create new pipeline from a list of either existing pipeline steps or uploaded files")
     public String createPipeline(@RequestParam("pipelineName") String pipelineName,
+            @RequestParam("pipelineDescription") String pipelineDescription,
             @RequestBody List<PipelineStepOrFile> pipelineSteps) {
-        return create(null, pipelineName, pipelineSteps);
+        return create(null, pipelineName, pipelineDescription, pipelineSteps);
     }
 
     @Override
@@ -159,8 +160,9 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @Override
     public String create(Pipeline config, Object... params) {
         String pipelineName = (String) params[0];
-        List<PipelineStepOrFile> pipelineSteps = (List) params[1];
-        Pipeline p = pipelineService.createPipeline(pipelineName, pipelineSteps);
+        String pipelineDescription = (String) params[1];
+        List<PipelineStepOrFile> pipelineSteps = (List) params[2];
+        Pipeline p = pipelineService.createPipeline(pipelineName, pipelineDescription, pipelineSteps);
         return p.getName();
     }
 

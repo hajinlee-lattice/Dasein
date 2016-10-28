@@ -89,7 +89,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
             pipelineSteps.add(p);
         }
         
-        Pipeline newPipeline = pipelineService.createPipeline("P1", pipelineSteps);
+        Pipeline newPipeline = pipelineService.createPipeline("P1", "P1 Description", pipelineSteps);
         assertTrue(newPipeline.getPipelineDriver().contains("pipelines/P1/pipeline-"));
         assertEquals(newPipeline.getPipelineSteps().size(), 6);
     }

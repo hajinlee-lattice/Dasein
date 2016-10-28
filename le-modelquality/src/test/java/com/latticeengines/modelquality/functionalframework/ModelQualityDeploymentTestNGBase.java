@@ -233,7 +233,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             pipelineSteps.add(p);
         }
-        String newPipelineName = modelQualityProxy.createPipeline("P1", pipelineSteps);
+        String newPipelineName = modelQualityProxy.createPipeline("P1", "P1 Description", pipelineSteps);
         return modelQualityProxy.getPipelineByName(newPipelineName);
     }
 

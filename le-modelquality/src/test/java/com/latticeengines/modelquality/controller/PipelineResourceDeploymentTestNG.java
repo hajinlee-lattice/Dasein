@@ -94,7 +94,7 @@ public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTest
             pipelineSteps.add(p);
         }
         
-        String pipelineName = modelQualityProxy.createPipeline("P1", pipelineSteps);
+        String pipelineName = modelQualityProxy.createPipeline("P1", "P1 Description", pipelineSteps);
         Assert.assertEquals(pipelineName, "P1");
     }
 

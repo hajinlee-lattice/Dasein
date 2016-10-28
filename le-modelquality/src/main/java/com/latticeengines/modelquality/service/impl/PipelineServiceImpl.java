@@ -49,6 +49,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         Pipeline pipeline = new Pipeline();
         String version = getVersion();
         pipeline.setName("PRODUCTION-" + version);
+        pipeline.setDescription("Production pipeline version: " + pipeline.getName());
         String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
         setPipelineProperties(pipeline, pipelineJson);
         
@@ -86,9 +87,10 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     }
 
     @Override
-    public Pipeline createPipeline(String pipelineName, List<PipelineStepOrFile> pipelineSteps) {
+    public Pipeline createPipeline(String pipelineName, String pipelineDescription, List<PipelineStepOrFile> pipelineSteps) {
         Pipeline pipeline = new Pipeline();
         pipeline.setName(pipelineName);
+        pipeline.setDescription(pipelineDescription);
         pipelineEntityMgr.create(pipeline);
         int i = 1;
         for (PipelineStepOrFile psof : pipelineSteps) {

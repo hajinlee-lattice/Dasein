@@ -29,6 +29,7 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         
         pipeline = new Pipeline();
         pipeline.setName("Pipeline1");
+        pipeline.setDescription("Test Pipeline");
 
         PipelineStep step = new PipelineStep();
         step.setName("StepName1");

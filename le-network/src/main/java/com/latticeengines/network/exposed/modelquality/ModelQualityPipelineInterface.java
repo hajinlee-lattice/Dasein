@@ -27,7 +27,7 @@ public interface ModelQualityPipelineInterface {
     
     String uploadPipelineStepRTSPythonScript(String fileName, String stepName, HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity);
     
-    String createPipeline(String pipelineName, List<PipelineStepOrFile> pipelineSteps);
+    String createPipeline(String pipelineName, String pipelineDescription, List<PipelineStepOrFile> pipelineSteps);
 
     Pipeline getPipelineByName(String pipelineName);
 
