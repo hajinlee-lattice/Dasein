@@ -446,7 +446,88 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         return null;
     };
-    
+
+    this.FormatSimpleBuckets = function(attributeName, attributeColor, modelSummary) {
+        if (attributeName == null || modelSummary == null) {
+            return null;
+        }
+
+        var predictor = this.GetAttributeByName(attributeName, modelSummary.Predictors);
+        if (predictor == null) {
+            return null;
+        }
+
+        var toReturn = {
+            name: predictor.DisplayName,
+            color: attributeColor,
+            description: predictor.Description || "",
+            elementList: []
+        };
+        var nullBucket = null;
+
+        var isContinuous = false;
+        if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
+            for (i = 0; i < predictor.Elements.length; i++) {
+                bucket = predictor.Elements[i];
+                if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
+                    isContinuous = true;
+                    break;
+                }
+            }
+        }
+
+        for (var i = 0; i < predictor.Elements.length; i++) {
+            var bucket = predictor.Elements[i];
+            var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
+
+            var bucketToDisplay = {
+                name: bucketName,
+                lift: bucket.Lift,
+                percentTotal: (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0
+            };
+
+            // Set sort property based on whether it is a discrete versus a continuous value
+            if (isContinuous) {
+                bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
+                // Only when the attribute is continuous, sorting is increasing order
+            } else {
+                bucketToDisplay.SortProperty = bucketToDisplay.lift;
+            }
+            if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
+                (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
+                nullBucket = bucketToDisplay;
+                nullBucket.name = "N/A";
+                continue;
+            }
+            toReturn.elementList.push(bucketToDisplay);
+        }
+
+        // sort the list of buckets
+        toReturn.elementList.sort(function (a, b)  {
+            if (a.SortProperty < b.SortProperty) {
+                return isContinuous ? -1 : 1;
+            }
+            if (a.SortProperty == b.SortProperty) {
+                return 0;
+            }
+            if (a.SortProperty > b.SortProperty) {
+                return isContinuous ? 1 : -1;
+            }
+                return 0;
+        });
+
+        // Always sort NULL bucket to the bottom
+        if (nullBucket != null) {
+            toReturn.elementList.push(nullBucket);
+        }
+
+        //DP-932
+        if (isContinuous && nullBucket != null && toReturn.elementList.length == 2) {
+        	toReturn.elementList[0].name = "Available";
+        }
+
+        return toReturn;
+    };
    
     this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
@@ -588,11 +669,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             };
         }
         
-        // Always sort Other bucket second from bottom  
+        // Always sort Other bucket second from bottom
         if (otherBucket != null) {
             toReturn.elementList.push(otherBucket);
-        }   
-        
+        }
+
         // Always sort NULL bucket to the bottom
         if (nullBucket != null) {
             toReturn.elementList.push(nullBucket);

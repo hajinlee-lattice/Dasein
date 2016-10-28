@@ -8,13 +8,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 
 .controller('TopPredictorWidgetController', function (
         $scope, $sce, $element, $compile, $rootScope, ResourceUtility, 
-        WidgetFrameworkService, TopPredictorService, ModelStore
+        WidgetFrameworkService, TopPredictorService, ModelStore, FeatureFlagService
     ) {
     
     var widgetConfig = ModelStore.widgetConfig.Widgets[0];
     var metadata = ModelStore.metadata;
     var data = ModelStore.data;
     var parentData = $scope.parentData;
+    var flags = FeatureFlagService.Flags();
     $scope.ResourceUtility = ResourceUtility;
     
     
@@ -392,7 +393,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             scope.mouseX = mouseX;
             scope.mouseY = mouseY;
             scope.selectedPath = path; // for anchoring tail and hoverElem position
-            scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
+            scope.data = !FeatureFlagService.FlagIsEnabled(flags.ENABLE_DATA_PROFILING_V2) ?
+                TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data) :
+                TopPredictorService.FormatSimpleBuckets(attributeName, attributeColor, data);
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
         }, 500);
     }
