@@ -68,7 +68,7 @@ def tomcat_task(profile_vars):
         container = container.set_env(k, p.ref())
 
     ledp = Volume("ledp", "/etc/ledp")
-    scoringcache = Volume("scoringcache", "/var/cache/scoringapi")
+    scoringcache = Volume("scoringcache", "/mnt/efs/scoringapi")
 
     container = container.mount("/etc/ledp", ledp).mount("/var/cache/scoringapi", scoringcache)
 
