@@ -16,6 +16,9 @@ class AutoScalingGroup(Resource):
                 "MaxSize" : max_size.ref() if isinstance(max_size, Parameter) else max_size,
                 "DesiredCapacity" : capacity.ref() if isinstance(capacity, Parameter) else capacity
             },
+            "MetricsCollection" : {
+                "Granularity" : "1Minute",
+            },
             "CreationPolicy" : {
                 "ResourceSignal" : {
                     "Timeout" : "PT15M"
