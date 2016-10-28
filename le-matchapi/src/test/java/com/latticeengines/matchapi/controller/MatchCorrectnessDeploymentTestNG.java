@@ -78,7 +78,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Value("${propdata.test.correctness.rows}")
     private Integer numRecords;
 
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
     private String latestDataCloudVersion;
 
     @BeforeMethod(groups = "deployment")

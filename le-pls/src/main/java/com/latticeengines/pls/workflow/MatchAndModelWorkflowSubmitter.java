@@ -47,7 +47,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.0}")
+    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
     private String latestDataCloudVersion;
     
     @SuppressWarnings("unused")
