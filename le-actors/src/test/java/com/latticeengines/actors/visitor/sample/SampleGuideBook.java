@@ -1,29 +1,30 @@
 package com.latticeengines.actors.visitor.sample;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.exposed.traveler.TravelException;
-import com.latticeengines.actors.exposed.traveler.Traveler;
-
-import akka.actor.ActorRef;
+import com.latticeengines.actors.exposed.traveler.TravelerContext;
 
 public class SampleGuideBook implements GuideBook {
-    private final SampleActorStateTransitionGraph actorStateTransitionGraph;
+    private final SampleMatchActorStateTransitionGraph actorStateTransitionGraph;
 
-    public SampleGuideBook(SampleActorStateTransitionGraph actorStateTransitionGraph) {
+    public SampleGuideBook(SampleMatchActorStateTransitionGraph actorStateTransitionGraph) {
         this.actorStateTransitionGraph = actorStateTransitionGraph;
     }
 
     @Override
-    public Object getDestination(Object currentActorRef, Traveler traveler) {
-        Object destinationActorRef = traveler.getOriginalSender();
-        if (currentActorRef == null || currentActorRef instanceof ActorRef) {
-            if (traveler.getResult() == null) {
-                destinationActorRef = actorStateTransitionGraph//
-                        .next((ActorRef) currentActorRef, traveler);
-            }
-        } else {
-            throw new TravelException("Incorrect type got currentActorRef: " + currentActorRef);
+    public String next(String currentLocation, TravelerContext traveler) {
+        String destinationLocation = null;
+        if (traveler.getResult() == null && currentLocation != null) {
+            destinationLocation = actorStateTransitionGraph//
+                    .next(currentLocation, traveler, traveler.getOriginalLocation());
+        } else if (currentLocation == null) {
+            destinationLocation = actorStateTransitionGraph.getDummyGraph().get(0);
         }
-        return destinationActorRef;
+        return destinationLocation;
+    }
+
+    @Override
+    public String getDataSourceActorPath(String dataSourceName) {
+
+        return actorStateTransitionGraph.getDataSourceActors().get(dataSourceName);
     }
 }
