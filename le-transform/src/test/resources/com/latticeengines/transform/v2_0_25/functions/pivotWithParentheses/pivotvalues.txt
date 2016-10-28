@@ -1,0 +1,1 @@
+{u'Adobe33': (u'x', [u'Adobe (3 3)']), u'(Adobe)': (u'x', [u'[Adobe]']), u'Adobe1"\'"]1': (u'x&?)', [u"Adobe 1 '1]", u'Adobe 1 \'"1']), u'Adobe2': (u'x', [u'Adobe(2)'])}
