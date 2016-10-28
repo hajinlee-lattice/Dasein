@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.pls.service.FileUploadService;
 
 import io.swagger.annotations.Api;
@@ -41,6 +42,13 @@ public class FileUploadResource {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18093, e);
         }
+    }
+    
+    @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve metadata for a source file")
+    public Table getMetadataForSourceFile(@PathVariable String fileName) {
+        return fileUploadService.getMetadata(fileName);
     }
 
 }

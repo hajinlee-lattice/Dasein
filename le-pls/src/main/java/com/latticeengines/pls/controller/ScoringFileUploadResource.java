@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
@@ -62,9 +61,6 @@ public class ScoringFileUploadResource {
 
     @Autowired
     private SourceFileService sourceFileService;
-
-    @Autowired
-    private ModelMetadataService modelMetadataService;
 
     @Autowired
     private ModelingFileMetadataService modelingFileMetadataService;
