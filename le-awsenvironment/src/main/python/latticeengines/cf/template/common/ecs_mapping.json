@@ -1,0 +1,7 @@
+{
+  "LpiEfsIps": {
+    "us-east-1a"  : {"Ip": { "Ref" : "LpiEfsIp1" }},
+    "us-east-1c" : {"Ip": { "Ref" : "LpiEfsIp2" }},
+    "us-east-1d" : {"Ip": { "Ref" : "LpiEfsIp3" }}
+  }
+}

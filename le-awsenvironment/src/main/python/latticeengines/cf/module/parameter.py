@@ -84,6 +84,10 @@ PARAM_TARGET_GROUP=ArnParameter("TargetGroupArn", "Arn of the target group for l
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
 PARAM_MAX_CAPACITY = Parameter("MaximumCapacity", "Desired number of containers", type="Number", default="8")
 
+PARAM_LPI_EFS_IP_1 = Parameter("SubnetId1", "Ip of ESF mount in the first AZ" )
+PARAM_LPI_EFS_IP_2 = Parameter("SubnetId2", "Ip of ESF mount in the second AZ")
+PARAM_LPI_EFS_IP_3 = Parameter("SubnetId3", "Ip of ESF mount in the third AZ")
+
 COMMON_PARAMETERS = {
     PARAM_VPC_ID,
     PARAM_SUBNET_1,
@@ -99,5 +103,8 @@ ECS_PARAMETERS = {
     PARAM_ECS_INSTANCE_PROFILE,
     PARAM_TARGET_GROUP,
     PARAM_CAPACITY,
-    PARAM_MAX_CAPACITY
+    PARAM_MAX_CAPACITY,
+    PARAM_LPI_EFS_IP_1,
+    PARAM_LPI_EFS_IP_2,
+    PARAM_LPI_EFS_IP_3
 }

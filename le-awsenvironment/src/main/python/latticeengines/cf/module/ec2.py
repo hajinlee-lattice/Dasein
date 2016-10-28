@@ -56,13 +56,13 @@ def ecs_metadata(ec2, ecscluster, efs):
                                 "",
                                 [ "#!/usr/bin/env bash \n",
                                   "mkdir -p /mnt/efs \n",
-                                  "efs_dns=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
-                                  efs.ref() if efs is not None else "none",
-                                  ".efs.",
-                                  { "Ref" : "AWS::Region" },
-                                  ".amazonaws.com\n",
-                                  "echo ${efs_dns}\n",
-                                  "echo \"${efs_dns}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
+                                  "echo \"", {"Fn::FindInMap": ["LpiEfsIps", "us-east-1a", "Ip"]}, "\" > /tmp/us-east-1a.ip\n",
+                                  "echo \"", {"Fn::FindInMap": ["LpiEfsIps", "us-east-1c", "Ip"]}, "\" > /tmp/us-east-1c.ip\n",
+                                  "echo \"", {"Fn::FindInMap": ["LpiEfsIps", "us-east-1d", "Ip"]}, "\" > /tmp/us-east-1d.ip\n",
+                                  "az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)\n",
+                                  "efs_ip=`cat /tmp/${az}.ip`",
+                                  "echo ${efs_ip}\n",
+                                  "echo \"${efs_ip}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
                                   ]
                             ]
                         },

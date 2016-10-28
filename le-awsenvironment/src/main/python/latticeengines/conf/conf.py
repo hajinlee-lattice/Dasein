@@ -41,6 +41,15 @@ class AwsEnvironment:
     def lpi_efs_id(self):
         return self._props['lpi.efs.id']
 
+    def lpi_efs_ip_1(self):
+        return self._props['lpi.efs.ip.1']
+
+    def lpi_efs_ip_2(self):
+        return self._props['lpi.efs.ip.2']
+
+    def lpi_efs_ip_3(self):
+        return self._props['lpi.efs.ip.3']
+
     def zk_observer_ips(self):
         return self._props['zk.observer.ips'].split(',')
 
