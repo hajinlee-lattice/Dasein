@@ -38,6 +38,9 @@ class AwsEnvironment:
     def private_subnet_3(self):
         return self._props['private.subnet.id.3']
 
+    def lpi_efs_id(self):
+        return self._props['lpi.efs.id']
+
     def zk_observer_ips(self):
         return self._props['zk.observer.ips'].split(',')
 

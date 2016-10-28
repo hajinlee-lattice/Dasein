@@ -12,7 +12,7 @@ def ec2_defn():
     with open(json_file) as f:
         return json.load(f)
 
-def ecs_metadata(ec2, ecscluster):
+def ecs_metadata(ec2, ecscluster, efs):
     return {
         "AWS::CloudFormation::Init" : {
             "configSets": {
@@ -20,6 +20,12 @@ def ecs_metadata(ec2, ecscluster):
                 "reload": [ "install" ]
             },
             "install" : {
+                "packages" : {
+                    "yum" : {
+                        "xfsprogs" : [],
+                        "nfs-utils": []
+                    }
+                },
                 "files" : {
                     "/etc/cfn/cfn-hup.conf" : {
                         "content" : { "Fn::Join" : ["", [
@@ -43,6 +49,24 @@ def ecs_metadata(ec2, ecscluster):
                             "         --region ", { "Ref" : "AWS::Region" }, "\n",
                             "runas=root\n"
                         ]]}
+                    },
+                    "/tmp/mount_efs.sh": {
+                        "content": {
+                            "Fn::Join": [
+                                "",
+                                [ "#!/usr/bin/env bash \n",
+                                  "mkdir -p /mnt/efs \n",
+                                  "echo \"mount -t nfs4 -o nfsvers=4.1 $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
+                                  efs.ref() ,
+                                  ".efs.",
+                                  { "Ref" : "AWS::Region" },
+                                  ".amazonaws.com:/ /mnt/efs\" >> /etc/fstab \n",
+                                  ]
+                            ]
+                        },
+                        "mode": "000777",
+                        "owner": "root",
+                        "group": "root"
                     }
                 },
                 "commands" : {
@@ -81,6 +105,12 @@ def ecs_metadata(ec2, ecscluster):
                             "instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
                             "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"
+                        ] ] }
+                    },
+                    "30_mount_efs" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "bash /mount_efs.sh",
+                            "mount -a"
                         ] ] }
                     }
                 },

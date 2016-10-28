@@ -16,6 +16,7 @@ PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
+PARAM_EFS = Parameter("Efs", "EFS Id")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -39,7 +40,7 @@ def template(environment, stackname, profile, upload=False):
 
 def create_template(profile):
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.")
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS])
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = tomcat_task(profile_vars)
@@ -99,6 +100,8 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     tgrp_arn = find_tgrp_arn(tgrp)
     config = AwsEnvironment(environment)
     sg = config.tomcat_sg()
+
+    extra_params.append(PARAM_EFS.config(config.lpi_efs_id()))
 
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
