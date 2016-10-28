@@ -88,6 +88,7 @@ public class SqoopJobServiceImpl {
                 cmds.add(option);
             }
         }
+        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
         } finally {
@@ -146,6 +147,7 @@ public class SqoopJobServiceImpl {
                 cmds.add(option);
             }
         }
+        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         try {
             return runTool(cmds, yarnConfiguration, exporter.isSync(), uuid);
         } finally {
@@ -436,7 +438,8 @@ public class SqoopJobServiceImpl {
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // MR_AM_COMMAND_OPTS
         // yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
-        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+        // "-Xdebug -Xnoagent -Djava.compiler=NONE
+        // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         System.out.println("cmds are " + cmds);
         try {
