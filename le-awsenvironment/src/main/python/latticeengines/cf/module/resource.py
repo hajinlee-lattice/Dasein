@@ -22,14 +22,21 @@ class Resource(Template):
             self._template["DependsOn"].append(resource.logical_id())
         return self
 
-    def add_tag(self, key, value):
+    def add_tag(self, key, value, propogate=None):
         if "Tags" not in self._template["Properties"]:
             self._template["Properties"]["Tags"] = []
 
-        self._template["Properties"]["Tags"].append({
-            "Key": key,
-            "Value": value
-        })
+        if propogate is None:
+            self._template["Properties"]["Tags"].append({
+                "Key": key,
+                "Value": value
+            })
+        else:
+            self._template["Properties"]["Tags"].append({
+                "Key": key,
+                "Value": value,
+                "PropagateAtLaunch": propogate
+            })
         return self
 
     def require(self, condition):
