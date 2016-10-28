@@ -88,28 +88,54 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 }
             },
             resolve: {
-                MeasurementData: function (InfluxDbService) {
+                SelectedPipelineMetrics: function (InfluxDbService) {
                     var cols = [
                         'time',
-                        'AlgorithmName',
                         'AnalyticPipelineName',
                         'AnalyticTestName',
-                        'AnalyticTestTag',
                         'DataSetName',
-                        'ModelID',
                         'PipelineName',
-                        'PropDataConfigName',
                         'RocScore',
-                        'SamplingName',
                         'Top10PercentLift',
                         'Top20PercentLift',
                         'Top30PercentLift'
                     ].join(',');
+
+                    var clause = [
+                        'WHERE', ' ',
+                        'AnalyticTestTag',
+                        '!=',
+                        '\'PRODUCTION\'',
+                    ].join('');
+
                     return InfluxDbService.Query({
-                        q: 'SELECT ' + cols + ' FROM ModelingMeasurement',
+                        q: 'SELECT ' + cols + ' FROM ModelingMeasurement ' + clause,
                         db: 'ModelQuality'
                     });
-                }
+                },
+                ProductionPipelineMetrics: function (InfluxDbService) {
+                    var aggregrates = [
+                        'MEAN(RocScore) AS RocScore',
+                        'MEAN(Top10PercentLift) AS Top10PercentLift',
+                        'MEAN(Top20PercentLift) AS Top20PercentLift',
+                        'MEAN(Top30PercentLift) AS Top30PercentLift'
+                    ].join(',');
+
+                    var clause = [
+                        'WHERE', ' ',
+                        'AnalyticTestTag',
+                        '=',
+                        '\'PRODUCTION\'', ' ',
+                        'GROUP BY', ' ',
+                        'AnalyticPipelineName', ',',
+                        'PipelineName'
+                    ].join('');
+
+                    return InfluxDbService.Query({
+                        q: 'SELECT ' + aggregrates + ' FROM ModelingMeasurement ' + clause,
+                        db: 'ModelQuality'
+                    });
+                },
             }
         })
         .state('MODELQUALITY.CREATEPIPELINE', {

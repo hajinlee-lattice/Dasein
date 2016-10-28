@@ -1,6 +1,6 @@
 angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 ])
-.controller('ModelQualityDashboardCtrl', function ($scope, $state, MeasurementData, $window, $rootScope) {
+.controller('ModelQualityDashboardCtrl', function ($scope, $state, $window, $rootScope, SelectedPipelineMetrics, ProductionPipelineMetrics) {
 
     var stateChangeStart = $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
         _window.unbind('resize', bindResize);
@@ -20,7 +20,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
     });
 
 
-    var data = MeasurementData.resultObj.results[0].series[0],
+    var data = SelectedPipelineMetrics.resultObj.results[0].series[0],
         columns = data.columns,
         rows = data.values;
 
@@ -32,20 +32,16 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
     var timeColumnIndex = columnToIndexMap.time,
         analyticPipelineNameIndex = columnToIndexMap.AnalyticPipelineName,
         analyticTestNameIndex = columnToIndexMap.AnalyticTestName,
-        analyticTestTagIndex = columnToIndexMap.AnalyticTestTag,
         dataSetNameIndex = columnToIndexMap.DataSetName,
-        pipelineNameIndex = columnToIndexMap.PipelineName,
-        samplingNameIndex = columnToIndexMap.SamplingName,
-        propDataNameIndex = columnToIndexMap.PropDataConfigName,
-        metricsColIndex = {
-            RocScore: columnToIndexMap.RocScore,
-            Top10PercentLift: columnToIndexMap.Top10PercentLift,
-            Top20PercentLift: columnToIndexMap.Top20PercentLift,
-            Top30PercentLift: columnToIndexMap.Top30PercentLift
-        };
+        pipelineNameIndex = columnToIndexMap.PipelineName;
 
-    var lineBuckets = {},
-        barBuckets = {};
+    var metricsColIndex = {};
+    metricsColIndex.RocScore = columnToIndexMap.RocScore;
+    metricsColIndex.Top10PercentLift = columnToIndexMap.Top10PercentLift;
+    metricsColIndex.Top20PercentLift = columnToIndexMap.Top20PercentLift;
+    metricsColIndex.Top30PercentLift = columnToIndexMap.Top30PercentLift;
+
+    var barChartBuckets = {};
     rows.forEach(function (row) {
 
         var at = row[analyticTestNameIndex];
@@ -54,56 +50,20 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
         var ds = row[dataSetNameIndex];
         var date = row[timeColumnIndex];
 
-        // if (!at || at === 'null' ||
-        //     !ap || ap === 'null' ||
-        //     !p  || p === 'null' ||
-        //     !ds || ds === 'null') {
-        //     return;
-        // }
-
-        // line charts
-        var key = [at,ap,p,ds].join(':');
-        if (!lineBuckets[key]) {
-            lineBuckets[key] = {
-                description: {
-                    analyticTest: at,
-                    analyticPipeline: ap,
-                    pipeline: p,
-                    dataset: ds
-                },
-                key: key,
-                data: {}
-            };
-        }
-
-        var bucket = lineBuckets[key].data;
-        for (var metric in metricsColIndex) {
-            if (!bucket[metric]) {
-                bucket[metric] = [];
-            }
-
-            bucket[metric].push({
-                key: metric,
-                date: new Date(date),
-                value: row[metricsColIndex[metric]]
-            });
-        }
-
         // bar charts
-        if (!barBuckets[at]) {
-            barBuckets[at] = {};
+        if (!barChartBuckets[at]) {
+            barChartBuckets[at] = {};
         }
 
-        var atBucket = barBuckets[at];
+        var atBucket = barChartBuckets[at];
         if (!atBucket[ds]) {
-            atBucket[ds] = {
-                dataset: ds,
-                description: {
-                    analyticTest: at,
-                    dataset: ds
-                },
-                pipelines: {}
-            };
+            var newDsBucket = {};
+            newDsBucket.dataset = ds;
+            newDsBucket.description = {};
+            newDsBucket.description.analyticTest = at;
+            newDsBucket.description.dataset = ds;
+            newDsBucket.pipelines = {};
+            atBucket[ds] = newDsBucket;
         }
 
         var dsBucket = atBucket[ds];
@@ -120,54 +80,90 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
                 value[m] = row[metricsColIndex[m]];
             }
 
-            pBucket.description = {
-                analyticTest: at,
-                dataset: ds,
-                analyticPipeline: ap,
-                pipeline: p
-            };
+            pBucket.description = {};
+            pBucket.description.analyticTest = at;
+            pBucket.description.dataset = ds;
+            pBucket.description.analyticPipeline = ap;
+            pBucket.description.pipeline = p;
             pBucket.date = date;
             pBucket.value = value;
         }
 
     });
 
-    $scope.lineCharts = Object.keys(lineBuckets).map(function(key) {
-        var bucket = lineBuckets[key];
-        return {
-            data: {
-                data: Object.keys(bucket.data).map(function (metric) {
-                    return {
-                        key: metric,
-                        values: bucket.data[metric]
-                    };
-                }),
-                title: bucket.description.analyticTest
-            },
-            type: 'line'
-        };
+    $scope.barCharts = _.map(barChartBuckets, function (atData, atKey) {
+        var chartData = {};
+        chartData.title = atKey;
+        chartData.data = _.map(atData, function (dsData, dsKey) {
+            var groupData = {};
+            groupData.dataset = dsKey;
+            groupData.categories = _.map(dsData.pipelines, function (pipelineData, pipelineKey) {
+                var barData = {};
+                barData.category = pipelineData.description.pipeline;
+                barData.value = pipelineData.value;
+                barData.description = pipelineData.description;
+
+                return barData;
+            });
+
+            return groupData;
+        });
+
+        return chartData;
     });
 
-    $scope.barCharts = Object.keys(barBuckets).map(function (barBucket) {
-        var bucketData = barBuckets[barBucket];
+    // production line charts
+    var series = ProductionPipelineMetrics.resultObj.results[0].series;
 
-        return {
-            data: Object.keys(bucketData).map(function (dataset) {
-                var dsBucket = bucketData[dataset];
-                return {
-                    dataset: dataset,
-                    categories: Object.keys(dsBucket.pipelines).map(function(pipeline) {
-                        var pipelineData = dsBucket.pipelines[pipeline];
-                        return {
-                            category: pipelineData.description.pipeline,
-                            value: pipelineData.value,
-                            description: pipelineData.description
-                        };
-                    })
-                };
-            }),
-            title: barBucket
-        };
+    var seriesData = {
+        RocScore: [],
+        Top10PercentLift: [],
+        Top20PercentLift: [],
+        Top30PercentLift: []
+    };
+
+    series.forEach(function (serie) {
+        var ap = serie.tags.AnalyticPipelineName;
+
+        var RocScoreIdx = serie.columns.indexOf('RocScore'),
+            Top10PercentLiftIdx = serie.columns.indexOf('Top10PercentLift'),
+            Top20PercentLiftIdx = serie.columns.indexOf('Top20PercentLift'),
+            Top30PercentLiftIdx = serie.columns.indexOf('Top30PercentLift');
+
+        seriesData.RocScore.push({
+            y: serie.values[0][RocScoreIdx],
+            x: ap
+        });
+        seriesData.Top10PercentLift.push({
+            y: serie.values[0][Top10PercentLiftIdx],
+            x: ap
+        });
+        seriesData.Top20PercentLift.push({
+            y: serie.values[0][Top20PercentLiftIdx],
+            x: ap
+        });
+        seriesData.Top30PercentLift.push({
+            y: serie.values[0][Top30PercentLiftIdx],
+            x: ap
+        });
+
     });
 
+    var productionChart = {};
+    productionChart.description = {};
+    productionChart.data = _.map(seriesData, function (values, key) {
+        var chartData = {};
+        chartData.key = key;
+        chartData.values = _.map(values, function (value) {
+            return {
+                key: key,
+                x: value.x,
+                y: value.y
+            };
+        }).sort(function(a,b) { return (a.x > b.x) ? 1 : ((a.x < b.x) ? -1 : 0); });
+
+        return chartData;
+    });
+    productionChart.title = 'Production';
+    $scope.productionChart = productionChart;
 });

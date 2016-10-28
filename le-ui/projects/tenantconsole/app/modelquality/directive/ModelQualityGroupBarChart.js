@@ -7,9 +7,6 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
             data: '='
         },
         link: function (scope, element, attr, ModelQualityGroupBarChartVm) {
-            scope.$on('resize', function () {
-                resize();
-            });
 
             var container = element[0];
             $(container).empty();
@@ -25,7 +22,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                 .attr("class", "chart-title")
                 .text(scope.data.title);
 
-            var options = ['RocScore', 'Top10PercentLift','Top20PercentLift','Top30PercentLift'];
+            var options = ['RocScore', 'Top10PercentLift', 'Top20PercentLift','Top30PercentLift'];
 
             var dropdown = d3container.append("select")
                 .attr("class", "chart-metric-menu")
@@ -44,7 +41,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
             var key = options[0];
 
-            var margin = {top: 20, right: 0, bottom: 40, left: 40},
+            var margin = {top: 20, right: 20, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
                 height = container.clientHeight - margin.top - margin.bottom;
 
@@ -55,7 +52,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
             var chart = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var x0 = d3.scaleBand().rangeRound([0, width]).padding(0.5).align(0.5),
+            var x0 = d3.scaleBand().rangeRound([0, width]).padding(1/3).align(0.5),
                 x1 = d3.scaleBand(),
                 y = d3.scaleLinear().range([height, 0]);
 
@@ -91,7 +88,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
                 chart.selectAll("g").remove();
 
-                var legendRectSize = 18,
+                var legendRectSize = 12,
                     legendSpacing = 4,
                     charSize = 8,
                     vert = height + margin.bottom,
@@ -105,15 +102,15 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
                 legend.append("rect")
                     .attr("width", legendRectSize)
-                    .attr("height", legendRectSize)
+                    .attr("height", legendRectSize/2)
                     .style("fill", color)
                     .style("stroke", color);
 
                 legend.append("text")
                     .attr("x", legendRectSize + legendSpacing)
-                    .attr("y", 9)
                     .attr("dy", ".35em")
                     .attr("text-anchor", "start")
+                    .attr("dominant-baseline", "middle")
                     .text(function(d) { return d.toUpperCase(); });
 
                 legend.each(function(d, i) {
@@ -145,17 +142,19 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     .attr("y", function(d) { return y(d.value[key]); })
                     .attr("width", x1.bandwidth())
                     .attr("height", function(d) {
-                        return height - y(d.value[key]); })
+                        return height - y(d.value[key]);
+                    })
                     .style("fill", function(d) {
-                        return color(d.category); });
+                        return color(d.category);
+                    });
 
                 bars.on("mouseenter", function(d,i) {
                     var template = '';
                     template += 'Dataset: ' + d.description.dataset + '<br>';
                     template += 'Pipeline: ' + d.description.pipeline + '<br>';
 
-                    template += Object.keys(d.value).map(function (metric) {
-                        return metric + ': ' + d.value[metric];
+                    template += _.map(d.value, function (value, metric) {
+                        return metric + ': ' + value;
                     }).join('<br>');
 
                     tooltip.html(template);
@@ -191,7 +190,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                         return d.value[key];
                     });
                 })]);
-                yAxis = d3.axisLeft(y);
+                yAxis.scale(y);
 
                 chart.select('.y.axis').transition().duration(200).call(yAxis);
                 bars.transition().duration(200)
@@ -201,26 +200,23 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     });
             };
 
-            var ignoreFirst = true;
             var resize = function () {
-                if (ignoreFirst) {
-                    ignoreFirst = false;
-                    return;
-                }
                 width = container.clientWidth - margin.left - margin.right;
                 height = container.clientHeight - margin.top - margin.bottom;
 
                 svg.attr("width", container.clientWidth)
                     .attr("height", container.clientHeight);
 
-                x0 = d3.scaleBand().rangeRound([0, width]).padding(0.5).align(0.5);
-                x1 = d3.scaleBand();
+                x0.rangeRound([0, width]);
                 xAxis.scale(x0);
+
                 render();
             };
 
-            scope.$watch('data', function (newData, oldData) {
-                render();
+            render();
+
+            scope.$on('resize', function () {
+                resize();
             });
 
         },
