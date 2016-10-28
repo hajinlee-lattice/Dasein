@@ -21,12 +21,7 @@
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:test-testframework-context.xml"/>
+    <import resource="classpath:test-testframework-testbed-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
-
-    <bean id="deploymentTestBed" class="com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed">
-        <constructor-arg name="plsApiHostPort" value="${pls.test.deployment.api}"/>
-        <constructor-arg name="adminApiHostPort" value="${pls.test.deployment.admin.api}"/>
-        <constructor-arg name="environment" value="${pls.test.env}"/>
-    </bean>
 
 </beans>
