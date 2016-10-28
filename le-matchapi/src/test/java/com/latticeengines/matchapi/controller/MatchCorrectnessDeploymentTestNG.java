@@ -72,8 +72,8 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private List<List<Object>> accountPool;
     private Integer numFields;
-    private List<Map<String, Object>> bulkResult = new ArrayList<>();
-    private List<Map<String, Object>> realtimeResult = new ArrayList<>();
+    private List<Map<String, Object>> bulkResult;
+    private List<Map<String, Object>> realtimeResult;
 
     @Value("${propdata.test.correctness.rows}")
     private Integer numRecords;
@@ -85,6 +85,8 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     private void setUpMethod() {
         prepareCleanPod(HDFS_POD);
         loadAccountPool();
+        bulkResult = new ArrayList<>();
+        realtimeResult = new ArrayList<>();
     }
 
     @Test(groups = "deployment", dataProvider = "versions")
