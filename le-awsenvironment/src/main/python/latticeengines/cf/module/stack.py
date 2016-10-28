@@ -129,11 +129,6 @@ class ECSStack(Stack):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
 
-        json_file = os.path.join(TEMPLATE_DIR, 'common', 'ecs_mappings.json')
-        with open(json_file) as f:
-            data = json.load(f)
-            self.add_mappings(data)
-
         if use_asgroup:
             self._ecscluster, self._asgroup = self._construct(efs)
         else:
@@ -304,18 +299,11 @@ class ECSStack(Stack):
             subnet2 = config.private_subnet_2()
             subnet3 = config.private_subnet_3()
 
-        efsip1 = config.lpi_efs_ip_1()
-        efsip2 = config.lpi_efs_ip_2()
-        efsip3 = config.lpi_efs_ip_3()
-
         params = [
             PARAM_VPC_ID.config(config.vpc()),
             PARAM_SUBNET_1.config(subnet1),
             PARAM_SUBNET_2.config(subnet2),
             PARAM_SUBNET_3.config(subnet3),
-            PARAM_LPI_EFS_IP_1.config(efsip1),
-            PARAM_LPI_EFS_IP_2.config(efsip2),
-            PARAM_LPI_EFS_IP_3.config(efsip3),
             PARAM_KEY_NAME.config(config.ec2_key()),
             PARAM_SECURITY_GROUP.config(security_group),
             PARAM_INSTANCE_TYPE.config(instance_type),

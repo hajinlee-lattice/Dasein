@@ -20,6 +20,15 @@ class AwsEnvironment:
     def vpc(self):
         return self._props['vpc.id']
 
+    def subnet_az_1(self):
+        return self._props['subnet.az.1']
+
+    def subnet_az_2(self):
+        return self._props['subnet.az.2']
+
+    def subnet_az_3(self):
+        return self._props['subnet.az.3']
+
     def public_subnet_1(self):
         return self._props['public.subnet.id.1']
 
@@ -85,7 +94,17 @@ class AwsEnvironment:
 
     def to_props(self):
         return {
-            "EcrRegistry": self.ecr_registry()
+            "EcrRegistry": self.ecr_registry(),
+            "SubnetAZs": {
+                "1": self.subnet_az_1(),
+                "2": self.subnet_az_2(),
+                "3": self.subnet_az_3()
+            },
+            "LpiEfsIps": {
+                "1": self.lpi_efs_ip_1(),
+                "2": self.lpi_efs_ip_1(),
+                "3": self.lpi_efs_ip_1()
+            }
         }
 
     @staticmethod
