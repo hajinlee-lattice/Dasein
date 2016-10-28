@@ -493,13 +493,16 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             } else {
                 bucketToDisplay.SortProperty = bucketToDisplay.lift;
             }
-            if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
-                (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
-                nullBucket = bucketToDisplay;
-                nullBucket.name = "N/A";
-                continue;
+
+            if (bucket.IsVisible) {
+                if (bucketToDisplay.name != null && typeof bucketToDisplay.name === 'string' &&
+                    (bucketToDisplay.name.toUpperCase() === "NULL" || bucketToDisplay.name.toUpperCase() === "NONE" || bucketToDisplay.name.toUpperCase() === "NOT AVAILABLE")) {
+                    nullBucket = bucketToDisplay;
+                    nullBucket.name = "N/A";
+                    continue;
+                }
+                toReturn.elementList.push(bucketToDisplay);
             }
-            toReturn.elementList.push(bucketToDisplay);
         }
 
         // sort the list of buckets
