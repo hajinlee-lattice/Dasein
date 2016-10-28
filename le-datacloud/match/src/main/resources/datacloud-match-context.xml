@@ -9,7 +9,7 @@
 
     <import resource="classpath:datacloud-core-context.xml"/>
     <import resource="classpath:datacloud-match-persistence-context.xml"/>
-    <!--import resource="classpath:datacloud-match-fuzzy-match-context.xml"/-->
+    <import resource="classpath:datacloud-match-fuzzy-match-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:datafabric-context.xml" />

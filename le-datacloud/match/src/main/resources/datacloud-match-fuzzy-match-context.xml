@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:akka="http://repo.akka.io/schema/akka"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
@@ -12,4 +12,4 @@
         <context:component-scan base-package="com.latticeengines.datacloud.match.service"/>
         <context:component-scan base-package="com.latticeengines.datacloud.match.actors.visitor"/>
 
-</beans-->
+</beans>

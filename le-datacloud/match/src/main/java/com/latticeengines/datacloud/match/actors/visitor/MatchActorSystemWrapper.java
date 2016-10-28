@@ -10,12 +10,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DnbLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DunsBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DunsDomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DynamoLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.LocationBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.LocationBasedMicroEngineActor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
