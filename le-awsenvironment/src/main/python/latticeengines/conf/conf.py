@@ -95,16 +95,12 @@ class AwsEnvironment:
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry(),
-            "SubnetAZs": {
-               "Description": "Comma-delimited list of three AZs",
-               "Type": "CommaDelimitedList",
-               "Default": ", ".join([self.subnet_az_1(), self.subnet_az_2(), self.subnet_az_3()])
-           },
-            "LpiEfsIps":{
-                "Description": "Comma-delimited list of three EFS ips",
-                "Type": "CommaDelimitedList",
-                "Default": ", ".join([self.lpi_efs_ip_1(), self.lpi_efs_ip_2(), self.lpi_efs_ip_3()])
-            }
+            "SubnetAZ1": self.subnet_az_1(),
+            "SubnetAZ2": self.subnet_az_2(),
+            "SubnetAZ3": self.subnet_az_3(),
+            "LpiEfsIp1": self.lpi_efs_ip_1(),
+            "LpiEfsIp2": self.lpi_efs_ip_2(),
+            "LpiEfsIp3": self.lpi_efs_ip_3()
         }
 
     @staticmethod
