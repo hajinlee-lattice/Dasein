@@ -32,4 +32,11 @@ public class SamplingResourceDeploymentTestNG extends ModelQualityDeploymentTest
         Sampling samplingConfig = modelQualityProxy.getSamplingConfigByName((String) ((Map) samplingConfigs.get(0)).get("name"));
         Assert.assertNotNull(samplingConfig);
     }
+    
+    // Ensure attempting to create Production again does not fail
+    @Test(groups = "deployment", dependsOnMethods = "createSamplingFromProduction")
+    public void createSamplingFromProductionAgain() {
+        Sampling samplingConfig = modelQualityProxy.createSamplingFromProduction();
+        Assert.assertNotNull(samplingConfig);
+    }
 }

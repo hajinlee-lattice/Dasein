@@ -28,4 +28,11 @@ public class AlgorithmResourceDeploymentTestNG extends ModelQualityDeploymentTes
         List<Algorithm> algorithms = modelQualityProxy.getAlgorithms();
         Assert.assertEquals(algorithms.size(), 1);
     }
+    
+    // Ensure attempting to create Production again does not fail
+    @Test(groups = "deployment", dependsOnMethods = "createAlgorithmFromProduction")
+    public void createAlgorithmFromProductionAgain() {
+        Algorithm algorithm = modelQualityProxy.createAlgorithmFromProduction();
+        Assert.assertNotNull(algorithm);
+    }
 }

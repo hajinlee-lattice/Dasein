@@ -31,5 +31,11 @@ public class DataFlowResourceDeploymentTestNG extends ModelQualityDeploymentTest
         String name = ((Map<String, String>) dataFlows.get(0)).get("name");
         Assert.assertTrue(name.startsWith("PRODUCTION-"));
     }
-
+    
+    // Ensure attempting to create Production again does not fail
+    @Test(groups = "deployment", dependsOnMethods = "createDataFlowFromProduction")
+    public void createDataFlowFromProductionAgain() {
+        DataFlow dataFlow = modelQualityProxy.createDataFlowFromProduction();
+        Assert.assertNotNull(dataFlow);
+    }
 }

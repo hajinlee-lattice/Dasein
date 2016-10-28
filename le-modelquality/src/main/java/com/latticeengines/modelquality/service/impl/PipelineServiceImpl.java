@@ -46,8 +46,16 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     
     @Override
     public Pipeline createLatestProductionPipeline() {
-        Pipeline pipeline = new Pipeline();
         String version = getVersion();
+        String pipelineName = "PRODUCTION-" + version;
+        Pipeline pipeline = pipelineEntityMgr.findByName(pipelineName);
+        
+        if(pipeline != null)
+        {
+            return pipeline;
+        }
+        
+        pipeline = new Pipeline();
         pipeline.setName("PRODUCTION-" + version);
         pipeline.setDescription("Production pipeline version: " + pipeline.getName());
         String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);

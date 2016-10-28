@@ -16,8 +16,15 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
     @Override
     public PropData createLatestProductionPropData() {
         String version = getVersion();
-        PropData propData = new PropData();
-        propData.setName("PRODUCTION-" + version);
+        String propDataName = "PRODUCTION-" + version;
+        PropData propData = propDataEntityMgr.findByName(propDataName);
+        
+        if(propData != null)
+        {
+            return propData;
+        }
+        propData = new PropData();
+        propData.setName(propDataName);
         propData.setDataCloudVersion("1.0.0");
         propDataEntityMgr.create(propData);
         return propData;

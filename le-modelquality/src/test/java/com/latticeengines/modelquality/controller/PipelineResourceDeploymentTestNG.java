@@ -37,6 +37,13 @@ public class PipelineResourceDeploymentTestNG extends ModelQualityDeploymentTest
         Pipeline pipeline = modelQualityProxy.createPipelineFromProduction();
         Assert.assertNotNull(pipeline);
     }
+    
+    // Ensure attempting to create Production again does not fail
+    @Test(groups = "deployment", dependsOnMethods = "createPipelineFromProduction")
+    public void createPipelineFromProductionAgain() {
+        Pipeline pipeline = modelQualityProxy.createPipelineFromProduction();
+        Assert.assertNotNull(pipeline);
+    }
 
     @Test(groups = "deployment", dependsOnMethods = "createPipelineFromProduction")
     public void getPipelines() {

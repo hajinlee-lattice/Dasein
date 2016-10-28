@@ -27,4 +27,11 @@ public class PropDataResourceDeploymentTestNG extends ModelQualityDeploymentTest
         List<PropData> configs = modelQualityProxy.getPropDataConfigs();
         Assert.assertEquals(configs.size(), 1);
     }
+    
+    // Ensure attempting to create Production again does not fail
+    @Test(groups = "deployment", dependsOnMethods = "createPropDataConfigFromProduction")
+    public void createPropDataConfigFromProductionAgain() {
+        PropData propdata = modelQualityProxy.createPropDataConfigFromProduction();
+        Assert.assertNotNull(propdata);
+    }
 }

@@ -20,8 +20,16 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
     public Algorithm createLatestProductionAlgorithm() {
         String version = getVersion();
         
-        Algorithm algorithm = new Algorithm();
-        algorithm.setName(AlgorithmFactory.ALGORITHM_NAME_RF);
+        String algorithmName = AlgorithmFactory.ALGORITHM_NAME_RF + "-" + version;
+        Algorithm algorithm  = algorithmEntityMgr.findByName(algorithmName);
+        
+        if(algorithm != null)
+        {
+            return algorithm;
+        }
+        
+        algorithm = new Algorithm();
+        algorithm.setName(algorithmName);
         String algorithmScript = String.format("/app/%s/dataplatform/scripts/algorithm/rf_train.py", version);
         algorithm.setScript(algorithmScript);
 
