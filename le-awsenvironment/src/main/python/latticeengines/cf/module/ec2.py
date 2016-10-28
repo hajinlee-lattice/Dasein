@@ -56,11 +56,13 @@ def ecs_metadata(ec2, ecscluster, efs):
                                 "",
                                 [ "#!/usr/bin/env bash \n",
                                   "mkdir -p /mnt/efs \n",
-                                  "echo \"mount -t nfs4 -o nfsvers=4.1 $(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
+                                  "efs_dns=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone).",
                                   efs.ref() if efs is not None else "none",
                                   ".efs.",
                                   { "Ref" : "AWS::Region" },
-                                  ".amazonaws.com:/ /mnt/efs\" >> /etc/fstab \n",
+                                  ".amazonaws.com\n",
+                                  "echo ${efs_dns}\n",
+                                  "echo \"${efs_dns}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
                                   ]
                             ]
                         },
