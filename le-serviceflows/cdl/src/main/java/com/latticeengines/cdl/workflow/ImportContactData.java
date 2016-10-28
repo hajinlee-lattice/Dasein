@@ -14,9 +14,6 @@ public class ImportContactData extends BaseWorkflowStep<ImportContactStepConfigu
 
     @Override
     public void execute() {
-        if (configuration.getSourceFileName() == null) {
-            return;
-        }
         importData.setConfiguration(configuration);
         importData.setExecutionContext(executionContext);
         importData.execute();

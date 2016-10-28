@@ -14,9 +14,6 @@ public class ImportAccountData extends BaseWorkflowStep<ImportAccountStepConfigu
 
     @Override
     public void execute() {
-        if (configuration.getSourceFileName() == null) {
-            return;
-        }
         importData.setConfiguration(configuration);
         importData.setExecutionContext(executionContext);
         importData.execute();
