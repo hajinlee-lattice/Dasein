@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTestType;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.PropDataMatchType;
 import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
@@ -42,7 +43,8 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         analyticTestEntityNames.setAnalyticPipelineNames(analyticPipelines);
 
         analyticTestEntityNames.setPropDataMatchType(PropDataMatchType.DNB);
-
+        analyticTestEntityNames.setAnalyticTestType(AnalyticTestType.Default);
+        
         AnalyticTest at = analyticTestService.createAnalyticTest(analyticTestEntityNames);
 
         at = analyticTestEntityMgr.findByName("BadAnalyticTest");
@@ -59,11 +61,14 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         analyticTestEntityNames.setAnalyticPipelineNames(getTestAnalyticPipelines());
 
         analyticTestEntityNames.setPropDataMatchType(PropDataMatchType.DNB);
+        
+        analyticTestEntityNames.setAnalyticTestType(AnalyticTestType.Default);
 
         AnalyticTest at = analyticTestService.createAnalyticTest(analyticTestEntityNames);
 
         at = analyticTestEntityMgr.findByName("SrvImplTestAnalyticTest");
         Assert.assertNotNull(at);
+        Assert.assertEquals(at.getAnalyticTestType(), AnalyticTestType.Default);
     }
     
     @Test(groups = "functional", dependsOnMethods = { "createAnalyticTest" })

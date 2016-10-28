@@ -21,11 +21,27 @@ public class AnalyticTestEntityNames {
     @ApiModelProperty(required = true)
     private PropDataMatchType propDataMatchType;
 
+    @JsonProperty("analytic_test_type")
+    @ApiModelProperty(required = true)
+    private AnalyticTestType analyticTestType;
+    
     @JsonProperty("analytic_pipeline_names")
     @ApiModelProperty(required = true)
     private List<String> analyticPipelineNames = new ArrayList<>();
 
     public AnalyticTestEntityNames() {
+    }
+
+    public AnalyticTestEntityNames(AnalyticTest atest) {
+        name = atest.getName();
+        propDataMatchType = atest.getPropDataMatchType();
+        analyticTestType = atest.getAnalyticTestType();
+        for (DataSet dataset : atest.getDataSets()) {
+            this.dataSetNames.add(dataset.getName());
+        }
+        for (AnalyticPipeline analyticPipeline : atest.getAnalyticPipelines()){
+            this.analyticPipelineNames.add(analyticPipeline.getName());
+        }
     }
 
     public void setName(String name) {
@@ -36,20 +52,20 @@ public class AnalyticTestEntityNames {
         return name;
     }
 
-    public void setDataSetNames(List<String> dataSetNames) {
-        this.dataSetNames = dataSetNames;
-    }
-
-    public List<String> getDataSetNames() {
-        return dataSetNames;
-    }
-
     public void setPropDataMatchType(PropDataMatchType propDataMatchType) {
         this.propDataMatchType = propDataMatchType;
     }
 
     public PropDataMatchType getPropDataMatchType() {
         return propDataMatchType;
+    }
+    
+    public void setAnalyticTestType(AnalyticTestType analyticTestType) {
+        this.analyticTestType = analyticTestType;
+    }
+
+    public AnalyticTestType getAnalyticTestType() {
+        return analyticTestType;
     }
 
     public void setAnalyticPipelineNames(List<String> analyticPipelineNames) {
@@ -58,5 +74,13 @@ public class AnalyticTestEntityNames {
 
     public List<String> getAnalyticPipelineNames() {
         return analyticPipelineNames;
+    }
+
+    public void setDataSetNames(List<String> dataSetNames) {
+        this.dataSetNames = dataSetNames;
+    }
+
+    public List<String> getDataSetNames() {
+        return dataSetNames;
     }
 }

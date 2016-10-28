@@ -2,6 +2,7 @@ package com.latticeengines.modelquality.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,8 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         }
         analyticTest.setPropDataMatchType(analyticTestEntityNames.getPropDataMatchType());
 
+        analyticTest.setAnalyticTestType(analyticTestEntityNames.getAnalyticTestType());
+        
         if (analyticTestEntityNames.getAnalyticPipelineNames() == null
                 || analyticTestEntityNames.getAnalyticPipelineNames().isEmpty()) {
             throw new RuntimeException("Need to provide atleast one AnalyticPipeline");
@@ -99,8 +102,9 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
                 modelRunEntityNames.setAnalyticPipelineName(ap.getName());
                 modelRunEntityNames.setDataSetName(ds.getName());
-                modelRunEntityNames.setName(analyticTestName + "_" + ap.getName() + "_" + ds.getName());
+                modelRunEntityNames.setName(analyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
                 modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
+                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestType().toString());
                 ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames,
                         Environment.getCurrentEnvironment());
                 resultSet.add(modelRun.getName());
@@ -115,6 +119,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         AnalyticTestEntityNames result = new AnalyticTestEntityNames();
         result.setName(atest.getName());
         result.setPropDataMatchType(atest.getPropDataMatchType());
+        result.setAnalyticTestType(atest.getAnalyticTestType());
 
         for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
             result.getAnalyticPipelineNames().add(ap.getName());
@@ -134,7 +139,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
             AnalyticTestEntityNames atestName = new AnalyticTestEntityNames();
             atestName.setName(atest.getName());
             atestName.setPropDataMatchType(atest.getPropDataMatchType());
-
+            atestName.setAnalyticTestType(atest.getAnalyticTestType());
             for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
                 atestName.getAnalyticPipelineNames().add(ap.getName());
             }

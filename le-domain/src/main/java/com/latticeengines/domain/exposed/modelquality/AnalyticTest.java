@@ -42,16 +42,24 @@ public class AnalyticTest implements HasName, HasPid {
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
+    @JsonProperty("match_type")
+    @Column(name = "MATCH_TYPE", nullable = false)
+    private PropDataMatchType propDataMatchType;
+
+    @JsonProperty("analytic_test_type")
+    @Column(name = "ANALYTIC_TEST_TYPE", nullable = false)
+    private AnalyticTestType analyticTestType = AnalyticTestType.Default;
+
+//    @JsonProperty("is_executed") // uncomment when this feature is implemented
+//    @Column(name = "Is_Executed", nullable = false)
+//    private boolean isExecuted;
+
     @JsonProperty("data_sets")
     @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", joinColumns = {
             @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
     @Fetch(value=FetchMode.SUBSELECT)
     private List<DataSet> dataSets = new ArrayList<>();
-
-    @JsonProperty("match_type")
-    @Column(name = "MATCH_TYPE", nullable = false)
-    private PropDataMatchType propDataMatchType;
 
     @JsonProperty("analytic_pipelines")
     @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
@@ -95,6 +103,14 @@ public class AnalyticTest implements HasName, HasPid {
 
     public void setPropDataMatchType(PropDataMatchType propDataMatchType) {
         this.propDataMatchType = propDataMatchType;
+    }
+    
+    public AnalyticTestType getAnalyticTestType() {
+        return analyticTestType;
+    }
+
+    public void setAnalyticTestType(AnalyticTestType analyticTestType) {
+        this.analyticTestType = analyticTestType;
     }
 
     public List<AnalyticPipeline> getAnalyticPipelines() {
