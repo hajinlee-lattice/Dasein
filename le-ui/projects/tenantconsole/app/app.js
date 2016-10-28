@@ -76,11 +76,6 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 '': {
                     templateUrl: 'app/modelquality/view/ModelQualityRootView.html',
                     controller: 'ModelQualityRootCtrl'
-                },
-                'navigation@MODELQUALITY': {
-                    templateUrl: 'app/modelquality/view/NavigationView.html',
-                    controller: 'ModelQualityNavigationCtrl',
-                    controllerAs: 'vm_modelqualityNav'
                 }
             }
         })

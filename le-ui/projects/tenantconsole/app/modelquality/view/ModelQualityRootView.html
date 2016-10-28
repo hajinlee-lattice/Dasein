@@ -3,10 +3,9 @@
     <a class="logo" ui-sref="MODELQUALITY.DASHBOARD"><img src="assets/img/logo_lattice.png"/></a>
 </header>
 <main-nav></main-nav>
-<div class="container">
-    <div ui-view="navigation" class="col-xs-2 no-gutter"></div>
-    <div class="col-xs-10" ng-if="loading">
+<div class="container-fluid">
+    <div class="col-xs-12" ng-if="loading">
       <div class="loader text-center"></div>
     </div>
-    <div ng-show="!loading" ui-view="main" class="col-xs-10"></div>
+    <div ng-show="!loading" ui-view="main" class="col-xs-12"></div>
 </div>

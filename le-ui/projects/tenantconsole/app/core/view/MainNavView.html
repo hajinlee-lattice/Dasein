@@ -12,7 +12,21 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li ng-class="{active: activeState==='Tenants'}"><a ui-sref="TENANT.LIST">Tenants</a></li>
-                <li ng-class="{active: activeState==='ModelQuality'}"><a ui-sref="MODELQUALITY.DASHBOARD">Model Quality</a></li>
+                <li class="dropdown" ng-class="{active: activeState==='ModelQuality'}">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                        Model Quality <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu modelquality-dropdown" role="menu">
+                        <li role="presentation">
+                          <a ui-sref="MODELQUALITY.DASHBOARD"
+                            ui-sref-active="active">Model Quality Dashboard</a>
+                        </li>
+                        <li role="presentation">
+                          <a ui-sref="MODELQUALITY.CREATEPIPELINE"
+                            ui-sref-active="active">Create Pipeline</a>
+                        </li>
+                    </ul>
+                </li>
                 <li ng-class="{active: activeState==='DataCloud'}"><a ui-sref="DATACLOUD.METADATA">Data Cloud</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
