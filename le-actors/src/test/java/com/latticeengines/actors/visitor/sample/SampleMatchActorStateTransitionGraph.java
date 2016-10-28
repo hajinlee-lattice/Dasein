@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.actors.visitor;
+package com.latticeengines.actors.visitor.sample;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +9,12 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.actors.exposed.traveler.TravelerContext;
 
-public class MatchActorStateTransitionGraph {
+public class SampleMatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
     private Map<String, String> dataSourceActors = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public MatchActorStateTransitionGraph(String... actorRefs) {
+    public SampleMatchActorStateTransitionGraph(String... actorRefs) {
         if (actorRefs != null) {
             dummyGraph.addAll(CollectionUtils.arrayToList(actorRefs));
         }

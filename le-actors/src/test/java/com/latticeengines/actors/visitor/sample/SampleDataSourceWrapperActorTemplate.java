@@ -1,0 +1,62 @@
+package com.latticeengines.actors.visitor.sample;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import com.latticeengines.actors.ActorTemplate;
+import com.latticeengines.actors.exposed.traveler.Response;
+
+import akka.actor.ActorRef;
+
+public abstract class SampleDataSourceWrapperActorTemplate extends ActorTemplate {
+
+    private static Map<String, SampleDataSourceLookupRequest> requestMap = new HashMap<>();
+
+    protected abstract SampleDataSourceLookupService getDataSourceLookupService();
+
+    @Override
+    protected boolean isValidMessageType(Object msg) {
+        return msg instanceof SampleDataSourceLookupRequest || msg instanceof Response;
+    }
+
+    @Override
+    protected void processMessage(Object msg) {
+        if (msg instanceof SampleDataSourceLookupRequest) {
+            SampleDataSourceLookupRequest request = (SampleDataSourceLookupRequest) msg;
+            request.setCallerMicroEngineReference(sender().path().toSerializationFormat());
+
+            SampleDataSourceLookupService dataSourceLookupService = getDataSourceLookupService();
+
+            if (shouldDoAsyncLookup()) {
+                String lookupId = UUID.randomUUID().toString();
+                requestMap.put(lookupId, request);
+                dataSourceLookupService.asyncLookup(lookupId, request.getInputData(),
+                        self().path().toSerializationFormat(), context().system());
+            } else {
+                Response response = dataSourceLookupService.syncLookup(request.getInputData());
+                response.setTravelerContext(request.getMatchTravelerContext());
+                sender().tell(response, self());
+            }
+        } else if (msg instanceof Response) {
+            Response response = (Response) msg;
+            String lookupId = response.getRequestId();
+            SampleDataSourceLookupRequest request = requestMap.remove(lookupId);
+            response.setTravelerContext(request.getMatchTravelerContext());
+
+            sendResponseToCaller(request, response);
+        } else {
+            unhandled(msg);
+        }
+
+    }
+
+    protected boolean shouldDoAsyncLookup() {
+        return false;
+    }
+
+    private void sendResponseToCaller(SampleDataSourceLookupRequest request, Response response) {
+        ActorRef callerMicroEngineActorRef = context().actorFor(request.getCallerMicroEngineReference());
+        callerMicroEngineActorRef.tell(response, self());
+    }
+}

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.actors.visitor;
+package com.latticeengines.actors.visitor.sample;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,13 +9,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DnbLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DunsBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DunsDomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.DynamoLookupActor;
-import com.latticeengines.datacloud.match.actors.visitor1.impl.LocationBasedMicroEngineActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleDomainBasedMicroEngineActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleDunsBasedMicroEngineActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleDunsDomainBasedMicroEngineActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleDynamoLookupActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleFuzzyMatchAnchorActor;
+import com.latticeengines.actors.visitor.sample.impl.SampleLocationBasedMicroEngineActor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -24,12 +24,12 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 
 @Component
-public class MatchActorSystemWrapper {
-    private static final Log log = LogFactory.getLog(MatchActorSystemWrapper.class);
+public class SampleMatchActorSystemWrapper {
+    private static final Log log = LogFactory.getLog(SampleMatchActorSystemWrapper.class);
 
     private ActorSystem system;
     private ActorRef fuzzyMatchAnchor;
-    private MatchActorStateTransitionGraph matchActorStateTransitionGraph;
+    private SampleMatchActorStateTransitionGraph matchActorStateTransitionGraph;
 
     @PostConstruct
     public void init() {
@@ -44,8 +44,8 @@ public class MatchActorSystemWrapper {
         return fuzzyMatchAnchor;
     }
 
-    public MatchGuideBook createGuideBook() {
-        return new MatchGuideBook(matchActorStateTransitionGraph);
+    public SampleMatchGuideBook createGuideBook() {
+        return new SampleMatchGuideBook(matchActorStateTransitionGraph);
     }
 
     public void shutdown() {
@@ -56,34 +56,34 @@ public class MatchActorSystemWrapper {
 
     private void initActors() {
         ActorRef dynamoLookupActor = //
-                system.actorOf(Props.create(DynamoLookupActor.class), //
+                system.actorOf(Props.create(SampleDynamoLookupActor.class), //
                         "dynamoLookupActor");
 
         ActorRef dnbLookupActor = //
-                system.actorOf(Props.create(DnbLookupActor.class), //
+                system.actorOf(Props.create(SampleDnbLookupActor.class), //
                         "dnbLookupActor");
 
         ActorRef dunsDomainBasedMicroEngineActor = //
-                system.actorOf(Props.create(DunsDomainBasedMicroEngineActor.class), //
+                system.actorOf(Props.create(SampleDunsDomainBasedMicroEngineActor.class), //
                         "dunsDomainBasedMicroEngineActor");
 
         ActorRef domainBasedMicroEngineActor = //
-                system.actorOf(Props.create(DomainBasedMicroEngineActor.class), //
+                system.actorOf(Props.create(SampleDomainBasedMicroEngineActor.class), //
                         "domainBasedMicroEngineActor");
 
         ActorRef microEngine3Actor = //
-                system.actorOf(Props.create(DunsBasedMicroEngineActor.class), //
+                system.actorOf(Props.create(SampleDunsBasedMicroEngineActor.class), //
                         "dunsBasedMicroEngineActor");
 
         ActorRef microEngine4Actor = //
-                system.actorOf(Props.create(LocationBasedMicroEngineActor.class), //
+                system.actorOf(Props.create(SampleLocationBasedMicroEngineActor.class), //
                         "locationBasedMicroEngineActor");
 
         fuzzyMatchAnchor = //
-                system.actorOf(Props.create(FuzzyMatchAnchorActor.class), //
+                system.actorOf(Props.create(SampleFuzzyMatchAnchorActor.class), //
                         "fuzzyMatchAnchorActor");
 
-        matchActorStateTransitionGraph = new MatchActorStateTransitionGraph(
+        matchActorStateTransitionGraph = new SampleMatchActorStateTransitionGraph(
                 dunsDomainBasedMicroEngineActor.path().toSerializationFormat(),
                 domainBasedMicroEngineActor.path().toSerializationFormat(),
                 microEngine3Actor.path().toSerializationFormat(), //

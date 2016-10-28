@@ -1,30 +1,47 @@
-//package com.latticeengines.datacloud.match.actors.visitor.impl;
-//
-//import java.util.UUID;
-//
-//import org.apache.commons.lang3.RandomUtils;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
-//
-//import com.latticeengines.actors.exposed.traveler.Traveler;
-//import com.latticeengines.datacloud.match.actors.visitor.MatchActorTemplate;
-//
-//public class LocationBasedMicroEngineActor extends MatchActorTemplate {
-//    private static final Log log = LogFactory.getLog(LocationBasedMicroEngineActor.class);
-//
-//    @Override
-//    protected Log getLogger() {
-//        return log;
-//    }
-//
-//    @Override
-//    protected Object process(Traveler traveler) {
-//        log.info("Try processing message");
-//
-//        if (RandomUtils.nextLong(0, 4) == 0) {
-//            log.info("Found result");
-//            return UUID.randomUUID().toString();
-//        }
-//        return null;
-//    }
-//}
+package com.latticeengines.datacloud.match.actors.visitor.impl;
+
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
+
+public class LocationBasedMicroEngineActor extends MicroEngineActorTemplate {
+    private static final Log log = LogFactory.getLog(LocationBasedMicroEngineActor.class);
+
+    @Override
+    protected Log getLogger() {
+        return log;
+    }
+
+    @Override
+    protected String getDataSourceActor() {
+        return "dnb";
+    }
+
+    @Override
+    protected boolean accept(TravelerContext traveler) {
+        Map<String, Object> dataKeyValueMap = traveler.getDataKeyValueMap();
+
+        if (dataKeyValueMap.containsKey("CompanyName") //
+                && dataKeyValueMap.containsKey("Country")//
+                && (dataKeyValueMap.containsKey("City") //
+                        || dataKeyValueMap.containsKey("State"))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected void process(Response response) {
+        if (response.getResult() != null) {
+            Map<String, Object> dataMap = response.getTravelerContext().getDataKeyValueMap();
+            dataMap.put("DUNS", response.getResult());
+            response.setResult(null);
+        }
+    }
+}

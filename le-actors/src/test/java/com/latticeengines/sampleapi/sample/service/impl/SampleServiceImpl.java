@@ -2,6 +2,7 @@ package com.latticeengines.sampleapi.sample.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -11,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.visitor.sample.SampleActorSystemWrapper;
-import com.latticeengines.actors.visitor.sample.SampleTraveler;
+import com.latticeengines.actors.visitor.sample.SampleMatchActorSystemWrapper;
+import com.latticeengines.actors.visitor.sample.SampleMatchTravelerContext;
 import com.latticeengines.sampleapi.sample.service.SampleService;
 
 import akka.pattern.Patterns;
@@ -26,40 +27,41 @@ public class SampleServiceImpl implements SampleService {
     private static final Log log = LogFactory.getLog(SampleServiceImpl.class);
 
     @Autowired
-    private SampleActorSystemWrapper wrapper;
+    private SampleMatchActorSystemWrapper wrapper;
 
     @Override
-    public Object doSampleWork(Object matchRequest) throws Exception {
-        List<Object> matchRequests = new ArrayList<>();
+    public Object callMatch(Map<String, Object> matchRequest) throws Exception {
+        List<Map<String, Object>> matchRequests = new ArrayList<>();
         matchRequests.add(matchRequest);
-        return doSampleWork(matchRequests).get(0);
+        return callMatch(matchRequests).get(0);
     }
 
     @Override
-    public List<Object> doSampleWork(List<Object> matchRequests) throws Exception {
+    public List<Object> callMatch(List<Map<String, Object>> matchRequests) throws Exception {
         List<Object> results = new ArrayList<>();
 
         FiniteDuration duration = new FiniteDuration(10, TimeUnit.MINUTES);
         Timeout timeout = new Timeout(duration);
         List<Future<Object>> matchFutures = new ArrayList<>();
-        for (Object matchRequest : matchRequests) {
+        for (Map<String, Object> matchRequest : matchRequests) {
             GuideBook gb = wrapper.createGuideBook();
-            SampleTraveler traveler = new SampleTraveler(UUID.randomUUID().toString(), gb);
-            traveler.setData(matchRequest);
+            SampleMatchTravelerContext traveler = new SampleMatchTravelerContext(UUID.randomUUID().toString(), gb);
 
-            matchFutures.add(askSampleActor(traveler, timeout));
+            traveler.setDataKeyValueMap(matchRequest);
+
+            matchFutures.add(askFuzzyMatchAnchor(traveler, timeout));
         }
 
         for (Future<Object> future : matchFutures) {
-            SampleTraveler result = (SampleTraveler) Await.result(future, timeout.duration());
-            log.info("Got result: " + result.getData());
+            Object result = (Object) Await.result(future, timeout.duration());
+            log.info("Got result: " + result);
             results.add(result);
         }
         return results;
     }
 
-    private Future<Object> askSampleActor(SampleTraveler traveler, Timeout timeout) {
-        return Patterns.ask(wrapper.getSampleActor(), traveler, timeout);
+    private Future<Object> askFuzzyMatchAnchor(SampleMatchTravelerContext traveler, Timeout timeout) {
+        return Patterns.ask(wrapper.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
 }

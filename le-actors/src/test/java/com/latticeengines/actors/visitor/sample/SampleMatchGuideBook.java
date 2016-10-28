@@ -1,12 +1,12 @@
-package com.latticeengines.datacloud.match.actors.visitor;
+package com.latticeengines.actors.visitor.sample;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.TravelerContext;
 
-public class MatchGuideBook implements GuideBook {
-    private final MatchActorStateTransitionGraph actorStateTransitionGraph;
+public class SampleMatchGuideBook implements GuideBook {
+    private final SampleMatchActorStateTransitionGraph actorStateTransitionGraph;
 
-    public MatchGuideBook(MatchActorStateTransitionGraph actorStateTransitionGraph) {
+    public SampleMatchGuideBook(SampleMatchActorStateTransitionGraph actorStateTransitionGraph) {
         this.actorStateTransitionGraph = actorStateTransitionGraph;
     }
 
