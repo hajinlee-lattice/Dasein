@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
-import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
+import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
-public class MigrateReportAndOutput extends WorkflowFunctionalTestNGBase {
+public class MigrateReportAndOutput extends WorkflowTestNGBase {
 
     private static final Log log = LogFactory.getLog(MigrateReportAndOutput.class);
 

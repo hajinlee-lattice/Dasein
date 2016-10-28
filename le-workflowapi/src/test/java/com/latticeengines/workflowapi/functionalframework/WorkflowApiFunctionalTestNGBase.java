@@ -59,11 +59,11 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
-import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
+import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-workflowapi-context.xml" })
-public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBase {
+public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     protected static final CustomerSpace WFAPITEST_CUSTOMERSPACE = CustomerSpace
             .parse("WFAPITests.WFAPITests.WFAPITests");
