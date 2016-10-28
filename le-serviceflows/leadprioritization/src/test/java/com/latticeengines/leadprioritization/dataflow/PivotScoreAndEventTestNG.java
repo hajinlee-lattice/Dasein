@@ -1,7 +1,7 @@
 package com.latticeengines.leadprioritization.dataflow;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertSame;
+
 import java.io.InputStreamReader;
 import java.util.List;
 
