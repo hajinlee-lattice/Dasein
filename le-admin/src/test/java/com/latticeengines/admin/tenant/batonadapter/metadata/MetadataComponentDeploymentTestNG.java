@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -33,8 +35,15 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentTestNG;
 
-    @Value("${admin.metadata.url}")
+    @Value("${common.test.microservice.url}")
+    private String microserviceUrl;
+
     private String metadataUrl;
+
+    @PostConstruct
+    public void postConstruct() {
+        metadataUrl = microserviceUrl + "/metadata";
+    }
 
     public void installMetadata() {
         Map<String, Map<String, String>> properties = new HashMap<>();
