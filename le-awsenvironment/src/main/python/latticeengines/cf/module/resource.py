@@ -23,6 +23,9 @@ class Resource(Template):
         return self
 
     def add_tag(self, key, value):
+        if "Tags" not in self._template["Properties"]:
+            self._template["Properties"]["Tags"] = []
+
         self._template["Properties"]["Tags"].append({
             "Key": key,
             "Value": value
