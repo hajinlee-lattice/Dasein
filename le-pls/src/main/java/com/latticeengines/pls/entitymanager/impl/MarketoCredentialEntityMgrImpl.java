@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -45,17 +46,20 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(MarketoCredential marketoCredential) {
-        assertCredentialNameNotInDatabase(marketoCredential.getName());
         populateMarketoCredentialWithTenant(marketoCredential);
         marketoCredential.setEnrichment(enrichmentEntityMgr.createEnrichment());
-        marketoCredentialDao.create(marketoCredential);
+        try {
+            marketoCredentialDao.create(marketoCredential);
+        } catch (ConstraintViolationException e) {
+            throw new LedpException(LedpCode.LEDP_18119,
+                    new String[] { marketoCredential.getName() });
+        }
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateMarketoCredentialById(String credentialId,
             MarketoCredential marketoCredential) {
-        assertCredentialNameNotInDatabase(marketoCredential.getName());
         MarketoCredential marketoCredential1 = marketoCredentialDao
                 .findMarketoCredentialById(credentialId);
 
@@ -106,12 +110,6 @@ public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCre
         }
 
         return marketoCredentials;
-    }
-
-    private void assertCredentialNameNotInDatabase(String credentialName) {
-        if (marketoCredentialDao.findByField("name", credentialName) != null) {
-            throw new LedpException(LedpCode.LEDP_18119, new String[] { credentialName });
-        }
     }
 
     private void populateMarketoCredentialWithTenant(MarketoCredential marketoCredential) {
