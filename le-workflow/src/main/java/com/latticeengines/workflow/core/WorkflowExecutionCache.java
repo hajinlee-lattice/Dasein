@@ -38,7 +38,6 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
@@ -138,6 +137,7 @@ public class WorkflowExecutionCache {
 
         for (final WorkflowExecutionId workflowId : workflowIds) {
             callables.add(new Callable<Job>() {
+                @Override
                 public Job call() throws Exception {
                     try {
                         return getJob(workflowId);

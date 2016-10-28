@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 
-public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase {
+public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
 
     @Autowired
     private FailableStep failableStep;

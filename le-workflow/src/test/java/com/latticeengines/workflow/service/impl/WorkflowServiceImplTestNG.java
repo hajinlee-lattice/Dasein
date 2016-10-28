@@ -38,10 +38,10 @@ import com.latticeengines.workflow.functionalframework.SleepableStep;
 import com.latticeengines.workflow.functionalframework.SleepableWorkflow;
 import com.latticeengines.workflow.functionalframework.SuccessfulListener;
 import com.latticeengines.workflow.functionalframework.SuccessfulStep;
-import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
+import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 import com.latticeengines.workflow.functionalframework.WorkflowWithFailingListener;
 
-public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
+public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
     @Autowired
     private WorkflowService workflowService;

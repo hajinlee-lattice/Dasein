@@ -15,9 +15,9 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
-import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
+import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
-public class WorkflowJobEntityMgrImplTestNG extends WorkflowFunctionalTestNGBase {
+public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @Autowired
     private TenantService tenantService;

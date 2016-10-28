@@ -17,7 +17,7 @@ import com.latticeengines.workflow.core.DataPlatformInfrastructure;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @ContextConfiguration(locations = { "classpath:test-workflow-context.xml" })
-public class WorkflowFunctionalTestNGBase extends SecurityFunctionalTestNGBase {
+public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
 
     protected static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
 
