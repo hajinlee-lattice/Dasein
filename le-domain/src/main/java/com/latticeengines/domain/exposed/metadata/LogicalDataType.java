@@ -10,10 +10,11 @@ public enum LogicalDataType {
     StageName, //
     Reference, //
     RowId, //
-    Opportunity;
+    Opportunity, //
+    Timestamp;
 
     private static EnumSet<LogicalDataType> typesExcludedFromRealTimeMetadata = EnumSet.of(LogicalDataType.InternalId,
-            LogicalDataType.Event, LogicalDataType.Opportunity);
+            LogicalDataType.Event, LogicalDataType.Opportunity, LogicalDataType.Timestamp);
 
     public static boolean isExcludedFromRealTimeMetadata(LogicalDataType type) {
         return typesExcludedFromRealTimeMetadata.contains(type);
