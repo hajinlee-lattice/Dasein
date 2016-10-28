@@ -16,8 +16,8 @@
         base-package="com.latticeengines.transform">
     </context:component-scan>
 
-    <yarn:configuration>
-        <!-- Needed for Hadoop which is caused by a pull by TransformRetriever -->
-    </yarn:configuration>
+    <yarn:configuration/>
 
+    <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:test-testframework-testbed-context.xml"/>
 </beans>
