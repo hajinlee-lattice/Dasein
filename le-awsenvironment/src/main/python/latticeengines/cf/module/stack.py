@@ -163,7 +163,8 @@ class ECSStack(Stack):
             subnet = SUBNETS[n % 3]
             ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster, efs) \
                 .add_sg(PARAM_SECURITY_GROUP) \
-                .set_subnet(subnet)
+                .set_subnet(subnet) \
+                .add_tag("Name", { "Ref" : "AWS::StackName" })
 
             if n < len(ips):
                 ip = ips[n]
@@ -189,6 +190,8 @@ class ECSStack(Stack):
 
         asgroup.add_pool(launchconfig)
         asgroup.attach_tgrp(PARAM_TARGET_GROUP)
+        asgroup.add_tag("Name", { "Ref" : "AWS::StackName" })
+
         self.add_resources([asgroup, launchconfig])
         return asgroup
 

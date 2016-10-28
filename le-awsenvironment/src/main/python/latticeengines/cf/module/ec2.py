@@ -101,8 +101,13 @@ def ecs_metadata(ec2, ecscluster, efs):
                     "20_start_cadvisor" : {
                         "command" : { "Fn::Join": [ "", [
                             "start ecs\n"
-                            "yum install -y aws-cli jq\n"
-                            "instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                            "yum install -y aws-cli jq\n",
+                            "for i in {1..100}; do\n",
+                            "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                            "    if [ ! -z \"${instance_arn}\" ]; then\n",
+                            "        break;\n",
+                            "    fi;\n",
+                            "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
                             "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"
                         ] ] }
