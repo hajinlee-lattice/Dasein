@@ -47,5 +47,5 @@ COPY server.crt /etc/pki/tls/star.lattice.local.crt
 COPY start.sh /start.sh
 
 WORKDIR /opt/node/app
-EXPOSE 3000
+EXPOSE 3000 3002
 CMD ["bash", "/start.sh"]

@@ -17,8 +17,8 @@ module.exports = function(grunt) {
             webfont: '1.5.16',
             d3: '4.2.5',
             bootstrap: '3.3.4',
-            "font-awesome": '4.3.0',
-            "json-formatter": '0.6.0',
+            "font-awesome": '4.7.0',
+            "ng-prettyjson": '0.2.0',
 
             kendo: '2015.1.408'
         },
@@ -84,7 +84,7 @@ module.exports = function(grunt) {
                     'webfont/<%= app.version.webfont %>/webfontloader.js',
                     'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js',
                     'd3/<%= app.version.d3 %>/d3.js',
-                    'json-formatter/<%= app.version["json-formatter"] %>/json-formatter.js'
+                    'ng-prettyjson/<%= app.version["ng-prettyjson"] %>/ng-prettyjson.js'
                 ],
                 dest: '<%= app.dir %>/lib/js'
             },
@@ -98,7 +98,7 @@ module.exports = function(grunt) {
                     'qtip2/<%= app.version.qtip2 %>/jquery.qtip.css',
                     'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css',
                     'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css.map',
-                    'json-formatter/<%= app.version["json-formatter"] %>/json-formatter.css'
+                    'ng-prettyjson/<%= app.version["ng-prettyjson"] %>/ng-prettyjson.css'
                 ],
                 dest: '<%= app.dir %>/lib/css'
             },
@@ -253,26 +253,6 @@ module.exports = function(grunt) {
                     src: ['<%= app.dir %>/assets/img/**/*', '<%= app.dir %>/lib/css/**/*', '<%= app.dir %>/app/**/*.html'],
                     dest: '<%= app.dist %>'
                 }]
-            },
-
-            prettyjson: {
-                files: [{
-                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.css'],
-                    dest: '<%= app.dir %>/lib/css/ng-prettyjson.min.css'
-                }, {
-                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.js'],
-                    dest: '<%= app.dir %>/lib/js/ng-prettyjson.min.js'
-                }]
-            },
-
-            prettyjsondist: {
-                files: [{
-                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.css'],
-                    dest: '<%= app.dist %>/lib/css/ng-prettyjson.min.css'
-                }, {
-                    src: ['<%= app.dir %>/node_modules/ng-prettyjson/dist/ng-prettyjson.min.js'],
-                    dest: '<%= app.dist %>/lib/js/ng-prettyjson.min.js'
-                }]
             }
         },
 
@@ -370,84 +350,6 @@ module.exports = function(grunt) {
             }
         },
 
-        // End to End (e2e) tests (aka UI automation)
-        protractor: {
-            options:          {
-                configFile: '<%= testenv.protractorConf %>',
-                noColor:    false,
-                keepAlive:  false // don't keep browser process alive after failures
-            },
-            chrome:           {
-                options: {
-                    args: {
-                        browser:       'chrome',
-                        baseUrl:       '<%= testenv.url %>',
-                        directConnect: true
-                    }
-                }
-            },
-            firefox:          {
-                options: {
-                    args: {
-                        browser:       'firefox',
-                        baseUrl:       '<%= testenv.url %>',
-                        directConnect: true
-                    }
-                }
-            },
-            internetexplorer: {
-                options: {
-                    args: {
-                        browser: 'internet explorer',
-                        baseUrl: '<%= testenv.url %>'
-                    }
-                }
-            },
-            safari:           {
-                options: {
-                    args: {
-                        browser: 'safari',
-                        baseUrl: '<%= testenv.url %>'
-                    }
-                }
-            }
-        },
-
-        // E2E UI Automation with code coverage
-        protractor_coverage: {
-            options: {
-                keepAlive: false,
-                noColor: false,
-                coverageDir: 'target/protractor_coverage',
-                configFile: '<%= testenv.protractorCcConf %>'
-            },
-            chrome:           {
-                options: {
-                    args: {
-                        browser: 'chrome',
-                        baseUrl: '<%= testenv.url %>'
-                    }
-                }
-            }
-        },
-
-        instrument: {
-            files: 'src/main/webapp/app/**/*[!Spec].js',
-            options: {
-                lazy: true,
-                basePath: "target/protractor_coverage/instrumented"
-            }
-        },
-
-        makeReport: {
-            src: 'target/protractor_coverage/*.json',
-            options: {
-                type: 'cobertura',
-                dir: 'target/protractor_coverage/reports',
-                print: 'detail'
-            }
-        },
-
         concurrent: {
             options: {
                 limit: 8
@@ -469,9 +371,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-concurrent');
-    grunt.loadNpmTasks('grunt-protractor-runner');
-    grunt.loadNpmTasks('grunt-protractor-coverage');
-    grunt.loadNpmTasks('grunt-istanbul');
 
     // main task to run before deploy the dist war
     grunt.registerTask('build', [
@@ -483,22 +382,14 @@ module.exports = function(grunt) {
         'cssmin',
         'processhtml:dist',
         'clean:postDist',
-        'copy:assets',
-        'copy:prettyjsondist'
+        'copy:assets'
     ]);
 
     // download vendor javascript and css
     grunt.registerTask('init', [
         'clean:vendor',
         'concurrent:wget',
-        'copy:prettyjson',
         'less:dev']);
-
-    var instrumentJsText = 'Instrument javascript code for code coverage';
-    grunt.registerTask('instrumentJs', instrumentJsText, [
-        'instrument',
-        'copy:instrumented'
-    ]);
 
     grunt.registerTask('unit', ['karma:unit']);
 
@@ -510,30 +401,6 @@ module.exports = function(grunt) {
     grunt.registerTask('sentry', sentryText, [
         'watch:css',
         'watch:js'
-    ]);
-
-    var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
-    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome']);
-
-    var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
-    grunt.registerTask('e2eFirefox', e2eFirefoxText, ['protractor:firefox']);
-
-    var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
-    grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, ['protractor:internetexplorer']);
-
-    var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
-    grunt.registerTask('e2eSafari', e2eSafariText, ['protractor:safari']);
-
-    var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
-    grunt.registerTask('e2eMac', e2eMacText, ['concurrent:mac']);
-
-    var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
-    grunt.registerTask('e2eWin', e2eWinText, ['concurrent:windows']);
-
-    var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
-    grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
-        'protractor_coverage:chrome',
-        'makeReport'
     ]);
 
 };
