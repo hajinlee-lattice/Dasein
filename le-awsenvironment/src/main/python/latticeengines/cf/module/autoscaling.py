@@ -17,6 +17,7 @@ class AutoScalingGroup(Resource):
                 "DesiredCapacity" : capacity.ref() if isinstance(capacity, Parameter) else capacity,
                 "MetricsCollection" : {
                     "Granularity" : "1Minute",
+                    "Metrics": []
                 },
             },
             "CreationPolicy" : {
