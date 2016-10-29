@@ -1,9 +1,9 @@
 from collections import OrderedDict
 import logging
-import random
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
+from leframework.util.scoringutil import ScoringUtil
 
 class SegmentationGenerator(State):
 
@@ -17,12 +17,7 @@ class SegmentationGenerator(State):
         schema = mediator.schema
 
         orderedScore = self.mediator.data[[schema["reserved"]["score"], schema["target"]]]
-        
-        meanScore = orderedScore[schema["reserved"]["score"]].mean()
-        random.seed(-1)
-        shift = [0.0001 * meanScore * random.uniform(0, 1) for i in range(orderedScore.shape[0])]
-        orderedScore[schema["reserved"]["score"]] = orderedScore[schema["reserved"]["score"]] + shift        
-        orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        orderedScore = ScoringUtil.sortWithRandom(orderedScore, 0)
         numLeads = orderedScore.shape[0]
 
         # Break Into 1% Granularity
