@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -65,6 +66,9 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private SourceFileEntityMgr sourceFileEntityMgr;
 
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+
     private static final String localPathBase = ClassLoader.getSystemResource(
             "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
 
@@ -84,8 +88,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants();
         cleanup();
         setupHdfs();
-        log.info("Wait for 300 seconds to download model summary");
-        Thread.sleep(400000L);
+        log.info("Wait for 60 seconds to download model summary");
+        Thread.sleep(60000L);
         setupTables();
     }
 
@@ -144,7 +148,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(tenant1.getId())).toString()
                 + "/" + outputFileName;
-        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/" + outputFileName;
+        sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/"
+                + outputFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
                 outputPath);
         SourceFile sourceFile = new SourceFile();
@@ -167,15 +172,16 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
                         .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19")
                         .append("part1.avro").toString());
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant1.getId());
     }
 
     @Test(groups = "deployment")
     public void testModelCopy() throws Exception {
 
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
-
-        log.info("Wait for 300 seconds to download model summary");
-        Thread.sleep(400000L);
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
+        log.info("Wait for 60 seconds to download model summary");
+        Thread.sleep(60000L);
 
         setupSecurityContext(tenant2);
 
