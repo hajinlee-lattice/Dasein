@@ -28,6 +28,7 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
     private String latestMajorVersion;
 
     @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public DataCloudVersion currentApprovedVersion() {
         return latestApprovedForMajorVersion(latestMajorVersion);
     }
