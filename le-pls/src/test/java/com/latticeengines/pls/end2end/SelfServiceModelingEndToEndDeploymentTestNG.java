@@ -608,13 +608,23 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         List<Object> rawJobs = restTemplate.getForObject(String.format("%s/pls/jobs", getRestAPIHostPort()),
                 List.class);
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
+        String jobsInString = "There are " + rawJobs.size() + " jobs:\n";
+        try {
+            jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JsonUtils.serialize(rawJobs));
+        } catch (IOException e) {
+            log.warn(e);
+        }
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
-                        .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
+                if (job == null) {
+                    return false;
+                } else {
+                    return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
+                            .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
+                }
             }
-        }));
+        }), jobsInString);
     }
 
     public String prepareModel(SchemaInterpretation schemaInterpretation, String fileName) throws InterruptedException {
