@@ -42,6 +42,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
@@ -78,8 +79,11 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Value("${propdata.test.correctness.rows}")
     private Integer numRecords;
 
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
+    @Value("${datacloud.match.latest.data.cloud.version:2.0}")
     private String latestDataCloudVersion;
+
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @BeforeMethod(groups = "deployment")
     private void setUpMethod() {
@@ -120,7 +124,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     @DataProvider(name = "versions")
     public Object[][] versionsToTest() {
-        return new Object[][] { { null }, { latestDataCloudVersion } };
+        return new Object[][] { { null }, { dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion) } };
     }
 
     private void compareResults() {

@@ -610,19 +610,17 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         List<Job> jobs = JsonUtils.convertList(rawJobs, Job.class);
         String jobsInString = "There are " + rawJobs.size() + " jobs:\n";
         try {
-            jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(JsonUtils.serialize(rawJobs));
+            jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(JsonUtils.serialize(rawJobs));
         } catch (IOException e) {
             log.warn(e);
         }
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                if (job == null) {
-                    return false;
-                } else {
-                    return job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId) && job
-                            .getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME).equals(MODEL_DISPLAY_NAME);
-                }
+                return job != null && job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
+                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
+                                .equals(MODEL_DISPLAY_NAME);
             }
         }), jobsInString);
     }

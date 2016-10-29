@@ -17,7 +17,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountmasterColumnService;
 
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
+    @Value("${datacloud.match.latest.data.cloud.version:2.0}")
     private String latestDataCloudVersion;
 
     @Autowired
