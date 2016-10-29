@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -107,24 +109,27 @@ public abstract class ModelServiceBase implements ModelService {
         if (StringUtils.isNotEmpty(modelSummary.getModuleName())) {
             module = metadataProxy.getModule(sourceTenantId, modelSummary.getModuleName());
         } else if (StringUtils.isNotEmpty(modelSummary.getPivotArtifactPath())) {
-            Artifact pivotFileArtifact = metadataProxy.getArtifactByPath(sourceTenantId,
-                    modelSummary.getPivotArtifactPath());
-            module = metadataProxy.getModule(sourceTenantId, pivotFileArtifact.getModule().getName());
+            String moduleName = StringUtils.substringBetween(modelSummary.getPivotArtifactPath(), //
+                    PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(), //
+                            CustomerSpace.parse(sourceTenantId)).toString() + "/", //
+                    "/");
+            module = metadataProxy.getModule(sourceTenantId, moduleName);
         }
 
         Map<String, Artifact> newArtifactsMap = new HashMap<>();
         String newModuleName = "cp_module_" + UUID.randomUUID().toString();
         if (module != null) {
             CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
-            newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration,
-                    module.getArtifacts(), customerSpace, newModuleName);
+            newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration, module.getArtifacts(),
+                    customerSpace, newModuleName);
             for (Artifact artifact : newArtifactsMap.values()) {
                 metadataProxy.createArtifact(customerSpace.toString(), newModuleName, artifact.getName(), artifact);
             }
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap, newModuleName);
+                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap,
+                newModuleName);
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
         JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName, "ms__"
