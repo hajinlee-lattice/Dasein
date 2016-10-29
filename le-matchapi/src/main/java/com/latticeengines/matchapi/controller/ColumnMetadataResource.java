@@ -2,7 +2,9 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,6 +35,9 @@ public class ColumnMetadataResource {
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
+    @Value("${datacloud.match.latest.data.cloud.major.version}")
+    private String latestDataCloudVersion;
+
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
@@ -53,9 +58,20 @@ public class ColumnMetadataResource {
         return versionEntityMgr.allVerions();
     }
 
+    @RequestMapping(value = "/versions/latest", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get latest approved data cloud version. If query parameter compatibleto is provided. " +
+            "Will return latest approved version under the same major version.")
+    public DataCloudVersion latestVersion(@RequestParam(value = "compatibleto", required = false) String compatibleToVersion) {
+        if (StringUtils.isEmpty(compatibleToVersion)) {
+            compatibleToVersion = latestDataCloudVersion;
+        }
+        return versionEntityMgr.latestApprovedForMajorVersion(compatibleToVersion);
+    }
+
     @RequestMapping(value = "/", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all known data cloud versions")
+    @ApiOperation(value = "Get all columns belong to a data cloud version")
     public List<ColumnMetadata> getAllColumns(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.findAll(dataCloudVersion);

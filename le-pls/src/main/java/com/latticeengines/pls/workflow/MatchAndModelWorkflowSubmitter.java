@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -40,24 +41,23 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private MetadataProxy metadataProxy;
-    
+
     @Autowired
     private SourceFileService sourceFileService;
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
-    private String latestDataCloudVersion;
-    
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
+
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
     public ApplicationId submit(String cloneTableName, CloneModelingParameters parameters,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         TransformationGroup transformationGroup;
-        String originalTransformationGroup = getTransformationGroupNameForModelSummary(
-                modelSummary);
+        String originalTransformationGroup = getTransformationGroupNameForModelSummary(modelSummary);
         if (parameters.enableTransformation() && originalTransformationGroup.equals("none")) {
             transformationGroup = getTransformationGroupFromZK();
         } else if (parameters.enableTransformation()) {
@@ -66,8 +66,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             transformationGroup = TransformationGroup.NONE;
         }
 
-        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName,
-                parameters, transformationGroup, userRefinedAttributes, modelSummary);
+        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName, parameters,
+                transformationGroup, userRefinedAttributes, modelSummary);
         return workflowJobService.submit(configuration);
     }
 
@@ -80,17 +80,16 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "modelAndEmailWorkflow");
-        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                parameters.getDisplayName());
-        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
+        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
+                sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
 
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", stoplistPath);
 
         List<DataRule> dataRules = parameters.getDataRules();
         if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
-            Table eventTable = metadataProxy.getTable(
-                    MultiTenantContext.getCustomerSpace().toString(),
+            Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                     modelSummary.getEventTableName());
             dataRules = eventTable.getDataRules();
         }
@@ -121,8 +120,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains,
-                        parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
                         parameters.isExcludePropDataAttributes()) //
                 .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
@@ -130,8 +128,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .dataCloudVersion(getDataCloudVersion())
-                .matchColumnSelection(Predefined.getDefaultSelection(), null)
+                .dataCloudVersion(getDataCloudVersion()).matchColumnSelection(Predefined.getDefaultSelection(), null)
                 .moduleName(modelSummary.getModuleName()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
@@ -144,10 +141,11 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         }
         return builder.build();
     }
-    
+
     private String getDataCloudVersion() {
         if (useDnBFlagFromZK()) {
-            return latestDataCloudVersion;
+            // retrieve latest version from matchapi
+            return columnMetadataProxy.latestVersion(null).getVersion();
         }
         return null;
     }

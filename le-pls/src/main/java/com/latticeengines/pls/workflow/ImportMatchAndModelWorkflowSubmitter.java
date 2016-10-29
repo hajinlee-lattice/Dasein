@@ -42,6 +42,7 @@ import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflo
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.PivotMappingFileUtils;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -62,6 +63,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
+
     @Value("${pls.modeling.validation.min.dedupedrows:300}")
     private long minDedupedRows;
 
@@ -70,9 +74,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
-
-    @Value("${datacloud.match.latest.data.cloud.version:2.0.1}")
-    private String latestDataCloudVersion;
 
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
 
@@ -224,7 +225,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             return parameters.getDataCloudVersion();
         }
         if (useDnBFlagFromZK()) {
-            return latestDataCloudVersion;
+            // retrieve latest version from matchapi
+            return columnMetadataProxy.latestVersion(null).getVersion();
         }
         return null;
     }

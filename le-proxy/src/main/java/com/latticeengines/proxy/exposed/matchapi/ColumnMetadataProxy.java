@@ -16,6 +16,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
@@ -59,6 +60,17 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         } else {
             return requestColumnSelection(selectName, dataCloudVersion);
         }
+    }
+
+    @Override
+    public DataCloudVersion latestVersion(String compatibleVersion) {
+        String url;
+        if (StringUtils.isEmpty(compatibleVersion)) {
+            url = constructUrl("/versions/latest?compatibleto={compatibleVersion}", compatibleVersion);
+        } else {
+            url = "/versions/latest";
+        }
+        return get("latest version", url, DataCloudVersion.class);
     }
 
     @SuppressWarnings({ "unchecked" })

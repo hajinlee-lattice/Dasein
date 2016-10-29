@@ -37,7 +37,7 @@ IGNORE 1 LINES;
 INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, Status)
 VALUES
   ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', 'APPROVED');
-  --('2.0.1', '2016-10-28', '2.0', '2016-10-28_17-32-32_UTC', '2016-10-28_14-45-38_UTC', '', 'APPROVED');
+  ('2.0.1', '2016-10-28', '2.0', '2016-10-28_17-32-32_UTC', '2016-10-28_14-45-38_UTC', '', 'NEW');
 
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/Ingestion.csv' INTO TABLE `Ingestion`
 FIELDS TERMINATED BY ','
