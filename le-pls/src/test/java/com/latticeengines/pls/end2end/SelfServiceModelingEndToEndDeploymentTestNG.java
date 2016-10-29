@@ -618,9 +618,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override
             public boolean apply(@Nullable Job job) {
-                return job != null && job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID).equals(jobModelId)
-                        && job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME)
-                                .equals(MODEL_DISPLAY_NAME);
+                return job != null && job.getOutputs() != null
+                        && jobModelId.equals(job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID))
+                        && MODEL_DISPLAY_NAME
+                                .equals(job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME));
             }
         }), jobsInString);
     }
