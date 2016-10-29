@@ -14,10 +14,10 @@ class AutoScalingGroup(Resource):
                 "Cooldown": "1200",
                 "MinSize" : min_size.ref() if isinstance(min_size, Parameter) else min_size,
                 "MaxSize" : max_size.ref() if isinstance(max_size, Parameter) else max_size,
-                "DesiredCapacity" : capacity.ref() if isinstance(capacity, Parameter) else capacity
-            },
-            "MetricsCollection" : {
-                "Granularity" : "1Minute",
+                "DesiredCapacity" : capacity.ref() if isinstance(capacity, Parameter) else capacity,
+                "MetricsCollection" : {
+                    "Granularity" : "1Minute",
+                },
             },
             "CreationPolicy" : {
                 "ResourceSignal" : {
