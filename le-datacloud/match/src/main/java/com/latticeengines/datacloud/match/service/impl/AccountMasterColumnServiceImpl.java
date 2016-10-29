@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -22,9 +21,6 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
 
     @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> metadataColumnEntityMgr;
-
-    @Value("${datacloud.match.latest.data.cloud.major.version}")
-    private String latestDataCloudVersion;
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -64,6 +60,6 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
 
     @Override
     protected String getLatestVersion() {
-        return versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
+        return versionEntityMgr.currentApprovedVersion().getVersion();
     }
 }

@@ -7,6 +7,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 public interface DataCloudVersionEntityMgr {
 
+    DataCloudVersion currentApprovedVersion();
+
     DataCloudVersion latestApprovedForMajorVersion(String majorVersion);
 
     DataCloudVersion findVersion(String version);

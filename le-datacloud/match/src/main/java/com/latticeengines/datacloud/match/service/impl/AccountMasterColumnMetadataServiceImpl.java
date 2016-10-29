@@ -17,9 +17,6 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountmasterColumnService;
 
-    @Value("${datacloud.match.latest.data.cloud.major.version}")
-    private String latestDataCloudVersion;
-
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
@@ -40,7 +37,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
 
     @Override
     protected String getLatestVersion() {
-        return versionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion).getVersion();
+        return versionEntityMgr.currentApprovedVersion().getVersion();
     }
 
 }

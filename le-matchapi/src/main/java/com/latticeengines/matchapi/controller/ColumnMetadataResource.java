@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,9 +34,6 @@ public class ColumnMetadataResource {
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    @Value("${datacloud.match.latest.data.cloud.major.version}")
-    private String latestDataCloudVersion;
-
     @RequestMapping(value = "/predefined/{selectName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Available choices for selectName are LeadEnrichment, DerivedColumns and Model (case-sensitive)")
@@ -64,7 +60,7 @@ public class ColumnMetadataResource {
             "Will return latest approved version under the same major version.")
     public DataCloudVersion latestVersion(@RequestParam(value = "compatibleto", required = false) String compatibleToVersion) {
         if (StringUtils.isEmpty(compatibleToVersion)) {
-            compatibleToVersion = latestDataCloudVersion;
+            compatibleToVersion = versionEntityMgr.currentApprovedVersion().getVersion();
         }
         return versionEntityMgr.latestApprovedForMajorVersion(compatibleToVersion);
     }

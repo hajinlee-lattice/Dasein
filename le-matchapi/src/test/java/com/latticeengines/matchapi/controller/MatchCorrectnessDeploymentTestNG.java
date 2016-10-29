@@ -79,9 +79,6 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Value("${propdata.test.correctness.rows}")
     private Integer numRecords;
 
-    @Value("${datacloud.match.latest.data.cloud.major.version}")
-    private String latestDataCloudVersion;
-
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
@@ -124,7 +121,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     @DataProvider(name = "versions")
     public Object[][] versionsToTest() {
-        return new Object[][] { { null }, { dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestDataCloudVersion) } };
+        return new Object[][] { { null }, { dataCloudVersionEntityMgr.currentApprovedVersion() } };
     }
 
     private void compareResults() {

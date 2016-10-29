@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,6 +23,14 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
 
     @Autowired
     private DataCloudVersionDao dataCloudVersionDao;
+
+    @Value("${datacloud.match.latest.data.cloud.major.version}")
+    private String latestMajorVersion;
+
+    @Override
+    public DataCloudVersion currentApprovedVersion() {
+        return latestApprovedForMajorVersion(latestMajorVersion);
+    }
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
