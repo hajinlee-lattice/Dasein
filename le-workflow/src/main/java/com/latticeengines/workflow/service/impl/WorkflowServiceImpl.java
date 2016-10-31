@@ -54,8 +54,8 @@ import com.latticeengines.workflow.exposed.user.WorkflowUser;
 public class WorkflowServiceImpl implements WorkflowService {
     private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
 
-    @Value("${hadoop.yarn.resourcemanager.webapp.address}")
-    private String resourceManagerUrl;
+    @Value("${hadoop.yarn.timeline-service.webapp.address}")
+    private String timelineServiceUrl;
 
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
     private static final String CUSTOMER_SPACE = "CustomerSpace";
@@ -223,7 +223,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .getJob(workflowId);
         if (job.getOutputs() != null && job.getApplicationId() != null) {
             job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH, String.format(
-                    "http://%s/cluster/app/%s", resourceManagerUrl, job.getApplicationId()));
+                    "%s/app/%s", timelineServiceUrl, job.getApplicationId()));
         }
         return job;
     }
