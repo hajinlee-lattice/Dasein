@@ -6,8 +6,8 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
-    'angulartics', 
-    'angulartics.mixpanel',
+    //'angulartics', 
+    //'angulartics.mixpanel',
 
     //'lp.header',
     'common.modules',
