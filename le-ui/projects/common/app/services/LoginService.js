@@ -122,7 +122,6 @@ angular.module('mainApp.login.services.LoginService', [
             }
         })
         .success(function(data, status, headers, config) {
-            console.log(data);
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();

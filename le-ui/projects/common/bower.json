@@ -16,7 +16,6 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "^1.4.9",
     "jquery": "^2.2.0",
     "jStorage": "jstorage#^0.4.12",
     "qtip2": "^2.2.1",
@@ -27,10 +26,11 @@
     "ui-bootstrap": "^1.1.1",
     "angular-sanitize": "^1.4.9",
     "angular-animate": "^1.4.9",
-    "angular-ui-router": "^0.2.17",
     "angular-resource": "^1.4.9",
     "angular-route": "^1.4.9",
     "oclazyload": "^1.0.9",
-    "pako": "^1.0.1"
+    "pako": "^1.0.1",
+    "angular-ui-router": "^0.3.1",
+    "angular": "^1.5.8"
   }
 }

@@ -1,0 +1,56 @@
+<div class="messaging success-messaging" data-ng-show="$ctrl.showSuccessMessage">
+    <p>{{$ctrl.successMessage}}</p>
+</div>
+
+<div class="messaging error-messaging" ng-if="$ctrl.showLoginError">
+    <button id="close-button" type="button" class="close" ng-click="$ctrl.showLoginError = false;">x</button>
+    <ico class="fa fa-warning"></ico>
+    <span>{{$ctrl.loginErrorMessage}}</span>
+</div>
+<form class="form form-signin" name="login-form" ng-if="$ctrl.visible">
+    <div class="form-group">
+        <label>{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}</label>
+        <input  type="text" 
+                id="username" 
+                autocomplete="on" 
+                name="le-login_username"
+                data-ng-model="$ctrl.username" 
+                data-ng-enter="$ctrl.loginClick()" 
+                title="{{$ctrl.ResourceUtility.getString('LOGIN_USERNAME')}}"
+                class="form-control {{$ctrl.usernameInvalid ? 'error' : ''}}" 
+                autofocus>
+    </div>
+    <div class="form-group">
+        <label>{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
+        <input  type="password"  
+                id="password"
+                name="le-login_password"
+                autocomplete="on" 
+                data-ng-model="$ctrl.password" 
+                data-ng-enter="$ctrl.loginClick()" 
+                title="{{$ctrl.ResourceUtility.getString('LOGIN_PASSWORD')}}" 
+                class="form-control {{$ctrl.passwordInvalid ? 'error' : ''}}">
+    </div>
+    <div class="form-actions">
+        <button 
+                id="loginButton" 
+                type="submit" 
+                data-ng-click="$ctrl.loginClick()" 
+                class="button orange-button"
+                ng-disabled="$ctrl.loginInProgress">
+            {{$ctrl.ResourceUtility.getString('LOGIN_LABEL')}}
+        </button>
+        <i ng-show="$ctrl.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
+        <div class="secondary-actions">
+            <a href="javascript:void(0)" data-ng-click="$ctrl.forgotPasswordClick($event)">
+                {{$ctrl.ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
+            </a>
+        </div>
+    </div>
+    <p class="footer smallest login-footer">© {{$ctrl.copyrightString}}
+        <a href="http://lattice-engines.com/about/privacy-policy">
+            {{$ctrl.ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+        </a>
+    </p>
+
+</form>

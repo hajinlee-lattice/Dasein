@@ -4,46 +4,46 @@
 
             <div class="columns two offset-three logo-area">
                 <img src="/login/assets/images/logo_login.png" alt="Lattice">
-                <ul class="user-info" ng-if="login.username">
+                <ul class="user-info" ng-if="$ctrl.login.username">
                     <li class="label">username</li>
-                    <li class="value">{{login.username}}</li>
+                    <li class="value">{{$ctrl.login.username}}</li>
                     <li class="label">
                         <span 
                             ui-sref="login.update" 
-                            ng-if="state.current.name != 'login.update'" 
+                            ng-if="$ctrl.state.current.name != 'login.update'" 
                             class="default">[change]</span>
                         password
                     </li>
-                    <li class="value" ng-if="login.expireDays > 90">expires on {{login.expires | date:'MM/dd/yyyy'}}</li>
-                    <li class="value" ng-if="login.expireDays <= 90">expires in {{login.expireDays}} days</li>
-                    <li class="label" ng-if="login.tenant">
+                    <li class="value" ng-if="$ctrl.login.expireDays > 90">expires on {{$ctrl.login.expires | date:'MM/dd/yyyy'}}</li>
+                    <li class="value" ng-if="$ctrl.login.expireDays <= 90">expires in {{$ctrl.login.expireDays}} days</li>
+                    <li class="label" ng-if="$ctrl.login.tenant">
                         <span 
                             ui-sref="login.tenants" 
-                            ng-if="state.current.name != 'login.tenants'" 
+                            ng-if="$ctrl.state.current.name != 'login.tenants'" 
                             class="default">[change]</span>
                         current tenant
                     </li>
-                    <li class="value" ng-if="login.tenant">{{login.tenant}}</li>
+                    <li class="value" ng-if="$ctrl.login.tenant">{{$ctrl.login.tenant}}</li>
                     
-                    <li class="value" ng-if="login.username && !login.tenant && state.current.name != 'login.tenants'">
+                    <li class="value" ng-if="$ctrl.login.username && !$ctrl.login.tenant && $ctrl.state.current.name != 'login.tenants'">
                         <a ui-sref="login.tenants" class="default">
                             Choose a Tenant
                         </a>
                     </li>
                     
-                    <li class="value" ng-if="login.tenant">
-                        <a href="javascript:void(0)" ng-click="clickModelList()" class="default">
+                    <li class="value" ng-if="$ctrl.login.tenant">
+                        <a href="javascript:void(0)" ng-click="$ctrl.clickModelList()" class="default">
                             View Models
                         </a>
                     </li>
 
-                    <li class="" ng-if="login.username">
-                        <button ng-click="clickLogout()" class="button white-button block-button">
+                    <li class="" ng-if="$ctrl.login.username">
+                        <button ng-click="$ctrl.clickLogout()" class="button white-button block-button">
                             Sign Out
                         </button>
                     </li>
 
-                    <li class="" ng-if="!login.username">
+                    <li class="" ng-if="!$ctrl.login.username">
                         <button ui-sref="login.form" class="button orange-button block-button">
                             Sign In
                         </button>
@@ -53,9 +53,9 @@
 
             <div class="columns five login-content">
 
-                <div ng-if="state.loading">Loading</div>
+                <div ng-if="$ctrl.state.loading">Loading</div>
 
-                <div ui-view="FrameContent" ng-if="!state.loading"></div>
+                <div ui-view="FrameContent" ng-if="!$ctrl.state.loading"></div>
                 
             </div><!-- End .columns.five -->
 

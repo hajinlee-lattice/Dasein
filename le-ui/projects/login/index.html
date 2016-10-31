@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" id="ng-app" data-ng-app="mainApp">
+<html lang="en" id="ng-app" data-ng-app="loginApp">
     <head runat="server">
         <base href="/login/"> 
         <title>Login - Lattice Engines</title>
@@ -15,32 +15,23 @@
         <link rel="stylesheet" type="text/css" href="assets/css/production.css" />
         <!-- endbuild -->
     </head>
-    <style>
-        body {
-            opacity: 0;
-            transition: opacity 166ms ease;
-        }
-        body.initialized {
-            opacity: 1;
-        }
-    </style>
-    <body data-ng-controller="MainController" class="blue-background">
-        <div id="mainView">
-            <div ui-view="info" id="mainInfoView"></div>
-            <div ui-view="main" id="mainContentView"></div>
-        </div>
+
+    <body>
+        <div ui-view="info"></div>
+        <div ui-view="main"></div>
     </body>
     
     <script src="/assets/vendor.min.js"></script>
     <script src="/assets/lattice.min.js"></script>
 
     <!-- build:js app.js -->
-    <script src="app/app.js"></script>
-    <script src="app/login/frame/LatticeFrameModule.js"></script>
-    <script src="app/login/form/LoginFormModule.js"></script>
-    <script src="app/login/forgot/PasswordForgotModule.js"></script>
-    <script src="app/login/update/PasswordUpdateModule.js"></script>
-    <script src="app/login/tenants/TenantSelectModule.js"></script>
+    <script src="app/app.component.js"></script>
+    <script src="app/app.routes.js"></script>
+    <script src="app/login/frame/frame.component.js"></script>
+    <script src="app/login/form/form.component.js"></script>
+    <script src="app/login/forgot/forgot.component.js"></script>
+    <script src="app/login/update/update.component.js"></script>
+    <script src="app/login/tenants/tenants.component.js"></script>
     <!-- endbuild -->
 
     <!-- build:remove:dist -->

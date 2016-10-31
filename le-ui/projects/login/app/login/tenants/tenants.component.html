@@ -1,0 +1,78 @@
+<form class="form form-tenant-select" name="tenant-select-form" ng-if="$ctrl.initialize">
+    <div class="messaging error-messaging" ng-if="$ctrl.showTenantError">
+        <button id="close-button" type="button" class="close" ng-click="$ctrl.showTenantError = false;">x</button>
+        <ico class="fa fa-warning"></ico>
+        <span>{{$ctrl.tenantErrorMessage}}</span>
+    </div>
+    <div class="tenant-select-header row">
+        <h4 class="tenant-header">{{$ctrl.ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
+    </div>
+    <div class="tenant-select-body">
+        <div class="tenant-select-controls">
+            <div class="button-group" role="group" aria-label="Basic example">
+                <button ng-click="$ctrl.version = '3.0'" type="button" class="button {{$ctrl.version=='3.0'?'green':'white'}}-button icon-button">3.0</button>
+                <button ng-click="$ctrl.version = '2.0'" type="button" class="button {{$ctrl.version=='2.0'?'green':'white'}}-button icon-button">2.0</button>
+                <button ng-click="$ctrl.version = ''" type="button" class="button {{!$ctrl.version?'green':'white'}}-button icon-button">All</button>
+            </div>
+            <div class="tenant-select-controls-right pull-right">
+                <div class="select-menu ng-search open-absolute">
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        placeholder="Search" 
+                        ng-model="$ctrl.SearchValue" 
+                        ng-show="$ctrl.visible"
+                        ng-keydown="$ctrl.keyDown($event)"
+                        autofocus
+                    />
+                    <a class="button icon-button white-button" ng-click="$ctrl.toggle()">
+                        <span class="fa fa-search" ng-show="!$ctrl.visible"></span>
+                        <span class="fa fa-times" ng-show="$ctrl.visible"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div 
+            class="columns twelve panel panel-default tenant-select-list"
+            ng-class="{ 'deactivated': $ctrl.deactivated }"
+            ng-model="select_value" 
+        >
+            <div class="row panel-heading custom-heading">
+                <div class="columns two" ng-click="$ctrl.sort('UIVersion')">
+                    Ver.
+                    <i ng-if="$ctrl.SortProperty == 'UIVersion'" class="fa fa-caret-{{$ctrl.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
+                <div class="columns six" ng-click="$ctrl.sort('DisplayName')">
+                    Name
+                    <i ng-if="$ctrl.SortProperty == 'DisplayName'" class="fa fa-caret-{{$ctrl.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
+                <div class="columns four" ng-click="$ctrl.sort('RegisteredTime')">
+                    Created
+                    <i ng-if="$ctrl.SortProperty == 'RegisteredTime'" class="fa fa-caret-{{$ctrl.SortDirection ? 'up' : 'down'}}"></i>
+                </div>
+            </div>
+            <div class="row panel-body tenant-selection-list" ng-mouseover="$ctrl.hover()">
+                <div 
+                    ng-repeat="tenant in $ctrl.tenantList | 
+                        filter: { 'UIVersion': $ctrl.version, 'DisplayName': $ctrl.SearchValue } | 
+                        orderBy: $ctrl.SortDirection + $ctrl.SortProperty"
+                    class="job-td-row tenant-list-item {{$index}}"
+                    id="{{tenant.Identifier}}"
+                    ng-if="!$ctrl.deactivated"
+                    ng-click="$ctrl.select(tenant)"
+                >
+                    <div class="columns two tenant-version"><span class="badge {{tenant.UIVersion == '3.0' ? 'blue' : 'gray'}}-badge">{{tenant.UIVersion}}</span></div>
+                    <div class="columns seven tenant-name">{{tenant.DisplayName}}</div>
+                    <div class="columns three tenant-date">{{tenant.RegisteredTime | date:'MM/dd/yyyy'}}</div>
+                </div>
+                <div class="text-center tenant-list-spinner" ng-if="$ctrl.deactivated">
+                    <section class="loading-spinner lattice show-spinner"> 
+                        <h2 class="text-center">Launching LP{{$ctrl.selected.UIVersion == '2.0' ? ' 2.0' : 'I' }}</h2>
+                        <div class="meter"><span class="indeterminate"></span></div> 
+                    </section>
+                </div>
+            </div>
+            <span class="tenant-total">Displaying {{ ($ctrl.tenantList | filter: { 'UIVersion': $ctrl.version, 'DisplayName': $ctrl.SearchValue }).length || 0 }} tenants</span>
+        </div>
+    </div>
+</form>

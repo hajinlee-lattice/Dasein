@@ -231,7 +231,7 @@ module.exports = function (grunt) {
             login:     {
                 files: {
                     '<%= dir.login %>/<%= dir.assets %>/css/production.css': [
-                        '<%= dir.login %>/<%= dir.app %>/app.scss'
+                        '<%= dir.login %>/<%= dir.app %>/app.component.scss'
                     ]
                 }
             },

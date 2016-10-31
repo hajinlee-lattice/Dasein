@@ -1,0 +1,10 @@
+@import "login/frame/frame.component.scss";
+@import "login/tenants/tenants.component.scss";
+
+body {
+    opacity: 0;
+    transition: opacity 166ms ease;
+}
+body.initialized {
+    opacity: 1;
+}
