@@ -34,7 +34,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
             modelRun.getDataSet().setName(dataSetName);
             modelRun.getDataSet().setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
-            modelRun.getAnalyticPipeline().getPropData().setDataCloudVersion("2.0.0");
+            modelRun.getAnalyticPipeline().getPropData().setDataCloudVersion("2.0.1");
             modelRun.getAnalyticPipeline().getPropData().setExcludePublicDomains(true);
 
             dataSetEntityMgr.create(modelRun.getDataSet());
@@ -61,7 +61,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
             modelRun.getAnalyticPipeline().getPropData().setExcludePublicDomains(true);
             dataSetEntityMgr.create(modelRun.getDataSet());
-            
+
             ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
             log.info("Tenant=" + user + " Dataset=" + dataSetName);
@@ -78,23 +78,15 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
         return new Object[][] { { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
-        // { "bams_domain", "bams_domain.csv" }, //
-        // { "Mulesoft_Emea_doman_AccountMaster",
-        // "Mulesoft_Emea_domain.csv" },
-        // //
-        // { "Mulesoft_Apac_doman_AccountMaster",
-        // "Mulesoft_Apac_domain.csv" },
-        // //
-        // { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
-        // { "HootSuite_domain_AccountMaster",
-        // "HootSuite_PLS132_Clone_LP3_ModelingLead_OneLeadPerDomain_OrigAct_20160520_161631.csv"
-        // },
-        // //
-        // { "CornerStone_domain_AccountMaster",
-        // "CornerStone_domain.csv" }, //
-        // { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
-        // { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
+                { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
+                { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
+                { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
+                { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
+                { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
+                { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
+                { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
 
+        // { "bams_domain", "bams_domain.csv" }, //
         };
     }
 
