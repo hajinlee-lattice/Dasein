@@ -132,6 +132,15 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     @SuppressWarnings("unchecked")
+    protected String getOutputValue(String key) {
+        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
+        if (map == null) {
+            return null;
+        }
+        return map.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
     protected void putOutputValue(String key, String val) {
         Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
         if (map == null) {
