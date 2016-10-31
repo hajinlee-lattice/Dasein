@@ -20,7 +20,7 @@ public class Pivot implements RealTimeTransform {
 
     private static final Pattern patternDictionary = Pattern.compile("^\\{(.*)\\}$");
     private static final Pattern patternKeyAndValue = Pattern
-            .compile("^u?(\\'(.*?)\'|\"(.*?)\"): \\(u?(\'(.*?)\'|\"(.*?)\"), \\[(.*?)\\]\\)(, u?(\'|\").*|$)");
+            .compile("^u?(\'(.*?)\'|\"(.*?)\"): \\(u?(\'(.*?)\'|\"(.*?)\"), \\[(.*?)\\]\\)(, u?(\'|\").*|$)");
     private static final Pattern patternValues = Pattern.compile("^u?(\'(.*?)\'|\"(.*?)\")(, u?(\'|\").*|$)");
 
     protected Map<String, Object> lookupMap = new HashMap<>();
@@ -85,7 +85,7 @@ public class Pivot implements RealTimeTransform {
                                 pythonString));
             }
 
-            while (Boolean.TRUE) {
+            while (true) {
                 Matcher matcherKeyAndValue = patternKeyAndValue.matcher(dictionaryString);
                 if (matcherKeyAndValue.matches()) {
                     String targetColKey = matcherKeyAndValue.group(2);
