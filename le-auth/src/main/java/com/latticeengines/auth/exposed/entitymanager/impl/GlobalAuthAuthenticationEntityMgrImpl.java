@@ -12,6 +12,7 @@ import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 
 import java.util.Date;
+import java.util.HashMap;
 
 @Component("globalAuthAuthenticationEntityMgr")
 public class GlobalAuthAuthenticationEntityMgrImpl extends
@@ -36,6 +37,18 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthAuthentication findByUsernameJoinUser(String username) {
         return gaAuthenticationDao.findByUsernameJoinUser(username);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public GlobalAuthAuthentication findByUserId(Long userId) {
+        return gaAuthenticationDao.findByField("User_ID", userId);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public HashMap<Long, String> findUserInfoByTenantId(Long tenantId) {
+        return gaAuthenticationDao.findUserInfoByTenantId(tenantId);
     }
 
     @Override

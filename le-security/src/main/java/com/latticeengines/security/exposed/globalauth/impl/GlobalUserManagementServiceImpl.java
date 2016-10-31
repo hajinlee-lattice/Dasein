@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -541,58 +543,57 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested: " + tenantId);
         }
-        List<GlobalAuthUser> userDatas = gaUserTenantRightEntityMgr.findUsersByTenantId(tenantData.getPid());
-        if (userDatas == null || userDatas.size() == 0) {
+        List<GlobalAuthUserTenantRight> userRightDatas = gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid());
+        if (userRightDatas == null || userRightDatas.size() == 0) {
             return userRightsList;
         }
-        for (GlobalAuthUser userData : userDatas) {
-            User user = new User();
-            GlobalAuthAuthentication authData = gaUserEntityMgr
-                    .findByUserIdWithTenantRightsAndAuthentications(userData.getPid())
-                    .getAuthentications().get(0);
-            user.setUsername(authData.getUsername());
 
-            if (userData.getEmail() != null) {
-                user.setEmail(userData.getEmail());
-            }
+        HashMap<Long, String> userIdToUsername = gaAuthenticationEntityMgr.findUserInfoByTenantId(tenantData.getPid());
 
-            if (userData.getFirstName() != null) {
-                user.setFirstName(userData.getFirstName());
-            }
-
-            if (userData.getLastName() != null) {
-                user.setLastName(userData.getLastName());
-            }
-
-            if (userData.getTitle() != null) {
-                user.setTitle(userData.getTitle());
-            }
-
-            if (userData.getPhoneNumber() != null) {
-                user.setPhoneNumber(userData.getPhoneNumber());
-            }
-
-            if (userData.getIsActive()) {
-                user.setActive(userData.getIsActive());
-            }
-
-            AbstractMap.SimpleEntry<User, List<String>> uRights;
-            List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
-                    .findByUserIdAndTenantId(userData.getPid(), tenantData.getPid());
-            if (rightsData != null) {
-
-                Set<String> distinctRights = new HashSet<String>();
-                for (GlobalAuthUserTenantRight rightData : rightsData) {
-                    distinctRights.add(rightData.getOperationName());
-                }
-                List<String> rights = new ArrayList<String>(distinctRights);
-                uRights = new AbstractMap.SimpleEntry<>(user, rights);
+        HashMap<Long, AbstractMap.SimpleEntry<User, HashSet<String>>> userRights = new HashMap<>();
+        for(GlobalAuthUserTenantRight userRightData : userRightDatas) {
+            GlobalAuthUser userData = userRightData.getGlobalAuthUser();
+            if (userRights.containsKey(userData.getPid())) {
+                AbstractMap.SimpleEntry<User, HashSet<String>> uRights = userRights.get(userData.getPid());
+                uRights.getValue().add(userRightData.getOperationName());
             } else {
-                uRights = new AbstractMap.SimpleEntry<>(user, null);
+                User user = new User();
+                user.setUsername(userIdToUsername.get(userData.getPid()));
+
+                if (userData.getEmail() != null) {
+                    user.setEmail(userData.getEmail());
+                }
+
+                if (userData.getFirstName() != null) {
+                    user.setFirstName(userData.getFirstName());
+                }
+
+                if (userData.getLastName() != null) {
+                    user.setLastName(userData.getLastName());
+                }
+
+                if (userData.getTitle() != null) {
+                    user.setTitle(userData.getTitle());
+                }
+
+                if (userData.getPhoneNumber() != null) {
+                    user.setPhoneNumber(userData.getPhoneNumber());
+                }
+
+                if (userData.getIsActive()) {
+                    user.setActive(userData.getIsActive());
+                }
+                AbstractMap.SimpleEntry<User, HashSet<String>> uRights = new AbstractMap.SimpleEntry<>(user,
+                        new HashSet<String>());
+                uRights.getValue().add(userRightData.getOperationName());
+                userRights.put(userData.getPid(), uRights);
             }
-
+        }
+        for (Map.Entry<Long, AbstractMap.SimpleEntry<User, HashSet<String>>> entry : userRights.entrySet()) {
+            List<String> rights = new ArrayList<>(entry.getValue().getValue());
+            AbstractMap.SimpleEntry<User, List<String>> uRights = new AbstractMap.SimpleEntry<>(
+                    entry.getValue().getKey(), rights);
             userRightsList.add(uRights);
-
         }
         return userRightsList;
     }

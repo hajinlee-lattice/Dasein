@@ -1,10 +1,14 @@
 package com.latticeengines.auth.exposed.dao.impl;
 
+import java.util.HashMap;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
+import javax.persistence.Table;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
@@ -18,6 +22,10 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
     @Override
     protected Class<GlobalAuthAuthentication> getEntityClass() {
         return GlobalAuthAuthentication.class;
+    }
+
+    private Class<GlobalAuthUserTenantRight> getUserRightClass() {
+        return GlobalAuthUserTenantRight.class;
     }
 
     @SuppressWarnings("rawtypes")
@@ -40,6 +48,32 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
                 }
             }
             return (GlobalAuthAuthentication) list.get(0);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public HashMap<Long, String> findUserInfoByTenantId(Long tenantId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthAuthentication> entityClz = getEntityClass();
+        Class<GlobalAuthUserTenantRight> userRightClz = getUserRightClass();
+        String gaAuthTable = entityClz.getAnnotation(Table.class).name();
+        String gaUserRightTable = userRightClz.getAnnotation(Table.class).name();
+        String sqlStr = String.format("SELECT gaAuth.User_Id, gaAuth.Username " +
+                "FROM %s as gaAuth JOIN %s as gaUserRight " +
+                "ON gaAuth.User_Id = gaUserRight.User_Id " +
+                "WHERE gaUserRight.Tenant_Id = :tenantId", gaAuthTable, gaUserRightTable);
+        SQLQuery query = session.createSQLQuery(sqlStr);
+        query.setParameter("tenantId", tenantId);
+        List<Object[]> list = query.list();
+        HashMap<Long, String> userInfos = new HashMap<>();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            for (Object[] auth: list) {
+                userInfos.put(Long.parseLong(auth[0].toString()), auth[1].toString());
+            }
+            return userInfos;
         }
     }
 
