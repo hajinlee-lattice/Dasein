@@ -151,7 +151,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                 bars.on("mouseenter", function(d,i) {
                     var template = '';
                     template += 'Dataset: ' + d.description.dataset + '<br>';
-                    template += 'Pipeline: ' + d.description.pipeline + '<br>';
+                    template += 'AnalyticPipeline: ' + d.description.analyticPipeline + '<br>';
 
                     template += _.map(d.value, function (value, metric) {
                         return metric + ': ' + value;

@@ -1,17 +1,18 @@
-angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
-    'app.modelquality.controller.ModelQualityCreatePipelineStepCtrl'
+angular.module('app.modelquality.controller.PipelineCtrl', [
+    'app.modelquality.controller.PipelineStepCtrl'
 ])
-.controller('ModelQualityCreatePipelineCtrl', function ($scope, $state, $q, Pipelines, ModelQualityService) {
+.controller('PipelineCtrl', function ($scope, $state, $q, Pipelines, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
         labels: {
             ADD_STEP: 'Upload New Step',
-            PIPELINES: 'All Model Pipelines',
+            PIPELINES: 'All Pipelines',
             CREATE_NEW: 'Create New',
             STEPS: 'New Pipeline Steps',
             EMPTY_STEPS: 'This pipeline has 0 steps',
             PIPELINE_NAME: 'Pipeline Name',
+            PIPELINE_DESCRIPTION: 'Pipeline Description',
             CANCEL: 'Cancel',
             SAVE: 'Save',
             LOAD_SAVING: 'Saving Pipeline...',
@@ -21,14 +22,17 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
         selectedPipeline: null,
         pipeline: null,
         pipelineName: null,
+        pipelineDescription: null,
         isCreatingStep: false,
-        errorMsg: null,
-        loading: false,
         stepMetadata: null,
-        successMsg: null
+        loading: false,
+        error: false,
+        message: null
     });
 
     vm.selectPipeline = function (pipeline) {
+        vm.reset();
+
         if (!pipeline) {
             vm.selectedPipeline = null;
 
@@ -71,6 +75,8 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
 
     vm.createStep = function () {
         vm.isCreatingStep = true;
+        vm.error = false;
+        vm.message = null;
     };
 
     vm.cancelAddStep = function () {
@@ -78,13 +84,16 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
     };
 
     vm.savePipeline = function () {
+        vm.error = false;
+        vm.message = null;
+        vm.loading = true;
+
         if (!vm.pipelineName) {
-            vm.errorMsg = 'Pipeline name is required';
+            vm.error = true;
+            vm.message = 'Pipeline name is required';
             return;
         }
 
-        vm.errorMsg = null;
-        vm.successMsg = null;
         var newPipeline = vm.pipeline.pipeline_steps.map(function (step) {
             if (step.isNewStep) {
                 return {
@@ -97,8 +106,7 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
             }
         });
 
-        vm.loading = true;
-        ModelQualityService.CreatePipeline(vm.pipelineName, newPipeline)
+        ModelQualityService.CreatePipeline(vm.pipelineName, vm.pipelineDescription, newPipeline)
             .then(function (result) {
 
                 if (result.resultObj) {
@@ -112,21 +120,19 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
             }).then(function (result) {
 
                 vm.reset();
-                vm.successMsg = result.resultObj.name + ' has been created.';
+                vm.message = result.resultObj.name + ' has been created.';
                 vm.pipelines.push(result.resultObj);
 
             }).catch(function (error) {
-
+                vm.error = true;
                 if (error && error.errMsg) {
-                    vm.errorMsg = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+                    vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
                 } else {
-                    vm.errorMsg = 'Unexpected error has occured. Please try again.';
+                    vm.message = 'Unexpected error has occured. Please try again.';
                 }
 
             }).finally(function () {
-
                 vm.loading = false;
-
             });
 
     };
@@ -139,11 +145,12 @@ angular.module('app.modelquality.controller.ModelQualityCreatePipelineCtrl', [
         vm.selectedPipeline = null;
         vm.pipeline = null;
         vm.pipelineName = null;
+        vm.pipelineDescription = null;
         vm.isCreatingStep = false;
-        vm.errorMsg = null;
-        vm.successMsg = null;
-        vm.loading = false;
         vm.stepMetadata = null;
+        vm.loading = false;
+        vm.message = null;
+        vm.error = false;
     };
 
     vm.swapSteps = function (a, b) {

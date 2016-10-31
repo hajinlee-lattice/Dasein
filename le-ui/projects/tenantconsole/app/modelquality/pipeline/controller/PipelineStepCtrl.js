@@ -1,4 +1,4 @@
-angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl", [
+angular.module("app.modelquality.controller.PipelineStepCtrl", [
 ])
 .directive('fileModel', ['$parse', function ($parse) {
     // TODO: file uploader directive like le-ui
@@ -16,7 +16,7 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
         }
     };
 }])
-.controller('ModelQualityCreatePipelineStepCtrl', function ($scope, $state, $q, ModelQualityService) {
+.controller('PipelineStepCtrl', function ($scope, $state, $q, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -29,23 +29,23 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
             LOAD_SAVING: 'Saving Step...'
         },
         errorMsg: null,
-        pythonSuccess: null,
         pythonError: null,
-        metadataSuccess: null,
         metadataError: null,
-        loading: false
+        loading: false,
+        error: false,
+        message: null
     });
 
     vm.createStep = function () {
         vm.clearMessage();
 
-        var errorMsg = '';
-        errorMsg += !vm.stepName ? 'Step name required. ' : '';
-        errorMsg += !vm.pythonFile ? 'Python file required. ' : '';
-        errorMsg += !vm.metadataFile ? 'Metadata file required. ' : '';
+        vm.message = '';
+        vm.message += !vm.stepName ? 'Step name required. ' : '';
+        vm.message += !vm.pythonFile ? 'Python file required. ' : '';
+        vm.message += !vm.metadataFile ? 'Metadata file required. ' : '';
 
-        if (errorMsg) {
-            vm.setErrorMsg(errorMsg);
+        if (vm.message.length) {
+            vm.error = true;
             return;
         }
 
@@ -64,13 +64,11 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
             // because $q.all only catches first error, we want to catch all errors
             // ModelQualityService.UploadStepFile will resolve errors
             if (results.python) {
-                vm.pythonError = results.python.errMsg ? results.python.errMsg.errMsg : null;
-                vm.pythonSuccess = results.python.success ? 'Success' : null;
+                vm.message += results.python.errMsg ? results.python.errMsg.errMsg : '';
             }
 
             if (results.metadata) {
-                vm.metadataError = results.metadata.errMsg ? results.metadata.errMsg.errMsg : null;
-                vm.metadataSuccess = results.metadata.success ? 'Success' : null;
+                vm.message += results.metadata.errMsg ? results.metadata.errMsg.errMsg : '';
             }
 
             var errorMsg = _.reduce(results, function (result, value, key) {
@@ -78,7 +76,8 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
             }, '');
 
             if (errorMsg) {
-                vm.setErrorMsg(errorMsg);
+                vm.error = true;
+                vm.message = errorMsg;
             } else {
                 var pythonPath = results.python.resultObj.path;
                 var metadataPath = results.metadata.resultObj.path;
@@ -94,15 +93,17 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
                     vm.clearForm();
                     $scope.vm_createPipeline.isCreatingStep = false;
                 } else {
-                    vm.setErrorMsg('Dir path error: expected same directory path but got' + pythonPath + ' and ' + metadataPath);
+                    vm.error = true;
+                    vm.message = 'Dir path error: expected same directory path but got' + pythonPath + ' and ' + metadataPath;
                 }
             }
 
         }).catch(function (error) {
+            vm.error = true;
             if (error && error.errMsg) {
-                vm.setErrorMsg(error.errMsg);
+                vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
             } else {
-                vm.setErrorMsg('Unexpected error has occured. Please try again.');
+                vm.message = 'Unexpected error has occured. Please try again.';
             }
         }).finally(function () {
             vm.loading = false;
@@ -121,10 +122,6 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
         }
     };
 
-    vm.setErrorMsg = function (msg) {
-        vm.errorMsg = msg;
-    };
-
     vm.clearForm = function () {
         vm.stepName = '';
         vm.pythonFile = null;
@@ -132,10 +129,7 @@ angular.module("app.modelquality.controller.ModelQualityCreatePipelineStepCtrl",
     };
 
     vm.clearMessage = function () {
-        vm.pythonError = null;
-        vm.pythonSuccess = null;
-        vm.metadataError = null;
-        vm.metadataSuccess = null;
-        vm.errorMsg = null;
+        vm.error = false;
+        vm.message = null;
     };
 });

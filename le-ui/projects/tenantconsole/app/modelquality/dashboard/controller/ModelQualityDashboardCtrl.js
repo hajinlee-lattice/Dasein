@@ -99,7 +99,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
             groupData.dataset = dsKey;
             groupData.categories = _.map(dsData.pipelines, function (pipelineData, pipelineKey) {
                 var barData = {};
-                barData.category = pipelineData.description.pipeline;
+                barData.category = pipelineData.description.analyticPipeline;
                 barData.value = pipelineData.value;
                 barData.description = pipelineData.description;
 

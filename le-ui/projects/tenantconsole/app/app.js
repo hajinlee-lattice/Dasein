@@ -102,10 +102,8 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                     ].join(',');
 
                     var clause = [
-                        'WHERE', ' ',
-                        'AnalyticTestTag',
-                        '!=',
-                        '\'PRODUCTION\'',
+                        'WHERE ',
+                        'AnalyticTestTag != \'PRODUCTION\''
                     ].join('');
 
                     return InfluxDbService.Query({
@@ -122,13 +120,11 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                     ].join(',');
 
                     var clause = [
-                        'WHERE', ' ',
-                        'AnalyticTestTag',
-                        '=',
-                        '\'PRODUCTION\'', ' ',
-                        'GROUP BY', ' ',
-                        'AnalyticPipelineName', ',',
-                        'PipelineName'
+                        'WHERE ',
+                        'AnalyticTestTag =~ /^PRODUCTION/', ' ',
+                        'GROUP BY ',
+                        'AnalyticTestTag', ',',
+                        'AnalyticPipelineName'
                     ].join('');
 
                     return InfluxDbService.Query({
@@ -138,23 +134,53 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 },
             }
         })
-        .state('MODELQUALITY.CREATEPIPELINE', {
-            url: '/createpipeline',
+        .state('MODELQUALITY.PIPELINE', {
+            url: '/pipeline',
             views: {
                 'main@MODELQUALITY': {
-                    templateUrl: 'app/modelquality/pipeline/view/CreatePipelineView.html',
-                    controller: 'ModelQualityCreatePipelineCtrl',
+                    templateUrl: 'app/modelquality/pipeline/view/PipelineView.html',
+                    controller: 'PipelineCtrl',
                     controllerAs: 'vm_createPipeline'
                 },
-                'createPipelineStep@MODELQUALITY.CREATEPIPELINE': {
-                    templateUrl: 'app/modelquality/pipeline/view/CreatePipelineStepView.html',
-                    controller: 'ModelQualityCreatePipelineStepCtrl',
+                'createPipelineStep@MODELQUALITY.PIPELINE': {
+                    templateUrl: 'app/modelquality/pipeline/view/PipelineStepView.html',
+                    controller: 'PipelineStepCtrl',
                     controllerAs: 'vm_createPipelineStep'
                 }
             },
             resolve: {
                 Pipelines: function (ModelQualityService) {
                     return ModelQualityService.GetAllPipelines();
+                }
+            }
+        })
+        .state('MODELQUALITY.ANALYTICPIPELINE', {
+            url: '/analyticpipeline',
+            views: {
+                'main@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/Analyticpipeline/view/AnalyticPipelineView.html',
+                    controller: 'AnalyticPipelineCtrl',
+                    controllerAs: 'vm_analyticPipeline'
+                }
+            },
+            resolve: {
+                Algorithms: function (ModelQualityService) {
+                    return ModelQualityService.GetAllAlgorithms();
+                },
+                AnalyticPipelines: function (ModelQualityService) {
+                    return ModelQualityService.GetAllAnalyticPipelines();
+                },
+                Pipelines: function (ModelQualityService) {
+                    return ModelQualityService.GetAllPipelines();
+                },
+                SamplingConfigs: function (ModelQualityService) {
+                    return ModelQualityService.GetAllSamplingConfigs();
+                },
+                Dataflows: function (ModelQualityService) {
+                    return ModelQualityService.GetAllDataflows();
+                },                
+                PropdataConfigs: function (ModelQualityService) {
+                    return ModelQualityService.GetAllPropdataConfigs();
                 }
             }
         })

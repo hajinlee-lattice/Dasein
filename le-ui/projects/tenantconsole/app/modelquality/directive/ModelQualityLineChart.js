@@ -193,7 +193,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     hoverVerticalLine.attr("transform", "translate("+ translateXBy + ", 0)");
 
                     var tooltipData = {};
-                    tooltipData.Pipeline = tippedKey;
+                    tooltipData.AnalyticPipeline = tippedKey;
 
                     dots.style("r", function (d, i) {
                         if (d.x === tippedKey) {

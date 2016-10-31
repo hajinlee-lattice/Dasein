@@ -1,7 +1,7 @@
 .modelquality-dropdown {
   li a.active {
     background-color: #d9230f;
-    color: white;
+    color: white !important;
   }
 }
 
@@ -20,12 +20,13 @@
 }
 
 .pipeline-list {
-  padding-left: 1em;
+  padding: 0;
   overflow-y: auto;
   border-right: 1px solid #ccc;
   height: ~"calc(100vh - 200px)";
 
   li {
+    padding-left: 1em;
     cursor: pointer;
   }
 
