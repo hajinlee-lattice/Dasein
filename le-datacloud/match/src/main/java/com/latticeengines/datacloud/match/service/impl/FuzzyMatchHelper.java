@@ -31,8 +31,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
-@Component("dynamoDbHelper")
-public class DynamoDbHelper implements DbHelper {
+@Component("fuzzyMatchHelper")
+public class FuzzyMatchHelper implements DbHelper {
 
     private static final Log log = LogFactory.getLog(DynamoDbHelper.class);
 
@@ -48,7 +48,7 @@ public class DynamoDbHelper implements DbHelper {
 
     @Override
     public boolean accept(String version) {
-        return !useFuzzyMatch && MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+        return useFuzzyMatch && MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
@@ -63,18 +63,12 @@ public class DynamoDbHelper implements DbHelper {
         return matchContext;
     }
 
-
     @Override
     public void initExecutors() {
     }
 
     @Override
     public MatchContext fetch(MatchContext context) {
-        return fetchSync(context);
-    }
-
-    @Override
-    public MatchContext fetchSync(MatchContext context) {
         AccountLookupRequest request = context.getAccountLookupRequest();
         if (request == null) {
             throw new NullPointerException("Cannot find AccountLookupRequest in the MatchContext");
@@ -95,6 +89,11 @@ public class DynamoDbHelper implements DbHelper {
         log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
                 System.currentTimeMillis() - startTime, accounts.size()));
         return context;
+    }
+
+    @Override
+    public MatchContext fetchSync(MatchContext context) {
+        return fetch(context);
     }
 
     @Override
@@ -176,7 +175,7 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     private AccountLookupRequest createLookupRequest(MatchContext matchContext,
-            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
+                                                     List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
         String dataCloudVersion = matchContext.getInput().getDataCloudVersion();
         AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
         populateLookupRequest(matchContext, lookupRequestTriplets, accountLookupRequest);
@@ -184,14 +183,14 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     private void populateLookupRequest(MatchContext matchContext,
-            List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets,
-            AccountLookupRequest accountLookupRequest) {
+                                       List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets,
+                                       AccountLookupRequest accountLookupRequest) {
 
         for (InternalOutputRecord record : matchContext.getInternalResults()) {
             accountLookupRequest.addLookupPair(
                     (StringUtils.isEmpty(record.getParsedDomain())
                             || "null".equalsIgnoreCase(record.getParsedDomain().trim()) || record.isPublicDomain())
-                                    ? null : record.getParsedDomain(),
+                            ? null : record.getParsedDomain(),
                     (StringUtils.isEmpty(record.getParsedDuns())
                             || "null".equalsIgnoreCase(record.getParsedDuns().trim()) ? null : record.getParsedDuns()));
             Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> accountLookupRequestTriplet = new MutableTriple<>(
@@ -201,7 +200,7 @@ public class DynamoDbHelper implements DbHelper {
     }
 
     private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, LatticeAccount account,
-            ColumnSelection columnSelection, String dataCloudVersion) {
+                                                      ColumnSelection columnSelection, String dataCloudVersion) {
         Map<String, Object> queryResult = parseLatticeAccount(account, columnSelection, dataCloudVersion);
         record.setQueryResult(queryResult);
     }

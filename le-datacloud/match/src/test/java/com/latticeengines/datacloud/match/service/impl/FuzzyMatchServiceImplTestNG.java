@@ -16,13 +16,14 @@ import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctional
 
 @Test
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+
     @Autowired
     private FuzzyMatchService service;
 
     @Autowired
     private MatchGuideBook guideBook;
 
-    @Test
+    @Test(groups = "pending")
     public void test() throws Exception {
         try {
             List<Map<String, Object>> matchRequests = new ArrayList<>();
