@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -23,7 +25,9 @@ public class LocationUtils {
 
     static {
         Object[][] countrySynonData = new Object[][]{ //
-                { USA, new String[] { "USA", "U S A", "US", "U S", "United States", "United States of America", "America" } }, //
+                { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES", "THE UNITED STATES",
+                        "UNITED STATES OF AMERICA", "THE UNITED STATES OF AMERICA", "UNITED STATES OF AMERICA THE",
+                        "AMERICA", "AMERICAN" } }, //
         };
 
         Object[][] usStateSynonData = new Object[][] { //
@@ -218,11 +222,11 @@ public class LocationUtils {
     }
 
     public static String getStandardCountry(String country) {
-        String phrase = country.toUpperCase().replace(".", "").trim();
+        String phrase = getStandardString(country);
         if (countrySynonMap.containsKey(phrase)) {
             return countrySynonMap.get(phrase);
         } else {
-            return country;
+            return phrase;
         }
     }
 
@@ -324,6 +328,23 @@ public class LocationUtils {
         {
             return null;
         }
+    }
+
+    private static String getStandardString(String str) {
+        Character[] symbols = { '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[',
+                ']', '|', '\\', ':', ';', '\'', '"', '<', '>', ',', '.', '/', '?' };
+        Set<Character> symbolSet = new HashSet<Character>(Arrays.asList(symbols));
+        StringBuilder sb = new StringBuilder(str.toUpperCase().trim());
+        for (int i = 0; i < sb.length(); i++) {
+            if (symbolSet.contains(sb.charAt(i))) {
+                sb.replace(i, i + 1, "");
+            }
+        }
+        String res = sb.toString();
+        while (res.indexOf("  ") >= 0) {
+            res = res.replace("  ", " ");
+        }
+        return res;
     }
 
 }

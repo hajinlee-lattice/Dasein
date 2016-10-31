@@ -33,18 +33,17 @@ ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES;
 
-
 INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, Status)
 VALUES
   ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', 'APPROVED'),
   ('2.0.1', '2016-10-28', '2.0', '2016-10-28_17-32-32_UTC', '2016-10-28_14-45-38_UTC', '', 'NEW');
 
-LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/Ingestion.csv' INTO TABLE `Ingestion`
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
+CHARACTER SET UTF8
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
-IGNORE 1 LINES
-(PID,IngestionName,Source,CronExpression,SchedularEnabled,NewJobRetryInterval,NewJobMaxRetry,IngestionType,IngestionCriteria);
+IGNORE 1 LINES;
 
 SET SQL_SAFE_UPDATES = 0;
 
@@ -68,7 +67,7 @@ UPDATE AccountMasterColumn
 SET FundamentalType = NULL
 WHERE FundamentalType = '';
 
-UPDATE LDC_ManageDB.SourceColumn
+UPDATE SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')
 WHERE SourceName = 'DnBCacheSeedRaw';
 
