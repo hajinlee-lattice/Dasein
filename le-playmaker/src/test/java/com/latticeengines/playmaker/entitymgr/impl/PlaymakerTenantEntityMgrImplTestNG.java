@@ -1,12 +1,8 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
-import java.net.InetAddress;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,9 +10,10 @@ import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
+import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
-public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
+
+public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
 
     @Autowired
     private PlaymakerTenantEntityMgr playMakerEntityMgr;
@@ -89,24 +86,4 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
         Assert.assertFalse(user.getPasswordExpired());
     }
 
-    public static PlaymakerTenant getTenant() {
-        PlaymakerTenant tenant = new PlaymakerTenant();
-        tenant.setExternalId("");
-        tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.118;instanceName=SQL2012STD;databaseName=PlayMakerDB");
-        tenant.setJdbcUserName("playmaker");
-        tenant.setJdbcPassword("playmaker");
-        tenant.setTenantName(getTenantName());
-        return tenant;
-    }
-
-    public static String getTenantName() {
-        String hostName;
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (Exception ex) {
-            hostName = "localhost";
-        }
-        return "test." + System.getProperty("user.name") + "." + hostName;
-    }
 }

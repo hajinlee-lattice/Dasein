@@ -16,16 +16,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.entitymgr.JdbcTempalteFactory;
+import com.latticeengines.playmaker.entitymgr.JdbcTemplateFactory;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-@Component("JdbcTempalteFactory")
-public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
+@Component("jdbcTemplateFactory")
+public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
 
     private static final Log log = LogFactory.getLog(JdbcTemplateFactoryImpl.class);
 
-    private Map<String, TemplateInfo> jdbcTempates = new ConcurrentHashMap<>();
+    private Map<String, TemplateInfo> jdbcTemplates = new ConcurrentHashMap<>();
 
     @Autowired
     private PlaymakerTenantEntityMgr tenantEntityMgr;
@@ -45,6 +45,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
     @Value("${playmaker.datasource.password.encrypted}")
     private String dataSoucePassword;
 
+    @Override
     public NamedParameterJdbcTemplate getTemplate(String tenantName) {
 
         PlaymakerTenant tenant = tenantEntityMgr.findByTenantName(tenantName);
@@ -53,22 +54,22 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
         }
 
         boolean hasCreatedNew = false;
-        TemplateInfo templateInfo = jdbcTempates.get(tenantName);
+        TemplateInfo templateInfo = jdbcTemplates.get(tenantName);
         if (templateInfo == null) {
-            synchronized (jdbcTempates) {
-                templateInfo = jdbcTempates.get(tenantName);
+            synchronized (jdbcTemplates) {
+                templateInfo = jdbcTemplates.get(tenantName);
                 if (templateInfo == null) {
                     templateInfo = getTemplateInfo(tenant);
-                    jdbcTempates.put(tenantName, templateInfo);
+                    jdbcTemplates.put(tenantName, templateInfo);
                 }
             }
         } else if (isHashChanged(tenant, templateInfo)) {
             if (!hasCreatedNew) {
-                synchronized (jdbcTempates) {
+                synchronized (jdbcTemplates) {
                     if (!hasCreatedNew) {
                         removeTemplate(tenantName);
                         templateInfo = getTemplateInfo(tenant);
-                        jdbcTempates.put(tenantName, templateInfo);
+                        jdbcTemplates.put(tenantName, templateInfo);
                         hasCreatedNew = true;
                     }
                 }
@@ -80,8 +81,8 @@ public class JdbcTemplateFactoryImpl implements JdbcTempalteFactory {
 
     public void removeTemplate(String tenantName) {
 
-        synchronized (jdbcTempates) {
-            TemplateInfo tempInfo = jdbcTempates.remove(tenantName);
+        synchronized (jdbcTemplates) {
+            TemplateInfo tempInfo = jdbcTemplates.remove(tenantName);
             if (tempInfo != null) {
                 try {
                     tempInfo.cpds.close();

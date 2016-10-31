@@ -8,9 +8,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalTestNG;
+import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
-public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
+public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     private RestTemplate restTemplate = null;
     protected OAuth2RestTemplate adminRestTemplate = null;

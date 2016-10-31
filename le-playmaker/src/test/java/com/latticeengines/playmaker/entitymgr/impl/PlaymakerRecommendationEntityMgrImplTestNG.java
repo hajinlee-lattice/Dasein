@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,9 +12,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
+import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
-@ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
-public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {
+public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGBase {
 
     @Autowired
     private PlaymakerTenantEntityMgr playMakerTenantEntityMgr;
@@ -26,10 +24,11 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
 
     private PlaymakerTenant tenant;
 
+    @Override
     @BeforeClass
     @Test(groups = "functional", enabled = true)
     public void beforeClass() {
-        tenant = getTennat();
+        tenant = getTenant();
         try {
             playMakerTenantEntityMgr.deleteByTenantName(tenant.getTenantName());
         } catch (Exception ex) {
@@ -417,10 +416,6 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
         Assert.assertFalse(extension.containsKey("Item_ID"));
         Assert.assertFalse(extension.containsKey("yyy"));
 
-    }
-
-    public PlaymakerTenant getTennat() {
-        return PlaymakerTenantEntityMgrImplTestNG.getTenant();
     }
 
 }

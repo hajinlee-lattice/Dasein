@@ -5,7 +5,7 @@ import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ExceptionEncodingTranslatorTestNG {
+public class ExceptionEncodingTranslatorUnitTestNG {
 
     @Test(groups = "unit")
     public void translate() throws Exception {

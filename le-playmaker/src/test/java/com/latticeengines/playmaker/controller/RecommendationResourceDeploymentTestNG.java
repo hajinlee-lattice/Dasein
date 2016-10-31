@@ -12,9 +12,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalTestNG;
+import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
-public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG {
+public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     private OAuth2RestTemplate restTemplate = null;
 
