@@ -68,21 +68,19 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     @Override
     public List<Job> getJobs(String modelId) {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
-                + tenantWithPid.getPid() + " and model " + modelId);
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid()
+                + " and model " + modelId);
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
-            if (job.getJobType().equals("scoreWorkflow")
-                    || job.getJobType().equals("importMatchAndScoreWorkflow")
+            if (job.getJobType().equals("scoreWorkflow") || job.getJobType().equals("importMatchAndScoreWorkflow")
                     || job.getJobType().equals("rtsBulkScoreWorkflow")
                     || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
                 String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
                 ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
                 String jobModelName = modelSummary != null ? modelSummary.getDisplayName() : null;
                 if (jobModelId != null && jobModelId.equals(modelId)) {
-                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                            jobModelName);
+                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, jobModelName);
                     ret.add(job);
                 }
             }
@@ -92,13 +90,22 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public InputStream getResults(String workflowJobId) {
+    public InputStream getScoreResults(String workflowJobId) {
+        return getResultFile(workflowJobId, WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+    }
+
+    @Override
+    public InputStream getPivotScoringFile(String workflowJobId) {
+        return getResultFile(workflowJobId, WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH);
+    }
+
+    private InputStream getResultFile(String workflowJobId, String resultFileType) {
         Job job = workflowProxy.getWorkflowExecution(workflowJobId);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
 
-        String path = job.getOutputs().get(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+        String path = job.getOutputs().get(resultFileType);
 
         if (path == null) {
             throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
@@ -107,8 +114,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         try {
             String hdfsDir = StringUtils.substringBeforeLast(path, "/");
             String filePrefix = StringUtils.substringAfterLast(path, "/");
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir,
-                    filePrefix + ".*");
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
             if (CollectionUtils.isEmpty(paths)) {
                 throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
             }
@@ -120,7 +126,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String getResultFileName(String workflowJobId) {
+    public String getResultScoreFileName(String workflowJobId) {
         Job job = workflowProxy.getWorkflowExecution(workflowJobId);
         if (job == null) {
             throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
@@ -139,32 +145,23 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String scoreTestingData(String modelId, String fileName, Boolean useRts,
-            Boolean performEnrichment, Boolean debug) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+    public String getResultPivotScoreFileName(String workflowJobId) {
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
+        if (job == null) {
+            throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
 
-        boolean useRtsApi = false;
-        boolean enableLeadEnrichment = performEnrichment == null ? false
-                : performEnrichment.booleanValue();
-        boolean enableDebug = debug == null ? false : debug.booleanValue();
+        String path = job.getOutputs().get(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH);
 
-        if (enableLeadEnrichment
-                || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
-            useRtsApi = true;
+        if (path == null) {
+            throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
         }
-
-        if (useRtsApi) {
-            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment,
-                    enableDebug);
-        }
-        return scoreTestingData(modelId, fileName);
+        String fileName = StringUtils.substringAfterLast(path, "/");
+        return StringUtils.substringBeforeLast(fileName, "_pivoted") + "_pivoted.csv";
     }
 
     @Override
-    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment,
+    public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment,
             Boolean debug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
@@ -172,12 +169,31 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
 
         boolean useRtsApi = false;
-        boolean enableLeadEnrichment = performEnrichment == null ? false
-                : performEnrichment.booleanValue();
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
         boolean enableDebug = debug == null ? false : debug.booleanValue();
 
-        if (enableLeadEnrichment
-                || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
+            useRtsApi = true;
+        }
+
+        if (useRtsApi) {
+            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
+        }
+        return scoreTestingData(modelId, fileName);
+    }
+
+    @Override
+    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment, Boolean debug) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+
+        boolean useRtsApi = false;
+        boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
+        boolean enableDebug = debug == null ? false : debug.booleanValue();
+
+        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
             useRtsApi = true;
         }
 
@@ -199,23 +215,20 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
 
         String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return scoreWorkflowSubmitter
-                .submit(modelSummary.getId(), modelSummary.getTrainingTableName(), "Training Data",
-                        TransformationGroup.fromName(transformationGroupName))
-                .toString();
+        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                "Training Data", TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     private String scoreTestingData(String modelId, String fileName) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return importMatchAndScoreWorkflowSubmitter
-                .submit(modelId, fileName, TransformationGroup.fromName(transformationGroupName))
-                .toString();
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
+                TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
-        String transformationGroupName = modelSummary.getModelSummaryConfiguration()
-                .getString(ProvenancePropertyName.TransformationGroupName, null);
+        String transformationGroupName = modelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null);
         if (transformationGroupName == null) {
             transformationGroupName = modelSummary.getTransformationGroupName();
         }
@@ -226,21 +239,19 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         return transformationGroupName;
     }
 
-    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary,
-            boolean enableLeadEnrichment, boolean debug) {
+    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment, boolean debug) {
         if (modelSummary.getTrainingTableName() == null) {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
 
-        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(),
-                modelSummary.getTrainingTableName(), enableLeadEnrichment, "Training Data", debug)
-                .toString();
+        return rtsBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+                enableLeadEnrichment, "Training Data", debug).toString();
     }
 
     private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName,
             boolean enableLeadEnrichment, boolean debug) {
-        return importAndRTSBulkScoreWorkflowSubmitter
-                .submit(modelSummary.getId(), fileName, enableLeadEnrichment, debug).toString();
+        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment,
+                debug).toString();
     }
 
     @Override

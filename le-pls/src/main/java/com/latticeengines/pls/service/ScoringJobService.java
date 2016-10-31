@@ -9,14 +9,18 @@ public interface ScoringJobService {
 
     List<Job> getJobs(String modelId);
 
-    InputStream getResults(String workflowJobId);
+    InputStream getScoreResults(String workflowJobId);
 
     String scoreTestingData(String modelId, String fileName, Boolean useRtsApi, Boolean performEnrichment, Boolean debug);
 
     String scoreTrainingData(String modelId, Boolean useRtsApi, Boolean performEnrichmen, Boolean debug);
 
-    String getResultFileName(String workflowJobId);
+    String getResultScoreFileName(String workflowJobId);
 
     InputStream getScoringErrorStream(String jobId);
+
+    InputStream getPivotScoringFile(String workflowJobId);
+
+    String getResultPivotScoreFileName(String workflowJobId);
 
 }

@@ -41,16 +41,32 @@ public class ScoringJobResource {
         return scoringJobService.getJobs(modelId);
     }
 
-    @RequestMapping(value = "{jobId}/results", method = RequestMethod.GET, produces = "application/csv")
+    @RequestMapping(value = "{jobId}/results/score", method = RequestMethod.GET, produces = "application/csv")
     @ResponseBody
     @ApiOperation(value = "Retrieve results csv for the provided jobId")
     public void getResultsCsv(@PathVariable String jobId, HttpServletResponse response) {
         try {
-            InputStream is = scoringJobService.getResults(jobId);
+            InputStream is = scoringJobService.getScoreResults(jobId);
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             response.setHeader("Content-Encoding", "gzip");
             response.setHeader("Content-Disposition",
-                    String.format("attachment; filename=\"%s\"", scoringJobService.getResultFileName(jobId)));
+                    String.format("attachment; filename=\"%s\"", scoringJobService.getResultScoreFileName(jobId)));
+            GzipUtils.copyAndCompressStream(is, response.getOutputStream());
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18102, e);
+        }
+    }
+
+    @RequestMapping(value = "{jobId}/results/pivotscore", method = RequestMethod.GET, produces = "application/csv")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve results csv for the provided jobId")
+    public void getPivotScoringResultCsv(@PathVariable String jobId, HttpServletResponse response) {
+        try {
+            InputStream is = scoringJobService.getPivotScoringFile(jobId);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            response.setHeader("Content-Encoding", "gzip");
+            response.setHeader("Content-Disposition",
+                    String.format("attachment; filename=\"%s\"", scoringJobService.getResultPivotScoreFileName(jobId)));
             GzipUtils.copyAndCompressStream(is, response.getOutputStream());
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18102, e);

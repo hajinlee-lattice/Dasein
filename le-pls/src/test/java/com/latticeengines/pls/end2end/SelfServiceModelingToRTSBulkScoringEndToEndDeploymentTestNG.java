@@ -226,7 +226,7 @@ public class SelfServiceModelingToRTSBulkScoringEndToEndDeploymentTestNG extends
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
                 byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
