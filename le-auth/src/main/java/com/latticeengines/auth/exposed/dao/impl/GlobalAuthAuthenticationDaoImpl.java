@@ -3,16 +3,17 @@ package com.latticeengines.auth.exposed.dao.impl;
 import java.util.HashMap;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import javax.persistence.Table;
+
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
-import javax.persistence.Table;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
-import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 
 @Component("globalAuthAuthenticationDao")
 public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthentication>
@@ -64,7 +65,7 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
                 "ON gaAuth.User_Id = gaUserRight.User_Id " +
                 "WHERE gaUserRight.Tenant_Id = :tenantId", gaAuthTable, gaUserRightTable);
         SQLQuery query = session.createSQLQuery(sqlStr);
-        query.setParameter("tenantId", tenantId);
+        query.setLong("tenantId", tenantId);
         List<Object[]> list = query.list();
         HashMap<Long, String> userInfos = new HashMap<>();
         if (list.size() == 0) {
