@@ -62,12 +62,12 @@ public class LocationUtilsUnitTestNG {
                 { "USA", "Rhode Island", "Rhode Island", "New England" }, //
                 { "USA", "Virgin Islands", "Virgin Islands", "Other" }, //
                 { "USA", "NB", "Nebraska", "West North Central" }, //
-                { "Canada", "NB", "New Brunswick", "Canada" }, //
-                { "Canada", "Québec", "Quebec", "Canada" }, //
-                { "China", "Beijing", "Beijing", "China" }, //
-                { "Japan", "Nowhere", "Nowhere", "Japan" }, //
+                { "Canada", "NB", "New Brunswick", "CANADA" }, //
+                { "Canada", "Québec", "Quebec", "CANADA" }, //
+                { "China", "Beijing", "Beijing", "CHINA" }, //
+                { "Japan", "Nowhere", "Nowhere", "JAPAN" }, //
                 { "USA", "Beijing", null, "Other" }, //
-                { "Canada", "Nowhere", null, "Canada" }, //
+                { "Canada", "Nowhere", null, "CANADA" }, //
         };
     }
 
