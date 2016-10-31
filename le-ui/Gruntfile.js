@@ -78,6 +78,21 @@ module.exports = function (grunt) {
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false
             },
+            devb_admin: {
+                NODE_APPS: 'leadmin',
+                NODE_ENV: 'development',
+                API_ADMIN_URL: 'https://10.41.0.26:8085',
+                API_MCSVC_URL: 'https://10.41.0.26:8080',
+                API_MATCHAPI_URL: 'https://10.41.0.26:8076',
+                API_INFLUXDB_URL: 'http://10.41.1.188:8086',
+                COMPRESSED: false,
+                LOGGING: './server/log',
+                ADMIN_HTTP_PORT: 3003,
+                ADMIN_HTTPS_PORT: 3002,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
+            },
             local: {
                 NODE_APPS: 'leui',
                 NODE_ENV: 'development',
