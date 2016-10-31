@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +29,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -215,7 +218,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 .replace("{env}", environment);
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         try {
-            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName);
+            provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, featureFlagMap);
         } catch (Exception e) {
             throw new RuntimeException("Failed to provision tenant via tenant console.", e);
         }
@@ -231,8 +234,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         return tenant;
     }
 
-    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
-            throws IOException {
+    private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson,
+            Map<String, Boolean> featureFlagMap) throws IOException {
         String url = "tenantconsole/" + tenantRegJson;
         log.info("Using tenant registration template " + url);
         List<BasicNameValuePair> adHeaders = loginAd();
@@ -244,13 +247,30 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             throw new IOException("Cannot find resource [" + url + "]");
         }
         String payload = null;
-        payload = IOUtils.toString(ins, "UTF-8");
+        if (featureFlagMap.containsKey(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())
+                && !featureFlagMap.get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())) {
+            payload = overWriteEncrptionFeatureFlagToFalse(ins);
+        } else {
+            payload = IOUtils.toString(ins, "UTF-8");
+        }
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
         HttpClientWithOptionalRetryUtils.sendPostRequest(
                 adminApiHostPort + "/admin/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders,
                 payload);
+    }
+
+    private String overWriteEncrptionFeatureFlagToFalse(InputStream ins) throws IOException {
+        String input = IOUtils.toString(ins, "UTF-8");
+        Pattern pattern = Pattern.compile("(\\\\\"EnableDataEncryption\\\\\")(:true)");
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer result = new StringBuffer();
+        if (matcher.find()) {
+            matcher.appendReplacement(result, "\\\\\"EnableDataEncryption\\\\\":false");
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {

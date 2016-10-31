@@ -72,7 +72,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
             if (enableEncryptionTenant.booleanValue()) {
                 Assert.assertTrue(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
             } else {
-                // Assert.assertFalse(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
+                Assert.assertFalse(dataEncryptionService.isEncrypted(CustomerSpace.parse(mainTestTenant.getId())));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         updatedHdfsDir = directory + "/testfolder_updated";
         testDirectoryCreation();
         testFileCreation();
-        testFileReading();
+        testFileReading(enableEncryptionTenant);
         testUpdateDirectoryName();
         testDeleteDirectory();
     }
@@ -116,13 +116,13 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     }
 
-    protected void testFileReading() {
+    protected void testFileReading(boolean enableEncryptionTenant) {
         log.info("Start reading the file created in Hdfs: " + hdfsDir);
         try {
             FileStatus fileStatus = WebHdfsUtils.getFileStatus(webHdfsUrl, yarnConfiguration,
                     String.format("%s/%s", hdfsDir, FILE_NAME));
             Assert.assertTrue(fileStatus.isFile());
-            Assert.assertTrue(fileStatus.isEncrypted());
+            Assert.assertEquals(Boolean.valueOf(enableEncryptionTenant), Boolean.valueOf(fileStatus.isEncrypted()));
             String expectedFileContents = FileUtils.readFileToString(
                     new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
             log.info("file contents are: " + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
