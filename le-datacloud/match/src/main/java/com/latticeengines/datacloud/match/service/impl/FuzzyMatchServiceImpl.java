@@ -11,9 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.datacloud.match.actors.visitor.MatchActorSystemWrapper;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTravelerContext;
+import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 
 import akka.pattern.Patterns;
@@ -27,7 +26,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
     @Autowired
-    private MatchActorSystemWrapper wrapper;
+    private MatchGuideBook guideBook;
 
     @Override
     public Object callMatch(Map<String, Object> matchRequest) throws Exception {
@@ -44,8 +43,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         Timeout timeout = new Timeout(duration);
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (Map<String, Object> matchRequest : matchRequests) {
-            GuideBook gb = wrapper.createGuideBook();
-            MatchTravelerContext traveler = new MatchTravelerContext(UUID.randomUUID().toString(), gb);
+            MatchTravelContext traveler = //
+                    new MatchTravelContext(UUID.randomUUID().toString(), guideBook);
 
             traveler.setDataKeyValueMap(matchRequest);
 
@@ -60,8 +59,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return results;
     }
 
-    private Future<Object> askFuzzyMatchAnchor(MatchTravelerContext traveler, Timeout timeout) {
-        return Patterns.ask(wrapper.getFuzzyMatchAnchor(), traveler, timeout);
+    private Future<Object> askFuzzyMatchAnchor(MatchTravelContext traveler, Timeout timeout) {
+        return Patterns.ask(guideBook.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
 }

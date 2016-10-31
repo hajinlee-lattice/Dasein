@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchActorSystemWrapper;
+import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
@@ -20,7 +20,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     private FuzzyMatchService service;
 
     @Autowired
-    private MatchActorSystemWrapper wrapper;
+    private MatchGuideBook guideBook;
 
     @Test
     public void test() throws Exception {
@@ -50,7 +50,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 Assert.assertNotEquals(result, matchRequests.get(idx++));
             }
         } finally {
-            wrapper.shutdown();
+            guideBook.shutdown();
         }
     }
 }

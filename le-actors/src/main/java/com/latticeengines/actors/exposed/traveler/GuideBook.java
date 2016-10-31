@@ -1,7 +1,9 @@
 package com.latticeengines.actors.exposed.traveler;
 
-public interface GuideBook {
-    String next(String currentLocation, TravelerContext traveler);
+public abstract class GuideBook {
+    public abstract String next(String currentLocation, TravelContext context);
 
-    String getDataSourceActorPath(String dataSourceName);
+    public void logVisit(String traversedActor, TravelContext context) {
+        context.logVisit(traversedActor);
+    }
 }

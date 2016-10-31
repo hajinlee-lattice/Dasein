@@ -1,17 +1,14 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
-import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 public class MatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
-    private Map<String, String> dataSourceActors = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public MatchActorStateTransitionGraph(String... actorRefs) {
@@ -24,7 +21,7 @@ public class MatchActorStateTransitionGraph {
         return dummyGraph;
     }
 
-    public String next(String currentLocation, TravelerContext traveler, String originalLocation) {
+    public String next(String currentLocation, TravelContext traveler, String originalLocation) {
         int idx = 0;
         for (String node : dummyGraph) {
             if (node.equals(currentLocation)) {
@@ -39,13 +36,4 @@ public class MatchActorStateTransitionGraph {
 
         return originalLocation;
     }
-
-    public void setDataSourceActors(Map<String, String> dataSourceActors) {
-        this.dataSourceActors.putAll(dataSourceActors);
-    }
-
-    public Map<String, String> getDataSourceActors() {
-        return dataSourceActors;
-    }
-
 }

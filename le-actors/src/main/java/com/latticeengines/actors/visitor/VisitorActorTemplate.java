@@ -3,8 +3,9 @@ package com.latticeengines.actors.visitor;
 import org.apache.commons.logging.Log;
 
 import com.latticeengines.actors.ActorTemplate;
+import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 import akka.actor.ActorRef;
 
@@ -12,24 +13,27 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected abstract Log getLogger();
 
-    protected abstract boolean process(TravelerContext traveler);
+    protected abstract boolean process(TravelContext traveler);
 
     protected abstract void process(Response response);
 
-    protected String getNextLocation(TravelerContext traveler) {
-        return traveler.getNextLocationFromVisitingQueue();
+    protected abstract GuideBook getGuideBook();
+
+    protected String getNextLocation(TravelContext traveler) {
+        return getGuideBook().next(self().path().toSerializationFormat(), traveler);
+        // return traveler.getNextLocationFromVisitingQueue();
     }
 
     @Override
     protected boolean isValidMessageType(Object msg) {
-        return msg instanceof TravelerContext || msg instanceof Response;
+        return msg instanceof TravelContext || msg instanceof Response;
     }
 
     @Override
     protected void processMessage(Object msg) {
         if (isValidMessageType(msg)) {
-            if (msg instanceof TravelerContext) {
-                TravelerContext traveler = (TravelerContext) msg;
+            if (msg instanceof TravelContext) {
+                TravelContext traveler = (TravelContext) msg;
                 getLogger().info("Received traveler: " + traveler);
 
                 setOriginalSender(traveler, sender());
@@ -54,7 +58,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
                 process(response);
 
-                TravelerContext traveler = response.getTravelerContext();
+                TravelContext traveler = response.getTravelerContext();
                 if (response.getResult() != null) {
                     traveler.setResult(response.getResult());
                 }
@@ -76,7 +80,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         }
     }
 
-    protected void handleResult(Response response, TravelerContext traveler) {
+    protected void handleResult(Response response, TravelContext traveler) {
         String anchorLocation = traveler.getAnchorActorLocation();
 
         ActorRef nextActorRef = getContext().actorFor(anchorLocation);
@@ -86,8 +90,8 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         sendResult(nextActorRef, response);// traveler.getResult());
     }
 
-    protected void travel(TravelerContext traveler, ActorRef nextActorRef, ActorRef currentActorRef) {
-        traveler.updateVisitedHistoryInfo(((ActorRef) currentActorRef).path().toSerializationFormat());
+    protected void travel(TravelContext traveler, ActorRef nextActorRef, ActorRef currentActorRef) {
+        getGuideBook().logVisit(((ActorRef) currentActorRef).path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
     }
 
@@ -95,7 +99,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         nextActorRef.tell(result, self());
     }
 
-    protected void setOriginalSender(TravelerContext traveler, ActorRef originalSender) {
+    protected void setOriginalSender(TravelContext traveler, ActorRef originalSender) {
         // do nothing
     }
 }

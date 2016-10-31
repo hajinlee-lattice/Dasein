@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor;
 
 public class DataSourceLookupRequest {
     private Object inputData;
-    private MatchTravelerContext matchTravelerContext;
+    private MatchTravelContext matchTravelerContext;
     private String callerMicroEngineReference;
 
     public Object getInputData() {
@@ -13,11 +13,11 @@ public class DataSourceLookupRequest {
         this.inputData = inputData;
     }
 
-    public MatchTravelerContext getMatchTravelerContext() {
+    public MatchTravelContext getMatchTravelerContext() {
         return matchTravelerContext;
     }
 
-    public void setMatchTravelerContext(MatchTravelerContext matchTravelerContext) {
+    public void setMatchTravelerContext(MatchTravelContext matchTravelerContext) {
         this.matchTravelerContext = matchTravelerContext;
     }
 

@@ -1,9 +1,9 @@
 package com.latticeengines.actors.visitor.sample;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.actors.exposed.traveler.TravelContext;
 
-public class SampleMatchTravelerContext extends TravelerContext {
+public class SampleMatchTravelerContext extends TravelContext {
     private boolean isMatched;
 
     public SampleMatchTravelerContext(String rootOperationUid, GuideBook guideBook) {

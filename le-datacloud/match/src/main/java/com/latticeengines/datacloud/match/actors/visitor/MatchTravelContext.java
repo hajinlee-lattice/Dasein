@@ -1,12 +1,12 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.actors.exposed.traveler.TravelContext;
 
-public class MatchTravelerContext extends TravelerContext {
+public class MatchTravelContext extends TravelContext {
     private boolean isMatched;
 
-    public MatchTravelerContext(String rootOperationUid, GuideBook guideBook) {
+    public MatchTravelContext(String rootOperationUid, GuideBook guideBook) {
         super(rootOperationUid, guideBook);
     }
 

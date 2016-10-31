@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.springframework.util.CollectionUtils;
 
-import com.latticeengines.actors.exposed.traveler.TravelerContext;
+import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 public class SampleMatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
@@ -24,7 +24,7 @@ public class SampleMatchActorStateTransitionGraph {
         return dummyGraph;
     }
 
-    public String next(String currentLocation, TravelerContext traveler, String originalLocation) {
+    public String next(String currentLocation, TravelContext traveler, String originalLocation) {
         int idx = 0;
         for (String node : dummyGraph) {
             if (node.equals(currentLocation)) {
