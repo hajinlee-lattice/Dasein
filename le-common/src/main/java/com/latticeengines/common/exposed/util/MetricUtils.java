@@ -207,7 +207,8 @@ public class MetricUtils {
                 method.setAccessible(true);
                 Object value = method.invoke(Fact);
                 if (value != null) {
-                    return new AbstractMap.SimpleEntry<>(key, fieldType.getJavaClass().cast(value));
+                    Object type = fieldType.getJavaClass().cast(value);
+                    return new AbstractMap.SimpleEntry<>(key, type);
                 } else {
                     return new AbstractMap.SimpleEntry<>(key, null);
                 }
