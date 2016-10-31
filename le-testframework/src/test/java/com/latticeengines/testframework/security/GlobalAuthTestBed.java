@@ -20,9 +20,9 @@ public interface GlobalAuthTestBed {
 
     void bootstrap(Integer numTenants);
 
-    void bootstrapForProduct(LatticeProduct product);
+    Tenant bootstrapForProduct(LatticeProduct product);
 
-    void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap);
+    Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap);
 
     List<Tenant> getTestTenants();
 
@@ -64,6 +64,6 @@ public interface GlobalAuthTestBed {
 
     void cleanupPlsHdfs();
 
-    void overwriteFeatureFlag(String featureFlagName, boolean value);
+    void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 
 }

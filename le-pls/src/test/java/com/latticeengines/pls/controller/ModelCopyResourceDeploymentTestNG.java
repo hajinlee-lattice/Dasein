@@ -1,15 +1,14 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -20,17 +19,20 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -61,16 +63,16 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private ModelSummaryService modelSummaryService;
 
     @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private SourceFileEntityMgr sourceFileEntityMgr;
 
     @Autowired
-    private SourceFileEntityMgr sourceFileEntityMgr;
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
-    private static final String localPathBase = ClassLoader.getSystemResource(
-            "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
+    private static final String localPathBase = ClassLoader
+            .getSystemResource("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel").getPath();
 
     private Tenant tenant1;
 
@@ -83,61 +85,72 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private String outputFileName = "nonLatinInRows.csv";
 
-    @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
-        setupTwoTenants();
+    @Test(groups = "deployment", dataProvider = "dataProvider")
+    public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
+        setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
         cleanup();
         setupHdfs();
         log.info("Wait for 60 seconds to download model summary");
         Thread.sleep(60000L);
         setupTables();
+        testModelCopy();
+        cleanup();
     }
 
     public void cleanup() throws IOException {
-        HdfsUtils.rmdir(yarnConfiguration,
-                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-                        .toString());
-        HdfsUtils.rmdir(yarnConfiguration,
-                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId()))
-                        .toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId())).toString());
+        HdfsUtils.rmdir(yarnConfiguration, PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId())).toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
+        ModelSummary model = modelSummaryEntityMgr.getByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
+        if (model != null) {
+            modelSummaryEntityMgr.delete(model);
+        }
     }
 
-    private void setupTwoTenants() throws KeyManagementException, NoSuchAlgorithmException {
+    private void setupTwoTenants(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted)
+            throws IllegalArgumentException, Exception {
         turnOffSslChecking();
-        tenant1 = new Tenant();
-        tenant1.setName("T1.T1.Production");
-        tenant1.setId(tenant1.getName());
+        tenant1 = createTenant(scrTenantIsEncrypted);
+        tenant2 = createTenant(dstTenantIsEncrypted);
+    }
 
-        tenant2 = new Tenant();
-        tenant2.setName("T2.T2.Production");
-        tenant2.setId(tenant2.getName());
-        deploymentTestBed.deleteTenant(tenant1);
-        deploymentTestBed.createTenant(tenant1);
-        deploymentTestBed.deleteTenant(tenant2);
-        deploymentTestBed.createTenant(tenant2);
+    private Tenant createTenant(boolean tenantIsEncrypted) throws Exception {
+        Tenant tenant = new Tenant();
+        if (tenantIsEncrypted) {
+            tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
+            ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
+                    .construct(new CustomerSpaceScope(CustomerSpace.parse(tenant.getId())));
+            assertTrue(controller.exists(new com.latticeengines.domain.exposed.camille.Path("/EncryptionKey")));
+        } else {
+            String TenantName = "LE" + UUID.randomUUID();
+            tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
+            tenant.setId(tenant.getName());
+            deploymentTestBed.deleteTenant(tenant);
+            deploymentTestBed.createTenant(tenant);
+        }
+        return tenant;
     }
 
     private void setupTables() throws IOException {
-        Table trainingTable = JsonUtils
-                .deserialize(
-                        IOUtils.toString(ClassLoader
-                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json")),
-                        Table.class);
+        Table trainingTable = JsonUtils.deserialize(
+                IOUtils.toString(ClassLoader.getSystemResourceAsStream(
+                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json")),
+                Table.class);
         Extract extract = trainingTable.getExtracts().get(0);
-        extract.setPath(PathBuilder
-                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
-                .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19").toString()
-                + "/*.avro");
+        extract.setPath(
+                PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
+                        .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19")
+                        .toString() + "/*.avro");
         trainingTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
         metadataProxy.createTable(tenant1.getId(), trainingTable.getName(), trainingTable);
 
-        Table eventTable = JsonUtils
-                .deserialize(
-                        IOUtils.toString(ClassLoader
-                                .getSystemResourceAsStream("com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json")),
-                        Table.class);
+        Table eventTable = JsonUtils.deserialize(
+                IOUtils.toString(ClassLoader.getSystemResourceAsStream(
+                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json")),
+                Table.class);
         extract = eventTable.getExtracts().get(0);
         extract.setPath(customerBase + tenant1.getId() + "/data/AccountModel/Samples/allTraining-r-00000.avro");
         eventTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
@@ -145,9 +158,9 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         setupSecurityContext(tenant1);
 
-        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(tenant1.getId())).toString()
-                + "/" + outputFileName;
+        String outputPath = PathBuilder
+                .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId())).toString() + "/"
+                + outputFileName;
         sourceFileLocalPath = "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/"
                 + outputFileName;
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, ClassLoader.getSystemResourceAsStream(sourceFileLocalPath),
@@ -166,8 +179,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         System.out.println(localPathBase + "/models");
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/models", customerBase + tenant1.getId());
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localPathBase + "/data", customerBase + tenant1.getId());
-        HdfsUtils.copyFromLocalToHdfs(
-                yarnConfiguration, //
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, //
                 localPathBase + "/data/AccountModel/Samples/allTest-r-00000.avro", //
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
                         .append("SourceFile_Account_copy_csv").append("Extracts").append("2016-03-31-18-26-19")
@@ -175,28 +187,28 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant1.getId());
     }
 
-    @Test(groups = "deployment")
-    public void testModelCopy() throws Exception {
+    private void testModelCopy() throws Exception {
 
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
+
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
         log.info("Wait for 60 seconds to download model summary");
         Thread.sleep(60000L);
 
         setupSecurityContext(tenant2);
 
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerBase + tenant2.getId()
-                + "/models", new HdfsUtils.HdfsFileFilter() {
+        List<String> paths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration,
+                customerBase + tenant2.getId() + "/models", new HdfsUtils.HdfsFileFilter() {
 
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-                String name = file.getPath().getName().toString();
-                return name.equals("modelsummary.json");
-            }
-        });
+                    @Override
+                    public boolean accept(FileStatus file) {
+                        if (file == null) {
+                            return false;
+                        }
+                        String name = file.getPath().getName().toString();
+                        return name.equals("modelsummary.json");
+                    }
+                });
         assertTrue(paths.size() == 1);
         String modelSummaryPath = paths.get(0);
         String uuid = UuidUtils.parseUuid(modelSummaryPath);
@@ -219,8 +231,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(provenance.get("TrainingTableName").asText(), newTrainingTableName);
         assertEquals(provenance.get("EventTableName").asText(), newEventTableName);
 
-        paths = HdfsUtils.getFilesForDir(yarnConfiguration, new Path(modelSummaryPath).getParent().getParent()
-                .toString(), ".*.model.json");
+        paths = HdfsUtils.getFilesForDir(yarnConfiguration,
+                new Path(modelSummaryPath).getParent().getParent().toString(), ".*.model.json");
         assertTrue(paths.size() == 1);
         String modelPath = paths.get(0);
         contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
@@ -237,5 +249,10 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(newSourceFile.getDisplayName(), outputFileName);
         assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()),
                 FileUtils.readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile())));
+    }
+
+    @DataProvider(name = "dataProvider")
+    public Object[][] dataProvider() {
+        return new Object[][] { { Boolean.FALSE, Boolean.TRUE }, { Boolean.TRUE, Boolean.FALSE } };
     }
 }

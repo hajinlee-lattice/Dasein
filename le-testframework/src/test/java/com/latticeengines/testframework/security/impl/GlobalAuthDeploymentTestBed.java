@@ -99,26 +99,27 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
-    public void overwriteFeatureFlag(String featureFlagName, boolean value) {
+    public void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value) {
         log.info(String.format("Overwriting the feature flag for %s to be %s", featureFlagName, String.valueOf(value)));
-        Tenant tenant = getMainTestTenant();
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         FeatureFlagClient.setEnabled(space, featureFlagName, value);
         assert (FeatureFlagClient.getFlags(space).get(featureFlagName).booleanValue() == value);
     }
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product) {
-        bootstrapViaTenantConsole(product, enviroment, null);
+    public Tenant bootstrapForProduct(LatticeProduct product) {
+        Tenant tenant = bootstrapViaTenantConsole(product, enviroment, null);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
+        return tenant;
     }
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
-        bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
+    public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        Tenant tenant = bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
         involvedDL = (LatticeProduct.LPA.equals(product));
         involvedZK = false;
+        return tenant;
     }
 
     @Override
@@ -207,7 +208,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     /**
      * bootstrap with one full tenant through tenant console
      */
-    public void bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
+    public Tenant bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
             Map<String, Boolean> featureFlagMap) {
         Tenant tenant = addBuiltInTestTenant();
         String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase())
@@ -224,9 +225,10 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         if (featureFlagMap != null) {
             log.info("Overwrite featureFlags " + featureFlagMap);
             for (String featureFlagId : featureFlagMap.keySet()) {
-                overwriteFeatureFlag(featureFlagId, featureFlagMap.get(featureFlagId).booleanValue());
+                overwriteFeatureFlag(tenant, featureFlagId, featureFlagMap.get(featureFlagId).booleanValue());
             }
         }
+        return tenant;
     }
 
     private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)

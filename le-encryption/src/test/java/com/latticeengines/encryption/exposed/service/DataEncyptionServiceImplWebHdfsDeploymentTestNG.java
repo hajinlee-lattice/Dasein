@@ -58,8 +58,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
             throws NoSuchAlgorithmException, KeyManagementException, IOException {
         Map<String, Boolean> encryptionFeatureFlagMap = new HashMap<String, Boolean>();
         encryptionFeatureFlagMap.put(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), new Boolean(encryptTenant));
-        testBed.bootstrapForProduct(product, encryptionFeatureFlagMap);
-        mainTestTenant = testBed.getMainTestTenant();
+        mainTestTenant = testBed.bootstrapForProduct(product, encryptionFeatureFlagMap);
         log.info("Tenant id is " + mainTestTenant.getId());
         switchToSuperAdmin();
     }

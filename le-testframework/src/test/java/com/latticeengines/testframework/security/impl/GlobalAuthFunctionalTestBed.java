@@ -42,17 +42,17 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     private SessionService sessionService;
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product) {
+    public Tenant bootstrapForProduct(LatticeProduct product) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }
 
     @Override
-    public void bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+    public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }
 
     @Override
-    public void overwriteFeatureFlag(String featureFlagName, boolean value) {
+    public void overwriteFeatureFlag(Tenant teanant, String featureFlagName, boolean value) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }
 

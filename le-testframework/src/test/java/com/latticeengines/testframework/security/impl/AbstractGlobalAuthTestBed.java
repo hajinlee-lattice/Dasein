@@ -102,32 +102,32 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Override
     public void switchToSuperAdmin() {
-        switchToSuperAdmin(getTestTenants().get(mainTenantIdx));
+        switchToSuperAdmin(getMainTestTenant());
     }
 
     @Override
     public void switchToInternalAdmin() {
-        switchToInternalAdmin(getTestTenants().get(mainTenantIdx));
+        switchToInternalAdmin(getMainTestTenant());
     }
 
     @Override
     public void switchToInternalUser() {
-        switchToInternalUser(getTestTenants().get(mainTenantIdx));
+        switchToInternalUser(getMainTestTenant());
     }
 
     @Override
     public void switchToExternalAdmin() {
-        switchToExternalAdmin(getTestTenants().get(mainTenantIdx));
+        switchToExternalAdmin(getMainTestTenant());
     }
 
     @Override
     public void switchToExternalUser() {
-        switchToExternalUser(getTestTenants().get(mainTenantIdx));
+        switchToExternalUser(getMainTestTenant());
     }
 
     @Override
     public void switchToThirdPartyUser() {
-        switchToThirdPartyUser(getTestTenants().get(mainTenantIdx));
+        switchToThirdPartyUser(getMainTestTenant());
     }
 
     @Override
