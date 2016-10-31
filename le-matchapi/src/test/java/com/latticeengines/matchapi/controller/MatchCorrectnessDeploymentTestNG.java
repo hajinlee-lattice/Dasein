@@ -119,22 +119,9 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         compareResults();
     }
 
-    // TODO - with following versionsToTest code it gets following exception
-    // testMatchCorrectness(com.latticeengines.matchapi.controller.MatchCorrectnessDeploymentTestNG):
-    // argument type mismatch
-    // Please enable this code and make sure this test can pass without running
-    // into type mismatch issue
-    //
-    //
-    // @DataProvider(name = "versions")
-    // public Object[][] versionsToTest() {
-    // return new Object[][] { { null }, {
-    // dataCloudVersionEntityMgr.currentApprovedVersion() } };
-    // }
-
     @DataProvider(name = "versions")
-    public String versionsToTest() {
-        return dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
+    public Object[][] versionsToTest() {
+        return new Object[][] { { null }, { dataCloudVersionEntityMgr.currentApprovedVersion().getVersion() } };
     }
 
     private void compareResults() {
