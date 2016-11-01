@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngi
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.LocationBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -81,7 +81,7 @@ public class MatchActorSystem {
         initNamedActor(DunsDomainBasedMicroEngineActor.class);
         initNamedActor(DomainBasedMicroEngineActor.class);
         initNamedActor(DunsBasedMicroEngineActor.class);
-        initNamedActor(LocationBasedMicroEngineActor.class);
+        initNamedActor(LocationToDunsMicroEngineActor.class);
     }
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {
