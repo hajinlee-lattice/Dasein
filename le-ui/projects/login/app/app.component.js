@@ -3,7 +3,7 @@ var mainApp = angular.module('loginApp', [
     'templates-main',
     'ui.router',
     'ui.bootstrap',
-    'login.frame',
+    'login',
     'login.form',
     'login.update',
     'login.forgot',

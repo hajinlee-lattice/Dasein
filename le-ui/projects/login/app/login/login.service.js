@@ -1,4 +1,4 @@
-angular.module('login.form')
+angular.module('login')
 .service('LoginStore', function(TimestampIntervalUtility, BrowserStorageUtility) {
     this.login = {
         username: '',

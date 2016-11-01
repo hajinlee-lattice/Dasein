@@ -1,13 +1,6 @@
-angular.module('login.frame', [
-    'mainApp.appCommon.directives.ngEnterDirective',
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.login.services.LoginService',
-    'mainApp.core.services.ResourceStringsService'
-])
+angular.module('login')
 .component('loginFrame', {
-    templateUrl: 'app/login/frame/frame.component.html',
+    templateUrl: 'app/login/login.component.html',
     controller: function(
         $scope, $state, $timeout, ResourceUtility, LoginService, 
         SessionTimeoutUtility, LoginStore
