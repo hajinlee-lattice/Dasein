@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
+import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 
@@ -26,7 +26,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
     @Autowired
-    private MatchGuideBook guideBook;
+    private MatchActorSystem actorSystem;
 
     @Override
     public Object callMatch(Map<String, Object> matchRequest) throws Exception {
@@ -44,7 +44,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (Map<String, Object> matchRequest : matchRequests) {
             MatchTravelContext traveler = //
-                    new MatchTravelContext(UUID.randomUUID().toString(), guideBook);
+                    new MatchTravelContext(UUID.randomUUID().toString());
 
             traveler.setDataKeyValueMap(matchRequest);
 
@@ -60,7 +60,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private Future<Object> askFuzzyMatchAnchor(MatchTravelContext traveler, Timeout timeout) {
-        return Patterns.ask(guideBook.getFuzzyMatchAnchor(), traveler, timeout);
+        return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
 }

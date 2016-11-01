@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.annotations.Test;
 
-import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
@@ -22,12 +21,11 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private FuzzyMatchService service;
 
-    @Autowired
-    @Qualifier("matchGuideBook")
-    private GuideBook guideBook;
-
     @Test(groups = "pending")
-    public void test() throws Exception {
+    public void testActorSystem() throws Exception {
+        LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
+        LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
+
         try {
             List<Map<String, Object>> matchRequests = new ArrayList<>();
             int MAX = 50;
@@ -54,7 +52,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 Assert.assertNotEquals(result, matchRequests.get(idx++));
             }
         } finally {
-            ((MatchGuideBook) guideBook).shutdown();
+            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
+            LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
         }
     }
 }

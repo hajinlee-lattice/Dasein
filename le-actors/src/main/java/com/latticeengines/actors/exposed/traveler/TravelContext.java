@@ -11,7 +11,6 @@ public abstract class TravelContext {
 
     private final String rootOperationUid;
     private final String travelerId;
-    private final GuideBook guideBook;
     private final List<String> travelLogs;
     private final List<TravelWarning> travelWarnings;
     private final List<String> visitedHistory;
@@ -22,10 +21,9 @@ public abstract class TravelContext {
     private String anchorActorLocation;
     private Queue<String> visitingQueue;
 
-    public TravelContext(String rootOperationUid, GuideBook guideBook) {
+    public TravelContext(String rootOperationUid) {
         travelerId = UUID.randomUUID().toString();
         this.rootOperationUid = rootOperationUid;
-        this.guideBook = guideBook;
         this.travelLogs = new ArrayList<>();
         travelWarnings = new ArrayList<>();
         visitedHistory = new ArrayList<>();
@@ -38,10 +36,6 @@ public abstract class TravelContext {
 
     public String getTravelerId() {
         return travelerId;
-    }
-
-    public GuideBook getGuideBook() {
-        return guideBook;
     }
 
     public List<String> getTravelLogs() {
@@ -105,7 +99,7 @@ public abstract class TravelContext {
     }
 
     @SuppressWarnings("unchecked")
-    public void setLocationInVisitingQueue(String... nextLocations) {
+    public void addLocationsToVisitingQueue(String... nextLocations) {
         for (String location : nextLocations) {
             if (!visitingQueue.contains(location)) {
                 visitingQueue.add(location);

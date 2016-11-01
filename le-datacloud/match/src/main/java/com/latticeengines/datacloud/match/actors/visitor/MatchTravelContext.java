@@ -1,13 +1,14 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 public class MatchTravelContext extends TravelContext {
-    private boolean isMatched;
 
-    public MatchTravelContext(String rootOperationUid, GuideBook guideBook) {
-        super(rootOperationUid, guideBook);
+    private boolean isMatched = false;
+    private boolean isProcessed = false;
+
+    public MatchTravelContext(String rootOperationUid) {
+        super(rootOperationUid);
     }
 
     public boolean isMatched() {
@@ -18,4 +19,12 @@ public class MatchTravelContext extends TravelContext {
         this.isMatched = isMatched;
     }
 
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean processed) {
+        isProcessed = processed;
+    }
 }

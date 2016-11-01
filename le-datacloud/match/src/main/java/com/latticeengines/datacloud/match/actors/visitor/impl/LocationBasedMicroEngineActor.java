@@ -11,10 +11,11 @@ import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplat
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
-public class LocationBasedMicroEngineActor extends MicroEngineActorTemplate {
+public class LocationBasedMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
+
     @Override
-    protected String getDataSourceActor() {
-        return "dnbLookupActor";
+    protected Class<DnbLookupActor> getDataSourceActorClz() {
+        return DnbLookupActor.class;
     }
 
     @Override

@@ -10,10 +10,11 @@ import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplat
 
 @Component("dunsDomainBasedMicroEngineActor")
 @Scope("prototype")
-public class DunsDomainBasedMicroEngineActor extends MicroEngineActorTemplate {
+public class DunsDomainBasedMicroEngineActor extends MicroEngineActorTemplate<DynamoLookupActor> {
+
     @Override
-    protected String getDataSourceActor() {
-        return "dynamoLookupActor";
+    protected Class<DynamoLookupActor> getDataSourceActorClz() {
+        return DynamoLookupActor.class;
     }
 
     @Override

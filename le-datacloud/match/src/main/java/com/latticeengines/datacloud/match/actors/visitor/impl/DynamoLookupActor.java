@@ -11,6 +11,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorT
 @Component("dynamoLookupActor")
 @Scope("prototype")
 public class DynamoLookupActor extends DataSourceWrapperActorTemplate {
+
     @Autowired
     @Qualifier("dynamoDBLookupService")
     private DataSourceLookupService dynamoDBLookupService;

@@ -37,7 +37,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         if (isValidMessageType(msg)) {
             if (msg instanceof TravelContext) {
                 TravelContext traveler = (TravelContext) msg;
-                log.info("Received traveler: " + traveler);
+                log.debug("Received traveler: " + traveler);
 
                 setOriginalSender(traveler, sender());
 
@@ -52,7 +52,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                     }
                     ActorRef nextActorRef = getContext().actorFor(nextLocation);
 
-                    log.info("Send message to " + nextActorRef);
+                    log.debug("Send message to " + nextActorRef);
 
                     travel(traveler, nextActorRef, getSelf());
                 }
@@ -73,7 +73,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
                     ActorRef nextActorRef = getContext().actorFor(anchor);
 
-                    log.info("Send message to anchor " + nextActorRef);
+                    log.debug("Send message to anchor " + nextActorRef);
 
                     sendResult(nextActorRef, traveler);
                 }

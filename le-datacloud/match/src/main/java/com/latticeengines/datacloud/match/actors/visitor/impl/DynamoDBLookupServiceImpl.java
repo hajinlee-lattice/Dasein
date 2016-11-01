@@ -6,25 +6,23 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
-import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 
 @Component("dynamoDBLookupService")
 public class DynamoDBLookupServiceImpl implements DataSourceLookupService {
     private static final Log log = LogFactory.getLog(DynamoDBLookupServiceImpl.class);
 
     @Autowired
-    @Qualifier("matchGuideBook")
-    private MatchGuideBook guideBook;
+    private MatchActorSystem actorSystem;
 
     @Override
     public void asyncLookup(String lookupId, Object inputData, String returnAddress) {
         // do async processing
-        log.info("Doing async lookup");
+        log.debug("Doing async lookup");
 
         Thread th = new Thread(createLookupRunnable(lookupId, inputData, returnAddress));
         th.start();
@@ -51,15 +49,15 @@ public class DynamoDBLookupServiceImpl implements DataSourceLookupService {
                     result = "LatticeAccountID_" + UUID.randomUUID().toString();
 
                 } else {
-                    log.info("Didn't find result for " + lookupId + " from DynamoDB");
+                    log.debug("Didn't find result for " + lookupId + " from DynamoDB");
                 }
 
                 Response response = new Response();
                 response.setRequestId(lookupId);
                 response.setResult(result);
 
-                log.info("Returned response for " + lookupId + " to " + returnAddress);
-                guideBook.sendResponse(response, returnAddress);
+                log.debug("Returned response for " + lookupId + " to " + returnAddress);
+                actorSystem.sendResponse(response, returnAddress);
             }
         };
         return task;
@@ -70,7 +68,7 @@ public class DynamoDBLookupServiceImpl implements DataSourceLookupService {
         Object result = UUID.randomUUID().toString();
         Response response = new Response();
         response.setResult(result);
-        log.info("Got result from lookup");
+        log.debug("Got result from lookup");
         return response;
     }
 }

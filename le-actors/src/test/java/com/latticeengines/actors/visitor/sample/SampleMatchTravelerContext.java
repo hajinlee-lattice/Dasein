@@ -7,7 +7,7 @@ public class SampleMatchTravelerContext extends TravelContext {
     private boolean isMatched;
 
     public SampleMatchTravelerContext(String rootOperationUid, GuideBook guideBook) {
-        super(rootOperationUid, guideBook);
+        super(rootOperationUid);
     }
 
     public boolean isMatched() {

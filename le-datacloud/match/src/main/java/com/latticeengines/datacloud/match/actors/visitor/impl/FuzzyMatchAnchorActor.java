@@ -46,7 +46,7 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
 
         ActorRef nextActorRef = getContext().actorFor(originalLocation);
 
-        log.info("Send message to " + nextActorRef);
+        log.debug("Send message to " + nextActorRef);
 
         sendResult(nextActorRef, traveler.getResult());
     }
