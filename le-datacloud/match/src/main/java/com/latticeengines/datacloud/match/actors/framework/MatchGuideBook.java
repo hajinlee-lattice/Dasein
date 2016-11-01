@@ -2,10 +2,12 @@ package com.latticeengines.datacloud.match.actors.framework;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
@@ -38,7 +41,8 @@ public class MatchGuideBook extends GuideBook {
         fuzzyMatchAnchor = actorSystem.getFuzzyMatchAnchor();
 
         dummyPathGraph = new ArrayList<>();
-        dummyPathGraph.add(actorSystem.getActorRef(DunsDomainBasedMicroEngineActor.class).path().toSerializationFormat());
+        dummyPathGraph
+                .add(actorSystem.getActorRef(DunsDomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DunsBasedMicroEngineActor.class).path().toSerializationFormat());
     }
@@ -50,6 +54,14 @@ public class MatchGuideBook extends GuideBook {
             return nextMoveForAnchor(matchTravelContext);
         } else {
             return nextMoveForMicroEngine(matchTravelContext);
+        }
+    }
+
+    @Override
+    public void logVisit(String traversedActor, TravelContext traveler) {
+        traveler.logVisitHistory(traversedActor);
+        if (traveler.visitingQueueIsEmpty()) {
+            traveler.addLocationsToVisitingQueue(dummyPathGraph.toArray(new String[dummyPathGraph.size()]));
         }
     }
 
@@ -65,26 +77,26 @@ public class MatchGuideBook extends GuideBook {
     }
 
     private String nextMoveForMicroEngine(MatchTravelContext traveler) {
-        String destinationLocation = traveler.getNextLocationFromVisitingQueue();
-        if (StringUtils.isEmpty(destinationLocation)) {
-            return traveler.getAnchorActorLocation();
-        } else {
-            return destinationLocation;
-        }
+        String destinationLocation;
+
+        do {
+            destinationLocation = traveler.getNextLocationFromVisitingQueue();
+            if (!visitSameActorWithSameDataAgain(destinationLocation, traveler)) {
+                return destinationLocation;
+            }
+        } while (StringUtils.isNotEmpty(destinationLocation));
+
+        return traveler.getAnchorActorLocation();
     }
 
-    private List<String> calculateNextVisitingActors(TravelContext traveler) {
-        String next = null;
-        if (traveler.getVisitedHistory().size() == 0) {
-            next = next(null, traveler);
+    private boolean visitSameActorWithSameDataAgain(String candiateDestination, MatchTravelContext traveler) {
+        Map<String, Set<String>> history = traveler.getVisitedHistory();
+        if (StringUtils.isNotEmpty(candiateDestination) && history.containsKey(candiateDestination)) {
+            Set<String> previousData = history.get(candiateDestination);
+            return previousData.contains(JsonUtils.serialize(traveler.getDataKeyValueMap()));
         } else {
-            String latestMicroEngineLocation = traveler.getVisitedHistory()
-                    .get(traveler.getVisitedHistory().size() - 1);
-            next = next(latestMicroEngineLocation, traveler);
+            return false;
         }
-        List<String> visitingActors = new ArrayList<>();
-        visitingActors.add(next);
-        return visitingActors;
     }
 
 }

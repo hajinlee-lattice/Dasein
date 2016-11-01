@@ -40,7 +40,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
             nextActorRef.tell(req, self());
             return true;
         } else {
-            traveler.logVisit(self().path().toSerializationFormat());
+            traveler.logVisitHistory(self().path().toSerializationFormat());
             return false;
         }
     }

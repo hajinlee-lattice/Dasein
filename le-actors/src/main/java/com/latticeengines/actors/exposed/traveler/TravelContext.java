@@ -1,11 +1,16 @@
 package com.latticeengines.actors.exposed.traveler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public abstract class TravelContext {
 
@@ -13,7 +18,7 @@ public abstract class TravelContext {
     private final String travelerId;
     private final List<String> travelLogs;
     private final List<TravelWarning> travelWarnings;
-    private final List<String> visitedHistory;
+    private final Map<String, Set<String>> visitedHistory;
     private TravelException travelException;
     private Map<String, Object> dataKeyValueMap;
     private Object result;
@@ -26,7 +31,7 @@ public abstract class TravelContext {
         this.rootOperationUid = rootOperationUid;
         this.travelLogs = new ArrayList<>();
         travelWarnings = new ArrayList<>();
-        visitedHistory = new ArrayList<>();
+        visitedHistory = new HashMap<>();
         visitingQueue = new LinkedList<>();
     }
 
@@ -54,12 +59,19 @@ public abstract class TravelContext {
         travelWarnings.add(travelWarning);
     }
 
-    public List<String> getVisitedHistory() {
+    public Map<String, Set<String>> getVisitedHistory() {
         return visitedHistory;
     }
 
-    public void logVisit(String traversedActor) {
-        visitedHistory.add(traversedActor);
+    public void logVisitHistory(String traversedActor) {
+        if (!visitedHistory.containsKey(traversedActor)) {
+            visitedHistory.put(traversedActor, new HashSet<String>());
+        }
+        visitedHistory.get(traversedActor).add(JsonUtils.serialize(dataKeyValueMap));
+    }
+
+    public void clearVisitedHistory() {
+        visitedHistory.clear();
     }
 
     public TravelException getTravelException() {
@@ -105,6 +117,10 @@ public abstract class TravelContext {
                 visitingQueue.add(location);
             }
         }
+    }
+
+    public boolean visitingQueueIsEmpty() {
+        return visitingQueue.isEmpty();
     }
 
     public String getAnchorActorLocation() {
