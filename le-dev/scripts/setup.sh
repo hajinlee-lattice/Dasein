@@ -101,4 +101,13 @@ echo "Rebuild admin war"
 pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
 processErrors
 
+if [ "${LE_ENVIRONMENT}" = "devcluster" ]; then
+    VERSION=`leversion`
+    echo "copying ${VERSION} artifacts from local hadoop to devcluster"
+    hdfs dfs -rm -r -f hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK} || true
+    hdfs dfs -mkdir -p hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}
+    hdfs dfs -cp /app hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}/${VERSION}
+    hdfs dfs -ls hdfs://bodcdevvhort148.lattice.local:8020/app/${LE_STACK}
+fi
+
 echo "Success!!!"

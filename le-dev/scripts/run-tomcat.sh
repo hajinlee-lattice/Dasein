@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-export LE_PROPDIR=$WSHOME/le-config/conf/env/dev
+if [ -z "${LE_ENVIRONMENT}" ]; then
+    export LE_ENVIRONMENT=dev
+fi
+
+if [ -z "${LE_CLIENT_ADDRESS}" ]; then
+    export LE_CLIENT_ADDRESS=localhost
+fi
+
+export LE_PROPDIR=$WSHOME/le-config/conf/env/${LE_ENVIRONMENT}
+echo "Using LE_PROPDIR=${LE_PROPDIR}"
+echo "Using LE_CLIENT_ADDRESS=${LE_CLIENT_ADDRESS}"
 
 export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=1g -Xmx4g -XX:ReservedCodeCacheSize=256m -XX:+UseCodeCacheFlushing"

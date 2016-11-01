@@ -10,7 +10,11 @@ def chdirToProjectDir(project):
 
 
 def propDirsOpts():
-    return ['-DLE_PROPDIR=%s/le-config/conf/env/dev' % os.environ['WSHOME']]
+    if 'LE_ENVIRONMENT' not in os.environ or os.environ['LE_ENVIRONMENT'] == '':
+        le_env = "dev"
+    else:
+        le_env= os.environ['LE_ENVIRONMENT']
+    return ['-DLE_PROPDIR=%s/le-config/conf/env/%s' % (os.environ['WSHOME'], le_env)]
 
 
 def commonOpts():

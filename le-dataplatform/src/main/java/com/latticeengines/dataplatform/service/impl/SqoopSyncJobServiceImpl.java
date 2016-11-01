@@ -35,6 +35,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     @Autowired
     @Qualifier("yarnConfiguration")
     private Configuration hadoopConfiguration;
+    
     @Autowired
     private JobNameService jobNameService;
 

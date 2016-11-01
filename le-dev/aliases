@@ -1,5 +1,5 @@
 alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -DskipTests clean install'
-alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
+alias leversion='cat $WSHOME/le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
 alias hdp-start='$WSHOME/le-dev/scripts/start-cluster.sh'
 alias hdp-stop='$WSHOME/le-dev/scripts/stop-cluster.sh'
