@@ -473,6 +473,7 @@ angular.module('mainApp.models.services.ModelService', [
             var leadToDisplay = {
                 Company: lead.Company,
                 Contact: lead.Contact || (lead.FirstName + " " + lead.LastName),
+                Website: lead.Website,
                 Converted: lead.Converted,
                 Score: lead.Score
             };
