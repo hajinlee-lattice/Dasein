@@ -81,7 +81,7 @@ public class MatchGuideBook extends GuideBook {
 
         do {
             destinationLocation = traveler.getNextLocationFromVisitingQueue();
-            if (!visitSameActorWithSameDataAgain(destinationLocation, traveler)) {
+            if (!visitSameMicroEngineWithSameDataAgain(destinationLocation, traveler)) {
                 return destinationLocation;
             }
         } while (StringUtils.isNotEmpty(destinationLocation));
@@ -89,10 +89,10 @@ public class MatchGuideBook extends GuideBook {
         return traveler.getAnchorActorLocation();
     }
 
-    private boolean visitSameActorWithSameDataAgain(String candiateDestination, MatchTravelContext traveler) {
+    private boolean visitSameMicroEngineWithSameDataAgain(String candidateDestination, MatchTravelContext traveler) {
         Map<String, Set<String>> history = traveler.getVisitedHistory();
-        if (StringUtils.isNotEmpty(candiateDestination) && history.containsKey(candiateDestination)) {
-            Set<String> previousData = history.get(candiateDestination);
+        if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
+            Set<String> previousData = history.get(candidateDestination);
             return previousData.contains(JsonUtils.serialize(traveler.getDataKeyValueMap()));
         } else {
             return false;
