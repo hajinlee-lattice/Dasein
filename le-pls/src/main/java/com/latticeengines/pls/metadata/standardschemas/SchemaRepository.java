@@ -55,7 +55,7 @@ public class SchemaRepository {
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
     }
-    
+
     private Table getCategorySchema() {
         Table table = createTable(SchemaInterpretation.Category);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
@@ -99,7 +99,6 @@ public class SchemaRepository {
 
         return table;
     }
-    
 
     private Table getTimeSeriesSchema() {
         Table table = createTable(SchemaInterpretation.TimeSeries);
@@ -370,7 +369,8 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES" })) //
+                .allowedDisplayNames(
+                        Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -423,7 +423,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "LEAD", "LEAD ID", "P1_EVENT" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "LEAD", "LEAD ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Id) //
@@ -443,7 +443,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "EVENT", "WON", "P1_EVENT" })) //
                 .required()//
                 .interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
@@ -751,7 +751,8 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "NO. OF EMPLOYEES" })) //
+                .allowedDisplayNames(Sets
+                        .newHashSet(new String[] { "NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "NO. OF EMPLOYEES" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
