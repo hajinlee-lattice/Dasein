@@ -14,4 +14,7 @@ public interface AccountLookupService {
     LatticeAccountMgr getAccountMgr(String version);
     AccountLookupEntryMgr getLookupMgr(String version);
 
+    List<String> batchLookupIds(AccountLookupRequest request);
+    List<LatticeAccount> batchFetchAccounts(List<String> accountIds, String dataCloudVersion);
+
 }
