@@ -8,49 +8,72 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NameLocation {
 
-    private String name;
-    private String country;
-    private String state;
-    private String city;
 
     @JsonProperty("Name")
+    private String name;
+
+    @JsonProperty("Country")
+    private String country;
+
+    @JsonProperty("State")
+    private String state;
+
+    @JsonProperty("City")
+    private String city;
+
+    @JsonProperty("ZipCode")
+    private String zipCode;
+
+    @JsonProperty("PhoneNumber")
+    private String phoneNumber;
+
+
     public String getName() {
         return name;
     }
 
-    @JsonProperty("Name")
     public void setName(String name) {
         this.name = name;
     }
 
-    @JsonProperty("Country")
     public String getCountry() {
         return country;
     }
 
-    @JsonProperty("Country")
     public void setCountry(String country) {
         this.country = country;
     }
 
-    @JsonProperty("State")
     public String getState() {
         return state;
     }
 
-    @JsonProperty("State")
     public void setState(String state) {
         this.state = state;
     }
 
-    @JsonProperty("City")
     public String getCity() {
         return city;
     }
 
-    @JsonProperty("City")
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override
@@ -65,7 +88,9 @@ public class NameLocation {
             return StringUtils.equals(this.name, nameLocation.name)
                     && StringUtils.equals(this.city, nameLocation.city)
                     && StringUtils.equals(this.state, nameLocation.state)
-                    && StringUtils.equals(this.country, nameLocation.country);
+                    && StringUtils.equals(this.zipCode, nameLocation.zipCode)
+                    && StringUtils.equals(this.country, nameLocation.country)
+                    && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber);
         } else {
             return false;
         }
@@ -77,7 +102,9 @@ public class NameLocation {
         toReturn += (name == null ? "null" : name);
         toReturn += (city == null ? "null" : city);
         toReturn += (state == null ? "null" : state);
+        toReturn += (zipCode == null ? "null" : zipCode);
         toReturn += (country == null ? "null" : country);
+        toReturn += (phoneNumber == null ? "null" : phoneNumber);
         toReturn += ")";
         return toReturn;
     }
