@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import akka.actor.ActorRef;
+
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
-
-import akka.actor.ActorRef;
 
 public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
 
@@ -31,10 +31,9 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
             if (shouldDoAsyncLookup()) {
                 String lookupId = UUID.randomUUID().toString();
                 requestMap.put(lookupId, request);
-                dataSourceLookupService.asyncLookup(lookupId, request.getInputData(),
-                        self().path().toSerializationFormat());
+                dataSourceLookupService.asyncLookup(lookupId, request, self().path().toSerializationFormat());
             } else {
-                Response response = dataSourceLookupService.syncLookup(request.getInputData());
+                Response response = dataSourceLookupService.syncLookup(request);
                 response.setTravelerContext(request.getMatchTravelerContext());
                 sender().tell(response, self());
             }

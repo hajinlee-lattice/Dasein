@@ -30,7 +30,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     @Override
     protected boolean process(TravelContext traveler) {
         if (accept(traveler)) {
-            ActorRef nextActorRef =  matchActorSystem.getActorRef(getDataSourceActorClz());
+            ActorRef nextActorRef = matchActorSystem.getActorRef(getDataSourceActorClz());
 
             DataSourceLookupRequest req = new DataSourceLookupRequest();
             req.setMatchTravelerContext((MatchTravelContext) traveler);

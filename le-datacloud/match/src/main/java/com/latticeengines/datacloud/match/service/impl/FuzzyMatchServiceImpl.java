@@ -29,14 +29,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private MatchActorSystem actorSystem;
 
     @Override
-    public Object callMatch(Map<String, Object> matchRequest) throws Exception {
+    public Object callMatch(Map<String, Object> matchRequest, String dataCloudVersion) throws Exception {
         List<Map<String, Object>> matchRequests = new ArrayList<>();
         matchRequests.add(matchRequest);
-        return callMatch(matchRequests).get(0);
+        return callMatch(matchRequests, dataCloudVersion).get(0);
     }
 
     @Override
-    public List<Object> callMatch(List<Map<String, Object>> matchRequests) throws Exception {
+    public List<Object> callMatch(List<Map<String, Object>> matchRequests, String dataCloudVersion) throws Exception {
         List<Object> results = new ArrayList<>();
 
         FiniteDuration duration = new FiniteDuration(10, TimeUnit.MINUTES);
@@ -47,6 +47,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     new MatchTravelContext(UUID.randomUUID().toString());
 
             traveler.setDataKeyValueMap(matchRequest);
+            traveler.setDataCloudVersion(dataCloudVersion);
 
             matchFutures.add(askFuzzyMatchAnchor(traveler, timeout));
         }

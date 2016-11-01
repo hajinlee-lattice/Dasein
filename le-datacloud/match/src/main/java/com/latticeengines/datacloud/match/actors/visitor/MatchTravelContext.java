@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 public class MatchTravelContext extends TravelContext {
-
+    private String dataCloudVersion;
+    
     private boolean isMatched = false;
     private boolean isProcessed = false;
 
@@ -27,4 +28,14 @@ public class MatchTravelContext extends TravelContext {
     public void setProcessed(boolean processed) {
         isProcessed = processed;
     }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+    
+    
 }

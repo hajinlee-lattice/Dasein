@@ -46,7 +46,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             }
 
             int idx = 0;
-            for (Object result : service.callMatch(matchRequests)) {
+            for (Object result : service.callMatch(matchRequests, "2.0.0")) {
                 System.out.println(result);
                 Assert.assertNotNull(result);
                 Assert.assertNotEquals(result, matchRequests.get(idx++));
