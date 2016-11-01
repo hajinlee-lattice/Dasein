@@ -20,8 +20,10 @@ import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -38,6 +40,12 @@ public class SqoopJobServiceImpl {
 
     @Value("${dataplatform.queue.scheme:legacy}")
     private String queueScheme;
+
+    @Autowired
+    protected VersionManager versionManager;
+
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
 
     protected ApplicationId exportData(String table, //
             String sourceDir, //
@@ -88,6 +96,7 @@ public class SqoopJobServiceImpl {
                 cmds.add(option);
             }
         }
+        addShadedJarToDistributedCache(yarnConfiguration);
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
@@ -147,6 +156,7 @@ public class SqoopJobServiceImpl {
                 cmds.add(option);
             }
         }
+        addShadedJarToDistributedCache(yarnConfiguration);
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         try {
             return runTool(cmds, yarnConfiguration, exporter.isSync(), uuid);
@@ -169,18 +179,16 @@ public class SqoopJobServiceImpl {
             Properties props, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
-            boolean sync, //
-            String version) {
+            boolean sync) {
 
         return importDataWithWhereCondition(table, query, targetDir, creds, queue, jobName, splitCols, //
                 columnsToInclude, "", numMappers, driver, props, //
-                metadataService, yarnConfiguration, sync, version);
+                metadataService, yarnConfiguration, sync);
     }
 
     protected ApplicationId importData(SqoopImporter importer, //
             String jobName, MetadataService metadataService, //
-            Configuration defaultConfiguration, //
-            String version) {
+            Configuration defaultConfiguration) {
 
         Configuration yarnConfiguration = importer.getYarnConfiguration();
         if (yarnConfiguration == null) {
@@ -280,15 +288,7 @@ public class SqoopJobServiceImpl {
                 }
             }
         }
-        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
-        for (String jarFilePath : jarFilePaths) {
-            try {
-                DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
-            } catch (URISyntaxException e) {
-                log.error(e);
-                throw new LedpException(LedpCode.LEDP_00002);
-            }
-        }
+        addShadedJarToDistributedCache(yarnConfiguration);
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
 
         try {
@@ -316,8 +316,7 @@ public class SqoopJobServiceImpl {
             Properties props, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
-            boolean sync, //
-            String version) {
+            boolean sync) {
 
         yarnConfiguration = new Configuration(yarnConfiguration);
 
@@ -426,15 +425,7 @@ public class SqoopJobServiceImpl {
                 yarnConfiguration.set("errorLineNumber", errorLineNumber);
             }
         }
-        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
-        for (String jarFilePath : jarFilePaths) {
-            try {
-                DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
-            } catch (URISyntaxException e) {
-                log.error(e);
-                throw new LedpException(LedpCode.LEDP_00002);
-            }
-        }
+        addShadedJarToDistributedCache(yarnConfiguration);
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // MR_AM_COMMAND_OPTS
         // yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
@@ -485,6 +476,19 @@ public class SqoopJobServiceImpl {
 
     private String getGenerateOutputDir(String uuid) {
         return "/tmp/sqoop-yarn/generate/outdir/" + uuid;
+    }
+
+    private void addShadedJarToDistributedCache(Configuration yarnConfiguration) {
+        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration,
+                versionManager.getCurrentVersionInStack(stackName));
+        for (String jarFilePath : jarFilePaths) {
+            try {
+                DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
+            } catch (URISyntaxException e) {
+                log.error(e);
+                throw new LedpException(LedpCode.LEDP_00002);
+            }
+        }
     }
 
     protected String overwriteQueue(String queue) {

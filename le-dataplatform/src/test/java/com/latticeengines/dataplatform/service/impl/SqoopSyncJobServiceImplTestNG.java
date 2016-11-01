@@ -241,8 +241,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
         SqoopImporter importer = new SqoopImporter.Builder().setTable("Nutanix").setTargetDir("/tmp/dataFromFile")
                 .setDbCreds(creds).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("Nutanix").setSplitColumn("Nutanix_EventTable_Clean").setNumMappers(1).setProperties(props)
-                .setSync(false).build();
+                .setCustomer("Nutanix").setSplitColumn("Nutanix_EventTable_Clean").setNumMappers(1)
+                .setProperties(props).setSync(false).build();
 
         ApplicationId appId = sqoopSyncJobService.importData(importer);
 
@@ -293,9 +293,10 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         String sourceDir = "/tmp/Warranty_Dell.txt";
         List<String> targetColumns = Arrays.asList("ORDER_BUSINESS_UNIT_ID", "LOCAL_CHANNEL", "SERVICE_TAG_ID",
                 "ORDER_NUMBER", "SERVICE_CONTRACT_ORDER_NUMBER", "SERVICE_CONTRACT_START_DATE",
-                "SERVICE_CONTRACT_END_DATE", "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM", "BRAND_DESC", "SERVICE_LEVEL_CODE",
-                "CUSTOMER_NUMBER", "SERVICE_CONTRACT_CUSTOMER_NUMBER", "PRODUCT_LINE_PARENT", "PRODUCT_LINE_DESC",
-                "PRODUCT_LINE", "SERVICE_CONTRACT_STATUS_DESC", "SOURCE_SYSTEM_UPDATE_DATE", "REGION_CODE");
+                "SERVICE_CONTRACT_END_DATE", "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM", "BRAND_DESC",
+                "SERVICE_LEVEL_CODE", "CUSTOMER_NUMBER", "SERVICE_CONTRACT_CUSTOMER_NUMBER", "PRODUCT_LINE_PARENT",
+                "PRODUCT_LINE_DESC", "PRODUCT_LINE", "SERVICE_CONTRACT_STATUS_DESC", "SOURCE_SYSTEM_UPDATE_DATE",
+                "REGION_CODE");
         String optionalEnclosurePara = "--optionally-enclosed-by";
         String optionalEnclosureValue = "\\\"";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt", "/tmp");
