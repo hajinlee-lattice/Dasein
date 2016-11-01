@@ -3,6 +3,7 @@ package com.latticeengines.modelquality.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineJson;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
@@ -34,33 +37,32 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private PipelineEntityMgr pipelineEntityMgr;
-    
+
     @Autowired
     private PipelineStepEntityMgr pipelineStepEntityMgr;
-    
+
     @Autowired
     private PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
-    
+
     @Override
     public Pipeline createLatestProductionPipeline() {
         String version = getVersion();
         String pipelineName = "PRODUCTION-" + version;
         Pipeline pipeline = pipelineEntityMgr.findByName(pipelineName);
-        
-        if(pipeline != null)
-        {
+
+        if (pipeline != null) {
             return pipeline;
         }
-        
+
         pipeline = new Pipeline();
         pipeline.setName("PRODUCTION-" + version);
         pipeline.setDescription("Production pipeline version: " + pipeline.getName());
         String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
         setPipelineProperties(pipeline, pipelineJson);
-        
+
         try {
             String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
             pipeline.addStepsFromPipelineJson(pipelineContents);
@@ -70,9 +72,10 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         }
         return pipeline;
     }
-    
+
     @Override
-    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names, PipelineStepType type) {
+    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names,
+            PipelineStepType type) {
         try {
             switch (type) {
             case METADATA:
@@ -95,28 +98,29 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     }
 
     @Override
-    public Pipeline createPipeline(String pipelineName, String pipelineDescription, List<PipelineStepOrFile> pipelineSteps) {
+    public Pipeline createPipeline(String pipelineName, String pipelineDescription,
+            List<PipelineStepOrFile> pipelineSteps) {
         Pipeline pipeline = new Pipeline();
+        List<PipelineToPipelineSteps> pToPSteps = new ArrayList<PipelineToPipelineSteps>();
         pipeline.setName(pipelineName);
         pipeline.setDescription(pipelineDescription);
-        pipelineEntityMgr.create(pipeline);
         int i = 1;
         for (PipelineStepOrFile psof : pipelineSteps) {
-            PipelineToPipelineSteps p = new PipelineToPipelineSteps();
-            p.setPipeline(pipeline);
-            p.setOrder(i++);
+            PipelineToPipelineSteps ptoPStep = new PipelineToPipelineSteps();
+            ptoPStep.setPipeline(pipeline);
+            ptoPStep.setOrder(i++);
             PipelineStep step = null;
             if (psof.pipelineStepName != null) {
                 step = pipelineStepEntityMgr.findByName(psof.pipelineStepName);
-                
                 if (step == null) {
-                    throw new RuntimeException(String.format("Pipeline step with name %s does not exist", psof.pipelineStepName));
+                    throw new LedpException(LedpCode.LEDP_35000,
+                            new String[] { "Pipeline step", psof.pipelineStepName });
                 }
             } else if (psof.pipelineStepDir != null) {
                 try {
-                    String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
+                    String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration,
                             psof.pipelineStepDir + "/metadata.json");
-                    
+
                     step = JsonUtils.deserialize(pipelineStepMetadata, PipelineStep.class);
                     String[] pipelineStepPythonScripts = getPythonScripts(step.getName(), psof.pipelineStepDir);
                     step.setScript(pipelineStepPythonScripts[0]);
@@ -124,11 +128,17 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                     step.setLoadFromHdfs(true);
                     pipelineStepEntityMgr.create(step);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new LedpException(LedpCode.LEDP_35001, new String[] {""});
                 }
             }
-            p.setPipelineStep(step);
-            pipelineToPipelineStepsEntityMgr.create(p);
+            ptoPStep.setPipelineStep(step);
+            pToPSteps.add(ptoPStep);
+        }
+
+        // Now that steps have been validated and created, create the pipeline and the associations
+        pipelineEntityMgr.create(pipeline);
+        for (PipelineToPipelineSteps ptoPStep : pToPSteps) {
+            pipelineToPipelineStepsEntityMgr.create(ptoPStep);
         }
 
         Pipeline p = pipelineEntityMgr.findByName(pipelineName);
@@ -139,10 +149,10 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
         return p;
     }
-    
+
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
         String version = getVersion();
         String pythonLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz", version);
@@ -152,7 +162,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         pipeline.setPipelineDriver(pipelineJson);
         pipeline.setPipelineScript(pipelineScript);
     }
-    
+
     private String createPipelineInHdfs(Pipeline pipeline) throws IOException {
         List<PipelineStep> steps = pipeline.getPipelineSteps();
         Map<String, PipelineStep> stepsMap = new HashMap<>();
@@ -170,20 +180,21 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, new ByteArrayInputStream(pipelineContents.getBytes()), path);
         return path;
     }
-    
+
     private String[] getPythonScripts(String stepName, String hdfsPath) {
         try {
-            List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, new HdfsUtils.HdfsFilenameFilter() {
-                
-                @Override
-                public boolean accept(String filename) {
-                    return filename.endsWith(".py");
-                }
-            });
+            List<String> pythonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath,
+                    new HdfsUtils.HdfsFilenameFilter() {
+
+                        @Override
+                        public boolean accept(String filename) {
+                            return filename.endsWith(".py");
+                        }
+                    });
             String[] files = new String[2];
-            
+
             for (String pythonFile : pythonFiles) {
-                String pyHdfsPath = Path.getPathWithoutSchemeAndAuthority(new Path(pythonFile)).toString(); 
+                String pyHdfsPath = Path.getPathWithoutSchemeAndAuthority(new Path(pythonFile)).toString();
                 if (pythonFile.endsWith(stepName + ".py")) {
                     files[0] = pyHdfsPath;
                 } else {

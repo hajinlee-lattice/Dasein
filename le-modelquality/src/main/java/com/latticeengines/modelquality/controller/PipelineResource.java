@@ -58,11 +58,11 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     }
 
     @Override
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create new pipeline from a list of either existing pipeline steps or uploaded files")
     public String createPipeline(@RequestParam("pipelineName") String pipelineName,
-            @RequestParam("pipelineDescription") String pipelineDescription,
+            @RequestParam(value="pipelineDescription", required=false) String pipelineDescription,
             @RequestBody List<PipelineStepOrFile> pipelineSteps) {
         return create(null, pipelineName, pipelineDescription, pipelineSteps);
     }

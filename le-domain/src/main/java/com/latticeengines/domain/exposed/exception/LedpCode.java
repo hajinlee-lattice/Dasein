@@ -495,7 +495,8 @@ public enum LedpCode {
     LEDP_34003("Could not locate tenant with name {0}"), //
 
     // le-modelquality
-    LEDP_35000("No {0} with name {1} found"); // No {Entity} with name {Name} found, for eg "No AnalyticTest with name AnalyticTest1 found"
+    LEDP_35000("No {0} with name {1} found"), // No {Entity} with name {Name} found, for eg "No AnalyticTest with name AnalyticTest1 found"
+    LEDP_35001("Failed to save PipelineStep {0}"); 
     
     private String message;
 
