@@ -97,8 +97,9 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def preTransformData(self, training, test, params):
         schema = params["schema"]
-        training[schema["reserved"]["training"]].update(Series([True] * training.shape[0]))
-        test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
+        if schema["reserved"] is not None:
+            training[schema["reserved"]["training"]].update(Series([True] * training.shape[0]))
+            test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
         params["allDataPreTransform"] = DataFrame.append(training, test)
         return (training, test)
 
