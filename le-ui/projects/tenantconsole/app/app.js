@@ -90,7 +90,6 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             resolve: {
                 SelectedPipelineMetrics: function (InfluxDbService) {
                     var cols = [
-                        'time',
                         'AnalyticPipelineName',
                         'AnalyticTestName',
                         'DataSetName',
@@ -103,7 +102,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
 
                     var clause = [
                         'WHERE ',
-                        'AnalyticTestTag != \'PRODUCTION\''
+                        'AnalyticTestTag !~ /^PRODUCTION/'
                     ].join('');
 
                     return InfluxDbService.Query({

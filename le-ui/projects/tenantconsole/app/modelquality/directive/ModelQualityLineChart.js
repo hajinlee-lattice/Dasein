@@ -98,7 +98,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
                 color.domain(seriesData.map(function(c) { return c.key; }));
                 // should not need to remove, use .enter() or .update()
-                chart.selectAll("g").remove(); // empty all except zoom
+                chart.selectAll("g").remove();
 
                 var legendRectSize = 12,
                     legendSpacing = 4,

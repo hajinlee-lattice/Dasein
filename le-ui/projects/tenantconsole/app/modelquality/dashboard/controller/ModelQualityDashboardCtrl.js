@@ -1,10 +1,6 @@
 angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 ])
-.controller('ModelQualityDashboardCtrl', function ($scope, $state, $window, $rootScope, SelectedPipelineMetrics, ProductionPipelineMetrics) {
-
-    var stateChangeStart = $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-        _window.unbind('resize', bindResize);
-    });
+.controller('ModelQualityDashboardCtrl', function ($scope, $state, $window, SelectedPipelineMetrics, ProductionPipelineMetrics) {
 
     var _window = angular.element($window);
 
@@ -16,13 +12,18 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
     _window.bind('resize', bindResize);
 
     $scope.$on('$destroy', function () {
-        typeof stateChangeStart === 'function' ? stateChangeStart() : null;
+        _window.unbind('resize', bindResize);
     });
 
 
-    var data = SelectedPipelineMetrics.resultObj.results[0].series[0],
-        columns = data.columns,
+    var data = [],
+        columns = [],
+        rows = [];
+    if (SelectedPipelineMetrics.resultObj.results && SelectedPipelineMetrics.resultObj.results[0].series) {
+        data = SelectedPipelineMetrics.resultObj.results[0].series[0];
+        columns = data.columns;
         rows = data.values;
+    }
 
     var columnToIndexMap = {};
     columns.forEach(function(column, index) {
@@ -112,58 +113,79 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
         return chartData;
     });
 
-    // production line charts
-    var series = ProductionPipelineMetrics.resultObj.results[0].series;
+    // tag type production line charts
+    var series = [];
+    if (ProductionPipelineMetrics.resultObj.results && ProductionPipelineMetrics.resultObj.results[0].series) {
+        series = ProductionPipelineMetrics.resultObj.results[0].series;
+    }
 
-    var seriesData = {
-        RocScore: [],
-        Top10PercentLift: [],
-        Top20PercentLift: [],
-        Top30PercentLift: []
-    };
+    var tagBuckets = {};
+    series.forEach(function (entry) {
+        var tagName = entry.tags.AnalyticTestTag;
 
-    series.forEach(function (serie) {
-        var ap = serie.tags.AnalyticPipelineName;
+        if (!tagBuckets[tagName]) {
+            tagBuckets[tagName] = [];
+        }
 
-        var RocScoreIdx = serie.columns.indexOf('RocScore'),
-            Top10PercentLiftIdx = serie.columns.indexOf('Top10PercentLift'),
-            Top20PercentLiftIdx = serie.columns.indexOf('Top20PercentLift'),
-            Top30PercentLiftIdx = serie.columns.indexOf('Top30PercentLift');
-
-        seriesData.RocScore.push({
-            y: serie.values[0][RocScoreIdx],
-            x: ap
-        });
-        seriesData.Top10PercentLift.push({
-            y: serie.values[0][Top10PercentLiftIdx],
-            x: ap
-        });
-        seriesData.Top20PercentLift.push({
-            y: serie.values[0][Top20PercentLiftIdx],
-            x: ap
-        });
-        seriesData.Top30PercentLift.push({
-            y: serie.values[0][Top30PercentLiftIdx],
-            x: ap
-        });
-
+        var tagBucket = tagBuckets[tagName];
+        tagBucket.push(entry);
     });
 
-    var productionChart = {};
-    productionChart.description = {};
-    productionChart.data = _.map(seriesData, function (values, key) {
-        var chartData = {};
-        chartData.key = key;
-        chartData.values = _.map(values, function (value) {
-            return {
-                key: key,
-                x: value.x,
-                y: value.y
-            };
-        }).sort(function(a,b) { return (a.x > b.x) ? 1 : ((a.x < b.x) ? -1 : 0); });
+    var lineCharts = _.map(tagBuckets, function (tagBucket, tagName) {
+        var bucketSeries = {
+            RocScore: [],
+            Top10PercentLift: [],
+            Top20PercentLift: [],
+            Top30PercentLift: []
+        };
 
-        return chartData;
+        tagBucket.forEach(function (bucket) {
+            var ap = bucket.tags.AnalyticPipelineName;
+
+            var columnToIndexMap = {};
+            bucket.columns.forEach(function(column, index) {
+                columnToIndexMap[column] = index;
+            });
+
+            bucketSeries.RocScore.push({
+                key: 'RocScore',
+                y: bucket.values[0][columnToIndexMap.RocScore],
+                x: ap
+            });
+            bucketSeries.Top10PercentLift.push({
+                key: 'Top10PercentLift',
+                y: bucket.values[0][columnToIndexMap.Top10PercentLift],
+                x: ap
+            });
+            bucketSeries.Top20PercentLift.push({
+                key: 'Top20PercentLift',
+                y: bucket.values[0][columnToIndexMap.Top20PercentLift],
+                x: ap
+            });
+            bucketSeries.Top30PercentLift.push({
+                key: 'Top30PercentLift',
+                y: bucket.values[0][columnToIndexMap.Top30PercentLift],
+                x: ap
+            });
+
+        });
+
+        var chart = {};
+        chart.data = _.map(bucketSeries, function (values, key) {
+            var chartData = {};
+            chartData.key = key;
+            chartData.values = values.sort(function(a,b) { return (a.x > b.x) ? 1 : ((a.x < b.x) ? -1 : 0); });
+
+            return chartData;
+        });
+        chart.title = tagName;
+
+        return chart;
     });
-    productionChart.title = 'Production';
-    $scope.productionChart = productionChart;
+
+    $scope.lineCharts = lineCharts;
+
+    if ($scope.lineCharts.length === 0 && $scope.barCharts.length === 0) {
+        $scope.message = 'No Charts to be Displayed';
+    }
 });
