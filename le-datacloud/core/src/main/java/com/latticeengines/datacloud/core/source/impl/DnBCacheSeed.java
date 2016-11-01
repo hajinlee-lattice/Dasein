@@ -3,31 +3,21 @@ package com.latticeengines.datacloud.core.source.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.DomainBased;
 import com.latticeengines.datacloud.core.source.DunsBased;
-import com.latticeengines.datacloud.core.source.FixedIntervalSource;
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
 import com.latticeengines.datacloud.core.source.Source;
 
 @Component("dnBCacheSeed")
-public class DnBCacheSeed implements FixedIntervalSource, DomainBased, DunsBased {
+public class DnBCacheSeed implements DerivedSource, DomainBased, DunsBased {
 
-    private static final long serialVersionUID = -6280748201445659077L;
-
-    // 2 year duration in seconds
-    private static final long DEFAULT_CUTOFF_LIMIT_IN_SECONDS = 2 * 366 * 24 * 60 * 60L;
-
+    private static final long serialVersionUID = -7331679821512614934L;
+    
     private String cronExpression;
-
-    private long cutoffLimitInSeconds = DEFAULT_CUTOFF_LIMIT_IN_SECONDS;
 
     @Autowired
     private DnBCacheSeedRaw baseSource;
-
-    @Override
-    public Source[] getBaseSources() {
-        return new Source[] { baseSource };
-    }
 
     @Override
     public String getSourceName() {
@@ -35,8 +25,18 @@ public class DnBCacheSeed implements FixedIntervalSource, DomainBased, DunsBased
     }
 
     @Override
-    public String getTimestampField() {
-        return "LE_Last_Upload_Date";
+    public Source[] getBaseSources() {
+        return new Source[] { baseSource };
+    }
+
+    @Override
+    public String getDunsField() {
+        return "DUNS_NUMBER";
+    }
+
+    @Override
+    public String getDomainField() {
+        return "LE_DOMAIN";
     }
 
     @Override
@@ -45,47 +45,27 @@ public class DnBCacheSeed implements FixedIntervalSource, DomainBased, DunsBased
     }
 
     @Override
-    public String getDefaultCronExpression() {
-        return cronExpression;
+    public String getTimestampField() {
+        return "LE_Last_Upload_Date";
     }
 
     @Override
     public PurgeStrategy getPurgeStrategy() {
-        return PurgeStrategy.NUM_VERSIONS;
+        return PurgeStrategy.NEVER;
     }
 
     @Override
     public Integer getNumberOfVersionsToKeep() {
-        return 3;
+        return null;
     }
 
     @Override
     public Integer getNumberOfDaysToKeep() {
-        return 7;
+        return null;
     }
 
     @Override
-    public String getDirForBaseVersionLookup() {
-        return "Raw";
-    }
-
-    @Override
-    public String getTransformationServiceBeanName() {
-        return "dnbCacheSeedCleanService";
-    }
-
-    @Override
-    public Long getCutoffDuration() {
-        return cutoffLimitInSeconds;
-    }
-
-    @Override
-    public String getDunsField() {
-         return "DUNS_NUMBER";
-    }
-
-    @Override
-    public String getDomainField() {
-         return "LE_DOMAIN";
+    public String getDefaultCronExpression() {
+        return cronExpression;
     }
 }

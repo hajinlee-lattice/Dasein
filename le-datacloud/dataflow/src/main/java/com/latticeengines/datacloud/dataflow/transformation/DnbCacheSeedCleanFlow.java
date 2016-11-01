@@ -12,18 +12,20 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunctio
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DnBCacheSeedConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("dnbCacheSeedCleanFlow")
 public class DnbCacheSeedCleanFlow
-        extends TransformationFlowBase<DnBCacheSeedConfiguration, TransformationFlowParameters> {
+        extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
 
     private final static String DUNS_FIELD = "DUNS_NUMBER";
+    private final static String DOMESTIC_ULTIMATE_DUNS_NUMBER = "DOMESTIC_ULTIMATE_DUNS_NUMBER";
+    private final static String LE_INDUSTRY = "LE_INDUSTRY";
 
     @Override
     protected Class<? extends TransformationConfiguration> getTransConfClass() {
-        return DnBCacheSeedConfiguration.class;
+        return BasicTransformationConfiguration.class;
     }
 
     @Override
@@ -37,7 +39,11 @@ public class DnbCacheSeedCleanFlow
     }
 
     private Node addFilterNode(Node node) {
-        return node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
+        node = node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
+        return node.filter(
+                DOMESTIC_ULTIMATE_DUNS_NUMBER + " != null || !(" + LE_INDUSTRY
+                        + ".equals(\"Nonclassifiable Establishments\"))",
+                new FieldList(DOMESTIC_ULTIMATE_DUNS_NUMBER, LE_INDUSTRY));
     }
 
     private Node addDedupNode(Node node, List<String> dedupColumns) {

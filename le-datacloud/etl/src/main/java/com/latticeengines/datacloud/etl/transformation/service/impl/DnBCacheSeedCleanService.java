@@ -9,12 +9,12 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.DnBCacheSeedConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 
 @Component("dnbCacheSeedCleanService")
 public class DnBCacheSeedCleanService
-        extends SimpleTransformationServiceBase<DnBCacheSeedConfiguration, TransformationFlowParameters>
-        implements TransformationService<DnBCacheSeedConfiguration> {
+        extends SimpleTransformationServiceBase<BasicTransformationConfiguration, TransformationFlowParameters>
+        implements TransformationService<BasicTransformationConfiguration> {
 
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanService.class);
 
@@ -39,11 +39,6 @@ public class DnBCacheSeedCleanService
     @Override
     protected String getServiceBeanName() {
         return "dnbCacheSeedCleanService";
-    }
-
-    @Override
-    public Class<DnBCacheSeedConfiguration> getConfigurationClass() {
-        return DnBCacheSeedConfiguration.class;
     }
 
 }
