@@ -114,7 +114,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
         $http({
             method: 'GET',
-            url: '/modelquality/analyticpipelines/' + (analyticTestName || ''),
+            url: '/modelquality/analytictests/' + (analyticTestName || ''),
         }).success(function(data){
             result.resultObj = data;
             defer.resolve(result);
