@@ -247,7 +247,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             throw new IOException("Cannot find resource [" + url + "]");
         }
         String payload = null;
-        if (featureFlagMap != null & featureFlagMap.containsKey(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())
+        if (featureFlagMap != null && featureFlagMap.containsKey(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())
                 && !featureFlagMap.get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())) {
             payload = overWriteEncrptionFeatureFlagToFalse(ins);
         } else {
