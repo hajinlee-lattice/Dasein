@@ -65,7 +65,7 @@ def main():
 
 
     # qacluster2
-    environment="qacluter"
+    environment="qacluster"
     aggregated=""
     keys={}
     for dir_name, _, _ in os.walk(WSHOME):
