@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.latticeengines.actors.ActorTemplate;
-import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 
 import akka.actor.ActorRef;
@@ -15,8 +14,6 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
     private static Map<String, DataSourceLookupRequest> requestMap = new HashMap<>();
 
     protected abstract DataSourceLookupService getDataSourceLookupService();
-
-    protected abstract GuideBook getGuideBook();
 
     @Override
     protected boolean isValidMessageType(Object msg) {

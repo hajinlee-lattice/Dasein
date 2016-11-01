@@ -2,29 +2,20 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
-import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 
 import akka.actor.ActorRef;
 
+@Component("fuzzyMatchAnchorActor")
+@Scope("prototype")
 public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
     private static final Log log = LogFactory.getLog(FuzzyMatchAnchorActor.class);
-    private MatchGuideBook guideBook;
-
-    public FuzzyMatchAnchorActor(MatchGuideBook guideBook) {
-        super();
-        this.guideBook = guideBook;
-    }
-
-    @Override
-    protected Log getLogger() {
-        return log;
-    }
 
     @Override
     protected boolean isValidMessageType(Object msg) {
@@ -55,13 +46,8 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
 
         ActorRef nextActorRef = getContext().actorFor(originalLocation);
 
-        getLogger().info("Send message to " + nextActorRef);
+        log.info("Send message to " + nextActorRef);
 
         sendResult(nextActorRef, traveler.getResult());
-    }
-
-    @Override
-    protected GuideBook getGuideBook() {
-        return guideBook;
     }
 }

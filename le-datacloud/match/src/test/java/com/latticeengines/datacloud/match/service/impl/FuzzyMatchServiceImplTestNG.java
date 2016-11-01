@@ -8,8 +8,10 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.annotations.Test;
 
+import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -21,7 +23,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     private FuzzyMatchService service;
 
     @Autowired
-    private MatchGuideBook guideBook;
+    @Qualifier("matchGuideBook")
+    private GuideBook guideBook;
 
     @Test(groups = "pending")
     public void test() throws Exception {
@@ -51,7 +54,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 Assert.assertNotEquals(result, matchRequests.get(idx++));
             }
         } finally {
-            guideBook.shutdown();
+            ((MatchGuideBook) guideBook).shutdown();
         }
     }
 }

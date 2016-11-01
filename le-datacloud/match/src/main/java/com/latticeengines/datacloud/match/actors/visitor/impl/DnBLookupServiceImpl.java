@@ -5,17 +5,19 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 
-@Component("DnBLookupService")
+@Component("dnBLookupService")
 public class DnBLookupServiceImpl implements DataSourceLookupService {
     private static final Log log = LogFactory.getLog(DnBLookupServiceImpl.class);
 
     @Autowired
+    @Qualifier("matchGuideBook")
     private MatchGuideBook guideBook;
 
     @Override

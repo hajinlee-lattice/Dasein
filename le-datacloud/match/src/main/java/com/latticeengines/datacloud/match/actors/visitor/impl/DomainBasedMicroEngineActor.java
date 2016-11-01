@@ -2,38 +2,18 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
-import com.latticeengines.datacloud.match.actors.visitor.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 
+@Component("domainBasedMicroEngineActor")
+@Scope("prototype")
 public class DomainBasedMicroEngineActor extends MicroEngineActorTemplate {
-    private static final Log log = LogFactory.getLog(DomainBasedMicroEngineActor.class);
-    private MatchGuideBook guideBook;
-    private String dataSourceActor;
-
-    public DomainBasedMicroEngineActor(MatchGuideBook guideBook, String dataSourceActor) {
-        super();
-        this.guideBook = guideBook;
-        this.dataSourceActor = dataSourceActor;
-    }
-
-    @Override
-    protected GuideBook getGuideBook() {
-        return guideBook;
-    }
-
-    @Override
-    protected Log getLogger() {
-        return log;
-    }
-
     @Override
     protected String getDataSourceActor() {
-        return dataSourceActor;
+        return "dynamoLookupActor";
     }
 
     @Override
@@ -46,5 +26,4 @@ public class DomainBasedMicroEngineActor extends MicroEngineActorTemplate {
 
         return false;
     }
-
 }

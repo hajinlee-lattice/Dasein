@@ -12,8 +12,6 @@ public abstract class MicroEngineActorTemplate extends VisitorActorTemplate {
 
     protected abstract boolean accept(TravelContext traveler);
 
-    protected abstract GuideBook getGuideBook();
-
     @Override
     protected boolean isValidMessageType(Object msg) {
         return msg instanceof MatchTravelContext || msg instanceof Response;
@@ -22,13 +20,12 @@ public abstract class MicroEngineActorTemplate extends VisitorActorTemplate {
     @Override
     protected boolean process(TravelContext traveler) {
         if (accept(traveler)) {
-            String dataSourceActor = getDataSourceActor();
-            ActorRef nextActorRef = getContext().actorFor(dataSourceActor);
+            ActorRef nextActorRef = ((MatchGuideBook) guideBook).getDataSourceActorRef(getDataSourceActor());
 
             DataSourceLookupRequest req = new DataSourceLookupRequest();
             req.setMatchTravelerContext((MatchTravelContext) traveler);
             req.setInputData(traveler.getDataKeyValueMap());
-            getGuideBook().logVisit(self().path().toSerializationFormat(), traveler);
+            guideBook.logVisit(self().path().toSerializationFormat(), traveler);
 
             nextActorRef.tell(req, self());
             return true;

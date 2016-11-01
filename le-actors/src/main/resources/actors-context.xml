@@ -9,9 +9,6 @@
           http://repo.akka.io/schema/akka
           http://repo.akka.io/akka-1.3.1.xsd">
 
-       <import resource="classpath:actors-context.xml"/>
- 
-        <context:component-scan base-package="com.latticeengines.datacloud.match.service"/>
-        <context:component-scan base-package="com.latticeengines.datacloud.match.actors.visitor"/>
+        <context:component-scan base-package="com.latticeengines.actors.exposed"/>
 
 </beans>

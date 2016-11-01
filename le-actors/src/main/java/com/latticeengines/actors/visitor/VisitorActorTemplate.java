@@ -1,6 +1,9 @@
 package com.latticeengines.actors.visitor;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
@@ -10,18 +13,18 @@ import com.latticeengines.actors.exposed.traveler.TravelContext;
 import akka.actor.ActorRef;
 
 public abstract class VisitorActorTemplate extends ActorTemplate {
+    private static final Log log = LogFactory.getLog(VisitorActorTemplate.class);
 
-    protected abstract Log getLogger();
+    @Autowired
+    @Qualifier("matchGuideBook")
+    protected GuideBook guideBook;
 
     protected abstract boolean process(TravelContext traveler);
 
     protected abstract void process(Response response);
 
-    protected abstract GuideBook getGuideBook();
-
     protected String getNextLocation(TravelContext traveler) {
-        return getGuideBook().next(self().path().toSerializationFormat(), traveler);
-        // return traveler.getNextLocationFromVisitingQueue();
+        return guideBook.next(self().path().toSerializationFormat(), traveler);
     }
 
     @Override
@@ -34,7 +37,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         if (isValidMessageType(msg)) {
             if (msg instanceof TravelContext) {
                 TravelContext traveler = (TravelContext) msg;
-                getLogger().info("Received traveler: " + traveler);
+                log.info("Received traveler: " + traveler);
 
                 setOriginalSender(traveler, sender());
 
@@ -49,7 +52,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                     }
                     ActorRef nextActorRef = getContext().actorFor(nextLocation);
 
-                    getLogger().info("Send message to " + nextActorRef);
+                    log.info("Send message to " + nextActorRef);
 
                     travel(traveler, nextActorRef, getSelf());
                 }
@@ -70,7 +73,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
                     ActorRef nextActorRef = getContext().actorFor(anchor);
 
-                    getLogger().info("Send message to anchor " + nextActorRef);
+                    log.info("Send message to anchor " + nextActorRef);
 
                     sendResult(nextActorRef, traveler);
                 }
@@ -85,13 +88,13 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
         ActorRef nextActorRef = getContext().actorFor(anchorLocation);
 
-        getLogger().info("Send message to " + nextActorRef);
+        log.info("Send message to " + nextActorRef);
 
-        sendResult(nextActorRef, response);// traveler.getResult());
+        sendResult(nextActorRef, response);
     }
 
     protected void travel(TravelContext traveler, ActorRef nextActorRef, ActorRef currentActorRef) {
-        getGuideBook().logVisit(((ActorRef) currentActorRef).path().toSerializationFormat(), traveler);
+        guideBook.logVisit(((ActorRef) currentActorRef).path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
     }
 
