@@ -95,7 +95,17 @@ class SampleGenerator(State):
             if not isTest(row):
                 return None
             lead = OrderedDict()
-            for colname, samplename in {'CompanyName':'Company', 'FirstName':'FirstName', 'LastName':'LastName'}.iteritems():
+            sampleMap = {}
+            if 'FirstName' not in samples.values() and 'LastName' not in samples.values() and 'Website' in samples.values():
+                ## This is an account-based model
+                sampleMap['CompanyName'] = 'Company'
+                sampleMap['Website'] = 'Website'
+            else:
+                ## This is a lead-based model
+                sampleMap['CompanyName'] = 'Company'
+                sampleMap['FirstName'] = 'FirstName'
+                sampleMap['LastName'] = 'LastName'
+            for colname, samplename in sampleMap.iteritems():
                 if colname not in samples.values():
                     lead[samplename] = '(Not Provided)'
                 else:

@@ -80,8 +80,15 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         if (firstName != null) {
             targets.add("FirstName: " + firstName.getName());
         } else {
-            log.info("No company attribute in this event table.");
+            log.info("No first name attribute in this event table.");
         }
+        Attribute website = eventTable.getAttribute(InterfaceName.Website);
+        if (website != null) {
+            targets.add("Website: " + website.getName());
+        } else {
+            log.info("No website attribute in this event table.");
+        }
+
 
         Attribute id = eventTable.getAttribute(InterfaceName.Id);
         Attribute email = eventTable.getAttribute(InterfaceName.Email);
