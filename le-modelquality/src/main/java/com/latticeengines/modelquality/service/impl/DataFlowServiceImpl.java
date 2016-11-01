@@ -11,7 +11,7 @@ import com.latticeengines.modelquality.service.DataFlowService;
 
 @Component("modelQualityDataFlowService")
 public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowService {
-    
+
     @Autowired
     private DataFlowEntityMgr dataFlowEntityMgr;
 
@@ -20,12 +20,11 @@ public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowServ
         String version = getVersion();
         String dataFlowName = "PRODUCTION-" + version;
         DataFlow dataFlow = dataFlowEntityMgr.findByName(dataFlowName);
-        
-        if(dataFlow != null)
-        {
+
+        if (dataFlow != null) {
             return dataFlow;
         }
-        
+
         dataFlow = new DataFlow();
         dataFlow.setName("PRODUCTION-" + version);
         dataFlow.setMatch(true);

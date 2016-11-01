@@ -12,22 +12,21 @@ import com.latticeengines.modelquality.service.AlgorithmService;
 
 @Component("algorithmService")
 public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmService {
-    
+
     @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
 
     @Override
     public Algorithm createLatestProductionAlgorithm() {
         String version = getVersion();
-        
+
         String algorithmName = AlgorithmFactory.ALGORITHM_NAME_RF + "-" + version;
-        Algorithm algorithm  = algorithmEntityMgr.findByName(algorithmName);
-        
-        if(algorithm != null)
-        {
+        Algorithm algorithm = algorithmEntityMgr.findByName(algorithmName);
+
+        if (algorithm != null) {
             return algorithm;
         }
-        
+
         algorithm = new Algorithm();
         algorithm.setName(algorithmName);
         String algorithmScript = String.format("/app/%s/dataplatform/scripts/algorithm/rf_train.py", version);
