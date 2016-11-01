@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 public class StringUtilsUnitTestNG {
 
     @DataProvider(name = "stringDataProvider")
-    Object[][] usaDataProvider() {
+    Object[][] stringDataProvider() {
         return new Object[][] { //
                 { "U.S.A  ", "USA" }, //
                 { "The United - States", "THE UNITED STATES" }, //
