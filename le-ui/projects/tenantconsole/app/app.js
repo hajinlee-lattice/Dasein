@@ -158,7 +158,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             url: '/analyticpipeline',
             views: {
                 'main@MODELQUALITY': {
-                    templateUrl: 'app/modelquality/Analyticpipeline/view/AnalyticPipelineView.html',
+                    templateUrl: 'app/modelquality/analyticpipeline/view/AnalyticPipelineView.html',
                     controller: 'AnalyticPipelineCtrl',
                     controllerAs: 'vm_analyticPipeline'
                 }
