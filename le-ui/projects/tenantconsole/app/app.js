@@ -183,6 +183,16 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 }
             }
         })
+        .state('MODELQUALITY.PUBLISHLATEST', {
+            url: '/publishlatest',
+            views: {
+                'main@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/publishlatest/view/PublishLatestView.html',
+                    controller: 'PublishLatestCtrl',
+                    controllerAs: 'vm_publishLatest'
+                }
+            }
+        })
         .state('DATACLOUD', {
             url: '/datacloud',
             views: {
