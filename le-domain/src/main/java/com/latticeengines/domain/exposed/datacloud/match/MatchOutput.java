@@ -7,7 +7,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,8 +45,8 @@ public class MatchOutput {
     @SuppressWarnings("unused")
     private MatchOutput() {}
 
-    public MatchOutput(UUID uuid) {
-        this.rootOperationUID = uuid.toString().toUpperCase();
+    public MatchOutput(String rootOperationUID) {
+        this.rootOperationUID = rootOperationUID;
     }
 
     static {

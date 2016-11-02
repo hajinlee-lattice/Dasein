@@ -122,7 +122,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection, List<ColumnMetadata> metadatas) {
-        MatchOutput output = new MatchOutput(input.getUuid());
+        MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());

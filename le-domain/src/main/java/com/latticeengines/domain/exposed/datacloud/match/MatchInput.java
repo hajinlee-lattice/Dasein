@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -56,7 +55,7 @@ public class MatchInput implements Fact, Dimension {
     // only applicable for bulk match
     private String yarnQueue;
 
-    private UUID uuid;
+    private String rootOperationUid;
 
     private String tableName;
 
@@ -240,14 +239,14 @@ public class MatchInput implements Fact, Dimension {
         this.numSelectedColumns = numSelectedColumns;
     }
 
-    @JsonIgnore
-    public UUID getUuid() {
-        return uuid;
+    @JsonProperty("RootOperationUID")
+    public String getRootOperationUid() {
+        return rootOperationUid;
     }
 
-    @JsonIgnore
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    @JsonProperty("RootOperationUID")
+    public void setRootOperationUid(String rootOperationUid) {
+        this.rootOperationUid = rootOperationUid;
     }
 
     @JsonProperty("YarnQueue")

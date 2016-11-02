@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -81,7 +82,9 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
 
     private MatchInput prepareMatchInput() {
         MatchInput input = new MatchInput();
-        input.setUuid(UUID.randomUUID());
+        if (StringUtils.isEmpty(input.getRootOperationUid())) {
+            input.setRootOperationUid(UUID.randomUUID().toString());
+        }
         input.setTenant(new Tenant("PD_Test"));
         input.setPredefinedSelection(Predefined.Model);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();

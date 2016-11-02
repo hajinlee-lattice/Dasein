@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,9 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
     protected MatchContext prepareMatchContext(MatchInput input, List<ColumnMetadata> metadatas,
                                                boolean skipExecutionPlanning) {
-        input.setUuid(UUID.randomUUID());
+        if (StringUtils.isEmpty(input.getRootOperationUid())) {
+            input.setRootOperationUid(UUID.randomUUID().toString());
+        }
         MatchContext matchContext = matchPlanner.plan(input, metadatas, skipExecutionPlanning);
         matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         matchContext.setReturnUnmatched(input.getReturnUnmatched());

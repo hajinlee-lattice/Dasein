@@ -106,8 +106,8 @@ public class MatchStepAspect {
                 }
             } else if (arg instanceof MatchInput) {
                 MatchInput input = (MatchInput) arg;
-                if (input.getUuid() != null) {
-                    return input.getUuid().toString().toUpperCase();
+                if (input.getRootOperationUid() != null) {
+                    return input.getRootOperationUid();
                 }
             }
         }

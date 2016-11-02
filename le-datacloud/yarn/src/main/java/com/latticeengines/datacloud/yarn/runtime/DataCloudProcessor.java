@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
@@ -235,7 +234,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
     private MatchInput constructMatchInputFromData(List<List<Object>> data) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setUuid(UUID.fromString(rootOperationUid));
+        matchInput.setRootOperationUid(rootOperationUid);
         matchInput.setReturnUnmatched(returnUnmatched);
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
