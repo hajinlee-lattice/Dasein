@@ -18,7 +18,7 @@ cd $WSHOME/le-domain
 mvn -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-for project in 'db' 'dataplatform' 'scoring'
+for project in 'db' 'dataplatform' 'scoring' 'quartzclient'
 do
     echo "Deploying ${project} to local MySQL" &&
     pushd $WSHOME/le-$project &&
