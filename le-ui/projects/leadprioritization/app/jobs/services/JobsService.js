@@ -111,7 +111,7 @@ angular
         
         $http({
             method: 'GET',
-            url: '/pls/scores/jobs/' + job.id + '/results',
+            url: '/pls/scores/jobs/' + job.id + '/results/score',
             headers: { 
                 'Accept': 'application/csv;charset=utf-8',
                 'ErrorDisplayMethod': 'banner'
