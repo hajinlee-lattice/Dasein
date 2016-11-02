@@ -69,12 +69,13 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 if (traveler.getResult() != null) {
                     handleResult(response, traveler);
                 } else {
-                    String anchor = traveler.getAnchorActorLocation();
+                    String nextLocation = getNextLocation(traveler);
 
-                    ActorRef nextActorRef = getContext().actorFor(anchor);
-
-                    log.debug("Send message to anchor " + nextActorRef);
-
+                    if (nextLocation == null || response.getResult() != null) {
+                        nextLocation = traveler.getAnchorActorLocation();
+                    }
+                    ActorRef nextActorRef = getContext().actorFor(nextLocation);
+                    
                     sendResult(nextActorRef, traveler);
                 }
             }

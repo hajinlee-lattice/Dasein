@@ -3,8 +3,6 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.util.CollectionUtils;
-
 import com.latticeengines.actors.exposed.traveler.TravelContext;
 
 public class MatchActorStateTransitionGraph {
@@ -13,7 +11,9 @@ public class MatchActorStateTransitionGraph {
     @SuppressWarnings("unchecked")
     public MatchActorStateTransitionGraph(String... actorRefs) {
         if (actorRefs != null) {
-            dummyGraph.addAll(CollectionUtils.arrayToList(actorRefs));
+            for (String ref : actorRefs) {
+                dummyGraph.add(ref);
+            }
         }
     }
 

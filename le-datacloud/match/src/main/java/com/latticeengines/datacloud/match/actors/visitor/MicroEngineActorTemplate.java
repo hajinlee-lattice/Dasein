@@ -16,6 +16,8 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
 
     protected abstract boolean accept(TravelContext traveler);
 
+    protected abstract void process(Response response);
+
     @Autowired
     private MatchActorSystem matchActorSystem;
 
@@ -28,26 +30,22 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     }
 
     @Override
-    protected boolean process(TravelContext traveler) {
-        if (accept(traveler)) {
+    protected boolean process(TravelContext context) {
+        MatchTravelContext travelContext = (MatchTravelContext) context;
+        if (accept(travelContext)) {
             ActorRef nextActorRef = matchActorSystem.getActorRef(getDataSourceActorClz());
 
             DataSourceLookupRequest req = new DataSourceLookupRequest();
-            req.setMatchTravelerContext((MatchTravelContext) traveler);
-            req.setInputData(traveler.getDataKeyValueMap());
-            guideBook.logVisit(self().path().toSerializationFormat(), traveler);
+            req.setMatchTravelerContext(travelContext);
+            req.setInputData(travelContext.getMatchKeyTuple());
+            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
 
             nextActorRef.tell(req, self());
             return true;
         } else {
-            traveler.logVisitHistory(self().path().toSerializationFormat());
+            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
             return false;
         }
-    }
-
-    @Override
-    protected void process(Response response) {
-        // may be do something
     }
 
     @Override

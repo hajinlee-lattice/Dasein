@@ -97,4 +97,5 @@ public class OutputRecord {
         msgs.add(errorMessage);
         this.errorMessages = msgs;
     }
+
 }

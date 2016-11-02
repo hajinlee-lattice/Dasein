@@ -1,11 +1,12 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 
 @Component("domainBasedMicroEngineActor")
@@ -19,12 +20,24 @@ public class DomainBasedMicroEngineActor extends MicroEngineActorTemplate<Dynamo
 
     @Override
     protected boolean accept(TravelContext traveler) {
-        Map<String, Object> dataKeyValueMap = traveler.getDataKeyValueMap();
 
-        if (dataKeyValueMap.containsKey("Domain")) {
+        MatchKeyTuple matchKeyTuple = ((MatchTravelContext) traveler).getMatchKeyTuple();
+
+        if (matchKeyTuple.getDomain() != null) {
             return true;
         }
 
         return false;
+    }
+
+    @Override
+    protected void process(Response response) {
+        MatchTravelContext context = (MatchTravelContext) response.getTravelerContext();
+        if (response.getResult() != null) {
+            context.setResult(response.getResult());
+            context.setProcessed(true);
+        } else {
+            context.setProcessed(false);
+        }
     }
 }

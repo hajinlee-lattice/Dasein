@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 
 @Component("dynamoDBLookupService")
 public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
@@ -20,25 +20,32 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private AccountLookupService accountLookupService;
 
-    @Override
-    protected String lookupFromService(DataSourceLookupRequest request) {
+    protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         String result = null;
-        if (request.getInputData() instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> inputMap = (Map<String, Object>) request.getInputData();
-            String lookupId = AccountLookupEntry.buildId((String) inputMap.get(MatchKey.Domain.name()),
-                    (String) inputMap.get(MatchKey.DUNS.name()));
-            AccountLookupEntryMgr lookupMgr = accountLookupService.getLookupMgr(request.getMatchTravelerContext()
-                    .getDataCloudVersion());
+        MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
+
+        String lookupId = AccountLookupEntry.buildId(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
+
+        if (matchKeyTuple.getDuns() != null && matchKeyTuple.getDomain() != null) {
+            AccountLookupEntryMgr lookupMgr = accountLookupService
+                    .getLookupMgr(request.getMatchTravelerContext().getDataCloudVersion());
+
             AccountLookupEntry lookupEntry = lookupMgr.findByKey(lookupId);
             if (lookupEntry != null) {
                 result = lookupEntry.getLatticeAccountId();
+            } else {
+                log.debug("Didn't get anything from real dynamodb but Simulating that we got some result for "
+                        + lookupId);
+                result = "DUMMY_LatticeAccountID_" + UUID.randomUUID().toString();
             }
-            if (result != null) {
-                log.info("Got result from lookup for Lookup key=" + lookupId + " Lattice Account Id=" + result);
-            }
+        } else {
+            log.debug("Skip lookup into dynamodb for " + lookupRequestId);
         }
-        return result;
 
+        if (result != null) {
+            log.debug("Got result from lookup for Lookup key=" + lookupId + " Lattice Account Id=" + result);
+        }
+
+        return result;
     }
 }

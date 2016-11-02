@@ -15,16 +15,17 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     @Autowired
     private MatchActorSystem actorSystem;
 
-    abstract protected String lookupFromService(DataSourceLookupRequest request);
+    abstract protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
 
     @Override
-    public void asyncLookup(String lookupId, Object request, String returnAddress) {
+    public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
         log.info("Doing async lookup");
-        Thread th = new Thread(createLookupRunnable(lookupId, request, returnAddress));
+        Thread th = new Thread(createLookupRunnable(lookupRequestId, request, returnAddress));
         th.start();
     }
 
-    private Runnable createLookupRunnable(final String lookupId, final Object request, final String returnAddress) {
+    private Runnable createLookupRunnable(final String lookupRequestId, final Object request,
+            final String returnAddress) {
         Runnable task = new Runnable() {
             @Override
             public void run() {
@@ -35,14 +36,14 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
                 String result = null;
                 if (request instanceof DataSourceLookupRequest) {
-                    result = lookupFromService((DataSourceLookupRequest) request);
+                    result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
                 }
 
                 Response response = new Response();
-                response.setRequestId(lookupId);
+                response.setRequestId(lookupRequestId);
                 response.setResult(result);
 
-                log.info("Returned response for " + lookupId + " to " + returnAddress);
+                log.info("Returned response for " + lookupRequestId + " to " + returnAddress);
                 actorSystem.sendResponse(response, returnAddress);
             }
         };
@@ -53,7 +54,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     public Response syncLookup(Object request) {
         Response response = new Response();
         if (request instanceof DataSourceLookupRequest) {
-            String result = lookupFromService((DataSourceLookupRequest) request);
+            String result = lookupFromService(null, (DataSourceLookupRequest) request);
             response.setResult(result);
         }
         return response;

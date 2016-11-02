@@ -1,12 +1,12 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 
 @Component("locationBasedMicroEngineActor")
@@ -20,12 +20,12 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
 
     @Override
     protected boolean accept(TravelContext traveler) {
-        Map<String, Object> dataKeyValueMap = traveler.getDataKeyValueMap();
+        MatchKeyTuple matchKeyTuple = ((MatchTravelContext) traveler).getMatchKeyTuple();
 
-        if (dataKeyValueMap.containsKey("CompanyName") //
-                && dataKeyValueMap.containsKey("Country")//
-                && (dataKeyValueMap.containsKey("City") //
-                        || dataKeyValueMap.containsKey("State"))) {
+        if ((matchKeyTuple.getCity() != null //
+                || matchKeyTuple.getState() != null) //
+                && matchKeyTuple.getCountry() != null//
+                && matchKeyTuple.getName() != null) {
             return true;
         }
 
@@ -35,8 +35,10 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     @Override
     protected void process(Response response) {
         if (response.getResult() != null) {
-            Map<String, Object> dataMap = response.getTravelerContext().getDataKeyValueMap();
-            dataMap.put("DUNS", response.getResult());
+            MatchTravelContext context = (MatchTravelContext) response.getTravelerContext();
+            MatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
+
+            matchKeyTuple.setDuns((String) response.getResult());
             response.setResult(null);
         }
     }

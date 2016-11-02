@@ -1,9 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Level;
@@ -14,6 +12,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
 @Test
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -27,29 +27,34 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
 
         try {
-            List<Map<String, Object>> matchRequests = new ArrayList<>();
+            List<OutputRecord> matchRecords = new ArrayList<>();
             int MAX = 50;
             for (int i = 0; i < MAX; i++) {
-                if (i == 0) {
-                    continue;
-                }
-                Map<String, Object> dataKeyValueMap = new HashMap<>();
-                dataKeyValueMap.put("Domain", UUID.randomUUID().toString());
-                if (i % 2 != 1) {
-                    dataKeyValueMap.put("DUNS", UUID.randomUUID().toString());
-                }
-                dataKeyValueMap.put("CompanyName", UUID.randomUUID().toString());
-                dataKeyValueMap.put("Country", UUID.randomUUID().toString());
-                dataKeyValueMap.put("State", UUID.randomUUID().toString());
 
-                matchRequests.add(dataKeyValueMap);
+                InternalOutputRecord matchRecord = new InternalOutputRecord();
+                NameLocation parsedNameLocation = new NameLocation();
+                parsedNameLocation.setName(UUID.randomUUID().toString());
+                parsedNameLocation.setCountry(UUID.randomUUID().toString());
+                parsedNameLocation.setState(UUID.randomUUID().toString());
+
+                matchRecord.setParsedDomain(UUID.randomUUID().toString());
+                if (i % 2 != 1) {
+                    parsedNameLocation.setCity(UUID.randomUUID().toString());
+                    matchRecord.setParsedDuns("832433726");
+                    matchRecord.setParsedDomain("co.wood.wi.us");
+                }
+
+                matchRecord.setParsedNameLocation(parsedNameLocation);
+                matchRecords.add(matchRecord);
             }
 
-            int idx = 0;
-            for (Object result : service.callMatch(matchRequests, "2.0.0")) {
-                System.out.println(result);
+            service.callMatch(matchRecords, "2.0.0");
+
+            for (OutputRecord result : matchRecords) {
                 Assert.assertNotNull(result);
-                Assert.assertNotEquals(result, matchRequests.get(idx++));
+                InternalOutputRecord matchRecord = (InternalOutputRecord) result;
+                Assert.assertNotNull(matchRecord.getLatticeAccountId());
+                System.out.println(matchRecord.getLatticeAccountId());
             }
         } finally {
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);

@@ -20,6 +20,7 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 
 import akka.actor.ActorRef;
 
@@ -45,6 +46,8 @@ public class MatchGuideBook extends GuideBook {
                 .add(actorSystem.getActorRef(DunsDomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DunsBasedMicroEngineActor.class).path().toSerializationFormat());
+        dummyPathGraph
+                .add(actorSystem.getActorRef(LocationToDunsMicroEngineActor.class).path().toSerializationFormat());
     }
 
     @Override
@@ -93,7 +96,7 @@ public class MatchGuideBook extends GuideBook {
         Map<String, Set<String>> history = traveler.getVisitedHistory();
         if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
             Set<String> previousData = history.get(candidateDestination);
-            return previousData.contains(JsonUtils.serialize(traveler.getDataKeyValueMap()));
+            return previousData.contains(JsonUtils.serialize(traveler.getMatchKeyTuple()));
         } else {
             return false;
         }

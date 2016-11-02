@@ -20,7 +20,6 @@ public abstract class TravelContext {
     private final List<TravelWarning> travelWarnings;
     private final Map<String, Set<String>> visitedHistory;
     private TravelException travelException;
-    private Map<String, Object> dataKeyValueMap;
     private Object result;
     private String originalLocation;
     private String anchorActorLocation;
@@ -34,6 +33,8 @@ public abstract class TravelContext {
         visitedHistory = new HashMap<>();
         visitingQueue = new LinkedList<>();
     }
+
+    protected abstract Object getInputData();
 
     public String getRootOperationUid() {
         return rootOperationUid;
@@ -67,7 +68,7 @@ public abstract class TravelContext {
         if (!visitedHistory.containsKey(traversedActor)) {
             visitedHistory.put(traversedActor, new HashSet<String>());
         }
-        visitedHistory.get(traversedActor).add(JsonUtils.serialize(dataKeyValueMap));
+        visitedHistory.get(traversedActor).add(JsonUtils.serialize(getInputData()));
     }
 
     public void clearVisitedHistory() {
@@ -80,14 +81,6 @@ public abstract class TravelContext {
 
     public void setTravelException(TravelException travelException) {
         this.travelException = travelException;
-    }
-
-    public Map<String, Object> getDataKeyValueMap() {
-        return dataKeyValueMap;
-    }
-
-    public void setDataKeyValueMap(Map<String, Object> dataKeyValueMap) {
-        this.dataKeyValueMap = dataKeyValueMap;
     }
 
     public Object getResult() {

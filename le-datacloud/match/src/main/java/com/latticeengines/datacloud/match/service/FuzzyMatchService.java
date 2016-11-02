@@ -1,11 +1,12 @@
 package com.latticeengines.datacloud.match.service;
 
 import java.util.List;
-import java.util.Map;
+
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
 public interface FuzzyMatchService {
-    Object callMatch(Map<String, Object> matchRequest, String dataCloudVersion) throws Exception;
+    void callMatch(OutputRecord matchRequest, String dataCloudVersion) throws Exception;
 
-    List<Object> callMatch(List<Map<String, Object>> matchRequests, String dataCloudVersion) throws Exception;
+    void callMatch(List<OutputRecord> matchRequests, String dataCloudVersion) throws Exception;
 
 }
