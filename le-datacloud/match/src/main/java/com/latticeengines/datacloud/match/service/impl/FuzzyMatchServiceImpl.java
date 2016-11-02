@@ -26,21 +26,21 @@ import scala.concurrent.duration.FiniteDuration;
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
-    private static final Timeout REALTIME_TIMEOUT =new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
+    private static final Timeout REALTIME_TIMEOUT = new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
     private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(1, TimeUnit.HOURS));
 
     @Autowired
     private MatchActorSystem actorSystem;
 
     @Override
-    public void callMatch(List<OutputRecord> matchRecords, String rootOperationUid, String dataCloudVersion)
-            throws Exception {
+    public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
+            String dataCloudVersion) throws Exception {
         checkRecordType(matchRecords);
 
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
         List<Future<Object>> matchFutures = new ArrayList<>();
 
-        for (OutputRecord record : matchRecords) {
+        for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
             MatchTraveler travelContext = new MatchTraveler(rootOperationUid);
             matchRecord.setTravelerId(travelContext.getTravelerId());
@@ -68,7 +68,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
-    private void checkRecordType(List<OutputRecord> matchRequests) {
+    private void checkRecordType(List<? extends OutputRecord> matchRequests) {
         if (matchRequests.size() > actorSystem.getMaxAllowedRecordCount()) {
             throw new RuntimeException("Too many records in the request: " + matchRequests.size()
                     + ", max allowed record count = " + actorSystem.getMaxAllowedRecordCount());

@@ -84,6 +84,8 @@ public class MatchActorSystem {
         this.batchMode = batchMode;
         if (batchMode) {
             maxAllowedRecordCount.set(MAX_ALLOWED_RECORD_COUNT_ASYNC);
+        } else {
+            maxAllowedRecordCount.set(MAX_ALLOWED_RECORD_COUNT_SYNC);
         }
         log.info("Switch MatchActorSystem to " + (isBatchMode() ? BATCH_MODE : REALTIME_MODE) + " mode.");
     }

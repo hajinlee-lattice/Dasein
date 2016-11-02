@@ -42,7 +42,6 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
     @PostConstruct
     private void postConstruct() {
-        loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {

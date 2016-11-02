@@ -3,15 +3,11 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +20,6 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -35,7 +30,7 @@ import com.newrelic.api.agent.Trace;
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
 
-    private static final Log log = LogFactory.getLog(DynamoDbHelper.class);
+    private static final Log log = LogFactory.getLog(FuzzyMatchHelper.class);
 
     @Autowired
     private AccountLookupService accountLookupService;
@@ -57,9 +52,6 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public void populateMatchHints(MatchContext context) {
-        List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets = new ArrayList<>();
-        AccountLookupRequest request = createLookupRequest(context, lookupRequestTriplets);
-        context.setAccountLookupRequest(request);
     }
 
     @Override
@@ -73,23 +65,28 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext fetch(MatchContext context) {
-        AccountLookupRequest request = context.getAccountLookupRequest();
-        if (request == null) {
-            throw new NullPointerException("Cannot find AccountLookupRequest in the MatchContext");
+        String dataCloudVersion = context.getInput().getDataCloudVersion();
+        try {
+            fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
+                    dataCloudVersion);
+        } catch (Exception e) {
+            log.error("Failed to run fuzzy match.", e);
         }
+
+        List<String> ids = new ArrayList<>();
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            ids.add(record.getLatticeAccountId());
+        }
+
         Long startTime = System.currentTimeMillis();
-        List<String> lookupIdsInOrder = request.getIds();
-        List<LatticeAccount> accounts = accountLookupService.batchLookup(request);
-        Map<String, String> latticeIdToLookupIdMap = new HashMap<>();
-        for (int i = 0; i < accounts.size(); i++) {
-            String lookupId = lookupIdsInOrder.get(i);
+        List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
+
+        for (int i = 0; i < ids.size(); i++) {
+            InternalOutputRecord record = context.getInternalResults().get(i);
             LatticeAccount account = accounts.get(i);
-            if (account != null) {
-                latticeIdToLookupIdMap.put(account.getId(), lookupId);
-            }
+            record.setLatticeAccount(account);
         }
-        context.setMatchedAccounts(accounts);
-        context.setLatticeIdToLookupIdMap(latticeIdToLookupIdMap);
+
         log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
                 System.currentTimeMillis() - startTime, accounts.size()));
         return context;
@@ -119,15 +116,10 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        List<LatticeAccount> accountsInOrder = context.getMatchedAccounts();
-        List<InternalOutputRecord> internalRecordsInOrder = context.getInternalResults();
-        for (int i = 0; i < internalRecordsInOrder.size(); i++) {
-            LatticeAccount matchedAccount = accountsInOrder.get(i);
-            InternalOutputRecord internalOutputRecord = internalRecordsInOrder.get(i);
-            updateInternalRecordByMatchedAccount(internalOutputRecord, matchedAccount, context.getColumnSelection(),
+        for (InternalOutputRecord record : context.getInternalResults()) {
+            updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
                     context.getInput().getDataCloudVersion());
         }
-        context.setInternalResults(internalRecordsInOrder);
         return context;
     }
 
@@ -137,81 +129,44 @@ public class FuzzyMatchHelper implements DbHelper {
         MatchInput dummyInput = new MatchInput();
         dummyInput.setDataCloudVersion(dataCloudVersion);
         mergedContext.setInput(dummyInput);
-        Set<String> allIds = new HashSet<>();
+
+        List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
         for (MatchContext matchContext : matchContextList) {
-            AccountLookupRequest request = matchContext.getAccountLookupRequest();
-            if (request != null) {
-                allIds.addAll(request.getIds());
+            String contextId = UUID.randomUUID().toString();
+            matchContext.setContextId(contextId);
+            for (InternalOutputRecord record : matchContext.getInternalResults()) {
+                record.setOriginalContextId(contextId);
+                internalOutputRecords.add(record);
             }
         }
-        if (!allIds.isEmpty()) {
-            AccountLookupRequest request = new AccountLookupRequest(dataCloudVersion);
-            for (String id : allIds) {
-                request.addId(id);
-            }
-            mergedContext.setAccountLookupRequest(request);
-        }
+        mergedContext.setInternalResults(internalOutputRecords);
+
         return mergedContext;
     }
 
     @Override
     public void splitContext(MatchContext mergedContext, List<MatchContext> matchContextList) {
-        Map<String, LatticeAccount> allAccounts = new HashMap<>();
-        Map<String, String> latticeIdToLookupIdMap = mergedContext.getLatticeIdToLookupIdMap();
-        for (LatticeAccount account : mergedContext.getMatchedAccounts()) {
-            if (account != null) {
-                String latticeId = latticeIdToLookupIdMap.get(account.getId());
-                allAccounts.put(latticeId, account);
-            }
-        }
+        Map<String, MatchContext> rootUidContextMap = new HashMap<>();
         for (MatchContext context : matchContextList) {
-            List<String> lookupIdsInOrder = context.getAccountLookupRequest().getIds();
-            List<LatticeAccount> accountsInOrder = new ArrayList<>();
-            for (String id : lookupIdsInOrder) {
-                if (allAccounts.containsKey(id)) {
-                    accountsInOrder.add(allAccounts.get(id));
-                } else {
-                    accountsInOrder.add(null);
-                }
-            }
-            context.setMatchedAccounts(accountsInOrder);
+            rootUidContextMap.put(context.getContextId(), context);
+            context.setInternalResults(new ArrayList<InternalOutputRecord>());
+        }
+        for (InternalOutputRecord internalOutputRecord : mergedContext.getInternalResults()) {
+            MatchContext originalContext = rootUidContextMap.get(internalOutputRecord.getOriginalContextId());
+            originalContext.getInternalResults().add(internalOutputRecord);
         }
     }
 
-    private AccountLookupRequest createLookupRequest(MatchContext matchContext,
-                                                     List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets) {
-        String dataCloudVersion = matchContext.getInput().getDataCloudVersion();
-        AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
-        populateLookupRequest(matchContext, lookupRequestTriplets, accountLookupRequest);
-        return accountLookupRequest;
-    }
-
-    private void populateLookupRequest(MatchContext matchContext,
-                                       List<Triple<InternalOutputRecord, AccountLookupRequest, MatchContext>> lookupRequestTriplets,
-                                       AccountLookupRequest accountLookupRequest) {
-
-        for (InternalOutputRecord record : matchContext.getInternalResults()) {
-            accountLookupRequest.addLookupPair(
-                    (StringUtils.isEmpty(record.getParsedDomain())
-                            || "null".equalsIgnoreCase(record.getParsedDomain().trim()) || record.isPublicDomain())
-                            ? null : record.getParsedDomain(),
-                    (StringUtils.isEmpty(record.getParsedDuns())
-                            || "null".equalsIgnoreCase(record.getParsedDuns().trim()) ? null : record.getParsedDuns()));
-            Triple<InternalOutputRecord, AccountLookupRequest, MatchContext> accountLookupRequestTriplet = new MutableTriple<>(
-                    record, accountLookupRequest, matchContext);
-            lookupRequestTriplets.add(accountLookupRequestTriplet);
-        }
-    }
-
-    private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, LatticeAccount account,
-                                                      ColumnSelection columnSelection, String dataCloudVersion) {
-        Map<String, Object> queryResult = parseLatticeAccount(account, columnSelection, dataCloudVersion);
+    private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, ColumnSelection columnSelection,
+            String dataCloudVersion) {
+        Map<String, Object> queryResult = parseLatticeAccount(record.getLatticeAccount(), columnSelection,
+                dataCloudVersion);
         record.setQueryResult(queryResult);
     }
 
     @Trace
-    private Map<String, Object> parseLatticeAccount(LatticeAccount account,
-                                                    ColumnSelection columnSelection, String dataCloudVersion) {
+    private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
+            String dataCloudVersion) {
         Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
                 .getDecodeParameters(columnSelection, dataCloudVersion);
 
@@ -221,7 +176,7 @@ public class FuzzyMatchHelper implements DbHelper {
             String columnName = column.getColumnName();
 
             Map<String, Object> decodedAttributes = new HashMap<>();
-            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry: parameters.entrySet()) {
+            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : parameters.entrySet()) {
                 BitCodeBook codeBook = entry.getValue().getLeft();
                 List<String> decodeFields = entry.getValue().getRight();
                 String encodeField = entry.getKey();

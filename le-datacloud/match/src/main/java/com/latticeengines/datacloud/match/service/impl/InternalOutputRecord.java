@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
@@ -19,6 +20,8 @@ class InternalOutputRecord extends OutputRecord {
     private Boolean failed = false;
     private String travelerId;
     private String latticeAccountId;
+    private LatticeAccount latticeAccount;
+    private String originalContextId;
 
     String getParsedDomain() {
         return parsedDomain;
@@ -98,5 +101,21 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setLatticeAccountId(String latticeAccountId) {
         this.latticeAccountId = latticeAccountId;
+    }
+
+    public LatticeAccount getLatticeAccount() {
+        return latticeAccount;
+    }
+
+    public void setLatticeAccount(LatticeAccount latticeAccount) {
+        this.latticeAccount = latticeAccount;
+    }
+
+    public String getOriginalContextId() {
+        return originalContextId;
+    }
+
+    public void setOriginalContextId(String originalContextId) {
+        this.originalContextId = originalContextId;
     }
 }

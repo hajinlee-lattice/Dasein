@@ -36,6 +36,9 @@ public class MatchContext implements Fact, Dimension {
     private List<LatticeAccount> matchedAccounts;
     private Map<String, String> latticeIdToLookupIdMap;
 
+    @JsonIgnore
+    private String contextId;
+
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
     public MatchInput getInput() {
@@ -158,6 +161,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setLatticeIdToLookupIdMap(Map<String, String> latticeIdToLookupIdMap) {
         this.latticeIdToLookupIdMap = latticeIdToLookupIdMap;
+    }
+
+    public String getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
     }
 
     @JsonIgnore

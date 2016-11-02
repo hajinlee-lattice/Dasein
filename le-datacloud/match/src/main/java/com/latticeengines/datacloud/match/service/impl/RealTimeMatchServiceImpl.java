@@ -68,6 +68,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
         List<MatchContext> matchContexts = new ArrayList<>(input.getInputList().size());
         List<ColumnMetadata> metadatas = null;
         for (MatchInput matchInput : input.getInputList()) {
+            matchInput.setRootOperationUid(input.getRequestId());
             MatchContext matchContext = prepareMatchContext(matchInput, metadatas);
             if (input.isHomogeneous() && metadatas == null) {
                 metadatas = matchContext.getOutput().getMetadata();

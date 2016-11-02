@@ -49,7 +49,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @PostConstruct
     private void postConstruct() {
-        loadCaches();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {

@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.UUID;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
 
         String lookupId = AccountLookupEntry.buildId(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
 
-        if (matchKeyTuple.getDuns() != null && matchKeyTuple.getDomain() != null) {
+        if (matchKeyTuple.getDuns() != null || matchKeyTuple.getDomain() != null) {
             AccountLookupEntryMgr lookupMgr = accountLookupService
                     .getLookupMgr(request.getMatchTravelerContext().getDataCloudVersion());
 
@@ -36,7 +34,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             } else {
                 log.debug("Didn't get anything from real dynamodb but Simulating that we got some result for "
                         + lookupId);
-                result = "DUMMY_LatticeAccountID_" + UUID.randomUUID().toString();
             }
         } else {
             log.debug("Skip lookup into dynamodb for " + lookupRequestId);

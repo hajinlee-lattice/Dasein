@@ -57,7 +57,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @PostConstruct
     private void postConstruct() {
-        loadCaches();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
