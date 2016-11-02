@@ -38,7 +38,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             Traveler traveler = null;
             if (msg instanceof Traveler) {
                 traveler = (Traveler) msg;
-                log.debug(self() + " received traveler " + traveler);
+                log.debug(self() + " received " + traveler);
 
                 setOriginalSender(traveler, sender());
                 boolean hasSentMessageToDataSourceActor = process(traveler);
@@ -51,7 +51,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 Response response = (Response) msg;
                 process(response);
                 traveler = response.getTravelerContext();
-                log.debug(self() + " received a response for traveler " + traveler);
+                log.debug(self() + " received a response for " + traveler);
             }
 
             if (traveler == null) {
@@ -70,7 +70,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             nextLocation = traveler.getAnchorActorLocation();
         }
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
-        log.debug(self() + " sent traveler " + traveler + " to " + nextActorRef);
+        log.debug(self() + " sent " + traveler + " to " + nextActorRef);
 
         guideBook.logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
