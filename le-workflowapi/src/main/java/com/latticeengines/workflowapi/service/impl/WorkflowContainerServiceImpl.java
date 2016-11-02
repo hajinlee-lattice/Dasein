@@ -2,7 +2,6 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +85,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         return appId;
     }
 
+    @Override
     public WorkflowExecutionId getWorkflowId(ApplicationId appId) {
         return workflowJobEntityMgr.findByApplicationId(appId.toString()).getAsWorkflowId();
     }
