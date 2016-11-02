@@ -18,4 +18,10 @@ public class SampleMatchTravelerContext extends TravelContext {
         this.isMatched = isMatched;
     }
 
+    @Override
+    protected Object getInputData() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
