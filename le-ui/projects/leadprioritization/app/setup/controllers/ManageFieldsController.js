@@ -426,11 +426,26 @@ angular.module('lp.managefields', [
     $scope.remodelClicked = function($event) {
         if ($scope.saveInProgress) { return; }
         $scope.showEditFieldsError = false;
+        if (allFieldsDisabled()) {
+            $scope.showEditFieldsError = true;
+            $scope.editFieldsErrorMessage = ResourceUtility.getString("SETUP_MANAGE_FIELDS_ALL_FIELDS_DISABLED_ERROR");
+            return;
+        }
 
         UpdateFieldsModal.show($scope.oneLeadPerDomain, $scope.includePersonalEmailDomains, $scope.useLatticeAttributes, $scope.enableTransformations, $scope.modelId,
             $scope.fields.concat($scope.fieldsNotDisplayed), Model.ModelDetails.DisplayName);
         $scope.saveInProgress = false;
     };
+
+    function allFieldsDisabled() {
+        for (var i = 0; i < $scope.fields.length; i++) {
+            if ($scope.fields[i].ApprovedUsage.toLowerCase() != "none" ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     function discardChangesOnPage() {
         $("#fieldsGrid").data("kendoGrid").cancelChanges();

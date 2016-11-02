@@ -482,6 +482,7 @@ SETUP_MANAGE_FIELDS_GET_OPTIONS_ERROR=We are unable to get attribute options at 
 SETUP_MANAGE_FIELDS_BUILD_MODEL_LABEL=Build Model
 SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR=We are unable to get value specifying build model group is running or not at this time.
 SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR=We are unable to build model at this time.
+SETUP_MANAGE_FIELDS_ALL_FIELDS_DISABLED_ERROR=Cannot clone model when all attributes have been disabled. Please enable at least one attribute before cloning.
 SETUP_DEPLOYMENT_WIZARD_NAV_IMPORT_AND_ENRICH_DATA=Import & Enrich Data
 SETUP_DEPLOYMENT_WIZARD_NAV_BUILD_MODEL=Build Model
 SETUP_DEPLOYMENT_WIZARD_NAV_PUBLISH_SCORES=Publish Scores
