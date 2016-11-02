@@ -4,14 +4,17 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Set;
 
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -24,11 +27,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
 
@@ -67,6 +65,7 @@ public class PythonScriptModelServiceTestNG extends PlsFunctionalTestNGBase {
         setupSecurityContext(tenant);
     }
 
+    @Override
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         setupTenant(TENANT1);
