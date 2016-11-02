@@ -1,14 +1,13 @@
 package com.latticeengines.quartz.entitymanager.impl;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.domain.exposed.quartz.*;
-import com.latticeengines.quartz.service.CustomQuartzJob;
-import com.latticeengines.quartz.service.JobHistoryCleanupJob;
-import com.latticeengines.quartzclient.entitymanager.JobSourceEntityMgr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -28,13 +27,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.quartz.JobConfig;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.JobInfo;
+import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
+import com.latticeengines.domain.exposed.quartz.JobSource;
+import com.latticeengines.domain.exposed.quartz.JobSourceType;
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
+import com.latticeengines.quartz.service.CustomQuartzJob;
+import com.latticeengines.quartz.service.JobHistoryCleanupJob;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import com.latticeengines.quartzclient.entitymanager.JobSourceEntityMgr;
 
 @Component("schedulerEntityMgr")
 public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
