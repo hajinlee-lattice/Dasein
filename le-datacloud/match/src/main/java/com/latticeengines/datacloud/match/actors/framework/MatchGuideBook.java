@@ -96,9 +96,10 @@ public class MatchGuideBook extends GuideBook {
 
     private boolean visitSameMicroEngineWithSameDataAgain(String candidateDestination, MatchTraveler traveler) {
         Map<String, Set<String>> history = traveler.getVisitedHistory();
+        String currentContext = JsonUtils.serialize(traveler.getMatchKeyTuple());
         if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
             Set<String> previousData = history.get(candidateDestination);
-            return previousData.contains(JsonUtils.serialize(traveler.getMatchKeyTuple()));
+            return previousData.contains(currentContext);
         } else {
             return false;
         }
