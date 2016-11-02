@@ -36,7 +36,7 @@ public class JobWatchdogBean implements QuartzJobBean {
     private int retryWaitTime;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         JobWatchdogCallable.Builder builder = new JobWatchdogCallable.Builder();
         builder.modelEntityMgr(modelEntityMgr)
                 .modelingJobService(modelingJobService)

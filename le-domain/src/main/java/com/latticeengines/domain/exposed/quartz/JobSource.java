@@ -1,20 +1,21 @@
 package com.latticeengines.domain.exposed.quartz;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-
 @Entity
-@Table(name = "QUARTZ_JOBACTIVE")
-public class JobActive implements HasPid {
+@Table(name = "QUARTZ_JOB_SOURCE")
+public class JobSource implements HasPid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,27 +24,18 @@ public class JobActive implements HasPid {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("job_name")
+    @JsonIgnore
     @Column(name = "JobName", nullable = false)
     private String jobName;
 
-    @JsonProperty("tenant_id")
+    @JsonIgnore
     @Column(name = "TenantId", nullable = false)
     private String tenantId;
 
-    @JsonProperty("")
-    @Column(name = "IsActive")
-    private boolean isActive;
-
-    @Override
-    public Long getPid() {
-        return pid;
-    }
-
-    @Override
-    public void setPid(Long pid) {
-        this.pid = pid;
-    }
+    @JsonIgnore
+    @Column(name = "JobSourceType", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private JobSourceType sourceType;
 
     public String getJobName() {
         return jobName;
@@ -61,11 +53,21 @@ public class JobActive implements HasPid {
         this.tenantId = tenantId;
     }
 
-    public boolean getIsActive() {
-        return isActive;
+    public JobSourceType getSourceType() {
+        return sourceType;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setSourceType(JobSourceType sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    @Override
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
     }
 }

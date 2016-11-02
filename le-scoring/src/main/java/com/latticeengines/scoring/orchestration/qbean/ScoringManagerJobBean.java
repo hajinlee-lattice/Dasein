@@ -59,7 +59,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     private int queueCapacity;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         ScoringManagerCallable.Builder builder = new ScoringManagerCallable.Builder();
         builder.cleanUpInterval(cleanUpInterval)
                 .customerBaseDir(customerBaseDir)

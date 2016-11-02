@@ -1,6 +1,6 @@
 package com.latticeengines.quartzclient.dao.impl;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.dao.JobHistoryDao;
@@ -14,7 +14,7 @@ import java.util.Calendar;
 import java.util.List;
 
 @Component("jobHistoryDao")
-public class JobHistoryDaoImpl extends BaseDaoImpl<JobHistory> implements JobHistoryDao {
+public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<JobHistory> implements JobHistoryDao {
 
     @Value("${quartz.scheduler.jobs.history.displaycount:5}")
     private int displayCount;

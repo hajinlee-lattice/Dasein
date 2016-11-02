@@ -34,4 +34,5 @@ bash $WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
 bash $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
 bash $WSHOME/le-dev/scripts/setupdb_oauth2.sh
 bash $WSHOME/le-dev/scripts/setupdb_globalauth.sh
+bash $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
 bash $WSHOME/le-dev/scripts/setupzk.sh

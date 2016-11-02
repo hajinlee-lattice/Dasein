@@ -23,7 +23,7 @@ public class DataCloudRefreshBean implements QuartzJobBean {
     private IngestionService ingestionService;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         return new DataCloudRefreshCallable.Builder() //
                 .transformationProxy(transformationService) //
                 .publicationProxy(publicationService) //

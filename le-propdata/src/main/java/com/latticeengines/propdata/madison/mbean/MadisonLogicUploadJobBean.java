@@ -20,7 +20,7 @@ public class MadisonLogicUploadJobBean implements QuartzJobBean {
     private boolean propdataJobsEnabled;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         MadisonLogicUploadCallable.Builder builder = new MadisonLogicUploadCallable.Builder();
         builder.propdataJobsEnabled(propdataJobsEnabled)
                 .propDataMadisonService(propDataMadisonService);

@@ -19,6 +19,9 @@ public class JobConfig {
     @JsonProperty("query_api")
     private String queryApi;
 
+    @JsonProperty("check_job_bean_url")
+    private String checkJobBeanUrl;
+
     @JsonProperty("job_arguments")
     private String jobArguments;
 
@@ -66,6 +69,14 @@ public class JobConfig {
 
     public void setQueryApi(String queryApi) {
         this.queryApi = queryApi;
+    }
+
+    public String getCheckJobBeanUrl() {
+        return checkJobBeanUrl;
+    }
+
+    public void setCheckJobBeanUrl(String checkJobBeanUrl) {
+        this.checkJobBeanUrl = checkJobBeanUrl;
     }
 
     public String getJobArguments() {

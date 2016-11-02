@@ -55,7 +55,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     private Future<Boolean> downloadModel(Tenant tenant) {
-        log.info("Downloading model for tenant " + tenant.getId());
+        log.debug("Downloading model for tenant " + tenant.getId());
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
         builder.modelServiceHdfsBaseDir(modelServiceHdfsBaseDir) //
                 .tenant(tenant) //
@@ -133,7 +133,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     private Boolean fullDownload() {
-        log.info("Perform full download!");
+        log.debug("Perform full download!");
         List<Tenant> tenants = tenantEntityMgr.findAll();
 
         List<Future<Boolean>> futures = new ArrayList<>();

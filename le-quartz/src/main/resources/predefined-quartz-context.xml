@@ -8,70 +8,77 @@
 
     <bean name="plsModelSummaryDownload" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="modelSummaryDownload" />
-        <property name="cronTrigger" value="0/15 * * * * ?" />
+        <property name="cronTrigger" value="${quartz.pls.modelsummarydownload.job.cron:0/15 * * * * ?}" />
         <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;modelSummaryDownload&quot;}" />
         <property name="jobTimeout" value="${quartz.pls.modelsummarydownload.job.timeout:3600}" />
     </bean>
 
     <bean name="plsSourceFilePurge" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="sourceFilePurge" />
-        <property name="cronTrigger" value="0 0 5 * * ?" />
+        <property name="cronTrigger" value="${quartz.pls.sourcefilepurge.job.cron:0 0 5 * * ?}" />
         <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;sourceFilePurge&quot;}" />
         <property name="jobTimeout" value="${quartz.pls.sourcefilepurge.job.timeout:3600}" />
     </bean>
 
     <bean name="dataplatformDLOrchestration" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dlOrchestrationQuartzJob" />
-        <property name="cronTrigger" value="0/15 * * * * ?" />
+        <property name="cronTrigger" value="${quartz.dataplatform.dlorchestration.job.cron:0/15 * * * * ?}" />
         <property name="destUrl" value="${quartz.dataplatform.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dataplatform.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dataplatform.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.dataplatform.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dlOrchestrationQuartzJob&quot;}" />
         <property name="jobTimeout" value="${quartz.dataplatform.dlorchestration.job.timeout:3600}" />
     </bean>
 
     <bean name="dataplatformJobWatchdog" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="jobWatchdog" />
-        <property name="cronTrigger" value="0/20 * * * * ?" />
+        <property name="cronTrigger" value="${quartz.dataplatform.jobwatchdog.job.cron:0/20 * * * * ?}" />
         <property name="destUrl" value="${quartz.dataplatform.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dataplatform.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dataplatform.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.dataplatform.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;jobWatchdog&quot;}" />
         <property name="jobTimeout" value="${quartz.dataplatform.jobwatchdog.job.timeout:3600}" />
     </bean>
 
     <bean name="dellebiDailyJob1" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dellebiDailyJob1" />
-        <property name="cronTrigger" value="0 0/5 * * * ?" />
+        <property name="cronTrigger" value="${quartz.dellebi.dailyjob1.job.cron:0 0/5 * * * ?}" />
         <property name="destUrl" value="${quartz.dellebi.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dellebi.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dellebi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.dellebi.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dellEbiDailyJob1&quot;}" />
         <property name="jobTimeout" value="${quartz.dellebi.dailyjob1.job.timeout:3600}" />
     </bean>
 
     <bean name="dellebiDailyJob2" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dellebiDailyJob2" />
-        <property name="cronTrigger" value="20 0/5 * * * ?" />
+        <property name="cronTrigger" value="${quartz.dellebi.dailyjob2.job.cron:20 0/5 * * * ?}" />
         <property name="destUrl" value="${quartz.dellebi.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dellebi.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dellebi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.dellebi.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dellEbiDailyJob2&quot;}" />
         <property name="jobTimeout" value="${quartz.dellebi.dailyjob2.job.timeout:3600}" />
     </bean>
 
     <bean name="dellebiDailyJob3" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dellebiDailyJob3" />
-        <property name="cronTrigger" value="40 0/5 * * * ?" />
+        <property name="cronTrigger" value="${quartz.dellebi.dailyjob3.job.cron:40 0/5 * * * ?}" />
         <property name="destUrl" value="${quartz.dellebi.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.dellebi.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.dellebi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.dellebi.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dellEbiDailyJob3&quot;}" />
         <property name="jobTimeout" value="${quartz.dellebi.dailyjob3.job.timeout:3600}" />
     </bean>
@@ -82,16 +89,18 @@
         <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url}" />
         <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url}" />
         <property name="queryApi" value="${quartz.propdata.predefined.job.query.api}" />
+        <property name="checkJobBeanUrl" value="${quartz.propdata.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dataCloudRefresh&quot;}" />
         <property name="jobTimeout" value="${quartz.propdata.refresh.job.timeout:3600}" />
     </bean>
 
     <bean name="scoringManagerJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="scoringManagerJob" />
-        <property name="cronTrigger" value="0/15 * * * * ?" />
+        <property name="cronTrigger" value="${quartz.scoring.scoringmanager.job.cron:0/15 * * * * ?}" />
         <property name="destUrl" value="${quartz.scoring.predefined.job.primary.url:}" />
         <property name="secondaryDestUrl" value="${quartz.scoring.predefined.job.secondary.url:}" />
         <property name="queryApi" value="${quartz.scoring.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.scoring.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;scoringManagerJob&quot;}" />
         <property name="jobTimeout" value="${quartz.scoring.scoringmanager.job.timeout:3600}" />
     </bean>

@@ -32,7 +32,7 @@ public class SourceFilePurgeBean implements QuartzJobBean {
     private int retainDays;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         SourceFilePurgeCallable.Builder builder = new SourceFilePurgeCallable.Builder();
         builder.sourceFileService(sourceFileService) //
                 .sourceFileEntityMgr(sourceFileEntityMgr) //

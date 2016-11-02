@@ -2,6 +2,7 @@ package com.latticeengines.quartzclient.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.quartz.PredefinedJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.quartzclient.service.QuartzJobService;
 
@@ -24,16 +24,22 @@ public class QuartzJobClientResource {
 
     @RequestMapping(value = "/triggerjob", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    public TriggeredJobInfo triggerJob(@RequestBody PredefinedJobArguments jobArgs,
+    public TriggeredJobInfo triggerJob(@RequestBody QuartzJobArguments jobArgs,
             HttpServletRequest request) {
         return quartzJobService.runJob(jobArgs);
     }
 
     @RequestMapping(value = "/checkactivejob", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    public Boolean checkActiveJob(@RequestBody PredefinedJobArguments jobArgs,
+    public Boolean checkActiveJob(@RequestBody QuartzJobArguments jobArgs,
             HttpServletRequest request) {
         return quartzJobService.hasActiveJob(jobArgs);
+    }
+
+    @RequestMapping(value = "/checkjobbean", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public Boolean checkJobBean(@RequestBody QuartzJobArguments jobArgs, HttpServletRequest request) {
+        return quartzJobService.jobBeanExist(jobArgs);
     }
 
 }

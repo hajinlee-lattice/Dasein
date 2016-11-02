@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.PredefinedJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.core.BaseJobHistoryEntityMgr;
@@ -33,8 +33,6 @@ public class QuartzJobServiceImpl implements QuartzJobService {
 
     private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
-    private Map<String, Callable<Boolean>> callables = new HashMap<String, Callable<Boolean>>();
-
     private static Map<String, Boolean> jobActives = new HashMap<String, Boolean>();
 
     @Autowired
@@ -44,36 +42,32 @@ public class QuartzJobServiceImpl implements QuartzJobService {
     private ApplicationContext appCtx;
 
     @Override
-    public TriggeredJobInfo runJob(PredefinedJobArguments jobArgs) {
+    public TriggeredJobInfo runJob(QuartzJobArguments jobArgs) {
         String predefinedJobType = jobArgs.getPredefinedJobType();
-        if (callables.containsKey(predefinedJobType)) {
-            return runJobInternal(jobArgs, callables.get(predefinedJobType));
+        QuartzJobBean jobBean = (QuartzJobBean) appCtx.getBean(predefinedJobType);
+        if (jobBean == null) {
+            log.error("Can not find the bean related to the predefined job type!");
+            return null;
         } else {
-            QuartzJobBean jobBean = (QuartzJobBean) appCtx.getBean(predefinedJobType);
-            if (jobBean == null) {
-                log.error("Can not find the bean related to the predefined job type!");
-                return null;
-            } else {
-                callables.put(predefinedJobType, jobBean.getCallable());
-                return runJobInternal(jobArgs, callables.get(predefinedJobType));
-            }
+            return runJobInternal(jobArgs, jobBean.getCallable(jobArgs.getJobArguments()));
         }
     }
 
-    private TriggeredJobInfo runJobInternal(PredefinedJobArguments jobArgs,
+    private TriggeredJobInfo runJobInternal(QuartzJobArguments jobArgs,
             Callable<Boolean> callable) {
         ListenableFuture<Boolean> task = taskExecutor
                 .submitListenable(callable);
-        jobActives.put(jobArgs.getPredefinedJobType(), true);
         final String jobId = Integer.toString(task.hashCode());
         final String tenantId = jobArgs.getTenantId();
         final String jobName = jobArgs.getJobName();
-        final String predefinedJobType = jobArgs.getPredefinedJobType();
+        final String jobType = jobArgs.getPredefinedJobType();
+        final String jobKey = tenantId + jobName + jobType;
+        jobActives.put(jobKey, true);
         task.addCallback(new ListenableFutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 try {
-                    jobActives.put(predefinedJobType, false);
+                    jobActives.put(jobKey, false);
                     JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
                             jobId);
                     if (jobHistory != null) {
@@ -99,7 +93,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             @Override
             public void onFailure(Throwable t) {
                 try {
-                    jobActives.put(predefinedJobType, false);
+                    jobActives.put(jobKey, false);
                     JobHistory jobHistory = jobHistoryEntityMgr.getJobHistory(tenantId, jobName,
                             jobId);
                     if (jobHistory != null) {
@@ -132,11 +126,23 @@ public class QuartzJobServiceImpl implements QuartzJobService {
     }
 
     @Override
-    public Boolean hasActiveJob(PredefinedJobArguments jobArgs) {
+    public Boolean hasActiveJob(QuartzJobArguments jobArgs) {
         if (jobActives.containsKey(jobArgs.getPredefinedJobType())) {
             return jobActives.get(jobArgs.getPredefinedJobType());
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public Boolean jobBeanExist(QuartzJobArguments jobArgs) {
+        String jobType = jobArgs.getPredefinedJobType();
+        QuartzJobBean jobBean = (QuartzJobBean) appCtx.getBean(jobType);
+        if (jobBean == null) {
+            log.error("Can not find the bean related to the predefined job type!");
+            return false;
+        } else {
+            return true;
         }
     }
 

@@ -105,7 +105,7 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
     private int queueCapacity;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         DLOrchestrationCallable.Builder builder = new DLOrchestrationCallable.Builder();
         builder.alertService(alertService)
                 .appTimeLineWebAppAddress(appTimeLineWebAppAddress)

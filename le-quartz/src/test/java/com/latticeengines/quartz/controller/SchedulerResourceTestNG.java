@@ -34,10 +34,19 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional")
     public void addJob() {
+        quartzSchedulerProxy.deleteJob("groupTestNG", "testNGJob");
         JobConfig jobTest = new JobConfig();
         jobTest.setCronTrigger("0/5 * * * * ?");
         jobTest.setJobName("testNGJob");
-        jobTest.setDestUrl(testDestUrl);
+        jobTest.setCronTrigger("0/5 * * * * ?");
+        jobTest.setDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setSecondaryDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setJobTimeout(30);
+        jobTest.setQueryApi("http://localhost:8899/quartz/quartzjob/checkactivejob");
+        jobTest.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobTest.setJobArguments("{" +
+                "  \"jobType\": \"testQuartzJob\"," +
+                "  \"printMsg\": \"Hello World\"," + "}");
         Boolean success = quartzSchedulerProxy.addJob("groupTestNG", jobTest);
         assertEquals(success, Boolean.TRUE);
     }
@@ -60,12 +69,20 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         assertEquals(success, Boolean.FALSE);
     }
 
-    @Test(groups = "functional", expectedExceptions = Exception.class)
+    @Test(groups = "functional", expectedExceptions = Exception.class, enabled = false)
     public void addWrongDestUrlJob() {
         JobConfig jobTest = new JobConfig();
         jobTest.setCronTrigger("0/5 * * * * ?");
         jobTest.setJobName("testNGWrongDestUrlJob");
-        jobTest.setDestUrl("//localhost:8080");
+        jobTest.setCronTrigger("0/5 * * * * ?");
+        jobTest.setDestUrl("//localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setSecondaryDestUrl("/localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setJobTimeout(30);
+        jobTest.setQueryApi("//localhost:8899/quartz/quartzjob/checkactivejob");
+        jobTest.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobTest.setJobArguments("{" +
+                "  \"jobType\": \"testQuartzJob\"," +
+                "  \"printMsg\": \"Hello World\"," + "}");
         Boolean success = quartzSchedulerProxy.addJob("groupTestNG", jobTest);
         assertEquals(success, Boolean.FALSE);
     }

@@ -17,8 +17,8 @@ public class DellEbiDailyJob3Bean extends DellEbiDailyJobBean {
     private final String quartzJob = "dellEbiDailyJob3";
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         super.setQuartzJob(quartzJob);
-        return super.getCallable();
+        return super.getCallable(jobArguments);
     }
 }

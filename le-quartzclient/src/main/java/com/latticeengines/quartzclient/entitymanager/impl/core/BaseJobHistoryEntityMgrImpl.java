@@ -24,13 +24,13 @@ public class BaseJobHistoryEntityMgrImpl extends BaseEntityMgrImpl<JobHistory> i
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public JobHistory getJobHistory(String tenantId, String jobName, String triggeredJobHandle) {
         return jobHistoryDao.getJobHistory(tenantId, jobName, triggeredJobHandle);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRED)
     public void updateJobHistory(JobHistory jobHistory) {
         jobHistoryDao.updateJobHistory(jobHistory);
 

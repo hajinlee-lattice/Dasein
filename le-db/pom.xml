@@ -96,7 +96,6 @@
                                 <argument>com.latticeengines.domain.exposed.datacloud.job</argument>
                                 <argument>com.latticeengines.domain.exposed.security</argument>
                                 <argument>com.latticeengines.domain.exposed.workflow</argument>
-                                <argument>com.latticeengines.domain.exposed.quartz</argument>
                             </arguments>
                         </configuration>
                     </execution>

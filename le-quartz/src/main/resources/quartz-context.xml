@@ -23,8 +23,8 @@
         <property name="applicationContextSchedulerContextKey" value="applicationContext" />
         <property name="waitForJobsToCompleteOnShutdown" value="true" />
         <property name="overwriteExistingJobs" value="true" />
-        <property name="dataSource" ref="dataSource" />
-        <property name="transactionManager" ref="transactionManager" />
+        <property name="dataSource" ref="qrtzDataSource" />
+        <property name="transactionManager" ref="qrtzTransactionManager" />
         <property name="quartzProperties">
             <props>
                 <prop key="org.quartz.jobStore.misfireThreshold">6000</prop>

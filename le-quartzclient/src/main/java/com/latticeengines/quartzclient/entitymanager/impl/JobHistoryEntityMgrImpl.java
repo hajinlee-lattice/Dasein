@@ -15,37 +15,37 @@ public class JobHistoryEntityMgrImpl extends BaseJobHistoryEntityMgrImpl impleme
         JobHistoryEntityMgr {
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<JobHistory> getJobHistory(String tenantId, String jobName) {
         return jobHistoryDao.getJobHistory(tenantId, jobName);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRED)
     public void saveJobHistory(JobHistory jobHistory) {
         jobHistoryDao.saveJobHistory(jobHistory);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRED)
     public void createJobHistory(JobHistory jobHistory) {
         jobHistoryDao.createJobHistory(jobHistory);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRED)
     public void deleteOldJobHistory(int retainingDays) {
         jobHistoryDao.deleteOldJobHistory(retainingDays);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public JobHistory getRecentUnfinishedJobHistory(String tenantId, String jobName) {
         return jobHistoryDao.getRecentUnfinishedJobHistory(tenantId, jobName);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "qrtzTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public JobHistory getLastJobHistory(String tenantId, String jobName) {
         return jobHistoryDao.getLastJobHistory(tenantId, jobName);
     }

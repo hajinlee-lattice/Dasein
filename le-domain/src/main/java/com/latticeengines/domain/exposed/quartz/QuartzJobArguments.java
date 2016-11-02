@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.quartz;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PredefinedJobArguments {
+public class QuartzJobArguments {
 
     @JsonProperty("job_name")
     private String jobName;
@@ -12,6 +12,9 @@ public class PredefinedJobArguments {
 
     @JsonProperty("predefined_job_type")
     private String predefinedJobType;
+
+    @JsonProperty("job_arguments")
+    private String jobArguments;
 
     public String getJobName() {
         return jobName;
@@ -35,6 +38,14 @@ public class PredefinedJobArguments {
 
     public void setPredefinedJobType(String predefinedJobType) {
         this.predefinedJobType = predefinedJobType;
+    }
+
+    public String getJobArguments() {
+        return jobArguments;
+    }
+
+    public void setJobArguments(String jobArguments) {
+        this.jobArguments = jobArguments;
     }
 
 }

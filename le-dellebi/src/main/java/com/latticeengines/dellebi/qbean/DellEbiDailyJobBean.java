@@ -25,7 +25,7 @@ public abstract class DellEbiDailyJobBean implements QuartzJobBean {
 
     protected String quartzJob = "dellEbiDailyJob";
 
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         DellEbiDailyJobCallable.Builder builder = new DellEbiDailyJobCallable.Builder();
         builder.dailyFlow(dailyFlow).exportAndReportService(exportAndReportService)
                 .dellEbiConfigEntityMgr(dellEbiConfigEntityMgr).quartzJob(quartzJob);

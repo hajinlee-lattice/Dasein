@@ -1,13 +1,10 @@
 package com.latticeengines.quartz.service;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.latticeengines.domain.exposed.quartz.JobConfig;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.JobInfo;
 import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
+import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -17,15 +14,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.quartz.JobConfig;
-import com.latticeengines.domain.exposed.quartz.JobInfo;
-import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(locations = { "classpath:test-quartz-context.xml" })
-public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
+public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
 
-    public static final String JOB_NAME = "testPredefinedJob";
-    public static final String JOB_GROUP = "PredefinedJobs";
+    public static final String JOB_NAME = "testCustomQuartzJob";
+    public static final String JOB_GROUP = "CustomQuartzJobs";
     @Autowired
     private Scheduler scheduler;
 
@@ -38,10 +37,19 @@ public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void addJob() {
-        List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("testPredefinedJobs");
-        for (JobConfig jobConfig : jobConfigs) {
-            schedulerEntityMgr.addPredefinedJob(jobConfig);
-        }
+        schedulerEntityMgr.deleteJob(JOB_GROUP, JOB_NAME);
+        JobConfig jobConfig = new JobConfig();
+        jobConfig.setJobName(JOB_NAME);
+        jobConfig.setCronTrigger("0/5 * * * * ?");
+        jobConfig.setDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobConfig.setSecondaryDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobConfig.setJobTimeout(30);
+        jobConfig.setQueryApi("http://localhost:8899/quartz/quartzjob/checkactivejob");
+        jobConfig.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobConfig.setJobArguments("{" +
+                "  \"jobType\": \"testQuartzJob\"," +
+                "  \"printMsg\": \"Hello World\"," + "}");
+        schedulerEntityMgr.addJob(JOB_GROUP, jobConfig);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "addJob" })
@@ -94,13 +102,7 @@ public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        JobKey jobKey = new JobKey(JOB_NAME, JOB_GROUP);
-        boolean deleted = false;
-        try {
-            deleted = scheduler.deleteJob(jobKey);
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
+        Boolean deleted = schedulerEntityMgr.deleteJob(JOB_GROUP, JOB_NAME);
         assertTrue(deleted);
     }
 
@@ -125,4 +127,3 @@ public class PredefinedJobTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 }
-

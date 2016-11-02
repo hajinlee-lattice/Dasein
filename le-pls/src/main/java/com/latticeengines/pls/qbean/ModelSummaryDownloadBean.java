@@ -65,7 +65,7 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Override
-    public Callable<Boolean> getCallable() {
+    public Callable<Boolean> getCallable(String jobArguments) {
         ModelSummaryDownloadCallable.Builder builder = new ModelSummaryDownloadCallable.Builder();
         builder.tenantEntityMgr(tenantEntityMgr)//
                 .modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
