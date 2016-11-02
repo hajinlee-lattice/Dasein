@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -58,7 +59,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     private static final String AVRO_FILE = "part-m-00000_small.avro";
 
-    private static final String TEST_MODEL_NAME_PREFIX = "b8684c37-a3b9-452f-b7e3-af440e4365b8";
+    private static String TEST_MODEL_NAME_PREFIX;
 
     private static final String LOCAL_DATA_DIR = "com/latticeengines/scoring/rts/data/";
 
@@ -87,6 +88,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), customerSpace)
                 .toString();
 
+        TEST_MODEL_NAME_PREFIX = UUID.randomUUID().toString();
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
