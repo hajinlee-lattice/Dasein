@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -27,29 +26,24 @@ import scala.concurrent.duration.FiniteDuration;
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
+    private static final Timeout REALTIME_TIMEOUT =new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
+    private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(1, TimeUnit.HOURS));
+
     @Autowired
     private MatchActorSystem actorSystem;
 
     @Override
-    public void callMatch(OutputRecord matchRecord, String dataCloudVersion) throws Exception {
-        checkRecordType(matchRecord);
-        List<OutputRecord> matchRecords = new ArrayList<>();
-        matchRecords.add(matchRecord);
-        callMatch(matchRecords, dataCloudVersion);
-    }
-
-    @Override
-    public void callMatch(List<OutputRecord> matchRecords, String dataCloudVersion) throws Exception {
+    public void callMatch(List<OutputRecord> matchRecords, String rootOperationUid, String dataCloudVersion)
+            throws Exception {
         checkRecordType(matchRecords);
 
-        FiniteDuration duration = new FiniteDuration(10, TimeUnit.MINUTES);
-        Timeout timeout = new Timeout(duration);
+        Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
         List<Future<Object>> matchFutures = new ArrayList<>();
 
         for (OutputRecord record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            MatchTraveler travelContext = //
-                    new MatchTraveler(UUID.randomUUID().toString());
+            MatchTraveler travelContext = new MatchTraveler(rootOperationUid);
+            matchRecord.setTravelerId(travelContext.getTravelerId());
 
             MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
             travelContext.setMatchKeyTuple(matchKeyTuple);
@@ -61,20 +55,17 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         int idx = 0;
         for (Future<Object> future : matchFutures) {
             MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
-            log.info("Got LatticeAccountId=" + traveler.getResult() + " for RootOperationUID=" + traveler.getRootOperationUid());
+            log.info("Got LatticeAccountId=" + traveler.getResult() + " for TravelerId=" + traveler.getTravelerId()
+                    + " in RootOperationUID=" + traveler.getRootOperationUid());
             InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx++);
-            matchRecord.setLatticeAccountId((String) traveler.getResult());
+            if (traveler.getResult() != null) {
+                matchRecord.setLatticeAccountId((String) traveler.getResult());
+            }
         }
     }
 
     private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler, Timeout timeout) {
         return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
-    }
-
-    private void checkRecordType(OutputRecord matchRequest) {
-        List<OutputRecord> matchRequests = new ArrayList<>();
-        matchRequests.add(matchRequest);
-        checkRecordType(matchRequests);
     }
 
     private void checkRecordType(List<OutputRecord> matchRequests) {

@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -18,11 +19,18 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 @Test
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
+    private static final String VALID_DUNS = "832433726";
+    private static final String VALID_DOMAIN = "co.wood.wi.us";
+    private static final String EXPECTED_LATTICE_ID = "50310468";
+
     @Autowired
     private FuzzyMatchService service;
 
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
+
     @Test(groups = "pending")
-    public void testActorSystem() throws Exception {
+    public void testRealTimeActorSystem() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
 
@@ -40,21 +48,24 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 matchRecord.setParsedDomain(UUID.randomUUID().toString());
                 if (i % 2 != 1) {
                     parsedNameLocation.setCity(UUID.randomUUID().toString());
-                    matchRecord.setParsedDuns("832433726");
-                    matchRecord.setParsedDomain("co.wood.wi.us");
+                    matchRecord.setParsedDuns(VALID_DUNS);
+                    matchRecord.setParsedDomain(VALID_DOMAIN);
                 }
 
                 matchRecord.setParsedNameLocation(parsedNameLocation);
                 matchRecords.add(matchRecord);
             }
 
-            service.callMatch(matchRecords, "2.0.0");
+            service.callMatch(matchRecords, UUID.randomUUID().toString(),
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion());
 
             for (OutputRecord result : matchRecords) {
                 Assert.assertNotNull(result);
-                InternalOutputRecord matchRecord = (InternalOutputRecord) result;
-                Assert.assertNotNull(matchRecord.getLatticeAccountId());
-                System.out.println(matchRecord.getLatticeAccountId());
+                InternalOutputRecord record = (InternalOutputRecord) result;
+                if (VALID_DUNS.equals(record.getParsedDuns()) || VALID_DOMAIN.equals(record.getParsedDomain())) {
+                    Assert.assertNotNull(record.getLatticeAccountId());
+                    Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_LATTICE_ID);
+                }
             }
         } finally {
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);

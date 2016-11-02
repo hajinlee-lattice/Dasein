@@ -20,7 +20,6 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
-import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
 
 import akka.actor.ActorRef;
 
@@ -46,8 +45,6 @@ public class MatchGuideBook extends GuideBook {
                 .add(actorSystem.getActorRef(DunsDomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DomainBasedMicroEngineActor.class).path().toSerializationFormat());
         dummyPathGraph.add(actorSystem.getActorRef(DunsBasedMicroEngineActor.class).path().toSerializationFormat());
-        dummyPathGraph
-                .add(actorSystem.getActorRef(LocationToDunsMicroEngineActor.class).path().toSerializationFormat());
     }
 
     @Override

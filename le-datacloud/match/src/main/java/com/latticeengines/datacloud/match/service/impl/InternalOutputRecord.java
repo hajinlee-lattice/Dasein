@@ -17,6 +17,7 @@ class InternalOutputRecord extends OutputRecord {
     private Map<String, Object> queryResult = new HashMap<>();
     private List<Boolean> columnMatched;
     private Boolean failed = false;
+    private String travelerId;
     private String latticeAccountId;
 
     String getParsedDomain() {
@@ -81,6 +82,14 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setFailed(Boolean failed) {
         this.failed = failed;
+    }
+
+    public String getTravelerId() {
+        return travelerId;
+    }
+
+    public void setTravelerId(String travelerId) {
+        this.travelerId = travelerId;
     }
 
     public String getLatticeAccountId() {
