@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -22,8 +24,8 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
     @Value("${datacloud.match.latest.rts.cache.version:1.0.0}")
     private String latstRtsCache;
 
-    private final ConcurrentMap<String, ExternalColumn> whiteColumnCache = new ConcurrentHashMap<>();
-    private final ConcurrentSkipListSet<String> blackColumnCache = new ConcurrentSkipListSet<>();
+    private final ConcurrentMap<String, ConcurrentMap<String, ExternalColumn>> whiteColumnCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ConcurrentSkipListSet<String>> blackColumnCache = new ConcurrentHashMap<>();
 
     @Override
     public boolean accept(String version) {
@@ -36,22 +38,19 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
     }
 
     @Override
-    protected ConcurrentMap<String, ExternalColumn> getWhiteColumnCache() {
+    protected ConcurrentMap<String, ConcurrentMap<String, ExternalColumn>> getWhiteColumnCache() {
         return whiteColumnCache;
     }
 
     @Override
-    protected ConcurrentSkipListSet<String> getBlackColumnCache() {
+    protected ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache() {
         return blackColumnCache;
     }
 
     @Override
-    protected boolean isLatestVersion(String dataCloudVersion) {
-        return true;
-    }
-
-    @Override
-    protected String getLatestVersion() {
-        return latstRtsCache;
+    protected List<String> getAllVersions() {
+        List<String> versions = new ArrayList<>();
+        versions.add(latstRtsCache);
+        return versions;
     }
 }
