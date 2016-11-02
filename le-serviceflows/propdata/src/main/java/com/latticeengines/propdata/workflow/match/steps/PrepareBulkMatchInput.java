@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
@@ -38,14 +39,17 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Value("${propdata.match.max.num.blocks:4}")
+    @Value("${datacloud.match.max.num.blocks:4}")
     private Integer maxNumBlocks;
 
-    @Value("${propdata.match.num.threads:4}")
+    @Value("${datacloud.match.num.threads:4}")
     private Integer threadPoolSize;
 
-    @Value("${propdata.match.group.size:20}")
+    @Value("${datacloud.match.group.size:20}")
     private Integer groupSize;
+
+    @Value("${datacloud.match.use.fuzzy.match:false}")
+    private boolean useFuzzyMatch;
 
     private String avroGlobs;
 
@@ -69,7 +73,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer[] determineBlockSizes(Long count) {
-        return divideIntoNumBlocks(count, determineNumBlocks(count));
+        if (MatchTypeUtil.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())
+                && useFuzzyMatch) {
+            return new Integer[] { count.intValue() };
+        } else {
+            return divideIntoNumBlocks(count, determineNumBlocks(count));
+        }
     }
 
     private Integer determineNumBlocks(Long count) {
@@ -113,7 +122,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                     jobConfiguration.getBlockOperationUid()).toString();
             jobConfiguration.setAvroPath(targetFile);
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
-            String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid()).getApplicationId();
+            String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
+                    .getApplicationId();
             jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]",
                     getConfiguration().getCustomerSpace().toString(), appId, blockIdx, blocks.length));
             configurations.add(jobConfiguration);

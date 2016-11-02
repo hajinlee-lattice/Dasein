@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -27,6 +29,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
@@ -99,6 +103,12 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
 
+    @Autowired
+    private MatchActorSystem matchActorSystem;
+
+    @Value("${datacloud.match.use.fuzzy.match:false}")
+    private boolean useFuzzyMatch;
+
     private ColumnMetadataService columnMetadataService;
 
     @Autowired
@@ -130,6 +140,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Boolean excludePublicDomains;
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
+
+    @PostConstruct
+    public void postConstruct() {
+        matchActorSystem.setBatchMode(true);
+    }
 
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
@@ -168,13 +183,15 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
-            Integer groupSize = jobConfiguration.getGroupSize();
-            numThreads = jobConfiguration.getThreadPoolSize();
+            Integer groupSize = useFuzzyMatch ? matchActorSystem.getMaxAllowedRecordCount()
+                    : jobConfiguration.getGroupSize();
+            numThreads = useFuzzyMatch ? 1 : jobConfiguration.getThreadPoolSize();
             ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
             avroPath = jobConfiguration.getAvroPath();
             divider = new BlockDivider(avroPath, yarnConfiguration, groupSize);
-            log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize);
+            log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize
+                    + " and a thread pool of size " + numThreads);
             inputSchema = jobConfiguration.getInputAvroSchema();
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
@@ -339,7 +356,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private void loadAccountMasterColumnMap() {
         accountMasterColumnMap = new HashMap<>();
         List<AccountMasterColumn> amColumns = columnService.scan(dataCloudVersion);
-        for (AccountMasterColumn column: amColumns) {
+        for (AccountMasterColumn column : amColumns) {
             accountMasterColumnMap.put(column.getColumnId(), column);
         }
     }
@@ -367,8 +384,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
             if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
-                throw new RuntimeException(String.format(
-                        "Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
+                throw new RuntimeException(String
+                        .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }
         } else {
             // check matched rows

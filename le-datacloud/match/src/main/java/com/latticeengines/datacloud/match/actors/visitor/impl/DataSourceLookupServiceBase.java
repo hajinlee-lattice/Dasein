@@ -42,7 +42,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
                 response.setRequestId(lookupRequestId);
                 response.setResult(result);
 
-                log.info("Returned response for " + lookupRequestId + " to " + returnAddress);
+                log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
                 actorSystem.sendResponse(response, returnAddress);
             }
         };
