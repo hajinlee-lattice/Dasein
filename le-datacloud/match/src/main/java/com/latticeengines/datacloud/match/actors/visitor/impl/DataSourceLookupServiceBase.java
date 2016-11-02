@@ -19,7 +19,6 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
-        log.info("Doing async lookup");
         Thread th = new Thread(createLookupRunnable(lookupRequestId, request, returnAddress));
         th.start();
     }

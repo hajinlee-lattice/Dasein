@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 
 public class MatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
@@ -21,7 +21,7 @@ public class MatchActorStateTransitionGraph {
         return dummyGraph;
     }
 
-    public String next(String currentLocation, TravelContext traveler, String originalLocation) {
+    public String next(String currentLocation, Traveler traveler, String originalLocation) {
         int idx = 0;
         for (String node : dummyGraph) {
             if (node.equals(currentLocation)) {

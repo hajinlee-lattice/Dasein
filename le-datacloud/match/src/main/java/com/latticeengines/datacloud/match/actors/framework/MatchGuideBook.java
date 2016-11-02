@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
@@ -51,24 +51,24 @@ public class MatchGuideBook extends GuideBook {
     }
 
     @Override
-    public String next(String currentLocation, TravelContext traveler) {
-        MatchTravelContext matchTravelContext = (MatchTravelContext) traveler;
+    public String next(String currentLocation, Traveler traveler) {
+        MatchTraveler matchTraveler = (MatchTraveler) traveler;
         if (fuzzyMatchAnchor.path().toSerializationFormat().equals(currentLocation)) {
-            return nextMoveForAnchor(matchTravelContext);
+            return nextMoveForAnchor(matchTraveler);
         } else {
-            return nextMoveForMicroEngine(matchTravelContext);
+            return nextMoveForMicroEngine(matchTraveler);
         }
     }
 
     @Override
-    public void logVisit(String traversedActor, TravelContext traveler) {
+    public void logVisit(String traversedActor, Traveler traveler) {
         traveler.logVisitHistory(traversedActor);
         if (traveler.visitingQueueIsEmpty()) {
             traveler.addLocationsToVisitingQueue(dummyPathGraph.toArray(new String[dummyPathGraph.size()]));
         }
     }
 
-    private String nextMoveForAnchor(MatchTravelContext traveler) {
+    private String nextMoveForAnchor(MatchTraveler traveler) {
         if (!traveler.isProcessed()) {
             traveler.setProcessed(true);
             // initialization
@@ -79,20 +79,22 @@ public class MatchGuideBook extends GuideBook {
         }
     }
 
-    private String nextMoveForMicroEngine(MatchTravelContext traveler) {
+    private String nextMoveForMicroEngine(MatchTraveler traveler) {
         String destinationLocation;
 
-        do {
-            destinationLocation = traveler.getNextLocationFromVisitingQueue();
-            if (!visitSameMicroEngineWithSameDataAgain(destinationLocation, traveler)) {
-                return destinationLocation;
-            }
-        } while (StringUtils.isNotEmpty(destinationLocation));
+        if (!traveler.isMatched()) {
+            do {
+                destinationLocation = traveler.getNextLocationFromVisitingQueue();
+                if (!visitSameMicroEngineWithSameDataAgain(destinationLocation, traveler)) {
+                    return destinationLocation;
+                }
+            } while (StringUtils.isNotEmpty(destinationLocation));
+        }
 
         return traveler.getAnchorActorLocation();
     }
 
-    private boolean visitSameMicroEngineWithSameDataAgain(String candidateDestination, MatchTravelContext traveler) {
+    private boolean visitSameMicroEngineWithSameDataAgain(String candidateDestination, MatchTraveler traveler) {
         Map<String, Set<String>> history = traveler.getVisitedHistory();
         if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
             Set<String> previousData = history.get(candidateDestination);

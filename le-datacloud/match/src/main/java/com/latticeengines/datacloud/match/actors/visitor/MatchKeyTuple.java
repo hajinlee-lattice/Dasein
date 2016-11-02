@@ -7,6 +7,7 @@ public class MatchKeyTuple {
     private String state;
     private String country;
     private String zipcode;
+    private String phoneNumber;
     private String duns;
 
     public String getDomain() {
@@ -55,6 +56,14 @@ public class MatchKeyTuple {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getDuns() {

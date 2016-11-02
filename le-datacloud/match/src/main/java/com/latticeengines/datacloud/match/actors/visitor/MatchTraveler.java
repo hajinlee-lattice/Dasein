@@ -1,15 +1,15 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 
-public class MatchTravelContext extends TravelContext {
+public class MatchTraveler extends Traveler {
     private MatchKeyTuple matchKeyTuple;
     private String dataCloudVersion;
 
     private boolean isMatched = false;
     private boolean isProcessed = false;
 
-    public MatchTravelContext(String rootOperationUid) {
+    public MatchTraveler(String rootOperationUid) {
         super(rootOperationUid);
     }
 

@@ -3,41 +3,19 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
-import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
 @Component("domainBasedMicroEngineActor")
 @Scope("prototype")
-public class DomainBasedMicroEngineActor extends MicroEngineActorTemplate<DynamoLookupActor> {
+public class DomainBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
 
     @Override
-    protected Class<DynamoLookupActor> getDataSourceActorClz() {
-        return DynamoLookupActor.class;
+    protected boolean accept(Traveler traveler) {
+        MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+        return matchKeyTuple.getDomain() != null;
     }
 
-    @Override
-    protected boolean accept(TravelContext traveler) {
-
-        MatchKeyTuple matchKeyTuple = ((MatchTravelContext) traveler).getMatchKeyTuple();
-
-        if (matchKeyTuple.getDomain() != null) {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected void process(Response response) {
-        MatchTravelContext context = (MatchTravelContext) response.getTravelerContext();
-        if (response.getResult() != null) {
-            context.setResult(response.getResult());
-            context.setProcessed(true);
-        } else {
-            context.setProcessed(false);
-        }
-    }
 }

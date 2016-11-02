@@ -3,7 +3,7 @@ package com.latticeengines.actors.exposed.traveler;
 public class Response {
     private String requestId;
     private Object result;
-    private TravelContext travelerContext;
+    private Traveler travelerContext;
 
     public String getRequestId() {
         return requestId;
@@ -21,11 +21,11 @@ public class Response {
         this.result = result;
     }
 
-    public TravelContext getTravelerContext() {
+    public Traveler getTravelerContext() {
         return travelerContext;
     }
 
-    public void setTravelerContext(TravelContext travelerContext) {
+    public void setTravelerContext(Traveler travelerContext) {
         this.travelerContext = travelerContext;
     }
 

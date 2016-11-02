@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.framework;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -31,7 +32,16 @@ public class MatchActorSystem {
 
     private static final Log log = LogFactory.getLog(MatchActorSystem.class);
 
+    private static final String BATCH_MODE = "batch";
+    private static final String REALTIME_MODE = "realtime";
+
+    private static final int MAX_ALLOWED_RECORD_COUNT_SYNC = 200;
+    private static final int MAX_ALLOWED_RECORD_COUNT_ASYNC = 10000;
+    private final AtomicInteger maxAllowedRecordCount = new AtomicInteger(MAX_ALLOWED_RECORD_COUNT_SYNC);
+
     private ActorSystem system;
+
+    private boolean batchMode = false;
 
     @Autowired
     private ActorFactory actorFactory;
@@ -64,6 +74,22 @@ public class MatchActorSystem {
     public void sendResponse(Object response, String returnAddress) {
         ActorRef ref = system.actorFor(returnAddress);
         ref.tell(response, null);
+    }
+
+    public boolean isBatchMode() {
+        return batchMode;
+    }
+
+    public void setBatchMode(boolean batchMode) {
+        this.batchMode = batchMode;
+        if (batchMode) {
+            maxAllowedRecordCount.set(MAX_ALLOWED_RECORD_COUNT_ASYNC);
+        }
+        log.info("Switch MatchActorSystem to " + (isBatchMode() ? BATCH_MODE : REALTIME_MODE) + " mode.");
+    }
+
+    public int getMaxAllowedRecordCount() {
+        return maxAllowedRecordCount.get();
     }
 
     private void initActors() {

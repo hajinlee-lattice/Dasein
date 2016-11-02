@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelContext;
+import com.latticeengines.actors.exposed.traveler.Traveler;
 
 import akka.actor.ActorRef;
 
@@ -19,83 +19,60 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     @Qualifier("matchGuideBook")
     protected GuideBook guideBook;
 
-    protected abstract boolean process(TravelContext traveler);
+    protected abstract boolean process(Traveler traveler);
 
     protected abstract void process(Response response);
 
-    protected String getNextLocation(TravelContext traveler) {
+    protected String getNextLocation(Traveler traveler) {
         return guideBook.next(self().path().toSerializationFormat(), traveler);
     }
 
     @Override
     protected boolean isValidMessageType(Object msg) {
-        return msg instanceof TravelContext || msg instanceof Response;
+        return msg instanceof Traveler || msg instanceof Response;
     }
 
     @Override
     protected void processMessage(Object msg) {
         if (isValidMessageType(msg)) {
-            if (msg instanceof TravelContext) {
-                TravelContext traveler = (TravelContext) msg;
-                log.debug("Received traveler: " + traveler);
+            Traveler traveler = null;
+            if (msg instanceof Traveler) {
+                traveler = (Traveler) msg;
+                log.debug(self() + " received traveler " + traveler);
 
                 setOriginalSender(traveler, sender());
-
                 boolean hasSentMessageToDataSourceActor = process(traveler);
-
-                if (!hasSentMessageToDataSourceActor) {
-
-                    String nextLocation = getNextLocation(traveler);
-
-                    if (nextLocation == null) {
-                        nextLocation = traveler.getAnchorActorLocation();
-                    }
-                    ActorRef nextActorRef = getContext().actorFor(nextLocation);
-
-                    log.debug("Send message to " + nextActorRef);
-
-                    travel(traveler, nextActorRef, getSelf());
+                if (hasSentMessageToDataSourceActor) {
+                    // unblock current actor
+                    return;
                 }
+
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
-
                 process(response);
-
-                TravelContext traveler = response.getTravelerContext();
-                if (response.getResult() != null) {
-                    traveler.setResult(response.getResult());
-                }
-
-                if (traveler.getResult() != null) {
-                    handleResult(response, traveler);
-                } else {
-                    String nextLocation = getNextLocation(traveler);
-
-                    if (nextLocation == null || response.getResult() != null) {
-                        nextLocation = traveler.getAnchorActorLocation();
-                    }
-                    ActorRef nextActorRef = getContext().actorFor(nextLocation);
-                    
-                    sendResult(nextActorRef, traveler);
-                }
+                traveler = response.getTravelerContext();
+                log.debug(self() + " received a response for traveler " + traveler);
             }
+
+            if (traveler == null) {
+                throw new NullPointerException("Traveler object should not be null at this step.");
+            }
+
+            travel(traveler, getSelf());
         } else {
             unhandled(msg);
         }
     }
 
-    protected void handleResult(Response response, TravelContext traveler) {
-        String anchorLocation = traveler.getAnchorActorLocation();
+    protected void travel(Traveler traveler, ActorRef currentActorRef) {
+        String nextLocation = getNextLocation(traveler);
+        if (nextLocation == null) {
+            nextLocation = traveler.getAnchorActorLocation();
+        }
+        ActorRef nextActorRef = getContext().actorFor(nextLocation);
+        log.debug(self() + " sent traveler " + traveler + " to " + nextActorRef);
 
-        ActorRef nextActorRef = getContext().actorFor(anchorLocation);
-
-        log.info("Send message to " + nextActorRef);
-
-        sendResult(nextActorRef, response);
-    }
-
-    protected void travel(TravelContext traveler, ActorRef nextActorRef, ActorRef currentActorRef) {
-        guideBook.logVisit(((ActorRef) currentActorRef).path().toSerializationFormat(), traveler);
+        guideBook.logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
     }
 
@@ -103,7 +80,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         nextActorRef.tell(result, self());
     }
 
-    protected void setOriginalSender(TravelContext traveler, ActorRef originalSender) {
+    protected void setOriginalSender(Traveler traveler, ActorRef originalSender) {
         // do nothing
     }
 }

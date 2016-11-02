@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
@@ -42,6 +43,9 @@ public class FuzzyMatchHelper implements DbHelper {
     @Autowired
     @Qualifier("accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
+
+    @Autowired
+    private FuzzyMatchService fuzzyMatchService;
 
     @Value("${datacloud.match.use.fuzzy.match:false}")
     private boolean useFuzzyMatch;

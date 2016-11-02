@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTravelContext;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -26,8 +26,6 @@ import scala.concurrent.duration.FiniteDuration;
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
-
-    private static final int MAX_ALLOWED_RECORD_COUNT = 200;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -50,8 +48,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         for (OutputRecord record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            MatchTravelContext travelContext = //
-                    new MatchTravelContext(UUID.randomUUID().toString());
+            MatchTraveler travelContext = //
+                    new MatchTraveler(UUID.randomUUID().toString());
 
             MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
             travelContext.setMatchKeyTuple(matchKeyTuple);
@@ -62,14 +60,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         int idx = 0;
         for (Future<Object> future : matchFutures) {
-            String result = (String) Await.result(future, timeout.duration());
-            log.info("Got result: " + result);
+            MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
+            log.info("Got LatticeAccountId=" + traveler.getResult() + " for RootOperationUID=" + traveler.getRootOperationUid());
             InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx++);
-            matchRecord.setLatticeAccountId(result);
+            matchRecord.setLatticeAccountId((String) traveler.getResult());
         }
     }
 
-    private Future<Object> askFuzzyMatchAnchor(MatchTravelContext traveler, Timeout timeout) {
+    private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler, Timeout timeout) {
         return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
@@ -80,9 +78,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private void checkRecordType(List<OutputRecord> matchRequests) {
-        if (matchRequests.size() > MAX_ALLOWED_RECORD_COUNT) {
+        if (matchRequests.size() > actorSystem.getMaxAllowedRecordCount()) {
             throw new RuntimeException("Too many records in the request: " + matchRequests.size()
-                    + ", max allowed record count = " + MAX_ALLOWED_RECORD_COUNT);
+                    + ", max allowed record count = " + actorSystem.getMaxAllowedRecordCount());
         }
         for (OutputRecord matchRequest : matchRequests) {
             if (!(matchRequest instanceof InternalOutputRecord)) {
@@ -99,8 +97,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             matchKeyTuple.setCountry(nameLocationInfo.getCountry());
             matchKeyTuple.setName(nameLocationInfo.getName());
             matchKeyTuple.setState(nameLocationInfo.getState());
+            matchKeyTuple.setZipcode(nameLocationInfo.getZipCode());
+            matchKeyTuple.setPhoneNumber(nameLocationInfo.getPhoneNumber());
         }
-
         matchKeyTuple.setDomain(matchRecord.getParsedDomain());
         matchKeyTuple.setDuns(matchRecord.getParsedDuns());
         return matchKeyTuple;

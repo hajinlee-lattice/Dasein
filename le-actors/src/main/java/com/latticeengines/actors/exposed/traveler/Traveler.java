@@ -2,33 +2,39 @@ package com.latticeengines.actors.exposed.traveler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public abstract class Traveler {
 
     private final String rootOperationUid;
     private final String travelerId;
-    private final GuideBook guideBook;
     private final List<String> travelLogs;
     private final List<TravelWarning> travelWarnings;
-    private final List<Object> traversedActors;
-    private final Map<Object, Integer> actorTraversalCountMap;
+    private final Map<String, Set<String>> visitedHistory;
     private TravelException travelException;
-    private Object data;
     private Object result;
-    private Object originalSender;
+    private String originalLocation;
+    private String anchorActorLocation;
+    private Queue<String> visitingQueue;
 
-    public Traveler(String rootOperationUid, GuideBook guideBook) {
+    public Traveler(String rootOperationUid) {
         travelerId = UUID.randomUUID().toString();
         this.rootOperationUid = rootOperationUid;
-        this.guideBook = guideBook;
         this.travelLogs = new ArrayList<>();
         travelWarnings = new ArrayList<>();
-        traversedActors = new ArrayList<>();
-        actorTraversalCountMap = new HashMap<>();
+        visitedHistory = new HashMap<>();
+        visitingQueue = new LinkedList<>();
     }
+
+    protected abstract Object getInputData();
 
     public String getRootOperationUid() {
         return rootOperationUid;
@@ -38,10 +44,6 @@ public abstract class Traveler {
         return travelerId;
     }
 
-    public GuideBook getGuideBook() {
-        return guideBook;
-    }
-
     public List<String> getTravelLogs() {
         return travelLogs;
     }
@@ -49,7 +51,7 @@ public abstract class Traveler {
     public void setTravelLog(String travelLog) {
         travelLogs.add(travelLog);
     }
-    
+
     public List<TravelWarning> getTravelWarnings() {
         return travelWarnings;
     }
@@ -58,21 +60,19 @@ public abstract class Traveler {
         travelWarnings.add(travelWarning);
     }
 
-    public List<Object> getTraversedActors() {
-        return traversedActors;
+    public Map<String, Set<String>> getVisitedHistory() {
+        return visitedHistory;
     }
 
-    public Map<Object, Integer> getActorTraversalCountMap() {
-        return actorTraversalCountMap;
-    }
-
-    public void updateTraversedActorInfo(Object traversedActor) {
-        traversedActors.add(traversedActor);
-        if (!actorTraversalCountMap.containsKey(traversedActor)) {
-            actorTraversalCountMap.put(traversedActor, 0);
+    public void logVisitHistory(String traversedActor) {
+        if (!visitedHistory.containsKey(traversedActor)) {
+            visitedHistory.put(traversedActor, new HashSet<String>());
         }
-        int actorTraversalCount = actorTraversalCountMap.get(traversedActor) + 1;
-        actorTraversalCountMap.put(traversedActor, actorTraversalCount);
+        visitedHistory.get(traversedActor).add(JsonUtils.serialize(getInputData()));
+    }
+
+    public void clearVisitedHistory() {
+        visitedHistory.clear();
     }
 
     public TravelException getTravelException() {
@@ -83,14 +83,6 @@ public abstract class Traveler {
         this.travelException = travelException;
     }
 
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
     public Object getResult() {
         return result;
     }
@@ -99,12 +91,42 @@ public abstract class Traveler {
         this.result = result;
     }
 
-    public Object getOriginalSender() {
-        return originalSender;
+    public String getOriginalLocation() {
+        return originalLocation;
     }
 
-    public void setOriginalSender(Object originalSender) {
-        this.originalSender = originalSender;
+    public void setOriginalLocation(String originalLocation) {
+        this.originalLocation = originalLocation;
+    }
+
+    public String getNextLocationFromVisitingQueue() {
+        return visitingQueue.poll();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void addLocationsToVisitingQueue(String... nextLocations) {
+        for (String location : nextLocations) {
+            if (!visitingQueue.contains(location)) {
+                visitingQueue.add(location);
+            }
+        }
+    }
+
+    public boolean visitingQueueIsEmpty() {
+        return visitingQueue.isEmpty();
+    }
+
+    public String getAnchorActorLocation() {
+        return anchorActorLocation;
+    }
+
+    public void setAnchorActorLocation(String anchorActorLocation) {
+        this.anchorActorLocation = anchorActorLocation;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Traveler[%s:%s]", getTravelerId(), getRootOperationUid());
     }
 
 }
