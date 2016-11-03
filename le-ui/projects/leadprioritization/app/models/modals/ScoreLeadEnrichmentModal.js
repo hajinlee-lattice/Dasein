@@ -97,10 +97,10 @@ angular.module('mainApp.models.leadenrichment', [
         }
     };
 
-    $scope.cancelClicked = function() {
+    $scope.cancelClicked = function(ignoreCancelState) {
         $("#modalContainer").modal('hide');
 
-        if (vm.state) {
+        if (vm.state && !ignoreCancelState) {
             $timeout(function() {
                 $state.go(vm.state);
             }, 1)
