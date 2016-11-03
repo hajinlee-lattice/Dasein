@@ -35,6 +35,7 @@ public class PivotUnitTestNG {
         assertEquals(result2, 0.0);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "unit")
     public void transformWithParentheses() throws Exception {
         URL url = ClassLoader.getSystemResource("com/latticeengines/transform/v2_0_25/functions/pivotWithParentheses");
