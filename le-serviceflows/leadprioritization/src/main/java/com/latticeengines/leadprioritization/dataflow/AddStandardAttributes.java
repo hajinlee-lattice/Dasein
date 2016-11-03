@@ -57,6 +57,8 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
         if (emailOrWebsite != null) {
             TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
+        } else {
+            TransformationPipeline.stdLengthDomain.arguments.put("column", "");
         }
     }
 
@@ -96,8 +98,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         for (Object value : definition.arguments.values()) {
             Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
             if (attr == null) {
-                log.info(String.format(
-                        "Excluding field %s (function %s) because some source columns are not available",
+                log.info(String.format("Excluding field %s (function %s) because some source columns are not available",
                         definition.output, definition.name));
                 return last;
             }
