@@ -12,6 +12,9 @@
         <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/resources/tomcat/le-tomcat</tomcat.docker.context>
         <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
+        <oauth2.docker.context>src/main/resources/tomcat/le-oauth2</oauth2.docker.context>
+        <playmaker.docker.context>src/main/resources/tomcat/le-playmaker</playmaker.docker.context>
+        <scoringapi.docker.context>src/main/resources/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
     </properties>
 
@@ -41,6 +44,15 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
                                       tofile="${project.basedir}/${matchapi.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
+                                      tofile="${project.basedir}/${oauth2.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
+                                      tofile="${project.basedir}/${playmaker.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-scoringapi/target/le-scoringapi-${project.version}.war"
+                                      tofile="${project.basedir}/${scoringapi.docker.context}/webapps/ROOT.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/qacluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster_aws/latticeengines.properties"
