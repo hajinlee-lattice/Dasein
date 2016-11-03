@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
@@ -141,16 +139,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
 
-    @PostConstruct
-    public void postConstruct() {
-        matchActorSystem.setBatchMode(true);
-    }
-
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
         try {
             appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
+
+            matchActorSystem.setBatchMode(true);
 
             dataCloudVersion = jobConfiguration.getDataCloudVersion();
             columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
