@@ -15,7 +15,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
         _window.unbind('resize', bindResize);
     });
 
-
+    // tag type selected pipelines bar charts
     var data = [],
         columns = [],
         rows = [];
@@ -69,13 +69,12 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 
         var dsBucket = atBucket[ds];
         var pBucketPipelines = dsBucket.pipelines;
-        var pKey = [ap, p].join(':');
-        if (!pBucketPipelines[pKey]) {
-            pBucketPipelines[pKey] = {};
+        if (!pBucketPipelines[ap]) {
+            pBucketPipelines[ap] = {};
         }
 
-        var pBucket = pBucketPipelines[pKey];
-        if (!pBucket.date || pBucket.date < date) { 
+        var pBucket = pBucketPipelines[ap];
+        if (!pBucket.date || pBucket.date < date) {
             var value = {};
             for (var m in metricsColIndex) {
                 value[m] = row[metricsColIndex[m]];
@@ -113,6 +112,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
         return chartData;
     });
 
+
     // tag type production line charts
     var series = [];
     if (ProductionPipelineMetrics.resultObj.results && ProductionPipelineMetrics.resultObj.results[0].series) {
@@ -147,30 +147,19 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
                 columnToIndexMap[column] = index;
             });
 
-            bucketSeries.RocScore.push({
-                key: 'RocScore',
-                y: bucket.values[0][columnToIndexMap.RocScore],
-                x: ap
-            });
-            bucketSeries.Top10PercentLift.push({
-                key: 'Top10PercentLift',
-                y: bucket.values[0][columnToIndexMap.Top10PercentLift],
-                x: ap
-            });
-            bucketSeries.Top20PercentLift.push({
-                key: 'Top20PercentLift',
-                y: bucket.values[0][columnToIndexMap.Top20PercentLift],
-                x: ap
-            });
-            bucketSeries.Top30PercentLift.push({
-                key: 'Top30PercentLift',
-                y: bucket.values[0][columnToIndexMap.Top30PercentLift],
-                x: ap
-            });
+            _.each(bucketSeries, function (bucketSerie, key) {
+                var colIdx = columnToIndexMap[key];
 
+                bucketSerie.push({
+                    key: key,
+                    y: bucket.values[0][colIdx],
+                    x: ap
+                });
+            });
         });
 
         var chart = {};
+        chart.title = tagName;
         chart.data = _.map(bucketSeries, function (values, key) {
             var chartData = {};
             chartData.key = key;
@@ -178,7 +167,6 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 
             return chartData;
         });
-        chart.title = tagName;
 
         return chart;
     });

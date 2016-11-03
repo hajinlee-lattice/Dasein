@@ -1,6 +1,9 @@
 <div ng-if="vm_publishLatest.message">
   <p class="alert" ng-class="vm_publishLatest.error ? 'alert-danger' : 'alert-success'">{{vm_publishLatest.message}}</p>
 </div>
+<div class="col-xs-12" ng-if="vm_publishLatest.loading">
+  <div class="loader loader-xs"> </div>
+</div>
 <div class="form-group" ng-repeat="item in ::vm_publishLatest.urls">
   <button class="btn btn-default" ng-click="vm_publishLatest.publishLatest($event, item.url)">{{::vm_publishLatest.labels[item.labelKey]}}</button>
 </div>

@@ -37,31 +37,6 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetAnalyticPipelines();
     };
 
-    this.CreateAnalyticPipelineProduction = function (analyticPipeline) {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/analyticpipelines/latest/',
-            data: analyticPipeline
-        }).success(function(data){
-            result.success = true;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
     this.CreateAnalyticPipeline = function (analyticPipeline) {
         var defer = $q.defer();
 
@@ -147,8 +122,22 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
         $http({
             method: 'POST',
-            url: '/modelquality/analytictest/',
-            data: analyticTest
+            url: '/modelquality/analytictests/',
+            data: analyticTest,
+            transformResponse: [function (data, headers, status) {
+                // why is this api returning a string!
+                try {
+                    return JSON.parse(data);
+                } catch (e) {
+                    if (status === 200) {
+                        return {
+                            analyticTestName: data
+                        };
+                    } else {
+                        return data;
+                    }
+                }
+            }]
         }).success(function(data) {
             result.success = true;
             defer.resolve(result);
@@ -160,7 +149,6 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
         return defer.promise;
     };
-
 
     // /modelquality/pipelines
     this.GetPipelines = function (pipelineName) {
@@ -194,10 +182,6 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
     this.GetPipelineByName = function (pipelineName) {
         return this.GetPipelines(pipelineName);
-    };
-
-    this.GetPipelinesProuction = function () {
-        return this.GetPipelines('latest');
     };
 
     this.CreatePipeline = function (pipelineName, pipelineDescription, pipelineSteps) {
@@ -251,6 +235,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return defer.promise;
     };
 
+    // /modelquality/pipelines/pipelinestepfiles/
     this.UploadStepFile = function (type, stepName, fileName, file) {
         var defer = $q.defer();
 
@@ -292,13 +277,9 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return defer.promise;
     };
 
-    this.UploadMetadataFile = function (stepName, fileName, file) {
-        return this.UploadStepFile('metadata', stepName, fileName, file);
-    };
+    this.UploadMetadataFile = this.UploadStepFile.bind(this, 'metadata');
 
-    this.UploadPythonFile = function (stepName, fileName, file) {
-        return this.UploadStepFile('python', stepName, fileName, file);
-    };
+    this.UploadPythonFile = this.UploadStepFile.bind(this, 'python');
 
     // /modelquality/algorithms
     this.GetAlgorithms = function(algorithmName) {
@@ -368,8 +349,38 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetDataflows(dataflowName);
     };
 
+    // /modelquality/datasets/
+    this.GetDatasets = function (datasetName) {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/modelquality/datasets/' + (datasetName || '')
+        }).success(function(data){
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
+    this.GetAllDatasets = function () {
+        return this.GetDatasets();
+    };
+
     // /modelquality/propdataconfigs/
-    this.GetPropdataConfigs = function(propdataConfigName) {
+    this.GetPropdataConfigs = function (propdataConfigName) {
         var defer = $q.defer();
 
         var result = {
@@ -435,4 +446,30 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
     this.GetSamplingConfigByName = function (samplingConfigName) {
         return this.GetSamplingConfigs(samplingConfigName);
     };
+
+    this.GetMatchTypes = function () {
+        var types = [];
+        types.push({name: 'DNB'});
+        types.push({name: 'RTS'});
+        types.push({name: 'NOMATCH'});
+
+        return {
+            success: true,
+            resultObj: types,
+            errMsg: null
+        };
+    };
+
+    this.GetAnalyticTestTypes = function () {
+        var types = [];
+        types.push({name: 'Production'});
+        types.push({name: 'Default'});
+
+        return {
+            success: true,
+            resultObj: types,
+            errMsg: null
+        };
+    };
+
 });

@@ -304,6 +304,11 @@ div.panel-heading:hover {
   }
 }
 
+.modal-max-height {
+  max-height: ~"calc(100vh - 125px)";
+  overflow-y: auto;
+}
+
 /* extend bootstrap */
 li {
   list-style-type: none;
@@ -338,6 +343,10 @@ Spinner
   position: relative;
   -webkit-animation: load6 1.7s infinite ease;
   animation: load6 1.7s infinite ease;
+
+  &.loader-xs {
+    font-size: 16px;
+  }
 }
 @-webkit-keyframes load6 {
   0% {

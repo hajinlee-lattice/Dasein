@@ -14,7 +14,8 @@ angular.module('app.modelquality.controller.PublishLatestCtrl', [
             ALL: 'Publish All'
         },
         error: false,
-        message: null
+        message: null,
+        loading: false
     });
 
     vm.urls = [];
@@ -45,26 +46,37 @@ angular.module('app.modelquality.controller.PublishLatestCtrl', [
 
     vm.publishLatest = function (event,  url) {
         event.preventDefault();
+
+        vm.loading = true;
+        vm.message = null;
+
         $http.post(url).then(function (result) {
             vm.error = false;
             vm.message = 'POST ' + url + ' success';
-        }, function (error) {
+        }).catch(function (error) {
             vm.error = true;
             vm.message = error.data.errorCode + ': ' + error.data.errorMsg;
+        }).finally(function () {
+            vm.loading = false;
         });
     };
 
     vm.publishAll = function () {
+        vm.loading = true;
+        vm.message = null;
+
         var promises = vm.urls.map(function (item) {
           return $http.post(item.url);
         });
 
         $q.all(promises).then(function (result) {
-          vm.error = false;
-          vm.message = 'POST all latest success';
+            vm.error = false;
+            vm.message = 'POST all latest success';
         }).catch(function (error) {
-          vm.error = true;
-          vm.message = error.data.errorCode + ': ' + error.data.errorMsg;
+            vm.error = true;
+            vm.message = error.data.errorCode + ': ' + error.data.errorMsg;
+        }).finally(function () {
+            vm.loading = false;
         });
     };
 });

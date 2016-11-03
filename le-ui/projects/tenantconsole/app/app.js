@@ -2,6 +2,7 @@ var app = angular.module('TenantConsoleApp', [
     'ui.router',
     'LocalStorageModule',
     'le.common.util.BrowserStorageUtility',
+    'le.common.filter.filters',
     'app.core.directive.MainNavDirective',
     'app.login.controller.LoginCtrl',
     'app.tenants.controller.TenantListCtrl',
@@ -180,6 +181,33 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 },                
                 PropdataConfigs: function (ModelQualityService) {
                     return ModelQualityService.GetAllPropdataConfigs();
+                }
+            }
+        })
+        .state('MODELQUALITY.ANALYTICTEST', {
+            url: '/analytictest',
+            views: {
+                'main@MODELQUALITY': {
+                    templateUrl: 'app/modelquality/analytictest/view/AnalyticTestView.html',
+                    controller: 'AnalyticTestCtrl',
+                    controllerAs: 'vm_analyticTest'
+                }
+            },
+            resolve: {
+                AnalyticTests: function (ModelQualityService) {
+                    return ModelQualityService.GetAllAnalyticTests();
+                },
+                AnalyticPipelines: function (ModelQualityService) {
+                    return ModelQualityService.GetAllAnalyticPipelines();
+                },
+                Datasets: function (ModelQualityService) {
+                    return ModelQualityService.GetAllDatasets();
+                },
+                MatchTypes: function (ModelQualityService) {
+                    return ModelQualityService.GetMatchTypes();
+                },
+                AnalyticTestTypes: function (ModelQualityService) {
+                    return ModelQualityService.GetAnalyticTestTypes();
                 }
             }
         })
