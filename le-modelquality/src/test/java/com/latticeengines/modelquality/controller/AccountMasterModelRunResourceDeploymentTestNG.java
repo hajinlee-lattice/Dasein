@@ -40,8 +40,9 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
             modelRun.getAnalyticPipeline().getPropData().setDataCloudVersion("2.0.1");
             modelRun.getAnalyticPipeline().getPropData().setExcludePublicDomains(true);
-
+            modelRun.setName(dataSetName);
             dataSetEntityMgr.create(modelRun.getDataSet());
+
             propDataEntityMgr.update(modelRun.getAnalyticPipeline().getPropData());
             ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
@@ -85,8 +86,10 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
         //
         { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
-        // { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
-        // { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
+        // { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" },
+        // //
+        // { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" },
+        // //
         // { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
         // { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
         // { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
