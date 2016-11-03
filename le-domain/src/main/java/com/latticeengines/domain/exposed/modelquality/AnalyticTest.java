@@ -50,23 +50,26 @@ public class AnalyticTest implements HasName, HasPid {
     @Column(name = "ANALYTIC_TEST_TYPE", nullable = false)
     private AnalyticTestType analyticTestType = AnalyticTestType.Default;
 
-//    @JsonProperty("is_executed") // uncomment when this feature is implemented
-//    @Column(name = "Is_Executed", nullable = false)
-//    private boolean isExecuted;
+    @JsonProperty("analytic_test_tag")
+    @Column(name = "ANALYTIC_TEST_TAG")
+    private String analyticTestTag;
+
+    @JsonProperty("is_executed")
+    @Column(name = "IS_EXECUTED", nullable = false)
+    private boolean isExecuted;
 
     @JsonProperty("data_sets")
-    @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinTable(name = "MODELQUALITY_AP_TEST_DATASET", joinColumns = {
             @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "DATASET_ID") })
-    @Fetch(value=FetchMode.SUBSELECT)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<DataSet> dataSets = new ArrayList<>();
 
     @JsonProperty("analytic_pipelines")
-    @ManyToMany(fetch=FetchType.EAGER, cascade = { CascadeType.MERGE })
-    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", 
-               joinColumns = { @JoinColumn(name = "AP_TEST_ID") }, 
-               inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
-    @Fetch(value=FetchMode.SUBSELECT)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
+    @JoinTable(name = "MODELQUALITY_AP_TEST_AP_PIPELINE", joinColumns = {
+            @JoinColumn(name = "AP_TEST_ID") }, inverseJoinColumns = { @JoinColumn(name = "AP_PIPELINE_ID") })
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
 
     @Override
@@ -89,14 +92,6 @@ public class AnalyticTest implements HasName, HasPid {
         this.name = name;
     }
 
-    public List<DataSet> getDataSets() {
-        return dataSets;
-    }
-
-    public void setDataSets(List<DataSet> dataSets) {
-        this.dataSets = dataSets;
-    }
-
     public PropDataMatchType getPropDataMatchType() {
         return propDataMatchType;
     }
@@ -104,13 +99,29 @@ public class AnalyticTest implements HasName, HasPid {
     public void setPropDataMatchType(PropDataMatchType propDataMatchType) {
         this.propDataMatchType = propDataMatchType;
     }
-    
+
     public AnalyticTestType getAnalyticTestType() {
         return analyticTestType;
     }
 
     public void setAnalyticTestType(AnalyticTestType analyticTestType) {
         this.analyticTestType = analyticTestType;
+    }
+
+    public String getAnalyticTestTag() {
+        return analyticTestTag;
+    }
+
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
+    }
+
+    public boolean isExecuted() {
+        return isExecuted;
+    }
+
+    public void setExecuted(boolean isExecuted) {
+        this.isExecuted = isExecuted;
     }
 
     public List<AnalyticPipeline> getAnalyticPipelines() {
@@ -121,4 +132,11 @@ public class AnalyticTest implements HasName, HasPid {
         this.analyticPipelines = analyticPipelines;
     }
 
+    public List<DataSet> getDataSets() {
+        return dataSets;
+    }
+
+    public void setDataSets(List<DataSet> dataSets) {
+        this.dataSets = dataSets;
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
 import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
+import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.AnalyticTestService;
 import com.latticeengines.modelquality.service.ModelRunService;
 
@@ -38,25 +40,37 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
     @Autowired
     private ModelRunService modelRunService;
 
+    @Autowired
+    private ModelRunEntityMgr modelRunEntityMgr;
+
+    @Value("${common.pls.url}")
+    private String apiHostPort;
+
     @Override
     public AnalyticTest createAnalyticTest(AnalyticTestEntityNames analyticTestEntityNames) {
 
         AnalyticTest analyticTest = new AnalyticTest();
         if (analyticTestEntityNames.getName() == null || analyticTestEntityNames.getName().trim().isEmpty()) {
-            throw new RuntimeException("AnalyticTest Name cannot be empty");
+            throw new LedpException(LedpCode.LEDP_35003, new String[] { "AnalyticTest Name" });
         }
+
+        if (analyticTestEntityMgr.findByName(analyticTestEntityNames.getName()) != null) {
+            throw new LedpException(LedpCode.LEDP_35002,
+                    new String[] { "AnalyticTest", analyticTestEntityNames.getName() });
+        }
+
         analyticTest.setName(analyticTestEntityNames.getName());
 
         if (analyticTestEntityNames.getPropDataMatchType() == null) {
-            throw new RuntimeException("Need to specify a Propdata match type");
+            throw new LedpException(LedpCode.LEDP_35003, new String[] { "Propdata Match Type" });
         }
         analyticTest.setPropDataMatchType(analyticTestEntityNames.getPropDataMatchType());
 
-        analyticTest.setAnalyticTestType(analyticTestEntityNames.getAnalyticTestType());
-        
+        analyticTest.setAnalyticTestTag(analyticTestEntityNames.getAnalyticTestTag());
+
         if (analyticTestEntityNames.getAnalyticPipelineNames() == null
                 || analyticTestEntityNames.getAnalyticPipelineNames().isEmpty()) {
-            throw new RuntimeException("Need to provide atleast one AnalyticPipeline");
+            throw new LedpException(LedpCode.LEDP_35003, new String[] { "AnalyticPipelines" });
         } else {
             ArrayList<AnalyticPipeline> analyticPipelines = new ArrayList<AnalyticPipeline>();
             for (String analyticPipelineName : analyticTestEntityNames.getAnalyticPipelineNames()) {
@@ -64,14 +78,15 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 if (ap != null) {
                     analyticPipelines.add(ap);
                 } else {
-                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic pipeline", analyticPipelineName});
+                    throw new LedpException(LedpCode.LEDP_35000,
+                            new String[] { "Analytic pipeline", analyticPipelineName });
                 }
             }
             analyticTest.setAnalyticPipelines(analyticPipelines);
         }
 
         if (analyticTestEntityNames.getDataSetNames() == null || analyticTestEntityNames.getDataSetNames().isEmpty()) {
-            throw new RuntimeException("Need to provide atleast one Dataset");
+            throw new LedpException(LedpCode.LEDP_35003, new String[] { "Datasets" });
         } else {
             ArrayList<DataSet> dataSets = new ArrayList<DataSet>();
             for (String datasetName : analyticTestEntityNames.getDataSetNames()) {
@@ -79,7 +94,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                 if (ds != null) {
                     dataSets.add(ds);
                 } else {
-                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataset", datasetName});
+                    throw new LedpException(LedpCode.LEDP_35000, new String[] { "Dataset", datasetName });
                 }
             }
             analyticTest.setDataSets(dataSets);
@@ -91,46 +106,64 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
     }
 
     @Override
-    public List<String> executeByName(String analyticTestName) {
-        ArrayList<String> resultSet = new ArrayList<String>();
+    public List<ModelRun> executeByName(String analyticTestName) {
+        ArrayList<ModelRun> resultSet = new ArrayList<ModelRun>();
         AnalyticTest analyticTest = analyticTestEntityMgr.findByName(analyticTestName);
         if (analyticTest == null) {
             throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic Test", analyticTestName });
         }
+        if (analyticTest.isExecuted()) {
+            return modelRunEntityMgr.findModelRunsByAnalyticTest(analyticTestName);
+        }
+
+        Environment env = new Environment();
+        env.apiHostPort = this.apiHostPort;
+        env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
+        env.username = "bnguyen@lattice-engines.com";
+        env.password = "tahoe";
+
         for (AnalyticPipeline ap : analyticTest.getAnalyticPipelines()) {
             for (DataSet ds : analyticTest.getDataSets()) {
                 ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
                 modelRunEntityNames.setAnalyticPipelineName(ap.getName());
                 modelRunEntityNames.setDataSetName(ds.getName());
-                modelRunEntityNames.setName(analyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
+                modelRunEntityNames
+                        .setName(analyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
                 modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
-                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestType().toString());
-                ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames,
-                        Environment.getCurrentEnvironment());
-                resultSet.add(modelRun.getName());
+                modelRunEntityNames.setAnalyticTestName(analyticTestName);
+                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag().toString());
+                ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames, env);
+                resultSet.add(modelRun);
             }
         }
+        analyticTest.setExecuted(true);
+        analyticTestEntityMgr.update(analyticTest);
         return resultSet;
     }
 
     @Transactional
     public AnalyticTestEntityNames getByName(String analyticTestName) {
         AnalyticTest atest = analyticTestEntityMgr.findByName(analyticTestName);
+        if (atest == null) {
+            throw new LedpException(LedpCode.LEDP_35000, new String[] { "Analytic Test", analyticTestName });
+        }
+
         AnalyticTestEntityNames result = new AnalyticTestEntityNames();
         result.setName(atest.getName());
         result.setPropDataMatchType(atest.getPropDataMatchType());
         result.setAnalyticTestType(atest.getAnalyticTestType());
+        result.setAnalyticTestTag(atest.getAnalyticTestTag());
 
         for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
             result.getAnalyticPipelineNames().add(ap.getName());
         }
-        
+
         for (DataSet ds : atest.getDataSets()) {
             result.getDataSetNames().add(ds.getName());
         }
         return result;
     }
-    
+
     @Transactional
     public List<AnalyticTestEntityNames> getAll() {
 
@@ -140,6 +173,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
             atestName.setName(atest.getName());
             atestName.setPropDataMatchType(atest.getPropDataMatchType());
             atestName.setAnalyticTestType(atest.getAnalyticTestType());
+            atestName.setAnalyticTestTag(atest.getAnalyticTestTag());
             for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {
                 atestName.getAnalyticPipelineNames().add(ap.getName());
             }

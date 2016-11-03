@@ -1,5 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,6 +35,12 @@ public class ModelRunEntityMgrImpl extends BaseEntityMgrImpl<ModelRun> implement
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelRun findByName(String modelRunName) {
         return modelRunDao.findByField("NAME", modelRunName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelRun> findModelRunsByAnalyticTest(String analyticTestName) {
+        return modelRunDao.findAllByField("ANALYTIC_TEST_NAME", analyticTestName);
     }
 
 }

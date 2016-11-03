@@ -22,9 +22,13 @@ public class AnalyticTestEntityNames {
     private PropDataMatchType propDataMatchType;
 
     @JsonProperty("analytic_test_type")
-    @ApiModelProperty(required = true)
+    @ApiModelProperty
     private AnalyticTestType analyticTestType;
-    
+
+    @JsonProperty("analytic_test_tag")
+    @ApiModelProperty(required = true)
+    private String analyticTestTag;
+
     @JsonProperty("analytic_pipeline_names")
     @ApiModelProperty(required = true)
     private List<String> analyticPipelineNames = new ArrayList<>();
@@ -35,11 +39,12 @@ public class AnalyticTestEntityNames {
     public AnalyticTestEntityNames(AnalyticTest atest) {
         name = atest.getName();
         propDataMatchType = atest.getPropDataMatchType();
+        analyticTestTag = atest.getAnalyticTestTag();
         analyticTestType = atest.getAnalyticTestType();
         for (DataSet dataset : atest.getDataSets()) {
             this.dataSetNames.add(dataset.getName());
         }
-        for (AnalyticPipeline analyticPipeline : atest.getAnalyticPipelines()){
+        for (AnalyticPipeline analyticPipeline : atest.getAnalyticPipelines()) {
             this.analyticPipelineNames.add(analyticPipeline.getName());
         }
     }
@@ -59,13 +64,21 @@ public class AnalyticTestEntityNames {
     public PropDataMatchType getPropDataMatchType() {
         return propDataMatchType;
     }
-    
+
+    public AnalyticTestType getAnalyticTestType() {
+        return analyticTestType;
+    }
+
     public void setAnalyticTestType(AnalyticTestType analyticTestType) {
         this.analyticTestType = analyticTestType;
     }
 
-    public AnalyticTestType getAnalyticTestType() {
-        return analyticTestType;
+    public void setAnalyticTestTag(String analyticTestTag) {
+        this.analyticTestTag = analyticTestTag;
+    }
+
+    public String getAnalyticTestTag() {
+        return analyticTestTag;
     }
 
     public void setAnalyticPipelineNames(List<String> analyticPipelineNames) {

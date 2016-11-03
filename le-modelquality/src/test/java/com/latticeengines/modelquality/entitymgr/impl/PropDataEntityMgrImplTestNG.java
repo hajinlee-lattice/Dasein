@@ -21,9 +21,11 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        propDataEntityMgr.deleteAll();
+        propData = propDataEntityMgr.findByName("PropData1");
+        if (propData != null) {
+            propDataEntityMgr.delete(propData);
+        }
 
-        propData = new PropData();
         propData = new PropData();
         propData.setName("PropData1");
         propData.setDataCloudVersion("2.0.1470268608");

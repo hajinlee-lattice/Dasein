@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
+import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.modelquality.service.AnalyticTestService;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticTestInterface;
 
@@ -49,12 +50,12 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     public AnalyticTestEntityNames getAnalyticTestByName(@PathVariable String analyticTestName) {
         return getByName(analyticTestName);
     }
-    
+
     @Override
-    @RequestMapping(value = "/execute/{analyticTestName:.*}", method = RequestMethod.POST)
+    @RequestMapping(value = "/execute/{analyticTestName:.*}", method = RequestMethod.PUT)
     @ResponseBody
     @ApiOperation(value = "Execute AnalyticTest by name")
-    public List<String> executeAnalyticTestByName(@PathVariable String analyticTestName) {
+    public List<ModelRun> executeAnalyticTestByName(@PathVariable String analyticTestName) {
         return analyticTestService.executeByName(analyticTestName);
     }
 

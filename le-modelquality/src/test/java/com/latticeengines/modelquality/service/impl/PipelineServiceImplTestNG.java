@@ -106,12 +106,11 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         PipelineStepOrFile p = new PipelineStepOrFile();
         p.pipelineStepName = "Invalid_step_name";
         pipelineSteps.add(p);
-        
+
         try {
-            Pipeline newPipeline = pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline",pipelineSteps);
-        }
-        catch(LedpException e){
-            // expected, so do nothing
+            pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps);
+        } catch (LedpException e) {
+            // expected, do nothing
         }
         Pipeline result = pipelineEntityMgr.findByName("P1-Fail");
         assertNull(result);

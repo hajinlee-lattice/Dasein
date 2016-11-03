@@ -9,5 +9,4 @@ public interface ModelRunService {
     ModelRun createModelRun(ModelRunEntityNames modelRunEntityNames, Environment env);
 
     void setEnvironment(Environment env);
-
 }

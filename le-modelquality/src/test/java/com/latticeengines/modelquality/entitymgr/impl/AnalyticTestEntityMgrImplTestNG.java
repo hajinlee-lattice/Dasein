@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTestType;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.PropDataMatchType;
 import com.latticeengines.modelquality.entitymgr.AnalyticTestEntityMgr;
@@ -33,6 +34,8 @@ public class AnalyticTestEntityMgrImplTestNG extends ModelQualityFunctionalTestN
         AnalyticTest analyticTest = new AnalyticTest();
         analyticTest.setName(testAnalyticTest);
         analyticTest.setPropDataMatchType(PropDataMatchType.DNB);
+        analyticTest.setAnalyticTestTag("TestTag");
+        analyticTest.setAnalyticTestType(AnalyticTestType.Default);
         List<DataSet> dataSets = getTestDatasets().subList(0, 1);
         analyticTest.setDataSets(dataSets);
         List<AnalyticPipeline> analyticPipelines = getTestAnalyticPipelines().subList(0, 1);

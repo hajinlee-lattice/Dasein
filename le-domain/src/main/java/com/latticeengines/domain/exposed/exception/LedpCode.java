@@ -423,14 +423,15 @@ public enum LedpCode {
     // le-dellebi
     LEDP_29000(
             "The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //
-    LEDP_29001("Must define one type to retrieve."), //
-    LEDP_29002("The input parameter {0} is null."), //
-    LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
-    LEDP_29004("Failed to download or unzip File , name={0}."), //
-    LEDP_29005("The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
-    LEDP_29006(
-            "The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
-    LEDP_29007("Cannot get the bean name. Did you change the quartz bean name for Dell ebi"), //
+            LEDP_29001("Must define one type to retrieve."), //
+            LEDP_29002("The input parameter {0} is null."), //
+            LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
+            LEDP_29004("Failed to download or unzip File , name={0}."), //
+            LEDP_29005(
+                    "The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
+                    LEDP_29006(
+                            "The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
+                            LEDP_29007("Cannot get the bean name. Did you change the quartz bean name for Dell ebi"), //
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //
@@ -475,11 +476,12 @@ public enum LedpCode {
     LEDP_31111("api_error", "Could not process record. Cause: {0}"), //
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
-    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
-            + "make sure to specify 'Email' field and for non-lead type model " //
-            + "specify either 'Website' or 'Domain' fields. If these fields " //
-            + "are not specified then specify both 'CompanyName' " //
-            + "and 'State' fields."), //
+    LEDP_31199("missing_domain",
+            "Required field(s) are missing: {0}. In case of lead type model, " //
+                    + "make sure to specify 'Email' field and for non-lead type model " //
+                    + "specify either 'Website' or 'Domain' fields. If these fields " //
+                    + "are not specified then specify both 'CompanyName' " //
+                    + "and 'State' fields."), //
 
     // le-serviceflows
     LEDP_32000("Validations failed: {0}"), //
@@ -491,14 +493,16 @@ public enum LedpCode {
     // le-encryption
     LEDP_34000("Directory {0} already exists and is non-empty.  Encryption requires a completely new customer with "
             + "empty or non-existent data directories.  Try a different customer id"), //
-    LEDP_34001("Could not create key for customer {0}"), //
-    LEDP_34002("Could not delete key for customer {0}"), //
-    LEDP_34003("Could not locate tenant with name {0}"), //
+            LEDP_34001("Could not create key for customer {0}"), //
+            LEDP_34002("Could not delete key for customer {0}"), //
+            LEDP_34003("Could not locate tenant with name {0}"), //
 
     // le-modelquality
-    LEDP_35000("No {0} with name {1} found"), // No {Entity} with name {Name} found, for eg "No AnalyticTest with name AnalyticTest1 found"
-    LEDP_35001("Failed to save PipelineStep {0}"); 
-    
+    LEDP_35000("No {0} with name {1} found"), // No {Entity} with name {Name} found
+    LEDP_35001("Failed to save PipelineStep {0}"), 
+    LEDP_35002("{0} with name {1} already exists"), 
+    LEDP_35003("{0} cannot be empty");
+
     private String message;
 
     private String externalCode;

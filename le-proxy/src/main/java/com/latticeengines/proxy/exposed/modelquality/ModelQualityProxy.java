@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityName
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
+import com.latticeengines.domain.exposed.modelquality.ModelRun;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
@@ -121,8 +122,10 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
-    public String createPipeline(String pipelineName, String pipelineDescription, List<PipelineStepOrFile> pipelineSteps) {
-        String url = constructUrl("/pipelines/?pipelineName={pipelineName}&pipelineDescription={pipelineDescription}", pipelineName, pipelineDescription);
+    public String createPipeline(String pipelineName, String pipelineDescription,
+            List<PipelineStepOrFile> pipelineSteps) {
+        String url = constructUrl("/pipelines/?pipelineName={pipelineName}&pipelineDescription={pipelineDescription}",
+                pipelineName, pipelineDescription);
         return post("createPipeline", url, pipelineSteps, String.class);
     }
 
@@ -293,9 +296,9 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
         String url = constructUrl("/analytictests/{analyticTestName}", analyticTestName);
         return get("getAnalyticTestByName", url, AnalyticTestEntityNames.class);
     }
-    
+
     @Override
-    public List<String> executeAnalyticTestByName(String analyticTestName) {
+    public List<ModelRun> executeAnalyticTestByName(String analyticTestName) {
         String url = constructUrl("/analytictests/execute/{analyticTestName}");
         return post("executeAnalyticTestByName", url, analyticTestName, List.class);
     }
