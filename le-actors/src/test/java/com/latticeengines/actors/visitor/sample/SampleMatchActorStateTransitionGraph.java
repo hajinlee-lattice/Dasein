@@ -1,22 +1,19 @@
 package com.latticeengines.actors.visitor.sample;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
 
 public class SampleMatchActorStateTransitionGraph {
     private List<String> dummyGraph = new ArrayList<>();
-    private Map<String, String> dataSourceActors = new HashMap<>();
 
     @SuppressWarnings("unchecked")
     public SampleMatchActorStateTransitionGraph(String... actorRefs) {
         if (actorRefs != null) {
-            dummyGraph.addAll(CollectionUtils.arrayToList(actorRefs));
+            for (String ref : actorRefs) {
+                dummyGraph.add(ref);
+            }
         }
     }
 
@@ -39,13 +36,4 @@ public class SampleMatchActorStateTransitionGraph {
 
         return originalLocation;
     }
-
-    public void setDataSourceActors(Map<String, String> dataSourceActors) {
-        this.dataSourceActors.putAll(dataSourceActors);
-    }
-
-    public Map<String, String> getDataSourceActors() {
-        return dataSourceActors;
-    }
-
 }

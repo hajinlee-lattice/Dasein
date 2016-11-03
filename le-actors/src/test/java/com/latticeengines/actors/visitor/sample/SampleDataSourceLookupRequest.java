@@ -2,7 +2,7 @@ package com.latticeengines.actors.visitor.sample;
 
 public class SampleDataSourceLookupRequest {
     private Object inputData;
-    private SampleMatchTravelerContext matchTravelerContext;
+    private SampleMatchTravelContext matchTravelerContext;
     private String callerMicroEngineReference;
 
     public Object getInputData() {
@@ -13,11 +13,11 @@ public class SampleDataSourceLookupRequest {
         this.inputData = inputData;
     }
 
-    public SampleMatchTravelerContext getMatchTravelerContext() {
+    public SampleMatchTravelContext getMatchTravelerContext() {
         return matchTravelerContext;
     }
 
-    public void setMatchTravelerContext(SampleMatchTravelerContext matchTravelerContext) {
+    public void setMatchTravelerContext(SampleMatchTravelContext matchTravelerContext) {
         this.matchTravelerContext = matchTravelerContext;
     }
 

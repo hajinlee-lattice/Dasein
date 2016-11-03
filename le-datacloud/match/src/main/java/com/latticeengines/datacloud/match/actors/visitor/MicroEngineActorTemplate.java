@@ -1,7 +1,9 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
@@ -22,7 +24,13 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     private MatchActorSystem matchActorSystem;
 
     @Autowired
-    private MatchGuideBook guideBook;
+    @Qualifier("matchGuideBook")
+    protected MatchGuideBook guideBook;
+
+    @Override
+    public GuideBook getGuideBook() {
+        return guideBook;
+    }
 
     @Override
     protected boolean isValidMessageType(Object msg) {

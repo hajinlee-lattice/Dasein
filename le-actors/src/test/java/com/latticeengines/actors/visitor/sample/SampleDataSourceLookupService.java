@@ -4,8 +4,8 @@ import com.latticeengines.actors.exposed.traveler.Response;
 
 public interface SampleDataSourceLookupService {
 
-    void asyncLookup(String lookupId, Object inputData, String returnAddress, Object system);
+    void asyncLookup(String lookupId, Object request, String returnAddress);
 
-    Response syncLookup(Object inputData);
+    Response syncLookup(Object request);
 
 }

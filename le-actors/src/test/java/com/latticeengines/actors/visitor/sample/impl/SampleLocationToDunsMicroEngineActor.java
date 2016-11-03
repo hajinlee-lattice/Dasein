@@ -9,21 +9,23 @@ import com.latticeengines.actors.visitor.sample.SampleMatchKeyTuple;
 import com.latticeengines.actors.visitor.sample.SampleMatchTravelContext;
 import com.latticeengines.actors.visitor.sample.SampleMicroEngineActorTemplate;
 
-@Component("sampleDomainBasedMicroEngineActor")
+@Component("sampleLocationBasedMicroEngineActor")
 @Scope("prototype")
-public class SampleDomainBasedMicroEngineActor extends SampleMicroEngineActorTemplate<SampleDynamoLookupActor> {
+public class SampleLocationToDunsMicroEngineActor extends SampleMicroEngineActorTemplate<SampleDnbLookupActor> {
 
     @Override
-    protected Class<SampleDynamoLookupActor> getDataSourceActorClz() {
-        return SampleDynamoLookupActor.class;
+    protected Class<SampleDnbLookupActor> getDataSourceActorClz() {
+        return SampleDnbLookupActor.class;
     }
 
     @Override
     protected boolean accept(Traveler traveler) {
-
         SampleMatchKeyTuple matchKeyTuple = ((SampleMatchTravelContext) traveler).getMatchKeyTuple();
 
-        if (matchKeyTuple.getDomain() != null) {
+        if ((matchKeyTuple.getCity() != null //
+                || matchKeyTuple.getState() != null) //
+                && matchKeyTuple.getCountry() != null//
+                && matchKeyTuple.getName() != null) {
             return true;
         }
 
@@ -32,12 +34,12 @@ public class SampleDomainBasedMicroEngineActor extends SampleMicroEngineActorTem
 
     @Override
     protected void process(Response response) {
-        SampleMatchTravelContext context = (SampleMatchTravelContext) response.getTravelerContext();
         if (response.getResult() != null) {
-            context.setResult(response.getResult());
-            context.setProcessed(true);
-        } else {
-            context.setProcessed(false);
+            SampleMatchTravelContext context = (SampleMatchTravelContext) response.getTravelerContext();
+            SampleMatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
+
+            matchKeyTuple.setDuns((String) response.getResult());
+            response.setResult(null);
         }
     }
 }

@@ -2,8 +2,6 @@ package com.latticeengines.actors.visitor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
@@ -15,16 +13,14 @@ import akka.actor.ActorRef;
 public abstract class VisitorActorTemplate extends ActorTemplate {
     private static final Log log = LogFactory.getLog(VisitorActorTemplate.class);
 
-    @Autowired
-    @Qualifier("matchGuideBook")
-    protected GuideBook guideBook;
+    protected abstract GuideBook getGuideBook();
 
     protected abstract boolean process(Traveler traveler);
 
     protected abstract void process(Response response);
 
     protected String getNextLocation(Traveler traveler) {
-        return guideBook.next(self().path().toSerializationFormat(), traveler);
+        return getGuideBook().next(self().path().toSerializationFormat(), traveler);
     }
 
     @Override
@@ -72,7 +68,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
         log.debug(self() + " sent " + traveler + " to " + nextActorRef);
 
-        guideBook.logVisit(currentActorRef.path().toSerializationFormat(), traveler);
+        getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
     }
 

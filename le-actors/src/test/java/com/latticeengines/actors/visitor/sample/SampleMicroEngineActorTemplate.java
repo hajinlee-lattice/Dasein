@@ -1,51 +1,64 @@
-//package com.latticeengines.actors.visitor.sample;
-//
-//import com.latticeengines.actors.exposed.traveler.GuideBook;
-//import com.latticeengines.actors.exposed.traveler.Response;
-//import com.latticeengines.actors.exposed.traveler.TravelContext;
-//import com.latticeengines.actors.visitor.VisitorActorTemplate;
-//
-//import akka.actor.ActorRef;
-//
-//public abstract class SampleMicroEngineActorTemplate extends VisitorActorTemplate {
-//    protected abstract String getDataSourceActor();
-//
-//    protected abstract boolean accept(TravelContext traveler);
-//
-//    @Override
-//    protected boolean isValidMessageType(Object msg) {
-//        return msg instanceof SampleMatchTravelerContext || msg instanceof Response;
-//    }
-//
-//    @Override
-//    protected boolean process(TravelContext traveler) {
-//        if (accept(traveler)) {
-//            String dataSourceActor = getDataSourceActor();
-//            dataSourceActor = traveler.getGuideBook().getDataSourceActorPath(dataSourceActor);
-//            ActorRef nextActorRef = getContext().actorFor(dataSourceActor);
-//
-//            SampleDataSourceLookupRequest req = new SampleDataSourceLookupRequest();
-//            req.setMatchTravelerContext((SampleMatchTravelerContext) traveler);
-//            req.setInputData(traveler.getDataKeyValueMap());
-//            traveler.logVisit(self().path().toSerializationFormat());
-//
-//            nextActorRef.tell(req, self());
-//            return true;
-//        } else {
-//            traveler.logVisit(self().path().toSerializationFormat());
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    protected void process(Response response) {
-//        // may be do something
-//    }
-//
-//    @Override
-//    protected String getNextLocation(TravelContext traveler) {
-//        GuideBook guideBook = traveler.getGuideBook();
-//        String nextLocation = guideBook.next(getSelf().path().toSerializationFormat(), traveler);
-//        return nextLocation;
-//    }
-//}
+package com.latticeengines.actors.visitor.sample;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import com.latticeengines.actors.exposed.traveler.GuideBook;
+import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.exposed.traveler.Traveler;
+import com.latticeengines.actors.visitor.VisitorActorTemplate;
+import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
+import com.latticeengines.actors.visitor.sample.framework.SampleMatchGuideBook;
+
+import akka.actor.ActorRef;
+
+public abstract class SampleMicroEngineActorTemplate<T extends SampleDataSourceWrapperActorTemplate>
+        extends VisitorActorTemplate {
+
+    protected abstract Class<T> getDataSourceActorClz();
+
+    protected abstract boolean accept(Traveler traveler);
+
+    protected abstract void process(Response response);
+
+    @Autowired
+    private SampleMatchActorSystem matchActorSystem;
+
+    @Autowired
+    @Qualifier("sampleMatchGuideBook")
+    protected SampleMatchGuideBook guideBook;
+
+    @Override
+    public GuideBook getGuideBook() {
+        return guideBook;
+    }
+
+    @Override
+    protected boolean isValidMessageType(Object msg) {
+        return msg instanceof SampleMatchTravelContext || msg instanceof Response;
+    }
+
+    @Override
+    protected boolean process(Traveler context) {
+        SampleMatchTravelContext travelContext = (SampleMatchTravelContext) context;
+        if (accept(travelContext)) {
+            ActorRef nextActorRef = matchActorSystem.getActorRef(getDataSourceActorClz());
+
+            SampleDataSourceLookupRequest req = new SampleDataSourceLookupRequest();
+            req.setMatchTravelerContext(travelContext);
+            req.setInputData(travelContext.getMatchKeyTuple());
+            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
+
+            nextActorRef.tell(req, self());
+            return true;
+        } else {
+            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
+            return false;
+        }
+    }
+
+    @Override
+    protected String getNextLocation(Traveler traveler) {
+        return guideBook.next(getSelf().path().toSerializationFormat(), traveler);
+    }
+}
