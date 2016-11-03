@@ -35,13 +35,14 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
 
         if (!pipeline) {
             vm.selectedPipeline = null;
-
             vm.pipeline = {
                 pipeline_steps: []
             };
+            vm.pipelineDescription = null;
         } else {
             vm.selectedPipeline = pipeline;
             vm.pipeline = angular.copy(pipeline);
+            vm.pipelineDescription = vm.pipeline.description;
         }
     };
 
