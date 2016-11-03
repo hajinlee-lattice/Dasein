@@ -184,7 +184,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         }
 
         public Builder skipStandardTransform(boolean skipTransform) {
-            addStandardAttributes.setSkipStep(true);
+            addStandardAttributes.setSkipStep(skipTransform);
             return this;
         }
 
