@@ -21,7 +21,7 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
     public void setup() throws Exception {
         super.cleanupDb();
         super.cleanupHdfs();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null);
 
         List<ModelRun> modelRuns = createModelRuns();
         modelRun1 = modelRuns.get(0);

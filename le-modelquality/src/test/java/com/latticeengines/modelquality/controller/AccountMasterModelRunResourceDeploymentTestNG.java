@@ -2,6 +2,7 @@ package com.latticeengines.modelquality.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -21,10 +22,13 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     private String user = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
     private String password = TestFrameworkUtils.GENERAL_PASSWORD;
 
+    @Value("${modelquality.test.tenant:Model_Quality_Test_DnB}")
+    protected String tenantName;
+
     @BeforeMethod(groups = "deployment")
     public void setup() throws Exception {
         super.cleanupDb();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, tenantName);
     }
 
     @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterCsvFile")
@@ -77,16 +81,23 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
     @DataProvider(name = "getAccountMasterCsvFile")
     public Object[][] getAccountMasterCsvFile() {
-        return new Object[][] { { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
-                { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
-                { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
-                { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
-                { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
-                { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
-                { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
-                { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
+        return new Object[][] {
+
+        //
+        { "Mulesoft_NA_doman_AccountMaster", "Mulesoft_NA_domain.csv" }, //
+        // { "Mulesoft_Emea_doman_AccountMaster", "Mulesoft_Emea_domain.csv" }, //
+        // { "Mulesoft_Apac_doman_AccountMaster", "Mulesoft_Apac_domain.csv" }, //
+        // { "Qlik_doman_AccountMaster", "Qlik_domaiin.csv" }, //
+        // { "HootSuite_domain_AccountMaster", "HootSuite_domain.csv" }, //
+        // { "CornerStone_domain_AccountMaster", "CornerStone_domain.csv" }, //
+        // { "PolyCom_domain_AccountMaster", "PolyCom_domain.csv" }, //
+        // { "Tenable_domain_AccountMaster", "Tenable_domain.csv" }, //
 
         // { "bams_domain", "bams_domain.csv" }, //
+        // { "Tenable_domain_clean_alexa_AccountMaster",
+        // "Tenable_domain_clean_alexa.csv" }, //
+        // { "PolyCom_domain_clean_alexa_AccountMaster",
+
         };
     }
 

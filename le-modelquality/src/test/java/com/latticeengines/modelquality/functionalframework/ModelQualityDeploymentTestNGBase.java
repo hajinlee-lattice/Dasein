@@ -75,10 +75,14 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         this.deploymentTestBed = testBed;
     }
 
-    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws NoSuchAlgorithmException,
-            KeyManagementException, IOException {
+    protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product, String tenantName)
+            throws NoSuchAlgorithmException, KeyManagementException, IOException {
         deploymentTestBed.bootstrapForProduct(product);
-        mainTestTenant = deploymentTestBed.getMainTestTenant();
+        if (tenantName == null) {
+            mainTestTenant = deploymentTestBed.getMainTestTenant();
+        } else {
+            mainTestTenant = deploymentTestBed.addExtraTestTenant(tenantName);
+        }
         switchToSuperAdmin();
     }
 
@@ -175,15 +179,16 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         org.springframework.core.io.Resource resource = new ClassPathResource(
                 "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues." //
-                + type.getFileExtension());;
+                        + type.getFileExtension());
+        ;
         switch (type) {
         case PYTHONRTS:
             resource = new ClassPathResource("com/latticeengines/modelquality/service/impl/assignconversionrate.py");
             break;
         default:
-            break; 
+            break;
         }
-            
+
         map.add("file", resource);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -199,7 +204,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         case METADATA:
             return modelQualityProxy.uploadPipelineStepMetadata(fileName, "assigncategorical", requestEntity);
         default:
-            return null; 
+            return null;
         }
 
     }

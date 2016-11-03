@@ -22,7 +22,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     public void setup() throws Exception {
         super.cleanupDb();
         super.cleanupHdfs();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "runModelAlfresco", enabled = false)
@@ -31,7 +31,8 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             List<ModelRun> modelRuns = createModelRuns();
             for (ModelRun modelRun : modelRuns) {
                 modelRun.getDataSet().setName("MuleSoft");
-                modelRun.getDataSet() //
+                modelRun.getDataSet()
+                        //
                         .setTrainingSetHdfsPath( //
                                 "/Pods/Default/Services/ModelQuality/Mulesoft_Migration_LP3_ModelingLead_ReducedRows_20160624_155355.csv");
                 dataSetEntityMgr.create(modelRun.getDataSet());
@@ -53,8 +54,9 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         try {
             ModelRun modelRun = createModelRuns().get(0);
             modelRun.getDataSet().setName("Alfresco");
-            modelRun.getDataSet().setTrainingSetHdfsPath(
-                    "/Pods/Default/Services/ModelQuality/Alfresco_SFDC_LP3_ModelingLead_ReducedRows_20160712_125241.csv");
+            modelRun.getDataSet()
+                    .setTrainingSetHdfsPath(
+                            "/Pods/Default/Services/ModelQuality/Alfresco_SFDC_LP3_ModelingLead_ReducedRows_20160712_125241.csv");
             dataSetEntityMgr.create(modelRun.getDataSet());
             ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames(modelRun);
 
