@@ -20,7 +20,7 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
     public Algorithm createLatestProductionAlgorithm() {
         String version = getVersion();
 
-        String algorithmName = AlgorithmFactory.ALGORITHM_NAME_RF + "-" + version;
+        String algorithmName = AlgorithmFactory.ALGORITHM_NAME_RF;
         Algorithm algorithm = algorithmEntityMgr.findByName(algorithmName);
 
         if (algorithm != null) {
