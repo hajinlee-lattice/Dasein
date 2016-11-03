@@ -33,6 +33,15 @@ public class PivotUnitTestNG {
         record2.put("ModelAction1", "60");
         Object result2 = pivot.transform(args, record2);
         assertEquals(result2, 0.0);
+
+        Map<String, Object> args3 = new HashMap<>();
+        args3.put("column1", "ModelAction1");
+        args3.put("column2", "ModelAction1_60");
+
+        Map<String, Object> record3 = new HashMap<>();
+        record3.put("ModelAction1", "-2.7755575615628914e-17");
+        Object result3 = pivot.transform(args3, record3);
+        assertEquals(result3, 1.0);
     }
 
     @SuppressWarnings("rawtypes")

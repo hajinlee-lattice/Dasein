@@ -18,7 +18,7 @@ public class ReplaceNullValue implements RealTimeTransform {
 
     private static final Pattern patternDictionary = Pattern.compile("^\\{(.*)\\}$");
     private static final Pattern patternKeyAndValue = Pattern
-            .compile("^u?(\'(.*?)\'|\"(.*?)\"): ([-+]?[0-9]*\\.?[0-9]+)(, u?(\'|\").*|$)");
+            .compile("^u?(\'(.*?)\'|\"(.*?)\"): ([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)(, u?(\'|\").*|$)");
 
     protected Map<String, Object> lookupMap = new HashMap<>();
 
@@ -70,7 +70,7 @@ public class ReplaceNullValue implements RealTimeTransform {
 
                     Double value = Double.parseDouble(matcherKeyAndValue.group(4));
                     lookupMap.put(key, value);
-                    dictionaryString = matcherKeyAndValue.group(5);
+                    dictionaryString = matcherKeyAndValue.group(6);
                     if (!dictionaryString.equals("")) {
                         dictionaryString = dictionaryString.substring(2);
                     } else {
