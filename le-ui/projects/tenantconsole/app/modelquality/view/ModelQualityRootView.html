@@ -3,7 +3,7 @@
     <a class="logo" ui-sref="MODELQUALITY.DASHBOARD"><img src="assets/img/logo_lattice.png"/></a>
 </header>
 <main-nav></main-nav>
-<div class="container-fluid">
+<div ng-class="state==='DASHBOARD' ? 'container-fluid' : 'container'">
     <div class="col-xs-12" ng-if="loading">
       <div class="loader text-center"></div>
     </div>

@@ -182,7 +182,6 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/tenants/directive/CamilleConfigDirective.js',
                         '<%= app.dir %>/app/tenants/controller/TenantListCtrl.js',
                         '<%= app.dir %>/app/tenants/controller/TenantConfigCtrl.js',
-                        '<%= app.dir %>/app/modelquality/controller/ModelQualityNavCtrl.js',
                         '<%= app.dir %>/app/modelquality/controller/ModelQualityRootCtrl.js',
                         '<%= app.dir %>/app/modelquality/directive/ModelQualityLineChart.js',
                         '<%= app.dir %>/app/modelquality/directive/ModelQualityGroupBarChart.js',
