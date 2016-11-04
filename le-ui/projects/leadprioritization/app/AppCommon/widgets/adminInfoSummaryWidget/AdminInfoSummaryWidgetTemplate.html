@@ -53,11 +53,11 @@
                     <td>{{sourceType=='SalesforceLead' ? ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')
                             : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</td>
                     <td>
-                        {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/readoutcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        {{ResourceUtility.getString('MODEL_ADMIN_SCORED_TRAINING_FILE')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="/files/datafiles/scoredeventtablecsv/score?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
-                        {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/scorecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        {{ResourceUtility.getString('MODEL_ADMIN_BUCKET_TOOL')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="/files/datafiles/scoredeventtablecsv/pivot?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
