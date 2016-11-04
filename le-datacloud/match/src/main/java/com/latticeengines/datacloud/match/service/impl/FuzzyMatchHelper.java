@@ -21,6 +21,7 @@ import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -47,7 +48,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public boolean accept(String version) {
-        return useFuzzyMatch && MatchUtils.isValidForAccountMasterBasedMatch(version);
+        return MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
@@ -69,11 +70,24 @@ public class FuzzyMatchHelper implements DbHelper {
         
         boolean fetchOnly = Boolean.TRUE.equals(context.getInput().getFetchOnly());
         if (!fetchOnly) {
-            try {
-                fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                        dataCloudVersion, context.getInput().getDecisionGraph());
-            } catch (Exception e) {
-                log.error("Failed to run fuzzy match.", e);
+            if (useFuzzyMatch) {
+                try {
+                    fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
+                            dataCloudVersion, context.getInput().getDecisionGraph());
+                } catch (Exception e) {
+                    log.error("Failed to run fuzzy match.", e);
+                }
+            } else {
+                AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
+                for (InternalOutputRecord record: context.getInternalResults()) {
+                    accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
+                }
+                List<String> ids = accountLookupService.batchLookupIds(accountLookupRequest);
+                for (int i = 0; i < ids.size(); i++) {
+                    String latticeAccountId = ids.get(i);
+                    InternalOutputRecord record = context.getInternalResults().get(i);
+                    record.setLatticeAccountId(latticeAccountId);
+                }
             }
         }
 

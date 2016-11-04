@@ -274,7 +274,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
         List<OutputRecord> cleanedResults = new ArrayList<>();
         for (OutputRecord record : groupOutput.getResult()) {
-            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
+            if (record.getMatchLog() != null && !record.getMatchLog().isEmpty()) {
                 record.setOutput(null);
                 cleanedResults.add(record);
             }

@@ -76,16 +76,16 @@ public abstract class AbstractMatcher implements Matcher {
             List<String> matchFieldNames = matchOutput.getOutputFields();
             OutputRecord outputRecord = matchOutput.getResult().get(0);
             String nameLocationStr = "";
-            if (outputRecord.getMatchedNameLocation() != null) {
-                nameLocationStr = JsonUtils.serialize(outputRecord.getMatchedNameLocation());
+            if (outputRecord.getPreMatchNameLocation() != null) {
+                nameLocationStr = JsonUtils.serialize(outputRecord.getPreMatchNameLocation());
             }
-            String errorMessages = outputRecord.getErrorMessages() == null ? ""
-                    : Joiner.on(",").join(outputRecord.getErrorMessages());
+            String errorMessages = outputRecord.getMatchLog() == null ? ""
+                    : Joiner.on(",").join(outputRecord.getMatchLog());
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()), nameLocationStr,
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getPreMatchDomain()), nameLocationStr,
                         errorMessages));
             }
 
@@ -93,7 +93,7 @@ public abstract class AbstractMatcher implements Matcher {
             if (!outputRecord.isMatched()) {
                 warnings.addWarning(
                         new Warning(WarningCode.NO_MATCH, new String[] { JsonUtils.serialize(matchInput.getKeyMap()),
-                                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
+                                Strings.nullToEmpty(outputRecord.getPreMatchDomain()) + nameLocationStr }));
             }
         }
         if (log.isDebugEnabled()) {
@@ -232,7 +232,7 @@ public abstract class AbstractMatcher implements Matcher {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (isPublicDomain) {
                         warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
-                                new String[] { Strings.nullToEmpty(outputRecord.getMatchedDomain()) }));
+                                new String[] { Strings.nullToEmpty(outputRecord.getPreMatchDomain()) }));
                     }
                 }
             }

@@ -162,7 +162,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
         if (inputRecord.size() != numInputFields) {
             record.setFailed(true);
-            record.addErrorMessage("The number of objects in this row [" + inputRecord.size()
+            record.addMatchLog("The number of objects in this row [" + inputRecord.size()
                     + "] does not match the number of fields claimed [" + numInputFields + "]");
             return record;
         }
@@ -195,7 +195,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 }
                 record.setParsedDomain(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
-                    record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
+                    record.addMatchLog("Parsed to a public domain: " + cleanDomain);
                     record.setPublicDomain(true);
                     if (excludePublicDomains) {
                         log.warn("A record with public domain is excluded from input.");
@@ -208,7 +208,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 }
             } catch (Exception e) {
                 record.setFailed(true);
-                record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
+                record.addMatchLog("Error when cleanup domain field: " + e.getMessage());
             }
         }
     }
@@ -263,7 +263,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             } catch (Exception e) {
                 log.error(ExceptionUtils.getFullStackTrace(e));
                 record.setFailed(true);
-                record.addErrorMessage("Error when cleanup name and location fields: " + e.getMessage());
+                record.addMatchLog("Error when cleanup name and location fields: " + e.getMessage());
             }
         }
     }
@@ -284,7 +284,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.setParsedDuns(cleanDuns);
             } catch (Exception e) {
                 record.setFailed(true);
-                record.addErrorMessage("Error when cleanup duns field: " + e.getMessage());
+                record.addMatchLog("Error when cleanup duns field: " + e.getMessage());
             }
         }
     }
@@ -305,7 +305,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.setLatticeAccountId(cleanId);
             } catch (Exception e) {
                 record.setFailed(true);
-                record.addErrorMessage("Error when cleanup lattice account id field: " + e.getMessage());
+                record.addMatchLog("Error when cleanup lattice account id field: " + e.getMessage());
             }
         }
     }

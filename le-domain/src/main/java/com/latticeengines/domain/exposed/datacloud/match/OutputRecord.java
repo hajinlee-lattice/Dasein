@@ -9,93 +9,109 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutputRecord {
 
-    private Integer rowNumber;
-    private Boolean matched;
-    private List<Object> input;
-    private String matchedDomain;
-    private NameLocation matchedNameLocation;
-    private List<Object> output;
-    private List<String> errorMessages;
-
     @JsonProperty("RowNumber")
+    private Integer rowNumber;
+
+    @JsonProperty("IsMatched")
+    private Boolean matched;
+
+    @JsonProperty("Input")
+    private List<Object> input;
+
+    @JsonProperty("PreMatchDomain")
+    private String preMatchDomain;
+
+    @JsonProperty("PreMatchNameLocation")
+    private NameLocation preMatchNameLocation;
+
+    @JsonProperty("PreMatchDUNS")
+    private String preMatchDuns;
+
+    @JsonProperty("PreMatchLatticeAccountId")
+    private String preMatchLatticeAccountId;
+
+    @JsonProperty("PreMatchEmail")
+    private String preMatchEmail;
+
+    @JsonProperty("Output")
+    private List<Object> output;
+
+    @JsonProperty("matchLog")
+    private List<String> matchLog;
+
     public Integer getRowNumber() {
         return rowNumber;
     }
 
-    @JsonProperty("RowNumber")
     public void setRowNumber(Integer rowNumber) {
         this.rowNumber = rowNumber;
     }
 
-    @JsonProperty("IsMatched")
     public Boolean isMatched() {
         return matched;
     }
 
-    @JsonProperty("IsMatched")
     public void setMatched(Boolean matched) {
         this.matched = matched;
     }
 
-    @JsonProperty("Input")
     public List<Object> getInput() {
         return input;
     }
 
-    @JsonProperty("Input")
     public void setInput(List<Object> input) {
         this.input = input;
     }
 
-    @JsonProperty("MatchedDomain")
-    public String getMatchedDomain() {
-        return matchedDomain;
+    public String getPreMatchDomain() {
+        return preMatchDomain;
     }
 
-    @JsonProperty("MatchedDomain")
-    public void setMatchedDomain(String matchedDomain) {
-        this.matchedDomain = matchedDomain;
+    public void setPreMatchDomain(String preMatchDomain) {
+        this.preMatchDomain = preMatchDomain;
     }
 
-    @JsonProperty("MatchedNameLocation")
-    public NameLocation getMatchedNameLocation() {
-        return matchedNameLocation;
+    public NameLocation getPreMatchNameLocation() {
+        return preMatchNameLocation;
     }
 
-    @JsonProperty("MatchedNameLocation")
-    public void setMatchedNameLocation(NameLocation matchedNameLocation) {
-        this.matchedNameLocation = matchedNameLocation;
+    public void setPreMatchNameLocation(NameLocation preMatchNameLocation) {
+        this.preMatchNameLocation = preMatchNameLocation;
     }
 
-    @JsonProperty("Output")
+    public String getPreMatchDuns() {
+        return preMatchDuns;
+    }
+
+    public void setPreMatchDuns(String preMatchDuns) {
+        this.preMatchDuns = preMatchDuns;
+    }
+
     public List<Object> getOutput() {
         return output;
     }
 
-    @JsonProperty("Output")
     public void setOutput(List<Object> output) {
         this.output = output;
     }
 
-    @JsonProperty("ErrorMessage")
-    public List<String> getErrorMessages() {
-        return errorMessages;
+    public List<String> getMatchLog() {
+        return matchLog;
     }
 
-    @JsonProperty("ErrorMessage")
-    public void setErrorMessages(List<String> errorMessages) {
-        this.errorMessages = errorMessages;
+    public void setMatchLog(List<String> matchLog) {
+        this.matchLog = matchLog;
     }
 
-    public void addErrorMessage(String errorMessage) {
+    public void addMatchLog(String message) {
         List<String> msgs;
-        if (this.errorMessages == null) {
+        if (this.matchLog == null) {
             msgs = new ArrayList<>();
         } else {
-            msgs = new ArrayList<>(this.errorMessages);
+            msgs = new ArrayList<>(this.matchLog);
         }
-        msgs.add(errorMessage);
-        this.errorMessages = msgs;
+        msgs.add(message);
+        this.matchLog = msgs;
     }
 
 }

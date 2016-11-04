@@ -77,7 +77,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 outputRecord.setInput(internalRecord.getInput());
                 outputRecord.setMatched(false);
                 outputRecord.setRowNumber(internalRecord.getRowNumber());
-                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
+                outputRecord.setMatchLog(internalRecord.getMatchLog());
                 outputRecords.add(outputRecord);
                 continue;
             }
@@ -159,10 +159,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 totalMatched++;
                 internalRecord.setMatched(true);
             } else {
-                if (internalRecord.getErrorMessages() == null) {
-                    internalRecord.setErrorMessages(new ArrayList<String>());
+                if (internalRecord.getMatchLog() == null) {
+                    internalRecord.setMatchLog(new ArrayList<String>());
                 }
-                internalRecord.getErrorMessages().add("The input does not matchBulk to any source.");
+                internalRecord.getMatchLog().add("The input does not matchBulk to any source.");
             }
 
             internalRecord.setResultsInPartition(null);
@@ -172,10 +172,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             }
             outputRecord.setInput(internalRecord.getInput());
             outputRecord.setMatched(internalRecord.isMatched());
-            outputRecord.setMatchedDomain(internalRecord.getParsedDomain());
-            outputRecord.setMatchedNameLocation(internalRecord.getParsedNameLocation());
+            outputRecord.setPreMatchDomain(internalRecord.getParsedDomain());
+            outputRecord.setPreMatchNameLocation(internalRecord.getParsedNameLocation());
             outputRecord.setRowNumber(internalRecord.getRowNumber());
-            outputRecord.setErrorMessages(internalRecord.getErrorMessages());
+            outputRecord.setMatchLog(internalRecord.getMatchLog());
             outputRecords.add(outputRecord);
         }
 
