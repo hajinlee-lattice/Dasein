@@ -22,13 +22,13 @@ public class StringUtils {
         Character[] symbols = { '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[',
                 ']', '|', '\\', ':', ';', '\'', '"', '<', '>', ',', '.', '/', '?', '\t' };
         Set<Character> symbolSet = new HashSet<Character>(Arrays.asList(symbols));
-        StringBuilder sb = new StringBuilder(str.toUpperCase().trim());
+        StringBuilder sb = new StringBuilder(str.toUpperCase());
         for (int i = 0; i < sb.length(); i++) {
             if (symbolSet.contains(sb.charAt(i))) {
-                sb.replace(i, i + 1, "");
+                sb.replace(i, i + 1, " ");
             }
         }
-        String res = sb.toString();
+        String res = sb.toString().trim();
         while (res.indexOf("  ") >= 0) {
             res = res.replace("  ", " ");
         }

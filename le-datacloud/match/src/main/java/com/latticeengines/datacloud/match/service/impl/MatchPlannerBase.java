@@ -20,6 +20,7 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.service.CountryCodeService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -42,6 +43,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
+
+    @Autowired
+    private CountryCodeService countryCodeService;
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
@@ -231,6 +235,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                         originalCountry = LocationUtils.USA;
                     }
                     String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
+                    String countryCode = countryCodeService.getCountryCode(cleanCountry);
 
                     String originalState = null;
                     for (Integer statePos : statePosList) {
@@ -242,6 +247,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     nameLocation.setName(originalName);
                     nameLocation.setState(cleanState);
                     nameLocation.setCountry(cleanCountry);
+                    nameLocation.setCountryCode(countryCode);
 
                     if (keyPositionMap.containsKey(MatchKey.City)) {
                         String originalCity = null;

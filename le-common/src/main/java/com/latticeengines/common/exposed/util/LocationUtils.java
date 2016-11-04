@@ -24,7 +24,55 @@ public class LocationUtils {
         Object[][] countrySynonData = new Object[][]{ //
                 { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES", "THE UNITED STATES",
                         "UNITED STATES OF AMERICA", "THE UNITED STATES OF AMERICA", "UNITED STATES OF AMERICA THE",
-                        "AMERICA", "AMERICAN" } }, //
+                        "AMERICA", "AMERICAN", "UNITED STATES OF AMERICA USA" } }, //
+                { "ANTIGUA AND BARBUDA", new String[] { "ANTIGUA AND BARBUDA", "ANTIGUA BARBUDA", "ANTIGUABARBUDA" } }, //
+                { "ASIA PACIFIC REGION", new String[] { "ASIA PACIFIC REGION", "ASIAPACIFIC REGION", "AP", "APAC" } }, //
+                { "ÅLAND IS", new String[] { "ÅLAND IS", "ALAND IS" } }, //
+                { "BOSNIA AND HERZEGOVINA",
+                        new String[] { "BOSNIA AND HERZEGOVINA", "BOSNIAHERZ", "BOSNIA HERZEGOVINA",
+                                "BOSNIAHERZEGOVINA" } }, //
+                { "BRUNEI DARUSSALAM", new String[] { "BRUNEI DARUSSALAM", "BRUNEI" } }, //
+                { "BOLIVIA", new String[] { "BOLIVIA", "BOLIVIA PLURINATIONAL STATE OF" } }, //
+                { "CONGO",
+                        new String[] { "CONGO", "CONGO KINSHASA", "CONGO BRAZZAVILLE",
+                                "CONGO DEMOCRATIC REPUBLIC OF THE", "CONGO DEMOCRATIC REPUBLIC OF", "CONGO THE DRC",
+                                "CONGO DEMOCRATIC REP", "CONGO DEMOCRATIC REPUBLIC OF THE",
+                                "DEMOCRATIC REPUBLIC OF THE CONGO", "DEMOCRATIC REPUBLIC OF CONGO" } }, //
+                { "HONG KONG",
+                        new String[] { "HONG KONG", "HONGKONG", "CHINA HONG KONG", "HONG KONG CHINA",
+                                "HONG KONG SAR" } }, //
+                { "MYANMAR", new String[] { "MYANMAR", "BURMA MYANMAR" } }, //
+                { "MACEDONIA THE FORMER YUGOSLAV REPUBLIC OF",
+                        new String[] { "MACEDONIA THE FORMER YUGOSLAV REPUBLIC OF", "YUGOSLAV", "YUGOSLAVIA" } }, //
+                { "SAINT HELENA ASCENSION AND TRISTAN DA CUNHA",
+                        new String[] { "ST HELENA ASCENSION AND TRISTAN DA CUNHA", "ASCENSION IS" } }, //
+                { "SAMOA", new String[] { "SAMOA", "WESTERN SAMOA" } }, //
+                { "UNITED KINGDOM",
+                        new String[] { "UNITED KINGDOM", "UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND",
+                                "UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND THE", "GREAT BRITAIN",
+                                "GREAT BRITAIN UK", "THE UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND",
+                                "NORTHERN IRELAND", "WALES", "UNITED KINGDOM GREAT BRITAIN", "UK", "U K" } }, //
+                { "UNITED STATES MINOR OUTLYING IS",
+                        new String[] { "UNITED STATES MINOR OUTLYING IS", "BAKER", "BAKER IS", "HOWLAND", "HOWLAND IS",
+                                "JARVIS", "JARVIS IS", "JOHNSTON ATOLL", "KINGMAN REEF", "MIDWAY", "MIDWAY IS",
+                                "NAVASSA", "NAVASSA IS", "PALMYRA ATOLL", "WAKE", "WAKE IS", "US MINOR OUTLYING IS",
+                                "U S MINOR IS", "US MINOR IS", "USA MINOR IS" } }, //
+                { "UNITED ARAB EMIRATES",
+                        new String[] { "UNITED ARAB EMIRATES", "UTD ARAB EMIR", "UAE", "UNITED EMIRATES", "U A E" } }, //
+                { "UGANDA", new String[] { "UGANDA", "UGANDA REPUBLIC", "UDA" } }, //
+                { "VIRGIN IS BRITISH",
+                        new String[] { "VIRGIN IS BRITISH", "BRITISH VIRGIN IS", "CHANNEL IS", "ANEGADA",
+                                "JOST VAN DYKE", "TORTOLA", "VIRGIN GORDA" } }, //
+                { "VIRGIN IS US",
+                        new String[] { "US VIRGIN IS", "U S VIRGIN IS", "VIRGIN IS US", "VIRGIN IS U S",
+                                "VIRGIN IS USA", "VIRGIN IS", "U S IS VIRGIN", "USA VIRGIN IS", "ST CROIX", "ST JOHN",
+                                "ST THOMAS" } }, //
+                { "VIET NAM", new String[] { "VIET NAM", "VIETNAM" } }, //
+                { "VENEZUELA",
+                        new String[] { "VENEZUELA", "VENEZUELA BOLIVARIAN REPUBLIC OF", "VENEZUELA BOLIVARIAN",
+                                "VENEZUELA BOLIVARIAN REPUBLIC" } }, //
+                { "WESTERN SAHARA", new String[] { "WESTERN SAHARA", "WEST SAHARA", "SAHARA" } }, //
+                { "ZIMBABWE", new String[] { "ZIMBABWE", "ZIMBABWE REPUBLIC" } }, //
         };
 
         Object[][] usStateSynonData = new Object[][] { //
@@ -219,7 +267,11 @@ public class LocationUtils {
     }
 
     public static String getStandardCountry(String country) {
+        country = country.replaceAll("\\d", "");
         String phrase = com.latticeengines.common.exposed.util.StringUtils.getStandardString(country);
+        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replaceAll(" ISLAND$", " IS")
+                .replaceAll(" ISLANDS$", " IS").replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ");
+        phrase = phrase.replace(" SAINT ", " ST ").replaceAll(" SAINT$", " ST").replaceAll("^SAINT ", "ST ");
         if (countrySynonMap.containsKey(phrase)) {
             return countrySynonMap.get(phrase);
         } else {

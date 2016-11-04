@@ -13,12 +13,15 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.actors.ActorTemplate;
+import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.DnBReturnCode;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
@@ -40,16 +43,19 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         msg.setCallerMicroEngineReference(null);
         MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
         matchKeyTuple.setCountryCode("US");
-        matchKeyTuple.setState("ARIZONA");
-        matchKeyTuple.setCity("GILBERT");
-        matchKeyTuple.setName("BENCHMARK BLINDS");
+        matchKeyTuple.setState("CALIFORNIA");
+        matchKeyTuple.setCity("FOSTER CITY");
+        matchKeyTuple.setName("LATTICE ENGINES");
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid);
         msg.setMatchTravelerContext(matchTravelerContext);
 
-        Object result = sendMessageToActor(msg, DnbLookupActor.class);
+        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);
         Assert.assertNotNull(result);
+        DnBMatchOutput data = (DnBMatchOutput) result.getResult();
+        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.Ok);
+        Assert.assertEquals(data.getDuns(), "028675958");
     }
 
     private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz) throws Exception {

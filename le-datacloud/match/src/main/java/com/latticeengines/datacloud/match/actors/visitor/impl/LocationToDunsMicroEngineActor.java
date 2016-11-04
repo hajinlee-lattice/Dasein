@@ -4,11 +4,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.exposed.traveler.TravelWarning;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
 import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.DnBReturnCode;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
@@ -23,10 +25,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     protected boolean accept(Traveler traveler) {
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
 
-        if ((matchKeyTuple.getCity() != null //
-                || matchKeyTuple.getState() != null) //
-                && matchKeyTuple.getCountryCode() != null//
-                && matchKeyTuple.getName() != null) {
+        if (matchKeyTuple.getCountryCode() != null && matchKeyTuple.getName() != null) {
             return true;
         }
 
@@ -40,6 +39,9 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             MatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
             DnBMatchOutput res = (DnBMatchOutput) response.getResult();
             matchKeyTuple.setDuns(res.getDuns());
+            if (res.getDnbCode() != DnBReturnCode.Ok) {
+                context.getTravelWarnings().add(new TravelWarning(res.getDnbCode().getMessage()));
+            }
             response.setResult(null);
         }
     }
