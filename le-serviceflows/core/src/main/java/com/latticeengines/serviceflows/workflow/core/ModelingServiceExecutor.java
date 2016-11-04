@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.PipelineFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -301,17 +300,9 @@ public class ModelingServiceExecutor {
     }
 
     private Algorithm getAlgorithm() {
-        Algorithm algo = AlgorithmFactory.createAlgorithm(builder.runTimeParams);
-        if (algo != null) {
-            PipelineFactory.configPipeline(algo, builder.runTimeParams);
-            return algo;
-        }
-
-        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setSampleName("all");
-
-        return randomForestAlgorithm;
+        Algorithm algorithm = AlgorithmFactory.createAlgorithm(builder.runTimeParams);
+        PipelineFactory.configPipeline(algorithm, builder.runTimeParams);
+        return algorithm;
     }
 
     protected JobStatus waitForAppId(String appId) throws Exception {

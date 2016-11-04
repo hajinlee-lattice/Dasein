@@ -38,6 +38,8 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
 
         if (parameters.doSort) {
+            log.info("Sorting event table.");
+            setEnforceGlobalOrdering(true);
             last = last.sort("InternalId", true);
         }
 
