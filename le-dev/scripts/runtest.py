@@ -59,4 +59,6 @@ if __name__ == "__main__":
     print 'Executing [with common opts added]: ' + ' '.join(['mvn'] + testOpts(args))
     my_env = os.environ
     my_env["MAVEN_OPTS"] = "-Xmx1g -XX:MaxPermSize=1g"
+    if args.command == "jetty:run":
+        my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
     subprocess.call(['mvn'] + propDirsOpts() + commonOpts() + testOpts(args), env=my_env)

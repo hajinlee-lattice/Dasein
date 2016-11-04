@@ -1,12 +1,11 @@
-package com.latticeengines.datacloud.match.exposed.service;
+package com.latticeengines.datacloud.match.service;
 
 import java.util.List;
 
+import com.latticeengines.datacloud.match.exposed.service.HasDataCloudVersion;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 
 public interface DbHelper extends HasDataCloudVersion {
-
-    void populateMatchHints(MatchContext context);
 
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning);
 

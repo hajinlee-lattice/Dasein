@@ -14,6 +14,7 @@ class InternalOutputRecord extends OutputRecord {
     private Boolean isPublicDomain = false;
     private String parsedDuns;
     private NameLocation parsedNameLocation;
+    private String parsedEmail;
     private Map<String, Map<String, Object>> resultsInPartition = new HashMap<>();
     private Map<String, Object> queryResult = new HashMap<>();
     private List<Boolean> columnMatched;
@@ -53,6 +54,14 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setParsedNameLocation(NameLocation parsedNameLocation) {
         this.parsedNameLocation = parsedNameLocation;
+    }
+
+    public String getParsedEmail() {
+        return parsedEmail;
+    }
+
+    public void setParsedEmail(String parsedEmail) {
+        this.parsedEmail = parsedEmail;
     }
 
     public Map<String, Map<String, Object>> getResultsInPartition() {

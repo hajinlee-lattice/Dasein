@@ -21,6 +21,7 @@ public class MatchContext implements Fact, Dimension {
 
     private Set<String> domains;
     private Set<NameLocation> nameLocations;
+    private Set<String> latticeAccountIds;
     private ColumnSelection columnSelection;
     private MatchInput input;
     private MatchOutput output;

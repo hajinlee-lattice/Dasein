@@ -27,9 +27,6 @@ public class OutputRecord {
     @JsonProperty("PreMatchDUNS")
     private String preMatchDuns;
 
-    @JsonProperty("PreMatchLatticeAccountId")
-    private String preMatchLatticeAccountId;
-
     @JsonProperty("PreMatchEmail")
     private String preMatchEmail;
 
@@ -85,6 +82,14 @@ public class OutputRecord {
 
     public void setPreMatchDuns(String preMatchDuns) {
         this.preMatchDuns = preMatchDuns;
+    }
+
+    public String getPreMatchEmail() {
+        return preMatchEmail;
+    }
+
+    public void setPreMatchEmail(String preMatchEmail) {
+        this.preMatchEmail = preMatchEmail;
     }
 
     public List<Object> getOutput() {

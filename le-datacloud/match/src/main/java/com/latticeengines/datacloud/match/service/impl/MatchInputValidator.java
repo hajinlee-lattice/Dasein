@@ -113,11 +113,8 @@ public class MatchInputValidator {
 
     private static void validateColumnSelection(MatchInput input) {
         if (Predefined.ID.equals(input.getPredefinedSelection())) {
-            if (!MatchUtils.isValidForAccountMasterBasedMatch(input.getDataCloudVersion())) {
-                throw new IllegalArgumentException(
-                        "LatticeAccountId match is only supported for AccountMaster based matches.");
-            }
             input.setLatticeAccountIdOnly(true);
+            return;
         }
         if (input.getPredefinedSelection() == null && input.getCustomSelection() == null
                 && input.getUnionSelection() == null) {

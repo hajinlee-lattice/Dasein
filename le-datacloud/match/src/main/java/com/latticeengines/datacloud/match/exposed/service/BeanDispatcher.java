@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 
 public interface BeanDispatcher {

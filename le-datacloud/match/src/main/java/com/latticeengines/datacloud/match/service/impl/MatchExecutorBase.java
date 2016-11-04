@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
@@ -174,6 +174,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatched(internalRecord.isMatched());
             outputRecord.setPreMatchDomain(internalRecord.getParsedDomain());
             outputRecord.setPreMatchNameLocation(internalRecord.getParsedNameLocation());
+            outputRecord.setPreMatchDuns(internalRecord.getParsedDuns());
+            outputRecord.setPreMatchEmail(internalRecord.getParsedEmail());
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setMatchLog(internalRecord.getMatchLog());
             outputRecords.add(outputRecord);

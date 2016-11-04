@@ -19,8 +19,8 @@ import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.service.CountryCodeService;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -114,9 +114,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         context.setInternalResults(records);
         context.setDomains(domainSet);
         context.setNameLocations(nameLocationSet);
-
-        DbHelper dbHelper = beanDispatcher.getDbHelper(input.getDataCloudVersion());
-        dbHelper.populateMatchHints(context);
 
         return context;
     }

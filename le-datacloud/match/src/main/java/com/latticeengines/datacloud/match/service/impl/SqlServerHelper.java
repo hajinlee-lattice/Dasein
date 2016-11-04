@@ -30,15 +30,14 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.exposed.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -116,10 +115,6 @@ public class SqlServerHelper implements DbHelper {
     }
 
     @Override
-    public void populateMatchHints(MatchContext context) {
-    }
-
-    @Override
     public MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
         if (!skipExecutionPlanning) {
             ColumnSelection columnSelection = matchContext.getColumnSelection();
@@ -168,8 +163,20 @@ public class SqlServerHelper implements DbHelper {
             }
         }
 
-        String sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
-                context.getNameLocations());
+        String sql;
+        if (Boolean.TRUE.equals(context.getInput().getFetchOnly())) {
+            Set<String> latticeAccountIds = new HashSet<>();
+            for (InternalOutputRecord record: context.getInternalResults()) {
+                if (StringUtils.isNotEmpty(record.getLatticeAccountId())) {
+                    latticeAccountIds.add(record.getLatticeAccountId());
+                }
+            }
+            sql = constructSqlQueryForFetching(involvedPartitions, targetColumns, latticeAccountIds);
+        } else {
+            sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
+                    context.getNameLocations());
+        }
+
         List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
                 MAX_RETRIES);
         for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
@@ -279,6 +286,16 @@ public class SqlServerHelper implements DbHelper {
         return sql;
     }
 
+    private String constructSqlQueryForFetching(Set<String> involvedPartitions, Set<String> targetColumns,
+            Collection<String> latticeAccountIds) {
+        String sql = String.format("SELECT p1.[%s]", MatchConstants.LID_FIELD);
+        sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
+        sql += "\nFROM " + fromJoinClause(involvedPartitions);
+        sql += "\nWHERE p1.[" + MatchConstants.LID_FIELD + "] IN ('" + StringUtils.join(latticeAccountIds, "', '")
+                + "')\n";
+        return sql;
+    }
+
     private String fromJoinClause(Set<String> partitions) {
         String clause = "[" + MatchConstants.CACHE_TABLE + "] p1 WITH(NOLOCK)";
         partitions.remove(MatchConstants.CACHE_TABLE);
@@ -293,7 +310,7 @@ public class SqlServerHelper implements DbHelper {
         return clause;
     }
 
-    public List<Map<String, Object>> query(JdbcTemplate jdbcTemplate, String sql) {
+    private List<Map<String, Object>> query(JdbcTemplate jdbcTemplate, String sql) {
         Long beforeQuerying = System.currentTimeMillis();
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
         String url = "";
@@ -309,19 +326,8 @@ public class SqlServerHelper implements DbHelper {
         return results;
     }
 
-    @VisibleForTesting
-    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
-            Map<String, List<Map<String, Object>>> resultsMap) {
-        for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
-            String sourceName = result.getKey();
-            distributeQueryResults(records, sourceName, result.getValue());
-        }
-        return records;
-    }
-
-    @VisibleForTesting
-    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
-            List<Map<String, Object>> results) {
+    private List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
+                                                         List<Map<String, Object>> results) {
         distributeQueryResults(records, results);
         return records;
     }
@@ -339,13 +345,16 @@ public class SqlServerHelper implements DbHelper {
             if (record.isFailed()) {
                 continue;
             }
-            // try using domain first
             boolean matched = false;
-            String parsedDomain = record.getParsedDomain();
-            if (StringUtils.isNotEmpty(parsedDomain)) {
+
+            // try lattice account id first
+            String latticeAccountId = record.getLatticeAccountId();
+            if (StringUtils.isNotEmpty(latticeAccountId)) {
                 for (Map<String, Object> row : rows) {
-                    if (row.containsKey(MatchConstants.DOMAIN_FIELD)
-                            && parsedDomain.equals(row.get(MatchConstants.DOMAIN_FIELD))) {
+                    Object rawId = row.get(MatchConstants.LID_FIELD);
+                    String strId = String.valueOf(rawId);
+                    if (row.containsKey(MatchConstants.LID_FIELD) && latticeAccountId.equals(strId)) {
+                        row.put(MatchConstants.LID_FIELD, strId);
                         if (singlePartitionMode) {
                             record.setQueryResult(row);
                         } else {
@@ -357,6 +366,26 @@ public class SqlServerHelper implements DbHelper {
                 }
             }
 
+            // then domain
+            if (!matched) {
+                String parsedDomain = record.getParsedDomain();
+                if (StringUtils.isNotEmpty(parsedDomain)) {
+                    for (Map<String, Object> row : rows) {
+                        if (row.containsKey(MatchConstants.DOMAIN_FIELD)
+                                && parsedDomain.equals(row.get(MatchConstants.DOMAIN_FIELD))) {
+                            if (singlePartitionMode) {
+                                record.setQueryResult(row);
+                            } else {
+                                record.getResultsInPartition().put(sourceName, row);
+                            }
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // finally, name + location
             if (!matched) {
                 NameLocation nameLocation = record.getParsedNameLocation();
                 if (nameLocation != null) {
@@ -597,7 +626,7 @@ public class SqlServerHelper implements DbHelper {
     }
 
     private List<MatchContext> convertResultMapToList(List<String> rootUids,
-                                                      Map<String, MatchContext> intermediateResults) {
+            Map<String, MatchContext> intermediateResults) {
         List<MatchContext> results = new ArrayList<>(rootUids.size());
         for (String rootUid : rootUids) {
             results.add(intermediateResults.get(rootUid));
