@@ -410,6 +410,24 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             RecordScoreResponse recordResp = null;
 
             try {
+                if (responseMap.get(recordId) == null) {
+                    recordResp = new RecordScoreResponse();
+                    responseMap.put(recordId, recordResp);
+                    responseList.add(recordResp);
+                    recordResp.setLatticeId(latticeId);
+
+                    recordResp.setId(recordId);
+
+                    recordResp.setTimestamp(tuple.getRequstTimestamp());
+
+                    scores = new ArrayList<>();
+                    recordResp.setScores(scores);
+                    recordResp.setWarnings(getWarnings(recordId));
+                } else {
+                    recordResp = responseMap.get(recordId);
+                    scores = recordResp.getScores();
+                }
+                
                 if (tuple.getException() == null) {
                     transformedRecord = unorderedTransformedRecords.get(tuple);
 
@@ -429,23 +447,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     }
                 }
 
-                if (responseMap.get(recordId) == null) {
-                    recordResp = new RecordScoreResponse();
-                    responseMap.put(recordId, recordResp);
-                    responseList.add(recordResp);
-                    recordResp.setLatticeId(latticeId);
 
-                    recordResp.setId(recordId);
-
-                    recordResp.setTimestamp(tuple.getRequstTimestamp());
-
-                    scores = new ArrayList<>();
-                    recordResp.setScores(scores);
-                    recordResp.setWarnings(getWarnings(recordId));
-                } else {
-                    recordResp = responseMap.get(recordId);
-                    scores = recordResp.getScores();
-                }
                 if (recordResp != null && tuple.getException() == null
                         && recordResp.getEnrichmentAttributeValues() == null
                         && tuple.getRecord().isPerformEnrichment()) {
