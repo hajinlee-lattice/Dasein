@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.framework;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
+import com.latticeengines.actors.exposed.TimerMessage;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
@@ -26,6 +28,7 @@ import com.typesafe.config.ConfigFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import scala.concurrent.duration.FiniteDuration;
 
 @Component("matchActorSystem")
 public class MatchActorSystem {
@@ -61,6 +64,17 @@ public class MatchActorSystem {
         log.info("Shutting down match actor system");
         system.shutdown();
         log.info("Completed shutdown of match actor system");
+    }
+
+    public void registerTimer(Class<? extends ActorTemplate> actorClazz, //
+            int timerFrequency, TimeUnit timeUnit, TimerMessage timerMessage) {
+        system.scheduler().schedule(//
+                FiniteDuration.create(0, TimeUnit.MILLISECONDS), //
+                FiniteDuration.create(timerFrequency, timeUnit), //
+                getActorRef(actorClazz), //
+                timerMessage, //
+                system.dispatcher(), //
+                null);
     }
 
     public <T extends ActorTemplate> ActorRef getActorRef(Class<T> actorClz) {

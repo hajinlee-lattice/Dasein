@@ -52,15 +52,4 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
             traveler.setOriginalLocation(originalSender.path().toSerializationFormat());
         }
     }
-
-    // @Override
-    // protected void handleResult(Traveler traveler, ActorRef originalSender) {
-    // String originalLocation = traveler.getOriginalLocation();
-    //
-    // ActorRef nextActorRef = getContext().actorFor(originalLocation);
-    //
-    // log.debug("Send message to " + nextActorRef);
-    //
-    // sendResult(nextActorRef, traveler.getResult());
-    // }
 }

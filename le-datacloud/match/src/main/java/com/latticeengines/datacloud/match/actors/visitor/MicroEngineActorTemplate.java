@@ -21,7 +21,8 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     protected abstract void process(Response response);
 
     @Autowired
-    private MatchActorSystem matchActorSystem;
+    @Qualifier("matchActorSystem")
+    protected MatchActorSystem matchActorSystem;
 
     @Autowired
     @Qualifier("matchGuideBook")
