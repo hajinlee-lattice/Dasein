@@ -547,8 +547,9 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $state) {
+                    controller: function($scope, $stateParams, $state) {
                         $scope.state = $state.current.name;
+                        $scope.id = $stateParams.id;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -590,10 +591,10 @@ angular
             }
         })
         .state('home.marketosettings.models', {
-            url: '/models',
+            url: '/models/{id}',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings'
+                pageTitle: 'Marketo Profiles'
             },
             views: { 
                 "summary@": {
@@ -602,8 +603,9 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
-                    controller: function($scope, $state) {
+                    controller: function($scope, $stateParams, $state) {
                         $scope.state = $state.current.name;
+                        $scope.id = $stateParams.id;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },

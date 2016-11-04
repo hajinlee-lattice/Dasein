@@ -1,13 +1,13 @@
 <div class="summary blue-fire">
 	<div class="nav">
 		<div class="button angled-button">
-	        <a ui-sref="home.marketosettings.profiles"><span>Profiles</span></a>
+	        <a ui-sref="home.marketosettings.apikey"><span>Profiles</span></a>
 	    </div>
-		<div class="button angled-button" ui-sref-active-eq="active">
-            <a ui-sref="home.marketosettings.enrichment"><span>Enrichment</span></a>
+		<div class="button angled-button" ui-sref-active="active">
+            <a ui-sref="home.marketosettings.enrichment({id:id})"><span>Enrichment</span></a>
 	    </div>
-		<div class="button angled-button" ui-sref-active-eq="active">
-            <a ui-sref="home.marketosettings.models"><span>Scoring</span></a>
+		<div class="button angled-button" ui-sref-active="active">
+            <a ui-sref="home.marketosettings.models({id:id})"><span>Scoring</span></a>
 	    </div>
 	</div>
 </div>
