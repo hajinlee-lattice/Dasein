@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.modeling.factory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,32 +25,48 @@ public class AlgorithmFactory extends ModelFactory {
     public static final String ALGORITHM_NAME_RF = "RF";
     public static final String ALGORITHM_NAME_LR = "LR";
     public static final String ALGORITHM_NAME_DT = "DT";
+    public static final String RF_SEED_KEY = "model.algorithm.randomforest.seed";
 
     private static final String SAMPLE_NAME = "all";
 
     public static Algorithm createAlgorithm(Map<String, String> runTimeParams) {
-
         log.info("Check and Create new algorithm.");
 
         com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo = getModelAlgorithm(runTimeParams);
-        if (modelAlgo == null) {
-            return null;
-        }
         Algorithm algorithm = null;
-        switch (modelAlgo.getName()) {
-        case ALGORITHM_NAME_RF:
-            algorithm = createRF(modelAlgo);
-            break;
-        case ALGORITHM_NAME_LR:
-            algorithm = createLR(modelAlgo);
-            break;
-        case ALGORITHM_NAME_DT:
-            algorithm = createDT(modelAlgo);
-            break;
+        if (modelAlgo != null) {
+            switch (modelAlgo.getName()) {
+            case ALGORITHM_NAME_RF:
+                algorithm = createRF(modelAlgo);
+                break;
+            case ALGORITHM_NAME_LR:
+                algorithm = createLR(modelAlgo);
+                break;
+            case ALGORITHM_NAME_DT:
+                algorithm = createDT(modelAlgo);
+                break;
+            }
         }
-        log.info("Successfully created the Algorithm=" + algorithm.getName() + " algorithm properties="
+        algorithm = getDefaultAlgorithm(runTimeParams);
+        log.info("Successfully created Algorithm=" + algorithm.getName() + " algorithm properties="
                 + algorithm.getAlgorithmProperties());
         return algorithm;
+    }
+    
+    private static Algorithm getDefaultAlgorithm(Map<String, String> runTimeParams) {
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(0);
+        randomForestAlgorithm.setSampleName("all");
+        
+        Properties props = randomForestAlgorithm.getAlgorithmProps();
+        String seed = runTimeParams.get(RF_SEED_KEY);
+        
+        if (seed != null) {
+            props.put("random_state", seed);
+            randomForestAlgorithm.setAlgorithmProps(props);
+        }
+
+        return randomForestAlgorithm;
     }
 
     private static com.latticeengines.domain.exposed.modelquality.Algorithm getModelAlgorithm(
@@ -79,15 +96,15 @@ public class AlgorithmFactory extends ModelFactory {
         configAlgorithm(algo, modelAlgo);
         return algo;
     }
-    
+
     private static AlgorithmPropertyDef getRandomSeedPropertyDef() {
         AlgorithmPropertyDef def = new AlgorithmPropertyDef();
         def.setName("random_state");
         AlgorithmPropertyValue value = new AlgorithmPropertyValue();
         value.setValue("123456");
-        
+
         def.addAlgorithmPropertyValue(value);
-        
+
         return def;
     }
 

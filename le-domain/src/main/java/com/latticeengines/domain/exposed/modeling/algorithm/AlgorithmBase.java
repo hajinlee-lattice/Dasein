@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.modeling.algorithm;
 
+import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.Basic;
@@ -94,6 +95,7 @@ public class AlgorithmBase implements Algorithm {
         return script;
     }
 
+    @Override
     @JsonProperty("script")
     public void setScript(String script) {
         this.script = script;
@@ -125,6 +127,16 @@ public class AlgorithmBase implements Algorithm {
     @JsonProperty("algorithm_properties")
     public void setAlgorithmProperties(String algorithmProperties) {
         this.algorithmProperties = algorithmProperties;
+    }
+    
+    @Override
+    @JsonIgnore
+    public void setAlgorithmProps(Properties props) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" ");
+        }
+        setAlgorithmProperties(sb.toString().trim());
     }
 
     @Override
@@ -167,34 +179,40 @@ public class AlgorithmBase implements Algorithm {
         return StringTokenUtils.stringToProperty(getContainerProperties());
     }
 
+    @Override
     @JsonProperty("pipeline_script")
     @Column(name = "PIPELINE_SCRIPT", nullable = true)
     public String getPipelineScript() {
         return pipelineScript;
     }
 
+    @Override
     @JsonProperty("pipeline_script")
     public void setPipelineScript(String pipelineScript) {
         this.pipelineScript = pipelineScript;
     }
 
+    @Override
     @JsonProperty("pipeline_lib_script")
     @Column(name = "PIPELINE_LIB_SCRIPT", nullable = true)
     public String getPipelineLibScript() {
         return pipelineLibScript;
     }
 
+    @Override
     @JsonProperty("pipeline_lib_script")
     public void setPipelineLibScript(String pipelineLibScript) {
         this.pipelineLibScript = pipelineLibScript;
     }
 
+    @Override
     @Transient
     @JsonIgnore
     public String getMapperSize() {
         return this.mapperSize;
     }
 
+    @Override
     @JsonIgnore
     public void setMapperSize(String mapperSize) {
         this.mapperSize = mapperSize;

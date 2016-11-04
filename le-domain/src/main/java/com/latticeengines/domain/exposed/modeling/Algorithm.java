@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 @Embeddable
 public interface Algorithm extends HasName, HasPid {
 
+    @Override
     String getName();
 
     String getScript();
@@ -39,7 +40,7 @@ public interface Algorithm extends HasName, HasPid {
     String getAlgorithmProperties();
     
     void setAlgorithmProperties(String algorithmProperties);
-
+    
     Properties getAlgorithmProps();
 
     Properties getContainerProps();
@@ -81,4 +82,8 @@ public interface Algorithm extends HasName, HasPid {
     void resetAlgorithmProperties();
     
     boolean hasDataDiagnostics();
+
+    void setAlgorithmProps(Properties props);
+
+    
 }
