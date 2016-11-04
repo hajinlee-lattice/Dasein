@@ -47,7 +47,7 @@ public class SamplingFactory extends ModelFactory {
                 log.warn("Failed to config sampling!", ex);
             }
             log.info("Successfully configured the Sampling");
-        } else {
+        } else if (runTimeParams != null) {
             String seed = runTimeParams.get(MODEL_SAMPLING_SEED_KEY);
             if (seed != null) {
                 samplingConfig.setRandomSeed(Long.valueOf(seed));
