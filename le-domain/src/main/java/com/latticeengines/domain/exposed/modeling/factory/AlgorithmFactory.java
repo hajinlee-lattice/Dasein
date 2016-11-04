@@ -59,7 +59,7 @@ public class AlgorithmFactory extends ModelFactory {
         randomForestAlgorithm.setSampleName("all");
         
         Properties props = randomForestAlgorithm.getAlgorithmProps();
-        String seed = runTimeParams.get(RF_SEED_KEY);
+        String seed = runTimeParams == null ? null : runTimeParams.get(RF_SEED_KEY);
         
         if (seed != null) {
             props.put("random_state", seed);
