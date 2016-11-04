@@ -54,8 +54,10 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);
         Assert.assertNotNull(result);
         DnBMatchOutput data = (DnBMatchOutput) result.getResult();
-        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.Ok);
+        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
         Assert.assertEquals(data.getDuns(), "028675958");
+        Assert.assertEquals((int) data.getConfidenceCode(), 7);
+        log.info(data.getMatchGrade());
     }
 
     private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz) throws Exception {

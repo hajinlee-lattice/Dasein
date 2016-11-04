@@ -40,6 +40,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         input.setCity(city);
 
         DnBMatchOutput res = dnBRealTimeLookupService.realtimeEntityLookup(input);
+        log.info(res.getDuns() + " " + res.getConfidenceCode() + " " + res.getMatchGrade().getRawCode() + " "
+                + res.getDnbCode().getMessage());
         Assert.assertEquals(res.getDnbCode().getMessage(), message);
     }
 
@@ -87,10 +89,10 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     @DataProvider(name = "inputData")
     public static Object[][] getInputData() {
-        return new Object[][] { { "Benchmark Blinds", "Gilbert", "Arizona", "US", DnBReturnCode.Ok.getMessage() },
-                { "\"El Camino Machine & Welding, LLC\"", "Salinas", "California", "US",
-                        DnBReturnCode.Ok.getMessage() },
-                { "Cornerstone Alliance Church", "Canon City", "Colorado", "US", DnBReturnCode.Ok.getMessage() },
-                { "  Gorman Manufacturing  ", "", "", "  US  ", DnBReturnCode.Ok.getMessage() } };
+        return new Object[][] { { "Benchmark Blinds", "Gilbert", "Arizona", "US", DnBReturnCode.OK.getMessage() },
+                { "El Camino Machine Welding LLC", "Salinas", "California", "US",
+                        DnBReturnCode.OK.getMessage() },
+                { "Cornerstone Alliance Church", "Canon City", "Colorado", "US", DnBReturnCode.OK.getMessage() },
+                { "  Gorman Manufacturing  ", "", "", "  US  ", DnBReturnCode.DISCARD.getMessage() } };
     }
 }

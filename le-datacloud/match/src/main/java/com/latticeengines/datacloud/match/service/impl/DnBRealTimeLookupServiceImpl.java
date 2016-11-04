@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
+import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
@@ -28,6 +29,9 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
 
+    @Autowired
+    private DnBMatchResultValidator dnbMatchResultValidator;
+
     @Value("${datacloud.dnb.realtime.url.prefix}")
     private String realTimeUrlPrefix;
 
@@ -36,6 +40,12 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
 
     @Value("${datacloud.dnb.realtime.duns.jsonpath}")
     private String dunsJsonPath;
+
+    @Value("${datacloud.dnb.realtime.confidencecode.jsonpath}")
+    private String confidenceCodeJsonPath;
+
+    @Value("${datacloud.dnb.realtime.matchgrade.jsonpath}")
+    private String matchGradeJsonPath;
 
     @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
     private String resultIdJsonPath;
@@ -98,9 +108,9 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
 
     private DnBReturnCode parseErrorBody(String body) {
         DnBReturnCode errCode;
-        String dnBErrorCode = retrieveValueFromResponse(resultIdJsonPath, body);
-        log.info(body);
-        log.info(dnBErrorCode);
+        String dnBErrorCode = (String) retrieveValueFromResponse(resultIdJsonPath, body);
+        // log.info(body);
+        // log.info(dnBErrorCode);
         switch (dnBErrorCode) {
         case "SC001":
         case "SC003":
@@ -130,8 +140,11 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
             res.setDnbCode(DnBReturnCode.Unknown);
             return;
         }
-        res.setDuns(retrieveValueFromResponse(dunsJsonPath, response.getBody()));
-        res.setDnbCode(DnBReturnCode.Ok);
+        res.setDuns((String) retrieveValueFromResponse(dunsJsonPath, response.getBody()));
+        res.setConfidenceCode((Integer) retrieveValueFromResponse(confidenceCodeJsonPath, response.getBody()));
+        res.setMatchGrade((String) retrieveValueFromResponse(matchGradeJsonPath, response.getBody()));
+        res.setDnbCode(DnBReturnCode.OK);
+        dnbMatchResultValidator.validate(res);
     }
 
     private String constructUrl(MatchKeyTuple input) {
@@ -184,7 +197,7 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         return res;
     }
 
-    private String retrieveValueFromResponse(String jsonPath, String body) {
+    private Object retrieveValueFromResponse(String jsonPath, String body) {
         return JsonPath.parse(body).read(jsonPath);
     }
 }

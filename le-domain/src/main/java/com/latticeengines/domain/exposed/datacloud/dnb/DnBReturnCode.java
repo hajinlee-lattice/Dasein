@@ -1,7 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
 public enum DnBReturnCode {
-    Ok("Ok"),
+    OK("Ok"), 
+    DISCARD("Discard"),
     TimeOut("Timeout"),
     InvalidInput("Invalid Input"),
     NoResult("No Result"),

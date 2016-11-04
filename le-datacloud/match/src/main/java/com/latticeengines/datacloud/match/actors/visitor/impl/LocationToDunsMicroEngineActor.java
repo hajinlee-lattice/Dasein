@@ -49,7 +49,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             MatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
             DnBMatchOutput res = (DnBMatchOutput) response.getResult();
             matchKeyTuple.setDuns(res.getDuns());
-            if (res.getDnbCode() != DnBReturnCode.Ok) {
+            if (res.getDnbCode() != DnBReturnCode.OK) {
                 context.getTravelWarnings().add(new TravelWarning(res.getDnbCode().getMessage()));
             }
             response.setResult(null);
