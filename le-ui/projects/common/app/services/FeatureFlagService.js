@@ -13,6 +13,17 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
     this.FlagIsEnabled = GetFlag;
 
+    this.UserIs = function(levels){
+        var sessionDoc = BrowserStorageUtility.getClientSession(),
+            levels = levels || '',
+            levelsAr = levels.split(',');
+
+        if(levelsAr.includes(sessionDoc.AccessLevel)) {
+            return true;
+        }
+        return false;
+    }
+
     // =======================================================
     // flag schema/hash ==> must in sync with backend schema
     // =======================================================
