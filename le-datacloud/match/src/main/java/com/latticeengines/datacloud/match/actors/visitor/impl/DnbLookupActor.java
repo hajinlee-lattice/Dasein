@@ -23,7 +23,7 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     @PostConstruct
     public void postConstruct() {
         TimerMessage timerMessage = new TimerMessage(DnbLookupActor.class);
-        matchActorSystem.registerTimer(DnbLookupActor.class, 1, TimeUnit.SECONDS, timerMessage);
+        matchActorSystem.registerTimer(DnbLookupActor.class, 5, TimeUnit.MINUTES, timerMessage);
         log.info("Registered for timer call");
     }
 
