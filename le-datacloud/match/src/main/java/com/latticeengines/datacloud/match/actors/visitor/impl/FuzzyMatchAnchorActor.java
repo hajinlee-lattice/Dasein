@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -17,6 +21,12 @@ import akka.actor.ActorRef;
 @Component("fuzzyMatchAnchorActor")
 @Scope("prototype")
 public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
+    private static final Log log = LogFactory.getLog(FuzzyMatchAnchorActor.class);
+
+    @PostConstruct
+    public void postConstruct() {
+        log.info("Started actor: " + self());
+    }
 
     @Autowired
     @Qualifier("matchGuideBook")

@@ -1,5 +1,9 @@
 package com.latticeengines.actors.exposed;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -11,6 +15,12 @@ import com.latticeengines.monitor.exposed.metric.service.MetricService;
 @Component("metricActor")
 @Scope("prototype")
 public class MetricActor extends ActorTemplate {
+    private static final Log log = LogFactory.getLog(MetricActor.class);
+
+    @PostConstruct
+    public void postConstruct() {
+        log.info("Started actor: " + self());
+    }
 
     @Autowired
     private MetricService metricService;
