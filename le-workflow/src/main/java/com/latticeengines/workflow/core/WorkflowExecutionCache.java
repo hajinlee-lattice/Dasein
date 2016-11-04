@@ -99,6 +99,7 @@ public class WorkflowExecutionCache {
             nonDetailedJob.setStartTimestamp(job.getStartTimestamp());
             nonDetailedJob.setJobType(job.getJobType());
             nonDetailedJob.setInputs(job.getInputs());
+            nonDetailedJob.setOutputs(job.getOutputs());
 
             nonDetailedJobs.add(nonDetailedJob);
         }
