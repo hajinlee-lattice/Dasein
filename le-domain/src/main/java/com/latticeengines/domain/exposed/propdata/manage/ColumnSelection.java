@@ -118,7 +118,7 @@ public class ColumnSelection {
         Enrichment("Enrichment"), //
         DerivedColumns("DerivedColumns"), //
         Model("Model"), //
-        DNB("DNB"), //
+        ID("ID"), //
         RTS("RTS");
 
         private final String name;
@@ -147,7 +147,7 @@ public class ColumnSelection {
             return getName() + "_" + version + ".json";
         }
 
-        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, DNB);
+        public static EnumSet<Predefined> supportedSelections = EnumSet.of(Model, DerivedColumns, RTS, ID);
 
         public static Predefined getLegacyDefaultSelection() {
             return DerivedColumns;

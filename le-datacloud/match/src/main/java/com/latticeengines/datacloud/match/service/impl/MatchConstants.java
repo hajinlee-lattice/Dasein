@@ -12,7 +12,7 @@ public final class MatchConstants {
     static final String COUNTRY_FIELD = "Country";
     static final String STATE_FIELD = "State";
     static final String CITY_FIELD = "City";
-    static final String LID_FIELD = "LatticeAccountID";
+    static final String LID_FIELD = "LatticeAccountId";
 
     static final String MODEL = Predefined.Model.getName();
     static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();

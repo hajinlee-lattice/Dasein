@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("accountMasterColumnService")
 public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {
@@ -32,7 +32,7 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+        return MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override

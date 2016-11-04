@@ -23,7 +23,6 @@ import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
@@ -73,7 +72,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer[] determineBlockSizes(Long count) {
-        if (MatchTypeUtil.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())
+        if (MatchUtils.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())
                 && useFuzzyMatch) {
             return new Integer[] { count.intValue() };
         } else {

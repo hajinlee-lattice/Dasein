@@ -45,7 +45,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
-            ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input.getDataCloudVersion());
+            ColumnSelectionService columnSelectionService = beanDispatcher
+                    .getColumnSelectionService(input.getDataCloudVersion());
             input.setPredefinedVersion(validateOrAssignPredefinedVersion(columnSelectionService,
                     input.getPredefinedSelection(), input.getPredefinedVersion()));
         }
@@ -53,7 +54,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Trace
     public ColumnSelection parseColumnSelection(MatchInput input) {
-        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input.getDataCloudVersion());
+        ColumnSelectionService columnSelectionService = beanDispatcher
+                .getColumnSelectionService(input.getDataCloudVersion());
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection());
         } else if (input.getPredefinedSelection() != null) {
@@ -64,7 +66,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     @MatchStep(threshold = 100L)
-    public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService, UnionSelection unionSelection) {
+    public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService,
+            UnionSelection unionSelection) {
         List<ColumnSelection> selections = new ArrayList<>();
         for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
             Predefined predefined = entry.getKey();
@@ -121,7 +124,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchContext;
     }
 
-    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection, List<ColumnMetadata> metadatas) {
+    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection,
+            List<ColumnMetadata> metadatas) {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
@@ -165,7 +169,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return null;
         }
 
-        parseRecordForNameLocationAndDuns(inputRecord, keyPositionMap, nameLocationSet, record);
+        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
+        parseRecordForDuns(inputRecord, keyPositionMap, record);
+        parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
 
         return record;
     }
@@ -201,13 +207,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
             }
         }
-    }
-
-    private void parseRecordForNameLocationAndDuns(List<Object> inputRecord,
-            Map<MatchKey, List<Integer>> keyPositionMap, Set<NameLocation> nameLocationSet,
-            InternalOutputRecord record) {
-        parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
-        parseRecordForDuns(inputRecord, keyPositionMap, record);
     }
 
     private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
@@ -280,6 +279,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             } catch (Exception e) {
                 record.setFailed(true);
                 record.addErrorMessage("Error when cleanup duns field: " + e.getMessage());
+            }
+        }
+    }
+
+    private void parseRecordForLatticeAccountId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+                                    InternalOutputRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.LatticeAccountID)) {
+            List<Integer> idPosList = keyPositionMap.get(MatchKey.LatticeAccountID);
+            try {
+                String cleanId = null;
+                for (Integer idPos : idPosList) {
+                    String originalId = String.valueOf(inputRecord.get(idPos));
+                    if (StringUtils.isNotEmpty(originalId)) {
+                        cleanId = originalId;
+                        break;
+                    }
+                }
+                record.setLatticeAccountId(cleanId);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessage("Error when cleanup lattice account id field: " + e.getMessage());
             }
         }
     }

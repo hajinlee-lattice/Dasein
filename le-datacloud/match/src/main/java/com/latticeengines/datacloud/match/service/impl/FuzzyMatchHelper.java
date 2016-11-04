@@ -18,13 +18,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
 @Component("fuzzyMatchHelper")
@@ -47,7 +47,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public boolean accept(String version) {
-        return useFuzzyMatch && MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+        return useFuzzyMatch && MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override
@@ -66,11 +66,15 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public MatchContext fetch(MatchContext context) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();
-        try {
-            fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                    dataCloudVersion);
-        } catch (Exception e) {
-            log.error("Failed to run fuzzy match.", e);
+        
+        boolean fetchOnly = Boolean.TRUE.equals(context.getInput().getFetchOnly());
+        if (!fetchOnly) {
+            try {
+                fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
+                        dataCloudVersion);
+            } catch (Exception e) {
+                log.error("Failed to run fuzzy match.", e);
+            }
         }
 
         List<String> ids = new ArrayList<>();
@@ -78,17 +82,20 @@ public class FuzzyMatchHelper implements DbHelper {
             ids.add(record.getLatticeAccountId());
         }
 
-        Long startTime = System.currentTimeMillis();
-        List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
+        boolean latticeAccountIdOnly = context.getInput().isLatticeAccountIdOnly();
+        if (!latticeAccountIdOnly) {
+            Long startTime = System.currentTimeMillis();
+            List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
 
-        for (int i = 0; i < ids.size(); i++) {
-            InternalOutputRecord record = context.getInternalResults().get(i);
-            LatticeAccount account = accounts.get(i);
-            record.setLatticeAccount(account);
+            for (int i = 0; i < ids.size(); i++) {
+                InternalOutputRecord record = context.getInternalResults().get(i);
+                LatticeAccount account = accounts.get(i);
+                record.setLatticeAccount(account);
+            }
+
+            log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
+                    System.currentTimeMillis() - startTime, accounts.size()));
         }
-
-        log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
-                System.currentTimeMillis() - startTime, accounts.size()));
         return context;
     }
 
@@ -116,9 +123,12 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        for (InternalOutputRecord record : context.getInternalResults()) {
-            updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
-                    context.getInput().getDataCloudVersion());
+        boolean latticeAccountIdOnly = context.getInput().isLatticeAccountIdOnly();
+        if (!latticeAccountIdOnly) {
+            for (InternalOutputRecord record : context.getInternalResults()) {
+                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
+                        context.getInput().getDataCloudVersion());
+            }
         }
         return context;
     }
@@ -172,6 +182,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
+        amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
         for (Column column : columnSelection.getColumns()) {
             String columnName = column.getColumnName();
 

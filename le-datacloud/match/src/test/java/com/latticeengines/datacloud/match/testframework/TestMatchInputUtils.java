@@ -12,55 +12,37 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class TestMatchInputUtils {
 
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
-        return prepareSimpleMatchInput(mockData, resolveKeyMap, false);
+        List<String> inputFields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");
+        return prepareSimpleMatchInput(mockData, inputFields, resolveKeyMap);
     }
 
-    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap, boolean withDuns) {
+    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, List<String> inputFields, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
         input.setReturnUnmatched(true);
         input.setPredefinedSelection(Predefined.RTS);
         input.setTenant(new Tenant("PD_Test"));
-        List<String> fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");
-        if (withDuns) {
-            fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country", "DUNS");
-        }
-        input.setFields(fields);
+        input.setFields(inputFields);
         if (resolveKeyMap) {
-            input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
+            input.setKeyMap(MatchKeyUtils.resolveKeyMap(inputFields));
         }
         input.setData(mockData);
         return input;
     }
 
     public static MatchInput prepareSimpleMatchInput(Object[][] data) {
-        return prepareSimpleMatchInput(data, false);
+        return prepareSimpleMatchInput(data, null);
     }
 
-    public static MatchInput prepareSimpleMatchInput(Object[][] data, boolean withDuns) {
+    public static MatchInput prepareSimpleMatchInput(Object[][] data, String[] fields) {
         List<List<Object>> mockData = new ArrayList<>();
         for (Object[] row : data) {
             mockData.add(Arrays.asList(row));
         }
-        return prepareSimpleMatchInput(mockData, true, withDuns);
-    }
-
-    public static List<List<Object>> getGoodInputData() {
-        Object[][] data = new Object[][] { { 0, "moyanne.com", "Moyanne", "Lynchburg", "Virginia", "USA" },
-                { 1, "jhip.com", "Jacobson Holman PLLC", "Washington", "Washington D.C.", "USA" },
-                { 2, "culturaltourismdc.org", "Captive Insurance Co", "Washington", "Washington D.C.", "USA" },
-                { 3, "thehousedc.org", "House Dc", "Washington", "Washington D.C.", "USA" },
-                { 4, "thetaxcenter.com", "Government Employee's Tax Specialists", "Washington", "Washington D.C.",
-                        "USA" },
-                { 5, "investmentwires.com", "Investmentwires Inc.", "Chagrin Falls", "Ohio", "USA" },
-                { 6, "chadbentz.com", "Chad Bentz", "Chagrin Falls", "Ohio", "USA" },
-                { 7, "countrysidemasonry.com", "Country Side Masonry", "Conneaut", "Ohio", "USA" },
-                { 8, "hickmanlandscape.com", "Hickman Lawn Care Inc", "Columbus", "Ohio", "USA" },
-                { 9, "suntool.com", "Sun Tool Co", "Las Cruces", "New Mexico", "USA" } };
-        List<List<Object>> mockData = new ArrayList<>();
-        for (Object[] row : data) {
-            mockData.add(Arrays.asList(row));
+        if (fields == null || fields.length == 0) {
+            return prepareSimpleMatchInput(mockData, true);
+        } else {
+            return prepareSimpleMatchInput(mockData, Arrays.asList(fields), true);
         }
-        return mockData;
     }
 
 }

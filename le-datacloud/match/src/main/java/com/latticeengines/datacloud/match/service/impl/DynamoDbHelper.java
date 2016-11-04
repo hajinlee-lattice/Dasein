@@ -22,13 +22,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
 @Component("dynamoDbHelper")
@@ -48,7 +48,7 @@ public class DynamoDbHelper implements DbHelper {
 
     @Override
     public boolean accept(String version) {
-        return !useFuzzyMatch && MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+        return !useFuzzyMatch && MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override

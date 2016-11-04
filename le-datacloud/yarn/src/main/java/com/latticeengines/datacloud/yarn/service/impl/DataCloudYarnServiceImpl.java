@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -18,9 +19,9 @@ import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.DataCloudProperty;
+import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("propDataYarnService")
@@ -35,6 +36,12 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Value("${datacloud.yarn.container.mem.mb}")
+    private int yarnContainerMemory;
+
+    @Value("${datacloud.yarn.container.vcores}")
+    private int yarnContainerVCores;
 
     @Override
     public ApplicationId submitPropDataJob(DataCloudJobConfiguration jobConfiguration) {
@@ -70,6 +77,8 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), queueName);
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
 
         if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
             appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
@@ -77,8 +86,8 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
 
         Properties containerProperties = new Properties();
         containerProperties.put(DataCloudProperty.DATACLOUD_CONFIG, jobConfiguration.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
+        containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
         containerProperties.put(ContainerProperty.PRIORITY.name(), "2");
 
         propDataJob.setAppMasterPropertiesObject(appMasterProperties);

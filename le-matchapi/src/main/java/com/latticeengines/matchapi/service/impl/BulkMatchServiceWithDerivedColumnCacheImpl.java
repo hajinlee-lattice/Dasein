@@ -15,11 +15,11 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.service.impl.MatchInputValidator;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.matchapi.service.BulkMatchService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -57,7 +57,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+        return MatchUtils.isValidForRTSBasedMatch(version);
     }
 
     @Override

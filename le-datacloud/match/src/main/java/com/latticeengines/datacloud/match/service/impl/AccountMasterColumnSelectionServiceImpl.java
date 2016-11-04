@@ -28,11 +28,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("accountMasterColumnSelectionService")
 public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionService {
@@ -67,7 +67,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForAccountMasterBasedMatch(version);
+        return MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
     @Override

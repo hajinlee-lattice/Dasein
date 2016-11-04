@@ -38,11 +38,11 @@ import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DbHelper;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
 @Component("sqlServerHelper")
@@ -112,7 +112,7 @@ public class SqlServerHelper implements DbHelper {
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+        return MatchUtils.isValidForRTSBasedMatch(version);
     }
 
     @Override

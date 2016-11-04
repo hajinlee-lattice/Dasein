@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,12 +24,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.newrelic.api.agent.Trace;
 
 @Component("columnSelectionService")
@@ -59,7 +58,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+        return MatchUtils.isValidForRTSBasedMatch(version);
     }
 
     @Override

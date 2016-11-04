@@ -70,9 +70,12 @@ public class MatchKeyUtils {
                     keyMap.put(MatchKey.Country, Collections.singletonList(field));
                     break;
                 case "duns":
+                case "duns_number":
+                case "dunsnumber":
                     keyMap.put(MatchKey.DUNS, Collections.singletonList(field));
                     break;
                 case latticeAccountId:
+                case "latticeid":
                     keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(field));
                     break;
             }

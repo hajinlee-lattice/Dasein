@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("externalColumnService")
 public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<ExternalColumn> {
@@ -29,7 +29,7 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+        return MatchUtils.isValidForRTSBasedMatch(version);
     }
 
     @Override

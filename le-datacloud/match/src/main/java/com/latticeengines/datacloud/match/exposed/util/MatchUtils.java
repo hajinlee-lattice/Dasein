@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 
 public class MatchUtils {
 
+    private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";
+
+    private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
+
     public static MatchOutput mergeOutputs(MatchOutput output, MatchOutput newOutput) {
         if (output == null) {
             return newOutput;
@@ -38,7 +42,14 @@ public class MatchUtils {
         return avroGlobs;
     }
 
-    public static boolean isAccountMaster(String dataCloudVersion) {
-        return StringUtils.isNotBlank(dataCloudVersion) && dataCloudVersion.startsWith("2.");
+    public static boolean isValidForRTSBasedMatch(String version) {
+        return StringUtils.isEmpty(version)
+                || version.trim().startsWith(DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING);
     }
+
+    public static boolean isValidForAccountMasterBasedMatch(String version) {
+        return !StringUtils.isEmpty(version)
+                && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING);
+    }
+
 }

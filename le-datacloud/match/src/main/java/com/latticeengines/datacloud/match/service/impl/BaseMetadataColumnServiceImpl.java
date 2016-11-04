@@ -7,11 +7,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
@@ -24,9 +28,18 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
 
+    @Autowired
+    @Qualifier("taskScheduler")
+    private ThreadPoolTaskScheduler scheduler;
+
     @PostConstruct
     private void postConstruct() {
-        loadCache();
+        scheduler.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                loadCache();
+            }
+        }, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override
@@ -46,6 +59,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         List<E> toReturn = new ArrayList<>();
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
         if (!whiteColumnCaches.containsKey(dataCloudVersion)) {
+            log.warn("Missed metadata cache for version " + dataCloudVersion);
             List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
             Map<String, E> columnMap = new HashMap<>();
             for (E column : columns) {
@@ -59,10 +73,9 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
                 }
             }
         } else {
-            ConcurrentMap<String, ConcurrentSkipListSet<String>> blackColumnCaches = getBlackColumnCache();
+            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
             for (String columnId : columnIds) {
-                if (blackColumnCaches.containsKey(dataCloudVersion)
-                        && blackColumnCaches.get(dataCloudVersion).contains(columnId)) {
+                if (blackColumnCache != null && blackColumnCache.contains(columnId)) {
                     toReturn.add(null);
                 } else if (!whiteColumnCaches.get(dataCloudVersion).containsKey(columnId)) {
                     toReturn.add(loadColumnMetadataById(columnId, dataCloudVersion));
@@ -135,15 +148,16 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         List<String> allVersions = getAllVersions();
         for (String dataCloudVersion : allVersions) {
             log.info("Start loading black and white column caches for version " + dataCloudVersion);
-            getBlackColumnCache().clear();
-            getWhiteColumnCache().clear();
             List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
             ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
+            for (E column : columns) {
+                whiteColumnCache.put(column.getColumnId(), column);
+            }
             synchronized (getWhiteColumnCache()) {
-                for (E column : columns) {
-                    whiteColumnCache.put(column.getColumnId(), column);
-                }
                 getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
+            }
+            synchronized (getBlackColumnCache()) {
+                getBlackColumnCache().clear();
             }
             log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
         }

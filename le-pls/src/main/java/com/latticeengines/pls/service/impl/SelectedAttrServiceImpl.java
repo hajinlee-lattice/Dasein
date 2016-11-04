@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -124,8 +123,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         // TODO - pass selectedAttributeInternalNames to columnSelection() to
         // get metadata about only these names
+        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
-                MatchTypeUtil.getVersionForEnforcingAccountMasterBasedMatch());
+                currentDataCloudVersion);
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
                 onlySelectedAttributes, offset, max);
@@ -169,8 +169,9 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, Tenant tenant, Boolean isSelected) {
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
-                MatchTypeUtil.getVersionForEnforcingAccountMasterBasedMatch());
+        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+                currentDataCloudVersion);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, null,

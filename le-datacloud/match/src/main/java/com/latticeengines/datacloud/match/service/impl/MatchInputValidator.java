@@ -112,6 +112,13 @@ public class MatchInputValidator {
     }
 
     private static void validateColumnSelection(MatchInput input) {
+        if (Predefined.ID.equals(input.getPredefinedSelection())) {
+            if (!MatchUtils.isValidForAccountMasterBasedMatch(input.getDataCloudVersion())) {
+                throw new IllegalArgumentException(
+                        "LatticeAccountId match is only supported for AccountMaster based matches.");
+            }
+            input.setLatticeAccountIdOnly(true);
+        }
         if (input.getPredefinedSelection() == null && input.getCustomSelection() == null
                 && input.getUnionSelection() == null) {
             throw new IllegalArgumentException("Must specify predefined, custom, or union column selection.");

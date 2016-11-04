@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +34,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -61,7 +64,6 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -74,6 +76,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private static final String LONG = Long.class.getSimpleName();
     private static final String FLOAT = Float.class.getSimpleName();
     private static final String DOUBLE = Double.class.getSimpleName();
+    private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.buffer";
 
     @Autowired
     private ApplicationContext appContext;
@@ -269,14 +272,14 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             throw new RuntimeException("Failed to write result to avro.", e);
         }
 
-        MatchOutput newOutput = JsonUtils.deserialize(JsonUtils.serialize(groupOutput), MatchOutput.class);
         List<OutputRecord> cleanedResults = new ArrayList<>();
-        for (OutputRecord record : newOutput.getResult()) {
+        for (OutputRecord record : groupOutput.getResult()) {
             if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
                 record.setOutput(null);
                 cleanedResults.add(record);
             }
         }
+
         groupOutput.setResult(cleanedResults);
         blockOutput = MatchUtils.mergeOutputs(blockOutput, groupOutput);
         log.info("Merge group output into block output.");
@@ -303,7 +306,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
-                if (MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
+                if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
                     value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
                 }
                 builder.set(fields.get(i), value);
@@ -429,7 +432,14 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         blockOutput.setReceivedAt(receivedAt);
         blockOutput.getStatistics().setRowsRequested(blockSize);
         blockOutput.getStatistics().setTimeElapsedInMsec(finishedAt.getTime() - receivedAt.getTime());
-        HdfsUtils.writeToFile(yarnConfiguration, outputJson, JsonUtils.serialize(blockOutput));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(new File(MATCHOUTPUT_BUFFER_FILE), blockOutput);
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, outputJson);
+            FileUtils.deleteQuietly(new File(MATCHOUTPUT_BUFFER_FILE));
+        } catch (Exception e) {
+            log.error("Failed to save matchoutput json.", e);
+        }
     }
 
     private class MatchCallable implements Callable<MatchContext> {

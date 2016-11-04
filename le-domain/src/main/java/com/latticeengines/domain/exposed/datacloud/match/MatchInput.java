@@ -32,6 +32,9 @@ public class MatchInput implements Fact, Dimension {
 
     private Boolean returnUnmatched = true;
     private Boolean excludePublicDomains = false;
+    private Boolean fetchOnly;
+
+    private boolean latticeAccountIdOnly = false;
 
     private InputBuffer inputBuffer;
     private IOBufferType outputBufferType;
@@ -81,10 +84,17 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("ExcludePublicDomains")
     public void setExcludePublicDomains(Boolean excludePublicDomains) {
-        this.excludePublicDomains = excludePublicDomains;
-        if (this.excludePublicDomains == null) {
-            this.excludePublicDomains = Boolean.FALSE;
-        }
+        this.excludePublicDomains = Boolean.TRUE.equals(excludePublicDomains);
+    }
+
+    @JsonProperty("FetchOnly")
+    public Boolean getFetchOnly() {
+        return fetchOnly;
+    }
+
+    @JsonProperty("FetchOnly")
+    public void setFetchOnly(Boolean fetchOnly) {
+        this.fetchOnly = fetchOnly;
     }
 
     @JsonProperty("KeyMap")
@@ -165,6 +175,7 @@ public class MatchInput implements Fact, Dimension {
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
+
 
     @MetricTagGroup
     @JsonProperty("PredefinedSelection")
@@ -277,6 +288,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("BulkOnly")
     public void setBulkOnly(boolean bulkOnly) {
         this.bulkOnly = bulkOnly;
+    }
+
+    @JsonIgnore
+    public boolean isLatticeAccountIdOnly() {
+        return latticeAccountIdOnly;
+    }
+
+    @JsonIgnore
+    public void setLatticeAccountIdOnly(boolean latticeAccountIdOnly) {
+        this.latticeAccountIdOnly = latticeAccountIdOnly;
     }
 
     @Override

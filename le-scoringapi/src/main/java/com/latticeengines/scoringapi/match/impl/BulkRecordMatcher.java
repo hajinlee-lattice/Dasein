@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
@@ -32,6 +34,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
     private static final String RTS_MATCH_ONLY = "RTS_MATCH_ONLY";
     private static final String AM_ENRICH_ONLY = "AM_ENRICH_ONLY";
     private static final String AM_MATCH_AND_OR_ENRICH = "AM_MATCH_AND_OR_ENRICH";
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public boolean accept(boolean isBulk) {
@@ -205,10 +210,11 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
             // call enrichment (without predefined column selection) against
             // AccountMaster only
+            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
             MatchInput matchAMEnrichmentInput = buildMatchInput(space, recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
-                    true, MatchTypeUtil.getVersionForEnforcingAccountMasterBasedMatch());
+                    true, currentDataCloudVersion);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
         } else {

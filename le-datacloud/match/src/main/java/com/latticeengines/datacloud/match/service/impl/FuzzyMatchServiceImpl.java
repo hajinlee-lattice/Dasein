@@ -42,24 +42,33 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            MatchTraveler travelContext = new MatchTraveler(rootOperationUid);
-            matchRecord.setTravelerId(travelContext.getTravelerId());
+            if (matchRecord.getLatticeAccount() != null) {
 
-            MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
-            travelContext.setMatchKeyTuple(matchKeyTuple);
-            travelContext.setDataCloudVersion(dataCloudVersion);
+                matchFutures.add(null);
 
-            matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
+            } else {
+                MatchTraveler travelContext = new MatchTraveler(rootOperationUid);
+                matchRecord.setTravelerId(travelContext.getTravelerId());
+
+                MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
+                travelContext.setMatchKeyTuple(matchKeyTuple);
+                travelContext.setDataCloudVersion(dataCloudVersion);
+
+                matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
+            }
         }
 
-        int idx = 0;
-        for (Future<Object> future : matchFutures) {
-            MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
-            log.info("Got LatticeAccountId=" + traveler.getResult() + " for TravelerId=" + traveler.getTravelerId()
-                    + " in RootOperationUID=" + traveler.getRootOperationUid());
-            InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx++);
-            if (traveler.getResult() != null) {
-                matchRecord.setLatticeAccountId((String) traveler.getResult());
+        for (int idx = 0; idx < matchFutures.size(); idx++) {
+            Future<Object> future = matchFutures.get(idx);
+            if (future != null) {
+                // null future means already has lattice account id
+                MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
+                log.info("Got LatticeAccountId=" + traveler.getResult() + " for TravelerId=" + traveler.getTravelerId()
+                        + " in RootOperationUID=" + traveler.getRootOperationUid());
+                InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx++);
+                if (traveler.getResult() != null) {
+                    matchRecord.setLatticeAccountId((String) traveler.getResult());
+                }
             }
         }
     }
@@ -91,7 +100,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             matchKeyTuple.setZipcode(nameLocationInfo.getZipCode());
             matchKeyTuple.setPhoneNumber(nameLocationInfo.getPhoneNumber());
         }
-        matchKeyTuple.setDomain(matchRecord.getParsedDomain());
+        if (!matchRecord.isPublicDomain()) {
+            matchKeyTuple.setDomain(matchRecord.getParsedDomain());
+        }
         matchKeyTuple.setDuns(matchRecord.getParsedDuns());
         return matchKeyTuple;
     }

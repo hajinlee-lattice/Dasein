@@ -104,7 +104,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 Object value = null;
                 boolean matched = false;
 
-                if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
+                if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
+                        && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
+                    matched = true;
+                    value = internalRecord.getLatticeAccountId();
+                } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
                     matched = true;

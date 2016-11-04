@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,13 +16,16 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
 public class SingleRecordMatcher extends AbstractMatcher {
     protected static final Log log = LogFactory.getLog(SingleRecordMatcher.class);
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public boolean accept(boolean isBulk) {
@@ -62,12 +66,13 @@ public class SingleRecordMatcher extends AbstractMatcher {
 
             // call enrichment (without predefined column selection) against
             // AccountMaster only
+            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
             Map<String, Map<String, Object>> enrichmentResult = //
                     buildAndExecuteMatch(space, interpreted, //
                             fieldSchemas, record, //
                             null, true, //
                             selectedLeadEnrichmentAttributes, true, //
-                            MatchTypeUtil.getVersionForEnforcingAccountMasterBasedMatch());
+                            currentDataCloudVersion);
 
             result.putAll(enrichmentResult);
 

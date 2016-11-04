@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import javax.annotation.Resource;
 
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
 
     @Override
     public boolean accept(String version) {
-        return MatchTypeUtil.isValidForRTSBasedMatch(version);
+        return MatchUtils.isValidForRTSBasedMatch(version);
     }
 
     @Override
