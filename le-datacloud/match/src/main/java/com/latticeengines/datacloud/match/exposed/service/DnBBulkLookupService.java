@@ -1,10 +1,13 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchEntry;
-
 import java.util.List;
 
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.DnBBulkMatchInfo;
+import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
+
 public interface DnBBulkLookupService {
-    public List<DnBMatchEntry> bulkEntitiesLookup(List<DnBMatchEntry> input);
-    public List<DnBMatchEntry> bulkEmailsLookup(List<DnBMatchEntry> input);
+    public DnBBulkMatchInfo sendRequest(List<MatchKeyTuple> input);
+
+    public List<DnBMatchOutput> getResult(DnBBulkMatchInfo info);
 }

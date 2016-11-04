@@ -7,9 +7,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupService;
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchEntry;
+import com.latticeengines.domain.exposed.datacloud.match.DnBBulkMatchInfo;
+import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
 
 @Component
 public class DnBBulkLookupServiceImpl implements DnBBulkLookupService {
@@ -20,12 +22,13 @@ public class DnBBulkLookupServiceImpl implements DnBBulkLookupService {
     private DnBAuthenticationService dnBAuthenticationService;
 
     @Override
-    public List<DnBMatchEntry> bulkEntitiesLookup(List<DnBMatchEntry> input) {
+    public DnBBulkMatchInfo sendRequest(List<MatchKeyTuple> input) {
         return null;
     }
 
     @Override
-    public List<DnBMatchEntry> bulkEmailsLookup(List<DnBMatchEntry> input) {
+    public List<DnBMatchOutput> getResult(DnBBulkMatchInfo info) {
         return null;
     }
+
 }
