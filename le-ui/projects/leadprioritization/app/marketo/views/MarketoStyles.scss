@@ -9,8 +9,11 @@
 	tr td, tr th {
 		padding: 15px;
 	}
-	tbody tr td:nth-child(3) {
-		padding-right: 15px;
+	tbody tr td {
+		&:nth-child(3), &:nth-child(4) {
+			width: 100px;
+			padding-right: 15px;
+		}
 	}
 	button.button.icon-button {
 		padding: 0;

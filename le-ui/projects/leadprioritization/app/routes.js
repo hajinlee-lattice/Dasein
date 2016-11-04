@@ -396,7 +396,7 @@ angular
             url: '/apikey',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings'
+                pageTitle: 'Marketo Profiles'
             },
             resolve: {
                 FeatureFlags: function($q, FeatureFlagService) {
@@ -427,17 +427,6 @@ angular
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'                    
                 },
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
-                    controller: function($scope, $state) {
-                        $scope.state = $state.current.name;
-                    },
-                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
-                },
                 "main@": {
                     resolve: {
                         MarketoCredentials: function($q, MarketoService) {
@@ -460,7 +449,7 @@ angular
             url: '/credentials',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings'
+                pageTitle: 'Marketo Profiles'
             },
             views: {
                 "summary@": {
@@ -487,7 +476,7 @@ angular
             url: '/create',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings > Create New Marketo Credential'
+                pageTitle: 'Marketo Profiles > Create New Marketo Profile'
             },
             views: {
                 "summary@": {
@@ -512,7 +501,7 @@ angular
             url: '/edit/{id}',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings > Edit Credential',
+                pageTitle: 'Marketo Profiles > Edit Credential',
             },
             views: {
                 "summary@": {
@@ -549,7 +538,7 @@ angular
             url: '/enrichment/{id}',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Settings > Enrichment',
+                pageTitle: 'Marketo Profiles > Enrichment',
             },
             views: {
                 "summary@": {
@@ -613,11 +602,9 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
-                    /*
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                    -- ben::bookmark
-                    */
+                    controller: function($scope, $state) {
+                        $scope.state = $state.current.name;
+                    },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {

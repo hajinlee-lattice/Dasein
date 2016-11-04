@@ -589,6 +589,7 @@ MODEL_COLUMNS_CSV_BUTTON_NEXT=Create Model
 MODEL_COLUMNS_CSV_BUTTON_MODELS_LIST=Go to Models List
 MODEL_COLUMNS_CSV_MAIN_TITLE=Your model is being built.
 MODEL_COLUMNS_CSV_SUPPORTING_TITLE=The job will continue to run if you leave this page.
+MODEL_COLUMNS_CSV_MAIN_TITLE_COMPLETED=Your model has been built.
 MODEL_JOBREPORT_CSV_LABEL_UPLOADED=All records that were Uploaded
 MODEL_JOBREPORT_CSV_LABEL_EXCLUDED=All records that were Excluded
 MODEL_JOBREPORT_CSV_LABEL_USED=Records used to Create the Model
