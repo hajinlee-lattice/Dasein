@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         try {
             List<OutputRecord> matchRecords = prepareData(numRequests);
             service.callMatch(matchRecords, UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), null);
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH);
 
             boolean hasError = false;
             for (OutputRecord result : matchRecords) {

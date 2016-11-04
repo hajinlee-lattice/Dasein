@@ -32,6 +32,7 @@ public class MatchGuideBook extends GuideBook {
 
     private static final Log log = LogFactory.getLog(MatchGuideBook.class);
     private static final String MICROENGINE_ACTOR = "MicroEngineActor";
+    public static final String DEFAULT_GRAPH = null;
 
     private String fuzzyMatchAnchorPath;
 
