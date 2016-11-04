@@ -69,12 +69,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         this.matchKeyTuple = matchKeyTuple;
     }
 
-    @MetricField(name = "AskedDnB", fieldType = MetricField.FieldType.BOOLEAN)
-    public Boolean getAskedDnB() {
-        return dnBMatchOutput != null;
-    }
-
-    @MetricFieldGroup
     public DnBMatchOutput getDnBMatchOutput() {
         return dnBMatchOutput;
     }

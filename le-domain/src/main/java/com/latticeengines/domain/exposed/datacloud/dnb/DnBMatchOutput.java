@@ -4,7 +4,7 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 
-public class DnBMatchOutput {
+public class DnBMatchOutput implements Fact {
 
     private String duns;
 
