@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -103,7 +103,7 @@ public class ScoreCorrectnessService {
 
     }
 
-    public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore)
+    public Map<String, ComparedRecord> analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore)
             throws IOException {
         String appId = "DUMMY_APP";
         String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId, appId).getValue();
@@ -135,6 +135,7 @@ public class ScoreCorrectnessService {
                 percentScored >= 90.0,
                 String.format("Actual scored records less than 90 percent, actual:%d, expected:%d",
                         scoreResponses.size(), numRecordsToScore));
+        return differentRecords;
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {

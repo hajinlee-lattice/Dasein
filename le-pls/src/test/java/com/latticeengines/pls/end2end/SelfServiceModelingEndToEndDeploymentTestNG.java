@@ -55,6 +55,9 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
+import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
+import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -184,6 +187,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setModuleName("module1");
         parameters.setPivotFileName("pivotvalues.csv");
         parameters.setFilename(sourceFile.getName());
+        Map<String, String> runtimeParams = new HashMap<>();
+        runtimeParams.put(SamplingFactory.MODEL_SAMPLING_SEED_KEY, "987654");
+        runtimeParams.put(AlgorithmFactory.RF_SEED_KEY, "987654");
+        runtimeParams.put(DataFlowFactory.DATAFLOW_DO_SORT_FOR_ATTR_FLOW, "");
+        parameters.setRunTimeParams(runtimeParams);
 
         sourceFile.setSchemaInterpretation(schemaInterpretation);
         ResponseDocument response = restTemplate.postForObject(

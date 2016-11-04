@@ -90,6 +90,7 @@ public class SchemaRepository {
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
                 .type(Schema.Type.LONG) //
+                .required() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -135,6 +136,7 @@ public class SchemaRepository {
         table.addAttribute(attr("Timestamp") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP" })) //
                 .type(Schema.Type.LONG) //
+                .required() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -676,6 +678,7 @@ public class SchemaRepository {
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
                 .type(Schema.Type.LONG) //
+                .required() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //

@@ -1,6 +1,9 @@
 package com.latticeengines.pls.end2end;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +41,8 @@ public class SelfServiceModelingToScoringEndToEndDeploymentTestNG extends PlsDep
     public void testLeadModelToScoreCorrectness() throws InterruptedException, IOException {
         String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
         String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
-        scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId, 1000);
+        Map<String, ComparedRecord> diffScores = scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId, 1000);
+        assertEquals(diffScores.size(), 2);
     }
 
     @Test(groups = "deployment.lp", enabled = false)
