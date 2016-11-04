@@ -43,7 +43,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private MetricService metricService;
 
-    @Test(groups = "pending", enabled = true)
+    @Test(groups = "pending", enabled = false)
     public void testSingleTraverse() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
@@ -72,7 +72,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         }
     }
 
-    @Test(groups = "pending", dataProvider = "actorTestData", enabled = false)
+    @Test(groups = "pending", dataProvider = "actorTestData", enabled = true)
     public void testRealTimeActorSystem(int numRequests, boolean batchMode) throws Exception {
         actorSystem.setBatchMode(batchMode);
 
