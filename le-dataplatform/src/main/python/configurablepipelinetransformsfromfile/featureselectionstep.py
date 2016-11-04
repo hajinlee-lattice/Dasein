@@ -31,6 +31,7 @@ class FeatureSelectionStep(PipelineStep):
                                           min_samples_leaf=10,
                                           max_depth=5,
                                           max_features=None,
+                                          random_state=123456,
                                           bootstrap=True)
         mediator = self.getMediator()
         features = self.params["schema"]["original_features"]

@@ -7,6 +7,8 @@ import java.util.Random;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -18,6 +20,8 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public abstract class RandomSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
+    
+    private static final Log log = LogFactory.getLog(RandomSamplingMapper.class);
     protected List<SamplingElement> trainingElements;
     protected SamplingElement testingElement;
     protected int samplingRate;
@@ -40,6 +44,15 @@ public abstract class RandomSamplingMapper extends Mapper<AvroKey<Record>, NullW
         outKey = new Text();
         outValue = new AvroValue<Record>();
         random = new Random();
+        
+        if (sampleConfig.getRandomSeed() != -1) {
+            Long seed = sampleConfig.getRandomSeed();
+            log.info("Random seed = " + seed);
+            random.setSeed(seed);
+        } else {
+            log.info("No random seed.");
+        }
+
     }
 
     private void setupCommonSamplingProperty(SamplingConfiguration sampleConfig) {

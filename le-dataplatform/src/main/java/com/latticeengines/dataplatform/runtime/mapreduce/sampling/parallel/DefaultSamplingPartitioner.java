@@ -11,10 +11,11 @@ public class DefaultSamplingPartitioner extends Partitioner<Text, AvroValue<Reco
 
     @Override
     public int getPartition(Text key, AvroValue<Record> value, int numPartitions) {
-        if (key.toString().equals(SamplingConfiguration.TRAINING_ALL_PREFIX))
+        if (key.toString().equals(SamplingConfiguration.TRAINING_ALL_PREFIX)) {
             return 0;
-        else
+        } else {
             return 1;
+        }
     }
 
 }
