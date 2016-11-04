@@ -127,7 +127,6 @@ angular.module('lp.enrichment.leadenrichment', [
                 getEnrichmentSubcategories(value);
             });
             vm.enable_category_dropdown = true;
-            console.log(vm.enable_category_dropdown);
         });
     }
 
