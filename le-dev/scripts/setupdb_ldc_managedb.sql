@@ -38,6 +38,12 @@ VALUES
   ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', 'APPROVED'),
   ('2.0.1', '2016-10-28', '2.0', '2016-10-28_17-32-32_UTC', '2016-10-28_14-45-38_UTC', '', 'NEW');
 
+INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
+VALUES
+  ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', 'DunsDomainBased', '0:1|1:2'),
+  ('DragonClaw', 'DunsDomainBased,DomainBased,DunsBased,LocationToDuns', 'DunsDomainBased', '0:1,2,3|3:0');
+
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
 CHARACTER SET UTF8
 FIELDS TERMINATED BY ','

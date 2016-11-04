@@ -50,6 +50,7 @@ public class MatchActorSystem {
     private ActorFactory actorFactory;
 
     private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void postConstruct() {
@@ -78,7 +79,15 @@ public class MatchActorSystem {
     }
 
     public <T extends ActorTemplate> ActorRef getActorRef(Class<T> actorClz) {
-        return actorRefMap.get(actorClz.getCanonicalName());
+        return getActorRef(actorClz.getSimpleName());
+    }
+
+    ActorRef getActorRef(String actorClassName) {
+        return actorRefMap.get(actorClassName);
+    }
+
+    String getActorClassName(String actorPath) {
+        return actorPathMap.get(actorPath);
     }
 
     public ActorRef getFuzzyMatchAnchor() {
@@ -128,8 +137,9 @@ public class MatchActorSystem {
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {
         ActorRef actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz);
-        actorRefMap.put(actorClz.getCanonicalName(), actorRef);
-        log.info("Add actor-ref " + actorClz.getSimpleName() + " to actorRefMap.");
+        actorRefMap.put(actorClz.getSimpleName(), actorRef);
+        actorPathMap.putIfAbsent(actorRef.path().toSerializationFormat(), actorClz.getSimpleName());
+        log.info("Add actor-ref " + actorClz.getSimpleName());
         return actorRef;
     }
 

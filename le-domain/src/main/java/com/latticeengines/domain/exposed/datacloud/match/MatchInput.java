@@ -33,6 +33,7 @@ public class MatchInput implements Fact, Dimension {
     private Boolean returnUnmatched = true;
     private Boolean excludePublicDomains = false;
     private Boolean fetchOnly;
+    private String decisionGraph;
 
     private boolean latticeAccountIdOnly = false;
 
@@ -95,6 +96,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("FetchOnly")
     public void setFetchOnly(Boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
+    }
+
+    @JsonProperty("DecisionGraph")
+    public String getDecisionGraph() {
+        return decisionGraph;
+    }
+
+    @JsonProperty("DecisionGraph")
+    public void setDecisionGraph(String decisionGraph) {
+        this.decisionGraph = decisionGraph;
     }
 
     @JsonProperty("KeyMap")

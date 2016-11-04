@@ -45,9 +45,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
-                process(response);
                 traveler = response.getTravelerContext();
-                log.debug(self() + " received a response for " + traveler);
+                log.debug(self() + " received a response for " + traveler + ": " + response.getResult());
+                process(response);
             }
 
             if (traveler == null) {

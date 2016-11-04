@@ -1,16 +1,18 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
@@ -36,6 +38,28 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
+    @Test(groups = "pending", enabled = false)
+    public void testSingleTraverse() throws Exception {
+        LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
+        LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
+
+        try {
+            InternalOutputRecord matchRecord = new InternalOutputRecord();
+            matchRecord.setParsedDuns(VALID_DUNS);
+            matchRecord.setParsedDomain(VALID_DOMAIN);
+
+            service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "DragonClaw");
+
+            Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
+            Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
+        } finally {
+            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
+            LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
+            actorSystem.setBatchMode(false);
+        }
+    }
+
     @Test(groups = "pending", dataProvider = "actorTestData")
     public void testRealTimeActorSystem(int numRequests, boolean batchMode) throws Exception {
         actorSystem.setBatchMode(batchMode);
@@ -48,22 +72,29 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         try {
             List<OutputRecord> matchRecords = prepareData(numRequests);
             service.callMatch(matchRecords, UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion());
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), null);
 
+            boolean hasError = false;
             for (OutputRecord result : matchRecords) {
                 Assert.assertNotNull(result);
                 InternalOutputRecord record = (InternalOutputRecord) result;
                 if (VALID_DUNS.equals(record.getParsedDuns()) || VALID_DOMAIN.equals(record.getParsedDomain())) {
-                    Assert.assertNotNull(record.getLatticeAccountId());
-                    if (record.getParsedDuns() == null) {
-                        Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DOMAIN);
-                    } else if (record.getParsedDomain() == null) {
-                        Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DUNS);
-                    } else {
-                        Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
+                    try {
+                        Assert.assertNotNull(record.getLatticeAccountId(), JsonUtils.serialize(record));
+                        if (record.getParsedDuns() == null) {
+                            Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DOMAIN);
+                        } else if (record.getParsedDomain() == null) {
+                            Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DUNS);
+                        } else {
+                            Assert.assertEquals(record.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
+                        }
+                    } catch (AssertionError e) {
+                        System.out.println(e.getMessage());
+                        hasError = true;
                     }
                 }
             }
+            Assert.assertFalse(hasError, "There are errors, see logs above.");
         } finally {
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
@@ -84,13 +115,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         for (int i = 0; i < numRecords; i++) {
 
             InternalOutputRecord matchRecord = new InternalOutputRecord();
-            NameLocation parsedNameLocation = new NameLocation();
-            parsedNameLocation.setName(UUID.randomUUID().toString());
-            parsedNameLocation.setCountry(UUID.randomUUID().toString());
-            parsedNameLocation.setState(UUID.randomUUID().toString());
-
             if (i % 2 == 0) {
-                parsedNameLocation.setCity(UUID.randomUUID().toString());
                 matchRecord.setParsedDuns(VALID_DUNS);
             }
 
@@ -98,11 +123,19 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 matchRecord.setParsedDomain(VALID_DOMAIN);
             }
 
+            if (i % 5 ==0) {
+                NameLocation parsedNameLocation = new NameLocation();
+                parsedNameLocation.setName(UUID.randomUUID().toString());
+                parsedNameLocation.setCountry(UUID.randomUUID().toString());
+                parsedNameLocation.setState(UUID.randomUUID().toString());
+                parsedNameLocation.setCity(UUID.randomUUID().toString());
+                matchRecord.setParsedNameLocation(parsedNameLocation);
+            }
+
             if (matchRecord.getParsedDomain() == null && matchRecord.getParsedDuns() == null) {
                 matchRecord.setParsedDomain(UUID.randomUUID().toString());
             }
 
-            matchRecord.setParsedNameLocation(parsedNameLocation);
             matchRecords.add(matchRecord);
         }
         return matchRecords;

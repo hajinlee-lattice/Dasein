@@ -23,11 +23,11 @@ class InternalOutputRecord extends OutputRecord {
     private LatticeAccount latticeAccount;
     private String originalContextId;
 
-    String getParsedDomain() {
+    public String getParsedDomain() {
         return parsedDomain;
     }
 
-    void setParsedDomain(String parsedDomain) {
+    public void setParsedDomain(String parsedDomain) {
         this.parsedDomain = parsedDomain;
     }
 

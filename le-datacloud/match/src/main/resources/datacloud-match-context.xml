@@ -35,4 +35,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="decisionGraphDao" class="com.latticeengines.datacloud.match.dao.impl.DecisionGraphDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

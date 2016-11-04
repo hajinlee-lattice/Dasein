@@ -71,7 +71,7 @@ public class FuzzyMatchHelper implements DbHelper {
         if (!fetchOnly) {
             try {
                 fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                        dataCloudVersion);
+                        dataCloudVersion, context.getInput().getDecisionGraph());
             } catch (Exception e) {
                 log.error("Failed to run fuzzy match.", e);
             }

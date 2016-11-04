@@ -112,6 +112,14 @@ public abstract class Traveler {
         }
     }
 
+    public void clearLocationsToVisitingQueue() {
+        visitingQueue.clear();
+    }
+
+    public Queue<String> getVisitingQueue() {
+        return visitingQueue;
+    }
+
     public boolean visitingQueueIsEmpty() {
         return visitingQueue.isEmpty();
     }

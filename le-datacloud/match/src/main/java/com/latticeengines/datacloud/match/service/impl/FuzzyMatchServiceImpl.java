@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -34,7 +36,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion) throws Exception {
+            String dataCloudVersion, String decisionGraph) throws Exception {
         checkRecordType(matchRecords);
 
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
@@ -42,10 +44,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            if (matchRecord.getLatticeAccount() != null) {
-
+            if (!StringUtils.isEmpty(matchRecord.getLatticeAccountId())) {
                 matchFutures.add(null);
-
             } else {
                 MatchTraveler travelContext = new MatchTraveler(rootOperationUid);
                 matchRecord.setTravelerId(travelContext.getTravelerId());
@@ -53,6 +53,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
                 travelContext.setMatchKeyTuple(matchKeyTuple);
                 travelContext.setDataCloudVersion(dataCloudVersion);
+                if (StringUtils.isNotEmpty(decisionGraph)) {
+                    travelContext.setDecisionGraph(decisionGraph);
+                }
 
                 matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
             }
@@ -63,13 +66,19 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             if (future != null) {
                 // null future means already has lattice account id
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
-                log.info("Got LatticeAccountId=" + traveler.getResult() + " for TravelerId=" + traveler.getTravelerId()
-                        + " in RootOperationUID=" + traveler.getRootOperationUid());
-                InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx++);
-                if (traveler.getResult() != null) {
-                    matchRecord.setLatticeAccountId((String) traveler.getResult());
-                }
+                log.info("Got LatticeAccountId=" + traveler.getResult() + " for TravelerId="
+                                + traveler.getTravelerId() + " in RootOperationUID=" + traveler.getRootOperationUid());
+                InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
+                matchRecord.setLatticeAccountId((String) traveler.getResult());
+            } else {
+                log.info("Do not have a future for " + JsonUtils.serialize(matchRecords.get(idx)));
             }
+        }
+
+        try {
+            Thread.sleep(2000L);
+        } catch (Exception e) {
+            // ignore
         }
     }
 

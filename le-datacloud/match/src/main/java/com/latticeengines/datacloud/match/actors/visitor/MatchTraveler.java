@@ -5,6 +5,7 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 public class MatchTraveler extends Traveler {
     private MatchKeyTuple matchKeyTuple;
     private String dataCloudVersion;
+    private String decisionGraph;
 
     private boolean isMatched = false;
     private boolean isProcessed = false;
@@ -32,6 +33,14 @@ public class MatchTraveler extends Traveler {
 
     public void setProcessed(boolean processed) {
         isProcessed = processed;
+    }
+
+    public String getDecisionGraph() {
+        return decisionGraph;
+    }
+
+    public void setDecisionGraph(String decisionGraph) {
+        this.decisionGraph = decisionGraph;
     }
 
     public MatchKeyTuple getMatchKeyTuple() {

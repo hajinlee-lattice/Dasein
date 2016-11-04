@@ -32,8 +32,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             if (lookupEntry != null) {
                 result = lookupEntry.getLatticeAccountId();
             } else {
-                log.debug("Didn't get anything from real dynamodb but Simulating that we got some result for "
-                        + lookupId);
+                log.debug("Didn't get anything from real dynamodb for " + lookupRequestId);
             }
         } else {
             log.debug("Skip lookup into dynamodb for " + lookupRequestId);
