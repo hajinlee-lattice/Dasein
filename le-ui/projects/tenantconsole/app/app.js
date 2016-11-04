@@ -241,11 +241,37 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
         })
         .state('NOWHERE', {
             url: '/',
-            templateUrl: 'app/core/view/Http404View.html'
+            templateUrl: 'app/core/view/Http404View.html',
+            params: {
+                error: false,
+                pageMessage: null
+            },
+            controller: function ($scope, $stateParams) {
+                if ($stateParams.pageMessage) {
+                    $scope.pageMessage = $stateParams.pageMessage;
+                } else if ($stateParams.error) {
+                    $scope.pageMessage = '500 (Internal Server Error)';
+                } else {
+                    $scope.pageMessage = '404 Page Not Found';
+                }
+            }
         });
 
     localStorageServiceProvider
         .setPrefix('lattice-engines')
         .setStorageType('sessionStorage')
         .setNotify(true, true);
+});
+
+app.run(function($rootScope, $state) {
+    $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
+        event.preventDefault();
+
+        var pageMessage = null;
+        if (error && error.errMsg) {
+            pageMessage = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+        }
+
+        $state.go('NOWHERE', {error: true, pageMessage: pageMessage});
+    });
 });
