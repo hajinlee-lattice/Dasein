@@ -93,6 +93,12 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         if (HdfsUtils.fileExists(yarnConfiguration, postMatchEventTablePath)) {
             paths.addAll(HdfsUtils.getFilesForDir(yarnConfiguration, postMatchEventTablePath, filter));
         }
+
+        String eventTableScoreFilePath = modelingServiceHdfsBaseDir + customer + "/data/" + summary.getEventTableName()
+                + "/csv_files/score_event_table_output";
+        if (HdfsUtils.fileExists(yarnConfiguration, eventTableScoreFilePath)) {
+            paths.addAll(HdfsUtils.getFilesForDir(yarnConfiguration, eventTableScoreFilePath, filter));
+        }
         if (CollectionUtils.isEmpty(paths)) {
             throw new LedpException(LedpCode.LEDP_18023);
         }
