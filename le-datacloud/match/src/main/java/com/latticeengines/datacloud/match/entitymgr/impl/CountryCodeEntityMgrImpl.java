@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.match.entitymgr.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Resource;
 
@@ -22,9 +22,9 @@ public class CountryCodeEntityMgrImpl implements CountryCodeEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Map<String, String> findAll() {
+    public ConcurrentMap<String, String> findAll() {
         List<CountryCode> countryCodes = countryCodeDao.findAll();
-        Map<String, String> countryCodeMap = new HashMap<String, String>();
+        ConcurrentMap<String, String> countryCodeMap = new ConcurrentHashMap<String, String>();
         for (CountryCode code : countryCodes) {
             countryCodeMap.put(code.getCountryName(), code.getIsoCountryCode2Char());
         }

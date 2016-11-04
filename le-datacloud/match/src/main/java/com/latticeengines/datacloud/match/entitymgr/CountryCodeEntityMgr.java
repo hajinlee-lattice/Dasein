@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.entitymgr;
 
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 public interface CountryCodeEntityMgr {
-    Map<String, String> findAll();
+    ConcurrentMap<String, String> findAll();
 }

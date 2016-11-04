@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +25,7 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     @Autowired
     private CountryCodeEntityMgr countryCodeEntityMgr;
 
-    private Map<String, String> countryCodeMap;
+    private ConcurrentMap<String, String> countryCodeMap;
 
     @Autowired
     @Qualifier("taskScheduler")
@@ -42,7 +42,6 @@ public class CountryCodeServiceImpl implements CountryCodeService {
 
     @PostConstruct
     private void postConstruct() {
-        loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
@@ -52,8 +51,9 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     }
 
     private void loadCache() {
-        log.info("Start loading country code ");
+        log.info("Start loading country code");
         countryCodeMap = countryCodeEntityMgr.findAll();
+        log.info("Loading country code finished");
     }
 
 }
