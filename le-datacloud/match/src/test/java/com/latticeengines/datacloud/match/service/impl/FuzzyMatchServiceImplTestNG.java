@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
+import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 @Test
 public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -39,10 +40,14 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
+    @Autowired
+    private MetricService metricService;
+
     @Test(groups = "pending", enabled = false)
     public void testSingleTraverse() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
+        metricService.enable();
 
         try {
             InternalOutputRecord matchRecord = new InternalOutputRecord();
@@ -55,9 +60,15 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
         } finally {
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
+            metricService.disable();
         }
     }
 
@@ -66,8 +77,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         actorSystem.setBatchMode(batchMode);
 
         if (!batchMode) {
-            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
+            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         }
 
         try {

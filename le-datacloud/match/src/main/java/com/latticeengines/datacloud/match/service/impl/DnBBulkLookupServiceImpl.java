@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupService;
-import com.latticeengines.domain.exposed.datacloud.match.DnBBulkMatchInfo;
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBBulkMatchInfo;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
 
 @Component
 public class DnBBulkLookupServiceImpl implements DnBBulkLookupService {

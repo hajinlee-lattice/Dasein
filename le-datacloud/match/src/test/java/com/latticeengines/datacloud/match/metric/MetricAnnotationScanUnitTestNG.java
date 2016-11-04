@@ -13,7 +13,7 @@ public class MetricAnnotationScanUnitTestNG {
     @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void scanMetricClasses() {
-        Reflections reflections = new Reflections("com.latticeengines.propdata");
+        Reflections reflections = new Reflections("com.latticeengines.datacloud.match");
 
         for (Class<?> clz: reflections.getSubTypesOf(Dimension.class)) {
             MetricUtils.scanTags(clz);

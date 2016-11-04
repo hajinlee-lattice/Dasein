@@ -59,12 +59,6 @@ public class MatchGuideBook extends GuideBook {
                         return decisionGraphEntityMgr.getDecisionGraph(graphName);
                     }
                 });
-        try {
-            decisionGraphLoadingCache.get(defaultGraph);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Failed to load default decision graph " + defaultGraph + " into loading cache",
-                    e);
-        }
     }
 
     @Override
@@ -73,7 +67,12 @@ public class MatchGuideBook extends GuideBook {
         if (fuzzyMatchAnchorPath.equals(currentLocation)) {
             return nextMoveForAnchor(matchTraveler);
         } else {
-            return nextMoveForMicroEngine(matchTraveler);
+            String nextStop = nextMoveForMicroEngine(matchTraveler);
+            if (fuzzyMatchAnchorPath.equals(nextStop)) {
+                String lastStop = toActorName(actorSystem.getActorClassName(currentLocation));
+                matchTraveler.setLastStop(lastStop);
+            }
+            return nextStop;
         }
     }
 
@@ -94,7 +93,7 @@ public class MatchGuideBook extends GuideBook {
             return;
         }
 
-        String nodeName = actorSystem.getActorClassName(traversedActor).replace(MICROENGINE_ACTOR, "");
+        String nodeName = toActorName(actorSystem.getActorClassName(traversedActor));
         DecisionGraph.Node thisNode = decisionGraph.getNode(nodeName);
         if (thisNode == null) {
             log.error("Cannot find node named " + nodeName);
@@ -102,7 +101,7 @@ public class MatchGuideBook extends GuideBook {
         List<DecisionGraph.Node> children = thisNode.getChildren();
         List<String> childNodes = new ArrayList<>();
         for (DecisionGraph.Node child : children) {
-            String actorPath = actorSystem.getActorRef(child.getName() + MICROENGINE_ACTOR).path()
+            String actorPath = actorSystem.getActorRef(toActorClassName(child.getName())).path()
                     .toSerializationFormat();
             childNodes.add(actorPath);
         }
@@ -127,7 +126,7 @@ public class MatchGuideBook extends GuideBook {
             String[] startingNodes = new String[decisionGraph.getStartingNodes().size()];
             for (int i = 0; i < startingNodes.length; i++) {
                 DecisionGraph.Node node = decisionGraph.getStartingNodes().get(i);
-                String actorPath = actorSystem.getActorRef(node.getName() + MICROENGINE_ACTOR).path()
+                String actorPath = actorSystem.getActorRef(toActorClassName(node.getName())).path()
                         .toSerializationFormat();
                 startingNodes[i] = actorPath;
             }
@@ -172,6 +171,14 @@ public class MatchGuideBook extends GuideBook {
             traveler.setDecisionGraph(defaultGraph);
         }
         return decisionGraphLoadingCache.get(graphName);
+    }
+
+    private String toActorName(String actorClassName) {
+        return actorClassName.replace(MICROENGINE_ACTOR, "");
+    }
+
+    private String toActorClassName(String actorName) {
+        return actorName + MICROENGINE_ACTOR;
     }
 
 }

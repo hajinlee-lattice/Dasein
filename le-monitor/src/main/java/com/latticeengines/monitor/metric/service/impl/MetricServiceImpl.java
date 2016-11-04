@@ -51,4 +51,11 @@ public class MetricServiceImpl implements MetricService {
         }
     }
 
+    @Override
+    public void enable() {
+        for (MetricWriter writer : metricWriters) {
+            writer.enable();
+        }
+    }
+
 }

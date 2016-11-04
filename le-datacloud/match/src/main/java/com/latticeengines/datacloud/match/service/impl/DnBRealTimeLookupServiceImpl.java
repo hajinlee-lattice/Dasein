@@ -17,9 +17,9 @@ import org.springframework.web.client.RestTemplate;
 import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
-import com.latticeengines.domain.exposed.datacloud.match.DnBKeyType;
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
-import com.latticeengines.domain.exposed.datacloud.match.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
 @Component
 public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {

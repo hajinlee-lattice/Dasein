@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.match;
+package com.latticeengines.domain.exposed.datacloud.dnb;
 
 public class DnBBulkMatchInfo {
     private String serviceBatchId;

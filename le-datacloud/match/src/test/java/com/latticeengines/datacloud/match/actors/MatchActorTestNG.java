@@ -20,8 +20,8 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
-import com.latticeengines.domain.exposed.datacloud.match.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;

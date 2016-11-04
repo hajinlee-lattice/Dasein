@@ -153,6 +153,15 @@ public class InfluxDbMetricWriter implements MetricWriter {
         }
     }
 
+    @Override
+    public void enable() {
+        if (!enabled) {
+            enabled = true;
+            forceDisabled = false;
+            log.info("InfluxDB metric service is enabled.");
+        }
+    }
+
     private <F extends Fact, D extends Dimension> BatchPoints generateBatchPoints(MetricDB db,
             List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());

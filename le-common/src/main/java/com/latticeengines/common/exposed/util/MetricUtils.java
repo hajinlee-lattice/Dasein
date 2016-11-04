@@ -104,7 +104,7 @@ public class MetricUtils {
         Fact fact = measurement.getFact();
 
         Map<String, Object> fieldMap = fieldMapArg;
-        if (fieldMap == null) {
+        if (fieldMap == null || fieldMap.isEmpty()) {
             fieldMap = parseFields(fact);
         }
 
@@ -123,7 +123,7 @@ public class MetricUtils {
             tokens.add(String.format("%s=\"%s\"", entry.getKey(), entry.getValue()));
         }
 
-        return StringUtils.join(tokens, ", ");
+        return StringUtils.join(tokens, " ");
     }
 
     @VisibleForTesting

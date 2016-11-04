@@ -131,5 +131,12 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
     </dependencies>
 </project>

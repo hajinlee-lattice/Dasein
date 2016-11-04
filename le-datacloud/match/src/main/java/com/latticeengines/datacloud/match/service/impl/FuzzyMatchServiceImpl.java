@@ -14,9 +14,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.pattern.Patterns;
 import akka.util.Timeout;
@@ -61,6 +65,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             }
         }
 
+        List<FuzzyMatchHistory> metrics = new ArrayList<>();
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
             if (future != null) {
@@ -70,15 +75,25 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                                 + traveler.getTravelerId() + " in RootOperationUID=" + traveler.getRootOperationUid());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 matchRecord.setLatticeAccountId((String) traveler.getResult());
+                metrics.add(new FuzzyMatchHistory(traveler));
             } else {
-                log.info("Do not have a future for " + JsonUtils.serialize(matchRecords.get(idx)));
+                InternalOutputRecord record = (InternalOutputRecord) matchRecords.get(idx);
+                log.info("Do not have a future for " + JsonUtils.serialize(record));
             }
         }
 
+        writeHistory(metrics);
+    }
+
+    @MatchStep
+    private void writeHistory(List<FuzzyMatchHistory> metrics) {
         try {
-            Thread.sleep(2000L);
+            MeasurementMessage<FuzzyMatchHistory> message = new MeasurementMessage<>();
+            message.setMeasurements(metrics);
+            message.setMetricDB(MetricDB.LDC_Match);
+            actorSystem.getMetricActor().tell(message, null);
         } catch (Exception e) {
-            // ignore
+            log.warn("Failed to extract output metric.", e);
         }
     }
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.match;
+package com.latticeengines.domain.exposed.datacloud.dnb;
 
 import java.util.List;
 

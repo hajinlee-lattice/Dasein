@@ -22,4 +22,6 @@ public interface MetricService {
 
     void disable();
 
+    void enable();
+
 }

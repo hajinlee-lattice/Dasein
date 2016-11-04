@@ -1,6 +1,10 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-public class MatchKeyTuple {
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.datacloud.match.service.impl.MatchConstants;
+
+public class MatchKeyTuple implements Fact {
     private String domain;
     private String name;
     private String city;
@@ -12,6 +16,7 @@ public class MatchKeyTuple {
     private String duns;
     private String email;
 
+    @MetricField(name = MatchConstants.DOMAIN_FIELD)
     public String getDomain() {
         return domain;
     }
@@ -20,6 +25,7 @@ public class MatchKeyTuple {
         this.domain = domain;
     }
 
+    @MetricField(name = MatchConstants.NAME_FIELD)
     public String getName() {
         return name;
     }
@@ -28,6 +34,7 @@ public class MatchKeyTuple {
         this.name = name;
     }
 
+    @MetricField(name = MatchConstants.CITY_FIELD)
     public String getCity() {
         return city;
     }
@@ -36,6 +43,7 @@ public class MatchKeyTuple {
         this.city = city;
     }
 
+    @MetricField(name = MatchConstants.STATE_FIELD)
     public String getState() {
         return state;
     }
@@ -44,6 +52,7 @@ public class MatchKeyTuple {
         this.state = state;
     }
 
+    @MetricField(name = MatchConstants.COUNTRY_FIELD)
     public String getCountry() {
         return country;
     }
@@ -52,6 +61,7 @@ public class MatchKeyTuple {
         this.country = country;
     }
 
+    @MetricField(name = "CountryCode")
     public String getCountryCode() {
         return countryCode;
     }
@@ -60,6 +70,7 @@ public class MatchKeyTuple {
         this.countryCode = countryCode;
     }
 
+    @MetricField(name = MatchConstants.ZIPCODE_FIELD)
     public String getZipcode() {
         return zipcode;
     }
@@ -68,6 +79,7 @@ public class MatchKeyTuple {
         this.zipcode = zipcode;
     }
 
+    @MetricField(name = MatchConstants.PHONE_NUM_FIELD)
     public String getPhoneNumber() {
         return phoneNumber;
     }
@@ -76,6 +88,7 @@ public class MatchKeyTuple {
         this.phoneNumber = phoneNumber;
     }
 
+    @MetricField(name = MatchConstants.DUNS_FIELD)
     public String getDuns() {
         return duns;
     }
@@ -84,6 +97,7 @@ public class MatchKeyTuple {
         this.duns = duns;
     }
 
+    @MetricField(name = MatchConstants.EMAIL_FIELD)
     public String getEmail() {
         return email;
     }

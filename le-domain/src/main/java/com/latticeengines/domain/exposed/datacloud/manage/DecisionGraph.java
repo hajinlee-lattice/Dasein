@@ -44,9 +44,6 @@ public class DecisionGraph implements HasPid, Serializable {
     private String edges;
 
     @Transient
-    private List<Node> nodes;
-
-    @Transient
     private List<Node> startingNodes;
 
     @Transient
@@ -101,13 +98,6 @@ public class DecisionGraph implements HasPid, Serializable {
         return startingNodes;
     }
 
-    public List<Node> getNodes() {
-        if (nodes == null) {
-            constructGraph();
-        }
-        return nodes;
-    }
-
     public Node getNode(String nodeName) {
         if (nodeMap == null) {
             constructGraph();
@@ -132,11 +122,6 @@ public class DecisionGraph implements HasPid, Serializable {
                 Node child = nodeMap.get(nodeNameList.get(idx2));
                 node.addChild(child);
             }
-        }
-
-        nodes = new ArrayList<>();
-        for (String nodeName: getVertices().split(",")) {
-            nodes.add(nodeMap.get(nodeName));
         }
 
         startingNodes = new ArrayList<>();

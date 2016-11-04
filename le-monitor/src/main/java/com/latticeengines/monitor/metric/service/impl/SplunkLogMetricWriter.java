@@ -2,6 +2,7 @@ package com.latticeengines.monitor.metric.service.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,14 +56,14 @@ public class SplunkLogMetricWriter implements MetricWriter {
 
     private <F extends Fact, D extends Dimension> void writeInternal(MetricDB db,
             List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
-        if (enabled) {
-            for (int i = 0; i < measurements.size(); i++) {
-                Measurement<F, D> measurement = measurements.get(i);
-                Map<String, Object> fieldMap = fieldMaps.get(i);
-
-                if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
-                    log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement, fieldMap));
-                }
+        for (int i = 0; i < measurements.size(); i++) {
+            Measurement<F, D> measurement = measurements.get(i);
+            Map<String, Object> fieldMap = new HashMap<>();
+            if (fieldMaps != null) {
+                fieldMap = fieldMaps.get(i);
+            }
+            if (measurement.getMetricStores().contains(MetricStoreImpl.SPLUNK_LOG)) {
+                log.info(logPrefix + "MetricDB=\"" + db + "\" " + MetricUtils.toLogMessage(measurement, fieldMap));
             }
         }
     }
@@ -72,6 +73,14 @@ public class SplunkLogMetricWriter implements MetricWriter {
         if (enabled) {
             log.info("Disable splunk log metric writer.");
             enabled = false;
+        }
+    }
+
+    @Override
+    public void enable() {
+        if (!enabled) {
+            log.info("Enable splunk log metric writer.");
+            enabled = true;
         }
     }
 

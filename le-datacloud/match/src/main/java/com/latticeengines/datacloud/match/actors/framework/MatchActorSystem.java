@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
+import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.TimerMessage;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
@@ -94,6 +95,10 @@ public class MatchActorSystem {
         return getActorRef(FuzzyMatchAnchorActor.class);
     }
 
+    public ActorRef getMetricActor() {
+        return getActorRef(MetricActor.class);
+    }
+
     public void sendResponse(Object response, String returnAddress) {
         ActorRef ref = system.actorFor(returnAddress);
         ref.tell(response, null);
@@ -124,6 +129,8 @@ public class MatchActorSystem {
         initMicroEngines();
 
         initNamedActor(FuzzyMatchAnchorActor.class);
+
+        initNamedActor(MetricActor.class);
 
         log.info("All match actors started");
     }

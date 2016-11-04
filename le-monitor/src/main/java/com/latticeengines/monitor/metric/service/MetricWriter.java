@@ -15,4 +15,6 @@ public interface MetricWriter {
 
     void disable();
 
+    void enable();
+
 }
