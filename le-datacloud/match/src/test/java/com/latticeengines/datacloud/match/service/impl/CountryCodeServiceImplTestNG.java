@@ -16,7 +16,6 @@ import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.service.CountryCodeService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
-
 @Component
 public class CountryCodeServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final Log log = LogFactory.getLog(CountryCodeServiceImplTestNG.class);

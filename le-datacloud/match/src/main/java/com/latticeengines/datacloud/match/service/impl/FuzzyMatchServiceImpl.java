@@ -95,6 +95,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         if (nameLocationInfo != null) {
             matchKeyTuple.setCity(nameLocationInfo.getCity());
             matchKeyTuple.setCountry(nameLocationInfo.getCountry());
+            matchKeyTuple.setCountryCode(nameLocationInfo.getCountryCode());
             matchKeyTuple.setName(nameLocationInfo.getName());
             matchKeyTuple.setState(nameLocationInfo.getState());
             matchKeyTuple.setZipcode(nameLocationInfo.getZipCode());

@@ -3,15 +3,19 @@ package com.latticeengines.datacloud.match.actors;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -23,15 +27,23 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+@Component
 public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(MatchActorTestNG.class);
+
     @Autowired
     private MatchActorSystem actorSystem;
 
-    @Test
+    @Test(groups = "functional")
     public void testDnBActor() throws Exception {
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
         msg.setCallerMicroEngineReference(null);
-        msg.setInputData("");
+        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+        matchKeyTuple.setCountryCode("US");
+        matchKeyTuple.setState("ARIZONA");
+        matchKeyTuple.setCity("GILBERT");
+        matchKeyTuple.setName("BENCHMARK BLINDS");
+        msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid);
         msg.setMatchTravelerContext(matchTravelerContext);

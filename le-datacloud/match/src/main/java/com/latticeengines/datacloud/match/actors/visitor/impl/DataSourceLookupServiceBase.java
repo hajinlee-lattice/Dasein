@@ -15,7 +15,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     @Autowired
     private MatchActorSystem actorSystem;
 
-    abstract protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
+    abstract protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
@@ -33,7 +33,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
                 } catch (InterruptedException e) {
                 }
 
-                String result = null;
+                Object result = null;
                 if (request instanceof DataSourceLookupRequest) {
                     result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
                 }
@@ -53,7 +53,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     public Response syncLookup(Object request) {
         Response response = new Response();
         if (request instanceof DataSourceLookupRequest) {
-            String result = lookupFromService(null, (DataSourceLookupRequest) request);
+            Object result = lookupFromService(null, (DataSourceLookupRequest) request);
             response.setResult(result);
         }
         return response;

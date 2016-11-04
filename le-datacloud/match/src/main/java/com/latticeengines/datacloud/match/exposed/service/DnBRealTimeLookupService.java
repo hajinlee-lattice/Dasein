@@ -1,10 +1,11 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
-import com.latticeengines.domain.exposed.datacloud.match.DnBMatchEntry;
+import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
 
 public interface DnBRealTimeLookupService {
 
-    public DnBMatchEntry realtimeEntityLookup(DnBMatchEntry input);
+    DnBMatchOutput realtimeEntityLookup(MatchKeyTuple input);
 
-    public DnBMatchEntry realtimeEmailLookup(DnBMatchEntry input);
+    DnBMatchOutput realtimeEmailLookup(MatchKeyTuple input);
 }

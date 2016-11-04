@@ -8,6 +8,7 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
+import com.latticeengines.domain.exposed.datacloud.match.DnBMatchOutput;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
@@ -24,7 +25,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
 
         if ((matchKeyTuple.getCity() != null //
                 || matchKeyTuple.getState() != null) //
-                && matchKeyTuple.getCountry() != null//
+                && matchKeyTuple.getCountryCode() != null//
                 && matchKeyTuple.getName() != null) {
             return true;
         }
@@ -37,7 +38,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
         if (response.getResult() != null) {
             MatchTraveler context = (MatchTraveler) response.getTravelerContext();
             MatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
-            matchKeyTuple.setDuns((String) response.getResult());
+            DnBMatchOutput res = (DnBMatchOutput) response.getResult();
+            matchKeyTuple.setDuns(res.getDuns());
             response.setResult(null);
         }
     }

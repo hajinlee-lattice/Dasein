@@ -41,4 +41,9 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
         // handle timer message
         log.debug("Got timer call");
     }
+    
+    @Override
+    protected boolean shouldDoAsyncLookup() {
+        return true;
+    }
 }

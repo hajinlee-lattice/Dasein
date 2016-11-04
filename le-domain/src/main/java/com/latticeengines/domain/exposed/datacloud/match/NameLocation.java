@@ -17,6 +17,9 @@ public class NameLocation {
     @JsonProperty("Country")
     private String country;
 
+    @JsonProperty("CountryCode")
+    private String countryCode;
+
     @JsonProperty("State")
     private String state;
 
@@ -44,6 +47,14 @@ public class NameLocation {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
     public String getState() {
