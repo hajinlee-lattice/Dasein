@@ -34,7 +34,10 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             Traveler traveler = null;
             if (msg instanceof Traveler) {
                 traveler = (Traveler) msg;
-                traveler.debug(getClass().getSimpleName() + " received " + traveler);
+                if (logCheckInNOut()) {
+                    traveler.checkIn(getClass().getSimpleName());
+                }
+                log.debug(self() + " received traveler " + traveler);
 
                 setOriginalSender(traveler, sender());
                 boolean hasSentMessageToDataSourceActor = process(traveler);
@@ -46,7 +49,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
                 traveler = response.getTravelerContext();
-                traveler.debug(getClass().getSimpleName() + " received a response for " + traveler + ": " + response.getResult());
+                log.debug(self() + " received a response for traveler " + traveler + ": " + response.getResult());
                 process(response);
             }
 
@@ -66,9 +69,12 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             nextLocation = traveler.getAnchorActorLocation();
         }
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
-        traveler.debug(getClass().getSimpleName() + " sent " + traveler + " to " + getActorName(nextActorRef));
 
         getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
+        if (logCheckInNOut()) {
+            traveler.checkOut(getClass().getSimpleName(), getActorName(nextActorRef));
+        }
+        log.debug(self() + " is sending traveler " + traveler + " to " + nextActorRef);
         nextActorRef.tell(traveler, currentActorRef);
     }
 
@@ -78,6 +84,10 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     protected String getActorName(ActorRef actorRef) {
         return actorRef.path().toSerializationFormat();
+    }
+
+    protected boolean logCheckInNOut() {
+        return true;
     }
 
 }

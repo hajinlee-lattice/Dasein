@@ -9,7 +9,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
-    private MatchKeyTuple matchKeyTuple;
+    private final MatchKeyTuple matchKeyTuple;
     private String dataCloudVersion;
     private String decisionGraph;
     private String lastStop;
@@ -19,8 +19,10 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private Boolean isMatched = false;
     private Boolean isProcessed = false;
 
-    public MatchTraveler(String rootOperationUid) {
+    public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
         super(rootOperationUid);
+        this.matchKeyTuple = matchKeyTuple;
+        this.start();
     }
 
     @Override
@@ -65,10 +67,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return matchKeyTuple;
     }
 
-    public void setMatchKeyTuple(MatchKeyTuple matchKeyTuple) {
-        this.matchKeyTuple = matchKeyTuple;
-    }
-
     public DnBMatchOutput getDnBMatchOutput() {
         return dnBMatchOutput;
     }
@@ -101,7 +99,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     }
 
     @Override
-    public String toString() {
-        return String.format("MatchTraveler[%s:%s]%s", getTravelerId(), getRootOperationUid(), getMatchKeyTuple());
+    public void start() {
+        super.start();
+        debug("Has " + getMatchKeyTuple() + " to begin with.");
     }
 }

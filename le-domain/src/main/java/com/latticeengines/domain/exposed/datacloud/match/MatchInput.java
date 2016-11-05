@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -34,6 +36,7 @@ public class MatchInput implements Fact, Dimension {
     private Boolean excludePublicDomains = false;
     private Boolean fetchOnly;
     private String decisionGraph;
+    private Level logLevel;
 
     private boolean latticeAccountIdOnly = false;
 
@@ -106,6 +109,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("DecisionGraph")
     public void setDecisionGraph(String decisionGraph) {
         this.decisionGraph = decisionGraph;
+    }
+
+    @JsonProperty("LogLevel")
+    public Level getLogLevel() {
+        return logLevel;
+    }
+
+    @JsonProperty("LogLevel")
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
     }
 
     @JsonProperty("KeyMap")

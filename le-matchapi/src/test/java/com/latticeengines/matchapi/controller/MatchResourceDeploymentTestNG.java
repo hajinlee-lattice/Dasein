@@ -139,7 +139,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
             if ("yahoo.com".equals(domains.get(idx % domains.size()))  //
                     || "gmail.com".equals(domains.get(idx % domains.size()))) {
-                Assert.assertTrue(outputRecord.getResult().get(0).getMatchLog().size() > 0);
+                Assert.assertTrue(outputRecord.getResult().get(0).getMatchLogs().size() > 0);
             }
             idx++;
         }

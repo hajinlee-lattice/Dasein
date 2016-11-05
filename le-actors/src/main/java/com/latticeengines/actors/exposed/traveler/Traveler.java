@@ -10,8 +10,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
@@ -21,20 +23,19 @@ public abstract class Traveler {
 
     private final String rootOperationUid;
     private final String travelerId;
-    private final List<TravelLog> travelLogs;
-    private final Map<String, Set<String>> visitedHistory;
+    private final List<TravelLog> travelStory = new ArrayList<>();
+    private final Map<String, Set<String>> visitedHistory = new HashMap<>();
+    private final Map<String, Long> checkpoints = new HashMap<>();
+    private final Queue<String> visitingQueue = new LinkedList<>();
     private TravelException travelException;
     private Object result;
     private String originalLocation;
     private String anchorActorLocation;
-    private Queue<String> visitingQueue;
+    private StopWatch stopWatch;
 
     public Traveler(String rootOperationUid) {
         travelerId = UUID.randomUUID().toString();
         this.rootOperationUid = rootOperationUid;
-        this.travelLogs = new ArrayList<>();
-        visitedHistory = new HashMap<>();
-        visitingQueue = new LinkedList<>();
     }
 
     protected abstract Object getInputData();
@@ -47,8 +48,8 @@ public abstract class Traveler {
         return travelerId;
     }
 
-    public List<TravelLog> getTravelLogs() {
-        return travelLogs;
+    public List<TravelLog> getTravelStory() {
+        return travelStory;
     }
 
     public Map<String, Set<String>> getVisitedHistory() {
@@ -120,28 +121,63 @@ public abstract class Traveler {
     }
 
     public void warn(String message, Throwable throwable) {
-        travelLogs.add(new TravelLog(TravelLog.Level.WARN, throwable, message));
-        log.warn(message, throwable);
+        travelStory.add(new TravelLog(Level.WARN, throwable, prefixByAge(message)));
     }
 
     public void warn(String message) {
-        travelLogs.add(new TravelLog(TravelLog.Level.WARN, message));
-        log.warn(message);
+        travelStory.add(new TravelLog(Level.WARN, prefixByAge(message)));
     }
 
     public void info(String message) {
-        travelLogs.add(new TravelLog(TravelLog.Level.INFO, message));
-        log.info(message);
+        travelStory.add(new TravelLog(Level.INFO, prefixByAge(message)));
     }
 
     public void debug(String message) {
-        travelLogs.add(new TravelLog(TravelLog.Level.DEBUG, message));
-        log.debug(message);
+        travelStory.add(new TravelLog(Level.DEBUG, prefixByAge(message)));
+    }
+
+    private String prefixByAge(String message) {
+        stopWatch.split();
+        String newMessage = "[" + stopWatch.toSplitString() + "] " + message;
+        stopWatch.unsplit();
+        return newMessage;
+    }
+
+    public void checkIn(String site) {
+        debug("Arrived " + site + ".");
+        checkpoints.put(site, age());
+    }
+
+    public void checkOut(String site, String nextSite) {
+        if (checkpoints.containsKey(site)) {
+            Long duration = age() - checkpoints.get(site);
+            debug(String.format("Spend Duration=%d ms at %s, and is now heading to %s", duration, site, nextSite));
+            // TODO: generate a metric data point
+        }
+    }
+
+    public void start() {
+        stopWatch = new StopWatch();
+        stopWatch.start();
+        debug("Started the journey.");
+    }
+
+    public void finish() {
+        String mood = getResult() != null ? "happily" : "sadly";
+        debug(String.format("Ended the journey %s after Duration=%d ms.", mood, age()));
+        stopWatch.stop();
+    }
+
+    private Long age() {
+        stopWatch.split();
+        Long age = stopWatch.getSplitTime();
+        stopWatch.unsplit();
+        return age;
     }
 
     @Override
     public String toString() {
-        return String.format("Traveler[%s:%s]", getTravelerId(), getRootOperationUid());
+        return String.format("%s[%s:%s]", getClass().getSimpleName(), getTravelerId(), getRootOperationUid());
     }
 
 }

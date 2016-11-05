@@ -79,8 +79,8 @@ public abstract class AbstractMatcher implements Matcher {
             if (outputRecord.getPreMatchNameLocation() != null) {
                 nameLocationStr = JsonUtils.serialize(outputRecord.getPreMatchNameLocation());
             }
-            String errorMessages = outputRecord.getMatchLog() == null ? ""
-                    : Joiner.on(",").join(outputRecord.getMatchLog());
+            String errorMessages = outputRecord.getMatchLogs() == null ? ""
+                    : Joiner.on(",").join(outputRecord.getMatchLogs());
 
             if (log.isDebugEnabled()) {
                 log.debug(String.format(

@@ -33,8 +33,8 @@ public class OutputRecord {
     @JsonProperty("Output")
     private List<Object> output;
 
-    @JsonProperty("matchLog")
-    private List<String> matchLog;
+    @JsonProperty("matchLogs")
+    private List<String> matchLogs;
 
     public Integer getRowNumber() {
         return rowNumber;
@@ -100,23 +100,19 @@ public class OutputRecord {
         this.output = output;
     }
 
-    public List<String> getMatchLog() {
-        return matchLog;
+    public List<String> getMatchLogs() {
+        return matchLogs;
     }
 
-    public void setMatchLog(List<String> matchLog) {
-        this.matchLog = matchLog;
+    public void setMatchLogs(List<String> matchLogs) {
+        this.matchLogs = matchLogs;
     }
 
-    public void addMatchLog(String message) {
-        List<String> msgs;
-        if (this.matchLog == null) {
-            msgs = new ArrayList<>();
-        } else {
-            msgs = new ArrayList<>(this.matchLog);
+    public void log(String log) {
+        if (this.matchLogs == null) {
+            matchLogs = new ArrayList<>();
         }
-        msgs.add(message);
-        this.matchLog = msgs;
+        matchLogs.add(log);
     }
 
 }

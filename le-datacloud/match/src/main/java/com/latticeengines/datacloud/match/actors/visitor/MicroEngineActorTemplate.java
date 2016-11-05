@@ -52,6 +52,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
             datasourceRef.tell(req, self());
             return true;
         } else {
+            matchTraveler.debug("Rejected by " + getClass().getSimpleName());
             guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
             return false;
         }

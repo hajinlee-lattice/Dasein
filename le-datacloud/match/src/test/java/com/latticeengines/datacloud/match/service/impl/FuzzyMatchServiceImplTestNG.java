@@ -56,7 +56,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             matchRecord.setParsedDomain(VALID_DOMAIN);
 
             service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "DragonClaw");
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "DragonClaw", Level.DEBUG);
 
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
@@ -87,7 +87,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         try {
             List<OutputRecord> matchRecords = prepareData(numRequests);
             service.callMatch(matchRecords, UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH);
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH,
+                    Level.DEBUG);
 
             boolean hasError = false;
             for (OutputRecord result : matchRecords) {
@@ -120,9 +121,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     @DataProvider(name = "actorTestData")
     public Object[][] provideActorTestData() {
-        return new Object[][] {
-                { 100, false },   // 100 match in realtime mode
-                { 1000, true }    // 1000 match in batch mode
+        return new Object[][] { { 1000, true }, // 1000 match in batch mode
+                { 100, false }, // 100 match in realtime mode
         };
     }
 
@@ -139,7 +139,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
                 matchRecord.setParsedDomain(VALID_DOMAIN);
             }
 
-            if (i % 5 ==0) {
+            if (i % 5 == 0) {
                 NameLocation parsedNameLocation = new NameLocation();
                 parsedNameLocation.setName(UUID.randomUUID().toString());
                 parsedNameLocation.setCountry(UUID.randomUUID().toString());

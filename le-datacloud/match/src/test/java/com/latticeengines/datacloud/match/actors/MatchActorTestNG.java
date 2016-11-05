@@ -48,7 +48,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchKeyTuple.setName("LATTICE ENGINES");
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
-        MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid);
+        MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
         msg.setMatchTravelerContext(matchTravelerContext);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);

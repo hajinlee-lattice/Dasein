@@ -50,6 +50,7 @@ public class FuzzyMatchHelper implements DbHelper {
     public boolean accept(String version) {
         return MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
+
     @Override
     public MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning) {
         return matchContext;
@@ -62,23 +63,26 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public MatchContext fetch(MatchContext context) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();
-        
+
         boolean fetchOnly = Boolean.TRUE.equals(context.getInput().getFetchOnly());
         if (!fetchOnly) {
             if (useFuzzyMatch) {
                 try {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                            dataCloudVersion, context.getInput().getDecisionGraph());
+                            dataCloudVersion, context.getInput().getDecisionGraph(), context.getInput().getLogLevel());
                 } catch (Exception e) {
                     log.error("Failed to run fuzzy match.", e);
                 }
             } else {
                 AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
-                for (InternalOutputRecord record: context.getInternalResults()) {
-                    if (record.isPublicDomain()) {
-                        accountLookupRequest.addLookupPair(null, record.getParsedDuns());
-                    } else {
-                        accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
+                for (InternalOutputRecord record : context.getInternalResults()) {
+                    if (!record.isFailed()) {
+                        if (record.isPublicDomain()
+                                && !Boolean.TRUE.equals(context.getInput().getExcludePublicDomains())) {
+                            accountLookupRequest.addLookupPair(null, record.getParsedDuns());
+                        } else {
+                            accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
+                        }
                     }
                 }
                 List<String> ids = accountLookupService.batchLookupIds(accountLookupRequest);

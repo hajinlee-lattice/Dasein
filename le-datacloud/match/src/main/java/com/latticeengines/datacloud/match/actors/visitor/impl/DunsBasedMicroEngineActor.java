@@ -28,4 +28,9 @@ public class DunsBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
         return matchKeyTuple.getDuns() != null;
     }
 
+    @Override
+    protected String usedKeys(MatchKeyTuple keyTuple) {
+        return String.format("( DUNS=%s )", keyTuple.getDuns());
+    }
+
 }

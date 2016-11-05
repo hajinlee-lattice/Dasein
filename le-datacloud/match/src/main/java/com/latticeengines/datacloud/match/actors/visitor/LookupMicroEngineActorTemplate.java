@@ -17,15 +17,19 @@ public abstract class LookupMicroEngineActorTemplate extends MicroEngineActorTem
 
     @Override
     protected void process(Response response) {
-        MatchTraveler context = (MatchTraveler) response.getTravelerContext();
+        MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         if (response.getResult() != null) {
             // got lattice account id from data source wrapper actor
-            context.setResult(response.getResult());
-            context.setMatched(true);
-            context.debug(getClass().getSimpleName() + " found a lattice account id " + response.getResult() + " for " + context);
+            traveler.setResult(response.getResult());
+            traveler.setMatched(true);
+            traveler.debug(
+                    "Found a precious LatticeAccountId=" + response.getResult() + " at " + getClass().getSimpleName()
+                            + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
         } else {
-            context.debug(getClass().getSimpleName() + " did not find any lattice account id for " + context);
+            traveler.debug("Did not get any luck at " + getClass().getSimpleName() + " with "
+                    + usedKeys(traveler.getMatchKeyTuple()));
         }
     }
 
+    protected abstract String usedKeys(MatchKeyTuple keyTuple);
 }

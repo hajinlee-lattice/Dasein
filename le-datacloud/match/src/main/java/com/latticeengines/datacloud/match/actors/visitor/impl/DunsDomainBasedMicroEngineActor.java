@@ -32,4 +32,9 @@ public class DunsDomainBasedMicroEngineActor extends LookupMicroEngineActorTempl
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
         return (matchKeyTuple.getDomain() != null && matchKeyTuple.getDuns() != null);
     }
+
+    @Override
+    protected String usedKeys(MatchKeyTuple keyTuple) {
+        return String.format("( Domain=%s, DUNS=%s )", keyTuple.getDomain(), keyTuple.getDuns());
+    }
 }

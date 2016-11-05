@@ -68,4 +68,10 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
     protected String getActorName(ActorRef actorRef) {
         return matchActorSystem.getActorName(actorRef);
     }
+
+    @Override
+    protected boolean logCheckInNOut() {
+        return false;
+    }
+
 }

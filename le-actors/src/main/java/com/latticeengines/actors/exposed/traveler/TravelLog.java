@@ -1,5 +1,7 @@
 package com.latticeengines.actors.exposed.traveler;
 
+import org.apache.log4j.Level;
+
 public class TravelLog {
 
     private final String message;
@@ -16,10 +18,6 @@ public class TravelLog {
         this(level, null, message);
     }
 
-    public TravelLog(Level level, Throwable throwable) {
-        this(level,throwable, null);
-    }
-
     public String getMessage() {
         return message;
     }
@@ -30,10 +28,6 @@ public class TravelLog {
 
     public Throwable getThrowable() {
         return throwable;
-    }
-
-    public enum Level {
-        WARN, INFO, DEBUG
     }
 
 }

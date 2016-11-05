@@ -44,12 +44,15 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     @Override
     protected void process(Response response) {
         if (response.getResult() != null) {
-            MatchTraveler context = (MatchTraveler) response.getTravelerContext();
-            MatchKeyTuple matchKeyTuple = context.getMatchKeyTuple();
+            MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
+            MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
             DnBMatchOutput res = (DnBMatchOutput) response.getResult();
+            if (res.getDuns() != null) {
+                traveler.debug("Found DUNS=" + res.getDuns() + " at " + getClass().getSimpleName() + ".");
+            }
             matchKeyTuple.setDuns(res.getDuns());
             if (res.getDnbCode() != DnBReturnCode.OK) {
-                context.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + context + ": "
+                traveler.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + traveler + ": "
                         + res.getDnbCode().getMessage());
             }
             response.setResult(null);

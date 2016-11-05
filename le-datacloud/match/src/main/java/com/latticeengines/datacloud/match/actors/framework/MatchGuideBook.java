@@ -147,10 +147,7 @@ public class MatchGuideBook extends GuideBook {
                     return destinationLocation;
                 }
             } while (StringUtils.isNotEmpty(destinationLocation));
-            traveler.debug("Depleted the visiting queue, sending " + traveler + " back to anchor.");
-        } else {
-            traveler.debug(
-                    "Found lattice account id " + traveler.getResult() + ", sending " + traveler + " back to anchor.");
+            traveler.debug(traveler + " has no where else to go but heading back to home.");
         }
 
         return traveler.getAnchorActorLocation();
