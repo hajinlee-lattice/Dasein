@@ -47,6 +47,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     public void testSingleTraverse() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
+        LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.DEBUG);
         metricService.enable();
 
         try {
@@ -61,12 +62,13 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
         } finally {
             try {
-                Thread.sleep(10000L);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 // ignore
             }
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
+            LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
             metricService.disable();
         }
@@ -79,6 +81,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         if (!batchMode) {
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
+            LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.DEBUG);
         }
 
         try {
@@ -110,6 +113,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         } finally {
             LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
+            LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
         }
     }

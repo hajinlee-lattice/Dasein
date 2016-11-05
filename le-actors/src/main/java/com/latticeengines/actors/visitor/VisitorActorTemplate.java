@@ -34,7 +34,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             Traveler traveler = null;
             if (msg instanceof Traveler) {
                 traveler = (Traveler) msg;
-                log.debug(self() + " received " + traveler);
+                traveler.debug(getClass().getSimpleName() + " received " + traveler);
 
                 setOriginalSender(traveler, sender());
                 boolean hasSentMessageToDataSourceActor = process(traveler);
@@ -46,7 +46,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
                 traveler = response.getTravelerContext();
-                log.debug(self() + " received a response for " + traveler + ": " + response.getResult());
+                traveler.debug(getClass().getSimpleName() + " received a response for " + traveler + ": " + response.getResult());
                 process(response);
             }
 
@@ -66,17 +66,18 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             nextLocation = traveler.getAnchorActorLocation();
         }
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
-        log.debug(self() + " sent " + traveler + " to " + nextActorRef);
+        traveler.debug(getClass().getSimpleName() + " sent " + traveler + " to " + getActorName(nextActorRef));
 
         getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         nextActorRef.tell(traveler, currentActorRef);
     }
 
-    protected void sendResult(ActorRef nextActorRef, Object result) {
-        nextActorRef.tell(result, self());
-    }
-
     protected void setOriginalSender(Traveler traveler, ActorRef originalSender) {
         // do nothing
     }
+
+    protected String getActorName(ActorRef actorRef) {
+        return actorRef.path().toSerializationFormat();
+    }
+
 }

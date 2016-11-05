@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
-import com.latticeengines.actors.exposed.traveler.TravelWarning;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -50,7 +49,8 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             DnBMatchOutput res = (DnBMatchOutput) response.getResult();
             matchKeyTuple.setDuns(res.getDuns());
             if (res.getDnbCode() != DnBReturnCode.OK) {
-                context.getTravelWarnings().add(new TravelWarning(res.getDnbCode().getMessage()));
+                context.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + context + ": "
+                        + res.getDnbCode().getMessage());
             }
             response.setResult(null);
         }

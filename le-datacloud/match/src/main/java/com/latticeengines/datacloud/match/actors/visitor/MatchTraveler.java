@@ -99,4 +99,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void setLastStop(String lastStop) {
         this.lastStop = lastStop;
     }
+
+    @Override
+    public String toString() {
+        return String.format("MatchTraveler[%s:%s]%s", getTravelerId(), getRootOperationUid(), getMatchKeyTuple());
+    }
 }

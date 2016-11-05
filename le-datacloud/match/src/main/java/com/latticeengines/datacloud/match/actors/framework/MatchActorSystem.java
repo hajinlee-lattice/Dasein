@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,8 +85,18 @@ public class MatchActorSystem {
         return actorRefMap.get(actorClassName);
     }
 
-    String getActorClassName(String actorPath) {
+    String getActorName(String actorPath) {
         return actorPathMap.get(actorPath);
+    }
+
+    public String getActorName(ActorRef actorRef) {
+        String path = actorRef.path().toSerializationFormat();
+        String clzName = getActorName(path);
+        if (StringUtils.isEmpty(clzName)) {
+            return path;
+        } else {
+            return clzName;
+        }
     }
 
     public ActorRef getFuzzyMatchAnchor() {
@@ -145,8 +156,7 @@ public class MatchActorSystem {
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz, boolean useRouting,
             int routingCardinality) {
-        ActorRef actorRef = null;
-
+        ActorRef actorRef;
         if (useRouting) {
             actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz,
                     RoutingLogic.RoundRobinRoutingLogic, routingCardinality);

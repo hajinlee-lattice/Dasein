@@ -10,14 +10,18 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public abstract class Traveler {
 
+    private static final Log log = LogFactory.getLog(Traveler.class);
+
     private final String rootOperationUid;
     private final String travelerId;
-    private final List<String> travelLogs;
-    private final List<TravelWarning> travelWarnings;
+    private final List<TravelLog> travelLogs;
     private final Map<String, Set<String>> visitedHistory;
     private TravelException travelException;
     private Object result;
@@ -29,7 +33,6 @@ public abstract class Traveler {
         travelerId = UUID.randomUUID().toString();
         this.rootOperationUid = rootOperationUid;
         this.travelLogs = new ArrayList<>();
-        travelWarnings = new ArrayList<>();
         visitedHistory = new HashMap<>();
         visitingQueue = new LinkedList<>();
     }
@@ -44,20 +47,8 @@ public abstract class Traveler {
         return travelerId;
     }
 
-    public List<String> getTravelLogs() {
+    public List<TravelLog> getTravelLogs() {
         return travelLogs;
-    }
-
-    public void setTravelLog(String travelLog) {
-        travelLogs.add(travelLog);
-    }
-
-    public List<TravelWarning> getTravelWarnings() {
-        return travelWarnings;
-    }
-
-    public void setTravelWarning(TravelWarning travelWarning) {
-        travelWarnings.add(travelWarning);
     }
 
     public Map<String, Set<String>> getVisitedHistory() {
@@ -69,10 +60,6 @@ public abstract class Traveler {
             visitedHistory.put(traversedActor, new HashSet<String>());
         }
         visitedHistory.get(traversedActor).add(JsonUtils.serialize(getInputData()));
-    }
-
-    public void clearVisitedHistory() {
-        visitedHistory.clear();
     }
 
     public TravelException getTravelException() {
@@ -130,6 +117,26 @@ public abstract class Traveler {
 
     public void setAnchorActorLocation(String anchorActorLocation) {
         this.anchorActorLocation = anchorActorLocation;
+    }
+
+    public void warn(String message, Throwable throwable) {
+        travelLogs.add(new TravelLog(TravelLog.Level.WARN, throwable, message));
+        log.warn(message, throwable);
+    }
+
+    public void warn(String message) {
+        travelLogs.add(new TravelLog(TravelLog.Level.WARN, message));
+        log.warn(message);
+    }
+
+    public void info(String message) {
+        travelLogs.add(new TravelLog(TravelLog.Level.INFO, message));
+        log.info(message);
+    }
+
+    public void debug(String message) {
+        travelLogs.add(new TravelLog(TravelLog.Level.DEBUG, message));
+        log.debug(message);
     }
 
     @Override

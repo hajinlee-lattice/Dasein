@@ -20,7 +20,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
-import com.latticeengines.actors.exposed.traveler.TravelWarning;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -69,7 +68,7 @@ public class MatchGuideBook extends GuideBook {
         } else {
             String nextStop = nextMoveForMicroEngine(matchTraveler);
             if (fuzzyMatchAnchorPath.equals(nextStop)) {
-                String lastStop = toActorName(actorSystem.getActorClassName(currentLocation));
+                String lastStop = toActorName(actorSystem.getActorName(currentLocation));
                 matchTraveler.setLastStop(lastStop);
             }
             return nextStop;
@@ -87,13 +86,13 @@ public class MatchGuideBook extends GuideBook {
         try {
             decisionGraph = getDecisionGraph((MatchTraveler) traveler);
         } catch (Exception e) {
-            traveler.getTravelWarnings().add(new TravelWarning("Failed to retrieve decision graph "
-                    + ((MatchTraveler) traveler).getDecisionGraph() + " from loading cache."));
+            traveler.warn("Failed to retrieve decision graph " + ((MatchTraveler) traveler).getDecisionGraph()
+                    + " from loading cache.", e);
             traveler.clearLocationsToVisitingQueue();
             return;
         }
 
-        String nodeName = toActorName(actorSystem.getActorClassName(traversedActor));
+        String nodeName = toActorName(actorSystem.getActorName(traversedActor));
         DecisionGraph.Node thisNode = decisionGraph.getNode(nodeName);
         if (thisNode == null) {
             log.error("Cannot find node named " + nodeName);
@@ -118,8 +117,8 @@ public class MatchGuideBook extends GuideBook {
             try {
                 decisionGraph = getDecisionGraph(traveler);
             } catch (Exception e) {
-                traveler.getTravelWarnings().add(new TravelWarning(
-                        "Failed to retrieve decision graph " + traveler.getDecisionGraph() + " from loading cache."));
+                traveler.warn(
+                        "Failed to retrieve decision graph " + traveler.getDecisionGraph() + " from loading cache.", e);
                 return traveler.getOriginalLocation();
             }
 
@@ -148,6 +147,10 @@ public class MatchGuideBook extends GuideBook {
                     return destinationLocation;
                 }
             } while (StringUtils.isNotEmpty(destinationLocation));
+            traveler.debug("Depleted the visiting queue, sending " + traveler + " back to anchor.");
+        } else {
+            traveler.debug(
+                    "Found lattice account id " + traveler.getResult() + ", sending " + traveler + " back to anchor.");
         }
 
         return traveler.getAnchorActorLocation();

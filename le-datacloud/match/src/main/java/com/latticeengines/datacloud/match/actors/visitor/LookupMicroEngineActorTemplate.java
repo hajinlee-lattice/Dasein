@@ -22,7 +22,9 @@ public abstract class LookupMicroEngineActorTemplate extends MicroEngineActorTem
             // got lattice account id from data source wrapper actor
             context.setResult(response.getResult());
             context.setMatched(true);
-            log.debug(self() + " found a match for traveler " + context.getTravelerId());
+            context.debug(getClass().getSimpleName() + " found a lattice account id " + response.getResult() + " for " + context);
+        } else {
+            context.debug(getClass().getSimpleName() + " did not find any lattice account id for " + context);
         }
     }
 

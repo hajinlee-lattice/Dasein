@@ -13,6 +13,7 @@ import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
+import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 
@@ -31,6 +32,9 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
     @Autowired
     @Qualifier("matchGuideBook")
     protected MatchGuideBook guideBook;
+
+    @Autowired
+    private MatchActorSystem matchActorSystem;
 
     @Override
     public GuideBook getGuideBook() {
@@ -58,5 +62,10 @@ public class FuzzyMatchAnchorActor extends VisitorActorTemplate {
         if (traveler.getOriginalLocation() == null) {
             traveler.setOriginalLocation(originalSender.path().toSerializationFormat());
         }
+    }
+
+    @Override
+    protected String getActorName(ActorRef actorRef) {
+        return matchActorSystem.getActorName(actorRef);
     }
 }

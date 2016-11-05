@@ -40,19 +40,19 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
 
     @Override
     protected boolean process(Traveler context) {
-        MatchTraveler travelContext = (MatchTraveler) context;
-        if (accept(travelContext)) {
+        MatchTraveler matchTraveler = (MatchTraveler) context;
+        if (accept(matchTraveler)) {
             ActorRef datasourceRef = matchActorSystem.getActorRef(getDataSourceActorClz());
 
             DataSourceLookupRequest req = new DataSourceLookupRequest();
-            req.setMatchTravelerContext(travelContext);
-            req.setInputData(travelContext.getMatchKeyTuple());
-            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
+            req.setMatchTravelerContext(matchTraveler);
+            req.setInputData(matchTraveler.getMatchKeyTuple());
+            guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
 
             datasourceRef.tell(req, self());
             return true;
         } else {
-            guideBook.logVisit(self().path().toSerializationFormat(), travelContext);
+            guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
             return false;
         }
     }
@@ -60,5 +60,10 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     @Override
     protected String getNextLocation(Traveler traveler) {
         return guideBook.next(getSelf().path().toSerializationFormat(), traveler);
+    }
+
+    @Override
+    protected String getActorName(ActorRef actorRef) {
+        return matchActorSystem.getActorName(actorRef);
     }
 }

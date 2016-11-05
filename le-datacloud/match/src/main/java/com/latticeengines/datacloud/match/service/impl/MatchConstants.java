@@ -17,6 +17,7 @@ public final class MatchConstants {
     public static final String PHONE_NUM_FIELD = "PhoneNumber";
     public static final String EMAIL_FIELD = "Email";
     public static final String DUNS_FIELD = "DUNS";
+    public static final String COUNTRY_CODE_FIELD = "CountryCode";
     public static final String LID_FIELD = "LatticeAccountId";
 
     static final String MODEL = Predefined.Model.getName();
