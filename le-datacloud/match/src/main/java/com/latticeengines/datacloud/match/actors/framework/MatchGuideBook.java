@@ -21,7 +21,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.entitymgr.DecisionGraphEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
@@ -95,7 +94,7 @@ public class MatchGuideBook extends GuideBook {
         String nodeName = toActorName(actorSystem.getActorName(traversedActor));
         DecisionGraph.Node thisNode = decisionGraph.getNode(nodeName);
         if (thisNode == null) {
-            log.error("Cannot find node named " + nodeName);
+            throw new RuntimeException("Cannot find the graph node named " + nodeName);
         }
         List<DecisionGraph.Node> children = thisNode.getChildren();
         List<String> childNodes = new ArrayList<>();
@@ -147,7 +146,7 @@ public class MatchGuideBook extends GuideBook {
                     return destinationLocation;
                 }
             } while (StringUtils.isNotEmpty(destinationLocation));
-            traveler.debug(traveler + " has no where else to go but heading back to home.");
+            traveler.debug("Has no where else to go but heading back to home.");
         }
 
         return traveler.getAnchorActorLocation();
@@ -155,7 +154,7 @@ public class MatchGuideBook extends GuideBook {
 
     private boolean visitSameMicroEngineWithSameDataAgain(String candidateDestination, MatchTraveler traveler) {
         Map<String, Set<String>> history = traveler.getVisitedHistory();
-        String currentContext = JsonUtils.serialize(traveler.getMatchKeyTuple());
+        String currentContext = traveler.getMatchKeyTuple().toString();
         if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
             Set<String> previousData = history.get(candidateDestination);
             return previousData.contains(currentContext);

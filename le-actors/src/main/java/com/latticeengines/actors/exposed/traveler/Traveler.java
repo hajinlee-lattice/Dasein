@@ -15,8 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-
 public abstract class Traveler {
 
     private static final Log log = LogFactory.getLog(Traveler.class);
@@ -60,7 +58,7 @@ public abstract class Traveler {
         if (!visitedHistory.containsKey(traversedActor)) {
             visitedHistory.put(traversedActor, new HashSet<String>());
         }
-        visitedHistory.get(traversedActor).add(JsonUtils.serialize(getInputData()));
+        visitedHistory.get(traversedActor).add(getInputData().toString());
     }
 
     public TravelException getTravelException() {

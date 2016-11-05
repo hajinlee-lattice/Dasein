@@ -28,11 +28,6 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                }
-
                 Object result = null;
                 if (request instanceof DataSourceLookupRequest) {
                     result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
