@@ -43,6 +43,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudMatchFunctionalTestNG
                 String standardizedCountry = LocationUtils.getStandardCountry(countryName);
                 String countryCode = countryCodeService.getCountryCode(standardizedCountry);
                 if (countryCode == null) {
+                    log.info("Input: " + countryName);
                     res = false;
                 }
             }

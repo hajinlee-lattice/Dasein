@@ -22,36 +22,62 @@ public class LocationUtils {
 
     static {
         Object[][] countrySynonData = new Object[][]{ //
-                { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES", "THE UNITED STATES",
-                        "UNITED STATES OF AMERICA", "THE UNITED STATES OF AMERICA", "UNITED STATES OF AMERICA THE",
-                        "AMERICA", "AMERICAN", "UNITED STATES OF AMERICA USA" } }, //
-                { "ANTIGUA AND BARBUDA", new String[] { "ANTIGUA AND BARBUDA", "ANTIGUA BARBUDA", "ANTIGUABARBUDA" } }, //
+                { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES",
+                        "UNITED STATES AMERICA", "AMERICA", "AMERICAN", "UNITED STATES AMERICA USA" } }, //
+                { "ANTIGUA BARBUDA", new String[] { "ANTIGUA BARBUDA", "ANTIGUABARBUDA" } }, //
                 { "ASIA PACIFIC REGION", new String[] { "ASIA PACIFIC REGION", "ASIAPACIFIC REGION", "AP", "APAC" } }, //
                 { "ÅLAND IS", new String[] { "ÅLAND IS", "ALAND IS" } }, //
-                { "BOSNIA AND HERZEGOVINA",
-                        new String[] { "BOSNIA AND HERZEGOVINA", "BOSNIAHERZ", "BOSNIA HERZEGOVINA",
-                                "BOSNIAHERZEGOVINA" } }, //
+                { "AUSTRIA", new String[] { "AUSTRIA", "ÖSTERREICH" } }, //
+                { "AMERICAN SAMOA", new String[] { "AMERICAN SAMOA", "SAMOA AMERICAN" } }, //
+                { "BOSNIA HERZEGOVINA", new String[] { "BOSNIAHERZ", "BOSNIA HERZEGOVINA", "BOSNIAHERZEGOVINA" } }, //
                 { "BRUNEI DARUSSALAM", new String[] { "BRUNEI DARUSSALAM", "BRUNEI" } }, //
-                { "BOLIVIA", new String[] { "BOLIVIA", "BOLIVIA PLURINATIONAL STATE OF" } }, //
+                { "BOLIVIA", new String[] { "BOLIVIA", "BOLIVIA PLURINATIONAL STATE" } }, //
                 { "CONGO",
-                        new String[] { "CONGO", "CONGO KINSHASA", "CONGO BRAZZAVILLE",
-                                "CONGO DEMOCRATIC REPUBLIC OF THE", "CONGO DEMOCRATIC REPUBLIC OF", "CONGO THE DRC",
-                                "CONGO DEMOCRATIC REP", "CONGO DEMOCRATIC REPUBLIC OF THE",
-                                "DEMOCRATIC REPUBLIC OF THE CONGO", "DEMOCRATIC REPUBLIC OF CONGO" } }, //
+                        new String[] { "CONGO", "CONGO KINSHASA", "CONGO BRAZZAVILLE", "CONGO DEMOCRATIC REPUBLIC",
+                                "CONGO DRC", "CONGO DEMOCRATIC REP", "DEMOCRATIC REPUBLIC CONGO", } }, //
+                { "FINLAND", new String[] { "FINLAND", "SUOMI" } }, //
                 { "HONG KONG",
                         new String[] { "HONG KONG", "HONGKONG", "CHINA HONG KONG", "HONG KONG CHINA",
                                 "HONG KONG SAR" } }, //
+                { "KOREA REPUBLIC", new String[] { "KOREA REPUBLIC", "SOUTH KOREA", "KOREA", "S KOREA" } }, //
                 { "MYANMAR", new String[] { "MYANMAR", "BURMA MYANMAR" } }, //
-                { "MACEDONIA THE FORMER YUGOSLAV REPUBLIC OF",
-                        new String[] { "MACEDONIA THE FORMER YUGOSLAV REPUBLIC OF", "YUGOSLAV", "YUGOSLAVIA" } }, //
-                { "SAINT HELENA ASCENSION AND TRISTAN DA CUNHA",
-                        new String[] { "ST HELENA ASCENSION AND TRISTAN DA CUNHA", "ASCENSION IS" } }, //
+                { "MACEDONIA FORMER YUGOSLAV REPUBLIC",
+                        new String[] { "MACEDONIA FORMER YUGOSLAV REPUBLIC", "YUGOSLAV", "YUGOSLAVIA" } }, //
+                { "OMAN", new String[] { "OMAN", "SULTANATE OMAN" } }, //
+                { "SAINT HELENA ASCENSION TRISTAN DA CUNHA",
+                        new String[] { "ST HELENA ASCENSION TRISTAN DA CUNHA", "ASCENSION IS", "ST HELENA" } }, //
                 { "SAMOA", new String[] { "SAMOA", "WESTERN SAMOA" } }, //
+                { "SYRIAN ARAB REPUBLIC",
+                        new String[] { "SYRIAN ARAB REPUBLIC", "SYRIAN ARAB REPUBLIC SYRIA", "SYRIA" } }, //
+                { "SWITZERLAND", new String[] { "SWITZERLAND", "SVIZZERA", "SUISSE", "SCHWEIZ" } }, //
+                { "SWEDEN", new String[] { "SWEDEN", "SVERIGE", "SCHWEDEN" } }, //
+                { "SOUTH AFRICA", new String[] { "SOUTH AFRICA", "SÜDAFRIKA" } }, //
+                { "SINT MAARTEN DUTCH PART", new String[] { "SINT MAARTEN DUTCH PART", "ST MAARTEN", "SINT MAARTEN" } }, //
+                { "ST MARTIN FRENCH PART", new String[] { "ST MARTIN FRENCH PART", "ST MARTIN" } }, //
+                { "ST KITTS NEVIS", new String[] { "ST KITTS NEVIS", "ST KITTS" } }, //
+                { "SRI LANKA", new String[] { "SRI LANKA", "SRILANKA" } }, //
+                { "SERBIA", new String[] { "SERBIA", "SRBIJA" } }, //
+                { "SPAIN", new String[] { "SPAIN", "SPANISH", "SPANIEN" } }, //
+                { "SOUTH GEORGIA SOUTH SANDWICH IS",
+                        new String[] { "SOUTH GEORGIA SOUTH SANDWICH IS", "SOUTH GEORGIA SOUTH SANDWICH ISL" } }, //
+                { "SLOVENIA", new String[] { "SLOVENIA", "SLOVENIJA" } }, //
+                { "SLOVAKIA", new String[] { "SLOVAKIA", "SLOVAKIA SLOVAK REPUBLIC", "SLOVAK REPUBLIC" } }, //
+                { "SIERRA LEONE", new String[] { "SIERRA LEONE", "SIERRA LEONE REPUBLIC" } }, //
+                { "SERBIA", new String[] { "SERBIA", "SERBIA MONTENEGRO", "SERBIA REPUBLIC SERBIA" } }, //
+                { "SAUDI ARABIA", new String[] { "SAUDI ARABIA", "SAUDIARABIA" } }, //
+                { "ST BARTHÉLEMY", new String[] { "ST BARTHÉLEMY", "ST BARTHELEMY" } }, //
+                { "SAO TOME PRINCIPE", new String[] { "SAO TOME PRINCIPE", "S TOME PRINCIPE", "SÃO TOMÉ PRÍNCIPE" } }, //
+                { "TURKEY", new String[] { "TURKEY", "TURKISH", "TÜRKIYE", "TURKIYE" } }, //
+                { "TUNISIA", new String[] { "TUNISIA", "TUNISIE" } }, //
+                { "TRINIDAD TOBAGO", new String[] { "TRINIDAD TOBAGO", "TRINIDAD" } }, //
+                { "TANZANIA UNITED REPUBLIC", new String[] { "TANZANIA UNITED REPUBLIC", "TANZANIA" } }, //
+                { "TAIWAN PROVINCE CHINA",
+                        new String[] { "TAIWAN PROVINCE CHINA", "TAIWAN ROC", "TAIWAN REPUBLIC CHINA", "TAIWAN R O C",
+                                "TAIWAN CHINA", "TAIWAN" } }, //
                 { "UNITED KINGDOM",
-                        new String[] { "UNITED KINGDOM", "UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND",
-                                "UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND THE", "GREAT BRITAIN",
-                                "GREAT BRITAIN UK", "THE UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND",
-                                "NORTHERN IRELAND", "WALES", "UNITED KINGDOM GREAT BRITAIN", "UK", "U K" } }, //
+                        new String[] { "UNITED KINGDOM", "UNITED KINGDOM GREAT BRITAIN NORTHERN IRELAND",
+                                "GREAT BRITAIN", "GREAT BRITAIN UK", "NORTHERN IRELAND", "WALES",
+                                "UNITED KINGDOM GREAT BRITAIN", "UK", "U K", "SCOTLAND" } }, //
                 { "UNITED STATES MINOR OUTLYING IS",
                         new String[] { "UNITED STATES MINOR OUTLYING IS", "BAKER", "BAKER IS", "HOWLAND", "HOWLAND IS",
                                 "JARVIS", "JARVIS IS", "JOHNSTON ATOLL", "KINGMAN REEF", "MIDWAY", "MIDWAY IS",
@@ -68,9 +94,7 @@ public class LocationUtils {
                                 "VIRGIN IS USA", "VIRGIN IS", "U S IS VIRGIN", "USA VIRGIN IS", "ST CROIX", "ST JOHN",
                                 "ST THOMAS" } }, //
                 { "VIET NAM", new String[] { "VIET NAM", "VIETNAM" } }, //
-                { "VENEZUELA",
-                        new String[] { "VENEZUELA", "VENEZUELA BOLIVARIAN REPUBLIC OF", "VENEZUELA BOLIVARIAN",
-                                "VENEZUELA BOLIVARIAN REPUBLIC" } }, //
+                { "VENEZUELA", new String[] { "VENEZUELA", "VENEZUELA BOLIVARIAN", "VENEZUELA BOLIVARIAN REPUBLIC" } }, //
                 { "WESTERN SAHARA", new String[] { "WESTERN SAHARA", "WEST SAHARA", "SAHARA" } }, //
                 { "ZIMBABWE", new String[] { "ZIMBABWE", "ZIMBABWE REPUBLIC" } }, //
         };
@@ -272,6 +296,9 @@ public class LocationUtils {
         phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replaceAll(" ISLAND$", " IS")
                 .replaceAll(" ISLANDS$", " IS").replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ");
         phrase = phrase.replace(" SAINT ", " ST ").replaceAll(" SAINT$", " ST").replaceAll("^SAINT ", "ST ");
+        phrase = phrase.replace(" OF ", " ").replaceAll(" OF$", "").replaceAll("^OF ", "");
+        phrase = phrase.replace(" AND ", " ");
+        phrase = phrase.replace(" THE ", " ").replaceAll(" THE$", "").replaceAll("^THE ", "");
         if (countrySynonMap.containsKey(phrase)) {
             return countrySynonMap.get(phrase);
         } else {
