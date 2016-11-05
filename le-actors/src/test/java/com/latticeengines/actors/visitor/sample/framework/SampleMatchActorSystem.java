@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
+import com.latticeengines.actors.exposed.RoutingLogic;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDomainBasedMicroEngineActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDunsBasedMicroEngineActor;
@@ -30,6 +31,8 @@ import akka.actor.ActorSystem;
 public class SampleMatchActorSystem {
 
     private static final Log log = LogFactory.getLog(SampleMatchActorSystem.class);
+
+    public static final int ACTOR_CARDINALITY = 5;
 
     private ActorSystem system;
 
@@ -67,8 +70,8 @@ public class SampleMatchActorSystem {
     }
 
     private void initActors() {
-        initNamedActor(SampleDynamoLookupActor.class);
-        initNamedActor(SampleDnbLookupActor.class);
+        initNamedActor(SampleDynamoLookupActor.class, true);
+        initNamedActor(SampleDnbLookupActor.class, true);
 
         initMicroEngines();
 
@@ -85,7 +88,17 @@ public class SampleMatchActorSystem {
     }
 
     private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz) {
-        ActorRef actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz);
+        return initNamedActor(actorClz, false);
+    }
+
+    private <T extends ActorTemplate> ActorRef initNamedActor(Class<T> actorClz, boolean useRouting) {
+        ActorRef actorRef = null;
+        if (useRouting) {
+            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz,
+                    RoutingLogic.RoundRobinRoutingLogic, ACTOR_CARDINALITY);
+        } else {
+            actorRef = actorFactory.create(system, actorClz.getSimpleName(), actorClz);
+        }
         actorRefMap.put(actorClz.getCanonicalName(), actorRef);
         log.info("Add actor-ref " + actorClz.getSimpleName() + " to actorRefMap.");
         return actorRef;

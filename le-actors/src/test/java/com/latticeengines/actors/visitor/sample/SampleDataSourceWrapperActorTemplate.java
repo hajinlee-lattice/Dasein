@@ -4,14 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import akka.actor.ActorRef;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
+
+import akka.actor.ActorRef;
 
 public abstract class SampleDataSourceWrapperActorTemplate extends ActorTemplate {
 
     private static Map<String, SampleDataSourceLookupRequest> requestMap = new HashMap<>();
+
+    @Autowired
+    protected SampleMatchActorSystem sampleMatchActorSystem;
 
     protected abstract SampleDataSourceLookupService getDataSourceLookupService();
 
