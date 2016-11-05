@@ -1,4 +1,0 @@
-0	write	SUCCESS	ksoze@lattice-engines.com
-1000	write	SUCCESS	scoring-harness-sample1@lattice-engines.com
-60000	readscore	SUCCESS	ksoze@lattice-engines.com	{"latticeLeadScore":"77"}
-61000	readscore	SUCCESS	scoring-harness-sample1@lattice-engines.com	{"latticeLeadScore":"77"}
