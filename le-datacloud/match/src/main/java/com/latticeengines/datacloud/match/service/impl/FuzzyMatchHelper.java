@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
@@ -75,7 +75,11 @@ public class FuzzyMatchHelper implements DbHelper {
             } else {
                 AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
                 for (InternalOutputRecord record: context.getInternalResults()) {
-                    accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
+                    if (record.isPublicDomain()) {
+                        accountLookupRequest.addLookupPair(null, record.getParsedDuns());
+                    } else {
+                        accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
+                    }
                 }
                 List<String> ids = accountLookupService.batchLookupIds(accountLookupRequest);
                 for (int i = 0; i < ids.size(); i++) {
