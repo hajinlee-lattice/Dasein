@@ -21,12 +21,12 @@ import com.latticeengines.sampleapi.sample.service.SampleNameLocation;
 import com.latticeengines.sampleapi.sample.service.SampleOutputRecord;
 
 @ContextConfiguration(locations = { "classpath:test-sample-service-context.xml" })
-public class SampleServiceImplUnitTestNG extends AbstractTestNGSpringContextTests {
+public class SampleServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private SampleFuzzyMatchService service;
 
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testActorSystem() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);

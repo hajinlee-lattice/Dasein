@@ -11,6 +11,7 @@ public class SampleMatchTravelContext extends Traveler {
 
     public SampleMatchTravelContext(String rootOperationUid) {
         super(rootOperationUid);
+        start();
     }
 
     @Override
