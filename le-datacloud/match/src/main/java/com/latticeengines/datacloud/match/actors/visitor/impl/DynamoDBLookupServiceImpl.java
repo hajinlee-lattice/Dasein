@@ -19,7 +19,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
     private AccountLookupService accountLookupService;
 
     protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
-        Long startTime = System.currentTimeMillis();
         String result = null;
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
 
@@ -28,7 +27,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                     request.getMatchTravelerContext().getDataCloudVersion());
             accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
-            log.info("Fetching a key from dynamodb used Duration=" + (System.currentTimeMillis() - startTime) + " ms.");
             if (StringUtils.isNotEmpty(result)) {
                 log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
                         + " Lattice Account Id=" + result);
