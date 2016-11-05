@@ -59,7 +59,7 @@
         <spring.data.version>2.1.1.RELEASE-hdp22</spring.data.version>
         <tez.version>0.8.2</tez.version>
         <jython.version>2.7.0</jython.version>
-        <javax.servlet.version>3.0.1</javax.servlet.version>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.jsp.version>2.2</javax.jsp.version>
 
         <apache.http.version>4.4.1</apache.http.version>
