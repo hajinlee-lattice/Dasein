@@ -117,8 +117,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @DataProvider(name = "actorTestData")
     public Object[][] provideActorTestData() {
         return new Object[][] {
-                { 20, false },   // 20 match in realtime mode
-                { 100, true }    // 100 match in batch mode
+                { 100, false },   // 100 match in realtime mode
+                { 1000, true }    // 1000 match in batch mode
         };
     }
 
