@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.ActorFactory;
+import com.latticeengines.actors.exposed.ActorSystemFactory;
 import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.RoutingLogic;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
@@ -25,8 +26,6 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMic
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.FuzzyMatchAnchorActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicroEngineActor;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -64,9 +63,7 @@ public class MatchActorSystem {
 
     @PostConstruct
     public void postConstruct() {
-        Config config = ConfigFactory.load();
-        system = ActorSystem.create("FuzzyMatch", config.getConfig("akka"));
-        log.info("Actor system for match started");
+        system = ActorSystemFactory.create("datacloud", 16);
         initActors();
     }
 
