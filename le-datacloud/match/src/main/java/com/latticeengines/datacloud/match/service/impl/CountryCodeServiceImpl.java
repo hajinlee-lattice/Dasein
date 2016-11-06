@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -26,35 +28,57 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     @Autowired
     private CountryCodeEntityMgr countryCodeEntityMgr;
 
-    private ConcurrentMap<String, String> countryCodeMap = new ConcurrentHashMap<String, String>();
+    private final ConcurrentMap<String, String> countryCodeWhiteCache = new ConcurrentHashMap<String, String>();
+    private final Set<String> countryCodeBlackCache = Collections
+            .newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Autowired
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     public String getCountryCode(String standardizedCountry) {
-        if (!countryCodeMap.containsKey(standardizedCountry)) {
-            log.info("Failed to map " + standardizedCountry + " to country code");
-            return null;
-        } else {
-            return countryCodeMap.get(standardizedCountry);
+        if (countryCodeWhiteCache.containsKey(standardizedCountry)) {
+            return countryCodeWhiteCache.get(standardizedCountry);
         }
+        if (countryCodeBlackCache.contains(standardizedCountry)) {
+            return null;
+        }
+        String countryCode = countryCodeEntityMgr.findByCountry(standardizedCountry);
+        if (countryCode == null) {
+            log.info("Failed to map " + standardizedCountry + " to country code");
+            synchronized (countryCodeBlackCache) {
+                countryCodeBlackCache.add(standardizedCountry);
+            }
+        } else {
+            synchronized (countryCodeWhiteCache) {
+                countryCodeWhiteCache.putIfAbsent(standardizedCountry, countryCode);
+            }
+        }
+        return countryCode;
     }
 
     @PostConstruct
     private void postConstruct() {
-        // loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(10));
+        }, TimeUnit.MINUTES.toMillis(30));
     }
 
     private void loadCache() {
         log.info("Start loading country code");
-        countryCodeMap = countryCodeEntityMgr.findAll();
+        ConcurrentMap<String, String> countryCodeMap = countryCodeEntityMgr.findAll();
+        synchronized (countryCodeWhiteCache) {
+            countryCodeWhiteCache.clear();
+            for (String key : countryCodeMap.keySet()) {
+                countryCodeWhiteCache.put(key, countryCodeMap.get(key));
+            }
+        }
+        synchronized (countryCodeBlackCache) {
+            countryCodeBlackCache.clear();
+        }
         log.info("Finished loading country code");
     }
 

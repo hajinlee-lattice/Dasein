@@ -30,4 +30,10 @@ public class CountryCodeEntityMgrImpl implements CountryCodeEntityMgr {
         }
         return countryCodeMap;
     }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public String findByCountry(String country) {
+        return countryCodeDao.findByCountry(country);
+    }
 }
