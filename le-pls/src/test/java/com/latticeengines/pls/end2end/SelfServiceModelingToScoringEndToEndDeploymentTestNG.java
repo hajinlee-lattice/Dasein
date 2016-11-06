@@ -48,7 +48,10 @@ public class SelfServiceModelingToScoringEndToEndDeploymentTestNG extends PlsDep
         
         if (expectedDiffCountStr != null) {
             int expectedDiffCount = Integer.valueOf(expectedDiffCountStr);
+            log.info("Checking if expected diff count is equal to " + expectedDiffCountStr);
             assertEquals(diffRecords.size(), expectedDiffCount);
+        } else {
+            log.info("Property DIFFCOUNT not set.");
         }
     }
 
