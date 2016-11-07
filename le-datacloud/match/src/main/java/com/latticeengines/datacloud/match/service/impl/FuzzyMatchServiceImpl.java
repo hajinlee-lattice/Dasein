@@ -23,6 +23,7 @@ import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -88,8 +89,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 matchRecord.setLatticeAccountId((String) traveler.getResult());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
-                if (traveler.getDnBMatchOutput() != null) {
-                    dnBMatchHistories.add(new DnBMatchHistory(traveler));
+                if (traveler.getDnBMatchContexts() != null) {
+                    for (DnBMatchContext dnBMatchContext: traveler.getDnBMatchContexts()) {
+                        dnBMatchHistories.add(new DnBMatchHistory(dnBMatchContext));
+                    }
                 }
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);

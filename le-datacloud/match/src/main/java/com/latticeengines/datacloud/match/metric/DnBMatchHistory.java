@@ -6,29 +6,28 @@ import java.util.Collection;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 
-public class DnBMatchHistory extends BaseMeasurement<DnBMatchOutput, MatchTraveler>
-        implements Measurement<DnBMatchOutput, MatchTraveler> {
+public class DnBMatchHistory extends BaseMeasurement<DnBMatchContext, DnBMatchContext>
+        implements Measurement<DnBMatchContext, DnBMatchContext> {
 
-    private final MatchTraveler traveler;
+    private final DnBMatchContext dnBMatchContext;
 
-    public DnBMatchHistory(MatchTraveler traveler) {
-        this.traveler = traveler;
+    public DnBMatchHistory(DnBMatchContext dnBMatchContext) {
+        this.dnBMatchContext = dnBMatchContext;
     }
 
     @Override
-    public DnBMatchOutput getFact() {
-        return this.traveler.getDnBMatchOutput();
+    public DnBMatchContext getFact() {
+        return this.dnBMatchContext;
     }
 
     @Override
-    public MatchTraveler getDimension() {
-        return this.traveler;
+    public DnBMatchContext getDimension() {
+        return this.dnBMatchContext;
     }
 
     @Override

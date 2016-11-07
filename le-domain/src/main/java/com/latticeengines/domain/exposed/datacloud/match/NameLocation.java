@@ -5,11 +5,12 @@ import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NameLocation {
-
+public class NameLocation implements Fact {
 
     @JsonProperty("Name")
     private String name;
@@ -32,7 +33,7 @@ public class NameLocation {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
-
+    @MetricField(name = "Name")
     public String getName() {
         return name;
     }
@@ -41,6 +42,7 @@ public class NameLocation {
         this.name = name;
     }
 
+    @MetricField(name = "Country")
     public String getCountry() {
         return country;
     }
@@ -49,6 +51,7 @@ public class NameLocation {
         this.country = country;
     }
 
+    @MetricField(name = "CountryCode")
     public String getCountryCode() {
         return countryCode;
     }
@@ -57,6 +60,7 @@ public class NameLocation {
         this.countryCode = countryCode;
     }
 
+    @MetricField(name = "State")
     public String getState() {
         return state;
     }
@@ -65,6 +69,7 @@ public class NameLocation {
         this.state = state;
     }
 
+    @MetricField(name = "City")
     public String getCity() {
         return city;
     }
@@ -73,6 +78,7 @@ public class NameLocation {
         this.city = city;
     }
 
+    @MetricField(name = "ZipCode")
     public String getZipCode() {
         return zipCode;
     }
@@ -81,6 +87,7 @@ public class NameLocation {
         this.zipCode = zipCode;
     }
 
+    @MetricField(name = "PhoneNumber")
     public String getPhoneNumber() {
         return phoneNumber;
     }

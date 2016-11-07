@@ -1,12 +1,15 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final MatchKeyTuple matchKeyTuple;
@@ -14,7 +17,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private String decisionGraph;
     private String lastStop;
 
-    private DnBMatchOutput dnBMatchOutput;
+    private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
     private Boolean isMatched = false;
     private Boolean isProcessed = false;
@@ -67,12 +70,12 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         return matchKeyTuple;
     }
 
-    public DnBMatchOutput getDnBMatchOutput() {
-        return dnBMatchOutput;
+    public List<DnBMatchContext> getDnBMatchContexts() {
+        return dnBMatchContexts;
     }
 
-    public void setDnBMatchOutput(DnBMatchOutput dnBMatchOutput) {
-        this.dnBMatchOutput = dnBMatchOutput;
+    public void appendDnBMatchContext(DnBMatchContext dnBMatchContext) {
+        this.dnBMatchContexts.add(dnBMatchContext);
     }
 
     @MetricField(name = "DataCloudVersion")
