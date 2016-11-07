@@ -9,7 +9,7 @@ public class StringUtilsUnitTestNG {
     @DataProvider(name = "stringDataProvider")
     Object[][] stringDataProvider() {
         return new Object[][] { //
-                { "U.S.A  ", "U S A" }, //
+                { "U.S.A  ", "USA" }, //
                 { "The United - States", "THE UNITED STATES" }, //
                 { "United States of America (the)", "UNITED STATES OF AMERICA THE" }, //
         };

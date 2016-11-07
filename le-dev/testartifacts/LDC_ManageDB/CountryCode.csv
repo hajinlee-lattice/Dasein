@@ -497,803 +497,1079 @@
 496,YEMEN YE,YE,Yemen
 497,ZAMBIA ZM,ZM,Zambia
 498,ZIMBABWE ZW,ZW,Zimbabwe
-499,AFGHANISTAN AFG,AF,Afghanistan
-500,ÅLAND IS ALA,AX,Åland Islands
-501,ALBANIA ALB,AL,Albania
-502,ALGERIA DZA,DZ,Algeria
-503,AMERICAN SAMOA ASM,AS,American Samoa
-504,ANDORRA AND,AD,Andorra
-505,ANGOLA AGO,AO,Angola
-506,ANGUILLA AIA,AI,Anguilla
-507,ANTARCTICA ATA,AQ,Antarctica
-508,ANTIGUA BARBUDA ATG,AG,Antigua and Barbuda
-509,ARGENTINA ARG,AR,Argentina
-510,ARMENIA ARM,AM,Armenia
-511,ARUBA ABW,AW,Aruba
-512,AUSTRALIA AUS,AU,Australia
-513,AUSTRIA AUT,AT,Austria
-514,AZERBAIJAN AZE,AZ,Azerbaijan
-515,BAHAMAS BHS,BS,Bahamas
-516,BAHRAIN BHR,BH,Bahrain
-517,BANGLADESH BGD,BD,Bangladesh
-518,BARBADOS BRB,BB,Barbados
-519,BELARUS BLR,BY,Belarus
-520,BELGIUM BEL,BE,Belgium
-521,BELIZE BLZ,BZ,Belize
-522,BENIN BEN,BJ,Benin
-523,BERMUDA BMU,BM,Bermuda
-524,BHUTAN BTN,BT,Bhutan
-525,BOLIVIA PLURINATIONAL STATE BOL,BO,"Bolivia, Plurinational State of"
-526,BONAIRE SINT EUSTATIUS SABA BES,BQ,"Bonaire, Sint Eustatius and Saba"
-527,BOSNIA HERZEGOVINA BIH,BA,Bosnia and Herzegovina
-528,BOTSWANA BWA,BW,Botswana
-529,BOUVET IS BVT,BV,Bouvet Island
-530,BRAZIL BRA,BR,Brazil
-531,BRITISH INDIAN OCEAN TERRITORY IOT,IO,British Indian Ocean Territory
-532,BRUNEI DARUSSALAM BRN,BN,Brunei Darussalam
-533,BULGARIA BGR,BG,Bulgaria
-534,BURKINA FASO BFA,BF,Burkina Faso
-535,BURUNDI BDI,BI,Burundi
-536,CAMBODIA KHM,KH,Cambodia
-537,CAMEROON CMR,CM,Cameroon
-538,CANADA CAN,CA,Canada
-539,CAPE VERDE CPV,CV,Cape Verde
-540,CAYMAN IS CYM,KY,Cayman Islands
-541,CENTRAL AFRICAN REPUBLIC CAF,CF,Central African Republic
-542,CHAD TCD,TD,Chad
-543,CHILE CHL,CL,Chile
-544,CHINA CHN,CN,China
-545,CHRISTMAS IS CXR,CX,Christmas Island
-546,COCOS KEELING IS CCK,CC,Cocos (Keeling) Islands
-547,COLOMBIA COL,CO,Colombia
-548,COMOROS COM,KM,Comoros
-549,CONGO COG,CG,Congo
-550,CONGO DEMOCRATIC REPUBLIC COD,CD,"Congo, the Democratic Republic of the"
-551,COOK IS COK,CK,Cook Islands
-552,COSTA RICA CRI,CR,Costa Rica
-553,CÔTE D IVOIRE CIV,CI,Côte d'Ivoire
-554,CROATIA HRV,HR,Croatia
-555,CUBA CUB,CU,Cuba
-556,CURAÇAO CUW,CW,Curaçao
-557,CYPRUS CYP,CY,Cyprus
-558,CZECH REPUBLIC CZE,CZ,Czech Republic
-559,DENMARK DNK,DK,Denmark
-560,DJIBOUTI DJI,DJ,Djibouti
-561,DOMINICA DMA,DM,Dominica
-562,DOMINICAN REPUBLIC DOM,DO,Dominican Republic
-563,ECUADOR ECU,EC,Ecuador
-564,EGYPT EGY,EG,Egypt
-565,EL SALVADOR SLV,SV,El Salvador
-566,EQUATORIAL GUINEA GNQ,GQ,Equatorial Guinea
-567,ERITREA ERI,ER,Eritrea
-568,ESTONIA EST,EE,Estonia
-569,ETHIOPIA ETH,ET,Ethiopia
-570,FALKLAND IS MALVINAS FLK,FK,Falkland Islands (Malvinas)
-571,FAROE IS FRO,FO,Faroe Islands
-572,FIJI FJI,FJ,Fiji
-573,FINLAND FIN,FI,Finland
-574,FRANCE FRA,FR,France
-575,FRENCH GUIANA GUF,GF,French Guiana
-576,FRENCH POLYNESIA PYF,PF,French Polynesia
-577,FRENCH SOUTHERN TERRITORIES ATF,TF,French Southern Territories
-578,GABON GAB,GA,Gabon
-579,GAMBIA GMB,GM,Gambia
-580,GEORGIA GEO,GE,Georgia
-581,GERMANY DEU,DE,Germany
-582,GHANA GHA,GH,Ghana
-583,GIBRALTAR GIB,GI,Gibraltar
-584,GREECE GRC,GR,Greece
-585,GREENLAND GRL,GL,Greenland
-586,GRENADA GRD,GD,Grenada
-587,GUADELOUPE GLP,GP,Guadeloupe
-588,GUAM GUM,GU,Guam
-589,GUATEMALA GTM,GT,Guatemala
-590,GUERNSEY GGY,GG,Guernsey
-591,GUINEA GIN,GN,Guinea
-592,GUINEA BISSAU GNB,GW,Guinea-Bissau
-593,GUYANA GUY,GY,Guyana
-594,HAITI HTI,HT,Haiti
-595,HEARD IS MCDONALD IS HMD,HM,Heard Island and McDonald Islands
-596,HOLY SEE VATICAN CITY STATE VAT,VA,Holy See (Vatican City State)
-597,HONDURAS HND,HN,Honduras
-598,HONG KONG HKG,HK,Hong Kong
-599,HUNGARY HUN,HU,Hungary
-600,ICELAND ISL,IS,Iceland
-601,INDIA IND,IN,India
-602,INDONESIA IDN,ID,Indonesia
-603,IRAN ISLAMIC REPUBLIC IRN,IR,"Iran, Islamic Republic of"
-604,IRAQ IRQ,IQ,Iraq
-605,IRELAND IRL,IE,Ireland
-606,ISLE MAN IMN,IM,Isle of Man
-607,ISRAEL ISR,IL,Israel
-608,ITALY ITA,IT,Italy
-609,JAMAICA JAM,JM,Jamaica
-610,JAPAN JPN,JP,Japan
-611,JERSEY JEY,JE,Jersey
-612,JORDAN JOR,JO,Jordan
-613,KAZAKHSTAN KAZ,KZ,Kazakhstan
-614,KENYA KEN,KE,Kenya
-615,KIRIBATI KIR,KI,Kiribati
-616,KOREA DEMOCRATIC PEOPLE S REPUBLIC PRK,KP,"Korea, Democratic People's Republic of"
-617,KOREA REPUBLIC KOR,KR,"Korea, Republic of"
-618,KUWAIT KWT,KW,Kuwait
-619,KYRGYZSTAN KGZ,KG,Kyrgyzstan
-620,LAO PEOPLE S DEMOCRATIC REPUBLIC LAO,LA,Lao People's Democratic Republic
-621,LATVIA LVA,LV,Latvia
-622,LEBANON LBN,LB,Lebanon
-623,LESOTHO LSO,LS,Lesotho
-624,LIBERIA LBR,LR,Liberia
-625,LIBYA LBY,LY,Libya
-626,LIECHTENSTEIN LIE,LI,Liechtenstein
-627,LITHUANIA LTU,LT,Lithuania
-628,LUXEMBOURG LUX,LU,Luxembourg
-629,MACAO MAC,MO,Macao
-630,MACEDONIA FORMER YUGOSLAV REPUBLIC MKD,MK,"Macedonia, the Former Yugoslav Republic of"
-631,MADAGASCAR MDG,MG,Madagascar
-632,MALAWI MWI,MW,Malawi
-633,MALAYSIA MYS,MY,Malaysia
-634,MALDIVES MDV,MV,Maldives
-635,MALI MLI,ML,Mali
-636,MALTA MLT,MT,Malta
-637,MARSHALL IS MHL,MH,Marshall Islands
-638,MARTINIQUE MTQ,MQ,Martinique
-639,MAURITANIA MRT,MR,Mauritania
-640,MAURITIUS MUS,MU,Mauritius
-641,MAYOTTE MYT,YT,Mayotte
-642,MEXICO MEX,MX,Mexico
-643,MICRONESIA FEDERATED STATES FSM,FM,"Micronesia, Federated States of"
-644,MOLDOVA REPUBLIC MDA,MD,"Moldova, Republic of"
-645,MONACO MCO,MC,Monaco
-646,MONGOLIA MNG,MN,Mongolia
-647,MONTENEGRO MNE,ME,Montenegro
-648,MONTSERRAT MSR,MS,Montserrat
-649,MOROCCO MAR,MA,Morocco
-650,MOZAMBIQUE MOZ,MZ,Mozambique
-651,MYANMAR MMR,MM,Myanmar
-652,NAMIBIA NAM,NA,Namibia
-653,NAURU NRU,NR,Nauru
-654,NEPAL NPL,NP,Nepal
-655,NETHERLANDS NLD,NL,Netherlands
-656,NEW CALEDONIA NCL,NC,New Caledonia
-657,NEW ZEALAND NZL,NZ,New Zealand
-658,NICARAGUA NIC,NI,Nicaragua
-659,NIGER NER,NE,Niger
-660,NIGERIA NGA,NG,Nigeria
-661,NIUE NIU,NU,Niue
-662,NORFOLK IS NFK,NF,Norfolk Island
-663,NORTHERN MARIANA IS MNP,MP,Northern Mariana Islands
-664,NORWAY NOR,NO,Norway
-665,OMAN OMN,OM,Oman
-666,PAKISTAN PAK,PK,Pakistan
-667,PALAU PLW,PW,Palau
-668,PALESTINE STATE PSE,PS,"Palestine, State of"
-669,PANAMA PAN,PA,Panama
-670,PAPUA NEW GUINEA PNG,PG,Papua New Guinea
-671,PARAGUAY PRY,PY,Paraguay
-672,PERU PER,PE,Peru
-673,PHILIPPINES PHL,PH,Philippines
-674,PITCAIRN PCN,PN,Pitcairn
-675,POLAND POL,PL,Poland
-676,PORTUGAL PRT,PT,Portugal
-677,PUERTO RICO PRI,PR,Puerto Rico
-678,QATAR QAT,QA,Qatar
-679,RÉUNION REU,RE,Réunion
-680,ROMANIA ROU,RO,Romania
-681,RUSSIAN FEDERATION RUS,RU,Russian Federation
-682,RWANDA RWA,RW,Rwanda
-683,ST BARTHÉLEMY BLM,BL,Saint Barthélemy
-684,ST HELENA ASCENSION TRISTAN DA CUNHA SHN,SH,"Saint Helena, Ascension and Tristan da Cunha"
-685,ST KITTS NEVIS KNA,KN,Saint Kitts and Nevis
-686,ST LUCIA LCA,LC,Saint Lucia
-687,ST MARTIN FRENCH PART MAF,MF,Saint Martin (French part)
-688,ST PIERRE MIQUELON SPM,PM,Saint Pierre and Miquelon
-689,ST VINCENT GRENADINES VCT,VC,Saint Vincent and the Grenadines
-690,SAMOA WSM,WS,Samoa
-691,SAN MARINO SMR,SM,San Marino
-692,SAO TOME PRINCIPE STP,ST,Sao Tome and Principe
-693,SAUDI ARABIA SAU,SA,Saudi Arabia
-694,SENEGAL SEN,SN,Senegal
-695,SERBIA SRB,RS,Serbia
-696,SEYCHELLES SYC,SC,Seychelles
-697,SIERRA LEONE SLE,SL,Sierra Leone
-698,SINGAPORE SGP,SG,Singapore
-699,SINT MAARTEN DUTCH PART SXM,SX,Sint Maarten (Dutch part)
-700,SLOVAKIA SVK,SK,Slovakia
-701,SLOVENIA SVN,SI,Slovenia
-702,SOLOMON IS SLB,SB,Solomon Islands
-703,SOMALIA SOM,SO,Somalia
-704,SOUTH AFRICA ZAF,ZA,South Africa
-705,SOUTH GEORGIA SOUTH SANDWICH IS SGS,GS,South Georgia and the South Sandwich Islands
-706,SOUTH SUDAN SSD,SS,South Sudan
-707,SPAIN ESP,ES,Spain
-708,SRI LANKA LKA,LK,Sri Lanka
-709,SUDAN SDN,SD,Sudan
-710,SURINAME SUR,SR,Suriname
-711,SVALBARD JAN MAYEN SJM,SJ,Svalbard and Jan Mayen
-712,SWAZILAND SWZ,SZ,Swaziland
-713,SWEDEN SWE,SE,Sweden
-714,SWITZERLAND CHE,CH,Switzerland
-715,SYRIAN ARAB REPUBLIC SYR,SY,Syrian Arab Republic
-716,TAIWAN PROVINCE CHINA TWN,TW,"Taiwan, Province of China"
-717,TAJIKISTAN TJK,TJ,Tajikistan
-718,TANZANIA UNITED REPUBLIC TZA,TZ,"Tanzania, United Republic of"
-719,THAILAND THA,TH,Thailand
-720,TIMOR LESTE TLS,TL,Timor-Leste
-721,TOGO TGO,TG,Togo
-722,TOKELAU TKL,TK,Tokelau
-723,TONGA TON,TO,Tonga
-724,TRINIDAD TOBAGO TTO,TT,Trinidad and Tobago
-725,TUNISIA TUN,TN,Tunisia
-726,TURKEY TUR,TR,Turkey
-727,TURKMENISTAN TKM,TM,Turkmenistan
-728,TURKS CAICOS IS TCA,TC,Turks and Caicos Islands
-729,TUVALU TUV,TV,Tuvalu
-730,UGANDA UGA,UG,Uganda
-731,UKRAINE UKR,UA,Ukraine
-732,UNITED ARAB EMIRATES ARE,AE,United Arab Emirates
-733,UNITED KINGDOM GBR,GB,United Kingdom
-734,UNITED STATES USA,US,United States
-735,UNITED STATES MINOR OUTLYING IS UMI,UM,United States Minor Outlying Islands
-736,URUGUAY URY,UY,Uruguay
-737,UZBEKISTAN UZB,UZ,Uzbekistan
-738,VANUATU VUT,VU,Vanuatu
-739,VENEZUELA BOLIVARIAN REPUBLIC VEN,VE,"Venezuela, Bolivarian Republic of"
-740,VIET NAM VNM,VN,Viet Nam
-741,VIRGIN IS BRITISH VGB,VG,"Virgin Islands, British"
-742,VIRGIN IS US VIR,VI,"Virgin Islands, US"
-743,WALLIS FUTUNA WLF,WF,Wallis and Futuna
-744,WESTERN SAHARA ESH,EH,Western Sahara
-745,YEMEN YEM,YE,Yemen
-746,ZAMBIA ZMB,ZM,Zambia
-747,ZIMBABWE ZWE,ZW,Zimbabwe
-748,AF,AF,Afghanistan
-749,AX,AX,Åland Islands
-750,AL,AL,Albania
-751,DZ,DZ,Algeria
-752,AS,AS,American Samoa
-753,AD,AD,Andorra
-754,AO,AO,Angola
-755,AI,AI,Anguilla
-756,AQ,AQ,Antarctica
-757,AG,AG,Antigua and Barbuda
-758,AR,AR,Argentina
-759,AM,AM,Armenia
-760,AW,AW,Aruba
-761,AU,AU,Australia
-762,AT,AT,Austria
-763,AZ,AZ,Azerbaijan
-764,BS,BS,Bahamas
-765,BH,BH,Bahrain
-766,BD,BD,Bangladesh
-767,BB,BB,Barbados
-768,BY,BY,Belarus
-769,BE,BE,Belgium
-770,BZ,BZ,Belize
-771,BJ,BJ,Benin
-772,BM,BM,Bermuda
-773,BT,BT,Bhutan
-774,BO,BO,"Bolivia, Plurinational State of"
-775,BQ,BQ,"Bonaire, Sint Eustatius and Saba"
-776,BA,BA,Bosnia and Herzegovina
-777,BW,BW,Botswana
-778,BV,BV,Bouvet Island
-779,BR,BR,Brazil
-780,IO,IO,British Indian Ocean Territory
-781,BN,BN,Brunei Darussalam
-782,BG,BG,Bulgaria
-783,BF,BF,Burkina Faso
-784,BI,BI,Burundi
-785,KH,KH,Cambodia
-786,CM,CM,Cameroon
-787,CA,CA,Canada
-788,CV,CV,Cape Verde
-789,KY,KY,Cayman Islands
-790,CF,CF,Central African Republic
-791,TD,TD,Chad
-792,CL,CL,Chile
-793,CN,CN,China
-794,CX,CX,Christmas Island
-795,CC,CC,Cocos (Keeling) Islands
-796,CO,CO,Colombia
-797,KM,KM,Comoros
-798,CG,CG,Congo
-799,CD,CD,"Congo, the Democratic Republic of the"
-800,CK,CK,Cook Islands
-801,CR,CR,Costa Rica
-802,CI,CI,Côte d'Ivoire
-803,HR,HR,Croatia
-804,CU,CU,Cuba
-805,CW,CW,Curaçao
-806,CY,CY,Cyprus
-807,CZ,CZ,Czech Republic
-808,DK,DK,Denmark
-809,DJ,DJ,Djibouti
-810,DM,DM,Dominica
-811,DO,DO,Dominican Republic
-812,EC,EC,Ecuador
-813,EG,EG,Egypt
-814,SV,SV,El Salvador
-815,GQ,GQ,Equatorial Guinea
-816,ER,ER,Eritrea
-817,EE,EE,Estonia
-818,ET,ET,Ethiopia
-819,FK,FK,Falkland Islands (Malvinas)
-820,FO,FO,Faroe Islands
-821,FJ,FJ,Fiji
-822,FI,FI,Finland
-823,FR,FR,France
-824,GF,GF,French Guiana
-825,PF,PF,French Polynesia
-826,TF,TF,French Southern Territories
-827,GA,GA,Gabon
-828,GM,GM,Gambia
-829,GE,GE,Georgia
-830,DE,DE,Germany
-831,GH,GH,Ghana
-832,GI,GI,Gibraltar
-833,GR,GR,Greece
-834,GL,GL,Greenland
-835,GD,GD,Grenada
-836,GP,GP,Guadeloupe
-837,GU,GU,Guam
-838,GT,GT,Guatemala
-839,GG,GG,Guernsey
-840,GN,GN,Guinea
-841,GW,GW,Guinea-Bissau
-842,GY,GY,Guyana
-843,HT,HT,Haiti
-844,HM,HM,Heard Island and McDonald Islands
-845,VA,VA,Holy See (Vatican City State)
-846,HN,HN,Honduras
-847,HK,HK,Hong Kong
-848,HU,HU,Hungary
-849,IS,IS,Iceland
-850,IN,IN,India
-851,ID,ID,Indonesia
-852,IR,IR,"Iran, Islamic Republic of"
-853,IQ,IQ,Iraq
-854,IE,IE,Ireland
-855,IM,IM,Isle of Man
-856,IL,IL,Israel
-857,IT,IT,Italy
-858,JM,JM,Jamaica
-859,JP,JP,Japan
-860,JE,JE,Jersey
-861,JO,JO,Jordan
-862,KZ,KZ,Kazakhstan
-863,KE,KE,Kenya
-864,KI,KI,Kiribati
-865,KP,KP,"Korea, Democratic People's Republic of"
-866,KR,KR,"Korea, Republic of"
-867,KW,KW,Kuwait
-868,KG,KG,Kyrgyzstan
-869,LA,LA,Lao People's Democratic Republic
-870,LV,LV,Latvia
-871,LB,LB,Lebanon
-872,LS,LS,Lesotho
-873,LR,LR,Liberia
-874,LY,LY,Libya
-875,LI,LI,Liechtenstein
-876,LT,LT,Lithuania
-877,LU,LU,Luxembourg
-878,MO,MO,Macao
-879,MK,MK,"Macedonia, the Former Yugoslav Republic of"
-880,MG,MG,Madagascar
-881,MW,MW,Malawi
-882,MY,MY,Malaysia
-883,MV,MV,Maldives
-884,ML,ML,Mali
-885,MT,MT,Malta
-886,MH,MH,Marshall Islands
-887,MQ,MQ,Martinique
-888,MR,MR,Mauritania
-889,MU,MU,Mauritius
-890,YT,YT,Mayotte
-891,MX,MX,Mexico
-892,FM,FM,"Micronesia, Federated States of"
-893,MD,MD,"Moldova, Republic of"
-894,MC,MC,Monaco
-895,MN,MN,Mongolia
-896,ME,ME,Montenegro
-897,MS,MS,Montserrat
-898,MA,MA,Morocco
-899,MZ,MZ,Mozambique
-900,MM,MM,Myanmar
-901,NA,NA,Namibia
-902,NR,NR,Nauru
-903,NP,NP,Nepal
-904,NL,NL,Netherlands
-905,NC,NC,New Caledonia
-906,NZ,NZ,New Zealand
-907,NI,NI,Nicaragua
-908,NE,NE,Niger
-909,NG,NG,Nigeria
-910,NU,NU,Niue
-911,NF,NF,Norfolk Island
-912,MP,MP,Northern Mariana Islands
-913,NO,NO,Norway
-914,OM,OM,Oman
-915,PK,PK,Pakistan
-916,PW,PW,Palau
-917,PS,PS,"Palestine, State of"
-918,PA,PA,Panama
-919,PG,PG,Papua New Guinea
-920,PY,PY,Paraguay
-921,PE,PE,Peru
-922,PH,PH,Philippines
-923,PN,PN,Pitcairn
-924,PL,PL,Poland
-925,PT,PT,Portugal
-926,PR,PR,Puerto Rico
-927,QA,QA,Qatar
-928,RE,RE,Réunion
-929,RO,RO,Romania
-930,RU,RU,Russian Federation
-931,RW,RW,Rwanda
-932,BL,BL,Saint Barthélemy
-933,SH,SH,"Saint Helena, Ascension and Tristan da Cunha"
-934,KN,KN,Saint Kitts and Nevis
-935,LC,LC,Saint Lucia
-936,MF,MF,Saint Martin (French part)
-937,PM,PM,Saint Pierre and Miquelon
-938,VC,VC,Saint Vincent and the Grenadines
-939,WS,WS,Samoa
-940,SM,SM,San Marino
-941,ST,ST,Sao Tome and Principe
-942,SA,SA,Saudi Arabia
-943,SN,SN,Senegal
-944,RS,RS,Serbia
-945,SC,SC,Seychelles
-946,SL,SL,Sierra Leone
-947,SG,SG,Singapore
-948,SX,SX,Sint Maarten (Dutch part)
-949,SK,SK,Slovakia
-950,SI,SI,Slovenia
-951,SB,SB,Solomon Islands
-952,SO,SO,Somalia
-953,ZA,ZA,South Africa
-954,GS,GS,South Georgia and the South Sandwich Islands
-955,SS,SS,South Sudan
-956,ES,ES,Spain
-957,LK,LK,Sri Lanka
-958,SD,SD,Sudan
-959,SR,SR,Suriname
-960,SJ,SJ,Svalbard and Jan Mayen
-961,SZ,SZ,Swaziland
-962,SE,SE,Sweden
-963,CH,CH,Switzerland
-964,SY,SY,Syrian Arab Republic
-965,TW,TW,"Taiwan, Province of China"
-966,TJ,TJ,Tajikistan
-967,TZ,TZ,"Tanzania, United Republic of"
-968,TH,TH,Thailand
-969,TL,TL,Timor-Leste
-970,TG,TG,Togo
-971,TK,TK,Tokelau
-972,TO,TO,Tonga
-973,TT,TT,Trinidad and Tobago
-974,TN,TN,Tunisia
-975,TR,TR,Turkey
-976,TM,TM,Turkmenistan
-977,TC,TC,Turks and Caicos Islands
-978,TV,TV,Tuvalu
-979,UG,UG,Uganda
-980,UA,UA,Ukraine
-981,AE,AE,United Arab Emirates
-982,GB,GB,United Kingdom
-983,US,US,United States
-984,UM,UM,United States Minor Outlying Islands
-985,UY,UY,Uruguay
-986,UZ,UZ,Uzbekistan
-987,VU,VU,Vanuatu
-988,VE,VE,"Venezuela, Bolivarian Republic of"
-989,VN,VN,Viet Nam
-990,VG,VG,"Virgin Islands, British"
-991,VI,VI,"Virgin Islands, US"
-992,WF,WF,Wallis and Futuna
-993,EH,EH,Western Sahara
-994,YE,YE,Yemen
-995,ZM,ZM,Zambia
-996,ZW,ZW,Zimbabwe
-997,AFG,AF,Afghanistan
-998,ALA,AX,Åland Islands
-999,ALB,AL,Albania
-1000,DZA,DZ,Algeria
-1001,ASM,AS,American Samoa
-1002,AND,AD,Andorra
-1003,AGO,AO,Angola
-1004,AIA,AI,Anguilla
-1005,ATA,AQ,Antarctica
-1006,ATG,AG,Antigua and Barbuda
-1007,ARG,AR,Argentina
-1008,ARM,AM,Armenia
-1009,ABW,AW,Aruba
-1010,AUS,AU,Australia
-1011,AUT,AT,Austria
-1012,AZE,AZ,Azerbaijan
-1013,BHS,BS,Bahamas
-1014,BHR,BH,Bahrain
-1015,BGD,BD,Bangladesh
-1016,BRB,BB,Barbados
-1017,BLR,BY,Belarus
-1018,BEL,BE,Belgium
-1019,BLZ,BZ,Belize
-1020,BEN,BJ,Benin
-1021,BMU,BM,Bermuda
-1022,BTN,BT,Bhutan
-1023,BOL,BO,"Bolivia, Plurinational State of"
-1024,BES,BQ,"Bonaire, Sint Eustatius and Saba"
-1025,BIH,BA,Bosnia and Herzegovina
-1026,BWA,BW,Botswana
-1027,BVT,BV,Bouvet Island
-1028,BRA,BR,Brazil
-1029,IOT,IO,British Indian Ocean Territory
-1030,BRN,BN,Brunei Darussalam
-1031,BGR,BG,Bulgaria
-1032,BFA,BF,Burkina Faso
-1033,BDI,BI,Burundi
-1034,KHM,KH,Cambodia
-1035,CMR,CM,Cameroon
-1036,CAN,CA,Canada
-1037,CPV,CV,Cape Verde
-1038,CYM,KY,Cayman Islands
-1039,CAF,CF,Central African Republic
-1040,TCD,TD,Chad
-1041,CHL,CL,Chile
-1042,CHN,CN,China
-1043,CXR,CX,Christmas Island
-1044,CCK,CC,Cocos (Keeling) Islands
-1045,COL,CO,Colombia
-1046,COM,KM,Comoros
-1047,COG,CG,Congo
-1048,COD,CD,"Congo, the Democratic Republic of the"
-1049,COK,CK,Cook Islands
-1050,CRI,CR,Costa Rica
-1051,CIV,CI,Côte d'Ivoire
-1052,HRV,HR,Croatia
-1053,CUB,CU,Cuba
-1054,CUW,CW,Curaçao
-1055,CYP,CY,Cyprus
-1056,CZE,CZ,Czech Republic
-1057,DNK,DK,Denmark
-1058,DJI,DJ,Djibouti
-1059,DMA,DM,Dominica
-1060,DOM,DO,Dominican Republic
-1061,ECU,EC,Ecuador
-1062,EGY,EG,Egypt
-1063,SLV,SV,El Salvador
-1064,GNQ,GQ,Equatorial Guinea
-1065,ERI,ER,Eritrea
-1066,EST,EE,Estonia
-1067,ETH,ET,Ethiopia
-1068,FLK,FK,Falkland Islands (Malvinas)
-1069,FRO,FO,Faroe Islands
-1070,FJI,FJ,Fiji
-1071,FIN,FI,Finland
-1072,FRA,FR,France
-1073,GUF,GF,French Guiana
-1074,PYF,PF,French Polynesia
-1075,ATF,TF,French Southern Territories
-1076,GAB,GA,Gabon
-1077,GMB,GM,Gambia
-1078,GEO,GE,Georgia
-1079,DEU,DE,Germany
-1080,GHA,GH,Ghana
-1081,GIB,GI,Gibraltar
-1082,GRC,GR,Greece
-1083,GRL,GL,Greenland
-1084,GRD,GD,Grenada
-1085,GLP,GP,Guadeloupe
-1086,GUM,GU,Guam
-1087,GTM,GT,Guatemala
-1088,GGY,GG,Guernsey
-1089,GIN,GN,Guinea
-1090,GNB,GW,Guinea-Bissau
-1091,GUY,GY,Guyana
-1092,HTI,HT,Haiti
-1093,HMD,HM,Heard Island and McDonald Islands
-1094,VAT,VA,Holy See (Vatican City State)
-1095,HND,HN,Honduras
-1096,HKG,HK,Hong Kong
-1097,HUN,HU,Hungary
-1098,ISL,IS,Iceland
-1099,IND,IN,India
-1100,IDN,ID,Indonesia
-1101,IRN,IR,"Iran, Islamic Republic of"
-1102,IRQ,IQ,Iraq
-1103,IRL,IE,Ireland
-1104,IMN,IM,Isle of Man
-1105,ISR,IL,Israel
-1106,ITA,IT,Italy
-1107,JAM,JM,Jamaica
-1108,JPN,JP,Japan
-1109,JEY,JE,Jersey
-1110,JOR,JO,Jordan
-1111,KAZ,KZ,Kazakhstan
-1112,KEN,KE,Kenya
-1113,KIR,KI,Kiribati
-1114,PRK,KP,"Korea, Democratic People's Republic of"
-1115,KOR,KR,"Korea, Republic of"
-1116,KWT,KW,Kuwait
-1117,KGZ,KG,Kyrgyzstan
-1118,LAO,LA,Lao People's Democratic Republic
-1119,LVA,LV,Latvia
-1120,LBN,LB,Lebanon
-1121,LSO,LS,Lesotho
-1122,LBR,LR,Liberia
-1123,LBY,LY,Libya
-1124,LIE,LI,Liechtenstein
-1125,LTU,LT,Lithuania
-1126,LUX,LU,Luxembourg
-1127,MAC,MO,Macao
-1128,MKD,MK,"Macedonia, the Former Yugoslav Republic of"
-1129,MDG,MG,Madagascar
-1130,MWI,MW,Malawi
-1131,MYS,MY,Malaysia
-1132,MDV,MV,Maldives
-1133,MLI,ML,Mali
-1134,MLT,MT,Malta
-1135,MHL,MH,Marshall Islands
-1136,MTQ,MQ,Martinique
-1137,MRT,MR,Mauritania
-1138,MUS,MU,Mauritius
-1139,MYT,YT,Mayotte
-1140,MEX,MX,Mexico
-1141,FSM,FM,"Micronesia, Federated States of"
-1142,MDA,MD,"Moldova, Republic of"
-1143,MCO,MC,Monaco
-1144,MNG,MN,Mongolia
-1145,MNE,ME,Montenegro
-1146,MSR,MS,Montserrat
-1147,MAR,MA,Morocco
-1148,MOZ,MZ,Mozambique
-1149,MMR,MM,Myanmar
-1150,NAM,NA,Namibia
-1151,NRU,NR,Nauru
-1152,NPL,NP,Nepal
-1153,NLD,NL,Netherlands
-1154,NCL,NC,New Caledonia
-1155,NZL,NZ,New Zealand
-1156,NIC,NI,Nicaragua
-1157,NER,NE,Niger
-1158,NGA,NG,Nigeria
-1159,NIU,NU,Niue
-1160,NFK,NF,Norfolk Island
-1161,MNP,MP,Northern Mariana Islands
-1162,NOR,NO,Norway
-1163,OMN,OM,Oman
-1164,PAK,PK,Pakistan
-1165,PLW,PW,Palau
-1166,PSE,PS,"Palestine, State of"
-1167,PAN,PA,Panama
-1168,PNG,PG,Papua New Guinea
-1169,PRY,PY,Paraguay
-1170,PER,PE,Peru
-1171,PHL,PH,Philippines
-1172,PCN,PN,Pitcairn
-1173,POL,PL,Poland
-1174,PRT,PT,Portugal
-1175,PRI,PR,Puerto Rico
-1176,QAT,QA,Qatar
-1177,REU,RE,Réunion
-1178,ROU,RO,Romania
-1179,RUS,RU,Russian Federation
-1180,RWA,RW,Rwanda
-1181,BLM,BL,Saint Barthélemy
-1182,SHN,SH,"Saint Helena, Ascension and Tristan da Cunha"
-1183,KNA,KN,Saint Kitts and Nevis
-1184,LCA,LC,Saint Lucia
-1185,MAF,MF,Saint Martin (French part)
-1186,SPM,PM,Saint Pierre and Miquelon
-1187,VCT,VC,Saint Vincent and the Grenadines
-1188,WSM,WS,Samoa
-1189,SMR,SM,San Marino
-1190,STP,ST,Sao Tome and Principe
-1191,SAU,SA,Saudi Arabia
-1192,SEN,SN,Senegal
-1193,SRB,RS,Serbia
-1194,SYC,SC,Seychelles
-1195,SLE,SL,Sierra Leone
-1196,SGP,SG,Singapore
-1197,SXM,SX,Sint Maarten (Dutch part)
-1198,SVK,SK,Slovakia
-1199,SVN,SI,Slovenia
-1200,SLB,SB,Solomon Islands
-1201,SOM,SO,Somalia
-1202,ZAF,ZA,South Africa
-1203,SGS,GS,South Georgia and the South Sandwich Islands
-1204,SSD,SS,South Sudan
-1205,ESP,ES,Spain
-1206,LKA,LK,Sri Lanka
-1207,SDN,SD,Sudan
-1208,SUR,SR,Suriname
-1209,SJM,SJ,Svalbard and Jan Mayen
-1210,SWZ,SZ,Swaziland
-1211,SWE,SE,Sweden
-1212,CHE,CH,Switzerland
-1213,SYR,SY,Syrian Arab Republic
-1214,TWN,TW,"Taiwan, Province of China"
-1215,TJK,TJ,Tajikistan
-1216,TZA,TZ,"Tanzania, United Republic of"
-1217,THA,TH,Thailand
-1218,TLS,TL,Timor-Leste
-1219,TGO,TG,Togo
-1220,TKL,TK,Tokelau
-1221,TON,TO,Tonga
-1222,TTO,TT,Trinidad and Tobago
-1223,TUN,TN,Tunisia
-1224,TUR,TR,Turkey
-1225,TKM,TM,Turkmenistan
-1226,TCA,TC,Turks and Caicos Islands
-1227,TUV,TV,Tuvalu
-1228,UGA,UG,Uganda
-1229,UKR,UA,Ukraine
-1230,ARE,AE,United Arab Emirates
-1231,GBR,GB,United Kingdom
-1232,USA,US,United States
-1233,UMI,UM,United States Minor Outlying Islands
-1234,URY,UY,Uruguay
-1235,UZB,UZ,Uzbekistan
-1236,VUT,VU,Vanuatu
-1237,VEN,VE,"Venezuela, Bolivarian Republic of"
-1238,VNM,VN,Viet Nam
-1239,VGB,VG,"Virgin Islands, British"
-1240,VIR,VI,"Virgin Islands, US"
-1241,WLF,WF,Wallis and Futuna
-1242,ESH,EH,Western Sahara
-1243,YEM,YE,Yemen
-1244,ZMB,ZM,Zambia
-1245,ZWE,ZW,Zimbabwe
-1246,AUSTRIA RETAIL,AT,Austria
-1247,AUSATRALIA,AU,Australia
-1248,AUSTRAILIA,AU,Australia
-1249,AZERBAYCAN,AZ,Azerbaijan
-1250,BOLIVIA,BO,"Bolivia, Plurinational State of"
-1251,BOSNIA HERZEGOWINA,BA,Bosnia and Herzegovina
-1252,BOSNIAHERZEGOWINA,BA,Bosnia and Herzegovina
-1253,BRASIL,BR,Brazil
-1254,BRUNEI DARESS,BN,Brunei Darussalam
-1255,CANADAC,CA,Canada
-1256,CANANDA,CA,Canada
-1257,CHRISTMAS ISLND,CX,Christmas Island
-1258,TURKS CAICOS ISLES,TC,Turks and Caicos Islands
-1259,URAGUAY,UY,Uruguay
-1260,UNTIED KINGDOM,GB,United Kingdom
-1261,UNTED KINGDOM,GB,United Kingdom
-1262,UNITIED KINGDOM,GB,United Kingdom
-1263,UNITERD KINGDOM,GB,United Kingdom
-1264,UNITED KNGDOM,GB,United Kingdom
-1265,UNITED KINGODM,GB,United Kingdom
-1266,UNITED KINGDROM,GB,United Kingdom
-1267,UNITED KINGDON,GB,United Kingdom
-1268,UNITED KINGDOM Ÿ,GB,United Kingdom
-1269,UNITED KINDOM,GB,United Kingdom
-1270,UNITED KINDGOM,GB,United Kingdom
-1271,UNITED KIN,GB,United Kingdom
-1272,UNITED KIGDOM,GB,United Kingdom
-1273,UNITED KINGOM,GB,United Kingdom
-1274,VIE,VN,Viet Nam
-1275,VIETNA,VN,Viet Nam
-1276,VIETMAN,VN,Viet Nam
-1277,VIETAM,VN,Viet Nam
-1278,VENEZUELA,VE,"Venezuela, Bolivarian Republic of"
-1279,VENEZUELA BOLIVARIAN REPUBLIC O,VE,"Venezuela, Bolivarian Republic of"
-1280,UNITED ARAB EMIRITES,AE,United Arab Emirates
-1281,UNITED ARAB EMIRATESMIRATES,AE,United Arab Emirates
-1282,UNITED ARAB EMIRATE,AE,United Arab Emirates
-1283,UNITED ARAB AMIRATES,AE,United Arab Emirates
-1285,UNTIED STATES,US,United States
-1286,UNTED STATES,US,United States
-1287,UNITES STATES AMERICA,US,United States
-1288,UNITES STATES,US,United States
-1289,UNITED STATS,US,United States
-1290,UNITED STAES,US,United States
-1291,UNITED STA,US,United States
-1292,UNITED SATES,US,United States
-1293,UNITED SALES,US,United States
-1294,UNITED STATE,US,United States
-1295,UNIETD STATES,US,United States
-1296,UNIED STATES,US,United States
-1297,UNATED STATES,US,United States
-1298,UBITED STATES,US,United States
-1299,ASIA PACIFIC REGION,AP,Asia/Pacific Region
+499,AF AFGHANISTAN,AF,Afghanistan
+500,AX ÅLAND IS,AX,Åland Islands
+501,AL ALBANIA,AL,Albania
+502,DZ ALGERIA,DZ,Algeria
+503,AS AMERICAN SAMOA,AS,American Samoa
+504,AD ANDORRA,AD,Andorra
+505,AO ANGOLA,AO,Angola
+506,AI ANGUILLA,AI,Anguilla
+507,AQ ANTARCTICA,AQ,Antarctica
+508,AG ANTIGUA BARBUDA,AG,Antigua and Barbuda
+509,AR ARGENTINA,AR,Argentina
+510,AM ARMENIA,AM,Armenia
+511,AW ARUBA,AW,Aruba
+512,AU AUSTRALIA,AU,Australia
+513,AT AUSTRIA,AT,Austria
+514,AZ AZERBAIJAN,AZ,Azerbaijan
+515,BS BAHAMAS,BS,Bahamas
+516,BH BAHRAIN,BH,Bahrain
+517,BD BANGLADESH,BD,Bangladesh
+518,BB BARBADOS,BB,Barbados
+519,BY BELARUS,BY,Belarus
+520,BE BELGIUM,BE,Belgium
+521,BZ BELIZE,BZ,Belize
+522,BJ BENIN,BJ,Benin
+523,BM BERMUDA,BM,Bermuda
+524,BT BHUTAN,BT,Bhutan
+525,BO BOLIVIA PLURINATIONAL STATE,BO,"Bolivia, Plurinational State of"
+526,BQ BONAIRE SINT EUSTATIUS SABA,BQ,"Bonaire, Sint Eustatius and Saba"
+527,BA BOSNIA HERZEGOVINA,BA,Bosnia and Herzegovina
+528,BW BOTSWANA,BW,Botswana
+529,BV BOUVET IS,BV,Bouvet Island
+530,BR BRAZIL,BR,Brazil
+531,IO BRITISH INDIAN OCEAN TERRITORY,IO,British Indian Ocean Territory
+532,BN BRUNEI DARUSSALAM,BN,Brunei Darussalam
+533,BG BULGARIA,BG,Bulgaria
+534,BF BURKINA FASO,BF,Burkina Faso
+535,BI BURUNDI,BI,Burundi
+536,KH CAMBODIA,KH,Cambodia
+537,CM CAMEROON,CM,Cameroon
+538,CA CANADA,CA,Canada
+539,CV CAPE VERDE,CV,Cape Verde
+540,KY CAYMAN IS,KY,Cayman Islands
+541,CF CENTRAL AFRICAN REPUBLIC,CF,Central African Republic
+542,TD CHAD,TD,Chad
+543,CL CHILE,CL,Chile
+544,CN CHINA,CN,China
+545,CX CHRISTMAS IS,CX,Christmas Island
+546,CC COCOS KEELING IS,CC,Cocos (Keeling) Islands
+547,CO COLOMBIA,CO,Colombia
+548,KM COMOROS,KM,Comoros
+549,CG CONGO,CG,Congo
+550,CD CONGO DEMOCRATIC REPUBLIC,CD,"Congo, the Democratic Republic of the"
+551,CK COOK IS,CK,Cook Islands
+552,CR COSTA RICA,CR,Costa Rica
+553,CI CÔTE D IVOIRE,CI,Côte d'Ivoire
+554,HR CROATIA,HR,Croatia
+555,CU CUBA,CU,Cuba
+556,CW CURAÇAO,CW,Curaçao
+557,CY CYPRUS,CY,Cyprus
+558,CZ CZECH REPUBLIC,CZ,Czech Republic
+559,DK DENMARK,DK,Denmark
+560,DJ DJIBOUTI,DJ,Djibouti
+561,DM DOMINICA,DM,Dominica
+562,DO DOMINICAN REPUBLIC,DO,Dominican Republic
+563,EC ECUADOR,EC,Ecuador
+564,EG EGYPT,EG,Egypt
+565,SV EL SALVADOR,SV,El Salvador
+566,GQ EQUATORIAL GUINEA,GQ,Equatorial Guinea
+567,ER ERITREA,ER,Eritrea
+568,EE ESTONIA,EE,Estonia
+569,ET ETHIOPIA,ET,Ethiopia
+570,FK FALKLAND IS MALVINAS,FK,Falkland Islands (Malvinas)
+571,FO FAROE IS,FO,Faroe Islands
+572,FJ FIJI,FJ,Fiji
+573,FI FINLAND,FI,Finland
+574,FR FRANCE,FR,France
+575,GF FRENCH GUIANA,GF,French Guiana
+576,PF FRENCH POLYNESIA,PF,French Polynesia
+577,TF FRENCH SOUTHERN TERRITORIES,TF,French Southern Territories
+578,GA GABON,GA,Gabon
+579,GM GAMBIA,GM,Gambia
+580,GE GEORGIA,GE,Georgia
+581,DE GERMANY,DE,Germany
+582,GH GHANA,GH,Ghana
+583,GI GIBRALTAR,GI,Gibraltar
+584,GR GREECE,GR,Greece
+585,GL GREENLAND,GL,Greenland
+586,GD GRENADA,GD,Grenada
+587,GP GUADELOUPE,GP,Guadeloupe
+588,GU GUAM,GU,Guam
+589,GT GUATEMALA,GT,Guatemala
+590,GG GUERNSEY,GG,Guernsey
+591,GN GUINEA,GN,Guinea
+592,GW GUINEA BISSAU,GW,Guinea-Bissau
+593,GY GUYANA,GY,Guyana
+594,HT HAITI,HT,Haiti
+595,HM HEARD IS MCDONALD IS,HM,Heard Island and McDonald Islands
+596,VA HOLY SEE VATICAN CITY STATE,VA,Holy See (Vatican City State)
+597,HN HONDURAS,HN,Honduras
+598,HK HONG KONG,HK,Hong Kong
+599,HU HUNGARY,HU,Hungary
+600,IS ICELAND,IS,Iceland
+601,IN INDIA,IN,India
+602,ID INDONESIA,ID,Indonesia
+603,IR IRAN ISLAMIC REPUBLIC,IR,"Iran, Islamic Republic of"
+604,IQ IRAQ,IQ,Iraq
+605,IE IRELAND,IE,Ireland
+606,IM ISLE MAN,IM,Isle of Man
+607,IL ISRAEL,IL,Israel
+608,IT ITALY,IT,Italy
+609,JM JAMAICA,JM,Jamaica
+610,JP JAPAN,JP,Japan
+611,JE JERSEY,JE,Jersey
+612,JO JORDAN,JO,Jordan
+613,KZ KAZAKHSTAN,KZ,Kazakhstan
+614,KE KENYA,KE,Kenya
+615,KI KIRIBATI,KI,Kiribati
+616,KP KOREA DEMOCRATIC PEOPLE S REPUBLIC,KP,"Korea, Democratic People's Republic of"
+617,KR KOREA REPUBLIC,KR,"Korea, Republic of"
+618,KW KUWAIT,KW,Kuwait
+619,KG KYRGYZSTAN,KG,Kyrgyzstan
+620,LA LAO PEOPLE S DEMOCRATIC REPUBLIC,LA,Lao People's Democratic Republic
+621,LV LATVIA,LV,Latvia
+622,LB LEBANON,LB,Lebanon
+623,LS LESOTHO,LS,Lesotho
+624,LR LIBERIA,LR,Liberia
+625,LY LIBYA,LY,Libya
+626,LI LIECHTENSTEIN,LI,Liechtenstein
+627,LT LITHUANIA,LT,Lithuania
+628,LU LUXEMBOURG,LU,Luxembourg
+629,MO MACAO,MO,Macao
+630,MK MACEDONIA FORMER YUGOSLAV REPUBLIC,MK,"Macedonia, the Former Yugoslav Republic of"
+631,MG MADAGASCAR,MG,Madagascar
+632,MW MALAWI,MW,Malawi
+633,MY MALAYSIA,MY,Malaysia
+634,MV MALDIVES,MV,Maldives
+635,ML MALI,ML,Mali
+636,MT MALTA,MT,Malta
+637,MH MARSHALL IS,MH,Marshall Islands
+638,MQ MARTINIQUE,MQ,Martinique
+639,MR MAURITANIA,MR,Mauritania
+640,MU MAURITIUS,MU,Mauritius
+641,YT MAYOTTE,YT,Mayotte
+642,MX MEXICO,MX,Mexico
+643,FM MICRONESIA FEDERATED STATES,FM,"Micronesia, Federated States of"
+644,MD MOLDOVA REPUBLIC,MD,"Moldova, Republic of"
+645,MC MONACO,MC,Monaco
+646,MN MONGOLIA,MN,Mongolia
+647,ME MONTENEGRO,ME,Montenegro
+648,MS MONTSERRAT,MS,Montserrat
+649,MA MOROCCO,MA,Morocco
+650,MZ MOZAMBIQUE,MZ,Mozambique
+651,MM MYANMAR,MM,Myanmar
+652,NA NAMIBIA,NA,Namibia
+653,NR NAURU,NR,Nauru
+654,NP NEPAL,NP,Nepal
+655,NL NETHERLANDS,NL,Netherlands
+656,NC NEW CALEDONIA,NC,New Caledonia
+657,NZ NEW ZEALAND,NZ,New Zealand
+658,NI NICARAGUA,NI,Nicaragua
+659,NE NIGER,NE,Niger
+660,NG NIGERIA,NG,Nigeria
+661,NU NIUE,NU,Niue
+662,NF NORFOLK IS,NF,Norfolk Island
+663,MP NORTHERN MARIANA IS,MP,Northern Mariana Islands
+664,NO NORWAY,NO,Norway
+665,OM OMAN,OM,Oman
+666,PK PAKISTAN,PK,Pakistan
+667,PW PALAU,PW,Palau
+668,PS PALESTINE STATE,PS,"Palestine, State of"
+669,PA PANAMA,PA,Panama
+670,PG PAPUA NEW GUINEA,PG,Papua New Guinea
+671,PY PARAGUAY,PY,Paraguay
+672,PE PERU,PE,Peru
+673,PH PHILIPPINES,PH,Philippines
+674,PN PITCAIRN,PN,Pitcairn
+675,PL POLAND,PL,Poland
+676,PT PORTUGAL,PT,Portugal
+677,PR PUERTO RICO,PR,Puerto Rico
+678,QA QATAR,QA,Qatar
+679,RE RÉUNION,RE,Réunion
+680,RO ROMANIA,RO,Romania
+681,RU RUSSIAN FEDERATION,RU,Russian Federation
+682,RW RWANDA,RW,Rwanda
+683,BL ST BARTHÉLEMY,BL,Saint Barthélemy
+684,SH ST HELENA ASCENSION TRISTAN DA CUNHA,SH,"Saint Helena, Ascension and Tristan da Cunha"
+685,KN ST KITTS NEVIS,KN,Saint Kitts and Nevis
+686,LC ST LUCIA,LC,Saint Lucia
+687,MF ST MARTIN FRENCH PART,MF,Saint Martin (French part)
+688,PM ST PIERRE MIQUELON,PM,Saint Pierre and Miquelon
+689,VC ST VINCENT GRENADINES,VC,Saint Vincent and the Grenadines
+690,WS SAMOA,WS,Samoa
+691,SM SAN MARINO,SM,San Marino
+692,ST SAO TOME PRINCIPE,ST,Sao Tome and Principe
+693,SA SAUDI ARABIA,SA,Saudi Arabia
+694,SN SENEGAL,SN,Senegal
+695,RS SERBIA,RS,Serbia
+696,SC SEYCHELLES,SC,Seychelles
+697,SL SIERRA LEONE,SL,Sierra Leone
+698,SG SINGAPORE,SG,Singapore
+699,SX SINT MAARTEN DUTCH PART,SX,Sint Maarten (Dutch part)
+700,SK SLOVAKIA,SK,Slovakia
+701,SI SLOVENIA,SI,Slovenia
+702,SB SOLOMON IS,SB,Solomon Islands
+703,SO SOMALIA,SO,Somalia
+704,ZA SOUTH AFRICA,ZA,South Africa
+705,GS SOUTH GEORGIA SOUTH SANDWICH IS,GS,South Georgia and the South Sandwich Islands
+706,SS SOUTH SUDAN,SS,South Sudan
+707,ES SPAIN,ES,Spain
+708,LK SRI LANKA,LK,Sri Lanka
+709,SD SUDAN,SD,Sudan
+710,SR SURINAME,SR,Suriname
+711,SJ SVALBARD JAN MAYEN,SJ,Svalbard and Jan Mayen
+712,SZ SWAZILAND,SZ,Swaziland
+713,SE SWEDEN,SE,Sweden
+714,CH SWITZERLAND,CH,Switzerland
+715,SY SYRIAN ARAB REPUBLIC,SY,Syrian Arab Republic
+716,TW TAIWAN PROVINCE CHINA,TW,"Taiwan, Province of China"
+717,TJ TAJIKISTAN,TJ,Tajikistan
+718,TZ TANZANIA UNITED REPUBLIC,TZ,"Tanzania, United Republic of"
+719,TH THAILAND,TH,Thailand
+720,TL TIMOR LESTE,TL,Timor-Leste
+721,TG TOGO,TG,Togo
+722,TK TOKELAU,TK,Tokelau
+723,TO TONGA,TO,Tonga
+724,TT TRINIDAD TOBAGO,TT,Trinidad and Tobago
+725,TN TUNISIA,TN,Tunisia
+726,TR TURKEY,TR,Turkey
+727,TM TURKMENISTAN,TM,Turkmenistan
+728,TC TURKS CAICOS IS,TC,Turks and Caicos Islands
+729,TV TUVALU,TV,Tuvalu
+730,UG UGANDA,UG,Uganda
+731,UA UKRAINE,UA,Ukraine
+732,AE UNITED ARAB EMIRATES,AE,United Arab Emirates
+733,GB UNITED KINGDOM,GB,United Kingdom
+734,US UNITED STATES,US,United States
+735,UM UNITED STATES MINOR OUTLYING IS,UM,United States Minor Outlying Islands
+736,UY URUGUAY,UY,Uruguay
+737,UZ UZBEKISTAN,UZ,Uzbekistan
+738,VU VANUATU,VU,Vanuatu
+739,VE VENEZUELA BOLIVARIAN REPUBLIC,VE,"Venezuela, Bolivarian Republic of"
+740,VN VIET NAM,VN,Viet Nam
+741,VG VIRGIN IS BRITISH,VG,"Virgin Islands, British"
+742,VI VIRGIN IS US,VI,"Virgin Islands, US"
+743,WF WALLIS FUTUNA,WF,Wallis and Futuna
+744,EH WESTERN SAHARA,EH,Western Sahara
+745,YE YEMEN,YE,Yemen
+746,ZM ZAMBIA,ZM,Zambia
+747,ZW ZIMBABWE,ZW,Zimbabwe
+748,AFG AFGHANISTAN,AF,Afghanistan
+749,ALA ÅLAND IS,AX,Åland Islands
+750,ALB ALBANIA,AL,Albania
+751,DZA ALGERIA,DZ,Algeria
+752,ASM AMERICAN SAMOA,AS,American Samoa
+753,AND ANDORRA,AD,Andorra
+754,AGO ANGOLA,AO,Angola
+755,AIA ANGUILLA,AI,Anguilla
+756,ATA ANTARCTICA,AQ,Antarctica
+757,ATG ANTIGUA BARBUDA,AG,Antigua and Barbuda
+758,ARG ARGENTINA,AR,Argentina
+759,ARM ARMENIA,AM,Armenia
+760,ABW ARUBA,AW,Aruba
+761,AUS AUSTRALIA,AU,Australia
+762,AUT AUSTRIA,AT,Austria
+763,AZE AZERBAIJAN,AZ,Azerbaijan
+764,BHS BAHAMAS,BS,Bahamas
+765,BHR BAHRAIN,BH,Bahrain
+766,BGD BANGLADESH,BD,Bangladesh
+767,BRB BARBADOS,BB,Barbados
+768,BLR BELARUS,BY,Belarus
+769,BEL BELGIUM,BE,Belgium
+770,BLZ BELIZE,BZ,Belize
+771,BEN BENIN,BJ,Benin
+772,BMU BERMUDA,BM,Bermuda
+773,BTN BHUTAN,BT,Bhutan
+774,BOL BOLIVIA PLURINATIONAL STATE,BO,"Bolivia, Plurinational State of"
+775,BES BONAIRE SINT EUSTATIUS SABA,BQ,"Bonaire, Sint Eustatius and Saba"
+776,BIH BOSNIA HERZEGOVINA,BA,Bosnia and Herzegovina
+777,BWA BOTSWANA,BW,Botswana
+778,BVT BOUVET IS,BV,Bouvet Island
+779,BRA BRAZIL,BR,Brazil
+780,IOT BRITISH INDIAN OCEAN TERRITORY,IO,British Indian Ocean Territory
+781,BRN BRUNEI DARUSSALAM,BN,Brunei Darussalam
+782,BGR BULGARIA,BG,Bulgaria
+783,BFA BURKINA FASO,BF,Burkina Faso
+784,BDI BURUNDI,BI,Burundi
+785,KHM CAMBODIA,KH,Cambodia
+786,CMR CAMEROON,CM,Cameroon
+787,CAN CANADA,CA,Canada
+788,CPV CAPE VERDE,CV,Cape Verde
+789,CYM CAYMAN IS,KY,Cayman Islands
+790,CAF CENTRAL AFRICAN REPUBLIC,CF,Central African Republic
+791,TCD CHAD,TD,Chad
+792,CHL CHILE,CL,Chile
+793,CHN CHINA,CN,China
+794,CXR CHRISTMAS IS,CX,Christmas Island
+795,CCK COCOS KEELING IS,CC,Cocos (Keeling) Islands
+796,COL COLOMBIA,CO,Colombia
+797,COM COMOROS,KM,Comoros
+798,COG CONGO,CG,Congo
+799,COD CONGO DEMOCRATIC REPUBLIC,CD,"Congo, the Democratic Republic of the"
+800,COK COOK IS,CK,Cook Islands
+801,CRI COSTA RICA,CR,Costa Rica
+802,CIV CÔTE D IVOIRE,CI,Côte d'Ivoire
+803,HRV CROATIA,HR,Croatia
+804,CUB CUBA,CU,Cuba
+805,CUW CURAÇAO,CW,Curaçao
+806,CYP CYPRUS,CY,Cyprus
+807,CZE CZECH REPUBLIC,CZ,Czech Republic
+808,DNK DENMARK,DK,Denmark
+809,DJI DJIBOUTI,DJ,Djibouti
+810,DMA DOMINICA,DM,Dominica
+811,DOM DOMINICAN REPUBLIC,DO,Dominican Republic
+812,ECU ECUADOR,EC,Ecuador
+813,EGY EGYPT,EG,Egypt
+814,SLV EL SALVADOR,SV,El Salvador
+815,GNQ EQUATORIAL GUINEA,GQ,Equatorial Guinea
+816,ERI ERITREA,ER,Eritrea
+817,EST ESTONIA,EE,Estonia
+818,ETH ETHIOPIA,ET,Ethiopia
+819,FLK FALKLAND IS MALVINAS,FK,Falkland Islands (Malvinas)
+820,FRO FAROE IS,FO,Faroe Islands
+821,FJI FIJI,FJ,Fiji
+822,FIN FINLAND,FI,Finland
+823,FRA FRANCE,FR,France
+824,GUF FRENCH GUIANA,GF,French Guiana
+825,PYF FRENCH POLYNESIA,PF,French Polynesia
+826,ATF FRENCH SOUTHERN TERRITORIES,TF,French Southern Territories
+827,GAB GABON,GA,Gabon
+828,GMB GAMBIA,GM,Gambia
+829,GEO GEORGIA,GE,Georgia
+830,DEU GERMANY,DE,Germany
+831,GHA GHANA,GH,Ghana
+832,GIB GIBRALTAR,GI,Gibraltar
+833,GRC GREECE,GR,Greece
+834,GRL GREENLAND,GL,Greenland
+835,GRD GRENADA,GD,Grenada
+836,GLP GUADELOUPE,GP,Guadeloupe
+837,GUM GUAM,GU,Guam
+838,GTM GUATEMALA,GT,Guatemala
+839,GGY GUERNSEY,GG,Guernsey
+840,GIN GUINEA,GN,Guinea
+841,GNB GUINEA BISSAU,GW,Guinea-Bissau
+842,GUY GUYANA,GY,Guyana
+843,HTI HAITI,HT,Haiti
+844,HMD HEARD IS MCDONALD IS,HM,Heard Island and McDonald Islands
+845,VAT HOLY SEE VATICAN CITY STATE,VA,Holy See (Vatican City State)
+846,HND HONDURAS,HN,Honduras
+847,HKG HONG KONG,HK,Hong Kong
+848,HUN HUNGARY,HU,Hungary
+849,ISL ICELAND,IS,Iceland
+850,IND INDIA,IN,India
+851,IDN INDONESIA,ID,Indonesia
+852,IRN IRAN ISLAMIC REPUBLIC,IR,"Iran, Islamic Republic of"
+853,IRQ IRAQ,IQ,Iraq
+854,IRL IRELAND,IE,Ireland
+855,IMN ISLE MAN,IM,Isle of Man
+856,ISR ISRAEL,IL,Israel
+857,ITA ITALY,IT,Italy
+858,JAM JAMAICA,JM,Jamaica
+859,JPN JAPAN,JP,Japan
+860,JEY JERSEY,JE,Jersey
+861,JOR JORDAN,JO,Jordan
+862,KAZ KAZAKHSTAN,KZ,Kazakhstan
+863,KEN KENYA,KE,Kenya
+864,KIR KIRIBATI,KI,Kiribati
+865,PRK KOREA DEMOCRATIC PEOPLE S REPUBLIC,KP,"Korea, Democratic People's Republic of"
+866,KOR KOREA REPUBLIC,KR,"Korea, Republic of"
+867,KWT KUWAIT,KW,Kuwait
+868,KGZ KYRGYZSTAN,KG,Kyrgyzstan
+869,LAO LAO PEOPLE S DEMOCRATIC REPUBLIC,LA,Lao People's Democratic Republic
+870,LVA LATVIA,LV,Latvia
+871,LBN LEBANON,LB,Lebanon
+872,LSO LESOTHO,LS,Lesotho
+873,LBR LIBERIA,LR,Liberia
+874,LBY LIBYA,LY,Libya
+875,LIE LIECHTENSTEIN,LI,Liechtenstein
+876,LTU LITHUANIA,LT,Lithuania
+877,LUX LUXEMBOURG,LU,Luxembourg
+878,MAC MACAO,MO,Macao
+879,MKD MACEDONIA FORMER YUGOSLAV REPUBLIC,MK,"Macedonia, the Former Yugoslav Republic of"
+880,MDG MADAGASCAR,MG,Madagascar
+881,MWI MALAWI,MW,Malawi
+882,MYS MALAYSIA,MY,Malaysia
+883,MDV MALDIVES,MV,Maldives
+884,MLI MALI,ML,Mali
+885,MLT MALTA,MT,Malta
+886,MHL MARSHALL IS,MH,Marshall Islands
+887,MTQ MARTINIQUE,MQ,Martinique
+888,MRT MAURITANIA,MR,Mauritania
+889,MUS MAURITIUS,MU,Mauritius
+890,MYT MAYOTTE,YT,Mayotte
+891,MEX MEXICO,MX,Mexico
+892,FSM MICRONESIA FEDERATED STATES,FM,"Micronesia, Federated States of"
+893,MDA MOLDOVA REPUBLIC,MD,"Moldova, Republic of"
+894,MCO MONACO,MC,Monaco
+895,MNG MONGOLIA,MN,Mongolia
+896,MNE MONTENEGRO,ME,Montenegro
+897,MSR MONTSERRAT,MS,Montserrat
+898,MAR MOROCCO,MA,Morocco
+899,MOZ MOZAMBIQUE,MZ,Mozambique
+900,MMR MYANMAR,MM,Myanmar
+901,NAM NAMIBIA,NA,Namibia
+902,NRU NAURU,NR,Nauru
+903,NPL NEPAL,NP,Nepal
+904,NLD NETHERLANDS,NL,Netherlands
+905,NCL NEW CALEDONIA,NC,New Caledonia
+906,NZL NEW ZEALAND,NZ,New Zealand
+907,NIC NICARAGUA,NI,Nicaragua
+908,NER NIGER,NE,Niger
+909,NGA NIGERIA,NG,Nigeria
+910,NIU NIUE,NU,Niue
+911,NFK NORFOLK IS,NF,Norfolk Island
+912,MNP NORTHERN MARIANA IS,MP,Northern Mariana Islands
+913,NOR NORWAY,NO,Norway
+914,OMN OMAN,OM,Oman
+915,PAK PAKISTAN,PK,Pakistan
+916,PLW PALAU,PW,Palau
+917,PSE PALESTINE STATE,PS,"Palestine, State of"
+918,PAN PANAMA,PA,Panama
+919,PNG PAPUA NEW GUINEA,PG,Papua New Guinea
+920,PRY PARAGUAY,PY,Paraguay
+921,PER PERU,PE,Peru
+922,PHL PHILIPPINES,PH,Philippines
+923,PCN PITCAIRN,PN,Pitcairn
+924,POL POLAND,PL,Poland
+925,PRT PORTUGAL,PT,Portugal
+926,PRI PUERTO RICO,PR,Puerto Rico
+927,QAT QATAR,QA,Qatar
+928,REU RÉUNION,RE,Réunion
+929,ROU ROMANIA,RO,Romania
+930,RUS RUSSIAN FEDERATION,RU,Russian Federation
+931,RWA RWANDA,RW,Rwanda
+932,BLM ST BARTHÉLEMY,BL,Saint Barthélemy
+933,SHN ST HELENA ASCENSION TRISTAN DA CUNHA,SH,"Saint Helena, Ascension and Tristan da Cunha"
+934,KNA ST KITTS NEVIS,KN,Saint Kitts and Nevis
+935,LCA ST LUCIA,LC,Saint Lucia
+936,MAF ST MARTIN FRENCH PART,MF,Saint Martin (French part)
+937,SPM ST PIERRE MIQUELON,PM,Saint Pierre and Miquelon
+938,VCT ST VINCENT GRENADINES,VC,Saint Vincent and the Grenadines
+939,WSM SAMOA,WS,Samoa
+940,SMR SAN MARINO,SM,San Marino
+941,STP SAO TOME PRINCIPE,ST,Sao Tome and Principe
+942,SAU SAUDI ARABIA,SA,Saudi Arabia
+943,SEN SENEGAL,SN,Senegal
+944,SRB SERBIA,RS,Serbia
+945,SYC SEYCHELLES,SC,Seychelles
+946,SLE SIERRA LEONE,SL,Sierra Leone
+947,SGP SINGAPORE,SG,Singapore
+948,SXM SINT MAARTEN DUTCH PART,SX,Sint Maarten (Dutch part)
+949,SVK SLOVAKIA,SK,Slovakia
+950,SVN SLOVENIA,SI,Slovenia
+951,SLB SOLOMON IS,SB,Solomon Islands
+952,SOM SOMALIA,SO,Somalia
+953,ZAF SOUTH AFRICA,ZA,South Africa
+954,SGS SOUTH GEORGIA SOUTH SANDWICH IS,GS,South Georgia and the South Sandwich Islands
+955,SSD SOUTH SUDAN,SS,South Sudan
+956,ESP SPAIN,ES,Spain
+957,LKA SRI LANKA,LK,Sri Lanka
+958,SDN SUDAN,SD,Sudan
+959,SUR SURINAME,SR,Suriname
+960,SJM SVALBARD JAN MAYEN,SJ,Svalbard and Jan Mayen
+961,SWZ SWAZILAND,SZ,Swaziland
+962,SWE SWEDEN,SE,Sweden
+963,CHE SWITZERLAND,CH,Switzerland
+964,SYR SYRIAN ARAB REPUBLIC,SY,Syrian Arab Republic
+965,TWN TAIWAN PROVINCE CHINA,TW,"Taiwan, Province of China"
+966,TJK TAJIKISTAN,TJ,Tajikistan
+967,TZA TANZANIA UNITED REPUBLIC,TZ,"Tanzania, United Republic of"
+968,THA THAILAND,TH,Thailand
+969,TLS TIMOR LESTE,TL,Timor-Leste
+970,TGO TOGO,TG,Togo
+971,TKL TOKELAU,TK,Tokelau
+972,TON TONGA,TO,Tonga
+973,TTO TRINIDAD TOBAGO,TT,Trinidad and Tobago
+974,TUN TUNISIA,TN,Tunisia
+975,TUR TURKEY,TR,Turkey
+976,TKM TURKMENISTAN,TM,Turkmenistan
+977,TCA TURKS CAICOS IS,TC,Turks and Caicos Islands
+978,TUV TUVALU,TV,Tuvalu
+979,UGA UGANDA,UG,Uganda
+980,UKR UKRAINE,UA,Ukraine
+981,ARE UNITED ARAB EMIRATES,AE,United Arab Emirates
+982,GBR UNITED KINGDOM,GB,United Kingdom
+983,USA UNITED STATES,US,United States
+984,UMI UNITED STATES MINOR OUTLYING IS,UM,United States Minor Outlying Islands
+985,URY URUGUAY,UY,Uruguay
+986,UZB UZBEKISTAN,UZ,Uzbekistan
+987,VUT VANUATU,VU,Vanuatu
+988,VEN VENEZUELA BOLIVARIAN REPUBLIC,VE,"Venezuela, Bolivarian Republic of"
+989,VNM VIET NAM,VN,Viet Nam
+990,VGB VIRGIN IS BRITISH,VG,"Virgin Islands, British"
+991,VIR VIRGIN IS US,VI,"Virgin Islands, US"
+992,WLF WALLIS FUTUNA,WF,Wallis and Futuna
+993,ESH WESTERN SAHARA,EH,Western Sahara
+994,YEM YEMEN,YE,Yemen
+995,ZMB ZAMBIA,ZM,Zambia
+996,ZWE ZIMBABWE,ZW,Zimbabwe
+997,AF,AF,Afghanistan
+998,AX,AX,Åland Islands
+999,AL,AL,Albania
+1000,DZ,DZ,Algeria
+1001,AS,AS,American Samoa
+1002,AD,AD,Andorra
+1003,AO,AO,Angola
+1004,AI,AI,Anguilla
+1005,AQ,AQ,Antarctica
+1006,AG,AG,Antigua and Barbuda
+1007,AR,AR,Argentina
+1008,AM,AM,Armenia
+1009,AW,AW,Aruba
+1010,AU,AU,Australia
+1011,AT,AT,Austria
+1012,AZ,AZ,Azerbaijan
+1013,BS,BS,Bahamas
+1014,BH,BH,Bahrain
+1015,BD,BD,Bangladesh
+1016,BB,BB,Barbados
+1017,BY,BY,Belarus
+1018,BE,BE,Belgium
+1019,BZ,BZ,Belize
+1020,BJ,BJ,Benin
+1021,BM,BM,Bermuda
+1022,BT,BT,Bhutan
+1023,BO,BO,"Bolivia, Plurinational State of"
+1024,BQ,BQ,"Bonaire, Sint Eustatius and Saba"
+1025,BA,BA,Bosnia and Herzegovina
+1026,BW,BW,Botswana
+1027,BV,BV,Bouvet Island
+1028,BR,BR,Brazil
+1029,IO,IO,British Indian Ocean Territory
+1030,BN,BN,Brunei Darussalam
+1031,BG,BG,Bulgaria
+1032,BF,BF,Burkina Faso
+1033,BI,BI,Burundi
+1034,KH,KH,Cambodia
+1035,CM,CM,Cameroon
+1036,CA,CA,Canada
+1037,CV,CV,Cape Verde
+1038,KY,KY,Cayman Islands
+1039,CF,CF,Central African Republic
+1040,TD,TD,Chad
+1041,CL,CL,Chile
+1042,CN,CN,China
+1043,CX,CX,Christmas Island
+1044,CC,CC,Cocos (Keeling) Islands
+1045,CO,CO,Colombia
+1046,KM,KM,Comoros
+1047,CG,CG,Congo
+1048,CD,CD,"Congo, the Democratic Republic of the"
+1049,CK,CK,Cook Islands
+1050,CR,CR,Costa Rica
+1051,CI,CI,Côte d'Ivoire
+1052,HR,HR,Croatia
+1053,CU,CU,Cuba
+1054,CW,CW,Curaçao
+1055,CY,CY,Cyprus
+1056,CZ,CZ,Czech Republic
+1057,DK,DK,Denmark
+1058,DJ,DJ,Djibouti
+1059,DM,DM,Dominica
+1060,DO,DO,Dominican Republic
+1061,EC,EC,Ecuador
+1062,EG,EG,Egypt
+1063,SV,SV,El Salvador
+1064,GQ,GQ,Equatorial Guinea
+1065,ER,ER,Eritrea
+1066,EE,EE,Estonia
+1067,ET,ET,Ethiopia
+1068,FK,FK,Falkland Islands (Malvinas)
+1069,FO,FO,Faroe Islands
+1070,FJ,FJ,Fiji
+1071,FI,FI,Finland
+1072,FR,FR,France
+1073,GF,GF,French Guiana
+1074,PF,PF,French Polynesia
+1075,TF,TF,French Southern Territories
+1076,GA,GA,Gabon
+1077,GM,GM,Gambia
+1078,GE,GE,Georgia
+1079,DE,DE,Germany
+1080,GH,GH,Ghana
+1081,GI,GI,Gibraltar
+1082,GR,GR,Greece
+1083,GL,GL,Greenland
+1084,GD,GD,Grenada
+1085,GP,GP,Guadeloupe
+1086,GU,GU,Guam
+1087,GT,GT,Guatemala
+1088,GG,GG,Guernsey
+1089,GN,GN,Guinea
+1090,GW,GW,Guinea-Bissau
+1091,GY,GY,Guyana
+1092,HT,HT,Haiti
+1093,HM,HM,Heard Island and McDonald Islands
+1094,VA,VA,Holy See (Vatican City State)
+1095,HN,HN,Honduras
+1096,HK,HK,Hong Kong
+1097,HU,HU,Hungary
+1098,IS,IS,Iceland
+1099,IN,IN,India
+1100,ID,ID,Indonesia
+1101,IR,IR,"Iran, Islamic Republic of"
+1102,IQ,IQ,Iraq
+1103,IE,IE,Ireland
+1104,IM,IM,Isle of Man
+1105,IL,IL,Israel
+1106,IT,IT,Italy
+1107,JM,JM,Jamaica
+1108,JP,JP,Japan
+1109,JE,JE,Jersey
+1110,JO,JO,Jordan
+1111,KZ,KZ,Kazakhstan
+1112,KE,KE,Kenya
+1113,KI,KI,Kiribati
+1114,KP,KP,"Korea, Democratic People's Republic of"
+1115,KR,KR,"Korea, Republic of"
+1116,KW,KW,Kuwait
+1117,KG,KG,Kyrgyzstan
+1118,LA,LA,Lao People's Democratic Republic
+1119,LV,LV,Latvia
+1120,LB,LB,Lebanon
+1121,LS,LS,Lesotho
+1122,LR,LR,Liberia
+1123,LY,LY,Libya
+1124,LI,LI,Liechtenstein
+1125,LT,LT,Lithuania
+1126,LU,LU,Luxembourg
+1127,MO,MO,Macao
+1128,MK,MK,"Macedonia, the Former Yugoslav Republic of"
+1129,MG,MG,Madagascar
+1130,MW,MW,Malawi
+1131,MY,MY,Malaysia
+1132,MV,MV,Maldives
+1133,ML,ML,Mali
+1134,MT,MT,Malta
+1135,MH,MH,Marshall Islands
+1136,MQ,MQ,Martinique
+1137,MR,MR,Mauritania
+1138,MU,MU,Mauritius
+1139,YT,YT,Mayotte
+1140,MX,MX,Mexico
+1141,FM,FM,"Micronesia, Federated States of"
+1142,MD,MD,"Moldova, Republic of"
+1143,MC,MC,Monaco
+1144,MN,MN,Mongolia
+1145,ME,ME,Montenegro
+1146,MS,MS,Montserrat
+1147,MA,MA,Morocco
+1148,MZ,MZ,Mozambique
+1149,MM,MM,Myanmar
+1150,NA,NA,Namibia
+1151,NR,NR,Nauru
+1152,NP,NP,Nepal
+1153,NL,NL,Netherlands
+1154,NC,NC,New Caledonia
+1155,NZ,NZ,New Zealand
+1156,NI,NI,Nicaragua
+1157,NE,NE,Niger
+1158,NG,NG,Nigeria
+1159,NU,NU,Niue
+1160,NF,NF,Norfolk Island
+1161,MP,MP,Northern Mariana Islands
+1162,NO,NO,Norway
+1163,OM,OM,Oman
+1164,PK,PK,Pakistan
+1165,PW,PW,Palau
+1166,PS,PS,"Palestine, State of"
+1167,PA,PA,Panama
+1168,PG,PG,Papua New Guinea
+1169,PY,PY,Paraguay
+1170,PE,PE,Peru
+1171,PH,PH,Philippines
+1172,PN,PN,Pitcairn
+1173,PL,PL,Poland
+1174,PT,PT,Portugal
+1175,PR,PR,Puerto Rico
+1176,QA,QA,Qatar
+1177,RE,RE,Réunion
+1178,RO,RO,Romania
+1179,RU,RU,Russian Federation
+1180,RW,RW,Rwanda
+1181,BL,BL,Saint Barthélemy
+1182,SH,SH,"Saint Helena, Ascension and Tristan da Cunha"
+1183,KN,KN,Saint Kitts and Nevis
+1184,LC,LC,Saint Lucia
+1185,MF,MF,Saint Martin (French part)
+1186,PM,PM,Saint Pierre and Miquelon
+1187,VC,VC,Saint Vincent and the Grenadines
+1188,WS,WS,Samoa
+1189,SM,SM,San Marino
+1190,ST,ST,Sao Tome and Principe
+1191,SA,SA,Saudi Arabia
+1192,SN,SN,Senegal
+1193,RS,RS,Serbia
+1194,SC,SC,Seychelles
+1195,SL,SL,Sierra Leone
+1196,SG,SG,Singapore
+1197,SX,SX,Sint Maarten (Dutch part)
+1198,SK,SK,Slovakia
+1199,SI,SI,Slovenia
+1200,SB,SB,Solomon Islands
+1201,SO,SO,Somalia
+1202,ZA,ZA,South Africa
+1203,GS,GS,South Georgia and the South Sandwich Islands
+1204,SS,SS,South Sudan
+1205,ES,ES,Spain
+1206,LK,LK,Sri Lanka
+1207,SD,SD,Sudan
+1208,SR,SR,Suriname
+1209,SJ,SJ,Svalbard and Jan Mayen
+1210,SZ,SZ,Swaziland
+1211,SE,SE,Sweden
+1212,CH,CH,Switzerland
+1213,SY,SY,Syrian Arab Republic
+1214,TW,TW,"Taiwan, Province of China"
+1215,TJ,TJ,Tajikistan
+1216,TZ,TZ,"Tanzania, United Republic of"
+1217,TH,TH,Thailand
+1218,TL,TL,Timor-Leste
+1219,TG,TG,Togo
+1220,TK,TK,Tokelau
+1221,TO,TO,Tonga
+1222,TT,TT,Trinidad and Tobago
+1223,TN,TN,Tunisia
+1224,TR,TR,Turkey
+1225,TM,TM,Turkmenistan
+1226,TC,TC,Turks and Caicos Islands
+1227,TV,TV,Tuvalu
+1228,UG,UG,Uganda
+1229,UA,UA,Ukraine
+1230,AE,AE,United Arab Emirates
+1231,GB,GB,United Kingdom
+1232,US,US,United States
+1233,UM,UM,United States Minor Outlying Islands
+1234,UY,UY,Uruguay
+1235,UZ,UZ,Uzbekistan
+1236,VU,VU,Vanuatu
+1237,VE,VE,"Venezuela, Bolivarian Republic of"
+1238,VN,VN,Viet Nam
+1239,VG,VG,"Virgin Islands, British"
+1240,VI,VI,"Virgin Islands, US"
+1241,WF,WF,Wallis and Futuna
+1242,EH,EH,Western Sahara
+1243,YE,YE,Yemen
+1244,ZM,ZM,Zambia
+1245,ZW,ZW,Zimbabwe
+1246,AFG,AF,Afghanistan
+1247,ALA,AX,Åland Islands
+1248,ALB,AL,Albania
+1249,DZA,DZ,Algeria
+1250,ASM,AS,American Samoa
+1251,AND,AD,Andorra
+1252,AGO,AO,Angola
+1253,AIA,AI,Anguilla
+1254,ATA,AQ,Antarctica
+1255,ATG,AG,Antigua and Barbuda
+1256,ARG,AR,Argentina
+1257,ARM,AM,Armenia
+1258,ABW,AW,Aruba
+1259,AUS,AU,Australia
+1260,AUT,AT,Austria
+1261,AZE,AZ,Azerbaijan
+1262,BHS,BS,Bahamas
+1263,BHR,BH,Bahrain
+1264,BGD,BD,Bangladesh
+1265,BRB,BB,Barbados
+1266,BLR,BY,Belarus
+1267,BEL,BE,Belgium
+1268,BLZ,BZ,Belize
+1269,BEN,BJ,Benin
+1270,BMU,BM,Bermuda
+1271,BTN,BT,Bhutan
+1272,BOL,BO,"Bolivia, Plurinational State of"
+1273,BES,BQ,"Bonaire, Sint Eustatius and Saba"
+1274,BIH,BA,Bosnia and Herzegovina
+1275,BWA,BW,Botswana
+1276,BVT,BV,Bouvet Island
+1277,BRA,BR,Brazil
+1278,IOT,IO,British Indian Ocean Territory
+1279,BRN,BN,Brunei Darussalam
+1280,BGR,BG,Bulgaria
+1281,BFA,BF,Burkina Faso
+1282,BDI,BI,Burundi
+1283,KHM,KH,Cambodia
+1284,CMR,CM,Cameroon
+1285,CAN,CA,Canada
+1286,CPV,CV,Cape Verde
+1287,CYM,KY,Cayman Islands
+1288,CAF,CF,Central African Republic
+1289,TCD,TD,Chad
+1290,CHL,CL,Chile
+1291,CHN,CN,China
+1292,CXR,CX,Christmas Island
+1293,CCK,CC,Cocos (Keeling) Islands
+1294,COL,CO,Colombia
+1295,COM,KM,Comoros
+1296,COG,CG,Congo
+1297,COD,CD,"Congo, the Democratic Republic of the"
+1298,COK,CK,Cook Islands
+1299,CRI,CR,Costa Rica
+1300,CIV,CI,Côte d'Ivoire
+1301,HRV,HR,Croatia
+1302,CUB,CU,Cuba
+1303,CUW,CW,Curaçao
+1304,CYP,CY,Cyprus
+1305,CZE,CZ,Czech Republic
+1306,DNK,DK,Denmark
+1307,DJI,DJ,Djibouti
+1308,DMA,DM,Dominica
+1309,DOM,DO,Dominican Republic
+1310,ECU,EC,Ecuador
+1311,EGY,EG,Egypt
+1312,SLV,SV,El Salvador
+1313,GNQ,GQ,Equatorial Guinea
+1314,ERI,ER,Eritrea
+1315,EST,EE,Estonia
+1316,ETH,ET,Ethiopia
+1317,FLK,FK,Falkland Islands (Malvinas)
+1318,FRO,FO,Faroe Islands
+1319,FJI,FJ,Fiji
+1320,FIN,FI,Finland
+1321,FRA,FR,France
+1322,GUF,GF,French Guiana
+1323,PYF,PF,French Polynesia
+1324,ATF,TF,French Southern Territories
+1325,GAB,GA,Gabon
+1326,GMB,GM,Gambia
+1327,GEO,GE,Georgia
+1328,DEU,DE,Germany
+1329,GHA,GH,Ghana
+1330,GIB,GI,Gibraltar
+1331,GRC,GR,Greece
+1332,GRL,GL,Greenland
+1333,GRD,GD,Grenada
+1334,GLP,GP,Guadeloupe
+1335,GUM,GU,Guam
+1336,GTM,GT,Guatemala
+1337,GGY,GG,Guernsey
+1338,GIN,GN,Guinea
+1339,GNB,GW,Guinea-Bissau
+1340,GUY,GY,Guyana
+1341,HTI,HT,Haiti
+1342,HMD,HM,Heard Island and McDonald Islands
+1343,VAT,VA,Holy See (Vatican City State)
+1344,HND,HN,Honduras
+1345,HKG,HK,Hong Kong
+1346,HUN,HU,Hungary
+1347,ISL,IS,Iceland
+1348,IND,IN,India
+1349,IDN,ID,Indonesia
+1350,IRN,IR,"Iran, Islamic Republic of"
+1351,IRQ,IQ,Iraq
+1352,IRL,IE,Ireland
+1353,IMN,IM,Isle of Man
+1354,ISR,IL,Israel
+1355,ITA,IT,Italy
+1356,JAM,JM,Jamaica
+1357,JPN,JP,Japan
+1358,JEY,JE,Jersey
+1359,JOR,JO,Jordan
+1360,KAZ,KZ,Kazakhstan
+1361,KEN,KE,Kenya
+1362,KIR,KI,Kiribati
+1363,PRK,KP,"Korea, Democratic People's Republic of"
+1364,KOR,KR,"Korea, Republic of"
+1365,KWT,KW,Kuwait
+1366,KGZ,KG,Kyrgyzstan
+1367,LAO,LA,Lao People's Democratic Republic
+1368,LVA,LV,Latvia
+1369,LBN,LB,Lebanon
+1370,LSO,LS,Lesotho
+1371,LBR,LR,Liberia
+1372,LBY,LY,Libya
+1373,LIE,LI,Liechtenstein
+1374,LTU,LT,Lithuania
+1375,LUX,LU,Luxembourg
+1376,MAC,MO,Macao
+1377,MKD,MK,"Macedonia, the Former Yugoslav Republic of"
+1378,MDG,MG,Madagascar
+1379,MWI,MW,Malawi
+1380,MYS,MY,Malaysia
+1381,MDV,MV,Maldives
+1382,MLI,ML,Mali
+1383,MLT,MT,Malta
+1384,MHL,MH,Marshall Islands
+1385,MTQ,MQ,Martinique
+1386,MRT,MR,Mauritania
+1387,MUS,MU,Mauritius
+1388,MYT,YT,Mayotte
+1389,MEX,MX,Mexico
+1390,FSM,FM,"Micronesia, Federated States of"
+1391,MDA,MD,"Moldova, Republic of"
+1392,MCO,MC,Monaco
+1393,MNG,MN,Mongolia
+1394,MNE,ME,Montenegro
+1395,MSR,MS,Montserrat
+1396,MAR,MA,Morocco
+1397,MOZ,MZ,Mozambique
+1398,MMR,MM,Myanmar
+1399,NAM,NA,Namibia
+1400,NRU,NR,Nauru
+1401,NPL,NP,Nepal
+1402,NLD,NL,Netherlands
+1403,NCL,NC,New Caledonia
+1404,NZL,NZ,New Zealand
+1405,NIC,NI,Nicaragua
+1406,NER,NE,Niger
+1407,NGA,NG,Nigeria
+1408,NIU,NU,Niue
+1409,NFK,NF,Norfolk Island
+1410,MNP,MP,Northern Mariana Islands
+1411,NOR,NO,Norway
+1412,OMN,OM,Oman
+1413,PAK,PK,Pakistan
+1414,PLW,PW,Palau
+1415,PSE,PS,"Palestine, State of"
+1416,PAN,PA,Panama
+1417,PNG,PG,Papua New Guinea
+1418,PRY,PY,Paraguay
+1419,PER,PE,Peru
+1420,PHL,PH,Philippines
+1421,PCN,PN,Pitcairn
+1422,POL,PL,Poland
+1423,PRT,PT,Portugal
+1424,PRI,PR,Puerto Rico
+1425,QAT,QA,Qatar
+1426,REU,RE,Réunion
+1427,ROU,RO,Romania
+1428,RUS,RU,Russian Federation
+1429,RWA,RW,Rwanda
+1430,BLM,BL,Saint Barthélemy
+1431,SHN,SH,"Saint Helena, Ascension and Tristan da Cunha"
+1432,KNA,KN,Saint Kitts and Nevis
+1433,LCA,LC,Saint Lucia
+1434,MAF,MF,Saint Martin (French part)
+1435,SPM,PM,Saint Pierre and Miquelon
+1436,VCT,VC,Saint Vincent and the Grenadines
+1437,WSM,WS,Samoa
+1438,SMR,SM,San Marino
+1439,STP,ST,Sao Tome and Principe
+1440,SAU,SA,Saudi Arabia
+1441,SEN,SN,Senegal
+1442,SRB,RS,Serbia
+1443,SYC,SC,Seychelles
+1444,SLE,SL,Sierra Leone
+1445,SGP,SG,Singapore
+1446,SXM,SX,Sint Maarten (Dutch part)
+1447,SVK,SK,Slovakia
+1448,SVN,SI,Slovenia
+1449,SLB,SB,Solomon Islands
+1450,SOM,SO,Somalia
+1451,ZAF,ZA,South Africa
+1452,SGS,GS,South Georgia and the South Sandwich Islands
+1453,SSD,SS,South Sudan
+1454,ESP,ES,Spain
+1455,LKA,LK,Sri Lanka
+1456,SDN,SD,Sudan
+1457,SUR,SR,Suriname
+1458,SJM,SJ,Svalbard and Jan Mayen
+1459,SWZ,SZ,Swaziland
+1460,SWE,SE,Sweden
+1461,CHE,CH,Switzerland
+1462,SYR,SY,Syrian Arab Republic
+1463,TWN,TW,"Taiwan, Province of China"
+1464,TJK,TJ,Tajikistan
+1465,TZA,TZ,"Tanzania, United Republic of"
+1466,THA,TH,Thailand
+1467,TLS,TL,Timor-Leste
+1468,TGO,TG,Togo
+1469,TKL,TK,Tokelau
+1470,TON,TO,Tonga
+1471,TTO,TT,Trinidad and Tobago
+1472,TUN,TN,Tunisia
+1473,TUR,TR,Turkey
+1474,TKM,TM,Turkmenistan
+1475,TCA,TC,Turks and Caicos Islands
+1476,TUV,TV,Tuvalu
+1477,UGA,UG,Uganda
+1478,UKR,UA,Ukraine
+1479,ARE,AE,United Arab Emirates
+1480,GBR,GB,United Kingdom
+1481,USA,US,United States
+1482,UMI,UM,United States Minor Outlying Islands
+1483,URY,UY,Uruguay
+1484,UZB,UZ,Uzbekistan
+1485,VUT,VU,Vanuatu
+1486,VEN,VE,"Venezuela, Bolivarian Republic of"
+1487,VNM,VN,Viet Nam
+1488,VGB,VG,"Virgin Islands, British"
+1489,VIR,VI,"Virgin Islands, US"
+1490,WLF,WF,Wallis and Futuna
+1491,ESH,EH,Western Sahara
+1492,YEM,YE,Yemen
+1493,ZMB,ZM,Zambia
+1494,ZWE,ZW,Zimbabwe
+1495,AUSTRIA RETAIL,AT,Austria
+1496,AUSATRALIA,AU,Australia
+1497,AUSTRAILIA,AU,Australia
+1498,AZERBAYCAN,AZ,Azerbaijan
+1499,BOLIVIA,BO,"Bolivia, Plurinational State of"
+1500,BOSNIA HERZEGOWINA,BA,Bosnia and Herzegovina
+1501,BOSNIAHERZEGOWINA,BA,Bosnia and Herzegovina
+1502,BRASIL,BR,Brazil
+1503,BRUNEI DARESS,BN,Brunei Darussalam
+1504,CANADAC,CA,Canada
+1505,CANANDA,CA,Canada
+1506,CHRISTMAS ISLND,CX,Christmas Island
+1507,OWNER US,US,United States
+1508,OWNER CA,CA,Canada
+1509,POLYN SIE FRAN AISE,PF,French Polynesia
+1510,PHILPPINES,PH,Philippines
+1511,PHILLIPINES,PH,Philippines
+1512,PHILIPPINE,PH,Philippines
+1513,PHILIPINES,PH,Philippines
+1514,PHILAPPINES,PH,Philippines
+1515,PAPUA NW GUINEA,PG,Papua New Guinea
+1516,PALESTINIAN TERRITORY OCCUPIE,PS,"Palestine, State of"
+1517,PAKISATN,PK,Pakistan
+1518,QUATAR,QA,Qatar
+1519,RUSASIAN FEDERATION,RU,Russian Federation
+1520,ROMAIA,RO,Romania
+1521,SWIZERLAND,CH,Switzerland
+1522,SWITZERLANND,CH,Switzerland
+1523,SWITERLAND,CH,Switzerland
+1524,SWEEDEN,SE,Sweden
+1525,SURINAM,SR,Suriname
+1526,SPAN,ES,Spain
+1527,SOUTH AFTRICA,ZA,South Africa
+1528,SINGAPRE,SG,Singapore
+1529,SAUDIA ARABIA,SA,Saudi Arabia
+1530,ST BARTHELME,BL,Saint Barthélemy
+1531,TURKS CAICOS ISLES,TC,Turks and Caicos Islands
+1532,THAIAND,TH,Thailand
+1533,TAJIKSTAN,TJ,Tajikistan
+1534,T AI WAN,TW,"Taiwan, Province of China"
+1535,URAGUAY,UY,Uruguay
+1536,UNTIED KINGDOM,GB,United Kingdom
+1537,UNTED KINGDOM,GB,United Kingdom
+1538,UNITIED KINGDOM,GB,United Kingdom
+1539,UNITERD KINGDOM,GB,United Kingdom
+1540,UNITED KNGDOM,GB,United Kingdom
+1541,UNITED KINGODM,GB,United Kingdom
+1542,UNITED KINGDROM,GB,United Kingdom
+1543,UNITED KINGDON,GB,United Kingdom
+1544,UNITED KINGDOM Ÿ,GB,United Kingdom
+1545,UNITED KINDOM,GB,United Kingdom
+1546,UNITED KINDGOM,GB,United Kingdom
+1547,UNITED KIN,GB,United Kingdom
+1548,UNITED KIGDOM,GB,United Kingdom
+1549,UNITED KINGOM,GB,United Kingdom
+1550,VIE,VN,Viet Nam
+1551,VIETNA,VN,Viet Nam
+1552,VIETMAN,VN,Viet Nam
+1553,VIETAM,VN,Viet Nam
+1554,VENEZUELA,VE,"Venezuela, Bolivarian Republic of"
+1555,VENEZUELA BOLIVARIAN REPUBLIC O,VE,"Venezuela, Bolivarian Republic of"
+1556,UNITED ARAB EMIRITES,AE,United Arab Emirates
+1557,UNITED ARAB EMIRATESMIRATES,AE,United Arab Emirates
+1558,UNITED ARAB EMIRATE,AE,United Arab Emirates
+1559,UNITED ARAB AMIRATES,AE,United Arab Emirates
+1561,UNTIED STATES,US,United States
+1562,UNTED STATES,US,United States
+1563,UNITES STATES AMERICA,US,United States
+1564,UNITES STATES,US,United States
+1565,UNITED STATS,US,United States
+1566,UNITED STAES,US,United States
+1567,UNITED STA,US,United States
+1568,UNITED SATES,US,United States
+1569,UNITED SALES,US,United States
+1570,UNITED STATE,US,United States
+1571,UNIETD STATES,US,United States
+1572,UNIED STATES,US,United States
+1573,UNATED STATES,US,United States
+1574,UBITED STATES,US,United States
+1575,ASIA PACIFIC REGION,AP,Asia/Pacific Region

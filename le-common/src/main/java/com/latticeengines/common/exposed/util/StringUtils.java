@@ -19,12 +19,17 @@ public class StringUtils {
         if (str == null) {
             return null;
         }
-        Character[] symbols = { '~', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[',
-                ']', '|', '\\', ':', ';', '\'', '"', '<', '>', ',', '.', '/', '?', '\t' };
-        Set<Character> symbolSet = new HashSet<Character>(Arrays.asList(symbols));
+        Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '(', ')', '+', '=', '{', '}', '[', ']', '\'', '"',
+                '<', '>', '.' };
+        Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',' };
+        Set<Character> removedSet = new HashSet<Character>(Arrays.asList(removed));
+        Set<Character> replacedBySpaceSet = new HashSet<Character>(Arrays.asList(replacedBySpace));
         StringBuilder sb = new StringBuilder(str.toUpperCase());
         for (int i = 0; i < sb.length(); i++) {
-            if (symbolSet.contains(sb.charAt(i))) {
+            if (removedSet.contains(sb.charAt(i))) {
+                sb.replace(i, i + 1, "");
+                i--;
+            } else if (replacedBySpaceSet.contains(sb.charAt(i))) {
                 sb.replace(i, i + 1, " ");
             }
         }

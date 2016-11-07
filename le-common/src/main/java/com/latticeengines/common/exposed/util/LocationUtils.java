@@ -23,7 +23,8 @@ public class LocationUtils {
     static {
         Object[][] countrySynonData = new Object[][]{ //
                 { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES",
-                        "UNITED STATES AMERICA", "AMERICA", "AMERICAN", "UNITED STATES AMERICA USA" } }, //
+                        "UNITED STATES AMERICA", "AMERICA", "AMERICAN", "UNITED STATES AMERICA USA",
+                        "UNITED STATES USA" } }, //
                 { "ANTIGUA BARBUDA", new String[] { "ANTIGUA BARBUDA", "ANTIGUABARBUDA" } }, //
                 { "ASIA PACIFIC REGION", new String[] { "ASIA PACIFIC REGION", "ASIAPACIFIC REGION", "AP", "APAC" } }, //
                 { "ÅLAND IS", new String[] { "ÅLAND IS", "ALAND IS" } }, //
@@ -32,19 +33,49 @@ public class LocationUtils {
                 { "BOSNIA HERZEGOVINA", new String[] { "BOSNIAHERZ", "BOSNIA HERZEGOVINA", "BOSNIAHERZEGOVINA" } }, //
                 { "BRUNEI DARUSSALAM", new String[] { "BRUNEI DARUSSALAM", "BRUNEI" } }, //
                 { "BOLIVIA", new String[] { "BOLIVIA", "BOLIVIA PLURINATIONAL STATE" } }, //
+                { "BELARUS", new String[] { "BELARUS", "REPUBLIC BELARUS" } }, //
                 { "CONGO",
                         new String[] { "CONGO", "CONGO KINSHASA", "CONGO BRAZZAVILLE", "CONGO DEMOCRATIC REPUBLIC",
-                                "CONGO DRC", "CONGO DEMOCRATIC REP", "DEMOCRATIC REPUBLIC CONGO", } }, //
+                                "CONGO DRC", "CONGO DEMOCRATIC REP", "DEMOCRATIC REPUBLIC CONGO", "RÉPUBLIQUE DU CONGO",
+                                "REPUBLIC CONGO", "REPOF CONGO" } }, //
+                { "CYPRUS", new String[] { "CYPRUS", "REPUBLIC CYPRUS" } }, //
+                { "CHINA",
+                        new String[] { "CHINA", "REPUBLIC CHINA", "PR CHINA", "PEOPLES REPUBLIC CHINA",
+                                "PEOPLES REP CHINA", "PR CHINA" } }, //
+                { "CROATIA", new String[] { "CROATIA", "REPUBLIC CROATIA" } }, //
+                { "DOMINICAN REPUBLIC",
+                        new String[] { "DOMINICAN REPUBLIC", "REPUBLICA DOMINICANA", "REPÚBLICA DOMINICANA" } }, //
+                { "EQUATORIAL GUINEA", new String[] { "EQUATORIAL GUINEA", "REPUBLIC EQUATORIAL GUINEA" } }, //
                 { "FINLAND", new String[] { "FINLAND", "SUOMI" } }, //
+                { "FIJI", new String[] { "FIJI", "REPUBIC FIJI" } }, //
+                { "FRANCE", new String[] { "FRANCE", "NEW CALEDONIAN" } }, //
                 { "HONG KONG",
                         new String[] { "HONG KONG", "HONGKONG", "CHINA HONG KONG", "HONG KONG CHINA",
                                 "HONG KONG SAR" } }, //
-                { "KOREA REPUBLIC", new String[] { "KOREA REPUBLIC", "SOUTH KOREA", "KOREA", "S KOREA" } }, //
+                { "IRELAND", new String[] { "IRELAND", "REPUBLIC IRELAND" } }, //
+                { "KOREA REPUBLIC",
+                        new String[] { "KOREA REPUBLIC", "SOUTH KOREA", "KOREA", "S KOREA", "REPUBLIC KOREA" } }, //
+                { "KOREA DEMOCRATIC PEOPLE S REPUBLIC",
+                        new String[] { "KOREA DEMOCRATIC PEOPLE S REPUBLIC", "NORTH KOREA" } }, //
                 { "MYANMAR", new String[] { "MYANMAR", "BURMA MYANMAR" } }, //
                 { "MACEDONIA FORMER YUGOSLAV REPUBLIC",
                         new String[] { "MACEDONIA FORMER YUGOSLAV REPUBLIC", "YUGOSLAV", "YUGOSLAVIA" } }, //
+                { "MARSHALL IS", new String[] { "MARSHALL IS", "REPUBLIC MARSHALL IS" } }, //
+                { "MOLDOVA REPUBLIC", new String[] { "MOLDOVA REPUBLIC", "REPUBLIC MOLDOVA" } }, //
+                { "NORWAY", new String[] { "NORWAY", "NORGE" } }, //
+                { "NETHERLANDS",
+                        new String[] { "NETHERLANDS", "NETHERLANDS NE", "NETHERLANDS ANTILLES",
+                                "NETHERLANDS HOLLAND" } }, //
                 { "OMAN", new String[] { "OMAN", "SULTANATE OMAN" } }, //
-                { "SAINT HELENA ASCENSION TRISTAN DA CUNHA",
+                { "PANAMA", new String[] { "PANAMA", "REPUBLICA DE PANAMA" } }, //
+                { "POLAND", new String[] { "POLAND", "POLSKA" } }, //
+                { "PALESTINE STATE",
+                        new String[] { "PALESTINE STATE", "PALESTINIAN TERRITORY OCCUPIED", "PALESTINIAN TERRITORY",
+                                "PALESTINIAN TERRITORIES", "PALESTINIAN AUTHORITY", "PALESTINE" } }, //
+                { "RUSSIAN FEDERATION",
+                        new String[] { "RUSSIAN FEDERATION", "RUSSIA FEDERATION", "RUSSIA", "RUSSIAN FED",
+                                "RUSSIAN" } }, //
+                { "ST HELENA ASCENSION TRISTAN DA CUNHA",
                         new String[] { "ST HELENA ASCENSION TRISTAN DA CUNHA", "ASCENSION IS", "ST HELENA" } }, //
                 { "SAMOA", new String[] { "SAMOA", "WESTERN SAMOA" } }, //
                 { "SYRIAN ARAB REPUBLIC",
@@ -56,7 +87,7 @@ public class LocationUtils {
                 { "ST MARTIN FRENCH PART", new String[] { "ST MARTIN FRENCH PART", "ST MARTIN" } }, //
                 { "ST KITTS NEVIS", new String[] { "ST KITTS NEVIS", "ST KITTS" } }, //
                 { "SRI LANKA", new String[] { "SRI LANKA", "SRILANKA" } }, //
-                { "SERBIA", new String[] { "SERBIA", "SRBIJA" } }, //
+                { "SERBIA", new String[] { "SERBIA", "SRBIJA", "REPUBLIC KOSOVO", "REP KOSOVO" } }, //
                 { "SPAIN", new String[] { "SPAIN", "SPANISH", "SPANIEN" } }, //
                 { "SOUTH GEORGIA SOUTH SANDWICH IS",
                         new String[] { "SOUTH GEORGIA SOUTH SANDWICH IS", "SOUTH GEORGIA SOUTH SANDWICH ISL" } }, //
@@ -66,25 +97,27 @@ public class LocationUtils {
                 { "SERBIA", new String[] { "SERBIA", "SERBIA MONTENEGRO", "SERBIA REPUBLIC SERBIA" } }, //
                 { "SAUDI ARABIA", new String[] { "SAUDI ARABIA", "SAUDIARABIA" } }, //
                 { "ST BARTHÉLEMY", new String[] { "ST BARTHÉLEMY", "ST BARTHELEMY" } }, //
-                { "SAO TOME PRINCIPE", new String[] { "SAO TOME PRINCIPE", "S TOME PRINCIPE", "SÃO TOMÉ PRÍNCIPE" } }, //
+                { "SAO TOME PRINCIPE", new String[] { "SAO TOME PRINCIPE", "STOME PRINCIPE", "SÃO TOMÉ PRÍNCIPE" } }, //
+                { "SINGAPORE", new String[] { "SINGAPORE", "REPUBLIC SINGAPORE" } }, //
                 { "TURKEY", new String[] { "TURKEY", "TURKISH", "TÜRKIYE", "TURKIYE" } }, //
                 { "TUNISIA", new String[] { "TUNISIA", "TUNISIE" } }, //
                 { "TRINIDAD TOBAGO", new String[] { "TRINIDAD TOBAGO", "TRINIDAD" } }, //
                 { "TANZANIA UNITED REPUBLIC", new String[] { "TANZANIA UNITED REPUBLIC", "TANZANIA" } }, //
                 { "TAIWAN PROVINCE CHINA",
                         new String[] { "TAIWAN PROVINCE CHINA", "TAIWAN ROC", "TAIWAN REPUBLIC CHINA", "TAIWAN R O C",
-                                "TAIWAN CHINA", "TAIWAN" } }, //
+                                "TAIWAN CHINA", "TAIWAN", "TAI WAN", "PROVINCE CHINA TAIWAN" } }, //
                 { "UNITED KINGDOM",
                         new String[] { "UNITED KINGDOM", "UNITED KINGDOM GREAT BRITAIN NORTHERN IRELAND",
                                 "GREAT BRITAIN", "GREAT BRITAIN UK", "NORTHERN IRELAND", "WALES",
-                                "UNITED KINGDOM GREAT BRITAIN", "UK", "U K", "SCOTLAND" } }, //
+                                "UNITED KINGDOM GREAT BRITAIN", "UK", "U K", "SCOTLAND", "ROYAUME UNI" } }, //
                 { "UNITED STATES MINOR OUTLYING IS",
                         new String[] { "UNITED STATES MINOR OUTLYING IS", "BAKER", "BAKER IS", "HOWLAND", "HOWLAND IS",
                                 "JARVIS", "JARVIS IS", "JOHNSTON ATOLL", "KINGMAN REEF", "MIDWAY", "MIDWAY IS",
                                 "NAVASSA", "NAVASSA IS", "PALMYRA ATOLL", "WAKE", "WAKE IS", "US MINOR OUTLYING IS",
                                 "U S MINOR IS", "US MINOR IS", "USA MINOR IS" } }, //
                 { "UNITED ARAB EMIRATES",
-                        new String[] { "UNITED ARAB EMIRATES", "UTD ARAB EMIR", "UAE", "UNITED EMIRATES", "U A E" } }, //
+                        new String[] { "UNITED ARAB EMIRATES", "UTD ARAB EMIR", "UAE", "UNITED EMIRATES", "U A E",
+                                "UTDARAB EMIR" } }, //
                 { "UGANDA", new String[] { "UGANDA", "UGANDA REPUBLIC", "UDA" } }, //
                 { "VIRGIN IS BRITISH",
                         new String[] { "VIRGIN IS BRITISH", "BRITISH VIRGIN IS", "CHANNEL IS", "ANEGADA",
