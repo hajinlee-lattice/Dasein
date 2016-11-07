@@ -486,7 +486,7 @@ angular
                         }
                     },
                     controller: function($scope, $state) {
-                        $scope.state = $state.current.name;
+                        $scope.state = 'home.marketosettings.apikey';
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -501,7 +501,7 @@ angular
             url: '/edit/{id}',
             params: {
                 pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Profiles > Edit Credential',
+                pageTitle: 'Marketo Profiles > Edit Profile',
             },
             views: {
                 "summary@": {
@@ -511,7 +511,7 @@ angular
                         }
                     },
                     controller: function($scope, $state) {
-                        $scope.state = $state.current.name;
+                        $scope.state = 'home.marketosettings.apikey';
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },

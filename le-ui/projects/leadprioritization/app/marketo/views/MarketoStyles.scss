@@ -30,6 +30,31 @@
 	}
 }
 
+.add-profile {
+	.form-group {
+		margin-bottom: 14px;
+	}
+	.columns .form-group:last-child {
+		margin-bottom: 0;
+	}
+	.panel-header {
+		background: #fff;
+		.form-group {
+			margin-bottom: 0;
+		}
+	}
+	h2 {
+		font-size: 18px;
+		margin-bottom: 16px;
+	}
+	h3 {
+		font-size: 16px;
+		text-transform: none;
+		color: #333;
+		margin-bottom: 6px;
+	}
+}
+
 @media only screen and (min-width: 1000px) {
 	.credential-name, .credential-endpoint {
 		max-width:300px;
