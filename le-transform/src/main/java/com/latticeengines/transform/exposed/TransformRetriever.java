@@ -64,10 +64,11 @@ public class TransformRetriever implements InitializingBean {
                         try {
                             Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class.forName(rtsClassName);
                             ctor = c.getConstructor(String.class);
+                            log.info("Loaded java transform: " + key.moduleName + ". constructor name:"
+                                    + ctor.getName());
                         } catch (Exception e) {
                             log.fatal("Failed to load java transform " + rtsClassName, e);
                         }
-                        log.info("Loaded java transform: " + key.moduleName + ". constructor name:" + ctor.getName());
                         return ctor.newInstance(new Object[] { key.modelPath });
                     }
                 });
