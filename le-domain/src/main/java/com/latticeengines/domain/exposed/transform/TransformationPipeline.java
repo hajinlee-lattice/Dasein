@@ -126,7 +126,7 @@ public class TransformationPipeline {
     public static TransformDefinition stdVisidbStateIsInSouthWest = new TransformDefinition(
             "StdVisidbDsStateIsInSouthWest", "StateIsInSouthWest", FieldType.BOOLEAN,
             new LinkedHashMap<String, Object>());
-    
+
     public static TransformDefinition dnbNaicsSector = new TransformDefinition(
             "DnBNaicsSector", "NaicsSector", FieldType.STRING, new LinkedHashMap<String, Object>());
 
@@ -203,9 +203,9 @@ public class TransformationPipeline {
         stdVisidbStateIsInRockyMountain.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthEast.arguments.put("column", InterfaceName.State.name());
         stdVisidbStateIsInSouthWest.arguments.put("column", InterfaceName.State.name());
-        
+
         // DnB transforms
-        
+
         dnbNaicsSector.arguments.put("column", "LE_NAICS_CODE");
         dnbNaicsSubsector.arguments.put("column", "LE_NAICS_CODE");
         dnbNaicsIndustryGroup.arguments.put("column", "LE_NAICS_CODE");
@@ -256,11 +256,10 @@ public class TransformationPipeline {
                 .add(stdVisidbDsTitleIsacademic) //
                 .add(stdVisidbDsFirstnameSameasLastname) //
                 .add(stdVisidbDsIndustryGroup) //
-                /*
                 .add(dnbNaicsSector) //
                 .add(dnbNaicsSubsector) //
                 .add(dnbNaicsIndustryGroup) //
-                .add(dnbSicCategory) //*/
+                .add(dnbSicCategory) //
                 .build();
         return stdTransformDefinitions;
     }

@@ -1,5 +1,29 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -30,7 +54,6 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
@@ -40,30 +63,6 @@ import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {
@@ -265,8 +264,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
         DataComposition eventTableDataComposition = getModelJsonTypeHandler(modelJsonType)
                 .getEventTableDataComposition(hdfsScoreArtifactTableDir, localPathToPersist);
-        Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
-                eventTableDataComposition, dataScienceDataComposition);
+        Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
         ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType).getScoreDerivation(
@@ -280,15 +278,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @VisibleForTesting
-    /*
-     * The purpose of this function is to remove certain transforms from the
-     * eventtable-generated datacomposition. This is needed because during
-     * profiling certain fields get removed so that the final
-     * datascience-generated datacomposition ends up being a subset of the
-     * eventtable-generated datacomposition.
-     */
-    Map<String, FieldSchema> mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
-            DataComposition eventTableDataComposition, DataComposition dataScienceDataComposition) {
+    Map<String, FieldSchema> mergeFields(DataComposition eventTableDataComposition,
+            DataComposition dataScienceDataComposition) {
         Map<String, FieldSchema> mergedFields = new HashMap<>();
 
         Map<String, FieldSchema> eventTableFields = eventTableDataComposition.fields;
@@ -306,36 +297,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 mergedFields.put(dsField, dsFieldSchema);
             }
         }
-
-        Set<String> difference = new HashSet<>(eventTableDataComposition.fields.keySet());
-        difference.removeAll(mergedFields.keySet());
-        if (log.isDebugEnabled()) {
-            log.debug("Difference in datacompositions:" + JsonUtils.serialize(difference));
-        }
-
-        List<TransformDefinition> transformsToKeep = new ArrayList<>();
-
-        for (TransformDefinition transformDefinition : eventTableDataComposition.transforms) {
-            boolean keepTransform = true;
-            for (Object argObject : transformDefinition.arguments.values()) {
-                if (argObject != null) {
-                    String argValue = String.valueOf(argObject);
-                    if (difference.contains(argValue)) {
-                        keepTransform = false;
-                    }
-                }
-            }
-            if (keepTransform) {
-                transformsToKeep.add(transformDefinition);
-            } else {
-                if (log.isInfoEnabled()) {
-                    log.info("Removing this transform:" + JsonUtils.serialize(transformDefinition));
-                }
-            }
-
-        }
-
-        eventTableDataComposition.transforms = transformsToKeep;
 
         return mergedFields;
     }
@@ -601,8 +562,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 .getDataScienceDataComposition(hdfsScoreArtifactBaseDir, localPathToPersist);
         DataComposition eventTableDataComposition = getModelJsonTypeHandler(modelJsonType)
                 .getEventTableDataComposition(hdfsScoreArtifactTableDir, localPathToPersist);
-        Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
-                eventTableDataComposition, dataScienceDataComposition);
+        Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
         String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);
         String scoredTxt = getScoredTxt(hdfsScoreArtifactBaseDir);
 

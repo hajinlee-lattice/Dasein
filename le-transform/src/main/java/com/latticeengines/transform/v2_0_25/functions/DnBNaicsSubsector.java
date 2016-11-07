@@ -13,10 +13,16 @@ public class DnBNaicsSubsector extends Substring {
 
     private static final long serialVersionUID = -7537875837591495149L;
 
+    public DnBNaicsSubsector() {
+    }
+
+    public DnBNaicsSubsector(String modelPath) {
+    }
+
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String naicsCode = getValueToSubstring(arguments, record);
-        
+
         try {
             if (naicsCode != null) {
                 return transform(0, 3, naicsCode);
@@ -24,10 +30,10 @@ public class DnBNaicsSubsector extends Substring {
         } catch (Exception e) {
             return null;
         }
-        
+
         return naicsCode;
     }
-    
+
 
     @Override
     public TransformMetadata getMetadata() {

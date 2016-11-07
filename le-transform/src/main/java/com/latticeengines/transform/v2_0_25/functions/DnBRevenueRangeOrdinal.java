@@ -14,6 +14,12 @@ public class DnBRevenueRangeOrdinal implements RealTimeTransform {
 
     private static final long serialVersionUID = 2101388118521954639L;
 
+    public DnBRevenueRangeOrdinal() {
+    }
+
+    public DnBRevenueRangeOrdinal(String modelPath) {
+    }
+
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");

@@ -13,10 +13,16 @@ public class DnBSicCategory extends Substring {
 
     private static final long serialVersionUID = -2916398769800590028L;
 
+    public DnBSicCategory() {
+    }
+
+    public DnBSicCategory(String modelPath) {
+    }
+
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String sicCode = getValueToSubstring(arguments, record);
-        
+
         try {
             if (sicCode != null) {
                 return transform(0, 2, sicCode);
@@ -24,10 +30,10 @@ public class DnBSicCategory extends Substring {
         } catch (Exception e) {
             return null;
         }
-        
+
         return sicCode;
     }
-    
+
 
     @Override
     public TransformMetadata getMetadata() {

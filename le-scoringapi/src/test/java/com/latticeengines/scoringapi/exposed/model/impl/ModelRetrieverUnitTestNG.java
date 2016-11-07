@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -11,6 +12,7 @@ import org.testng.annotations.Test;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 
 public class ModelRetrieverUnitTestNG {
 
@@ -30,11 +32,10 @@ public class ModelRetrieverUnitTestNG {
         DataComposition dataScienceDataComposition = JsonUtils.deserialize(dataScienceDataCompositionContents,
                 DataComposition.class);
 
-        int original = eventTableDataComposition.transforms.size();
         ModelRetrieverImpl modelRetriever = new ModelRetrieverImpl();
-        modelRetriever.mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(eventTableDataComposition,
+        Map<String, FieldSchema> mergedFields = modelRetriever.mergeFields(eventTableDataComposition,
                 dataScienceDataComposition);
 
-        Assert.assertEquals(original - eventTableDataComposition.transforms.size(), 2);
+        Assert.assertEquals(mergedFields.size(), 349);
     }
 }
