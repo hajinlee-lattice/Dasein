@@ -46,7 +46,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
 
             DataSourceLookupRequest req = new DataSourceLookupRequest();
             req.setMatchTravelerContext(matchTraveler);
-            req.setInputData(matchTraveler.getMatchKeyTuple());
+            req.setInputData(prepareInputData(matchTraveler.getMatchKeyTuple()));
             guideBook.logVisit(self().path().toSerializationFormat(), matchTraveler);
 
             datasourceRef.tell(req, self());
@@ -66,5 +66,9 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     @Override
     protected String getActorName(ActorRef actorRef) {
         return matchActorSystem.getActorName(actorRef);
+    }
+
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple rawInput) {
+        return rawInput;
     }
 }

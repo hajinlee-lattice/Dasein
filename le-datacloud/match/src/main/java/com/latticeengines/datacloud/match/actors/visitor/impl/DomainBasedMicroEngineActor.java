@@ -33,4 +33,11 @@ public class DomainBasedMicroEngineActor extends LookupMicroEngineActorTemplate 
         return String.format("( Domain=%s )", keyTuple.getDomain());
     }
 
+    @Override
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple rawInput) {
+        MatchKeyTuple input = new MatchKeyTuple();
+        input.setDomain(rawInput.getDomain());
+        return input;
+    }
+
 }
