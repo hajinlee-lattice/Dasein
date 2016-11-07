@@ -452,17 +452,6 @@ angular
                 pageTitle: 'Marketo Profiles'
             },
             views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
-                    controller: function($scope, $state) {
-                        $scope.state = 'home.marketosettings.apikey';
-                    },
-                    templateUrl: 'app/navigation/summary/MarketoTabs.html'
-                },
                 "main@": {
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
@@ -486,7 +475,7 @@ angular
                         }
                     },
                     controller: function($scope, $state) {
-                        $scope.state = 'home.marketosettings.apikey';
+                        $scope.state = 'home.marketosettings.edit';
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -510,8 +499,9 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $state) {
-                        $scope.state = 'home.marketosettings.apikey';
+                    controller: function($scope, $stateParams, $state) {
+                        $scope.state = 'home.marketosettings.edit';
+                        $scope.id = $stateParams.id;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
