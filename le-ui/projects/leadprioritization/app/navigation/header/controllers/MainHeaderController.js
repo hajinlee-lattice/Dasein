@@ -118,7 +118,7 @@ angular.module('pd.navigation.header', [
 
     function createUpdatePasswordSuccessView() {
         $('#mainHeaderView').hide();
-        LoginService.Logout();
+        //LoginService.Logout();
         $state.go('passwordsuccess');
     }
 });
