@@ -68,7 +68,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
         return matchActorSystem.getActorName(actorRef);
     }
 
-    protected MatchKeyTuple prepareInputData(MatchKeyTuple rawInput) {
-        return rawInput;
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
+        return input;
     }
 }

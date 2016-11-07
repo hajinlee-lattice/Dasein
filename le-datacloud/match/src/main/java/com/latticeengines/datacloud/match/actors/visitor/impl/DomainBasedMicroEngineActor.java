@@ -34,10 +34,10 @@ public class DomainBasedMicroEngineActor extends LookupMicroEngineActorTemplate 
     }
 
     @Override
-    protected MatchKeyTuple prepareInputData(MatchKeyTuple rawInput) {
-        MatchKeyTuple input = new MatchKeyTuple();
-        input.setDomain(rawInput.getDomain());
-        return input;
+    protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
+        MatchKeyTuple domainOnly = new MatchKeyTuple();
+        domainOnly.setDomain(input.getDomain());
+        return domainOnly;
     }
 
 }
