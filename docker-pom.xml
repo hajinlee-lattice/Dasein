@@ -14,13 +14,12 @@
         <relativePath>le-parent</relativePath>
     </parent>
 
+
+    <!-- pom.xml and playmaker-pom.xml are supposed to be build before this -->
+
     <modules>
         <module>le-config</module>
         <module>le-datafabric/pom-connect-shaded.xml</module>
-        <module>le-matchapi</module>
         <module>le-ui</module>
-        <module>le-oauth2</module>
-        <module>le-playmaker</module>
-        <module>le-scoringapi</module>
     </modules>
 </project>

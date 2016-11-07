@@ -3,7 +3,6 @@ FROM latticeengines/tomcat
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY webapps/ROOT.war /ROOT.war
-COPY META-INF /META-INF
 
 RUN mkdir ROOT \
     && cd ROOT \

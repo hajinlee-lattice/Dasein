@@ -16,6 +16,7 @@
         <playmaker.docker.context>src/main/resources/tomcat/le-playmaker</playmaker.docker.context>
         <scoringapi.docker.context>src/main/resources/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
+        <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
     </properties>
 
     <parent>
@@ -62,6 +63,35 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-ui.tar.gz"
                                       tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
+                                      overwrite="true" />
+
+                                <!-- microservices -->
+                                <copy file="${project.basedir}/../le-microservice/core/target/le-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/eai/target/le-eai-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/eai.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/metadata/target/le-metadata-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/metadata.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/modeling/target/le-modeling-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/modeling.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/scoring/target/le-scoring-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/scoring.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/quartz/target/le-quartz-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/quartz.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/modelquality/target/le-modelquality-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/modelquality.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/propdata/target/le-propdata-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/propdata.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/dellebi/target/le-dellebi-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/dellebi.war"
                                       overwrite="true" />
                             </tasks>
                         </configuration>
