@@ -11,7 +11,7 @@ angular
     this.ScoreCurrentFieldMapping = null;
 
     this.advancedSettings = {
-        oneLeadPerDomain: false,
+        oneLeadPerDomain: true,
         includePersonalEmailDomains: true,
         useLatticeAttributes: true,
         enableTransformations: true
@@ -26,7 +26,7 @@ angular
     };
 
     this.ResetAdvancedSettings = function() {
-        this.advancedSettings.oneLeadPerDomain = false;
+        this.advancedSettings.oneLeadPerDomain = true;
         this.advancedSettings.includePersonalEmailDomains = true;
         this.advancedSettings.useLatticeAttributes = true;
         this.advancedSettings.enableTransformations = true;
