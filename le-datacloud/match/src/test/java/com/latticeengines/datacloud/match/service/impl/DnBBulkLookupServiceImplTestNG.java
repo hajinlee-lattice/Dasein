@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +21,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional", enabled = false)
     public void testRealTimeLookupService() {
-        List<MatchKeyTuple> input = new ArrayList<MatchKeyTuple>();
+        Map<String, MatchKeyTuple> input = new HashMap<String, MatchKeyTuple>();
         dnBBulkLookupService.sendRequest(input);
     }
 }

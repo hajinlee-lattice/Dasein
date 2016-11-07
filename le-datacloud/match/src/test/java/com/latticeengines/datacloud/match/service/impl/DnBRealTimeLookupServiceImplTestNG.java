@@ -80,7 +80,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         }
 
         for(int i = 0; i < THREAD_NUM; i++) {
-            if(messageList.get(i).equals(DnBReturnCode.ExceedConcurrentNum.getMessage())) {
+            if(messageList.get(i).equals(DnBReturnCode.EXCEED_CONCURRENT_NUM.getMessage())) {
                 Assert.assertTrue(true);
             }
         }

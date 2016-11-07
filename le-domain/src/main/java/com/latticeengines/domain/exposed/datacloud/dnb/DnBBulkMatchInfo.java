@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
+import java.util.List;
+
 public class DnBBulkMatchInfo {
     private String serviceBatchId;
 
@@ -7,6 +9,8 @@ public class DnBBulkMatchInfo {
     private String timestamp;
 
     private DnBReturnCode dnbCode;
+
+    private List<String> lookupRequestIds;
 
     public String getServiceBatchId() {
         return serviceBatchId;
@@ -30,6 +34,14 @@ public class DnBBulkMatchInfo {
 
     public void setDnbCode(DnBReturnCode dnbCode) {
         this.dnbCode = dnbCode;
+    }
+
+    public List<String> getLookupRequestIds() {
+        return lookupRequestIds;
+    }
+
+    public void setLookupRequestIds(List<String> lookupRequestIds) {
+        this.lookupRequestIds = lookupRequestIds;
     }
 
 }

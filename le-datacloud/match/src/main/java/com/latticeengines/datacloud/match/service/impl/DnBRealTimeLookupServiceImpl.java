@@ -63,7 +63,7 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         DnBMatchOutput res = null;
         for (int i = 0; i < retries; i++) {
             res = tryRealtimeEntityLookup(input);
-            if (res.getDnbCode() != DnBReturnCode.Expired) {
+            if (res.getDnbCode() != DnBReturnCode.EXPIRED) {
                 break;
             }
             dnBAuthenticationService.refreshAndGetToken(DnBKeyType.realtime);
@@ -91,10 +91,10 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         Boolean isNeedParseBody = false;
         switch (ex.getStatusCode()) {
         case REQUEST_TIMEOUT:
-            errCode = DnBReturnCode.TimeOut;
+            errCode = DnBReturnCode.TIMEOUT;
             break;
         case NOT_FOUND:
-            errCode = DnBReturnCode.NoResult;
+            errCode = DnBReturnCode.NO_RESULT;
             break;
         default:
             isNeedParseBody = true;
@@ -114,16 +114,16 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         switch (dnBErrorCode) {
         case "SC001":
         case "SC003":
-            errCode = DnBReturnCode.Expired;
+            errCode = DnBReturnCode.EXPIRED;
             break;
         case "SC005":
-            errCode = DnBReturnCode.ExceedRequestNum;
+            errCode = DnBReturnCode.EXCEED_REQUEST_NUM;
             break;
         case "SC006":
-            errCode = DnBReturnCode.ExceedConcurrentNum;
+            errCode = DnBReturnCode.EXCEED_CONCURRENT_NUM;
             break;
         default:
-            errCode = DnBReturnCode.Unknown;
+            errCode = DnBReturnCode.UNKNOWN;
         }
 
         return errCode;
@@ -137,7 +137,7 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
     private void parseSucceededResponse(MatchKeyTuple input, ResponseEntity<String> response,
             DnBMatchOutput res) {
         if (response.getStatusCode() != OK) {
-            res.setDnbCode(DnBReturnCode.Unknown);
+            res.setDnbCode(DnBReturnCode.UNKNOWN);
             return;
         }
         res.setDuns((String) retrieveValueFromResponse(dunsJsonPath, response.getBody()));

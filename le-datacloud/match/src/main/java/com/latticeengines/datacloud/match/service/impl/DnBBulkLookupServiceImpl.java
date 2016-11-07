@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,13 +21,17 @@ public class DnBBulkLookupServiceImpl implements DnBBulkLookupService {
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;
 
+    // Key in the input is lookupRequestId.
+    // Put it in the TransactionalId field (2nd field) in the bulk match input
     @Override
-    public DnBBulkMatchInfo sendRequest(List<MatchKeyTuple> input) {
+    public DnBBulkMatchInfo sendRequest(Map<String, MatchKeyTuple> input) {
         return null;
     }
 
+    // Key in the output is lookupRequestId.
+    // Get it from the TransactionalId field in the bulk match output
     @Override
-    public List<DnBMatchOutput> getResult(DnBBulkMatchInfo info) {
+    public Map<String, DnBMatchOutput> getResult(DnBBulkMatchInfo info) {
         return null;
     }
 

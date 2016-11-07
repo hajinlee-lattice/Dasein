@@ -3,13 +3,15 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 public enum DnBReturnCode {
     OK("Ok"), 
     DISCARD("Discard"),
-    TimeOut("Timeout"),
-    InvalidInput("Invalid Input"),
-    NoResult("No Result"),
-    Expired("Expired Token"),
-    ExceedRequestNum("Exceed Hourly Maximum Limit"),
-    ExceedConcurrentNum("Exceed Concurrent Limit"),
-    Unknown("Unkown error");
+    IN_PROGRESS("In Progress"),
+    RATE_LIMITING("Rate Limiting"),
+    TIMEOUT("Timeout"),
+    INVALID_INPUT("Invalid Input"),
+    NO_RESULT("No Result"),
+    EXPIRED("Expired Token"),
+    EXCEED_REQUEST_NUM("Exceed Hourly Maximum Limit"),
+    EXCEED_CONCURRENT_NUM("Exceed Concurrent Limit"),
+    UNKNOWN("Unkown error");
 
     String message;
     DnBReturnCode(String str) {
