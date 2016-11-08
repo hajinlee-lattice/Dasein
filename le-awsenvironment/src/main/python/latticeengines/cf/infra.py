@@ -145,11 +145,10 @@ def create_load_balancers(tg_map):
     return resources, albs
 
 def create_listener(lb, tg):
-    listner = Listener(lb.name() + "Listener", lb, tg)
-    listner.add_tag("product", "lpi")
-    listner.depends_on(lb)
-    listner.depends_on(tg)
-    return listner
+    listener = Listener(lb.name() + "Listener", lb, tg)
+    listener.depends_on(lb)
+    listener.depends_on(tg)
+    return listener
 
 def create_listner_rule(listener, tg, path):
     if listener.logical_id() not in LISTENER_RULE_COUNTER:

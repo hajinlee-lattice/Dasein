@@ -24,7 +24,7 @@ class TargetGroup(Resource):
         }
 
 class Listener(Resource):
-    def __init__(self, logicalId, lb, tg, port=443, protocal="HTTPS"):
+    def __init__(self, logicalId, lb, tg, port=443, protocol="HTTPS"):
         assert isinstance(lb, ApplicationLoadBalancer)
         Resource.__init__(self, logicalId)
         self._template = {
@@ -39,7 +39,7 @@ class Listener(Resource):
                 } ],
                 "LoadBalancerArn" : lb.ref(),
                 "Port" : port,
-                "Protocol" : protocal
+                "Protocol" : protocol
             }
         }
 
