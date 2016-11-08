@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
 
 public interface DnBRealTimeLookupService {
 

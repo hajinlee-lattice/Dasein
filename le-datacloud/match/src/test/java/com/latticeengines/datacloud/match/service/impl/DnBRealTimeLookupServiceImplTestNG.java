@@ -17,10 +17,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchOutput;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
 public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 

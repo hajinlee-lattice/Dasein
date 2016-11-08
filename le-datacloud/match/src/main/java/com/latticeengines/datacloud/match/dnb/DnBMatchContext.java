@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.datacloud.dnb;
+package com.latticeengines.datacloud.match.dnb;
 
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
+import com.latticeengines.datacloud.match.dnb.DnBMatchOutput.MatchGrade;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public class DnBMatchContext implements Fact, Dimension {

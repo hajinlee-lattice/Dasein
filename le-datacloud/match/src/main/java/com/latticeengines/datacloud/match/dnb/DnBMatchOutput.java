@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.dnb;
+package com.latticeengines.datacloud.match.dnb;
 
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;

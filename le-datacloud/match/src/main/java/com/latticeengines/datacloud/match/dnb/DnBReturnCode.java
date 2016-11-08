@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.datacloud.dnb;
+package com.latticeengines.datacloud.match.dnb;
 
 public enum DnBReturnCode {
     OK("Ok"), 

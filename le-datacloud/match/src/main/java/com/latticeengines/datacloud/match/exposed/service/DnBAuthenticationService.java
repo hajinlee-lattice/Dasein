@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 
 public interface DnBAuthenticationService {
     String requestToken(DnBKeyType type);

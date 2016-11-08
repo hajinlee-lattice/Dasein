@@ -6,7 +6,7 @@ import java.util.Collection;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;

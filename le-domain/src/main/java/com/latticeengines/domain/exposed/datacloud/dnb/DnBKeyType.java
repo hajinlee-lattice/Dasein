@@ -1,5 +1,0 @@
-package com.latticeengines.domain.exposed.datacloud.dnb;
-
-public enum DnBKeyType {
-    realtime, bulkmatch
-}
