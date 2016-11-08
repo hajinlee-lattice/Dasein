@@ -133,6 +133,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder transformationGroup(TransformationGroup transformationGroup) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
+            model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
             return this;
         }
 
@@ -165,11 +166,13 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns, skipMatchingStep);
             return this;
         }
 
         public Builder skipDedupStep(boolean skipDedupStep) {
             dedupEventTable.setSkipStep(skipDedupStep);
+            model.addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain, !skipDedupStep);
             return this;
         }
 
@@ -188,6 +191,7 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             match.setExcludePublicDomains(excludePublicDomains);
+            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
             return this;
         }
 

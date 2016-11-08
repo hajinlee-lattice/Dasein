@@ -120,11 +120,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains()) //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
-                        parameters.isExcludePropDataAttributes()) //
-                .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
-                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //

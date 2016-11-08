@@ -268,12 +268,13 @@ public class ModelingServiceExecutor {
         if (builder.dataCloudVersion != null) {
             props.add("Data_Cloud_Version=" + builder.dataCloudVersion);
         }
+
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
         provenanceProperties += builder.modelSummaryProvenance.getProvenancePropertyString();
-        if (builder.getTransformationGroupName() != null) {
-            provenanceProperties += " Transformation_Group_Name=" + builder.getTransformationGroupName();
-        }
+//        if (builder.getTransformationGroupName() != null) {
+//            provenanceProperties += " Transformation_Group_Name=" + builder.getTransformationGroupName();
+//        }
         log.info("The model provenance property is: " + provenanceProperties);
 
         model.setProvenanceProperties(provenanceProperties);
@@ -918,7 +919,6 @@ public class ModelingServiceExecutor {
 
         public void setV2ProfilingEnabled(boolean v2ProfilingEnabled) {
             this.v2ProfilingEnabled = v2ProfilingEnabled;
-
         }
 
         public void setProductType(String productType) {

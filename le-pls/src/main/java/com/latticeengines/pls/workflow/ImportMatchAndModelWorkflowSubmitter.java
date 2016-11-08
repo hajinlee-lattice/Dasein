@@ -150,8 +150,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .dedupDataFlowBeanName("dedupEventTable")
                 .dedupDataFlowParams( //
-                        new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain", parameters
-                                .getDeduplicationType()))
+                        new DedupEventTableParameters(sourceFile.getTableName(), "PublicDomain",
+                                parameters.getDeduplicationType()))
                 //
                 .dedupFlowExtraSources(extraSources)
                 //
@@ -196,14 +196,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .enableV2Profiling(isV2ProfilingEnabled())
                 //
                 .excludePublicDomains(parameters.isExcludePublicDomains())
-                //
-                .addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain,
-                        parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN)
-                //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, parameters.isExcludePublicDomains())
-                //
-                .addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns,
-                        parameters.getExcludePropDataColumns())
                 //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())
                 .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //

@@ -5,7 +5,8 @@ public enum ProvenancePropertyName {
     ExcludePropdataColumns("Exclude_Propdata_Columns", Boolean.class), //
     ExcludePublicDomains("Exclude_Public_Domains", Boolean.class),
     TransformationGroupName("Transformation_Group_Name", String.class),
-    TrainingFilePath("Training_File_Path", String.class);
+    TrainingFilePath("Training_File_Path", String.class), 
+    IsV2ProfilingEnabled("Is_V2_Profiling_Enabled", Boolean.class);
 
     private String name;
     private Class<?> type;
