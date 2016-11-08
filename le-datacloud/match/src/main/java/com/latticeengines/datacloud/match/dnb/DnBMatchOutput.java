@@ -10,7 +10,7 @@ public class DnBMatchOutput implements Fact {
 
     private Integer confidenceCode;
 
-    private MatchGrade matchGrade;
+    private DnBMatchGrade matchGrade;
 
     private DnBReturnCode dnbCode;
 
@@ -34,12 +34,12 @@ public class DnBMatchOutput implements Fact {
     }
 
     @MetricFieldGroup
-    public MatchGrade getMatchGrade() {
+    public DnBMatchGrade getMatchGrade() {
         return matchGrade;
     }
 
     public void setMatchGrade(String matchGrade) {
-        this.matchGrade = new MatchGrade(matchGrade);
+        this.matchGrade = new DnBMatchGrade(matchGrade);
     }
 
     @MetricField(name = "DnbCode")
@@ -62,20 +62,6 @@ public class DnBMatchOutput implements Fact {
 
     public void setHitCache(Boolean hitCache) {
         this.hitCache = hitCache;
-    }
-
-    public static class MatchGrade implements Fact {
-
-        private final String rawCode;
-
-        public MatchGrade(String rawCode) {
-            this.rawCode = rawCode;
-        }
-
-        @MetricField(name = "DnBMatchGrade")
-        public String getRawCode() {
-            return rawCode;
-        }
     }
     
 }

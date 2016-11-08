@@ -1,6 +1,9 @@
 package com.latticeengines.datacloud.match.dnb;
 
-public class DnBMatchGrade {
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+
+public class DnBMatchGrade implements Fact {
 
     private final String rawCode;
 
@@ -8,8 +11,8 @@ public class DnBMatchGrade {
         this.rawCode = rawCode;
     }
 
-    @Override
-    public String toString() {
+    @MetricField(name = "DnBMatchGrade")
+    public String getRawCode() {
         return rawCode;
     }
 }
