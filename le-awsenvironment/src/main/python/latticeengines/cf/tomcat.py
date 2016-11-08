@@ -30,7 +30,7 @@ def template_cli(args):
     template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, upload=args.upload)
 
 def template(environment, stackname, profile, fixed_instances=False, num_instances=1, upload=False):
-    stack = create_template(profile)
+    stack = create_template(profile, fixed_instances, num_instances)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
