@@ -75,7 +75,7 @@ def create_template():
 def create_taget_groups():
     tgs = []
     tg_map = {}
-    for app, health in TOMCAT_APP_HEALTH_MAP:
+    for app, health in TOMCAT_APP_HEALTH_MAP.items():
         tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health).add_tag("product", "lpi")
         tgs.append(tg)
         tg_map[app] = tg
