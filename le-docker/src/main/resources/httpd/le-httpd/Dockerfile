@@ -1,5 +1,7 @@
 FROM httpd:2.4
 
+EXPOSE 80 443
+
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY httpd.conf /usr/local/apache2/conf/httpd.conf

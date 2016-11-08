@@ -14,8 +14,9 @@ from ..conf import AwsEnvironment
 
 _S3_CF_PATH='cloudformation/infra'
 TOMCAT_APP_HEALTH_MAP = {
-    "docprivate": "/doc/v2/api-docs",
-    "docpublic": "/doc/v2/api-docs",
+    "swaggerprivate": "/",
+    "swaggerpublic": "/",
+
     "eai": "/eai/v2/api-docs",
     "metadata": "/metadata/v2/api-docs",
     "scoring": "/scoring/v2/api-docs",
@@ -118,9 +119,9 @@ def create_load_balancers(tg_map):
     albs["adminconsole"] = ac_lb
 
     # listeners
-    private_lsnr = create_listener(private_lb, tg_map["docprivate"])
+    private_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
     resources.append(private_lsnr)
-    public_lsnr = create_listener(public_lb, tg_map["docpublic"])
+    public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
     resources.append(create_listener(lpi_lb, tg_map["lpi"]))
     resources.append(create_listener(ac_lb, tg_map["adminconsole"]))

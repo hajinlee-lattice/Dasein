@@ -3,18 +3,18 @@
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
 
 build_docker() {
-	IMAGE=$1	
+	IMAGE=$1
 	sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
 	docker build -t $IMAGE . || true
 	mv Dockerfile.bak Dockerfile
 }
 
-pushd le-centos
-build_docker latticeengines/centos
+pushd le-httpd
+build_docker latticeengines/httpd
 popd
 
-pushd le-ubuntu
-build_docker latticeengines/ubuntu
+pushd le-swagger
+build_docker latticeengines/swagger
 popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
