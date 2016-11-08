@@ -76,7 +76,7 @@ public class KeyManagementServiceImpl implements KeyManagementService {
         }
 
         String name = getKeyName(space);
-        if (System.getProperty("KEEPKEY") != null) {
+        if (System.getProperty("LE_ENCRYPTION_KEEPKEY") != null) {
             log.info(String.format("Keeping key %s for %s", name, space));
             return;
         }
