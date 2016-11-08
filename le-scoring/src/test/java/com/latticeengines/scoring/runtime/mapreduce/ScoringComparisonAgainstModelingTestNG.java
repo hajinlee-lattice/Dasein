@@ -46,7 +46,6 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
@@ -54,7 +53,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
@@ -103,12 +101,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
     @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
-
-    @Autowired
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
-    private DbCreds scoringCreds;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -181,7 +173,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         String diagnosticFilePath = metadataPath + "diagnostics.json";
         HdfsUtils.writeToFile(yarnConfiguration, diagnosticFilePath, summaryObj.toString());
 
-        String profileMulesoftScoringPath = metadataPath + "profile-mulesoft-scoring.avro";
+        String profileMulesoftScoringPath = metadataPath + "profile.avro";
         File profileMulesoftScoringFile = new File(
                 "../le-dataplatform/src/test/python/data/profile-mulesoft-scoring.avro");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, profileMulesoftScoringFile.getAbsolutePath(),
