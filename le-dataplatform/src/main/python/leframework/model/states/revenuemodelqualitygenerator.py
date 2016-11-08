@@ -32,12 +32,27 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
             self.logger.info("Calculating ValueScores in ModelQualityGenerator")
             # Check if EV model
+
+
+            
             if mediator.revenueColumn != None:
-                valueSpent = mediator.data[mediator.schema["reserved"]["predictedrevenue"]]
-                valueRanking = eventRanking
-                valueScores = self.calculateValueScore(valueSpent, valueRanking)
-                self.modelquality["valueScores"] = valueScores
-                self.logger.info("Finished Calculating ValueScores in ModelQualityGenerator")
+
+                valueSpent = mediator.data[mediator.revenueColumn] 
+                valueRanking = mediator.data[mediator.schema["reserved"]["predictedrevenue"]]
+                expectedValueRanking=valueRanking * eventRanking
+
+                expectedValueScores = self.calculateValueScore(valueSpent, expectedValueRanking)
+                self.modelquality["expectedValueScores"] = expectedValueScores
+                self.logger.info("Finished Calculating ExpectedValueScores in ModelQualityGenerator")
+                
+                propensityValueScores=self.calculateValueScore(valueSpent, eventRanking)
+                self.modelquality["propensityValueScores"] = propensityValueScores
+                self.logger.info("Finished Calculating PropensityValueScores in ModelQualityGenerator")
+                
+                predictedValueValueScores=self.calculateValueScore(valueSpent, valueRanking)
+                self.modelquality["predictedValueValueScores"] = predictedValueValueScores
+                self.logger.info("Finished Calculating PredictedValueValueScores in ModelQualityGenerator")               
+
 
             mediator.modelquality = self.modelquality
         except Exception as e:
@@ -80,7 +95,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
         return results
 
-    def calculateEventScore(self, event, ranking, liftBuckets=0.1):
+    def calculateEventScore(self, event, ranking, liftBuckets=0.01):
         length = len(event)
         if length != len(ranking):
             return None

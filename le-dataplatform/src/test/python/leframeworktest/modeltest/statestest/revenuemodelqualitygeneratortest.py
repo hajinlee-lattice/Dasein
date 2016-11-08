@@ -26,7 +26,7 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         # Check that modelquality field has the correct keys
         self.assertTrue(mediator.modelquality.keys(), ["eventScores", "modelScores"])
         self.assertTrue(mediator.modelquality["eventScores"].keys(), ["auc", "outputLiftCurve"])
-        self.assertTrue(mediator.modelquality["valueScores"].keys(), ["percTotalRev", "percMaxCount"])
+        self.assertTrue(mediator.modelquality["expectedValueScores"].keys(), ["percTotalRev", "percMaxCount"])
 
         # The AUC should be around the AUCTarget and we should have 100 buckets
         modelQuality = generator.getJsonProperty()
@@ -34,4 +34,4 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         self.assertTrue(calculatedAUC > aucTarget - 0.2 and
                          calculatedAUC < aucTarget + 0.2
                         , "AUC doesn't seem correct in ModelQuality")
-        self.assertEquals(len(modelQuality["valueScores"]["percTotalRev"]), 100)
+        self.assertEquals(len(modelQuality["expectedValueScores"]["percTotalRev"]), 100)
