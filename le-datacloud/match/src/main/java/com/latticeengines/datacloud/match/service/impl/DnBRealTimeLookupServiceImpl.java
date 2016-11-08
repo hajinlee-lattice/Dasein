@@ -11,20 +11,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component
-public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
+public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<MatchKeyTuple>
+        implements DnBRealTimeLookupService {
     private static final Log log = LogFactory.getLog(DnBRealTimeLookupServiceImpl.class);
+
+    private static final String DNB_MATCH_OUTPUT = "DNB_MATCH_OUTPUT";
 
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
@@ -60,73 +62,20 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
 
     @Override
     public DnBMatchOutput realtimeEntityLookup(MatchKeyTuple input) {
-        DnBMatchOutput res = null;
+        DataFlowContext context = null;
+        DnBMatchOutput output = new DnBMatchOutput();
         for (int i = 0; i < retries; i++) {
-            res = tryRealtimeEntityLookup(input);
-            if (res.getDnbCode() != DnBReturnCode.EXPIRED) {
+            context = executeLookup(input, DnBKeyType.realtime);
+            if (context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class) != DnBReturnCode.EXPIRED) {
+                output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchOutput.class);
                 break;
             }
             dnBAuthenticationService.refreshAndGetToken(DnBKeyType.realtime);
         }
 
-        return res;
-    }
+        output.setDnbCode(context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class));
 
-    private DnBMatchOutput tryRealtimeEntityLookup(MatchKeyTuple input) {
-        DnBMatchOutput res = new DnBMatchOutput();
-        String token = dnBAuthenticationService.requestToken(DnBKeyType.realtime);
-        String url = constructUrl(input);
-        try {
-            ResponseEntity<String> response = obtainRequestFromDnB(url, token);
-            parseSucceededResponse(input, response, res);
-        } catch (HttpClientErrorException ex) {
-            parseDnBHttpError(ex, res);
-        }
-
-        return res;
-    }
-
-    private void parseDnBHttpError(HttpClientErrorException ex, DnBMatchOutput res) {
-        DnBReturnCode errCode = null;
-        Boolean isNeedParseBody = false;
-        switch (ex.getStatusCode()) {
-        case REQUEST_TIMEOUT:
-            errCode = DnBReturnCode.TIMEOUT;
-            break;
-        case NOT_FOUND:
-            errCode = DnBReturnCode.NO_RESULT;
-            break;
-        default:
-            isNeedParseBody = true;
-        }
-        if (isNeedParseBody) {
-            errCode = parseErrorBody(ex.getResponseBodyAsString());
-        }
-
-        res.setDnbCode(errCode);
-    }
-
-    private DnBReturnCode parseErrorBody(String body) {
-        DnBReturnCode errCode;
-        String dnBErrorCode = (String) retrieveValueFromResponse(resultIdJsonPath, body);
-        // log.info(body);
-        // log.info(dnBErrorCode);
-        switch (dnBErrorCode) {
-        case "SC001":
-        case "SC003":
-            errCode = DnBReturnCode.EXPIRED;
-            break;
-        case "SC005":
-            errCode = DnBReturnCode.EXCEED_REQUEST_NUM;
-            break;
-        case "SC006":
-            errCode = DnBReturnCode.EXCEED_CONCURRENT_NUM;
-            break;
-        default:
-            errCode = DnBReturnCode.UNKNOWN;
-        }
-
-        return errCode;
+        return output;
     }
 
     @Override
@@ -134,41 +83,59 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         return null;
     }
 
-    private void parseSucceededResponse(MatchKeyTuple input, ResponseEntity<String> response,
-            DnBMatchOutput res) {
-        if (response.getStatusCode() != OK) {
-            res.setDnbCode(DnBReturnCode.UNKNOWN);
-            return;
-        }
-        res.setDuns((String) retrieveValueFromResponse(dunsJsonPath, response.getBody()));
-        res.setConfidenceCode((Integer) retrieveValueFromResponse(confidenceCodeJsonPath, response.getBody()));
-        res.setMatchGrade((String) retrieveValueFromResponse(matchGradeJsonPath, response.getBody()));
-        res.setDnbCode(DnBReturnCode.OK);
-        dnbMatchResultValidator.validate(res);
+    @Override
+    protected HttpEntity<String> constructEntity(MatchKeyTuple input, String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(authorizationHeader, token);
+        return new HttpEntity<>("", headers);
     }
 
-    private String constructUrl(MatchKeyTuple input) {
+    @Override
+    protected void parseSucceededResponse(ResponseEntity<String> response, DataFlowContext context) {
+        if (response.getStatusCode() != OK) {
+            context.setProperty(DNB_RETURN_CODE, DnBReturnCode.UNKNOWN);
+            return;
+        }
+        String body = response.getBody();
+        DnBMatchOutput output = new DnBMatchOutput();
+        output.setDuns((String) retrieveJsonValueFromResponse(dunsJsonPath, body));
+        output.setConfidenceCode((Integer) retrieveJsonValueFromResponse(confidenceCodeJsonPath, body));
+        output.setMatchGrade((String) retrieveJsonValueFromResponse(matchGradeJsonPath, body));
+        output.setDnbCode(DnBReturnCode.OK);
+        dnbMatchResultValidator.validate(output);
+        context.setProperty(DNB_MATCH_OUTPUT, output);
+        context.setProperty(DNB_RETURN_CODE, output.getDnbCode());
+    }
+
+    @Override
+    protected ResponseEntity<String> sendRequestToDnB(String url, HttpEntity<String> entity) {
+        ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        return res;
+    }
+
+    @Override
+    protected String constructUrl(MatchKeyTuple tuple) {
         StringBuilder url = new StringBuilder();
         url.append(realTimeUrlPrefix);
-        String normalizedstr = normalizeString(input.getName());
+        String normalizedstr = normalizeString(tuple.getName());
         if (normalizedstr.length() != 0) {
             url.append("SubjectName=");
             url.append(normalizedstr);
             url.append("&");
         }
-        normalizedstr = normalizeString(input.getCountryCode());
+        normalizedstr = normalizeString(tuple.getCountryCode());
         if (normalizedstr.length() != 0) {
             url.append("CountryISOAlpha2Code=");
             url.append(normalizedstr);
             url.append("&");
         }
-        normalizedstr = normalizeString(input.getCity());
+        normalizedstr = normalizeString(tuple.getCity());
         if (normalizedstr.length() != 0) {
             url.append("PrimaryTownName=");
             url.append(normalizedstr);
             url.append("&");
         }
-        normalizedstr = normalizeString(input.getState());
+        normalizedstr = normalizeString(tuple.getState());
         if (normalizedstr.length() != 0) {
             url.append("TerritoryName=");
             url.append(normalizedstr);
@@ -176,28 +143,5 @@ public class DnBRealTimeLookupServiceImpl implements DnBRealTimeLookupService {
         }
         url.append("cleansematch=true");
         return url.toString();
-    }
-
-    private String normalizeString(String str) {
-        if (str == null) {
-            return "";
-        }
-
-        return str.trim();
-    }
-
-    private HttpEntity<String> realTimeRequestEntity(String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(authorizationHeader, token);
-        return new HttpEntity<>("", headers);
-    }
-
-    private ResponseEntity<String> obtainRequestFromDnB(String url, String token) {
-        ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, realTimeRequestEntity(token), String.class);
-        return res;
-    }
-
-    private Object retrieveValueFromResponse(String jsonPath, String body) {
-        return JsonPath.parse(body).read(jsonPath);
     }
 }

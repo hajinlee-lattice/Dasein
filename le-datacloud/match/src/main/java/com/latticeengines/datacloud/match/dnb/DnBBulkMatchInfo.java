@@ -3,6 +3,9 @@ package com.latticeengines.datacloud.match.dnb;
 import java.util.List;
 
 public class DnBBulkMatchInfo {
+
+    private String applicationId;
+
     private String serviceBatchId;
 
     // Format: yyyy-MM-dd'T'HH:mm:ss.S'Z'
@@ -44,4 +47,11 @@ public class DnBBulkMatchInfo {
         this.lookupRequestIds = lookupRequestIds;
     }
 
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
 }
