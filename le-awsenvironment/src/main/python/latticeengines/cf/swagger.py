@@ -33,6 +33,7 @@ def template(environment, upload=False):
 
 def create_template():
     stack = ECSStack("AWS CloudFormation template for swagger ECS cluster.", use_asgroup=False, instances=1)
+    stack.add_param(PARAM_SWAGGER_APPS)
     task = swagger_task()
     stack.add_resource(task)
     stack.add_service("swagger", task, capacity=1)
