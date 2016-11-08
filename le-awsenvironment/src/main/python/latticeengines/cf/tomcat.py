@@ -27,9 +27,9 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.profile, args.upload)
+    template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, upload=args.upload)
 
-def template(environment, stackname, profile, upload=False):
+def template(environment, stackname, profile, fixed_instances=False, num_instances=1, upload=False):
     stack = create_template(profile)
     if upload:
         stack.validate()
@@ -38,8 +38,8 @@ def template(environment, stackname, profile, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile):
-    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", efs=PARAM_EFS)
+def create_template(profile, fixed_instances=False, num_instances=1):
+    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
@@ -176,6 +176,8 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
+    parser1.add_argument('--fixed-instances', dest='fixed', action='store_true', help='use fixed number of instances, instead of auto scaling group')
+    parser1.add_argument('-n', dest='numinstances', type=int, default="1", help='number of instances. only honored when --fixed-instances option is used.')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=template_cli)
 
@@ -189,8 +191,8 @@ def parse_args():
     parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
     parser1.add_argument('--catalina-opts', dest='copts', type=str, default='', help='CATALINA_OPTS')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
-    parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
-    parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity')
+    parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity. only honored when using auto scaling group.')
+    parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity. only honored when using auto scaling group.')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
