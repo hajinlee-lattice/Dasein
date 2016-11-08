@@ -27,8 +27,8 @@ TOMCAT_APP_HEALTH_MAP = {
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
-    "oauth2": "/oauth2/health",
-    "playmaker": "/api/health",
+    "oauth2": "/health",
+    "playmaker": "/health",
     "pls": "/pls/health",
     "admin": "/admin/health"
 }
@@ -94,6 +94,7 @@ def create_load_balancers(tg_map):
 
     # private tomcat
     private_lb = ApplicationLoadBalancer("private", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+    private_lb.add_tag("product", "lpi")
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(private_lb)
@@ -101,10 +102,25 @@ def create_load_balancers(tg_map):
 
     # public tomcat
     public_lb = ApplicationLoadBalancer("public", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    public_lb.add_tag("product", "lpi")
     for k, v in tg_map.items():
         private_lb.depends_on(v)
     resources.append(public_lb)
     albs["public"] = public_lb
+
+    # oauth2
+    oauth_lb = ApplicationLoadBalancer("oauth2", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    oauth_lb.add_tag("prodcut", "lpi")
+    oauth_lb.depends_on(tg_map["oauth2"])
+    resources.append(oauth_lb)
+    albs["oauth2"] = oauth_lb
+
+    # playmaker
+    pm_lb = ApplicationLoadBalancer("playmaker", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    pm_lb.add_tag("product", "lpi")
+    pm_lb.depends_on(tg_map["playmaker"])
+    resources.append(pm_lb)
+    albs["playmaker"] = pm_lb
 
     # lpi
     lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
@@ -123,6 +139,8 @@ def create_load_balancers(tg_map):
     resources.append(private_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
+    resources.append(create_listener(oauth_lb, tg_map["oauth2"]))
+    resources.append(create_listener(pm_lb, tg_map["playmaker"]))
     resources.append(create_listener(lpi_lb, tg_map["lpi"]))
     resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
 
@@ -140,8 +158,6 @@ def create_load_balancers(tg_map):
     resources.append(create_listner_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scores/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scoreinternal/*"))
-    resources.append(create_listner_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
-    resources.append(create_listner_rule(public_lsnr, tg_map["playmaker"], "/api/*"))
 
     return resources, albs
 
@@ -216,7 +232,7 @@ def provision(environment, stackname, consul=None):
     if consul is not None:
         albs = get_albs(stackname)
         for k, v in albs.items():
-            write_to_stack(consul, environment, stackname.replace('lpi-', ''), k, v)
+            write_to_stack(consul, environment, stackname, k, v)
 
 def get_albs(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
