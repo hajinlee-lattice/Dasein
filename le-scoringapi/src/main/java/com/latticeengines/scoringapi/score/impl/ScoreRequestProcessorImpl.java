@@ -83,7 +83,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
         requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
-        requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getName());
+        requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
         requestInfo.put("ModelType",
                 (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
 
