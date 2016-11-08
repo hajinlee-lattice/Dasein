@@ -8,19 +8,17 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         labels: {
             ADD_STEP: 'Upload New Step',
             PIPELINES: 'All Pipelines',
-            CREATE_NEW: 'Create New',
             STEPS: 'New Pipeline Steps',
             EMPTY_STEPS: 'This pipeline has 0 steps',
             PIPELINE_NAME: 'Pipeline Name',
             PIPELINE_DESCRIPTION: 'Pipeline Description',
-            CANCEL: 'Cancel',
+            CANCEL: 'Clear',
             SAVE: 'Save',
-            LOAD_SAVING: 'Saving Pipeline...',
-            COPY_OR_NEW: 'Copy an existing pipeline or create new'
+            LOAD_SAVING: 'Saving Pipeline...'
         },
         pipelines: Pipelines.resultObj,
         selectedPipeline: null,
-        pipeline: null,
+        pipeline: BasePipeline(),
         pipelineName: null,
         pipelineDescription: null,
         isCreatingStep: false,
@@ -33,17 +31,9 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     vm.selectPipeline = function (pipeline) {
         vm.reset();
 
-        if (!pipeline) {
-            vm.selectedPipeline = null;
-            vm.pipeline = {
-                pipeline_steps: []
-            };
-            vm.pipelineDescription = null;
-        } else {
-            vm.selectedPipeline = pipeline;
-            vm.pipeline = angular.copy(pipeline);
-            vm.pipelineDescription = vm.pipeline.description;
-        }
+        vm.selectedPipeline = pipeline;
+        vm.pipeline = angular.copy(pipeline);
+        vm.pipelineDescription = vm.pipeline.description;
     };
 
     vm.inspectMetadata = function (index) {
@@ -85,16 +75,15 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     };
 
     vm.savePipeline = function () {
-        vm.error = false;
-        vm.message = null;
-        vm.loading = true;
-
         if (!vm.pipelineName) {
             vm.error = true;
             vm.message = 'Pipeline name is required';
             return;
         }
 
+        vm.error = false;
+        vm.message = null;
+        vm.loading = true;
         var newPipeline = vm.pipeline.pipeline_steps.map(function (step) {
             if (step.isNewStep) {
                 return {
@@ -144,14 +133,16 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
 
     vm.reset = function () {
         vm.selectedPipeline = null;
-        vm.pipeline = null;
         vm.pipelineName = null;
+        vm.pipeline = BasePipeline();
         vm.pipelineDescription = null;
+
         vm.isCreatingStep = false;
         vm.stepMetadata = null;
         vm.loading = false;
         vm.message = null;
         vm.error = false;
+
     };
 
     vm.swapSteps = function (a, b) {
@@ -167,5 +158,11 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
             vm.clearStepMetadata();
         }
     };
+
+    function BasePipeline() {
+        return {
+           pipeline_steps: []
+        };
+    }
 
 });

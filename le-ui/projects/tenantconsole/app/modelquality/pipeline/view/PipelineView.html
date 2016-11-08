@@ -19,14 +19,7 @@
         {{::vm_createPipeline.message}}
       </p>
     </div>
-    <div ng-if="!vm_createPipeline.pipeline" class="text-center">
-      <div class="text-center">{{::vm_createPipeline.labels.COPY_OR_NEW}}</div>
-      <button class="btn"
-        ng-click="vm_createPipeline.selectPipeline()">
-        {{::vm_createPipeline.labels.CREATE_NEW}}
-      </button>
-    </div>
-    <div ng-if="vm_createPipeline.pipeline && !vm_createPipeline.loading">
+    <div ng-if="!vm_createPipeline.loading">
       <div class="row">
         <h4>{{::vm_createPipeline.labels.STEPS}}</h4>
         <form class="form-group">
@@ -84,7 +77,7 @@
         <hr>
       </div>
     </div>
-    <div class="row" ng-if="vm_createPipeline.pipeline && !vm_createPipeline.loading">
+    <div class="row" ng-if="!vm_createPipeline.loading">
       <div class="pull-right">
         <button class="btn btn-default"
           ng-click="vm_createPipeline.savePipeline()">{{::vm_createPipeline.labels.SAVE}}</button>

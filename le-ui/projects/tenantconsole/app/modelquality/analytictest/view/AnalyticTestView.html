@@ -26,9 +26,9 @@
       </tbody>
     </table>
     <ul uib-pagination total-items="vm_analyticTest.total" ng-model="vm_analyticTest.cur" max-size="vm_analyticTest.max" class="pagination-sm" boundary-links="true"></ul>
-    <hr>
   </div>
   <div class="row" ng-if="vm_analyticTest.isCreatingTest">
+    <hr>
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -55,6 +55,7 @@
     </div>
   </div>
   <div class="row" ng-if="!vm_analyticTest.isCreatingTest">
+    <hr>
     <div class="pull-right">
       <button class="btn btn-default" ng-click="vm_analyticTest.newTest()">{{::vm_analyticTest.labels.NEW_TEST}}</button>
     </div>

@@ -24,14 +24,6 @@ angular.module('app.modelquality.controller.PublishLatestCtrl', [
         labelKey: 'ALGORITHMS'
     });
     vm.urls.push({
-        url: '/modelquality/analyticpipelines/latest',
-        labelKey: 'ANALYTICPIPELINES'
-    });
-    vm.urls.push({
-        url: '/modelquality/pipelines/latest',
-        labelKey: 'PIPELINES'
-    });
-    vm.urls.push({
         url: '/modelquality/samplingconfigs/latest',
         labelKey: 'SAMPLINGCONFIGS'
     });
@@ -42,6 +34,14 @@ angular.module('app.modelquality.controller.PublishLatestCtrl', [
     vm.urls.push({
         url: '/modelquality/propdataconfigs/latest',
         labelKey: 'PROPDATACONFIGS'
+    });
+    vm.urls.push({
+        url: '/modelquality/pipelines/latest',
+        labelKey: 'PIPELINES'
+    });
+    vm.urls.push({
+        url: '/modelquality/analyticpipelines/latest',
+        labelKey: 'ANALYTICPIPELINES'
     });
 
     vm.publishLatest = function (event,  url) {

@@ -20,8 +20,9 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             CANCEL_TEST: 'Cancel',
             SAVE_TEST: 'Save',
             LOAD_SAVING: 'Saving...',
-            ANALYTIC_PIPELINE_NAMES: 'Pipelines',
+            ANALYTIC_PIPELINE_NAMES: 'Analytic Pipelines',
             ANALYTIC_TEST_TYPE: 'Test Type',
+            ANALYTIC_TEST_TAG: 'Test Tag',
             DATASET_NAMES: 'Datasets',
             MATCH_TYPE: 'Match Type',
             NAME: 'Name'
@@ -43,7 +44,8 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             {key:'dataset_names', type: 'multi'},
             {key:'analytic_pipeline_names', type: 'multi'},
             {key:'match_type', type: 'select'},
-            {key:'analytic_test_type', type: 'select'}
+            {key:'analytic_test_type', type: 'select'},
+            {key:'analytic_test_tag', type: 'input'}
         ]
     });
 
@@ -150,6 +152,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             dataset_names: [],
             match_type: null,
             analytic_test_type: null,
+            analytic_test_tag: null,
             analytic_pipeline_names: []
         };
     }
