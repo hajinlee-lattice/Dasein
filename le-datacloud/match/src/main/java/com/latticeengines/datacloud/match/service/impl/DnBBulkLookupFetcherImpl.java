@@ -97,7 +97,10 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
                 info.setDnbCode(returnCode);
-                output = context.getProperty(DNB_MATCH_OUTPUT_LIST, List.class);
+                List<?> outputUncheck = context.getProperty(DNB_MATCH_OUTPUT_LIST, List.class);
+                for(Object obj: outputUncheck) {
+                    output.add((DnBMatchOutput) obj);
+                }
                 break;
             }
             dnBAuthenticationService.refreshAndGetToken(DnBKeyType.bulkmatch);
