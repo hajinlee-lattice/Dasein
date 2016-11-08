@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+import random
 import sys
 import tempfile
 import time
@@ -10,7 +11,6 @@ from .autoscaling import AutoScalingGroup, LaunchConfiguration
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
-from .iam import InstanceProfile
 from .parameter import *
 from .resource import Resource
 from .template import Template, TEMPLATE_DIR
@@ -158,10 +158,11 @@ class ECSStack(Stack):
 
     def _create_ec2_instances(self, ecscluster, instances, efs, ips=()):
         ec2s = []
+        seed = random.randint(0, 2)
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
-            subnet = SUBNETS[n % 3]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE, ecscluster, efs) \
+            subnet = SUBNETS[(seed + n) % 3]
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet) \
                 .add_tag("Name", { "Ref" : "AWS::StackName" })
@@ -177,14 +178,12 @@ class ECSStack(Stack):
     def _construct(self, efs):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        asgroup = self._create_asgroup(ecscluster, PARAM_ECS_INSTANCE_PROFILE, efs)
+        asgroup = self._create_asgroup(ecscluster, efs)
         return ecscluster, asgroup
 
-    def _create_asgroup(self, ecscluster, instance_profile, efs):
-        assert isinstance(instance_profile, InstanceProfile) or isinstance(instance_profile, Parameter)
-
+    def _create_asgroup(self, ecscluster, efs):
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
-        launchconfig = LaunchConfiguration("containerpool").set_instance_profile(instance_profile)
+        launchconfig = LaunchConfiguration("containerpool").set_instance_profile(PARAM_ECS_INSTANCE_PROFILE_ARN)
         launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
@@ -196,8 +195,8 @@ class ECSStack(Stack):
         return asgroup
 
     @staticmethod
-    def _userdata(ec2, asgroup):
-        assert isinstance(ec2, LaunchConfiguration)
+    def _userdata(launch_config, asgroup):
+        assert isinstance(launch_config, LaunchConfiguration)
         assert isinstance(asgroup, AutoScalingGroup)
         return { "Fn::Base64" : { "Fn::Join" : ["", [
             "#!/bin/bash -xe\n",
@@ -206,7 +205,7 @@ class ECSStack(Stack):
             "/opt/aws/bin/cfn-init -v",
             "         -c bootstrap"
             "         --stack ", { "Ref" : "AWS::StackName" },
-            "         --resource %s " % ec2.logical_id(),
+            "         --resource %s " % launch_config.logical_id(),
             "         --region ", { "Ref" : "AWS::Region" }, "\n",
 
             "/opt/aws/bin/cfn-signal -e $? ",
@@ -308,7 +307,8 @@ class ECSStack(Stack):
             PARAM_SECURITY_GROUP.config(security_group),
             PARAM_INSTANCE_TYPE.config(instance_type),
             PARAM_ENVIRONMENT.config(environment),
-            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile_arn()),
+            PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
+            PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
             PARAM_TARGET_GROUP.config(tgrp),
             PARAM_CAPACITY.config(str(init_cap)),
             PARAM_MAX_CAPACITY.config(str(max_cap))

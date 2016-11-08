@@ -82,7 +82,7 @@ def provision(environment, stackname, zk_elb, quorum_size=3):
             PARAM_SECURITY_GROUP.config(config.zk_sg()),
             PARAM_INSTANCE_TYPE.config('t2.medium'),
             PARAM_ENVIRONMENT.config(environment),
-            PARAM_ECS_INSTANCE_PROFILE.config(config.ecs_instance_profile_arn()),
+            PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
             PARAM_ELB_NAME.config(zk_elb),
             PARAM_CAPACITY.config(str(quorum_size)),
             PARAM_MAX_CAPACITY.config(str(quorum_size))
