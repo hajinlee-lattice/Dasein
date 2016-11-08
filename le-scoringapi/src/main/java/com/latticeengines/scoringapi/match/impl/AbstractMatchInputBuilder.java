@@ -145,6 +145,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.DUNS, interpreted.getDuns(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Zipcode, interpreted.getPostalCode(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);
         matchInput.setKeyMap(keyMap);
     }
 

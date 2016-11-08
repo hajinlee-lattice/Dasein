@@ -18,5 +18,6 @@ public enum FieldInterpretation {
     PhoneNumber, //
     Website, //
     CompanyName, //
-    Industry //
+    Industry, //
+    DUNS //
 }

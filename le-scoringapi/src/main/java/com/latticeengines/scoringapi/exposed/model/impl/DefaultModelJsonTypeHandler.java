@@ -278,6 +278,15 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         case Domain:
             interpretedFields.setDomain(fieldName);
             break;
+        case PostalCode:
+            interpretedFields.setPostalCode(fieldName);
+            break;
+        case PhoneNumber:
+            interpretedFields.setPhoneNumber(fieldName);
+            break;
+        case DUNS:
+            interpretedFields.setDuns(fieldName);
+            break;
         default:
             break;
         }
