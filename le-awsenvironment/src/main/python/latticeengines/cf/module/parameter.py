@@ -85,6 +85,8 @@ PARAM_TARGET_GROUP=ArnParameter("TargetGroupArn", "Arn of the target group for l
 PARAM_CAPACITY = Parameter("DesiredCapacity", "Desired number of containers", type="Number", default="2")
 PARAM_MAX_CAPACITY = Parameter("MaximumCapacity", "Desired number of containers", type="Number", default="8")
 
+PARAM_SSL_CERTIFICATE_ARN = ArnParameter("LatticeCertificateArn", "Arn of lattice wildcard certificate.")
+
 COMMON_PARAMETERS = {
     PARAM_VPC_ID,
     PARAM_SUBNET_1,
