@@ -60,8 +60,6 @@ public class KeyManagementServiceImpl implements KeyManagementService {
 
     @Override
     public void deleteKey(CustomerSpace space) {
-        log.info(String.format("Deleting key for %s", space));
-
         if (keyPolicy == null || keyPolicy.equals(KeyPolicy.MASTER)) {
             return;
         }
@@ -78,6 +76,11 @@ public class KeyManagementServiceImpl implements KeyManagementService {
         }
 
         String name = getKeyName(space);
+        if (System.getProperty("KEEPKEY") != null) {
+            log.info(String.format("Keeping key %s for %s", name, space));
+            return;
+        }
+
         log.info(String.format("Deleting key %s for %s", name, space));
 
         try {
