@@ -215,7 +215,7 @@ def provision(environment, stackname, consul=None):
 
     if consul is not None:
         albs = get_albs(stackname)
-        for k, v in albs:
+        for k, v in albs.items():
             write_to_stack(consul, environment, stackname, k, v)
 
 def get_albs(stackname):
