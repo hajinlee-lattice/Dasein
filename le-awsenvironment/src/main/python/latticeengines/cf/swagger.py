@@ -92,6 +92,7 @@ def provision(environment, stackname, apps, tgrp, public=False):
             PARAM_MAX_CAPACITY.config("1"),
             PARAM_TARGET_GROUP.config(find_tgrp_arn(tgrp)),
             PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
+            PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
             PARAM_SWAGGER_APPS.config(apps)
         ],
         TimeoutInMinutes=60,
