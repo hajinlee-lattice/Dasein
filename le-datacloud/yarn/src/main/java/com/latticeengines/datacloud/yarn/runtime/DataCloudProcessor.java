@@ -272,15 +272,15 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             throw new RuntimeException("Failed to write result to avro.", e);
         }
 
-        List<OutputRecord> recordsWithLogs = new ArrayList<>();
+        List<OutputRecord> recordsWithErrors = new ArrayList<>();
         for (OutputRecord record : groupOutput.getResult()) {
-            if (record.getMatchLogs() != null && !record.getMatchLogs().isEmpty()) {
+            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
                 record.setOutput(null);
-                recordsWithLogs.add(record);
+                recordsWithErrors.add(record);
             }
         }
 
-        groupOutput.setResult(recordsWithLogs);
+        groupOutput.setResult(recordsWithErrors);
         blockOutput = MatchUtils.mergeOutputs(blockOutput, groupOutput);
         log.info("Merge group output into block output.");
     }

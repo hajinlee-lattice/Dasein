@@ -33,8 +33,11 @@ public class OutputRecord {
     @JsonProperty("Output")
     private List<Object> output;
 
-    @JsonProperty("matchLogs")
+    @JsonProperty("MatchLogs")
     private List<String> matchLogs;
+
+    @JsonProperty("ErrorMessages")
+    private List<String> errorMessages;
 
     public Integer getRowNumber() {
         return rowNumber;
@@ -106,6 +109,21 @@ public class OutputRecord {
 
     public void setMatchLogs(List<String> matchLogs) {
         this.matchLogs = matchLogs;
+    }
+
+    public List<String> getErrorMessages() {
+        return errorMessages;
+    }
+
+    public void setErrorMessages(List<String> errorMessages) {
+        this.errorMessages = errorMessages;
+    }
+
+    public void addErrorMessages(String errorMessage) {
+        if (this.errorMessages == null) {
+            this.errorMessages = new ArrayList<>();
+        }
+        this.errorMessages.add(errorMessage);
     }
 
     public void log(String log) {

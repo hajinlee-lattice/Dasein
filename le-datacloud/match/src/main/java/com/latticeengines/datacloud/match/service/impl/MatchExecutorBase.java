@@ -78,6 +78,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 outputRecord.setMatched(false);
                 outputRecord.setRowNumber(internalRecord.getRowNumber());
                 outputRecord.setMatchLogs(internalRecord.getMatchLogs());
+                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
                 outputRecords.add(outputRecord);
                 continue;
             }
@@ -159,7 +160,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 totalMatched++;
                 internalRecord.setMatched(true);
             } else {
-                internalRecord.log("The input does not match to any source.");
+                internalRecord.addErrorMessages("The input does not match to any source.");
             }
 
             internalRecord.setResultsInPartition(null);
@@ -174,6 +175,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setPreMatchDuns(internalRecord.getParsedDuns());
             outputRecord.setPreMatchEmail(internalRecord.getParsedEmail());
             outputRecord.setRowNumber(internalRecord.getRowNumber());
+            outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
             outputRecords.add(outputRecord);
         }
