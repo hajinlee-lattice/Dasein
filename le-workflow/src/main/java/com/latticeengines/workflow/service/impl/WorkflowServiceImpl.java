@@ -219,11 +219,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
+        long time1 = System.currentTimeMillis();
         com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache
                 .getJob(workflowId);
+        log.info(String.format("Job load time. Getting job from cache took: %.2f",
+                (System.currentTimeMillis() - time1) / 1000.0));
         if (job.getOutputs() != null && job.getApplicationId() != null) {
-            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH, String.format(
-                    "%s/app/%s", timelineServiceUrl, job.getApplicationId()));
+            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
+                    String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
         }
         return job;
     }

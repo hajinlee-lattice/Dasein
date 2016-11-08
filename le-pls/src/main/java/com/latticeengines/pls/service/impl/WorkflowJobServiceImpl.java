@@ -3,7 +3,6 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,8 +77,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public Job find(String jobId) {
+        long time1 = System.currentTimeMillis();
         Job job = workflowProxy.getWorkflowExecution(jobId);
+        log.info(String.format("Job load time. getting job from workflow api took: %.2f",
+                (System.currentTimeMillis() - time1) / 1000.0));
+
+        time1 = System.currentTimeMillis();
         updateJobWithModelSummary(job);
+        log.info(String.format("Job load time. Update job with modelsummary took: %.2f",
+                (System.currentTimeMillis() - time1) / 1000.0));
         return job;
     }
 
@@ -88,7 +94,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
                 + tenantWithPid.getPid());
+        long time1 = System.currentTimeMillis();
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
+        log.info(String.format("Job load time. getting all jobs from workflow api took: %.2f",
+                (System.currentTimeMillis() - time1) / 1000.0));
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
@@ -96,11 +105,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     private void updateJobWithModelSummary(Job job) {
-        Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
-        for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
-            modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
-        }
-
         if (job.getInputs() == null) {
             job.setInputs(new HashMap<String, String>());
         }
@@ -115,17 +119,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
             modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
         }
-        if (modelId == null || !modelIdToModelSummaries.containsKey(modelId)) {
+        if (modelId == null) {
             return;
         }
 
-        if (modelIdToModelSummaries.get(modelId).getStatus() == ModelSummaryStatus.DELETED) {
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        if (modelSummary != null) {
+            if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
+            }
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                    modelSummary.getDisplayName());
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
+                    modelSummary.getModelType());
+        } else {
+            log.warn(String.format(
+                    "ModelSummary: %s for job: %s cannot be found in the database. Please check",
+                    modelId, job.getId()));
             job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
         }
-        job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                modelIdToModelSummaries.get(modelId).getDisplayName());
-        job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
-                modelIdToModelSummaries.get(modelId).getModelType());
     }
 
     @Override

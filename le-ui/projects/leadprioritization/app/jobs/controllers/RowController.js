@@ -316,16 +316,14 @@ angular
             function queryJobStatusAndSetStatesVariables(jobId) {
 
                 JobsStore.getJob(jobId).then(function(response) {
-                    if (response.success) {
-                        var jobStatus = response.resultObj.jobStatus;
-                        if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
-                            cancelPeriodJobStatusQuery();
-                        }
-                        if (jobStatus == "Completed") {
-                            $rootScope.$broadcast("JobCompleted");
-                        }
-                        updateStatesBasedOnJobStatus(response.resultObj);
+                    var jobStatus = response.jobStatus;
+                    if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
+                        cancelPeriodJobStatusQuery();
                     }
+                    if (jobStatus == "Completed") {
+                        $rootScope.$broadcast("JobCompleted");
+                    }
+                    updateStatesBasedOnJobStatus(response);
                 });
             }
 
