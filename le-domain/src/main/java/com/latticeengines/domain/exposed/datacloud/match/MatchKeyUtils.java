@@ -66,6 +66,18 @@ public class MatchKeyUtils {
                 case "state_province":
                     keyMap.put(MatchKey.State, Collections.singletonList(field));
                     break;
+                case "zip":
+                case "zipcode":
+                case "zip_code":
+                case "postalcode":
+                case "postal_code":
+                    keyMap.put(MatchKey.Zipcode, Collections.singletonList(field));
+                    break;
+                case "phone":
+                case "phonenumber":
+                case "phone_number":
+                    keyMap.put(MatchKey.PhoneNumber, Collections.singletonList(field));
+                    break;
                 case "country":
                     keyMap.put(MatchKey.Country, Collections.singletonList(field));
                     break;
