@@ -1,11 +1,9 @@
 package com.latticeengines.proxy.exposed.pls;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -134,15 +132,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
             log.debug("Get from " + url);
             List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
-            List<ModelSummary> modelSummaryList = new ArrayList<>();
-            if (modelSummaryObjList != null) {
-
-                for (Object obj : modelSummaryObjList) {
-                    String json = JsonUtils.serialize(obj);
-                    ModelSummary modelSummary = JsonUtils.deserialize(json, ModelSummary.class);
-                    modelSummaryList.add(modelSummary);
-                }
-            }
+            List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList, ModelSummary.class);
 
             return modelSummaryList;
         } catch (Exception e) {
@@ -174,15 +164,9 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
-            List<LeadEnrichmentAttribute> attributeList = new ArrayList<>();
+            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
+                    LeadEnrichmentAttribute.class);
 
-            if (!CollectionUtils.isEmpty(combinedAttributeObjList)) {
-                for (Object obj : combinedAttributeObjList) {
-                    String json = JsonUtils.serialize(obj);
-                    LeadEnrichmentAttribute attr = JsonUtils.deserialize(json, LeadEnrichmentAttribute.class);
-                    attributeList.add(attr);
-                }
-            }
             return attributeList;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
@@ -248,6 +232,27 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String url = constructUrl("pls/internal/enrichment/lead/selectedpremiumattributes/count",
                     customerSpace.toString());
             return restTemplate.getForObject(url, Integer.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead/categories", customerSpace.toString());
+            List<?> categoriesObjList = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(categoriesObjList, String.class);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
+        try {
+            String url = constructUrl("pls/internal/enrichment/lead/subcategories", customerSpace.toString());
+            url += "?category=" + category;
+            List<?> subCategoriesObjList = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(subCategoriesObjList, String.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
         }

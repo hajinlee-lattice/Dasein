@@ -1,6 +1,5 @@
 package com.latticeengines.scoringapi.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +31,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/enrichment")
 public class EnrichmentResource {
-    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
 
     @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;
@@ -53,16 +51,8 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
-                null, null);
-
-        List<String> categoryStrList = new ArrayList<>();
-        for (Category category : Category.values()) {
-            if (containsAtleastOneAttributeForCategory(allAttributes, category)) {
-                categoryStrList.add(category.toString());
-            }
-        }
-        return categoryStrList;
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        return internalResourceRestApiProxy.getLeadEnrichmentCategories(customerSpace);
     }
 
     @RequestMapping(value = "/subcategories", method = RequestMethod.GET, //
@@ -70,12 +60,10 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
-            @ApiParam(value = "Category", required = true) //
+            @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
-        List<String> subcategories = new ArrayList<String>();
-        subcategories.add(DUMMY_SUBCATEGORY);
-        // once backend support is there, use that for getting subcategories
-        return subcategories;
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        return internalResourceRestApiProxy.getLeadEnrichmentSubcategories(customerSpace, category);
     }
 
     // NOTE - anoop - based on discussion with Jeff, we'enable put operation if

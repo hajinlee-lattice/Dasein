@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -66,6 +67,24 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
             Assert.assertTrue(expectedCategoryStrSet.contains(categoryStr));
             System.out.println("Category with non null attributes : " + categoryStr);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLeadEnrichmentSubcategories()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        String url = getRestAPIHostPort() + "/pls/enrichment/lead/subcategories?category="
+                + Category.TECHNOLOGY_PROFILE.toString();
+
+        List<String> subcategoryListRaw = restTemplate.getForObject(url, List.class);
+        assertNotNull(subcategoryListRaw);
+
+        List<String> subcategoryStrList = JsonUtils.convertList(subcategoryListRaw, String.class);
+
+        Assert.assertNotNull(subcategoryStrList);
+
+        Assert.assertTrue(subcategoryStrList.size() > 0);
+        System.out.println(subcategoryStrList.get(0));
     }
 
     private Set<String> getExpectedCategorySet()
@@ -207,10 +226,26 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertFalse(combinedAttributeList.isEmpty());
         assertEquals(combinedAttributeList.size(), totalLeadEnrichmentCount);
 
+        assertEnrichmentList(combinedAttributeList);
+
         List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
         assertNotNull(selectedAttributeList);
         assertFalse(selectedAttributeList.isEmpty());
         assertEquals(selectedAttributeList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
+
+        assertEnrichmentList(selectedAttributeList);
+    }
+
+    protected void assertEnrichmentList(List<LeadEnrichmentAttribute> attributeList) {
+        for (LeadEnrichmentAttribute attr : attributeList) {
+            Assert.assertNotNull(attr.getFieldType());
+            Assert.assertNotNull(attr.getFieldJavaType());
+            if (!"String".equals(attr.getFieldJavaType())) {
+                System.out.println(attr.getFieldJavaType() + " : " + attr.getFieldType());
+            }
+            Assert.assertNotNull(attr.getCategory());
+            Assert.assertNotNull(attr.getSubcategory());
+        }
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })

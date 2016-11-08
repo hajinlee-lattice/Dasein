@@ -8,13 +8,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -456,6 +459,42 @@ public class InternalResource extends InternalResourceBase {
             response.setSuccess(false);
         }
         return response;
+    }
+
+    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/categories" + "/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of categories")
+    public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
+            @PathVariable("tenantId") String tenantId) {
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, null, null,
+                false, null, null);
+
+        List<String> categoryStrList = new ArrayList<>();
+        for (Category category : Category.values()) {
+            if (containsAtleastOneAttributeForCategory(allAttributes, category)) {
+                categoryStrList.add(category.toString());
+            }
+        }
+        return categoryStrList;
+    }
+
+    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/subcategories" + "/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of subcategories for a given category")
+    public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
+            @PathVariable("tenantId") String tenantId, //
+            @ApiParam(value = "category", required = true) //
+            @RequestParam String category) {
+        Set<String> subcategories = new HashSet<String>();
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, category,
+                null, false, null, null);
+
+        for (LeadEnrichmentAttribute attr : allAttributes) {
+            subcategories.add(attr.getSubcategory());
+        }
+        return new ArrayList<String>(subcategories);
     }
 
     @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/"
@@ -972,5 +1011,17 @@ public class InternalResource extends InternalResourceBase {
         session.setTenant(tenant);
         auth.setSession(session);
         SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
+            Category category) {
+        if (!CollectionUtils.isEmpty(allAttributes)) {
+            for (LeadEnrichmentAttribute attr : allAttributes) {
+                if (category.toString().equals(attr.getCategory())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

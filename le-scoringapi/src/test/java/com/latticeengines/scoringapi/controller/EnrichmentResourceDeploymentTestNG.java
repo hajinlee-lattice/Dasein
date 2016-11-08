@@ -72,6 +72,19 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         }
     }
 
+    @Test(groups = "deployment", enabled = true)
+    public void testGetLeadEnrichmentSubcategories()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        String url = apiHostPort + "/score/enrichment/subcategories?category=" + Category.TECHNOLOGY_PROFILE.toString();
+        List<?> subcategoryListRaw = oAuth2RestTemplate.getForObject(url, List.class);
+        List<String> subcategoryStrList = JsonUtils.convertList(subcategoryListRaw, String.class);
+
+        Assert.assertNotNull(subcategoryStrList);
+
+        Assert.assertTrue(subcategoryStrList.size() > 0);
+        System.out.println(subcategoryStrList.get(0));
+    }
+
     private Set<String> getExpectedCategorySet()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
@@ -203,10 +216,26 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertFalse(combinedAttributeList.isEmpty());
         Assert.assertEquals(combinedAttributeList.size(), totalLeadEnrichmentCount);
 
+        assertEnrichmentList(combinedAttributeList);
+
         List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
         Assert.assertNotNull(selectedAttributeList);
         Assert.assertFalse(selectedAttributeList.isEmpty());
         Assert.assertEquals(selectedAttributeList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
+
+        assertEnrichmentList(selectedAttributeList);
+    }
+
+    protected void assertEnrichmentList(List<LeadEnrichmentAttribute> attributeList) {
+        for (LeadEnrichmentAttribute attr : attributeList) {
+            Assert.assertNotNull(attr.getFieldType());
+            Assert.assertNotNull(attr.getFieldJavaType());
+            if (!"String".equals(attr.getFieldJavaType())) {
+                System.out.println(attr.getFieldJavaType() + " : " + attr.getFieldType());
+            }
+            Assert.assertNotNull(attr.getCategory());
+            Assert.assertNotNull(attr.getSubcategory());
+        }
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })

@@ -18,6 +18,9 @@ public class LeadEnrichmentAttribute {
     @JsonProperty("FieldType")
     private String fieldType;
 
+    @JsonProperty("FieldJavaType")
+    private String fieldJavaType;
+
     @JsonProperty("CustomerColumnName")
     private String customerColumnName;
 
@@ -73,6 +76,14 @@ public class LeadEnrichmentAttribute {
 
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;
+    }
+
+    public String getFieldJavaType() {
+        return fieldJavaType;
+    }
+
+    public void setFieldJavaType(String fieldJavaType) {
+        this.fieldJavaType = fieldJavaType;
     }
 
     public String getCustomerColumnName() {

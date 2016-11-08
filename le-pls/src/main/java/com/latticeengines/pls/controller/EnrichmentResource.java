@@ -40,7 +40,6 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/enrichment")
 @PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class EnrichmentResource {
-    private static final String DUMMY_SUBCATEGORY = "DUMMY_STR_FOR_NOW";
 
     public static final String LEAD_ENRICH_PATH = "/lead";
 
@@ -73,7 +72,7 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
-            @ApiParam(value = "Category", required = true) //
+            @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
