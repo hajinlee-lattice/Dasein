@@ -157,7 +157,6 @@ def create_listner_rule(listener, tg, path):
         LISTENER_RULE_COUNTER[listener.logical_id()] += 1
     priority = LISTENER_RULE_COUNTER[listener.logical_id()]
     lr = ListenerRule(listener.logical_id() + tg.logical_id(), listener, priority, tg, path)
-    lr.add_tag("product", "lpi")
     lr.depends_on(listener)
     lr.depends_on(tg)
     return lr
