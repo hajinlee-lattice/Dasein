@@ -24,6 +24,9 @@ public interface InternalScoringApiInterface {
 
     List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier);
 
+    List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes);
+
     DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier);
 
     List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,

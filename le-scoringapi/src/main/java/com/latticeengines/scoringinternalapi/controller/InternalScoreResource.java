@@ -99,9 +99,11 @@ public class InternalScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
-            String tenantIdentifier) {
+            String tenantIdentifier, //
+            @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
+            boolean enrichInternalAttributes) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scorePercentileRecords(request, scoreRequest, customerSpace);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -110,9 +112,11 @@ public class InternalScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
-            String tenantIdentifier) {
+            String tenantIdentifier, //
+            @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
+            boolean enrichInternalAttributes) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")

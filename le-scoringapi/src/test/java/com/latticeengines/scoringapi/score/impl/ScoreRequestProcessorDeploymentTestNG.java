@@ -69,8 +69,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
             Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
 
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                modelIdSelectionMap.put(modelId, uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary()
-                        .getPredefinedSelection());
+                modelIdSelectionMap.put(modelId,
+                        uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary().getPredefinedSelection());
             }
 
             recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
@@ -136,8 +136,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
     public void testBulkMatchAndJoin() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
-                .bulkMatchAndJoin(customerSpace, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList,
-                        originalOrderModelSummaryList, false);
+                .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
+                        originalOrderModelSummaryList, false, false);
 
         unorderedMatchedRecordMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
         unorderedLeadEnrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT);
@@ -176,8 +176,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getScore());
-        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability().doubleValue() != recordScoreResponseDebugList
-                .get(0).getScores().get(0).getScore().doubleValue());
+        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability()
+                .doubleValue() != recordScoreResponseDebugList.get(0).getScores().get(0).getScore().doubleValue());
 
         checkScoreResultList(recordScoreResponseDebugList, true);
 

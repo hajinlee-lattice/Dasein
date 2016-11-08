@@ -51,8 +51,8 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
                 JsonNode node = new ObjectMapper().readTree(body);
             } catch (Exception e) {
                 // Throw a non-LedpException to allow for retries
-                throw new RuntimeException(String.format("Received status code %s from scoring api (%s)",
-                        response.getStatusCode(), body));
+                throw new RuntimeException(
+                        String.format("Received status code %s from scoring api (%s)", response.getStatusCode(), body));
             }
             throw new RemoteLedpException(null, response.getStatusCode(), LedpCode.LEDP_00002, body);
         }
@@ -139,8 +139,17 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
     }
 
     @Override
-    public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier) {
-        String url = constructUrl("/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
+    public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
+            String tenantIdentifier) {
+        return scorePercentileRecords(scoreRequest, tenantIdentifier, false);
+    }
+
+    @Override
+    public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
+            String tenantIdentifier, boolean enrichInternalAttributes) {
+        String url = constructUrl(
+                "/records?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}",
+                tenantIdentifier, enrichInternalAttributes);
         List<?> resultList = post("scorePercentileRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {

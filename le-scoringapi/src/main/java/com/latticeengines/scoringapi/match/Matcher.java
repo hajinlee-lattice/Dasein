@@ -17,7 +17,8 @@ public interface Matcher {
 
     Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
+            Map<String, FieldSchema> fieldSchemas,//
+            Map<String, Object> record, //
             ModelSummary modelSummary, //
             boolean forEnrichment);
 
@@ -25,6 +26,7 @@ public interface Matcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous);
+            boolean isHomogeneous,//
+            boolean enrichInternalAttributes);
 
 }

@@ -136,12 +136,22 @@ public abstract class BaseScoring extends CommonBase {
 
     protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
             BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
-        return scoreRecords(request, scoreRequest, false, customerSpace);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, false);
+    }
+
+    protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
+            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
+        return scoreRecords(request, scoreRequest, false, customerSpace, enrichInternalAttributes);
     }
 
     protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
             BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
-        return scoreRecords(request, scoreRequest, true, customerSpace);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, false);
+    }
+
+    protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
+            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
+        return scoreRecords(request, scoreRequest, true, customerSpace, enrichInternalAttributes);
     }
 
     protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,
@@ -224,11 +234,11 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
-            boolean isDebug, CustomerSpace customerSpace) {
+            boolean isDebug, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
-                    new Integer(MAX_ALLOWED_RECORDS).toString(),
+                            new Integer(MAX_ALLOWED_RECORDS).toString(),
                             new Integer(scoreRequests.getRecords().size()).toString() });
         }
 
@@ -240,7 +250,7 @@ public abstract class BaseScoring extends CommonBase {
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequests));
             }
-            response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug);
+            response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug, enrichInternalAttributes);
 
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));

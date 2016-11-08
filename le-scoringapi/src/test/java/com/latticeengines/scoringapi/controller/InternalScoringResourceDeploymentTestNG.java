@@ -211,7 +211,13 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         runScoringTest(url, true, false);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods={"scoreRecords" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })
+    public void scoreRecordsWithInternalEnrichmentFlag() throws IOException, InterruptedException {
+        final String url = apiHostPort + "/scoreinternal/records";
+        testScore(url, 10, 0, modelList, true, false, customerSpace, false, true);
+    }
+
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecordsWithInternalEnrichmentFlag" })
     public void testScoreLoadLimitReached() throws IOException, InterruptedException {
         final String url = apiHostPort + "/scoreinternal/records";
         runScoreLoadLimitTest(url, true, ratelimit);

@@ -162,7 +162,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     @Override
-    public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, boolean isDebug) {
+    public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, //
+            boolean isDebug, boolean enrichInternalAttributes) {
         List<RecordScoreResponse> scoreResponse = new ArrayList<>();
         String requestTimestamp = BaseScoring.dateFormat.format(new Date());
 
@@ -197,9 +198,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap = new HashMap<>();
 
             if (!partiallyOrderedParsedTupleList.isEmpty()) {
-                Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = bulkMatchAndJoin(
-                        space, uniqueFieldSchemasMap, partiallyOrderedParsedTupleList, originalOrderModelSummaryList,
-                        request.isHomogeneous());
+                Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
+                        true).matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
+                                originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes);
 
                 Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                         unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
@@ -295,16 +296,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             }
         }
         return map;
-    }
-
-    Map<RecordModelTuple, Map<String, Map<String, Object>>> bulkMatchAndJoin(CustomerSpace space,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, List<ModelSummary> originalOrderModelSummaryList,
-            boolean isHomogeneous) {
-        Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(true)
-                .matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList, isHomogeneous);
-        return unorderedMatchedRecordEnrichmentMap;
     }
 
     private Map<RecordModelTuple, Map<String, Object>> format(
@@ -427,7 +418,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     recordResp = responseMap.get(recordId);
                     scores = recordResp.getScores();
                 }
-                
+
                 if (tuple.getException() == null) {
                     transformedRecord = unorderedTransformedRecords.get(tuple);
 
@@ -446,7 +437,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                                 + " as it already has error: " + tuple.getException().getMessage());
                     }
                 }
-
 
                 if (recordResp != null && tuple.getException() == null
                         && recordResp.getEnrichmentAttributeValues() == null

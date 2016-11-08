@@ -91,7 +91,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous) {
+            boolean isHomogeneous, //
+            boolean enrichInternalAttributes) {
         throw new NotImplementedException();
     }
 

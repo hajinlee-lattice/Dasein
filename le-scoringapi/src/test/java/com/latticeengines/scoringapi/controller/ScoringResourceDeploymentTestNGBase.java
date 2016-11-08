@@ -54,7 +54,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected boolean shouldPrintPerformanceInfo = true;
     protected int baseAllModelCount = 0;
     protected int baseAllActiveModelCount = 0;
-    private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
+    protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
 
     @Autowired
     protected InternalScoringApiInterface internalScoringApiProxy;
@@ -128,6 +128,13 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected long testScore(String url, int n, long maxTime,
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
             boolean isPmmlModel, CustomerSpace customerSpace, boolean useNoRetry) throws IOException {
+        return testScore(url, n, maxTime, modelList, isInternalScoring, isPmmlModel, customerSpace, useNoRetry, false);
+    }
+
+    protected long testScore(String url, int n, long maxTime,
+            List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isInternalScoring,
+            boolean isPmmlModel, CustomerSpace customerSpace, boolean useNoRetry, boolean enrichInternalAttributes)
+            throws IOException {
         try {
             BulkRecordScoreRequest bulkScoreRequest = getBulkScoreRequest(n, modelList, isPmmlModel);
             bulkScoreRequest.setHomogeneous(true);
@@ -143,7 +150,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                     resultObjList = scorePercentileRecords(bulkScoreRequest, customerSpace.toString());
                 } else {
                     resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
-                            customerSpace.toString());
+                            customerSpace.toString(), enrichInternalAttributes);
                 }
             } else {
                 response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);
@@ -151,7 +158,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             }
             timeDuration = System.currentTimeMillis() - timeDuration;
             System.out.println(n + " => " + timeDuration);
-            threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);
+            if (threadPerfMap != null && threadPerfMap.get(Thread.currentThread().getName()) != null) {
+                threadPerfMap.get(Thread.currentThread().getName()).add(n + " => " + timeDuration);
+            }
             Assert.assertEquals(resultObjList.size(), n);
 
             int idx = 0;

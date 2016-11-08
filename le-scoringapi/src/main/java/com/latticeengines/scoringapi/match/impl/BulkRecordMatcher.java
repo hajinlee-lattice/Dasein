@@ -58,9 +58,11 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous) {
+            boolean isHomogeneous, //
+            boolean enrichInternalAttributes) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = buildMatchInput(space,
-                partiallyOrderedParsedTupleList, uniqueFieldSchemasMap, originalOrderModelSummaryList, isHomogeneous);
+                partiallyOrderedParsedTupleList, uniqueFieldSchemasMap, originalOrderModelSummaryList, isHomogeneous,
+                enrichInternalAttributes);
 
         Map<RecordModelTuple, Map<String, Map<String, Object>>> results = new HashMap<>();
 
@@ -139,7 +141,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
         }
 
-        BulkMatchOutput matchOutput =  matchProxy.matchRealTime(matchInput);
+        BulkMatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
         logInDebugMode("matchOutput:", matchOutput);
 
@@ -154,12 +156,13 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous) {
+            boolean isHomogeneous, //
+            boolean enrichInternalAttributes) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
                 initializeMatchInputMap(isHomogeneous);
 
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space,
-                partiallyOrderedParsedTupleList);
+                partiallyOrderedParsedTupleList, enrichInternalAttributes);
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
             prepareAndSetMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
@@ -170,12 +173,20 @@ public class BulkRecordMatcher extends AbstractMatcher {
     }
 
     private List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space,
-            List<RecordModelTuple> partiallyOrderedParsedTupleList) {
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean enrichInternalAttributes) {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
             if (recordModelTuple.getRecord().isPerformEnrichment()) {
-                selectedLeadEnrichmentAttributes = enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
+                selectedLeadEnrichmentAttributes = new ArrayList<>();
+                List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache
+                        .getEnrichmentAttributesMetadata(space);
+                for (LeadEnrichmentAttribute attr : tempSelectedLeadEnrichmentAttributes) {
+                    if (enrichInternalAttributes || !attr.getIsInternal()) {
+                        selectedLeadEnrichmentAttributes.add(attr);
+                    }
+                }
+
                 break;
             }
         }
@@ -222,7 +233,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
             MatchInput matchInput = buildMatchInput(space, //
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
-                    recordModelTuple.getRecord().isPerformEnrichment()?selectedLeadEnrichmentAttributes:null, false, null);
+                    recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
+                    null);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null

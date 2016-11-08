@@ -13,5 +13,5 @@ public interface ScoreRequestProcessor {
     ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug);
 
     List<RecordScoreResponse> process(CustomerSpace customerSpace, BulkRecordScoreRequest scoreRequests,
-            boolean isDebug);
+            boolean isDebug, boolean enrichInternalAttributes);
 }
