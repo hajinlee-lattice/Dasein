@@ -43,7 +43,7 @@ def parse_args():
 
     subparser = commands.add_parser("create", description="Create a log group. If already exists, clean it up.")
     subparser.add_argument('group', metavar='GROUP', type=str, help='log group to be created.')
-    subparser.set_defaults(func=clean)
+    subparser.set_defaults(func=create)
 
     subparser = commands.add_parser("clean", description="Clean up a log group")
     subparser.add_argument('group', metavar='GROUP', type=str, help='log group to be cleaned up.')
