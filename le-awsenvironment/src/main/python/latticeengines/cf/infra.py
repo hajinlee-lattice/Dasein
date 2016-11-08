@@ -76,11 +76,13 @@ def create_taget_groups():
     tgs = []
     tg_map = {}
     for app, health in TOMCAT_APP_HEALTH_MAP.items():
-        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health).add_tag("product", "lpi")
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon=health)
+        tg.add_tag("product", "lpi")
         tgs.append(tg)
         tg_map[app] = tg
     for app in UI_APPS:
-        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon="/").add_tag("product", "lpi")
+        tg = TargetGroup(app, port="443", protocol="HTTPS", checkon="/")
+        tg.add_tag("product", "lpi")
         tgs.append(tg)
         tg_map[app] = tg
     return tgs, tg_map
@@ -143,7 +145,8 @@ def create_load_balancers(tg_map):
     return resources, albs
 
 def create_listener(lb, tg):
-    listner = Listener(lb.name() + "Listener", lb, tg).add_tag("product", "lpi")
+    listner = Listener(lb.name() + "Listener", lb, tg)
+    listner.add_tag("product", "lpi")
     listner.depends_on(lb)
     listner.depends_on(tg)
     return listner
@@ -154,7 +157,8 @@ def create_listner_rule(listener, tg, path):
     else:
         LISTENER_RULE_COUNTER[listener.logical_id()] += 1
     priority = LISTENER_RULE_COUNTER[listener.logical_id()]
-    lr = ListenerRule(listener.logical_id() + tg.logical_id(), listener, priority, tg, path).add_tag("product", "lpi")
+    lr = ListenerRule(listener.logical_id() + tg.logical_id(), listener, priority, tg, path)
+    lr.add_tag("product", "lpi")
     lr.depends_on(listener)
     lr.depends_on(tg)
     return lr
