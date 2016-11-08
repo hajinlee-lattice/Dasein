@@ -549,15 +549,14 @@ public class AvroUtils {
 
     }
 
-    public static String generateHiveCreateTableStatement(String tableName, String pathDir, Schema schema) {
-        Schema simplified = extractTypeInformation(schema);
+    public static String generateHiveCreateTableStatement(String tableName, String pathDir, String schemaHdfsPath) {
 
         String template = "CREATE EXTERNAL TABLE %s COMMENT \"%s\"" + //
                 " ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'" + //
                 " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
                 " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
-                " LOCATION '%s'" + " TBLPROPERTIES ('avro.schema.literal'='%s')";
-        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, simplified);
+                " LOCATION '%s'" + " TBLPROPERTIES ('avro.schema.url'='%s')";
+        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, schemaHdfsPath);
     }
 
     public static Schema extractTypeInformation(Schema schema) {
