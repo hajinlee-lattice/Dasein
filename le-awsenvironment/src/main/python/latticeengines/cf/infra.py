@@ -109,14 +109,14 @@ def create_load_balancers(tg_map):
     albs["public"] = public_lb
 
     # oauth2
-    oauth_lb = ApplicationLoadBalancer("oauth2", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    oauth_lb = ApplicationLoadBalancer("oauth2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     oauth_lb.add_tag("prodcut", "lpi")
     oauth_lb.depends_on(tg_map["oauth2"])
     resources.append(oauth_lb)
     albs["oauth2"] = oauth_lb
 
     # playmaker
-    pm_lb = ApplicationLoadBalancer("playmaker", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+    pm_lb = ApplicationLoadBalancer("playmaker", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     pm_lb.add_tag("product", "lpi")
     pm_lb.depends_on(tg_map["playmaker"])
     resources.append(pm_lb)
