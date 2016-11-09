@@ -1,13 +1,9 @@
 package com.latticeengines.pls.functionalframework;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
@@ -27,7 +23,6 @@ import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
@@ -41,9 +36,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
 
     @Autowired
     private QuotaEntityMgr quotaEntityMgr;
@@ -65,11 +57,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     protected Tenant marketoTenant;
     protected Tenant eloquaTenant;
-    protected String marketoModelId;
-    protected String eloquaModelId;
-    protected static final String eloquaModelName = "PLSModel-Eloqua";
-    protected static final String marketoModelName = "PLSModel";
-    protected static final String modelIdPrefix = "ms__";
 
     @PostConstruct
     private void postConstruct() {
@@ -293,27 +280,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
             this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
         }
-    }
-
-    protected ModelSummary getDetails(Tenant tenant, String suffix) throws IOException {
-        String file = String.format(
-                "com/latticeengines/pls/functionalframework/modelsummary-%s-token.json", suffix);
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
-        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
-        String uuid = UUID.randomUUID().toString();
-        contents = contents.replace("{uuid}", uuid);
-        contents = contents.replace("{tenantId}", tenant.getId());
-        if ("eloqua".equals(suffix)) {
-            eloquaModelId = modelIdPrefix + uuid + "-" + eloquaModelName;
-            contents = contents.replace("{modelName}", eloquaModelName);
-        } else {
-            marketoModelId = modelIdPrefix + uuid + "-" + marketoModelName;
-            contents = contents.replace("{modelName}", marketoModelName);
-        }
-        String fakePath = String.format("/user/s-analytics/customers/%s", tenant.getId());
-        ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
-        summary.setTenant(tenant);
-        return summary;
     }
 
     protected void setupSecurityContext(ModelSummary summary) {

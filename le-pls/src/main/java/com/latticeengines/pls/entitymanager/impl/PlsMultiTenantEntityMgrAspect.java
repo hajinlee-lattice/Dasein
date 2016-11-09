@@ -23,6 +23,11 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.CampaignEntityMgrImpl.find*(..))")
+    public void findCampaign(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.find*(..))")
     public void findSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);

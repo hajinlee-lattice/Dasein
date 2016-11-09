@@ -163,7 +163,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     @Override
     public int getMaxPremiumLeadEnrichmentAttributes(String tenantId) {
-        String maxPremuimLeadEnrichmentAttributes;
+        String maxPremiumLeadEnrichmentAttributes;
         Camille camille = CamilleEnvironment.getCamille();
         Path contractPath = null;
         try {
@@ -172,30 +172,30 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             contractPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
                     customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
                     new Path(SERVICES_ZNODE + PLS_ZNODE + ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE));
-            maxPremuimLeadEnrichmentAttributes = camille.get(contractPath).getData();
+            maxPremiumLeadEnrichmentAttributes = camille.get(contractPath).getData();
         } catch (NoNodeException ex) {
-            log.error("Will replace maxPremuimLeadEnrichmentAttributes with the default value since there is none for the tenant: "
+            log.error("Will replace maxPremiumLeadEnrichmentAttributes with the default value since there is none for the tenant: "
                     + tenantId);
             Path defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
                     .append(new Path(ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE));
-            String defaultPremuimLeadEnrichmentAttributes;
+            String defaultPremiumLeadEnrichmentAttributes;
             try {
-                defaultPremuimLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
+                defaultPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
             } catch (Exception e) {
                 throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
             }
             try {
-                camille.upsert(contractPath, DocumentUtils.toRawDocument(defaultPremuimLeadEnrichmentAttributes),
+                camille.upsert(contractPath, DocumentUtils.toRawDocument(defaultPremiumLeadEnrichmentAttributes),
                         ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
                 throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
             }
-            return ValidateEnrichAttributesUtils.validateEnrichAttributes(defaultPremuimLeadEnrichmentAttributes);
+            return ValidateEnrichAttributesUtils.validateEnrichAttributes(defaultPremiumLeadEnrichmentAttributes);
         } catch (Exception e) {
             throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
         }
 
-        return ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremuimLeadEnrichmentAttributes);
+        return ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumLeadEnrichmentAttributes);
     }
 
     @VisibleForTesting

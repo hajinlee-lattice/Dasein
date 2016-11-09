@@ -1,5 +1,7 @@
 package com.latticeengines.pls.functionalframework;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -7,14 +9,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,6 +37,7 @@ import com.latticeengines.common.exposed.query.ExistsRestriction;
 import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.IntentScore;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
@@ -40,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
@@ -93,6 +100,15 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected RestTemplate magicRestTemplate = new RestTemplate();
     protected Tenant mainTestTenant;
 
+    protected String marketoModelId;
+    protected String eloquaModelId;
+    protected static final String eloquaModelName = "PLSModel-Eloqua";
+    protected static final String marketoModelName = "PLSModel";
+    protected static final String modelIdPrefix = "ms__";
+
+    @Autowired
+    private ModelSummaryParser modelSummaryParser;
+
     protected void setTestBed(GlobalAuthTestBed testBed) {
         this.testBed = testBed;
         restTemplate = testBed.getRestTemplate();
@@ -115,13 +131,16 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
 
     protected static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
         final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+            @Override
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                 return null;
             }
 
+            @Override
             public void checkClientTrusted(X509Certificate[] certs, String authType) {
             }
 
+            @Override
             public void checkServerTrusted(X509Certificate[] certs, String authType) {
             }
         } };
@@ -199,6 +218,27 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         Mockito.when(token.getSession()).thenReturn(session);
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    protected ModelSummary getDetails(Tenant tenant, String suffix) throws IOException {
+        String file = String.format(
+                "com/latticeengines/pls/functionalframework/modelsummary-%s-token.json", suffix);
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
+        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
+        String uuid = UUID.randomUUID().toString();
+        contents = contents.replace("{uuid}", uuid);
+        contents = contents.replace("{tenantId}", tenant.getId());
+        if ("eloqua".equals(suffix)) {
+            eloquaModelId = modelIdPrefix + uuid + "-" + eloquaModelName;
+            contents = contents.replace("{modelName}", eloquaModelName);
+        } else {
+            marketoModelId = modelIdPrefix + uuid + "-" + marketoModelName;
+            contents = contents.replace("{modelName}", marketoModelName);
+        }
+        String fakePath = String.format("/user/s-analytics/customers/%s", tenant.getId());
+        ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
+        summary.setTenant(tenant);
+        return summary;
     }
 
 }
