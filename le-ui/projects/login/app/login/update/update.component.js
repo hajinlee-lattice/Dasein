@@ -135,7 +135,7 @@ angular.module('login.update', [
     }
 })
 .component('loginUpdatePasswordSuccess', {
-    templateUrl: 'app/login/update/update.component.html',
+    templateUrl: 'app/login/update/success.component.html',
     controller: function(vm, ResourceUtility, LoginService) {
         var vm = this;
 
