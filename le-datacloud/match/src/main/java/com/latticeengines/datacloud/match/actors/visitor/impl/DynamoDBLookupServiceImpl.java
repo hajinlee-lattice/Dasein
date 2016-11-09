@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
@@ -18,6 +20,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private AccountLookupService accountLookupService;
 
+    @Override
     protected String lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         String result = null;
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
@@ -40,5 +43,26 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
 
         return result;
+    }
+
+    // Just temporary. Will change to bucketing strategy
+    @Override
+    protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
+            String returnAddress) {
+        Object result = null;
+        if (request instanceof DataSourceLookupRequest) {
+            result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
+        }
+
+        Response response = new Response();
+        response.setRequestId(lookupRequestId);
+        response.setResult(result);
+
+        log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        actorSystem.sendResponse(response, returnAddress);
+    }
+
+    @Override
+    public void bulkLookup(BulkLookupStrategy strategy) {
     }
 }

@@ -25,6 +25,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Boolean hitBlackCache = false;
 
+    private String lookupRequestId;
+
     @MetricFieldGroup
     public NameLocation getInputNameLocation() {
         return inputNameLocation;
@@ -108,6 +110,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setHitBlackCache(Boolean hitBlackCache) {
         this.hitBlackCache = hitBlackCache;
+    }
+
+    public String getLookupRequestId() {
+        return lookupRequestId;
+    }
+
+    public void setLookupRequestId(String lookupRequestId) {
+        this.lookupRequestId = lookupRequestId;
     }
 
     public static class MatchGrade implements Fact {

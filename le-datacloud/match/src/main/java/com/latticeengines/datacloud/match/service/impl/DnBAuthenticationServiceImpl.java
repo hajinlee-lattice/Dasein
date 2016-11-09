@@ -79,7 +79,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     private String obtainAuthorizationReponseBody(DnBKeyType type) throws IOException {
         String apikey;
-        if (type == DnBKeyType.realtime) {
+        if (type == DnBKeyType.REALTIME) {
             apikey = realtimeKey;
         } else {
             apikey = bulkKey;

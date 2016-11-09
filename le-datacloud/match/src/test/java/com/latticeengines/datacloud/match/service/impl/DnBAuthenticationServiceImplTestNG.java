@@ -21,8 +21,8 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
 
     @Test(groups = "functional", enabled = true)
     public void testAuthentication() {
-        String token1 = dnBAuthenticationService.requestToken(DnBKeyType.realtime);
-        String token2 = dnBAuthenticationService.requestToken(DnBKeyType.realtime);
+        String token1 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
+        String token2 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
 
         // token1 should be equal to token2 since token2 came from loading cache
         Assert.assertEquals(token1, token2);
@@ -32,10 +32,10 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
             sleep(70000);
         } catch (InterruptedException e) {
         }
-        String token3 = dnBAuthenticationService.requestToken(DnBKeyType.realtime);
+        String token3 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
         Assert.assertNotEquals(token1, token3);
 
-        String token4 = dnBAuthenticationService.refreshAndGetToken(DnBKeyType.realtime);
+        String token4 = dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
         Assert.assertNotEquals(token3, token4);
     }
 }

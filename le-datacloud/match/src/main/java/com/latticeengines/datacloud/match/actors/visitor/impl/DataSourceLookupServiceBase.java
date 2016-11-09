@@ -13,9 +13,12 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     private static final Log log = LogFactory.getLog(DataSourceLookupServiceBase.class);
 
     @Autowired
-    private MatchActorSystem actorSystem;
+    protected MatchActorSystem actorSystem;
 
     abstract protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
+
+    abstract protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
+            String returnAddress);
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
@@ -28,17 +31,22 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                Object result = null;
-                if (request instanceof DataSourceLookupRequest) {
-                    result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
+                if (!actorSystem.isBatchMode()) {
+                    Object result = null;
+                    if (request instanceof DataSourceLookupRequest) {
+                        result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
+                    }
+
+                    Response response = new Response();
+                    response.setRequestId(lookupRequestId);
+                    response.setResult(result);
+
+                    log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+                    actorSystem.sendResponse(response, returnAddress);
+                } else {
+                    acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
                 }
 
-                Response response = new Response();
-                response.setRequestId(lookupRequestId);
-                response.setResult(result);
-
-                log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
-                actorSystem.sendResponse(response, returnAddress);
             }
         };
         return task;

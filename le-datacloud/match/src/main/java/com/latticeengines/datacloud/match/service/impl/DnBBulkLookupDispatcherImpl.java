@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -86,18 +87,19 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<Map<St
         DataFlowContext context = null;
         DnBBulkMatchInfo info = new DnBBulkMatchInfo();
         for (int i = 0; i < retries; i++) {
-            context = executeLookup(input, DnBKeyType.bulkmatch);
+            context = executeLookup(input, DnBKeyType.BULKMATCH);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
                 info = context.getProperty(DNB_BULK_MATCH_INFO, DnBBulkMatchInfo.class);
-                log.info("Sent bulk match request to dnb, status=" + returnCode + " size=" + input.size()
+                log.info("Sent batched request to dnb bulk match api, status=" + returnCode + " size=" + input.size()
                         + " timestamp=" + info.getTimestamp() + " serviceId=" + info.getServiceBatchId());
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.bulkmatch);
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BULKMATCH);
         }
 
         info.setDnbCode(context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class));
+        info.setLookupRequestIds(new ArrayList<String>(input.keySet()));
 
         return info;
     }

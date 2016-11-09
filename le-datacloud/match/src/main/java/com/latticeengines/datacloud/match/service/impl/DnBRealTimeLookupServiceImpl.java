@@ -65,14 +65,14 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
         DataFlowContext context = null;
         DnBMatchOutput output = new DnBMatchOutput();
         for (int i = 0; i < retries; i++) {
-            context = executeLookup(input, DnBKeyType.realtime);
+            context = executeLookup(input, DnBKeyType.REALTIME);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
                 output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchOutput.class);
                 log.debug("Finished dnb realtime lookup request status= " + returnCode);
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.realtime);
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
         }
 
         output.setDnbCode(context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class));

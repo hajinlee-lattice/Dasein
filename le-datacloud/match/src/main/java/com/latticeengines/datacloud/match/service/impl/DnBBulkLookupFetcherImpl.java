@@ -2,10 +2,11 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static org.springframework.http.HttpStatus.OK;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
@@ -83,33 +84,31 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
 
     private static Date timeAnchor = new Date(1);
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<DnBMatchOutput> getResult(DnBBulkMatchInfo info) {
+    public Map<String, DnBMatchContext> getResult(DnBBulkMatchInfo info) {
 
         DataFlowContext context = new DataFlowContext();
         if (!preValidation()) {
-            context.setProperty(DNB_RETURN_CODE, DnBReturnCode.RATE_LIMITING);
+            info.setDnbCode(DnBReturnCode.RATE_LIMITING);
             return null;
         }
 
-        List<DnBMatchOutput> output = new ArrayList<>();
+        Map<String, DnBMatchContext> output = new HashMap<String, DnBMatchContext>();
         for (int i = 0; i < retries; i++) {
-            context = executeLookup(info, DnBKeyType.bulkmatch);
+            context = executeLookup(info, DnBKeyType.BULKMATCH);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
-                log.debug("Finished dnb get result request status= " + returnCode);
+                log.debug("Fetched result from DnB bulk match api. Status = " + returnCode);
                 info.setDnbCode(returnCode);
                 if (returnCode == DnBReturnCode.OK) {
-                    List<?> outputUncheck = context.getProperty(DNB_MATCH_OUTPUT_LIST, List.class);
-                    for (Object obj : outputUncheck) {
-                        output.add((DnBMatchOutput) obj);
-                    }
-                    log.info("Succeeded to get result from dnb, size=" + output.size() + " timestamp="
-                            + info.getTimestamp() + " serviceId=" + info.getServiceBatchId());
+                    output = context.getProperty(DNB_MATCH_OUTPUT_LIST, Map.class);
+                    log.info("Successfully fetched results from dnb. Size = " + output.size() + " Timestamp="
+                            + info.getTimestamp() + " ServiceId=" + info.getServiceBatchId());
                 }
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.bulkmatch);
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BULKMATCH);
         }
 
         return output;
@@ -147,12 +146,13 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
             return;
         }
 
-        List<DnBMatchOutput> outputList = new ArrayList<>();
+        Map<String, DnBMatchContext> outputList = new HashMap<String, DnBMatchContext>();
         String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, body);
         byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
         List<String> resultsList = Arrays.asList((new String(decodeResults)).split("\n"));
         for (String result : resultsList) {
-            outputList.add(normalizeOneRecord(result));
+            DnBMatchContext normalizedResult = normalizeOneRecord(result);
+            outputList.put(normalizedResult.getLookupRequestId(), normalizedResult);
         }
 
         context.setProperty(DNB_RETURN_CODE, returnCode);
@@ -177,11 +177,13 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
         return returnCode;
     }
 
-    private DnBMatchOutput normalizeOneRecord(String record) {
-        DnBMatchOutput output = new DnBMatchOutput();
+    private DnBMatchContext normalizeOneRecord(String record) {
+        DnBMatchContext output = new DnBMatchContext();
         record = record.substring(1, record.length() - 1);
         String[] values = record.split("\",\"");
 
+        String lookupRequestId = values[1];
+        output.setLookupRequestId(lookupRequestId);
         String duns = values[25];
         if (!StringUtils.isNumeric(values[48])) {
             output.setDnbCode(DnBReturnCode.DISCARD);

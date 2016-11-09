@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
-import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
@@ -44,8 +43,12 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         info.setTimestamp("2016-11-09T07:45:05-05:00");
         info.setServiceBatchId("2215928E1");
 
-        List<DnBMatchOutput> output = dnBBulkLookupFetcher.getResult(info);
+        Map<String, DnBMatchContext> output = dnBBulkLookupFetcher.getResult(info);
         Assert.assertEquals(output.size(), 4);
+        for (String lookupRequestId : output.keySet()) {
+            DnBMatchContext result = output.get(lookupRequestId);
+            log.info("Request " + result.getLookupRequestId() + ": " + output.get(lookupRequestId).getDuns());
+        }
     }
 
     static String[][] input = { { "Benchmark Blinds", "Gilbert", "Arizona", "US" },

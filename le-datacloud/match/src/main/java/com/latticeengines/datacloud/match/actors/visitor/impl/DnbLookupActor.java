@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.actors.exposed.TimerMessage;
 import com.latticeengines.actors.exposed.TimerRegistrationHelper;
 import com.latticeengines.actors.exposed.TimerRegistrationRequest;
+import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
@@ -27,22 +28,33 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
 
     public static TimerRegistrationHelper timerRegistrationHelper = new TimerRegistrationHelper(DnbLookupActor.class);
 
-    @Value("${datacloud.match.dnbLookupActor.timer.frequency:5}")
-    private int timerFrequency;
+    @Value("${datacloud.match.dnbLookupActor.dispatcher.timer.frequency:5}")
+    private int dispatcherTimerFrequency;
 
-    @Value("${datacloud.match.dnbLookupActor.timer.frequency.unit:MINUTES}")
-    private TimeUnit timerFrequencyUnit;
+    @Value("${datacloud.match.dnbLookupActor.dispatcher.timer.frequency.unit:MINUTES}")
+    private TimeUnit dispatcherTimerFrequencyUnit;
+
+    @Value("${datacloud.match.dnbLookupActor.fetcher.timer.frequency:30}")
+    private int fetcherTimerFrequency;
+
+    @Value("${datacloud.match.dnbLookupActor.fetcher.timer.frequency.unit:SECONDS}")
+    private TimeUnit fetcherTimerFrequencyUnit;
 
     @PostConstruct
     public void postConstruct() {
         log.info("Started actor: " + self());
-        Object timeContext = null;
-        TimerMessage timerMessage = new TimerMessage(DnbLookupActor.class);
-        timerMessage.setContext(timeContext);
-        TimerRegistrationRequest request = new TimerRegistrationRequest(timerFrequency, timerFrequencyUnit, null);
+        TimerMessage dispatcherTimerMessage = new TimerMessage(DnbLookupActor.class);
+        dispatcherTimerMessage.setContext(BulkLookupStrategy.DISPATCHER);
+        TimerRegistrationRequest dispatcherTimerRequest = new TimerRegistrationRequest(dispatcherTimerFrequency,
+                dispatcherTimerFrequencyUnit, dispatcherTimerMessage);
+        TimerMessage fetcherTimerMessage = new TimerMessage(DnbLookupActor.class);
+        fetcherTimerMessage.setContext(BulkLookupStrategy.FETCHER);
+        TimerRegistrationRequest fetcherTimerRequest = new TimerRegistrationRequest(fetcherTimerFrequency,
+                fetcherTimerFrequencyUnit, fetcherTimerMessage);
 
         List<TimerRegistrationRequest> requests = new ArrayList<>();
-        requests.add(request);
+        requests.add(dispatcherTimerRequest);
+        requests.add(fetcherTimerRequest);
 
         timerRegistrationHelper.register(//
                 context().system(), //
@@ -52,7 +64,7 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
 
     @Autowired
     @Qualifier("dnBLookupService")
-    private DataSourceLookupService dnBLookupService;
+    private DataSourceLookupServiceBase dnBLookupService;
 
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
@@ -62,7 +74,19 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     @Override
     protected void processTimerMessage(TimerMessage msg) {
         // handle timer message
-        log.debug("Got timer call");
+        log.debug("Got timer call: " + msg.getContext().toString());
+        Thread th = new Thread(createLookupRunnable((BulkLookupStrategy) msg.getContext()));
+        th.start();
+    }
+
+    private Runnable createLookupRunnable(final BulkLookupStrategy strategy) {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                dnBLookupService.bulkLookup(strategy);
+            }
+        };
+        return task;
     }
 
     @Override
