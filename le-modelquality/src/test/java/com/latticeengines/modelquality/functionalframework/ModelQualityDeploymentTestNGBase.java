@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.modelquality.service.AlgorithmService;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.modelquality.service.impl.PipelineStepType;
@@ -66,6 +67,9 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     @Autowired
     private AnalyticPipelineService analyticPipelineService;
+
+    @Autowired
+    private AlgorithmService algorithmService;
 
     @Resource(name = "modelRunService")
     protected ModelRunService modelRunService;
@@ -112,14 +116,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         if (analyticPipeline2AlreadyExists != null)
             analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
 
-        String algorithmStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
-                        .getFile()));
-        algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
-        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
-        if (algorithmAlreadyExists != null)
-            algorithmEntityMgr.delete(algorithmAlreadyExists);
-        algorithmEntityMgr.create(algorithm);
+        algorithmService.createLatestProductionAlgorithm();
+        algorithm = algorithmEntityMgr.findByName("RF");
 
         String dataflowStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
@@ -227,7 +225,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         samplingEntityMgr.delete(sampling);
         propDataEntityMgr.delete(propData);
         dataFlowEntityMgr.delete(dataflow);
-        algorithmEntityMgr.delete(algorithm);
     }
 
     protected void setTestBed(GlobalAuthDeploymentTestBed testBed) {
