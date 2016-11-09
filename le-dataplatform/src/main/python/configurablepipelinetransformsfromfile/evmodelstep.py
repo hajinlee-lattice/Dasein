@@ -32,7 +32,6 @@ class EVModelStep(PipelineStep):
         revenueColumn = self.model.predict_regression(dataFrame[self.modelInputColumns])
         if revenueColumn != None:
             outputFrame["PredictedRevenue"] = revenueColumn
-            outputFrame["PredictedRevenue"] = outputFrame["PredictedRevenue"].apply(lambda x : math.exp(x) - 1.0)
         else:
             outputFrame["PredictedRevenue"] = 0
         return outputFrame
