@@ -248,12 +248,15 @@ nav.primary-nav {
         }
 
         &.progress-menu {
-            & > li > a {
+            li > a {
                 position: relative;
             }
             ul {
                 margin-top: 0;
                 margin-left: 44px;
+                span.badge {
+                    margin-top: 6px;
+                }
             }
             li:after {
                 display: table;
@@ -274,6 +277,9 @@ nav.primary-nav {
             }
             & > li.active>a span:first-of-type span, & > li.active:hover>a span:first-of-type {
                 background: none;
+            }
+            li:hover>a span:first-of-type span:not(.no-svg) {
+                background-color: inherit;
             }
             & > li>a span:first-of-type span {
                 background: none;
