@@ -9,8 +9,8 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.etl.service.SourceService;
 
 @Component("sourceService")
 public class SourceServiceImpl implements SourceService {

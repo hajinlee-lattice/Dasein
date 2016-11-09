@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
-import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
 import com.latticeengines.datacloud.etl.service.SourceColumnService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
 import com.latticeengines.dataplatform.service.impl.metadata.SQLServerMetadataProvider;
+import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;

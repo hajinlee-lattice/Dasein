@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.etl.transformation;
 import org.apache.commons.logging.Log;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;

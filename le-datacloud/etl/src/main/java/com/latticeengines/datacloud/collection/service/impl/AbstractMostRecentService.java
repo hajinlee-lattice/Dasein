@@ -4,9 +4,9 @@ import java.util.Date;
 
 import com.latticeengines.datacloud.collection.service.CollectionDataFlowKeysDeprecated;
 import com.latticeengines.datacloud.collection.service.RefreshService;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.MostRecentSource;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
 @SuppressWarnings("deprecation")

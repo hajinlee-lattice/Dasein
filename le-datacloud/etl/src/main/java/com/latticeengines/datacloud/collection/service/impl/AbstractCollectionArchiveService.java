@@ -8,9 +8,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.CollectedArchiveService;
+import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.util.DateRange;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
-import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;

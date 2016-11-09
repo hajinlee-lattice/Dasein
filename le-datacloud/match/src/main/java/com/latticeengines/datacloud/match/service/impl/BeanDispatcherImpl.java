@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
-import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 @Component("beanDispatcher")

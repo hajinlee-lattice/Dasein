@@ -4,10 +4,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.service.SourceColumnService;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.DomainBased;
+import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.datacloud.etl.service.SourceColumnService;
 
 @Component("sourceColumnService")
 public class SourceColumnServiceImpl implements SourceColumnService {

@@ -8,8 +8,8 @@ import org.apache.commons.logging.Log;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.BulkArchiveService;
-import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.core.source.BulkSource;
+import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.domain.exposed.datacloud.StageServer;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;

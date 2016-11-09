@@ -8,8 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.latticeengines.datacloud.match.exposed.datasource.MatchClientContextHolder;
-import com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;

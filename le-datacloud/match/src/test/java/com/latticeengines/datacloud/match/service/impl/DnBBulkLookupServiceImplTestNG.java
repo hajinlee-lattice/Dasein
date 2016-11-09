@@ -12,12 +12,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupDispatcher;
-import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
 import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupDispatcher;
+import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
 public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 

@@ -2,13 +2,12 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import javax.annotation.Resource;
 
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 
 @Component("columnMetadataService")
 public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<ExternalColumn> {

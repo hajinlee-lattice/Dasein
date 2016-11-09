@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.datacloud.match.dao.CommandDao;
 import com.latticeengines.datacloud.match.dao.CommandParameterDao;
-import com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.datacloud.match.entitymgr.CommandEntityMgr;
+import com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.domain.exposed.datacloud.Commands;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
 

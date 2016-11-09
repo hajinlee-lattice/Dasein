@@ -2,11 +2,11 @@ package com.latticeengines.datacloud.match.dao.impl;
 
 import java.util.List;
 
-import com.latticeengines.datacloud.match.dao.ExternalColumnDao;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.match.dao.ExternalColumnDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 

@@ -9,10 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
-import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
-import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
@@ -23,6 +19,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
+import com.latticeengines.datacloud.match.entitymgr.LatticeAccountMgr;
+import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
+import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;

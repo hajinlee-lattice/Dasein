@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
-import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.metric.BulkMatchResponse;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
+import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;

@@ -4,8 +4,8 @@ import com.latticeengines.datacloud.match.entitymgr.AccountLookupEntryMgr;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
+import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class AccountLookupEntryMgrImpl extends BaseFabricEntityMgrImpl<AccountLookupEntry>
                                    implements AccountLookupEntryMgr {
