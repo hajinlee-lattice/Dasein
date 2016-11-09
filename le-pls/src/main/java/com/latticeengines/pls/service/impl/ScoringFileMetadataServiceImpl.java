@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -68,7 +69,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     private SourceFileService sourceFileService;
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFields,
+    public InputStream validateHeaderFields(InputStream stream,
             CloseableResourcePool closeableResourcePool, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -82,11 +83,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
-        ValidateFileHeaderUtils.checkForDuplicateHeaders(requiredFields, displayName, headerFields);
-        ValidateFileHeaderUtils.checkForMissingRequiredFields(requiredFields, displayName,
-                headerFields, false);
-
+        ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
         return stream;
     }
 
@@ -163,10 +160,13 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
 
         fieldMappingDocument.getRequiredFields().add(InterfaceName.Id.name());
-        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            fieldMappingDocument.getRequiredFields().add(InterfaceName.Website.name());
-        } else {
-            fieldMappingDocument.getRequiredFields().add(InterfaceName.Email.name());
+        if (!modelSummary.getModelSummaryConfiguration()
+                .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) {
+            if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+                fieldMappingDocument.getRequiredFields().add(InterfaceName.Website.name());
+            } else {
+                fieldMappingDocument.getRequiredFields().add(InterfaceName.Email.name());
+            }
         }
 
         Set<String> scoringHeaderFields = getHeaderFields(csvFileName);

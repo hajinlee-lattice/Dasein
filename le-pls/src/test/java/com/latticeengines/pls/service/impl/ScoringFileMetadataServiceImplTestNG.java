@@ -1,9 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -17,7 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,7 +29,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -42,7 +44,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
+    private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file2.csv";
     private File csvFile;
     private CloseableResourcePool closeableResourcePool;
     private String displayName;
@@ -55,35 +57,22 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         URL csvFileUrl = ClassLoader.getSystemResource(PATH);
         csvFile = new File(csvFileUrl.getFile());
         closeableResourcePool = new CloseableResourcePool();
-        displayName = "file1.csv";
+        displayName = "file2.csv";
     }
 
     @Test(groups = "functional")
-    public void testValidateHeaderFieldsWithSufficientColumns() throws FileNotFoundException {
-        boolean noException = false;
+    public void testValidateHeaderFieldsWithEmptyHeaders() throws FileNotFoundException {
         InputStream stream = new FileInputStream(csvFile);
+        boolean exceptionThrown = false;
         try {
-            scoringFileMetadataService.validateHeaderFields(stream, createTableWithSufficientColumns().getAttributes(),
-                    closeableResourcePool, displayName);
-            noException = true;
+            scoringFileMetadataService.validateHeaderFields(stream, closeableResourcePool,
+                    displayName);
+            assertTrue(exceptionThrown, "should have thrown exception");
         } catch (Exception e) {
-            Assert.fail("Should not throw exception");
-            e.printStackTrace();
+            exceptionThrown = true;
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18096);
         }
-        Assert.assertTrue(noException);
-    }
-
-    @Test(groups = "functional")
-    public void testValidateHeaderFieldsWithExtraColumns() throws FileNotFoundException {
-        boolean exception = false;
-        InputStream stream = new FileInputStream(csvFile);
-        try {
-            scoringFileMetadataService.validateHeaderFields(stream, createTableWithExtraColumns().getAttributes(),
-                    closeableResourcePool, displayName);
-            exception = true;
-        } catch (Exception e) {
-            Assert.assertFalse(exception);
-        }
+        assertTrue(exceptionThrown);
     }
 
     @Test(groups = "functional")
@@ -109,15 +98,18 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
 
         SourceFileService sourceFileService = Mockito.mock(SourceFileService.class);
         SourceFile sourceFile = new SourceFile();
-        sourceFile.setName("file1");
+        sourceFile.setName("file2");
         when(sourceFileService.findByName(anyString())).thenReturn(sourceFile);
         Mockito.doNothing().when(sourceFileService).update(any(SourceFile.class));
 
         MetadataProxy metadataProxy = Mockito.mock(MetadataProxy.class);
-        Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(), any(Table.class));
+        Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(),
+                any(Table.class));
 
-        ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
-        ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService",
+                modelMetadataService);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService",
+                sourceFileService);
         ReflectionTestUtils.setField(scoringFileMetadataService, "metadataProxy", metadataProxy);
 
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
@@ -146,49 +138,18 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
         mapping4.setFieldType(UserDefinedType.TEXT);
 
         fieldMappingDocument.setRequiredFields(Arrays.asList(new String[] { "A" }));
-        fieldMappingDocument.setFieldMappings(Arrays.asList(new FieldMapping[] { mapping, mapping2, mapping3, mapping4 }));
+        fieldMappingDocument.setFieldMappings(
+                Arrays.asList(new FieldMapping[] { mapping, mapping2, mapping3, mapping4 }));
 
         Tenant t = new Tenant();
         t.setId("t1");
         MultiTenantContext.setTenant(t);
-        Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", "modelid", fieldMappingDocument);
+        Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", "modelid",
+                fieldMappingDocument);
 
         assertEquals(table.getAttributes().size(), 4);
         assertNotNull(table.getAttribute("C_2"));
         assertNotNull(table.getAttribute("C_1_1"));
-    }
-
-    private Table createTableWithSufficientColumns() {
-        Table table = new Table();
-        table.setName("TableWithSufficientColumns");
-
-        Attribute att = new Attribute();
-        att.setName(InterfaceName.Id.name());
-        att.setDisplayName("Account ID");
-        table.addAttribute(att);
-
-        att = new Attribute();
-        att.setName(InterfaceName.Website.name());
-        att.setDisplayName("Website");
-        table.addAttribute(att);
-
-        att = new Attribute();
-        att.setName(InterfaceName.Event.name());
-        att.setDisplayName("Event");
-        table.addAttribute(att);
-
-        return table;
-    }
-
-    private Table createTableWithExtraColumns() {
-        Table table = createTableWithSufficientColumns();
-        table.setName("TableWithSufficientColumns");
-
-        Attribute att = new Attribute();
-        att.setName("ExtraColumn");
-        att.setDisplayName("ExtraColumn");
-        table.addAttribute(att);
-        return table;
     }
 
 }

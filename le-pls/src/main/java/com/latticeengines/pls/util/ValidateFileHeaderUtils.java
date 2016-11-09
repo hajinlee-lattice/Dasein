@@ -183,7 +183,7 @@ public class ValidateFileHeaderUtils {
 
     public static void checkForHeaderFormat(Set<String> headerFields) {
         if (headerFields.size() == 1) {
-            throw new LedpException(LedpCode.LEDP_19111);
+            throw new LedpException(LedpCode.LEDP_18120);
         }
     }
 

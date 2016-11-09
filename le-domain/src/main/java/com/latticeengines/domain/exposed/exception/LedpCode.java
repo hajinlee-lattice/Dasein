@@ -220,9 +220,10 @@ public enum LedpCode {
     LEDP_18117("Failed to Authenticate Marketo SOAP Credentials due to: {0}"), //
     LEDP_18118("Unable to copy source file"), //
     LEDP_18119("Cannot create marketo credential with duplicate name: {0}"), //
+    LEDP_18120("Invalid file uploaded. There must be minimum of 2 columns."), //
 
     // le-security 19000-19100
-    LEDP_19000("Failed to send an email."),
+    LEDP_19000("Failed to send an email."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //
@@ -235,7 +236,6 @@ public enum LedpCode {
     LEDP_19108("Cannot toggle the feature flag {0} for the tenant {1}."), //
     LEDP_19109("Cannot retrieve all the feature flags for the tenant {0}."), //
     LEDP_19110("Cannot remove the feature flag {0} from the tenant {1}."), //
-    LEDP_19111("The input file is invalid"), //
 
     // le-scoring 20000-20100
     LEDP_20000("ScoringCommand Failed"), //

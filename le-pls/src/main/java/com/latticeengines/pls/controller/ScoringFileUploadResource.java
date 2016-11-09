@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
@@ -63,9 +62,6 @@ public class ScoringFileUploadResource {
     private SourceFileService sourceFileService;
 
     @Autowired
-    private ModelingFileMetadataService modelingFileMetadataService;
-
-    @Autowired
     private ModelSummaryService modelSummary;
 
     @Autowired
@@ -78,14 +74,15 @@ public class ScoringFileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public ResponseDocument<SourceFile> uploadFile( //
-                                                    @RequestParam(value = "displayName", required = true) String displayName, //
-                                                    @RequestParam(value = "modelId") String modelId, //
-                                                    @RequestParam(value = "compressed", required = false) boolean compressed, //
-                                                    @RequestParam("file") MultipartFile file) {
+            @RequestParam(value = "displayName", required = true) String displayName, //
+            @RequestParam(value = "modelId") String modelId, //
+            @RequestParam(value = "compressed", required = false) boolean compressed, //
+            @RequestParam("file") MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             if (file.getSize() >= maxUploadSize) {
-                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
+                throw new LedpException(LedpCode.LEDP_18092,
+                        new String[] { Long.toString(maxUploadSize) });
             }
 
             InputStream stream = file.getInputStream();
@@ -96,23 +93,28 @@ public class ScoringFileUploadResource {
             SourceFile sourceFile = null;
             ModelSummary summary = modelSummary.getModelSummaryByModelId(modelId);
             if (summary.getModelType().equals(ModelType.PYTHONMODEL.getModelType())) {
-                stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, displayName);
+                stream = scoringFileMetadataService.validateHeaderFields(stream,
+                        closeableResourcePool, displayName);
 
-                sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                sourceFile = fileUploadService.uploadFile(
+                        "file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, displayName, stream);
             } else {
                 if (!stream.markSupported()) {
                     stream = new BufferedInputStream(stream);
                 }
-                stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
-                Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+                stream.mark(
+                        ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+                Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
+                        closeableResourcePool);
                 try {
                     stream.reset();
                 } catch (IOException e) {
                     log.error(e);
                     throw new LedpException(LedpCode.LEDP_00002, e);
                 }
-                sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                sourceFile = fileUploadService.uploadFile(
+                        "file_" + DateTime.now().getMillis() + ".csv",
                         SchemaInterpretation.TestingData, displayName, stream);
                 Table table = new Table();
                 table.setPrimaryKey(null);
@@ -120,7 +122,8 @@ public class ScoringFileUploadResource {
                 table.setDisplayName(sourceFile.getDisplayName());
                 for (String header : headers) {
                     Attribute attr = new Attribute();
-                    attr.setName(ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
+                    attr.setName(
+                            ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(header));
                     attr.setDisplayName(header);
                     attr.setPhysicalDataType(FieldType.STRING.avroTypes()[0]);
                     attr.setNullable(true);
@@ -129,7 +132,8 @@ public class ScoringFileUploadResource {
                 }
                 table.deduplicateAttributeNames();
                 sourceFile.setTableName(table.getName());
-                metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(), table);
+                metadataProxy.createTable(MultiTenantContext.getTenant().getId(), table.getName(),
+                        table);
 
                 sourceFileService.update(sourceFile);
             }
@@ -149,25 +153,29 @@ public class ScoringFileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Takes a file and get first round of field mappings through best effort")
     public ResponseDocument<FieldMappingDocument> getFieldMappings( //
-                                                                    @RequestParam(value = "csvFileName", required = true) String csvFileName, //
-                                                                    @RequestParam(value = "modelId", required = true) String modelId) {
-        return ResponseDocument.successResponse(scoringFileMetadataService.mapRequiredFieldsWithFileHeaders(csvFileName, modelId));
+            @RequestParam(value = "csvFileName", required = true) String csvFileName, //
+            @RequestParam(value = "modelId", required = true) String modelId) {
+        return ResponseDocument.successResponse(
+                scoringFileMetadataService.mapRequiredFieldsWithFileHeaders(csvFileName, modelId));
     }
 
-    @RequestMapping(value="fieldmappings/resolve", method = RequestMethod.POST)
+    @RequestMapping(value = "fieldmappings/resolve", method = RequestMethod.POST)
     @ApiOperation(value = "Take user input and resolve required field mappings for scoring")
     public void saveFieldMappingDocument( //
-                                          @RequestParam(value = "csvFileName", required = true) String csvFileName,
-                                          @RequestParam(value = "modelId", required = true) String modelId,
-                                          @RequestBody FieldMappingDocument fieldMappingDocument) {
-        scoringFileMetadataService.saveFieldMappingDocument(csvFileName, modelId, fieldMappingDocument);
+            @RequestParam(value = "csvFileName", required = true) String csvFileName,
+            @RequestParam(value = "modelId", required = true) String modelId,
+            @RequestBody FieldMappingDocument fieldMappingDocument) {
+        scoringFileMetadataService.saveFieldMappingDocument(csvFileName, modelId,
+                fieldMappingDocument);
     }
 
     @RequestMapping(value = "/headerfields", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Returns the header fields for a uploaded file")
-    public ResponseDocument<Set<String>> getHeaderFields(@RequestParam(value = "csvFileName", required = true) String csvFileName) {
-        return ResponseDocument.successResponse(scoringFileMetadataService.getHeaderFields(csvFileName));
+    public ResponseDocument<Set<String>> getHeaderFields(
+            @RequestParam(value = "csvFileName", required = true) String csvFileName) {
+        return ResponseDocument
+                .successResponse(scoringFileMetadataService.getHeaderFields(csvFileName));
     }
 
 }
