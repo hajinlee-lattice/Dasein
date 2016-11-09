@@ -30,9 +30,9 @@ def find_ec2_id_by_ip(private_ip):
         DryRun=False,
         Filters=[
             {
-                'Name': 'group-name',
+                'Name': 'instance-state-name',
                 'Values': [
-                    'sg.tomcat',
+                    'running',
                 ]
             },
         ],
