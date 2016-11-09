@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
@@ -196,4 +197,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         return get("getArtifactByPath", url, Artifact.class);
     }
 
+    @Override
+    public MetadataSegment createMetadataSegment(String customerSpace, String segmentName, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/segments/{segmentName}?tableName={tableName}", //
+                customerSpace, segmentName, tableName);
+        return post("createMetadataSegment", url, null, MetadataSegment.class);
+    }
 }
