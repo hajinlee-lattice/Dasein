@@ -20,11 +20,27 @@ angular.module('login.forgot', [
             $state.go('login.form');
         };
 
+        validateEmail = function(string) {
+            if (!string) {
+                return false;
+            }
+            var at = string.indexOf('@'),
+                dot = string.lastIndexOf('.');
+            if (at < 1 || dot - at < 2){
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
         vm.forgotPasswordOkClick = function (forgotPasswordUsername) {
+            var forgotPasswordUsername = forgotPasswordUsername || vm.forgotPasswordUsername;
+
             vm.resetPasswordSuccess = false;
             vm.showForgotPasswordError = false;
-            vm.forgotPasswordUsernameInvalid = forgotPasswordUsername === "";
-            
+            vm.forgotPasswordUsernameInvalid = !validateEmail(forgotPasswordUsername);
+
             if (vm.forgotPasswordUsernameInvalid) {
                 return;
             }
