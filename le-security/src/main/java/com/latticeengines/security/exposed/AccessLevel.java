@@ -11,6 +11,8 @@ public enum AccessLevel {
     ) //
     ), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
@@ -28,6 +30,8 @@ public enum AccessLevel {
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_USERS, //
@@ -51,6 +55,8 @@ public enum AccessLevel {
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_REPORTING, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
@@ -68,6 +74,8 @@ public enum AccessLevel {
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_USERS, //
@@ -92,6 +100,8 @@ public enum AccessLevel {
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
             GrantedRight.VIEW_PLS_USERS, //
