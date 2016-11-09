@@ -181,7 +181,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         }
         samplingEntityMgr.create(sampling);
 
-        pipelineService.createLatestProductionPipeline();
+        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("remediatedatarulesstep");
+        if (pipelineStepAlreadyExists == null) {
+            pipelineService.createLatestProductionPipeline();
+        }
+
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
                         .getFile()));

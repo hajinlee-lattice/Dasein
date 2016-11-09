@@ -89,6 +89,11 @@ public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestN
             samplingEntityMgr.delete(samplingAlreadyExists);
         samplingEntityMgr.create(sampling);
 
+        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("remediatedatarulesstep");
+        if (pipelineStepAlreadyExists == null) {
+            pipelineService.createLatestProductionPipeline();
+        }
+
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
                         .getFile()));
