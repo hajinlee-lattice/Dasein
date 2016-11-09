@@ -11,7 +11,8 @@ from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
-from ..elb.targetgroup import register
+from ..ec2.ec2 import register_ec2_to_targetgroup
+from ..elb.targetgroup import find_tgrp_arn
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
@@ -107,50 +108,6 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 
     register_ec2_to_targetgroup(stackname, tgrp)
-
-
-def register_ec2_to_targetgroup(stackname, tgrp):
-    ids = find_ec2_ids(stackname)
-    for ec2_id in ids:
-        print "registering ec2 %s to target group %s" % (ec2_id, tgrp)
-        register(tgrp, ec2_id)
-
-def find_ec2_ids(stackname):
-    stack = boto3.resource('cloudformation').Stack(stackname)
-    ips = []
-    for output in stack.outputs:
-        key = output['OutputKey']
-        value = output['OutputValue']
-        if 'PrivateIp' in key:
-            ips.append(value)
-            print "Added an EC2 at private ip " + value
-    ec2_ids = []
-    for ip in ips:
-        ec2_ids.append(find_ec2_id_by_ip(ip))
-    return ec2_ids
-
-
-def find_ec2_id_by_ip(private_ip):
-    client = boto3.client('ec2')
-    response = client.describe_instances(
-        DryRun=False,
-        Filters=[
-            {
-                'Name': 'group-name',
-                'Values': [
-                    'sg.tomcat',
-                ]
-            },
-        ],
-        MaxResults=999
-    )
-    instances = response["Reservations"]["Instances"]
-    for instance in instances:
-        if instance["PrivateIpAddress"] == private_ip:
-            return instance["InstanceId"]
-
-    raise Exception("Cannot find instance with private ip " + private_ip)
-
 
 def teardown_cli(args):
     teardown(args.stackname)

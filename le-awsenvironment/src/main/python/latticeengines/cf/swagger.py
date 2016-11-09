@@ -10,7 +10,8 @@ from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import *
 from .module.stack import ECSStack, teardown_stack, check_stack_not_exists, wait_for_stack_creation
 from ..conf import AwsEnvironment
-from ..elb.targetgroup import register
+from ..ec2.ec2 import register_ec2_to_targetgroup
+from ..elb.targetgroup import find_tgrp_arn
 
 _S3_CF_PATH='cloudformation/swagger'
 
@@ -111,61 +112,6 @@ def provision(environment, stackname, apps, tgrp, public=False):
     print 'Got StackId: %s' % response['StackId']
     wait_for_stack_creation(client, stackname)
     register_ec2_to_targetgroup(stackname, tgrp)
-
-
-def find_tgrp_arn(name):
-    client = boto3.client('elbv2')
-    response = client.describe_target_groups()
-    for tgrp in response['TargetGroups']:
-        if tgrp['TargetGroupName'] == name:
-            tgrp_arn = tgrp['TargetGroupArn']
-            print "Found target group " + tgrp_arn
-            return tgrp_arn
-    raise Exception("Cannot find target group named "+ name)
-
-
-def register_ec2_to_targetgroup(stackname, tgrp):
-    ids = find_ec2_ids(stackname)
-    for ec2_id in ids:
-        print "registering ec2 %s to target group %s" % (ec2_id, tgrp)
-        register(tgrp, ec2_id)
-
-def find_ec2_ids(stackname):
-    stack = boto3.resource('cloudformation').Stack(stackname)
-    ips = []
-    for output in stack.outputs:
-        key = output['OutputKey']
-        value = output['OutputValue']
-        if 'PrivateIp' in key:
-            ips.append(value)
-            print "Added an EC2 at private ip " + value
-    ec2_ids = []
-    for ip in ips:
-        ec2_ids.append(find_ec2_id_by_ip(ip))
-    return ec2_ids
-
-
-def find_ec2_id_by_ip(private_ip):
-    client = boto3.client('ec2')
-    response = client.describe_instances(
-        DryRun=False,
-        Filters=[
-            {
-                'Name': 'group-name',
-                'Values': [
-                    'sg.tomcat',
-                ]
-            },
-        ],
-        MaxResults=999
-    )
-    instances = response["Reservations"]["Instances"]
-    for instance in instances:
-        if instance["PrivateIpAddress"] == private_ip:
-            return instance["InstanceId"]
-
-    raise Exception("Cannot find instance with private ip " + private_ip)
-
 
 def teardown_cli(args):
     teardown(args.stackname)
