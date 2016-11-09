@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -42,12 +43,13 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
     @PostConstruct
     private void postConstruct() {
+        loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(11));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)), TimeUnit.MINUTES.toMillis(11));
     }
 
     @Override

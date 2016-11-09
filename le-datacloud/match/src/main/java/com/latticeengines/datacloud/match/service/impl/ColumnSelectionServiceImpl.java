@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,12 +49,13 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @PostConstruct
     private void postConstruct() {
+        loadCaches();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCaches();
             }
-        }, TimeUnit.MINUTES.toMillis(10));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)), TimeUnit.MINUTES.toMillis(11));
     }
 
     @Override

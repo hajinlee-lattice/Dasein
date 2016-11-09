@@ -449,6 +449,7 @@ public class SqlServerHelper implements DbHelper {
         for (int i = 0; i < numFetchers; i++) {
             executor.submit(new Fetcher());
         }
+
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {

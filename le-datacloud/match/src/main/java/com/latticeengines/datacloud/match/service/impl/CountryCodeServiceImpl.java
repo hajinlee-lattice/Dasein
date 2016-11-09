@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -57,12 +58,13 @@ public class CountryCodeServiceImpl implements CountryCodeService {
 
     @PostConstruct
     private void postConstruct() {
+        loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(30));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(30)), TimeUnit.MINUTES.toMillis(30));
     }
 
     private void loadCache() {

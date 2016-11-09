@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,13 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     @PostConstruct
     private void postConstruct() {
+        loadCache();
         scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(13));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(13)), TimeUnit.MINUTES.toMillis(13));
     }
 
     @Override
@@ -54,7 +56,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     @Override
     @Trace
-    @MatchStep(threshold = 500L)
+    @MatchStep
     public List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion) {
         List<E> toReturn = new ArrayList<>();
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
