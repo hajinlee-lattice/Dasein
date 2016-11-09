@@ -140,7 +140,7 @@ def create_load_balancers(tg_map):
     resources.append(create_listner_rule(private_lsnr, tg_map["admin"], "/admin/*"))
 
     resources.append(create_listner_rule(public_lsnr, tg_map["pls"], "/pls/*"))
-    resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scores/*"))
+    resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scoreinternal/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["playmaker"], "/playmaker/*"))
