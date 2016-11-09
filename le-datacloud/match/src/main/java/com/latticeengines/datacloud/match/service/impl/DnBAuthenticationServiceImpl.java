@@ -112,6 +112,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Override
     public String refreshAndGetToken(DnBKeyType type) {
         tokenCache.refresh(type);
+        log.info("DnB token is expired, retry it.");
         return requestToken(type);
     }
 
