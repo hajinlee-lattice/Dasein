@@ -57,6 +57,8 @@ public class ModelSummaryProvenance
                 break;
             case "class java.lang.Double":
                 ret = ret.concat(String.format(fmtString, name.getName(), this.getDouble(name, 0)));
+            case "class java.lang.Long":
+                ret = ret.concat(String.format(fmtString, name.getName(), this.getLong(name, 0)));
             default:
                 ret = ret
                         .concat(String.format(fmtString, name.getName(), this.getString(name, "")));

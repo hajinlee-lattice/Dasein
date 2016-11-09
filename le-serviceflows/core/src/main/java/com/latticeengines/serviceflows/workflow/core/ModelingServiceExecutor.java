@@ -272,9 +272,9 @@ public class ModelingServiceExecutor {
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
         provenanceProperties += builder.modelSummaryProvenance.getProvenancePropertyString();
-//        if (builder.getTransformationGroupName() != null) {
-//            provenanceProperties += " Transformation_Group_Name=" + builder.getTransformationGroupName();
-//        }
+        if (builder.getJobId() != null) {
+            provenanceProperties += " Workflow_Job_Id=" + Long.toString(builder.getJobId());
+        }
         log.info("The model provenance property is: " + provenanceProperties);
 
         model.setProvenanceProperties(provenanceProperties);
@@ -355,6 +355,7 @@ public class ModelingServiceExecutor {
 
         private String host;
         private int port;
+        private Long jobId;
         private String db;
         private String user;
         private String password;
@@ -423,6 +424,11 @@ public class ModelingServiceExecutor {
 
         public Builder dataSourcePort(int port) {
             this.setPort(port);
+            return this;
+        }
+
+        public Builder jobId(Long jobId) {
+            this.setJobId(jobId);
             return this;
         }
 
@@ -671,6 +677,14 @@ public class ModelingServiceExecutor {
 
         public void setPort(int port) {
             this.port = port;
+        }
+
+        public void setJobId(Long jobId) {
+            this.jobId = jobId;
+        }
+
+        public Long getJobId() {
+            return jobId;
         }
 
         public String getDb() {

@@ -154,7 +154,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
         bldr = bldr.targets(getTargets(eventTable, currentEvent)) //
                 .metadataTable(getMetadataTableFolderName(eventTable, currentEvent)) //
-                .keyColumn("Id").modelName(configuration.getModelName()) //
+                .keyColumn("Id").modelName(configuration.getModelName()).jobId(jobId) //
                 .eventTableName(getEventTable().getName()) //
                 .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                 .trainingTableName(getConfiguration().getTrainingTableName()) //

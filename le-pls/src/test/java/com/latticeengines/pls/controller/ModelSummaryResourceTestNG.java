@@ -427,10 +427,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
                 data, ModelSummary.class);
         assertNotNull(newSummary);
         ModelSummaryProvenance provenance = newSummary.getModelSummaryConfiguration();
-        assertEquals(provenance.getBag().size(), 6);
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePublicDomains));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns));
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
+        assertNotNull(provenance.getLong(ProvenancePropertyName.WorkflowJobId));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled));
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);

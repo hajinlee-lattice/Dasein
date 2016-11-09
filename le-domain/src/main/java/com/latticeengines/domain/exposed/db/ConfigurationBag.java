@@ -87,6 +87,10 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
         return get(option, dflt, Double.class);
     }
 
+    public long getLong(E option, long dflt) {
+        return get(option, dflt, Long.class);
+    }
+
     public boolean getBoolean(E option, boolean dflt) {
         return get(option, dflt, Boolean.class);
     }
@@ -103,6 +107,10 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
         return get(option, Double.class);
     }
 
+    public long getLong(E option) {
+        return get(option, Long.class);
+    }
+
     public boolean getBoolean(E option) {
         return get(option, Boolean.class);
     }
@@ -116,6 +124,10 @@ public class ConfigurationBag<T extends HasOptionAndValue, E extends Enum<E>> {
     }
 
     public void setDouble(E option, double value) {
+        set(option, value);
+    }
+
+    public void setLong(E option, long value) {
         set(option, value);
     }
 

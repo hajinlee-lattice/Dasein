@@ -172,6 +172,8 @@ public class ModelSummaryParser {
             configuration.setString(ProvenancePropertyName.TransformationGroupName,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Transformation_Group_Name"),
                             String.class, TransformationGroup.STANDARD.getName()));
+            configuration.setLong(ProvenancePropertyName.WorkflowJobId, JsonUtils
+                    .getOrDefault(eventTableProvenance.get("Workflow_Job_Id"), Long.class, -1L));
             configuration.setBoolean(ProvenancePropertyName.IsV2ProfilingEnabled,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Is_V2_Profiling_Enabled"),
                             Boolean.class, false));
