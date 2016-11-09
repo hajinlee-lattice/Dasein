@@ -159,7 +159,7 @@ def create_listener_rule(listener, tg, path):
     else:
         LISTENER_RULE_COUNTER[listener.logical_id()] += 1
     priority = LISTENER_RULE_COUNTER[listener.logical_id()]
-    lr = ListenerRule(listener.logical_id() + path.replace('/', '').replace('*', ''), listener, priority, tg, path)
+    lr = ListenerRule(listener.logical_id() + str(priority), listener, priority, tg, path)
     lr.depends_on(listener)
     lr.depends_on(tg)
     return lr
