@@ -1,5 +1,7 @@
 package com.latticeengines.actors.exposed;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,27 +26,35 @@ public class TimerRegistrationHelper {
         this.actorClazz = actorClazz;
     }
 
-    public void register(ActorSystem system, ActorRef actorRef, int timerFrequency, TimeUnit timeUnit) {
-        register(system, actorRef, timerFrequency, timeUnit, null);
+    public void register(ActorSystem system, ActorRef actorRef, TimerRegistrationRequest request) {
+        List<TimerRegistrationRequest> requests = new ArrayList<>();
+        requests.add(request);
+        register(system, actorRef, requests);
     }
 
-    public void register(ActorSystem system, ActorRef actorRef, int timerFrequency, TimeUnit timeUnit,
-            TimerMessage timerMessage) {
-        TimerMessage timerMessageObj = null;
-
-        if (timerMessage == null) {
-            timerMessageObj = new TimerMessage(actorClazz);
-        } else {
-            timerMessageObj = timerMessage;
-        }
-
+    public void register(ActorSystem system, ActorRef actorRef,
+            List<TimerRegistrationRequest> timerRegistrationRequests) {
         if (!registeredTimerFlag) {
             try {
                 lock.lock();
                 if (!registeredTimerFlag) {
-                    registerTimer(system, actorRef, timerFrequency, timeUnit, timerMessageObj);
+
+                    int counter = 0;
+                    for (TimerRegistrationRequest timerRegistrationRequest : timerRegistrationRequests) {
+
+                        TimerMessage timerMessageObj = null;
+
+                        if (timerRegistrationRequest.getTimerMessage() == null) {
+                            timerMessageObj = new TimerMessage(actorClazz);
+                        } else {
+                            timerMessageObj = timerRegistrationRequest.getTimerMessage();
+                        }
+
+                        registerTimer(system, actorRef, timerRegistrationRequest.getTimerFrequency(),
+                                timerRegistrationRequest.getTimeUnit(), timerMessageObj);
+                        log.info("Registered timer call " + counter++ + " for " + actorClazz.getName());
+                    }
                     registeredTimerFlag = true;
-                    log.info("Registered for timer call for " + actorClazz.getName());
                 }
             } finally {
                 lock.unlock();

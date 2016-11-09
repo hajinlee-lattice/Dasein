@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.TimerMessage;
 import com.latticeengines.actors.exposed.TimerRegistrationHelper;
+import com.latticeengines.actors.exposed.TimerRegistrationRequest;
 import com.latticeengines.actors.visitor.sample.SampleDataSourceLookupService;
 import com.latticeengines.actors.visitor.sample.SampleDataSourceWrapperActorTemplate;
 
@@ -36,10 +37,12 @@ public class SampleDynamoLookupActor extends SampleDataSourceWrapperActorTemplat
     public void postConstruct() {
         log.info("Started actor: " + self());
         actorCardinalityCounterForTest.incrementAndGet();
+        TimerRegistrationRequest request = new TimerRegistrationRequest(50, TimeUnit.MILLISECONDS, null);
+
         timerRegistrationHelper.register(//
                 context().system(), //
                 sampleMatchActorSystem.getActorRef(SampleDynamoLookupActor.class), //
-                50, TimeUnit.MILLISECONDS);
+                request);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.TimerMessage;
 import com.latticeengines.actors.exposed.TimerRegistrationHelper;
+import com.latticeengines.actors.exposed.TimerRegistrationRequest;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupService;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorTemplate;
 
@@ -33,10 +36,18 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     @PostConstruct
     public void postConstruct() {
         log.info("Started actor: " + self());
+        Object timeContext = null;
+        TimerMessage timerMessage = new TimerMessage(DnbLookupActor.class);
+        timerMessage.setContext(timeContext);
+        TimerRegistrationRequest request = new TimerRegistrationRequest(timerFrequency, timerFrequencyUnit, null);
+
+        List<TimerRegistrationRequest> requests = new ArrayList<>();
+        requests.add(request);
+
         timerRegistrationHelper.register(//
                 context().system(), //
                 matchActorSystem.getActorRef(DnbLookupActor.class), //
-                timerFrequency, timerFrequencyUnit);
+                requests);
     }
 
     @Autowired
