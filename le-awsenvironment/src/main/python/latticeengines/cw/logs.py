@@ -22,19 +22,19 @@ def clean_internal(group):
 def create(args):
     create_internal(args.group)
 
-def create_internal(group):
+def create_internal(grp_name):
     client = boto3.client('logs')
     response = client.describe_log_groups(
-        logGroupNamePrefix=group
+        logGroupNamePrefix=grp_name
     )
     already_exists = False
     for group in response['logGroups']:
-        if group['logGroupName'] == group:
+        if group['logGroupName'] == grp_name:
             already_exists = True
     if already_exists:
-        clean_internal(group)
+        clean_internal(grp_name)
     else:
-        client.create_log_group(logGroupName=group)
+        client.create_log_group(logGroupName=grp_name)
 
 
 def parse_args():
