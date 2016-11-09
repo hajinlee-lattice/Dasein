@@ -139,8 +139,14 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
         }
 
-        algorithmService.createLatestProductionAlgorithm();
-        algorithm = algorithmEntityMgr.findByName("RF");
+        String algorithmStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
+                        .getFile()));
+        algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
+        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
+        if (algorithmAlreadyExists == null) {
+            algorithmEntityMgr.create(algorithm);
+        }
 
         String dataflowStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")

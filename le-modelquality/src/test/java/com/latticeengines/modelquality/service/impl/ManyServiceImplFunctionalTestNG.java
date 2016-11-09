@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
@@ -52,7 +53,14 @@ public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestN
         if (analyticPipelineAlreadyExists != null)
             analyticPipelineEntityMgr.delete(analyticPipelineAlreadyExists);
 
-        algorithmService.createLatestProductionAlgorithm();
+        String algorithmStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
+                        .getFile()));
+        Algorithm algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
+        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
+        if (algorithmAlreadyExists == null) {
+            algorithmEntityMgr.create(algorithm);
+        }
 
         String dataflowStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
