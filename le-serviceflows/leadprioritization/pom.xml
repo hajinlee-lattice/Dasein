@@ -14,6 +14,8 @@
         <le.workflow.version>3.0.0-SNAPSHOT</le.workflow.version>
         <le.proxy.version>3.0.0-SNAPSHOT</le.proxy.version>
         <le.camille.version>3.0.0-SNAPSHOT</le.camille.version>
+        <le.remote.version>3.0.0-SNAPSHOT</le.remote.version>
+        <le.testframework.version>3.0.0-SNAPSHOT</le.testframework.version>
         <component-name>leadprioritization</component-name>
     </properties>
 
@@ -73,6 +75,21 @@
             <version>${le.proxy.version}</version>
             <classifier>intf</classifier>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testframework.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
 
         <dependency>
