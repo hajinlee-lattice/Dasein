@@ -2,6 +2,7 @@ package com.latticeengines.metadata.hive.util;
 
 import java.io.IOException;
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -19,7 +20,8 @@ public class HiveUtils {
         }
         Schema schema = AvroUtils.extractTypeInformation(MetadataConverter.getAvroSchema(configuration, table));
         String avroHdfsPath = table.getExtracts().get(0).getPath();
-        String schemaHdfsPath = avroHdfsPath.replace(".avro", ".avsc");
+        String schemaHdfsPath = getParentPath(getParentPath(avroHdfsPath)) + "/schema/" + tableName + "_"
+                + StringUtils.substringAfterLast(avroHdfsPath, "/").replace(".avro", ".avsc");
         if (!HdfsUtils.fileExists(configuration, schemaHdfsPath)) {
             HdfsUtils.writeToFile(configuration, schemaHdfsPath, schema.toString());
         }
