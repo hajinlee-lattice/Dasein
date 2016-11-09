@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
@@ -16,15 +16,17 @@ import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
+import com.latticeengines.domain.exposed.modelquality.PipelineStep;
+import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.modelquality.service.AlgorithmService;
 
 public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
 
-    private InternalResourceRestApiProxy proxy = null;
-    private AnalyticPipeline ap;
+    @Autowired
+    private AlgorithmService algorithmService;
 
     @Test(groups = "functional")
     public void testServiceImpl() throws Exception {
@@ -50,14 +52,7 @@ public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestN
         if (analyticPipelineAlreadyExists != null)
             analyticPipelineEntityMgr.delete(analyticPipelineAlreadyExists);
 
-        String algorithmStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
-                        .getFile()));
-        Algorithm algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
-        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
-        if (algorithmAlreadyExists != null)
-            algorithmEntityMgr.delete(algorithmAlreadyExists);
-        algorithmEntityMgr.create(algorithm);
+        algorithmService.createLatestProductionAlgorithm();
 
         String dataflowStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
@@ -93,7 +88,16 @@ public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestN
         Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline.getName());
         if (pipelineAlreadyExists != null)
             pipelineEntityMgr.delete(pipelineAlreadyExists);
-        pipelineEntityMgr.create(pipeline);
+
+        List<PipelineStep> pipelineSteps = pipeline.getPipelineSteps();
+        List<PipelineStepOrFile> pipelineStepsOrFiles = new ArrayList<>();
+        for (PipelineStep p : pipelineSteps) {
+            PipelineStepOrFile psof = new PipelineStepOrFile();
+            psof.pipelineStepName = p.getName();
+            pipelineStepsOrFiles.add(psof);
+        }
+
+        pipeline = pipelineService.createPipeline(pipeline.getName(), pipeline.getDescription(), pipelineStepsOrFiles);
 
         String datasetStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
@@ -121,7 +125,6 @@ public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestN
         samplingEntityMgr.delete(sampling);
         propDataEntityMgr.delete(propData);
         dataFlowEntityMgr.delete(dataflow);
-        algorithmEntityMgr.delete(algorithm);
     }
 
 }

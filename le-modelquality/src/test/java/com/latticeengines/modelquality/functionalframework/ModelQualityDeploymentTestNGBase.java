@@ -90,17 +90,23 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
+
         String analyticTestStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
                         .getFile()));
         AnalyticTestEntityNames analyticTestEntityNames = JsonUtils.deserialize(analyticTestStr,
                 AnalyticTestEntityNames.class);
         AnalyticTest analyticTestPrevAlreadyExists = analyticTestEntityMgr.findByName("TestAnalyticTest");
-        if (analyticTestPrevAlreadyExists != null)
+        if (analyticTestPrevAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", "TestAnalyticTest"));
             analyticTestEntityMgr.delete(analyticTestPrevAlreadyExists);
+        }
         AnalyticTest analyticTestAlreadyExists = analyticTestEntityMgr.findByName(analyticTestEntityNames.getName());
-        if (analyticTestAlreadyExists != null)
+        if (analyticTestAlreadyExists != null) {
+            System.out.println(
+                    String.format("Attempting to delete AnalyticTest \"%s\"", analyticTestEntityNames.getName()));
             analyticTestEntityMgr.delete(analyticTestAlreadyExists);
+        }
 
         String analyticPipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader
@@ -108,13 +114,30 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
                 AnalyticPipelineEntityNames.class);
+
+        List<ModelRun> existingModelRuns = modelRunEntityMgr.findAll();
+        for (ModelRun aModelRun : existingModelRuns) {
+            AnalyticPipelineEntityNames anAnalyticPipelineEntityNames = modelQualityProxy
+                    .getAnalyticPipelineByName(aModelRun.getAnalyticPipeline().getName());
+            if (anAnalyticPipelineEntityNames.getName().equals(analyticPipelineEntityNames.getName()) //
+                    || anAnalyticPipelineEntityNames.getName().equals(analyticPipline2Name)) {
+                System.out.println(String.format("Attempting to delete ModelRun \"%s\"", aModelRun.getName()));
+                modelRunEntityMgr.delete(aModelRun);
+            }
+        }
+
         AnalyticPipeline analyticPipeline1AlreadyExists = analyticPipelineEntityMgr
                 .findByName(analyticPipelineEntityNames.getName());
-        if (analyticPipeline1AlreadyExists != null)
+        if (analyticPipeline1AlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"",
+                    analyticPipelineEntityNames.getName()));
             analyticPipelineEntityMgr.delete(analyticPipeline1AlreadyExists);
+        }
         AnalyticPipeline analyticPipeline2AlreadyExists = analyticPipelineEntityMgr.findByName(analyticPipline2Name);
-        if (analyticPipeline2AlreadyExists != null)
+        if (analyticPipeline2AlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"", analyticPipline2Name));
             analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
+        }
 
         algorithmService.createLatestProductionAlgorithm();
         algorithm = algorithmEntityMgr.findByName("RF");
@@ -124,8 +147,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         dataflow = JsonUtils.deserialize(dataflowStr, DataFlow.class);
         DataFlow dataFlowAlreadyExists = dataFlowEntityMgr.findByName(dataflow.getName());
-        if (dataFlowAlreadyExists != null)
+        if (dataFlowAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
             dataFlowEntityMgr.delete(dataFlowAlreadyExists);
+        }
         dataFlowEntityMgr.create(dataflow);
 
         String propDataStr = FileUtils.readFileToString(new File( //
@@ -133,8 +158,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         propData = JsonUtils.deserialize(propDataStr, PropData.class);
         PropData propDataAlreadyExists = propDataEntityMgr.findByName(propData.getName());
-        if (propDataAlreadyExists != null)
+        if (propDataAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
             propDataEntityMgr.delete(propDataAlreadyExists);
+        }
         propDataEntityMgr.create(propData);
 
         String samplingStr = FileUtils.readFileToString(new File( //
@@ -142,8 +169,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         sampling = JsonUtils.deserialize(samplingStr, Sampling.class);
         Sampling samplingAlreadyExists = samplingEntityMgr.findByName(sampling.getName());
-        if (samplingAlreadyExists != null)
+        if (samplingAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
             samplingEntityMgr.delete(samplingAlreadyExists);
+        }
         samplingEntityMgr.create(sampling);
 
         pipelineService.createLatestProductionPipeline();
@@ -152,8 +181,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         pipeline1 = JsonUtils.deserialize(pipelineStr, Pipeline.class);
         Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline1.getName());
-        if (pipelineAlreadyExists != null)
+        if (pipelineAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
             pipelineEntityMgr.delete(pipelineAlreadyExists);
+        }
 
         List<PipelineStep> pipeline1Steps = pipeline1.getPipelineSteps();
         List<PipelineStepOrFile> pipeline1StepsOrFiles = new ArrayList<>();
@@ -173,8 +204,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                         .getFile()));
         dataset = JsonUtils.deserialize(datasetStr, DataSet.class);
         DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(dataset.getName());
-        if (datasetAlreadyExists != null)
+        if (datasetAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
             dataSetEntityMgr.delete(datasetAlreadyExists);
+        }
         dataSetEntityMgr.create(dataset);
 
         AnalyticPipeline analyticPipeline1 = analyticPipelineService
@@ -215,15 +248,23 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
+        System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTest.getName()));
         analyticTestEntityMgr.delete(analyticTest);
         for (AnalyticPipeline ap : analyticPipelines) {
+            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"", ap.getName()));
             analyticPipelineEntityMgr.delete(ap);
         }
+        System.out.println(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
         dataSetEntityMgr.delete(dataset);
+        System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
         pipelineEntityMgr.delete(pipeline1);
+        System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline2.getName()));
         pipelineEntityMgr.delete(pipeline2);
+        System.out.println(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
         samplingEntityMgr.delete(sampling);
+        System.out.println(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
         propDataEntityMgr.delete(propData);
+        System.out.println(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
         dataFlowEntityMgr.delete(dataflow);
     }
 

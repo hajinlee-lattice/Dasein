@@ -17,13 +17,13 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 
-public class ModelRunEntityMgrImplTestNG extends ModelQualityDeploymentTestNGBase {
+public class ModelRunEntityMgrImplDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
     private ModelRun modelRun;
     private final String modelRunName = "ModelRunEntityMgrImplDeploymentTestNG";
 
     @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         ModelRun alreadyExists = modelRunEntityMgr.findByName(modelRunName);
         if (alreadyExists != null)
@@ -39,13 +39,13 @@ public class ModelRunEntityMgrImplTestNG extends ModelQualityDeploymentTestNGBas
     }
 
     @Override
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         modelRunEntityMgr.delete(modelRun);
         super.tearDown();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void create() throws Exception {
         modelRunEntityMgr.create(modelRun);
 
