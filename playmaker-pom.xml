@@ -17,6 +17,8 @@
         <functional.groups>functional</functional.groups>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize>
         <jetty.version>9.1.1.v20140108</jetty.version>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
+        <javax.jsp.version>2.2</javax.jsp.version>
     </properties>
 
     <parent>

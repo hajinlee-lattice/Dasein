@@ -27,8 +27,8 @@ TOMCAT_APP_HEALTH_MAP = {
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
-    "oauth2": "/health",
-    "playmaker": "/health",
+    "oauth2": "/oauth2/health",
+    "playmaker": "/playmaker/health",
     "pls": "/pls/health",
     "admin": "/admin/health"
 }
@@ -108,20 +108,6 @@ def create_load_balancers(tg_map):
     resources.append(public_lb)
     albs["public"] = public_lb
 
-    # oauth2
-    oauth_lb = ApplicationLoadBalancer("oauth2", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
-    oauth_lb.add_tag("prodcut", "lpi")
-    oauth_lb.depends_on(tg_map["oauth2"])
-    resources.append(oauth_lb)
-    albs["oauth2"] = oauth_lb
-
-    # playmaker
-    pm_lb = ApplicationLoadBalancer("playmaker", PARAM_TOMCAT_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
-    pm_lb.add_tag("product", "lpi")
-    pm_lb.depends_on(tg_map["playmaker"])
-    resources.append(pm_lb)
-    albs["playmaker"] = pm_lb
-
     # lpi
     lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
     lpi_lb.depends_on(tg_map["lpi"])
@@ -139,8 +125,6 @@ def create_load_balancers(tg_map):
     resources.append(private_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
-    resources.append(create_listener(oauth_lb, tg_map["oauth2"]))
-    resources.append(create_listener(pm_lb, tg_map["playmaker"]))
     resources.append(create_listener(lpi_lb, tg_map["lpi"]))
     resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
 
@@ -158,6 +142,8 @@ def create_load_balancers(tg_map):
     resources.append(create_listner_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scores/*"))
     resources.append(create_listner_rule(public_lsnr, tg_map["scoringapi"], "/scoreinternal/*"))
+    resources.append(create_listner_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
+    resources.append(create_listner_rule(public_lsnr, tg_map["playmaker"], "/playmaker/*"))
 
     return resources, albs
 

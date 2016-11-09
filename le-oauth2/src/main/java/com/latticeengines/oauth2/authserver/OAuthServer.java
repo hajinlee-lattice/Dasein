@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
@@ -20,6 +21,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.web.WebApplicationInitializer;
 
 import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
@@ -28,7 +30,7 @@ import com.latticeengines.oauth2.exception.ExceptionEncodingTranslator;
 @EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @ImportResource(value = { "classpath:oauth2-authserver-context.xml", "classpath:common-properties-context.xml" })
-public class OAuthServer extends SpringBootServletInitializer {
+public class OAuthServer extends SpringBootServletInitializer implements WebApplicationInitializer {
 
     @Autowired
     private StatsService statsService;
