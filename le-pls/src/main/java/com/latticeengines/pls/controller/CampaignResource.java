@@ -31,7 +31,7 @@ public class CampaignResource {
 
     @RequestMapping(value = "/{campaignName}/models/", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create a campaign")
+    @ApiOperation(value = "Create a campaign from a list of models")
     @PreAuthorize("hasRole('Edit_PLS_Campaigns')")
     public SimpleBooleanResponse createFromModel(@PathVariable String campaignName, //
             @RequestBody List<String> modelIds, //
@@ -42,7 +42,7 @@ public class CampaignResource {
 
     @RequestMapping(value = "/{campaignName}/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create a campaign")
+    @ApiOperation(value = "Create a campaign from a list")
     @PreAuthorize("hasRole('Edit_PLS_Campaigns')")
     public SimpleBooleanResponse createFromTable(@PathVariable String campaignName, //
             @PathVariable String tableName, //
