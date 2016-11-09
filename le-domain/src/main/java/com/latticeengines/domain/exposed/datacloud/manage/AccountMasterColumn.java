@@ -85,8 +85,11 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "Groups", nullable = false, length = 1000)
     private String groups;
 
+    @Column(name = "IsInternalEnrichment", nullable = false)
+    private boolean internalEnrichment;
+
     @Column(name = "IsPremium", nullable = false)
-    private boolean isPremium;
+    private boolean premium;
 
     @Column(name = "DisplayDiscretizationStrategy", length = 1000)
     private String discretizationStrategy;
@@ -225,12 +228,22 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
     @JsonIgnore
     public boolean isPremium() {
-        return isPremium;
+        return premium;
     }
 
     @JsonIgnore
     public void setPremium(boolean premium) {
-        isPremium = premium;
+        this.premium = premium;
+    }
+
+    @JsonIgnore
+    public boolean isInternalEnrichment() {
+        return internalEnrichment;
+    }
+
+    @JsonIgnore
+    public void setInternalEnrichment(boolean internalEnrichment) {
+        this.internalEnrichment = internalEnrichment;
     }
 
     @JsonIgnore
