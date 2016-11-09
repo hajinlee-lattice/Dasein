@@ -8,6 +8,8 @@ import javax.persistence.Table;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
@@ -64,7 +66,9 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
                 "FROM %s as gaAuth JOIN %s as gaUserRight " +
                 "ON gaAuth.User_Id = gaUserRight.User_Id " +
                 "WHERE gaUserRight.Tenant_Id = :tenantId", gaAuthTable, gaUserRightTable);
-        SQLQuery query = session.createSQLQuery(sqlStr);
+        SQLQuery query = session.createSQLQuery(sqlStr)
+                .addScalar("User_Id", new LongType())
+                .addScalar("Username", new StringType());
         query.setLong("tenantId", tenantId);
         List<Object[]> list = query.list();
         HashMap<Long, String> userInfos = new HashMap<>();
