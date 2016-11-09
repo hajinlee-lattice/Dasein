@@ -13,8 +13,6 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -34,7 +32,7 @@ public class TableResourceHelper {
     @Autowired
     private MetadataService mdService;
 
-    public List<String> getTables(@PathVariable String customerSpace, HttpServletRequest request) {
+    public List<String> getTables(String customerSpace, HttpServletRequest request) {
         log.info(String.format("getTables(%s)", customerSpace));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         List<Table> tables = mdService.getTables(space);
@@ -45,23 +43,22 @@ public class TableResourceHelper {
         return tableNames;
     }
 
-    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
+    public Table getTable(String customerSpace, String tableName, HttpServletRequest request) {
         log.info(String.format("getTable(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.getTable(space, tableName);
     }
 
-    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName,
-            HttpServletRequest request) {
+    public ModelingMetadata getTableMetadata(String customerSpace, String tableName, HttpServletRequest request) {
         log.info(String.format("getTableMetadata(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         Table table = mdService.getTable(space, tableName);
         return table.getModelingMetadata();
     }
 
-    public Boolean createTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            @RequestBody Table table, //
+    public Boolean createTable(String customerSpace, //
+            String tableName, //
+            Table table, //
             HttpServletRequest request) {
         log.info(String.format("createTable(%s)", table.getName()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
@@ -69,9 +66,9 @@ public class TableResourceHelper {
         return true;
     }
 
-    public Boolean updateTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            @RequestBody Table table, //
+    public Boolean updateTable(String customerSpace, //
+            String tableName, //
+            Table table, //
             HttpServletRequest request) {
         log.info(String.format("updateTable(%s)", table.getName()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
@@ -79,8 +76,8 @@ public class TableResourceHelper {
         return true;
     }
 
-    public Boolean deleteTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
+    public Boolean deleteTable(String customerSpace, //
+            String tableName, //
             HttpServletRequest request) {
         log.info(String.format("deleteTable(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
@@ -102,8 +99,7 @@ public class TableResourceHelper {
         return mdService.copyTable(space, CustomerSpace.parse(targetCustomerSpace), tableName);
     }
 
-    public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
-            @RequestBody ModelingMetadata metadata) {
+    public SimpleBooleanResponse validateMetadata(String customerSpace, ModelingMetadata metadata) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         Map<String, Set<AnnotationValidationError>> validationErrors = mdService.validateTableMetadata(space, metadata);
         SimpleBooleanResponse response = SimpleBooleanResponse.successResponse();

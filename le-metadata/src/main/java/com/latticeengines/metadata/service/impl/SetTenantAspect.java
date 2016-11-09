@@ -18,6 +18,12 @@ public class SetTenantAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    @Before("execution(* com.latticeengines.metadata.service.impl.SegmentServiceImpl.*(..))")
+    public void allMethodsSegmentService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setSecurityContext(customerSpace.toString());
+    }
+
     @Before("execution(* com.latticeengines.metadata.service.impl.MetadataServiceImpl.*(..))")
     public void allMethodsMetadataService(JoinPoint joinPoint) {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];

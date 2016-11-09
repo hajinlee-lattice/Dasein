@@ -28,12 +28,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
-import com.latticeengines.metadata.dao.ColumnRuleResultDao;
 import com.latticeengines.metadata.dao.DataRuleDao;
 import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
-import com.latticeengines.metadata.dao.RowRuleResultDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
@@ -51,12 +49,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private AttributeDao attributeDao;
-
-    @Autowired
-    private ColumnRuleResultDao columnRuleResultDao;
-
-    @Autowired
-    private RowRuleResultDao rowRuleResultDao;
 
     @Autowired
     private DataRuleDao dataRuleDao;

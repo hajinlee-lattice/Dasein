@@ -1,17 +1,18 @@
 package com.latticeengines.metadata.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -28,8 +29,9 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
     private static final String RESOURCE_BASE = "com/latticeengines/artifact/validation";
 
     @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(ArtifactResourceTestNG.class);
+    private static final Log log = LogFactory.getLog(ArtifactResourceTestNG.class);
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
