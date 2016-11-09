@@ -159,6 +159,7 @@ class ECSStack(Stack):
     def _create_ec2_instances(self, ecscluster, instances, efs, ips=()):
         ec2s = []
         seed = random.randint(0, 2)
+        outputs = {}
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
             subnet = SUBNETS[(seed + n) % 3]
@@ -172,6 +173,13 @@ class ECSStack(Stack):
                 ec2.set_private_ip(ip)
 
             ec2s.append(ec2)
+
+            outputs["%sPrivateIp" % name] = {
+                "Description" : "DNS name for load balancer " + name,
+                "Value" : { "Fn::GetAtt" : [ ec2.logical_id(), "PrivateIp" ]}
+            }
+
+        self.add_ouputs(outputs)
         self.add_resources(ec2s)
         return ec2s
 

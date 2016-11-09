@@ -85,7 +85,7 @@ def provision(environment, stackname, apps, tgrp, public=False):
             PARAM_SUBNET_2.config(subnet2),
             PARAM_SUBNET_3.config(subnet3),
             PARAM_KEY_NAME.config(config.ec2_key()),
-            PARAM_SECURITY_GROUP.config(config.zk_sg()),
+            PARAM_SECURITY_GROUP.config(config.tomcat_sg()),
             PARAM_INSTANCE_TYPE.config('t2.small'),
             PARAM_ENVIRONMENT.config(environment),
             PARAM_CAPACITY.config("1"),
