@@ -40,6 +40,8 @@ Icons
 		background-color: $pearl-white;
 		-webkit-mask: url("/assets/images/ico-fingerprint.svg");
 		mask: url("/assets/images/ico-fingerprint.svg");
+		height: 28px !important;
+    	width: 20px !important;
 	}
 	&.ico-bullseye {
 		background-color: $pearl-white;

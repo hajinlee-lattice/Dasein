@@ -17,13 +17,16 @@
         <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
     </head>
     <body data-ng-controller="MainController" class="open-nav">
+    
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
         
         <div id="outer-wrap">
             <div id="inner-wrap">
 
                 <nav id="nav" class="primary-nav" role="navigation">
-                    <div ui-view="navigation"><ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include></div>
+                    <div ui-view="navigation">
+                        <ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>
+                    </div>
                 </nav>
 
                 <section id="main" role="main" class="main-content">
@@ -37,6 +40,8 @@
 
             </div><!-- End #inner-wrap -->
         </div><!-- End #outer-wrap -->
+
+
         <!-- combined common and vendor js -->
         <script src="/assets/vendor.min.js"></script>
         <script src="/assets/lattice.min.js"></script>

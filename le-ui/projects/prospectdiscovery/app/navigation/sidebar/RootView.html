@@ -1,29 +1,33 @@
-<a href="#/" class="logo"><img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" /></a>
-<!-- 
-<a class="" href="#/" data-ng-hide="mandatePasswordChange"> <img src="/assets/images/LatticeColorLogo.png" alt=""> </a> 
-<span class="logo" data-ng-show="mandatePasswordChange"> <img src="assets/images/logo_lattice.png" alt=""> </span>  
--->
-
-<ul class="menu">
-    <li role="presentation" ui-sref-active="active">
-        <a ui-sref="fingerprints"><span class="ico ico-fingerprint"></span>Analyze Your Customer Fingerprints</a>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a ui-sref="markets.list"><span class="ico ico-bullseye"></span>Manage Target Markets</a>
-        <ul>
-            <li role="presentation" ui-sref-active="active"><a ui-sref="markets.create">Create a Target Market</a></li>
-            <li role="presentation" ui-sref-active="active"><a ui-sref="markets.dashboard">Performance Dashboard</a></li>
-            <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_schedule">Prospecting Schedule</a></li>
-            <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_list">Prospecting History</a></li>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a ui-sref="jobs.status"><span class="ico ico-cog"></span>Jobs <!--<span class="loading pull-right"></span>--></a>
-        <ul>
-            <li role="presentation" ui-sref-active="active"><a ui-sref="jobs.import.credentials">Import Data</a></li>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a ui-sref="users"><span class="ico ico-user"></span>Manage Users</a>
-    </li>
-</ul>
+<section ng-controller="SidebarCtrl" class="lp-sidebar-menu" ng-click="handleSidebarToggle($event)">
+    <div class="logo-container">
+        <a href="#/" class="logo" style="float: none;padding: 0;">
+            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+        </a>
+    </div>
+    <ul class="menu">
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="fingerprints"><span class="ico-container"><span class="ico ico-fingerprint"></span></span><span class="label">Analyze Your Customer Fingerprints</span></a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="markets.list"><span class="ico-container"><span class="ico ico-bullseye"></span></span><span class="label">Manage Target Markets</span></a>
+            <ul>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.create">Create a Target Market</a></li>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.dashboard">Performance Dashboard</a></li>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_schedule">Prospecting Schedule</a></li>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_list">Prospecting History</a></li>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="jobs.status"><span class="ico-container"><span class="ico ico-cog"></span></span><span class="label">Jobs</span></a>
+            <ul>
+                <li role="presentation" ui-sref-active="active"><a ui-sref="jobs.import.credentials">Import Data</a></li>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="users"><span class="ico-container"><span class="ico ico-user"></span></span><span class="label">Manage Users</span></a>
+        </li>
+    </ul>
+    <button class="open-button open">
+        <span class="ico ico-arrow-open"></span>
+    </button>
+</section>

@@ -3,14 +3,63 @@ angular
         'pd.builder.attributes'
     ])
     .controller('SidebarCtrl', function($scope, $rootScope) {
-        $scope.toggle = function() {
-            $("body").toggleClass("open-nav");
-        }
+        $scope.handleSidebarToggle = function ($event) {
+            var target = angular.element($event.target),
+                collapsable_click = !target.parents('.menu').length;
+            if(collapsable_click) {
+                $('body').toggleClass('open-nav');
+                $('body').addClass('controlled-nav');  // indicate the user toggled the nav
+
+                if (typeof(sessionStorage) !== 'undefined'){
+                    sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
+                }
+                $rootScope.$broadcast('sidebar:toggle');
+            }
+        };
+
+
+        angular.extend($scope, {
+            init: function(){
+                if (typeof(sessionStorage) !== 'undefined') {
+                    if(sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
+                        $("body").addClass('open-nav');
+                    } else {
+                        $("body").removeClass('open-nav');
+                    }
+                }
+            }
+        })
+
+        $scope.init();
+
+
     })
     .controller('BuilderSidebarCtrl', function($scope, AttributesModel) {
+            
+        $scope.handleSidebarToggle = function ($event) {
+            var target = angular.element($event.target),
+                collapsable_click = !target.parents('.menu').length;
+            if(collapsable_click) {
+                $('body').toggleClass('open-nav');
+                $('body').addClass('controlled-nav');  // indicate the user toggled the nav
+
+                if (typeof(sessionStorage) !== 'undefined'){
+                    sessionStorage.setItem('open-nav', $('body').hasClass('open-nav'));
+                }
+                $rootScope.$broadcast('sidebar:toggle');
+            }
+        };
+
+
         angular.extend($scope, AttributesModel, {
             init: function() {
-                
+                if (typeof(sessionStorage) !== 'undefined') {
+                    if(sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
+                        $("body").addClass('open-nav');
+                    } else {
+                        $("body").removeClass('open-nav');
+                    }
+                }
             },
             handleRootCategoryRemoval: function(item, children) {
                 (children || []).forEach(function(child) {

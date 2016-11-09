@@ -1,11 +1,10 @@
-<div ng-controller="BuilderSidebarCtrl">
-    <div class="menu-header">
-    	<a ui-sref="markets.list" class="button icon-button">
-    	    <span class="fa fa-angle-left"></span>
-    	</a>
-    	<h3 contenteditable="true">{{ TargetMarketName }}</h3>
-    </div>
+<section ng-controller="BuilderSidebarCtrl" class="pd-sidebar-menu" ng-click="handleSidebarToggle($event)">
     <ul class="menu progress-menu">
+        <li role="presentation" ui-sref-active-eq="active">
+            <a ui-sref="markets.list">
+                <span class="ico-container"><span class="ico ico-back no-svg"></span></span><span class="label">{{ TargetMarketName }}</span>
+            </a>
+        </li>
         <li role="presentation" ui-sref-active-eq="active">
             <a class="pd-sidebar-header" ui-sref="builder.category">
                 <span class="fa fa-circle-thin"></span>
@@ -100,4 +99,8 @@
             </ul>
         </li>
     </ul>
-</div>
+
+    <button class="open-button open">
+        <span class="ico ico-arrow-open"></span>
+    </button>
+</section>

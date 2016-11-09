@@ -12,12 +12,22 @@ angular.module('pd.header', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
-    var clientSession = BrowserStorageUtility.getClientSession();
+    var ClientSession = BrowserStorageUtility.getClientSession();
     
-    $scope.userDisplayName = clientSession.DisplayName;
+    if (ClientSession != null) {
+        var LoginDocument = BrowserStorageUtility.getLoginDocument();
+        var Tenants = LoginDocument ? LoginDocument.Tenants : {};
+        var Tenant = ClientSession ? ClientSession.Tenant : {};
+
+        $scope.userDisplayName = ClientSession.DisplayName;
+        $scope.tenantName = window.escape(Tenant.DisplayName);
+        $scope.tenants = Tenants;
+    }
+
+    $scope.showProfileNav = false;
 
     
-    if (clientSession != null) {
+    if (ClientSession != null) {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
             $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
@@ -28,18 +38,30 @@ angular.module('pd.header', [
         });
     }
     
-    $(".dropdown > a").click(function(e){
-        $(this).toggleClass("active");
-        $(".dropdown > ul").toggle();
-        e.stopPropagation();
-    });
+    // $(".dropdown > a").click(function(e){
+    //     $(this).toggleClass("active");
+    //     $(".dropdown > ul").toggle();
+    //     e.stopPropagation();
+    // });
 
-    $(document).click(function() {
-        if ($(".dropdown > ul").is(':visible')) {
-            $(".dropdown > ul", this).hide();
-            $(".dropdown > a").removeClass('active');
+    $(document.body).click(function() {
+        if ($scope.showProfileNav) {
+            $scope.showProfileNav = false;
+            $scope.$apply();
         }
     });
+
+    $scope.headerClicked = function($event) {
+        $scope.showProfileNav = !$scope.showProfileNav;
+        $event.stopPropagation();
+    };
+
+    // $(document).click(function() {
+    //     if ($(".dropdown > ul").is(':visible')) {
+    //         $(".dropdown > ul", this).hide();
+    //         $(".dropdown > a").removeClass('active');
+    //     }
+    // });
     // Toggle Collapsible Areas
     $(".toggle > a").click(function(e){
         $(this).parent().toggleClass("open");
