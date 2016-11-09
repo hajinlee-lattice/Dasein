@@ -48,9 +48,8 @@ public class AvroUtilsUnitTestNG {
         URL url = ClassLoader.getSystemResource(
                 String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
         File avscFile = new File(url.getFile());
-        Schema schema = Schema.parse(avscFile);
-        //String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", schema);
-        //System.out.println(hiveTableDDL);
+        String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", avscFile.getPath());
+        System.out.println(hiveTableDDL);
     }
 
     @Test(groups = "unit")
