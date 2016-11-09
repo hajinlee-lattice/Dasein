@@ -246,6 +246,43 @@ nav.primary-nav {
         .fa-circle-thin, .fa-check-circle-o {
             background-color: #222831; 
         }
+
+        &.progress-menu {
+            & > li > a {
+                position: relative;
+            }
+            ul {
+                margin-top: 0;
+                margin-left: 44px;
+            }
+            li:after {
+                display: table;
+                content: "";
+                clear: both;
+            }
+            .label {
+                width: calc(100% - 80px);
+                top: -10px;
+            }
+            li:hover .label {
+            }
+            span.badge {
+                margin-top: 13px;
+                margin-right: 10px;
+                position: absolute;
+                top: 0;
+            }
+            & > li.active>a span:first-of-type span, & > li.active:hover>a span:first-of-type {
+                background: none;
+            }
+            & > li>a span:first-of-type span {
+                background: none;
+                vertical-align: top;
+            }
+            & > li>a span:first-of-type .pd-sidebar-category-icon span {
+                background: inherit;
+            }
+        }
     }
     .menu-header {
         padding: 10px 0;

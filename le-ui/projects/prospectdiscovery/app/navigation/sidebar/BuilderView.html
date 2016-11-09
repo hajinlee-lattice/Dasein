@@ -7,9 +7,9 @@
         </li>
         <li role="presentation" ui-sref-active-eq="active">
             <a class="pd-sidebar-header" ui-sref="builder.category">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Select Attributes</span>
-                <span class="badge badge-blue pull-right" ng-init="attrCount = 0;">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Select Attributes</span>
+                <span class="badge blue-badge pull-right" ng-init="attrCount = 0;">
                     {{ (MasterList | filter: { selected: true, visible: true }).length || "0" }}
                 </span>
             </a>
@@ -58,45 +58,35 @@
             </ul>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="builder.intent({AttrKey: 'Industry'})">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Select Intent Topics</span>
-                <span class="badge badge-blue pull-right">0</span>
+            <a ui-sref="builder.intent({AttrKey: 'Industry'})">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Select Intent Topics</span>
+                <span class="badge blue-badge pull-right">0</span>
             </a>
-            <ul>
-            </ul>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="builder.filtercontacts">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Filter Contacts</span>
+            <a ui-sref="builder.filtercontacts">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Filter Contacts</span>
             </a>
-            <ul>
-            </ul>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="builder.fitmodel">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Set Fit Criteria</span>
+            <a ui-sref="builder.fitmodel">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Set Fit Criteria</span>
             </a>
-            <ul>
-            </ul>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="builder.intentmodel">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Set Intent Criteria</span>
+            <a ui-sref="builder.intentmodel">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Set Intent Criteria</span>
             </a>
-            <ul>
-            </ul>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="builder.setup">
-                <span class="fa fa-circle-thin"></span>
-                <span class="pd-sidebar-header-label">Setup Prospecting</span>
+            <a ui-sref="builder.setup">
+                <span class="ico-container"><span class="fa fa-circle-thin"></span></span>
+                <span class="label">Setup Prospecting</span>
             </a>
-            <ul>
-            </ul>
         </li>
     </ul>
 
