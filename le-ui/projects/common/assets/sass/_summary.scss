@@ -81,7 +81,12 @@ Page Summary / Sub-Nav Headers
     padding: 40px 0;
   }
 
-  
+  .black-summary-list.stats dt {
+    color: rgba(255, 255, 255, 0.8);  
+  }
+  .black-summary-list.stats dd {
+    font-size: 1em;
+  }
   .black-summary-list.stats h3.summary-title {
     color: #fff;
     text-align: left;

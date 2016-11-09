@@ -1,22 +1,6 @@
-<div class="summary blue-fire tmb-summary">
+<div class="summary blue-steel tmb-summary">
 
-    <div class="data">
-
-
-        <div>
-            <div class="stats black-summary-list stats-group">
-                <h3 class="summary-title">{{vm.schemaInterpretation == 'SalesforceLead' ? 'Leads' : 'Accounts'}}</h3>
-                <dl>
-                    <dt>Before</dt>
-                    <dd id="detail-status">{{vm.totalRecords}}</dd>
-                </dl>
-                <dl>
-                    <dt>After</dt>
-                    <dd id="detail-created">{{vm.totalRecordsAfterDisplay}}</dd>
-                </dl>
-            </div>
-        </div>
-
+    <div class="data" ng-controller="SummaryCtrl as summary">
         <div>
             <div class="stats black-summary-list">
                 <dl>
@@ -31,7 +15,6 @@
                 </dl>
             </div>
         </div>
-
         <div>
             <div class="stats black-summary-list">
                 <dl>
@@ -40,13 +23,42 @@
                 </dl>
             </div>
         </div>
+        <div>
+            <div class="stats black-summary-list">
+                <dl>
+                    <dt>Matching Companies</dt>
+                    <dd>
+                        {{ summary.MatchedTotal | number: 0 }}
+                        <span 
+                            ng-show="summary.refreshing" 
+                            class="pd-spinner fa fa-spinner fa-pulse">
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        <div>
+            <div class="stats black-summary-list">
+                <dl>
+                    <dt>Matching Contacts</dt>
+                    <dd>{{ summary.ContactsTotal | number: 0 }}</dd>
+                </dl>
+                <a href="#" class="view-samples pull-right">Samples</a>
+            </div>
+        </div>
+        <div>
+            <div class="stats black-summary-list">
+                <dl>
+                    <dt>Expected Revenue</dt>
+                    <dd>{{ summary.RevenueTotal | currency }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div><!-- End .data -->
 
-
-
-    </div>
 
     <div class="row" ng-controller="CarouselCtrl as carousel">
-        <div class="twelve columns">
+        <div class="ten columns offset-one">
 
             <div class="carousel">
                 <div class="nav-prev" ng-if="carousel.pagesize < carousel.links.length">
@@ -84,47 +96,6 @@
             </div>
 
         </div>
-    </div>
-
-    <div class="container">
-        <div class="row" ng-controller="SummaryCtrl as summary">
-            <div class="three columns">
-                
-            </div><!-- End .three.columns -->
-            <div class="three columns">
-                <div class="stats black-summary-list">
-                    <dl>
-                        <dt>Matching Companies</dt>
-                        <dd>
-                            {{ summary.MatchedTotal | number: 0 }}
-                            <span 
-                                ng-show="summary.refreshing" 
-                                class="pd-spinner fa fa-spinner fa-pulse">
-                            </span>
-                        </dd>
-                    </dl>
-                </div>
-            </div><!-- End .three.columns -->
-            <div class="three columns">
-                <div class="stats black-summary-list">
-                    <dl>
-                        <dt>Matching Contacts</dt>
-                        <dd>{{ summary.ContactsTotal | number: 0 }}</dd>
-                    </dl>
-                    <a href="#" class="view-samples pull-right">Samples</a>
-                </div>
-            </div><!-- End .three.columns -->
-            <div class="three columns">
-                <div class="stats black-summary-list">
-                    <dl>
-                        <dt>Expected Revenue</dt>
-                        <dd>{{ summary.RevenueTotal | currency }}</dd>
-                    </dl>
-                </div>
-            </div><!-- End .three.columns -->          
-        </div><!-- End .row -->
-
-        
     </div>
 
 </div>
