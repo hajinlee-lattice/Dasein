@@ -393,9 +393,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             scope.mouseX = mouseX;
             scope.mouseY = mouseY;
             scope.selectedPath = path; // for anchoring tail and hoverElem position
-            scope.data = !FeatureFlagService.FlagIsEnabled(flags.ENABLE_DATA_PROFILING_V2) ?
-                TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data) :
-                TopPredictorService.FormatSimpleBuckets(attributeName, attributeColor, data);
+            var displaySimpleBuckets = false;
+            for (var i = 0; i < data.ModelDetails.ModelSummaryProvenanceProperties.length; i++) {
+                if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == "IsV2ProfilingEnabled") {
+                    displaySimpleBuckets = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value == "true";
+                }
+            }
+            scope.data = displaySimpleBuckets ?
+                TopPredictorService.FormatSimpleBuckets(attributeName, attributeColor, data) :
+                TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
         }, 500);
     }
