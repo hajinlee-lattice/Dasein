@@ -1,0 +1,19 @@
+{
+    "name": "ModelQualityDeploymentTest", 
+    "sampling_property_defs": [
+        {
+            "name": "model.sampling.test.percentage", 
+            "sampling_property_values": [
+                {
+                    "value": "100"
+                }, 
+                {
+                    "value": "80"
+                }, 
+                {
+                    "value": "20"
+                }
+            ]
+        }
+    ]
+}

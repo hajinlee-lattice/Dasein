@@ -5,7 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -13,26 +13,29 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyDef;
 import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
-import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
 
     private Pipeline pipeline;
+    private final String pipelineName = "PipelineEntityMgrImplTestNG";
+    private PipelineStep step;
+    private final String pipelineStepName = "PipelineEntityMgrImplTestNG-Step";
 
-    @Autowired
-    private PipelineEntityMgr pipelineEntityMgr;
-
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        super.cleanupDb();
-        
+        super.setup();
+        Pipeline alreadyExists = pipelineEntityMgr.findByName(pipelineName);
+        if (alreadyExists != null)
+            pipelineEntityMgr.delete(alreadyExists);
+
         pipeline = new Pipeline();
-        pipeline.setName("Pipeline1");
+        pipeline.setName(pipelineName);
         pipeline.setDescription("Test Pipeline");
 
-        PipelineStep step = new PipelineStep();
-        step.setName("StepName1");
+        step = new PipelineStep();
+        step.setName(pipelineStepName);
         step.setScript("StepScript1");
         step.setMainClassName("StepName1");
         List<PipelinePropertyDef> pipelinePropertyDefs = new ArrayList<>();
@@ -50,13 +53,20 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         pipeline.addPipelineStep(step);
     }
 
+    @Override
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        pipelineEntityMgr.delete(pipeline);
+        pipelineStepEntityMgr.delete(step);
+        super.tearDown();
+    }
+
     @Test(groups = "functional")
     public void create() {
         pipelineEntityMgr.create(pipeline);
 
         List<Pipeline> pipelines = pipelineEntityMgr.findAll();
-        assertEquals(pipelines.size(), 1);
-        Pipeline retrievedPineline = pipelines.get(0);
+        Pipeline retrievedPineline = pipelineEntityMgr.findByName(pipelineName);
 
         assertEquals(retrievedPineline.getName(), pipeline.getName());
         assertEquals(retrievedPineline.getPipelineSteps().size(), pipeline.getPipelineSteps().size());
@@ -76,6 +86,5 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
                 pipelinePropertyDef.getPipelinePropertyValues().size());
         assertEquals(retrievedPipelinePropertyDef.getPipelinePropertyValues().get(0).getValue(), //
                 pipelinePropertyDef.getPipelinePropertyValues().get(0).getValue());
-
     }
 }

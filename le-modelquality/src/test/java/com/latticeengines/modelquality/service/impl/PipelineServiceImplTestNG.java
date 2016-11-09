@@ -6,19 +6,23 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
@@ -38,24 +42,34 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
 
     private InternalResourceRestApiProxy proxy = null;
 
+    protected Pipeline pipeline;
+    protected Pipeline newPipeline;
+
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        super.cleanupDb();
-        super.cleanupHdfs();
-
         proxy = mock(InternalResourceRestApiProxy.class);
         Map<String, String> activeStack = new HashMap<>();
         activeStack.put("CurrentStack", "");
         when(proxy.getActiveStack()).thenReturn(activeStack);
         ReflectionTestUtils.setField(pipelineService, "internalResourceRestApiProxy", proxy);
+
+        String pipelineStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
+                        .getFile()));
+        pipeline = JsonUtils.deserialize(pipelineStr, Pipeline.class);
+        pipelineEntityMgr.create(pipeline);
     }
 
-    @Test(groups = "functional")
-    public void createLatestProductionPipeline() {
-        pipelineService.createLatestProductionPipeline();
+    @Override
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        pipelineEntityMgr.delete(pipeline);
+        pipelineEntityMgr.delete(newPipeline);
+        cleanupHdfs();
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "createLatestProductionPipeline" })
+    @Test(groups = "functional", enabled = false)
     public void uploadPipelineStepFileForMetadata() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream(
                 "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues.json");
@@ -65,7 +79,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, step));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "uploadPipelineStepFileForMetadata" })
+    @Test(groups = "functional", dependsOnMethods = { "uploadPipelineStepFileForMetadata" }, enabled = false)
     public void uploadPipelineStepFileForPython() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream(
                 "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues.py");
@@ -76,10 +90,8 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
 
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "uploadPipelineStepFileForPython" })
+    @Test(groups = "functional", dependsOnMethods = { "uploadPipelineStepFileForPython" }, enabled = false)
     public void createPipeline() {
-        Pipeline pipeline = pipelineEntityMgr.findAll().get(0);
-
         List<PipelineStepOrFile> pipelineSteps = new ArrayList<>();
 
         for (PipelineStep step : pipeline.getPipelineSteps()) {
@@ -95,12 +107,13 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
             pipelineSteps.add(p);
         }
 
-        Pipeline newPipeline = pipelineService.createPipeline("P1", "P1 Description", pipelineSteps);
-        assertTrue(newPipeline.getPipelineDriver().contains("pipelines/P1/pipeline-"));
+        newPipeline = pipelineService.createPipeline("ModelQualityFunctionalTest", "ModelQualityFunctionalTest",
+                pipelineSteps);
+        assertTrue(newPipeline.getPipelineDriver().contains("pipelines/ModelQualityFunctionalTest/pipeline-"));
         assertEquals(newPipeline.getPipelineSteps().size(), 7);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void createPipelineFailure() {
         List<PipelineStepOrFile> pipelineSteps = new ArrayList<>();
         PipelineStepOrFile p = new PipelineStepOrFile();
@@ -110,7 +123,7 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         try {
             pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps);
         } catch (LedpException e) {
-            // expected, do nothing
+            // expected, so do nothing
         }
         Pipeline result = pipelineEntityMgr.findByName("P1-Fail");
         assertNull(result);

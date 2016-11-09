@@ -1,0 +1,6 @@
+{
+    "predefined_selection_name": null, 
+    "name": "ModelQualityDeploymentTest", 
+    "exclude_propdata_columns": false, 
+    "data_cloud_version": "1.0.0"
+}

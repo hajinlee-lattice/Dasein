@@ -1,0 +1,10 @@
+{
+    "training_hdfs_path": "/Pods/Default/Services/ModelQuality/datasets/HostingCom_RowsRemoved/hostingcom_rowsremoved.csv", 
+    "schemaInterpretation": "SalesforceAccount", 
+    "name": "ModelQualityDeploymentTest-Account", 
+    "customer_space": "Unknown", 
+    "industry": "SaSS", 
+    "scoring_data_sets": [], 
+    "dataSetType": "FILE", 
+    "test_hdfs_path": null
+}

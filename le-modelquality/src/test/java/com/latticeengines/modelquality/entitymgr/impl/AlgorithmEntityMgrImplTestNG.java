@@ -4,29 +4,30 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
-import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
 
     private Algorithm algorithm;
+    private final String algorithmName = "AlgorithmEntityMgrImplTestNG";
 
-    @Autowired
-    private AlgorithmEntityMgr algorithmEntityMgr;
-
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        cleanupDb();
+        super.setup();
+        Algorithm alreadyExists = algorithmEntityMgr.findByName(algorithmName);
+        if (alreadyExists != null)
+            algorithmEntityMgr.delete(alreadyExists);
 
         algorithm = new Algorithm();
-        algorithm.setName("Random Forest");
+        algorithm.setName(algorithmName);
         algorithm.setScript("/app/dataplatform/scripts/random_forest.py");
         AlgorithmPropertyDef numTrees = new AlgorithmPropertyDef("n_estimators");
         AlgorithmPropertyValue numTrees100 = new AlgorithmPropertyValue("100");
@@ -38,13 +39,19 @@ public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBa
         numTrees.addAlgorithmPropertyValue(numTrees300);
     }
 
+    @Override
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        algorithmEntityMgr.delete(algorithm);
+        super.tearDown();
+    }
+
     @Test(groups = "functional")
     public void create() {
         algorithmEntityMgr.create(algorithm);
 
         List<Algorithm> retrievedAlgorithms = algorithmEntityMgr.findAll();
-        assertEquals(retrievedAlgorithms.size(), 1);
-        Algorithm retrievedAlgorithm = retrievedAlgorithms.get(0);
+        Algorithm retrievedAlgorithm = algorithmEntityMgr.findByName(algorithmName);
 
         assertEquals(retrievedAlgorithm.getName(), algorithm.getName());
         assertEquals(retrievedAlgorithm.getScript(), algorithm.getScript());

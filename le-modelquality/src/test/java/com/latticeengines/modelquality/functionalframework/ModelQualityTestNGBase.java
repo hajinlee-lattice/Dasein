@@ -21,6 +21,9 @@ import com.latticeengines.modelquality.entitymgr.PipelineStepEntityMgr;
 import com.latticeengines.modelquality.entitymgr.PipelineToPipelineStepsEntityMgr;
 import com.latticeengines.modelquality.entitymgr.PropDataEntityMgr;
 import com.latticeengines.modelquality.entitymgr.SamplingEntityMgr;
+import com.latticeengines.modelquality.service.AnalyticPipelineService;
+import com.latticeengines.modelquality.service.AnalyticTestService;
+import com.latticeengines.modelquality.service.PipelineService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-modelquality-context.xml" })
@@ -56,25 +59,24 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
     protected AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
     @Autowired
     protected AnalyticTestEntityMgr analyticTestEntityMgr;
+    @Autowired
+    protected PipelineService pipelineService;
+    @Autowired
+    protected AnalyticPipelineService analyticPipelineService;
+    @Autowired
+    protected AnalyticTestService analyticTestService;
 
     protected void cleanupHdfs() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/steps");
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/pipelines");
     }
-
-    protected void cleanupDb() {
-        modelRunEntityMgr.deleteAll();
-        modelConfigEntityMgr.deleteAll();
-        analyticTestEntityMgr.deleteAll();
-        analyticPipelineEntityMgr.deleteAll();
-        algorithmEntityMgr.deleteAll();
-        dataFlowEntityMgr.deleteAll();
-        dataSetEntityMgr.deleteAll();
-        pipelineToPipelineStepsEntityMgr.deleteAll();
-        pipelineStepEntityMgr.deleteAll();
-        pipelineEntityMgr.deleteAll();
-        propDataEntityMgr.deleteAll();
-        samplingEntityMgr.deleteAll();
-    }
-
+    /*
+     * protected void cleanupDb() { modelRunEntityMgr.deleteAll();
+     * modelConfigEntityMgr.deleteAll(); analyticTestEntityMgr.deleteAll();
+     * analyticPipelineEntityMgr.deleteAll(); algorithmEntityMgr.deleteAll();
+     * dataFlowEntityMgr.deleteAll(); dataSetEntityMgr.deleteAll();
+     * pipelineToPipelineStepsEntityMgr.deleteAll();
+     * pipelineStepEntityMgr.deleteAll(); pipelineEntityMgr.deleteAll();
+     * propDataEntityMgr.deleteAll(); samplingEntityMgr.deleteAll(); }
+     */
 }

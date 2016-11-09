@@ -1,0 +1,78 @@
+{
+    "algorithm_property_defs": [
+        {
+            "name": "n_estimators", 
+            "algorithm_property_values": [
+                {
+                    "value": "100"
+                }
+            ]
+        }, 
+        {
+            "name": "criterion", 
+            "algorithm_property_values": [
+                {
+                    "value": "gini"
+                }
+            ]
+        }, 
+        {
+            "name": "n_jobs", 
+            "algorithm_property_values": [
+                {
+                    "value": "5"
+                }
+            ]
+        }, 
+        {
+            "name": "min_samples_split", 
+            "algorithm_property_values": [
+                {
+                    "value": "25"
+                }
+            ]
+        }, 
+        {
+            "name": "min_samples_leaf", 
+            "algorithm_property_values": [
+                {
+                    "value": "10"
+                }
+            ]
+        }, 
+        {
+            "name": "max_depth", 
+            "algorithm_property_values": [
+                {
+                    "value": "8"
+                }
+            ]
+        }, 
+        {
+            "name": "bootstrap", 
+            "algorithm_property_values": [
+                {
+                    "value": "True"
+                }
+            ]
+        }, 
+        {
+            "name": "calibration_width", 
+            "algorithm_property_values": [
+                {
+                    "value": "4"
+                }
+            ]
+        }, 
+        {
+            "name": "cross_validation", 
+            "algorithm_property_values": [
+                {
+                    "value": "5"
+                }
+            ]
+        }
+    ], 
+    "name": "RF", 
+    "script": "/app//dataplatform/scripts/algorithm/rf_train.py"
+}

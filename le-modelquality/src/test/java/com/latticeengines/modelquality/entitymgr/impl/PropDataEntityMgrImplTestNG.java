@@ -4,31 +4,35 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.PropData;
-import com.latticeengines.modelquality.entitymgr.PropDataEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
 
     private PropData propData;
+    private final String propDataName = "PropDataEntityMgrImplTestNG";
 
-    @Autowired
-    private PropDataEntityMgr propDataEntityMgr;
-
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        propData = propDataEntityMgr.findByName("PropData1");
-        if (propData != null) {
-            propDataEntityMgr.delete(propData);
-        }
-
+        super.setup();
+        PropData alreadyExists = propDataEntityMgr.findByName(propDataName);
+        if (alreadyExists != null)
+            propDataEntityMgr.delete(alreadyExists);
         propData = new PropData();
-        propData.setName("PropData1");
+        propData.setName(propDataName);
         propData.setDataCloudVersion("2.0.1470268608");
+    }
+
+    @Override
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        propDataEntityMgr.delete(propData);
+        super.tearDown();
     }
 
     @Test(groups = "functional")
@@ -36,8 +40,7 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         propDataEntityMgr.create(propData);
 
         List<PropData> propDatas = propDataEntityMgr.findAll();
-        assertEquals(propDatas.size(), 1);
-        PropData retrievedPropData = propDatas.get(0);
+        PropData retrievedPropData = propDataEntityMgr.findByName("PropDataEntityMgrImplTestNG");
 
         assertEquals(retrievedPropData.getName(), propData.getName());
         assertEquals(retrievedPropData.getDataCloudVersion(), propData.getDataCloudVersion());

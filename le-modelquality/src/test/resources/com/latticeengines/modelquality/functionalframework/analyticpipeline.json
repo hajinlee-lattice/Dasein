@@ -1,0 +1,8 @@
+{
+    "name": "ModelQualityDeploymentTest", 
+    "dataflow_name": "ModelQualityDeploymentTest", 
+    "algorithm_name": "RF", 
+    "sampling_name": "ModelQualityDeploymentTest", 
+    "pipeline_name": "ModelQualityDeploymentTest", 
+    "prop_data_name": "ModelQualityDeploymentTest"
+}

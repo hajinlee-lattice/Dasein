@@ -1,5 +1,6 @@
 package com.latticeengines.modelquality.functionalframework;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,27 +19,27 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
-import com.latticeengines.domain.exposed.modelquality.DataSetType;
-import com.latticeengines.domain.exposed.modelquality.ModelConfig;
 import com.latticeengines.domain.exposed.modelquality.ModelRun;
-import com.latticeengines.domain.exposed.modelquality.ModelRunStatus;
+import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
-import com.latticeengines.domain.exposed.modelquality.ScoringDataSet;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.modelquality.entitymgr.ModelRunEntityMgr;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.modelquality.service.impl.PipelineStepType;
@@ -68,8 +70,165 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     @Resource(name = "modelRunService")
     protected ModelRunService modelRunService;
 
-    @Autowired
-    private ModelRunEntityMgr modelRunEntityMgr;
+    protected Algorithm algorithm;
+    protected DataFlow dataflow;
+    protected PropData propData;
+    protected Sampling sampling;
+    protected Pipeline pipeline1;
+    protected Pipeline pipeline2;
+    protected DataSet dataset;
+
+    protected final String analyticPipline2Name = "ModelQualityDeploymentTest-2";
+
+    protected List<AnalyticPipeline> analyticPipelines = new ArrayList<>();
+    protected AnalyticTest analyticTest;
+    protected List<ModelRunEntityNames> modelRunEntityNames = new ArrayList<>();
+
+    @BeforeClass(groups = "deployment")
+    public void setup() throws Exception {
+        String analyticTestStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
+                        .getFile()));
+        AnalyticTestEntityNames analyticTestEntityNames = JsonUtils.deserialize(analyticTestStr,
+                AnalyticTestEntityNames.class);
+        AnalyticTest analyticTestPrevAlreadyExists = analyticTestEntityMgr.findByName("TestAnalyticTest");
+        if (analyticTestPrevAlreadyExists != null)
+            analyticTestEntityMgr.delete(analyticTestPrevAlreadyExists);
+        AnalyticTest analyticTestAlreadyExists = analyticTestEntityMgr.findByName(analyticTestEntityNames.getName());
+        if (analyticTestAlreadyExists != null)
+            analyticTestEntityMgr.delete(analyticTestAlreadyExists);
+
+        String analyticPipelineStr = FileUtils.readFileToString(new File( //
+                ClassLoader
+                        .getSystemResource("com/latticeengines/modelquality/functionalframework/analyticpipeline.json")
+                        .getFile()));
+        AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
+                AnalyticPipelineEntityNames.class);
+        AnalyticPipeline analyticPipeline1AlreadyExists = analyticPipelineEntityMgr
+                .findByName(analyticPipelineEntityNames.getName());
+        if (analyticPipeline1AlreadyExists != null)
+            analyticPipelineEntityMgr.delete(analyticPipeline1AlreadyExists);
+        AnalyticPipeline analyticPipeline2AlreadyExists = analyticPipelineEntityMgr.findByName(analyticPipline2Name);
+        if (analyticPipeline2AlreadyExists != null)
+            analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
+
+        String algorithmStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
+                        .getFile()));
+        algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
+        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
+        if (algorithmAlreadyExists != null)
+            algorithmEntityMgr.delete(algorithmAlreadyExists);
+        algorithmEntityMgr.create(algorithm);
+
+        String dataflowStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
+                        .getFile()));
+        dataflow = JsonUtils.deserialize(dataflowStr, DataFlow.class);
+        DataFlow dataFlowAlreadyExists = dataFlowEntityMgr.findByName(dataflow.getName());
+        if (dataFlowAlreadyExists != null)
+            dataFlowEntityMgr.delete(dataFlowAlreadyExists);
+        dataFlowEntityMgr.create(dataflow);
+
+        String propDataStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/propdata.json")
+                        .getFile()));
+        propData = JsonUtils.deserialize(propDataStr, PropData.class);
+        PropData propDataAlreadyExists = propDataEntityMgr.findByName(propData.getName());
+        if (propDataAlreadyExists != null)
+            propDataEntityMgr.delete(propDataAlreadyExists);
+        propDataEntityMgr.create(propData);
+
+        String samplingStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/sampling.json")
+                        .getFile()));
+        sampling = JsonUtils.deserialize(samplingStr, Sampling.class);
+        Sampling samplingAlreadyExists = samplingEntityMgr.findByName(sampling.getName());
+        if (samplingAlreadyExists != null)
+            samplingEntityMgr.delete(samplingAlreadyExists);
+        samplingEntityMgr.create(sampling);
+
+        pipelineService.createLatestProductionPipeline();
+        String pipelineStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
+                        .getFile()));
+        pipeline1 = JsonUtils.deserialize(pipelineStr, Pipeline.class);
+        Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline1.getName());
+        if (pipelineAlreadyExists != null)
+            pipelineEntityMgr.delete(pipelineAlreadyExists);
+
+        List<PipelineStep> pipeline1Steps = pipeline1.getPipelineSteps();
+        List<PipelineStepOrFile> pipeline1StepsOrFiles = new ArrayList<>();
+        for (PipelineStep p : pipeline1Steps) {
+            PipelineStepOrFile psof = new PipelineStepOrFile();
+            psof.pipelineStepName = p.getName();
+            pipeline1StepsOrFiles.add(psof);
+        }
+
+        pipeline1 = pipelineService.createPipeline(pipeline1.getName(), pipeline1.getDescription(),
+                pipeline1StepsOrFiles);
+
+        pipeline2 = createNewDataPipeline(pipeline1);
+
+        String datasetStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
+                        .getFile()));
+        dataset = JsonUtils.deserialize(datasetStr, DataSet.class);
+        DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(dataset.getName());
+        if (datasetAlreadyExists != null)
+            dataSetEntityMgr.delete(datasetAlreadyExists);
+        dataSetEntityMgr.create(dataset);
+
+        AnalyticPipeline analyticPipeline1 = analyticPipelineService
+                .createAnalyticPipeline(analyticPipelineEntityNames);
+
+        analyticPipelineEntityNames.setName(analyticPipline2Name);
+        analyticPipelineEntityNames.setPipeline(pipeline2.getName());
+        AnalyticPipeline analyticPipeline2 = analyticPipelineService
+                .createAnalyticPipeline(analyticPipelineEntityNames);
+
+        analyticPipelines.add(analyticPipeline1);
+        analyticPipelines.add(analyticPipeline2);
+
+        List<String> analyticPipelineNames = new ArrayList<>();
+        analyticPipelineNames.add(analyticPipeline1.getName());
+        analyticPipelineNames.add(analyticPipeline2.getName());
+        List<String> datasetNames = new ArrayList<>();
+        datasetNames.add(dataset.getName());
+        analyticTestEntityNames.setAnalyticPipelineNames(analyticPipelineNames);
+        analyticTestEntityNames.setDataSetNames(datasetNames);
+        analyticTest = analyticTestService.createAnalyticTest(analyticTestEntityNames);
+
+        String modelRunStr = FileUtils.readFileToString(new File( //
+                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/modelrun.json")
+                        .getFile()));
+        ModelRunEntityNames modelRunEntityNames1 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
+        modelRunEntityNames1.setAnalyticPipelineName(analyticPipeline1.getName());
+        modelRunEntityNames1.setDataSetName(dataset.getName());
+        modelRunEntityNames1.setName("ModelQualityDeploymentTest-1");
+        ModelRunEntityNames modelRunEntityNames2 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
+        modelRunEntityNames2.setAnalyticPipelineName(analyticPipeline2.getName());
+        modelRunEntityNames2.setDataSetName(dataset.getName());
+        modelRunEntityNames2.setName("ModelQualityDeploymentTest-2");
+
+        modelRunEntityNames.add(modelRunEntityNames1);
+        modelRunEntityNames.add(modelRunEntityNames2);
+    }
+
+    @AfterClass(groups = "deployment")
+    public void tearDown() throws Exception {
+        analyticTestEntityMgr.delete(analyticTest);
+        for (AnalyticPipeline ap : analyticPipelines) {
+            analyticPipelineEntityMgr.delete(ap);
+        }
+        dataSetEntityMgr.delete(dataset);
+        pipelineEntityMgr.delete(pipeline1);
+        pipelineEntityMgr.delete(pipeline2);
+        samplingEntityMgr.delete(sampling);
+        propDataEntityMgr.delete(propData);
+        dataFlowEntityMgr.delete(dataflow);
+        algorithmEntityMgr.delete(algorithm);
+    }
 
     protected void setTestBed(GlobalAuthDeploymentTestBed testBed) {
         this.deploymentTestBed = testBed;
@@ -90,85 +249,21 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         deploymentTestBed.switchToSuperAdmin(mainTestTenant);
     }
 
-    protected List<ModelRun> createModelRuns() {
-
-        Algorithm algo = createAlgorithm();
-        DataSet dataSet = createDataSet();
-        DataFlow dataFlow = createDataFlow();
-        PropData propData = createPropData();
-        Pipeline pipeline = createPipeline();
-        Pipeline pipeline2 = createNewDataPipeline(pipeline);
-        Sampling sampling = createSampling();
-
-        AnalyticPipelineEntityNames analyticPipelineEntityNames1 = new AnalyticPipelineEntityNames();
-        analyticPipelineEntityNames1.setName("analyticPipeline1");
-        analyticPipelineEntityNames1.setPipeline(pipeline.getName());
-        analyticPipelineEntityNames1.setAlgorithm(algo.getName());
-        analyticPipelineEntityNames1.setPropData(propData.getName());
-        analyticPipelineEntityNames1.setDataFlow(dataFlow.getName());
-        analyticPipelineEntityNames1.setSampling(sampling.getName());
-
-        AnalyticPipelineEntityNames analyticPipelineEntityNames2 = new AnalyticPipelineEntityNames();
-        analyticPipelineEntityNames2.setName("analyticPipeline2");
-        analyticPipelineEntityNames2.setPipeline(pipeline2.getName());
-        analyticPipelineEntityNames2.setAlgorithm(algo.getName());
-        analyticPipelineEntityNames2.setPropData(propData.getName());
-        analyticPipelineEntityNames2.setDataFlow(dataFlow.getName());
-        analyticPipelineEntityNames2.setSampling(sampling.getName());
-
-        AnalyticPipeline analyticPipeline1 = analyticPipelineService
-                .createAnalyticPipeline(analyticPipelineEntityNames1);
-        AnalyticPipeline analyticPipeline2 = analyticPipelineService
-                .createAnalyticPipeline(analyticPipelineEntityNames2);
-
-        ModelRun modelRun1 = new ModelRun();
-        modelRun1.setName("modelRun1");
-        modelRun1.setAnalyticPipeline(analyticPipeline1);
-        modelRun1.setDataSet(dataSet);
-        modelRun1.setStatus(ModelRunStatus.NEW);
-
-        ModelRun modelRun2 = new ModelRun();
-        modelRun2.setName("modelRun2");
-        modelRun2.setAnalyticPipeline(analyticPipeline2);
-        modelRun2.setDataSet(dataSet);
-        modelRun2.setStatus(ModelRunStatus.NEW);
-
-        List<ModelRun> modelRuns = new ArrayList<>();
-        modelRuns.add(modelRun1);
-        modelRuns.add(modelRun2);
-        return modelRuns;
-    }
-
-    protected ModelConfig createModelConfig(String algoName) {
-        SelectedConfig selectedConfig = getSelectedConfigs().get(0);
-        ModelConfig modelConfig = new ModelConfig();
-        modelConfig.setName("modelConfig1");
-        modelConfig.setSelectedConfig(selectedConfig);
-        return modelConfig;
-    }
-
     @SuppressWarnings("unchecked")
     protected List<SelectedConfig> getSelectedConfigs() {
-        Algorithm algo = createAlgorithm();
-        DataSet dataSet = createDataSet();
-        DataFlow dataFlow = createDataFlow();
-        PropData propData = createPropData();
-        Pipeline pipeline = createPipeline();
-        Sampling sampling = createSampling();
-
         SelectedConfig selectedConfig1 = new SelectedConfig();
-        selectedConfig1.setAlgorithm(algo);
-        selectedConfig1.setDataFlow(dataFlow);
-        selectedConfig1.setDataSet(dataSet);
-        selectedConfig1.setPipeline(pipeline);
+        selectedConfig1.setAlgorithm(algorithm);
+        selectedConfig1.setDataFlow(dataflow);
+        selectedConfig1.setDataSet(dataset);
+        selectedConfig1.setPipeline(pipeline1);
         selectedConfig1.setPropData(propData);
         selectedConfig1.setSampling(sampling);
 
         SelectedConfig selectedConfig2 = new SelectedConfig();
-        selectedConfig2.setAlgorithm(algo);
-        selectedConfig2.setDataFlow(dataFlow);
-        selectedConfig2.setDataSet(dataSet);
-        selectedConfig2.setPipeline(createNewDataPipeline(pipeline));
+        selectedConfig2.setAlgorithm(algorithm);
+        selectedConfig2.setDataFlow(dataflow);
+        selectedConfig2.setDataSet(dataset);
+        selectedConfig2.setPipeline(pipeline2);
         selectedConfig2.setPropData(propData);
         selectedConfig2.setSampling(sampling);
 
@@ -238,43 +333,15 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
             pipelineSteps.add(p);
         }
-        String newPipelineName = modelQualityProxy.createPipeline("P1", "P1 Description", pipelineSteps);
-        return modelQualityProxy.getPipelineByName(newPipelineName);
-    }
-
-    protected Sampling createSampling() {
-        return modelQualityProxy.createSamplingFromProduction();
-    }
-
-    protected DataFlow createDataFlow() {
-        return modelQualityProxy.createDataFlowFromProduction();
-    }
-
-    protected Pipeline createPipeline() {
-        return modelQualityProxy.createPipelineFromProduction();
-    }
-
-    protected PropData createPropData() {
-        return modelQualityProxy.createPropDataConfigFromProduction();
-    }
-
-    protected DataSet createDataSet() {
-        DataSet dataSet = new DataSet();
-        dataSet.setName("DataSet1");
-        dataSet.setIndustry("Industry1");
-        dataSet.setTenant(new Tenant("Model_Quality_Test.Model_Quality_Test.Production"));
-        dataSet.setDataSetType(DataSetType.FILE);
-        dataSet.setSchemaInterpretation(SchemaInterpretation.SalesforceLead);
-        dataSet.setTrainingSetHdfsPath("/Pods/Default/Services/ModelQuality/Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv");
-        ScoringDataSet scoringDataSet = new ScoringDataSet();
-        scoringDataSet.setName("ScoringDataSet1");
-        scoringDataSet.setDataHdfsPath("ScoringDataSetPath1");
-        dataSet.addScoringDataSet(scoringDataSet);
-        return dataSet;
-    }
-
-    protected Algorithm createAlgorithm() {
-        return modelQualityProxy.createAlgorithmFromProduction();
+        Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName("ModelQualityDeploymentTest-2");
+        if (pipelineAlreadyExists != null)
+            pipelineEntityMgr.delete(pipelineAlreadyExists);
+        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
+        if (pipelineStepAlreadyExists != null)
+            pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+        String newPipelineName = modelQualityProxy.createPipeline("ModelQualityDeploymentTest-2",
+                "ModelQualityDeploymentTest-2", pipelineSteps);
+        return pipelineEntityMgr.findByName(newPipelineName);
     }
 
     protected void waitAndCheckModelRun(String modelName) {
@@ -292,8 +359,8 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                 Assert.fail("Failed due to= " + modelRun.getErrorMessage());
                 break;
             }
-            System.out.println("Waiting for modelRun name \"" + modelName + "\": Status is "
-                    + modelRun.getStatus().toString());
+            System.out.println(
+                    "Waiting for modelRun name \"" + modelName + "\": Status is " + modelRun.getStatus().toString());
             long end = System.currentTimeMillis();
             if ((end - start) > 10 * 3_600_000) { // 10 hours max
                 Assert.fail("Timeout for modelRun name \"" + modelName + "\"");

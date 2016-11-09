@@ -1,0 +1,93 @@
+{
+    "pipeline_steps": [
+        {
+            "KeyWhenSortingByAscending": 1, 
+            "Name": "remediatedatarulesstep", 
+            "ColumnTransformFilePath": "remediatedatarulesstep.py", 
+            "OperatesOnColumns": [], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {
+                "enabledRules": {
+                    "PopulatedRowCountDS": [], 
+                    "UniqueValueCountDS": []
+                }, 
+                "params": "params"
+            }, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "RemediateDataRulesStep"
+        }, 
+        {
+            "KeyWhenSortingByAscending": 2, 
+            "Name": "pivotstep", 
+            "ColumnTransformFilePath": "pivotstep.py", 
+            "OperatesOnColumns": [], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {
+                "maxCategoricalCount": 10, 
+                "pvalueThreshold": 0.1, 
+                "columnsToPivot": "emptyDictionary", 
+                "minCategoricalCount": 5, 
+                "categoricalColumns": "categoricalColumns", 
+                "dataprofile": "dataprofile"
+            }, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "PivotStep"
+        }, 
+        {
+            "KeyWhenSortingByAscending": 3, 
+            "Name": "enumeratedcolumntransformstep", 
+            "ColumnTransformFilePath": "enumeratedcolumntransformstep.py", 
+            "OperatesOnColumns": [
+                "Categorical"
+            ], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {
+                "columns": "categoricalColumns"
+            }, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "EnumeratedColumnTransformStep"
+        }, 
+        {
+            "KeyWhenSortingByAscending": 4, 
+            "Name": "columntypeconversionstep", 
+            "ColumnTransformFilePath": "columntypeconversionstep.py", 
+            "OperatesOnColumns": [], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {
+                "columnsToConvert": "columnsToTransform"
+            }, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "ColumnTypeConversionStep"
+        }, 
+        {
+            "KeyWhenSortingByAscending": 5, 
+            "Name": "imputationstep", 
+            "ColumnTransformFilePath": "imputationstep.py", 
+            "OperatesOnColumns": [
+                "Numerical"
+            ], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {
+                "columns": "orderedDictContinuousColumns", 
+                "imputationValues": "emptyDictionary", 
+                "targetCol": "targetColumn"
+            }, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "ImputationStep"
+        }, 
+        {
+            "KeyWhenSortingByAscending": 6, 
+            "Name": "exportdfstep", 
+            "ColumnTransformFilePath": "exportdfstep.py", 
+            "OperatesOnColumns": [], 
+            "UniqueColumnTransformName": null, 
+            "NamedParameterListToInit": {}, 
+            "LoadFromHdfs": false, 
+            "MainClassName": "ExportDataFrameStep"
+        }
+    ], 
+    "pipeline_script": "/app//dataplatform/scripts/pipeline.py", 
+    "pipeline_lib_script": "/app//dataplatform/scripts/lepipeline.tar.gz", 
+    "pipeline_driver": "/app//dataplatform/scripts/pipeline.json", 
+    "name": "ModelQualityDeploymentTest"
+}

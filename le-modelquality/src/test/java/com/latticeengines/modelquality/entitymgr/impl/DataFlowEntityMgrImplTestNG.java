@@ -4,30 +4,37 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.modelquality.entitymgr.DataFlowEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
 public class DataFlowEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase {
 
     private DataFlow dataFlow;
+    private final String dataFlowName = "DataFlowEntityMgrImplTestNG";
 
-    @Autowired
-    private DataFlowEntityMgr dataFlowEntityMgr;
-
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        cleanupDb();
-
+        super.setup();
+        DataFlow alreadyExists = dataFlowEntityMgr.findByName(dataFlowName);
+        if (alreadyExists != null)
+            dataFlowEntityMgr.delete(alreadyExists);
         dataFlow = new DataFlow();
-        dataFlow.setName("DataFlow1");
+        dataFlow.setName(dataFlowName);
         dataFlow.setMatch(Boolean.TRUE);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
+    }
+
+    @Override
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        dataFlowEntityMgr.delete(dataFlow);
+        super.tearDown();
     }
 
     @Test(groups = "functional")
@@ -35,8 +42,7 @@ public class DataFlowEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         dataFlowEntityMgr.create(dataFlow);
 
         List<DataFlow> dataFlows = dataFlowEntityMgr.findAll();
-        assertEquals(dataFlows.size(), 1);
-        DataFlow retrievedDataFlow = dataFlows.get(0);
+        DataFlow retrievedDataFlow = dataFlowEntityMgr.findByName("DataFlowEntityMgrImplTestNG");
 
         assertEquals(retrievedDataFlow.getName(), dataFlow.getName());
         assertEquals(retrievedDataFlow.getMatch(), Boolean.TRUE);
