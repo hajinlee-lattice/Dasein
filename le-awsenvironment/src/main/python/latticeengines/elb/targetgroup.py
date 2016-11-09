@@ -1,6 +1,8 @@
 import argparse
 import boto3
 
+DUMMY_TGRP="arn:aws:iam::028036828464:target-group/dummy"
+
 def main():
     args = parse_args()
     args.func(args)

@@ -27,7 +27,7 @@ public class ColumnMetadata {
     private String tags;
     private String discretizationStrategy;
     private String matchDestination;
-    private Boolean isPremium = Boolean.FALSE;
+    private boolean isPremium;
 
     @JsonProperty("CanModel")
     private boolean canModel;
@@ -155,12 +155,12 @@ public class ColumnMetadata {
     }
 
     @JsonProperty("IsPremium")
-    public Boolean isPremium() {
+    public boolean isPremium() {
         return isPremium;
     }
 
     @JsonProperty("IsPremium")
-    public void setIsPremium(Boolean isPremium) {
+    public void setIsPremium(boolean isPremium) {
         this.isPremium = isPremium;
     }
 
