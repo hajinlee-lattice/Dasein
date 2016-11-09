@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 
@@ -72,7 +73,12 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<Map<St
 
     @PostConstruct
     public void initialize() throws IOException {
-        dnBBulkApiBody = IOUtils.toString(ClassLoader.getSystemResourceAsStream(DNB_BULK_BODY_FILE_NAME), "UTF-8");
+        InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(DNB_BULK_BODY_FILE_NAME);
+        if (is == null) {
+            throw new RuntimeException("Cannot find resource " + DNB_BULK_BODY_FILE_NAME);
+        }
+        dnBBulkApiBody = IOUtils.toString(is, "UTF-8");
     }
 
     @Override

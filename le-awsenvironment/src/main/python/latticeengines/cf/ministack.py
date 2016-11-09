@@ -34,7 +34,7 @@ def template(environment, upload=False):
         stack.validate()
 
 def create_template():
-    stack = ECSStack("AWS CloudFormation template for mini-stack ECS cluster.", use_asgroup=False, instances=1)
+    stack = ECSStack("AWS CloudFormation template for mini-stack ECS cluster.", use_asgroup=False, instances=3)
     stack.add_param(PARAM_SWAGGER_APPS)
     task = swagger_task()
     stack.add_resource(task)
@@ -55,7 +55,7 @@ def swagger_task():
             "awslogs-region": { "Ref": "AWS::Region" }
         }}) \
         .set_env("SWAGGER_APPS", PARAM_SWAGGER_APPS.ref()) \
-        .set_env("JVMFLAGS", "-Xms1g -Xmx1700m")
+        .set_env("JVMFLAGS", "-Xms256m -Xmx512m")
     task = TaskDefinition("swaggertask")
     task.add_container(container)
     return task
@@ -137,7 +137,7 @@ def parse_args():
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
-    parser1.add_argument('-s', dest='stack', type=str, required=True, help='the LE_STACK to be created')
+    parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, help='comma separated list of swagger apps.')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=provision_cli)

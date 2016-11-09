@@ -39,7 +39,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             public void run() {
                 loadCache();
             }
-        }, TimeUnit.MINUTES.toMillis(10));
+        }, TimeUnit.MINUTES.toMillis(13));
     }
 
     @Override

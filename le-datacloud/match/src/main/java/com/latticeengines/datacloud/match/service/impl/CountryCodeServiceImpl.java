@@ -1,9 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +27,8 @@ public class CountryCodeServiceImpl implements CountryCodeService {
     @Autowired
     private CountryCodeEntityMgr countryCodeEntityMgr;
 
-    private final ConcurrentMap<String, String> countryCodeWhiteCache = new ConcurrentHashMap<String, String>();
-    private final Set<String> countryCodeBlackCache = Collections
-            .newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    private ConcurrentMap<String, String> countryCodeWhiteCache = new ConcurrentHashMap<>();
+    private final ConcurrentSkipListSet<String> countryCodeBlackCache = new ConcurrentSkipListSet<>();
 
     @Autowired
     @Qualifier("taskScheduler")
@@ -69,13 +67,7 @@ public class CountryCodeServiceImpl implements CountryCodeService {
 
     private void loadCache() {
         log.info("Start loading country code");
-        ConcurrentMap<String, String> countryCodeMap = countryCodeEntityMgr.findAll();
-        synchronized (countryCodeWhiteCache) {
-            countryCodeWhiteCache.clear();
-            for (String key : countryCodeMap.keySet()) {
-                countryCodeWhiteCache.put(key, countryCodeMap.get(key));
-            }
-        }
+        countryCodeWhiteCache = countryCodeEntityMgr.findAll();
         synchronized (countryCodeBlackCache) {
             countryCodeBlackCache.clear();
         }
