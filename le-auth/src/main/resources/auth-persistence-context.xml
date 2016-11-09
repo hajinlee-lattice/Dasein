@@ -20,7 +20,7 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
     <bean id="dataSourceGlobalAuth" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="driverClassName" value="${auth.globalauth.datasource.driver:com.microsoft.sqlserver.jdbc.SQLServerDriver}" />
         <property name="url" value="${auth.globalauth.datasource.url}" />
         <property name="username" value="${auth.globalauth.datasource.user}" />
         <property name="password" value="${auth.globalauth.datasource.password.encrypted}" />
