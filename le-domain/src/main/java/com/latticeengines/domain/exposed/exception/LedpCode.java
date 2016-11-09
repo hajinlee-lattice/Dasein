@@ -30,6 +30,7 @@ public enum LedpCode {
     LEDP_11003("Could not retrieve keys for table {0}."), //
     LEDP_11004("Could not retrieve metadata for table {0}."), //
     LEDP_11005("SQL column name {0} is different from the avro column name {1}."), //
+    LEDP_11006("Table {0} does not exist. A segment must reference an existing table."), //
 
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."), //
@@ -88,7 +89,7 @@ public enum LedpCode {
     LEDP_16010("Problem publishing model for model command:{0}, yarnAppId:{1}."), //
     LEDP_16011("Problem publishing model-artifacts for model command:{0}, yarnAppId:{1}."), //
 
-    // Eai Service 17000-17999
+    // le-eai 17000-17999
     LEDP_17000("At least one attribute required."), //
     LEDP_17001("File import can only have one data source."), //
     LEDP_17002("No metadata for attribute {0}."), //
@@ -100,7 +101,7 @@ public enum LedpCode {
     LEDP_17008("Unsupported Source Credential Check for Source Type {0}"), //
     LEDP_17009("Got NULL Value from Primary Key for Tenant {0}"), //
 
-    // PLS 18000-18999
+    // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
     LEDP_18001("Could not authenticate user {0}."), //
     LEDP_18002("Could not authenticate ticket {0}."), //
@@ -221,6 +222,7 @@ public enum LedpCode {
     LEDP_18118("Unable to copy source file"), //
     LEDP_18119("Cannot create marketo credential with duplicate name: {0}"), //
     LEDP_18120("Invalid file uploaded. There must be minimum of 2 columns."), //
+    LEDP_18121("Model summary with id {0} must exist for campaign creation."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
