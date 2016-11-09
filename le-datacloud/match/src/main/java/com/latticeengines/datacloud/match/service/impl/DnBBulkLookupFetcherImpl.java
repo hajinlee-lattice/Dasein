@@ -37,8 +37,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
 
     private static final String DNB_MATCH_OUTPUT_LIST = "DNB_MATCH_OUTPUT_LIST";
 
-    private static final String DNB_GET_RESULT_URL = "https://direct.dnb.com:8443/V3.0/Batches/%s?SubmittingOfficeID=%s&ServiceVersionNumber=%s&ApplicationTransactionID=%s&TransactionTimestamp=%s";
-
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;
 
@@ -78,6 +76,9 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
     private String resultIdJsonPath;
 
+    @Value("${datacloud.dnb.bulk.getresult.url.format}")
+    private String getResultUrlFormat;
+
     private RestTemplate restTemplate = new RestTemplate();
 
     private static Date timeAnchor = new Date(1);
@@ -91,17 +92,20 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
             return null;
         }
 
-        List<DnBMatchOutput> output = null;
+        List<DnBMatchOutput> output = new ArrayList<>();
         for (int i = 0; i < retries; i++) {
             context = executeLookup(info, DnBKeyType.bulkmatch);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
+                log.debug("Finished dnb get result request status= " + returnCode);
                 info.setDnbCode(returnCode);
-                if(returnCode == DnBReturnCode.OK) {
+                if (returnCode == DnBReturnCode.OK) {
                     List<?> outputUncheck = context.getProperty(DNB_MATCH_OUTPUT_LIST, List.class);
                     for (Object obj : outputUncheck) {
                         output.add((DnBMatchOutput) obj);
                     }
+                    log.info("Succeeded to get result from dnb, size=" + output.size() + " timestamp="
+                            + info.getTimestamp() + " serviceId=" + info.getServiceBatchId());
                 }
                 break;
             }
@@ -151,6 +155,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
             outputList.add(normalizeOneRecord(result));
         }
 
+        context.setProperty(DNB_RETURN_CODE, returnCode);
         context.setProperty(DNB_MATCH_OUTPUT_LIST, outputList);
     }
 
@@ -174,11 +179,11 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
 
     private DnBMatchOutput normalizeOneRecord(String record) {
         DnBMatchOutput output = new DnBMatchOutput();
-        record = record.substring(1, record.length()-1);
+        record = record.substring(1, record.length() - 1);
         String[] values = record.split("\",\"");
 
         String duns = values[25];
-        if(!StringUtils.isNumeric(values[48])) {
+        if (!StringUtils.isNumeric(values[48])) {
             output.setDnbCode(DnBReturnCode.DISCARD);
             return output;
         }
@@ -201,7 +206,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
 
     @Override
     protected String constructUrl(DnBBulkMatchInfo info) {
-        return String.format(DNB_GET_RESULT_URL, info.getServiceBatchId(), officeID, serviceNumber,
-                info.getApplicationId(), info.getTimestamp());
+        return String.format(getResultUrlFormat, info.getServiceBatchId(), officeID, serviceNumber,
+                info.getTimestamp());
     }
 }

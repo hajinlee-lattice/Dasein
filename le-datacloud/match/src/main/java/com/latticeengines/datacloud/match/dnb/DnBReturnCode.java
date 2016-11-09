@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.dnb;
 
 public enum DnBReturnCode {
-    OK("Ok"), 
+    OK("Ok"),
     DISCARD("Discard"),
     IN_PROGRESS("In Progress"),
     RATE_LIMITING("Rate Limiting"),
@@ -11,6 +11,7 @@ public enum DnBReturnCode {
     EXPIRED("Expired Token"),
     EXCEED_REQUEST_NUM("Exceed Hourly Maximum Limit"),
     EXCEED_CONCURRENT_NUM("Exceed Concurrent Limit"),
+    BAD_REQUEST("Bad Request"),
     UNKNOWN("Unkown error");
 
     String message;

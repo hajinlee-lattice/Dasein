@@ -1,0 +1,45 @@
+<bat:ProcessBatchRequest xmlns:bat="http://services.dnb.com/BatchServiceV1.0" ServiceVersionNumber="3">
+   <BatchDetail>
+      <ApplicationBatchID>123456789</ApplicationBatchID>
+      <MessageTimeStamp>%s</MessageTimeStamp>
+   </BatchDetail>
+   <BatchSpecification>
+      <BatchProcessID>CPCM_CM</BatchProcessID>
+      <BatchPriorityValue>5</BatchPriorityValue>
+      <BatchSpecificationObject>
+         <ContentObject>
+			PGNvbTpHZXRDbGVhbnNlTWF0Y2hSZXF1ZXN0IHhtbG5zOmNvbT0iaHR0cDovL3Nl
+			cnZpY2VzLmRuYi5jb20vQ29tcGFueVNlcnZpY2VWMi4wIiBTZXJ2aWNlVmVyc2lv
+			bk51bWJlcj0iMSI+DQogPEdldENsZWFuc2VNYXRjaFJlcXVlc3REZXRhaWw+DQog
+			ICA8SW5xdWlyeURldGFpbD4NCiAgIDwvSW5xdWlyeURldGFpbD4NCiAgIDxNYXRj
+			aFNwZWNpZmljYXRpb24+DQogICAgIDxDb25maWRlbmNlTG93ZXJMZXZlbFRocmVz
+			aG9sZFZhbHVlPjc8L0NvbmZpZGVuY2VMb3dlckxldmVsVGhyZXNob2xkVmFsdWU+
+			DQogICAgIDxFeGNsdXNpb25Dcml0ZXJpYT4NCiAgICAgICA8RXhjbHVzaW9uRGF0
+			YURlc2NyaXB0aW9uPkV4Y2x1ZGUgVW5kZWxpdmVyYWJsZTwvRXhjbHVzaW9uRGF0
+			YURlc2NyaXB0aW9uPg0KICAgICA8L0V4Y2x1c2lvbkNyaXRlcmlhPg0KICAgICA8
+			SW5jbHVkZUNsZWFuc2VkQW5kU3RhbmRhcmRpemVkSW5mb3JtYXRpb25JbmRpY2F0
+			b3I+dHJ1ZTwvSW5jbHVkZUNsZWFuc2VkQW5kU3RhbmRhcmRpemVkSW5mb3JtYXRp
+			b25JbmRpY2F0b3I+DQogICA8L01hdGNoU3BlY2lmaWNhdGlvbj4NCiA8L0dldENs
+			ZWFuc2VNYXRjaFJlcXVlc3REZXRhaWw+DQo8L2NvbTpHZXRDbGVhbnNlTWF0Y2hS
+			ZXF1ZXN0Pg0K
+		 </ContentObject>
+         <ObjectFormatTypeText>XML</ObjectFormatTypeText>
+         <LayoutName>Company Service</LayoutName>
+      </BatchSpecificationObject>
+   </BatchSpecification>
+   <InputDetail>
+      <InputObjectDetail>
+         <ContentObject>%s</ContentObject>
+         <ObjectFormatTypeText>CSV</ObjectFormatTypeText>
+         <LayoutName>PCMGBIMatch</LayoutName>
+         <LayoutVersion>1.0</LayoutVersion>
+         <LanguageCode>36</LanguageCode>
+         <CompressTypeValue>None</CompressTypeValue>
+         <RecordsCount>%s</RecordsCount>
+      </InputObjectDetail>
+   </InputDetail>
+   <OutputSpecification>
+      <ObjectFormatTypeText>CSV</ObjectFormatTypeText>
+   </OutputSpecification>
+</bat:ProcessBatchRequest>
+

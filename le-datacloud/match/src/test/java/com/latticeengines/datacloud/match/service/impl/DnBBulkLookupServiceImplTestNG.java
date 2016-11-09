@@ -30,28 +30,25 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
     private DnBBulkLookupFetcher dnBBulkLookupFetcher;
 
     @Test(groups = "functional", enabled = true)
-    public void testRealTimeLookupService() {
+    public void testBulkLookupService() {
         DnBBulkMatchInfo info = dnBBulkLookupDispatcher.sendRequest(generateInput());
         Assert.assertEquals(info.getDnbCode(), DnBReturnCode.OK);
 
         dnBBulkLookupFetcher.getResult(info);
-
-        Assert.assertEquals(info.getDnbCode(), DnBReturnCode.IN_PROGRESS);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testBulkLookupFetcher() {
         DnBBulkMatchInfo info = new DnBBulkMatchInfo();
 
-        info.setTimestamp("2016-11-08T11:57:19-05:00");
-        info.setServiceBatchId("2209761E1");
-        info.setApplicationId("754f9e06-514f-48cb-9370-24e2ac1e75ab");
+        info.setTimestamp("2016-11-09T07:45:05-05:00");
+        info.setServiceBatchId("2215928E1");
 
         List<DnBMatchOutput> output = dnBBulkLookupFetcher.getResult(info);
         Assert.assertEquals(output.size(), 4);
     }
 
-    static String[][] input = { { "Benchmark Blinds", "Gilbert", "Arizona", "US", DnBReturnCode.OK.getMessage() },
+    static String[][] input = { { "Benchmark Blinds", "Gilbert", "Arizona", "US" },
             { "El Camino Machine Welding LLC", "Salinas", "California", "US" },
             { "Cornerstone Alliance Church", "Canon City", "Colorado", "US" },
             { "  Gorman Manufacturing  ", "", "", "  US  " } };

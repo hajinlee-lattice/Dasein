@@ -4,8 +4,6 @@ import java.util.List;
 
 public class DnBBulkMatchInfo {
 
-    private String applicationId;
-
     private String serviceBatchId;
 
     // Format: yyyy-MM-dd'T'HH:mm:ss.S'Z'
@@ -45,13 +43,5 @@ public class DnBBulkMatchInfo {
 
     public void setLookupRequestIds(List<String> lookupRequestIds) {
         this.lookupRequestIds = lookupRequestIds;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
     }
 }

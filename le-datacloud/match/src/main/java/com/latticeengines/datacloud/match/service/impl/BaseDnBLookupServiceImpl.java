@@ -11,7 +11,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ import org.xml.sax.SAXException;
 import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public abstract class BaseDnBLookupServiceImpl<T> {
     private static final Log log = LogFactory.getLog(BaseDnBLookupServiceImpl.class);
@@ -64,6 +64,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             break;
         case NOT_FOUND:
             errCode = DnBReturnCode.NO_RESULT;
+            break;
+        case BAD_REQUEST:
+            errCode = DnBReturnCode.BAD_REQUEST;
             break;
         default:
             isNeedParseBody = true;
