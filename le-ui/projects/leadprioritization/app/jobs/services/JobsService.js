@@ -14,9 +14,9 @@ angular
         "profileAndModel": "create_global_model",
         "chooseModel": "create_global_model",
         "activateModel": "create_global_model",
-        "score": "create_global_target_market", 
         "runScoreTableDataFlow": "create_global_target_market", 
-        "runAttributeLevelSummaryDataFlows": "create_global_target_market" 
+        "runAttributeLevelSummaryDataFlows": "create_global_target_market",
+        "score": "score_training_set" 
     }; 
     
     var dictionary = {
@@ -72,7 +72,8 @@ angular
         "match_data": 0, 
         "generate_insights": 0,
         "create_global_model": 0, 
-        "create_global_target_market": 0 
+        "create_global_target_market": 0,
+        "score_training_set": 0
     };
 
     this.getErrorLog = function(JobReport) {
@@ -363,6 +364,10 @@ angular
             currStepIndex += numStepsInGroup.create_global_target_market;
             completedTimes.create_global_target_market = job.steps[currStepIndex - 1].endTimestamp;
         }
+        if (runningStep != "score_training_set" && completedSteps.indexOf("score_training_set") > -1) {
+            currStepIndex += numStepsInGroup.score_training_set;
+            completedTimes.score_training_set = job.steps[currStepIndex - 1].endTimestamp;
+        }
         return completedTimes;
     }
 
@@ -445,5 +450,6 @@ angular
         numStepsInGroup.generate_insights = 0;
         numStepsInGroup.create_global_model = 0;
         numStepsInGroup.create_global_target_market = 0;
+        numStepsInGroup.score_training_set = 0;
     }
 });

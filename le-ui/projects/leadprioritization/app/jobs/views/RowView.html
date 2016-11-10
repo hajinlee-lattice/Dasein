@@ -137,6 +137,21 @@
 
                         </div>
                     </li>
+                    <li ng-class="(jobStepsCompletedStates.score_training_set) ? 'success' : ''">
+                        <div>
+                                
+                            <span class="scoring-training-set">
+                                <p>Scoring Training Set</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma' }}</p>
+                            </span>
+                            <span>
+                                <span class="loading-small" data-ng-if="jobStepsRunningStates.score_training_set"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.score_training_set"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'score_training_set'"></i>
+                            </span>
+
+                        </div>
+                    </li>
                 </ol>
 
                 <ol class="wizard job-status" ng-if="jobType == 'fitModelWorkflow'">
