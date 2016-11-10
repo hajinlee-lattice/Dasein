@@ -150,6 +150,9 @@ class ECSStack(Stack):
 
         self.add_resource(service)
 
+    def get_ec2s(self):
+        return self._ec2s
+
     def _construct_by_ec2(self, instances, efs, ips=()):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
@@ -233,6 +236,12 @@ class ECSStack(Stack):
                     "reload": [ "install" ]
                 },
                 "install" : {
+                    "packages" : {
+                        "yum" : {
+                            "xfsprogs" : [],
+                            "nfs-utils": []
+                        }
+                    },
                     "files" : {
                         "/etc/cfn/cfn-hup.conf" : {
                             "content" : { "Fn::Join" : ["", [
@@ -256,6 +265,31 @@ class ECSStack(Stack):
                                 "         --region ", { "Ref" : "AWS::Region" }, "\n",
                                 "runas=root\n"
                             ]]}
+                        },
+                        "/tmp/mount_efs.sh": {
+                            "content": {
+                                "Fn::Join": [
+                                    "",
+                                    [ "#!/usr/bin/env bash \n",
+                                      "mkdir -p /mnt/efs \n",
+                                      "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp1"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ1"]}, ".ip\n",
+                                      "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp2"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ2"]}, ".ip\n",
+                                      "echo \"", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "LpiEfsIp3"]}, "\" > /tmp/", {"Fn::FindInMap": ["Environment2Props", PARAM_ENVIRONMENT.ref(), "SubnetAZ3"]}, ".ip\n",
+                                      "for i in {1..100}; do\n",
+                                      "    az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)\n",
+                                      "    if [ ! -z \"${az}\" ]; then\n",
+                                      "        break;\n",
+                                      "    fi;\n",
+                                      "done;\n",
+                                      "efs_ip=`cat /tmp/${az}.ip`\n",
+                                      "echo ${efs_ip}\n",
+                                      "echo \"${efs_ip}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
+                                      ]
+                                ]
+                            },
+                            "mode": "000777",
+                            "owner": "root",
+                            "group": "root"
                         }
                     },
                     "commands" : {
@@ -268,7 +302,16 @@ class ECSStack(Stack):
                                 "echo $PUBADDR >> /etc/externaladdr.txt"
                             ] ] }
                         },
-                        "02_add_instance_to_cluster" : {
+                        "03_le_dirs" : {
+                            "command" : { "Fn::Join": [ "\n", [
+                                "#!/bin/bash",
+                                "mkdir -p /etc/ledp",
+                                "chmod 777 /etc/ledp",
+                                "mkdir -p /var/cache/scoringapi",
+                                "chmod 777 /var/cache/scoringapi"
+                            ] ] }
+                        },
+                        "10_add_instance_to_cluster" : {
                             "command" : { "Fn::Join": [ "", [
                                 "#!/bin/bash\n",
                                 "rm -rf /etc/ecs/ecs.config\n",
@@ -276,6 +319,26 @@ class ECSStack(Stack):
                                 "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
                                 "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
                                 "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
+                            ] ] }
+                        },
+                        "20_start_cadvisor" : {
+                            "command" : { "Fn::Join": [ "", [
+                                "start ecs\n"
+                                "yum install -y aws-cli jq\n",
+                                "for i in {1..100}; do\n",
+                                "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                                "    if [ ! -z \"${instance_arn}\" ]; then\n",
+                                "        break;\n",
+                                "    fi;\n",
+                                "done;\n",
+                                "region=", { "Ref" : "AWS::Region" }, "\n",
+                                "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"
+                            ] ] }
+                        },
+                        "30_mount_efs" : {
+                            "command" : { "Fn::Join": [ "\n", [
+                                "bash /tmp/mount_efs.sh",
+                                "mount -a"
                             ] ] }
                         }
                     },
