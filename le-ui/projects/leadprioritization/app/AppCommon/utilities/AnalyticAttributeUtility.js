@@ -161,11 +161,17 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
                     lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
                     upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
                     toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_CONTINUOUS_BETWEEN_LABEL", [lowerValue, upperValue]);
+                    if (lowerValue == upperValue) {
+                        toReturn = lowerValue;
+                    }
                 }
             } else {
                 lowerValue = this.FormatBucketValue(bucket.LowerInclusive, attributeMetadata);
                 upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
                 toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_CONTINUOUS_BETWEEN_LABEL", [lowerValue, upperValue]);
+                if (lowerValue == upperValue) {
+                    toReturn = lowerValue;
+                }
             }
         } else if (bucket.LowerInclusive == null && bucket.UpperExclusive == null) {
             toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_ALL_VALUES_LABEL");
