@@ -1,7 +1,7 @@
 {
     "pls": {
         "cpu": 512,
-        "mem": 2048,
+        "mem": 1536,
         "port": 8081
     },
     "admin": {
@@ -15,19 +15,19 @@
     },
     "scoringapi": {
         "cpu": 1024,
-        "mem": 2048,
+        "mem": 1536,
         "port": 8073
     },
     "oauth2": {
-        "mem": 512,
+        "mem": 1024,
         "port": 8072
     },
     "playmaker": {
-        "mem": 512,
+        "mem": 1024,
         "port": 8071
     },
     "eai": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9001
     },
     "metadata": {
@@ -35,15 +35,15 @@
         "port": 9002
     },
     "scoring": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9003
     },
     "modeling": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9004
     },
     "dataflowapi": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9005
     },
     "workflowapi": {
@@ -52,19 +52,19 @@
     },
     "quartz": {
         "cpu": 1024,
-        "mem": 512,
+        "mem": 1024,
         "port": 9007
     },
     "modelquality": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9008
     },
     "propdata": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9009
     },
     "dellebi": {
-        "mem": 512,
+        "mem": 1024,
         "port": 9010
     }
 }

@@ -269,7 +269,7 @@ def teardown(stackname, apps=None, completely=False):
     if (apps is None) or completely:
         apps = ALL_APPS
 
-    for app in ALL_APPS.split(","):
+    for app in apps.split(","):
         thread = DeleteServiceThread(stackname, app)
         thread.start()
         threads.append(thread)
@@ -328,7 +328,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of apps to bootstrap.')
-    parser1.add_argument('-i', dest='ip', type=str, help='IP of HAProxy.')
+    parser1.add_argument('-i', dest='ip', type=str, required=True, help='IP of HAProxy.')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=bootstrap_cli)
