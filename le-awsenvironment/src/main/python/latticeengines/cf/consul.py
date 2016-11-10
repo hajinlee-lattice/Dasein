@@ -1,5 +1,7 @@
+import base64
 import httplib
 import json
+
 
 def write_to_stack(server, environment, stack, key, value):
     key = "%s/%s/%s" % (environment, stack, key)
@@ -26,7 +28,8 @@ def _read_from_consul(server, key):
     conn.request("GET", "/v1/kv/%s" % key)
     response = conn.getresponse()
     print response.status, response.reason
-    return json.loads(response.read())[0]["Value"]
+    body = response.read()
+    return base64.b64decode(json.loads(body)[0]["Value"])
 
 def _remove_from_consul(server, key):
     conn = httplib.HTTPConnection(server)
