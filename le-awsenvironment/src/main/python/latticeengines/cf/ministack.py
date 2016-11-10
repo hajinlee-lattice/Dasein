@@ -228,6 +228,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip
+    params["HAPROXY_ADDRESS"] = ip
 
     # TODO: change to https
     protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
