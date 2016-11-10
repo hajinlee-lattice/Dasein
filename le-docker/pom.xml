@@ -64,6 +64,9 @@
                                 <copy file="${project.basedir}/../le-admin/target/le-admin-${project.version}.war"
                                       tofile="${project.basedir}/${admin.docker.context}/webapps/ROOT.war"
                                       overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/devcluster_aws/latticeengines.properties"
+                                      tofile="${project.basedir}/${tomcat.docker.context}/conf/env/devcluster_aws/latticeengines.properties"
+                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/qacluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster_aws/latticeengines.properties"
                                       overwrite="true" />

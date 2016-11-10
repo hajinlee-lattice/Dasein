@@ -1,9 +1,17 @@
 import sys
 
+SPECIAL_CONTEXT_PATH = {
+    "scoringapi": "score",
+    "matchapi": "match"
+}
+
 def generate_options(options):
     lines = []
     for opt in options.split(","):
-        lines.append("<option value=\"/%s/v2/api-docs\">%s</option>\n" % (opt, opt))
+        context_path = opt
+        if opt in SPECIAL_CONTEXT_PATH:
+            context_path = SPECIAL_CONTEXT_PATH[opt]
+        lines.append("<option value=\"/%s/v2/api-docs\">%s</option>\n" % (context_path, opt))
     return lines
 
 def replace_options(options):
