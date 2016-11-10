@@ -17,7 +17,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -39,7 +39,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         input.setState(state);
         input.setCity(city);
 
-        DnBMatchOutput res = dnBRealTimeLookupService.realtimeEntityLookup(input);
+        DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(input);
         log.info(res.getDuns() + " " + res.getConfidenceCode() + " " + res.getMatchGrade().getRawCode() + " "
                 + res.getDnbCode().getMessage());
         Assert.assertEquals(res.getDnbCode().getMessage(), message);
@@ -50,17 +50,17 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
         List<String> messageList = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_NUM);
-        CompletionService<DnBMatchOutput> cs = new ExecutorCompletionService<DnBMatchOutput>(executorService);
+        CompletionService<DnBMatchContext> cs = new ExecutorCompletionService<DnBMatchContext>(executorService);
 
         for (int i = 0; i < THREAD_NUM; i++) {
-            cs.submit(new Callable<DnBMatchOutput>() {
-                public DnBMatchOutput call() throws Exception {
+            cs.submit(new Callable<DnBMatchContext>() {
+                public DnBMatchContext call() throws Exception {
                     MatchKeyTuple input = new MatchKeyTuple();
                     input.setCountryCode("US");
                     input.setName("Gorman Manufacturing");
                     input.setState("CA");
 
-                    DnBMatchOutput res = dnBRealTimeLookupService.realtimeEntityLookup(input);
+                    DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(input);
                     return res;
                 }
             });
@@ -69,7 +69,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
         for (int i = 0; i < THREAD_NUM; i++) {
             try {
-                DnBMatchOutput result = cs.take().get();
+                DnBMatchContext result = cs.take().get();
                 log.info(i + " message:" + result.getDnbCode().getMessage());
                 messageList.add(result.getDnbCode().getMessage());
             } catch (InterruptedException e) {

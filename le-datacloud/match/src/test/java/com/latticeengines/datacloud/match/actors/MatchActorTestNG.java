@@ -34,19 +34,27 @@ import scala.concurrent.duration.FiniteDuration;
 public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final Log log = LogFactory.getLog(MatchActorTestNG.class);
 
+    private static final String COUNTRY_CODE = "US";
+    private static final String STATE = "CALIFORNIA";
+    private static final String CITY = "FOSTER CITY";
+    private static final String NAME = "LATTICE ENGINES";
+    private static final String DUNS = "028675958";
+    private static final int CONFIDENCE_CODE = 7;
+    private static final String MATCH_GRADE = "AZZFAZZAFAF";
+
     @Autowired
     private MatchActorSystem actorSystem;
 
     @Test(groups = "functional")
-    public void testDnBActor() throws Exception {
-        actorSystem.setBatchMode(true);
+    public void testDnBActorNonBatchMode() throws Exception {
+        actorSystem.setBatchMode(false);
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
         msg.setCallerMicroEngineReference(null);
         MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
-        matchKeyTuple.setCountryCode("US");
-        matchKeyTuple.setState("CALIFORNIA");
-        matchKeyTuple.setCity("FOSTER CITY");
-        matchKeyTuple.setName("LATTICE ENGINES");
+        matchKeyTuple.setCountryCode(COUNTRY_CODE);
+        matchKeyTuple.setState(STATE);
+        matchKeyTuple.setCity(CITY);
+        matchKeyTuple.setName(NAME);
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
@@ -56,9 +64,33 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         Assert.assertNotNull(result);
         DnBMatchContext data = (DnBMatchContext) result.getResult();
         Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
-        Assert.assertEquals(data.getDuns(), "028675958");
-        // Assert.assertEquals((int) data.getConfidenceCode(), 7);
-        // log.info(data.getMatchGrade());
+        Assert.assertEquals(data.getDuns(), DUNS);
+        Assert.assertEquals((int) data.getConfidenceCode(), CONFIDENCE_CODE);
+        Assert.assertEquals(data.getMatchGrade().getRawCode(), MATCH_GRADE);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testDnBActorNonBatchMode" })
+    public void testDnBActorBatchMode() throws Exception {
+        actorSystem.setBatchMode(true);
+        DataSourceLookupRequest msg = new DataSourceLookupRequest();
+        msg.setCallerMicroEngineReference(null);
+        MatchKeyTuple matchKeyTuple = new MatchKeyTuple();
+        matchKeyTuple.setCountryCode(COUNTRY_CODE);
+        matchKeyTuple.setState(STATE);
+        matchKeyTuple.setCity(CITY);
+        matchKeyTuple.setName(NAME);
+        msg.setInputData(matchKeyTuple);
+        String rootOperationUid = UUID.randomUUID().toString();
+        MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
+        msg.setMatchTravelerContext(matchTravelerContext);
+
+        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);
+        Assert.assertNotNull(result);
+        DnBMatchContext data = (DnBMatchContext) result.getResult();
+        Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
+        Assert.assertEquals(data.getDuns(), DUNS);
+        Assert.assertEquals((int) data.getConfidenceCode(), CONFIDENCE_CODE);
+        Assert.assertEquals(data.getMatchGrade().getRawCode(), MATCH_GRADE);
         actorSystem.setBatchMode(false);
     }
 

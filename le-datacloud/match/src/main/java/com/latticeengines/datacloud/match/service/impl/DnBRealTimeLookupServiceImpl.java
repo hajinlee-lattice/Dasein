@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
@@ -61,14 +61,14 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     private RestTemplate restTemplate = new RestTemplate();
 
     @Override
-    public DnBMatchOutput realtimeEntityLookup(MatchKeyTuple input) {
+    public DnBMatchContext realtimeEntityLookup(MatchKeyTuple input) {
         DataFlowContext context = null;
-        DnBMatchOutput output = new DnBMatchOutput();
+        DnBMatchContext output = new DnBMatchContext();
         for (int i = 0; i < retries; i++) {
             context = executeLookup(input, DnBKeyType.REALTIME);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
-                output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchOutput.class);
+                output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
                 log.debug("Finished dnb realtime lookup request status= " + returnCode);
                 break;
             }
@@ -81,7 +81,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     }
 
     @Override
-    public DnBMatchOutput realtimeEmailLookup(MatchKeyTuple input) {
+    public DnBMatchContext realtimeEmailLookup(MatchKeyTuple input) {
         return null;
     }
 
@@ -99,7 +99,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
             return;
         }
         String body = response.getBody();
-        DnBMatchOutput output = new DnBMatchOutput();
+        DnBMatchContext output = new DnBMatchContext();
         output.setDuns((String) retrieveJsonValueFromResponse(dunsJsonPath, body));
         output.setConfidenceCode((Integer) retrieveJsonValueFromResponse(confidenceCodeJsonPath, body));
         output.setMatchGrade((String) retrieveJsonValueFromResponse(matchGradeJsonPath, body));

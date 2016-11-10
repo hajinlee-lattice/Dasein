@@ -12,7 +12,7 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
-import com.latticeengines.datacloud.match.dnb.DnBMatchOutput;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 
 @Component("locationBasedMicroEngineActor")
@@ -46,7 +46,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
         if (response.getResult() != null) {
             MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
             MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
-            DnBMatchOutput res = (DnBMatchOutput) response.getResult();
+            DnBMatchContext res = (DnBMatchContext) response.getResult();
             if (res.getDuns() != null) {
                 traveler.debug("Found DUNS=" + res.getDuns() + " at " + getClass().getSimpleName() + ".");
             }
