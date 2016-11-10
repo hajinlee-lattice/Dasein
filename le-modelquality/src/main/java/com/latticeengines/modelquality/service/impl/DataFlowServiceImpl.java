@@ -26,7 +26,7 @@ public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowServ
         }
 
         dataFlow = new DataFlow();
-        dataFlow.setName("PRODUCTION-" + version);
+        dataFlow.setName(dataFlowName);
         dataFlow.setMatch(true);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
         dataFlow.setDedupType(DedupType.MULTIPLELEADSPERDOMAIN);

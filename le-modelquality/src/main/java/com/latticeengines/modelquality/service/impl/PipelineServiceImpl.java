@@ -58,7 +58,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         }
 
         pipeline = new Pipeline();
-        pipeline.setName("PRODUCTION-" + version);
+        pipeline.setName(pipelineName);
         pipeline.setDescription("Production pipeline version: " + pipeline.getName());
         String pipelineJson = String.format("/app/%s/dataplatform/scripts/pipeline.json", version);
         setPipelineProperties(pipeline, pipelineJson);

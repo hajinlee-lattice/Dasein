@@ -131,7 +131,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
                         .setName(analyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
                 modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
                 modelRunEntityNames.setAnalyticTestName(analyticTestName);
-                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag().toString());
+                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag());
                 ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames, env);
                 resultSet.add(modelRun);
             }

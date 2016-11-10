@@ -29,7 +29,7 @@ public class SamplingServiceImpl extends BaseServiceImpl implements SamplingServ
         }
         
         sampling =new Sampling();
-        sampling.setName("PRODUCTION-" + version);
+        sampling.setName(samplingName);
 
         SamplingPropertyDef def = new SamplingPropertyDef();
         def.setName(SamplingFactory.MODEL_SAMPLING_RATE_KEY);

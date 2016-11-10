@@ -16,10 +16,10 @@ public class BaseServiceImpl implements InitializingBean {
 
     @Value("${modelquality.file.upload.hdfs.dir}")
     private String hdfsDir;
-    
+
     @Value("${common.pls.url}")
     private String plsApiHostPort;
-    
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
     
     protected Map<String, String> getActiveStack() {
@@ -27,15 +27,17 @@ public class BaseServiceImpl implements InitializingBean {
     }
     
     protected String getVersion() {
+
         Map<String, String> stackInfo = getActiveStack();
         String stackName = stackInfo.get("CurrentStack");
-        return versionManager.getCurrentVersionInStack(stackName);
+        String version = versionManager.getCurrentVersionInStack(stackName).replace('/', '_');
+        return version;
     }
-    
+
     protected String getHdfsDir() {
         return hdfsDir;
     }
-    
+
     @Override
     public void afterPropertiesSet() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
