@@ -25,7 +25,7 @@ source ../functions.sh
 #    latticeengines/matchapi
 
 docker run -d \
-    --name ${CLUSTER}_tomcat \
+    --name ${CLUSTER} \
     -h ${CLUSTER}-tomcat \
     -l ${SERVICE}.group=${CLUSTER} \
     -l cluster=${CLUSTER} \
