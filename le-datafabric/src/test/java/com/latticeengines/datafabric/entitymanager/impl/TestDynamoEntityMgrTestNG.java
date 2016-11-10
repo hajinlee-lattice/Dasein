@@ -40,9 +40,11 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
 
     @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
+        dynamoService.switchToLocal();
+
         repo = leEnv + "_" + leStack + "_testRepo";
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
-        teardown();
+        dynamoService.deleteTable(tableName);
 
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
         AmazonDynamoDBClient client = dynamoService.getClient();
@@ -57,6 +59,7 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
     @AfterClass(groups = "dynamo")
     public void teardown() throws Exception {
         dynamoService.deleteTable(tableName);
+        dynamoService.switchToRemote();
     }
 
     @Test(groups = "dynamo")

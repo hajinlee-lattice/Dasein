@@ -13,6 +13,10 @@ public interface DynamoService {
 
     AmazonDynamoDBClient getClient();
 
+    void switchToLocal();
+
+    void switchToRemote();
+
     DynamoDB getDynamoDB();
 
 }

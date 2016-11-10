@@ -27,19 +27,25 @@ public class DynamoServiceImpl implements DynamoService {
     private static final Log log = LogFactory.getLog(DynamoServiceImpl.class);
 
     private AmazonDynamoDBClient client;
+    private AmazonDynamoDBClient remoteClient;
+    private AmazonDynamoDBClient localClient;
+
     private DynamoDB dynamoDB;
+    private DynamoDB remoteDynamoDb;
+    private DynamoDB localDynamoDb;
 
     @Autowired
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials,
                              @Value("${aws.dynamo.endpoint:}") String endpoint) {
-        if (StringUtils.isEmpty(endpoint)) {
-            log.info("Constructing DynamoServiceImpl using BasicAWSCredentials.");
-            client = new AmazonDynamoDBClient(awsCredentials);
-        } else {
-            log.info("Constructing DynamoServiceImpl using endpoint " + endpoint);
-            client = new AmazonDynamoDBClient().withEndpoint(endpoint);
+        log.info("Constructing DynamoDB client using BasicAWSCredentials.");
+        remoteClient = new AmazonDynamoDBClient(awsCredentials);
+        remoteDynamoDb = new DynamoDB(remoteClient);
+        if (StringUtils.isNotEmpty(endpoint)) {
+            log.info("Constructing DynamoDB client using endpoint " + endpoint);
+            localClient = new AmazonDynamoDBClient().withEndpoint(endpoint);
+            localDynamoDb = new DynamoDB(localClient);
         }
-        dynamoDB = new DynamoDB(client);
+        switchToRemote();
     }
 
     public DynamoServiceImpl(AmazonDynamoDBClient client) {
@@ -50,6 +56,23 @@ public class DynamoServiceImpl implements DynamoService {
     @Override
     public AmazonDynamoDBClient getClient() {
         return client;
+    }
+
+    @Override
+    public void switchToLocal() {
+        if (localClient == null) {
+            throw new RuntimeException("Local dynamo client has not been initialized.");
+        }
+        log.info("Switching dynamo service to local mode.");
+        client = localClient;
+        dynamoDB = localDynamoDb;
+    }
+
+    @Override
+    public void switchToRemote() {
+        log.info("Switching dynamo service to remote mode.");
+        client = remoteClient;
+        dynamoDB = remoteDynamoDb;
     }
 
     @Override
