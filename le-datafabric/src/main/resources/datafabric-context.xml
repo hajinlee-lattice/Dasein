@@ -9,4 +9,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.farbic.service.message.impl*" />
     </context:component-scan>
 
+    <import resource="classpath:aws-context.xml" />
+
 </beans>
