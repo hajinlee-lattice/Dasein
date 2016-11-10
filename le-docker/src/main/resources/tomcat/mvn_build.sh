@@ -4,6 +4,10 @@ docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev
 
 source ../functions.sh
 
+pushd le-config
+build_docker latticeengines/config
+popd
+
 pushd le-tomcat
 build_docker latticeengines/tomcat
 popd

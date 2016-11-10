@@ -11,6 +11,7 @@
         <component-name>docker</component-name>
         <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/resources/tomcat/le-tomcat</tomcat.docker.context>
+        <config.docker.context>src/main/resources/tomcat/le-config</config.docker.context>
         <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
         <oauth2.docker.context>src/main/resources/tomcat/le-oauth2</oauth2.docker.context>
         <playmaker.docker.context>src/main/resources/tomcat/le-playmaker</playmaker.docker.context>
@@ -72,6 +73,15 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/devcluster_aws/latticeengines.properties"
+                                      tofile="${project.basedir}/${config.docker.context}/conf/env/devcluster_aws/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/qacluster_aws/latticeengines.properties"
+                                      tofile="${project.basedir}/${config.docker.context}/conf/env/qacluster_aws/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster_aws/latticeengines.properties"
+                                      tofile="${project.basedir}/${config.docker.context}/conf/env/prodcluster_aws/latticeengines.properties"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-ui.tar.gz"
                                       tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
