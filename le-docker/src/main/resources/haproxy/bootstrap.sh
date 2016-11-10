@@ -17,7 +17,7 @@ docker run -d \
     -h ${CLUSTER}-matchapi \
     -e LE_ENVIRONMENT=dev \
     -e LE_STACK=${LE_STACK} \
-    -e MATCHAPI_HOSTPORT="tomcat:8080" \
+    -e HOSTS="10.41.0.1,10.41.0.2" \
     -l ${SERVICE}.group=${CLUSTER} \
     -l cluster=${CLUSTER} \
     -p 80:80 \
