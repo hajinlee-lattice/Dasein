@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -27,10 +28,15 @@ public class StatsServiceImpl implements StatsService {
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
+    @Value("${monitor.health.inspection.enabled}")
+    private boolean inspectionEnabled;
+
     @Override
     public void register(Inspection inspection) {
-        scheduler.scheduleWithFixedDelay(new InspectionRunnable(inspection), inspection.interval());
-        log.info("Registered inspection " + inspection + " to scheduler " + scheduler);
+        if (inspectionEnabled) {
+            scheduler.scheduleWithFixedDelay(new InspectionRunnable(inspection), inspection.interval());
+            log.info("Registered inspection " + inspection + " to scheduler " + scheduler);
+        }
     }
 
     private class InspectionRunnable implements Runnable {
