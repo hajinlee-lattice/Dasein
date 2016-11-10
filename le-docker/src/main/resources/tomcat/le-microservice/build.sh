@@ -31,21 +31,21 @@ function build_docker() {
 }
 
 MICROSERVICES="doc"
-MICROSERVICES="${MICROSERVICES}\n eai"
-MICROSERVICES="${MICROSERVICES}\n metadata"
-MICROSERVICES="${MICROSERVICES}\n scoring"
-MICROSERVICES="${MICROSERVICES}\n modeling"
-MICROSERVICES="${MICROSERVICES}\n dataflowapi"
-MICROSERVICES="${MICROSERVICES}\n workflowapi"
-MICROSERVICES="${MICROSERVICES}\n quartz"
-MICROSERVICES="${MICROSERVICES}\n modelquality"
-MICROSERVICES="${MICROSERVICES}\n propdata"
-MICROSERVICES="${MICROSERVICES}\n dellebi"
+MICROSERVICES="${MICROSERVICES},eai"
+MICROSERVICES="${MICROSERVICES},metadata"
+MICROSERVICES="${MICROSERVICES},scoring"
+MICROSERVICES="${MICROSERVICES},modeling"
+MICROSERVICES="${MICROSERVICES},dataflowapi"
+MICROSERVICES="${MICROSERVICES},workflowapi"
+MICROSERVICES="${MICROSERVICES},quartz"
+MICROSERVICES="${MICROSERVICES},modelquality"
+MICROSERVICES="${MICROSERVICES},propdata"
+MICROSERVICES="${MICROSERVICES},dellebi"
 
 mkdir -p /tmp/latticeengines || true
 mkdir tmp || true
 
-for service in ${MICROSERVICES}; do
+for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     WAR=${service} &&
     if [ "${WAR}" = "doc" ]; then
         WAR=ROOT
