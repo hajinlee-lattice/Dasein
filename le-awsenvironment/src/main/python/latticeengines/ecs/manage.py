@@ -53,6 +53,24 @@ def find_cluster(cluster):
 
     raise Exception("Cannot find the ecs cluster named " + cluster)
 
+
+def find_cluster_random_token(cluster):
+    response = ECS_CLIENT.list_clusters()
+
+    token = None
+    for c in response['clusterArns']:
+        full_name = c.split(':')[5].replace('cluster/', '')
+        cluster_name = full_name.split('-ecscluster-')[0]
+        if cluster_name == cluster:
+            token = full_name.split('-ecscluster-')[1]
+
+    if token is not None:
+        return token
+
+    sys.stdout.flush()
+
+    raise Exception("Cannot find the ecs cluster named " + cluster)
+
 def count_tasks_in_service(cluster_arn, service_arn):
     response = ECS_CLIENT.describe_services(cluster=cluster_arn, services=[service_arn])
     return response['services'][0]['runningCount']

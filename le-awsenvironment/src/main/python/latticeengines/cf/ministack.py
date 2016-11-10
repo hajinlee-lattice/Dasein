@@ -17,7 +17,7 @@ from ..conf import AwsEnvironment
 from ..cw.logs import clean_internal as clean_log_group
 from ..cw.logs import create_internal as create_log_group
 from ..ecs.container import Container
-from ..ecs.manage import register_task, deregister_task, create_service, delete_service
+from ..ecs.manage import register_task, deregister_task, create_service, delete_service, find_cluster_random_token
 from ..ecs.volume import Volume as ECSVolume
 from ..elb.targetgroup import DUMMY_TGRP
 
@@ -47,7 +47,8 @@ class CreateServiceThread (threading.Thread):
         container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         scoringcache = ECSVolume("scoringcache", "/mnt/efs/scoringapi")
-        task = "%s-%s" % (self.stackname, self.app)
+        token = find_cluster_random_token(self.stackname)
+        task = "%s-%s-%s" % (self.stackname, self.app, token)
         register_task(task, [container], [ledp, scoringcache])
         create_service(self.stackname, self.app, task, 1)
 
@@ -61,7 +62,9 @@ class DeleteServiceThread (threading.Thread):
 
     def run(self):
         delete_service(self.stackname, self.app)
-        deregister_task("%s-%s" % (self.stackname, self.app))
+        token = find_cluster_random_token(self.stackname)
+        task = "%s-%s-%s" % (self.stackname, self.app, token)
+        deregister_task(task)
 
 def main():
     args = parse_args()
@@ -230,6 +233,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
         "awslogs-region": region
     })
     container.publish_port(8080, alloc["port"])
+    container.hostname(app)
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip
@@ -245,7 +249,6 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
     params["AWS_OAUTH_ADDRESS"] = "%s://%s/oauth2" % (protocol, ip)
     params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/playmaker" % (protocol, ip)
 
-    params["LE_SWLIB_DISABLED"] = "true"
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment
     params["CATALINA_OPTS"] = "-Xmx%dm" % (int(alloc["mem"] * 0.9))

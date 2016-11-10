@@ -55,6 +55,7 @@ def tomcat_task(profile_vars):
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
+        .hostname(PARAM_DOCKER_IMAGE.ref()) \
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
         .publish_port(1099, 1099) \

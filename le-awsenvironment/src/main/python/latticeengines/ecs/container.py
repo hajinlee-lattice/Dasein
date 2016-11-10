@@ -15,6 +15,9 @@ class Container(Template):
     def cpu(self, cpu):
         self._template["cpu"] = cpu
 
+    def hostname(self, hostname):
+        self._template["hostname"] = hostname
+
     def publish_port(self, container_port, host_port, protocol='tcp'):
         if 'portMappings' not in self._template:
             self._template["portMappings"] = []
