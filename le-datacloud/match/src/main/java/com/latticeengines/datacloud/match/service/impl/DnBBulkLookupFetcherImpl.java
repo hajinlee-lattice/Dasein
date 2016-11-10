@@ -25,8 +25,8 @@ import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
-import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
+import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 

@@ -18,8 +18,8 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
+import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component

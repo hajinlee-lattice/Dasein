@@ -9,7 +9,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
 public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.exposed.service;
+package com.latticeengines.datacloud.match.service;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;

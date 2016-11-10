@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.exposed.service;
+package com.latticeengines.datacloud.match.service;
 
 import java.util.Map;
 

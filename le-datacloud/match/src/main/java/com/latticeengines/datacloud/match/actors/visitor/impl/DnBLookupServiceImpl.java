@@ -19,9 +19,9 @@ import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupDispatcher;
-import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
-import com.latticeengines.datacloud.match.exposed.service.DnBRealTimeLookupService;
+import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
+import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
+import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 
 @Component("dnBLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {

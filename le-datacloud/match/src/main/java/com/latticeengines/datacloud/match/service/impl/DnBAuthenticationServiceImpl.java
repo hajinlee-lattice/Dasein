@@ -22,7 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
+import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 
 @Component
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
