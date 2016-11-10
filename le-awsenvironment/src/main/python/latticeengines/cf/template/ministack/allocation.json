@@ -1,22 +1,24 @@
 {
     "pls": {
         "cpu": 512,
-        "mem": 1536,
+        "mem": 2048,
         "port": 8081
     },
     "admin": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 8085
     },
     "matchapi": {
         "cpu": 512,
         "mem": 3096,
-        "port": 8076
+        "port": 8076,
+        "capacity": 2
     },
     "scoringapi": {
         "cpu": 1024,
-        "mem": 1536,
-        "port": 8073
+        "mem": 2048,
+        "port": 8073,
+        "capacity": 2
     },
     "oauth2": {
         "mem": 1024,
@@ -47,20 +49,20 @@
         "port": 9005
     },
     "workflowapi": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 9006
     },
     "quartz": {
         "cpu": 1024,
-        "mem": 1024,
+        "mem": 2048,
         "port": 9007
     },
     "modelquality": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 9008
     },
     "propdata": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 9009
     },
     "dellebi": {

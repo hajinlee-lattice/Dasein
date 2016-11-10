@@ -32,13 +32,14 @@ ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
 
 class CreateServiceThread (threading.Thread):
-    def __init__(self, environment, stackname, app, ecr, ip, profile, region):
+    def __init__(self, environment, stackname, app, instances, ecr, ip, profile, region):
         threading.Thread.__init__(self)
         self.threadID = "%s-%s" % (stackname, app)
         self.environment = environment
         self.stackname = stackname
         self.app = app
         self.ecr = ecr
+        self.instances = instances
         self.ip = ip
         self.profile = profile
         self.region = region
@@ -50,7 +51,7 @@ class CreateServiceThread (threading.Thread):
         token = find_cluster_random_token(self.stackname)
         task = "%s-%s-%s" % (self.stackname, self.app, token)
         register_task(task, [container], [ledp, scoringcache])
-        create_service(self.stackname, self.app, task, 1)
+        create_service(self.stackname, self.app, task, self.instances)
 
 
 class DeleteServiceThread (threading.Thread):
@@ -215,7 +216,9 @@ def bootstrap(environment, stackname, apps, profile, region="us-east-1"):
 
     threads = []
     for app in apps.split(","):
-        thread = CreateServiceThread(environment, stackname, app, ecr_url, ip, profile, region)
+        alloc = ALLOCATION[app]
+        instances = alloc['capacity'] if 'capacity' in alloc else 1
+        thread = CreateServiceThread(environment, stackname, app, instances, ecr_url, ip, profile, region)
         thread.start()
         threads.append(thread)
 
@@ -321,7 +324,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of swagger apps.')
-    parser1.add_argument('-n', dest='instances', type=int, default="1", help='number of instances.')
+    parser1.add_argument('-n', dest='instances', type=int, default="2", help='number of instances.')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.set_defaults(func=template_cli)
 
