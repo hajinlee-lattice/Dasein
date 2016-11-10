@@ -80,6 +80,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setUserId(user);
         workflowJob.setApplicationId(appId.toString());
         workflowJob.setInputContext(workflowConfig.getInputProperties());
+        workflowJob.setStartTimeInMillis(System.currentTimeMillis());
         workflowEntityMgr.create(workflowJob);
 
         return appId;
@@ -193,6 +194,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
         job.setInputs(inputProperties);
         job.setId(workflowJob.getPid());
+        job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
 
         // get state first from database
         if (workflowJob.getStatus() != null
