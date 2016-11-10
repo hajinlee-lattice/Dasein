@@ -1,8 +1,13 @@
 package org.apache.sqoop;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.GenericOptionsParser;
 
@@ -13,6 +18,7 @@ import com.cloudera.sqoop.util.OptionsFileUtil;
 
 @SuppressWarnings("deprecation")
 public class LedpSqoop extends Sqoop {
+    protected static final Log log = LogFactory.getLog(LedpSqoop.class);
 
 
     private SqoopTool tool;
@@ -35,6 +41,14 @@ public class LedpSqoop extends Sqoop {
      * does not call System.exit() as main() will.
      */
     public static int runTool(String[] args, Configuration conf) {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+        StringBuilder sb = new StringBuilder();
+        for (URL url: urls) {
+            sb.append(url.getFile() + "\n");
+        }
+        log.info("Sqoop Classpath:\n" + sb.toString());
+
         // Expand the options
         String[] expandedArgs = null;
         try {
