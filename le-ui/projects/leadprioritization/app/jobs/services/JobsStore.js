@@ -5,10 +5,16 @@ angular
         JobsStore.getJobs();
     }, 1000); // FIXME: we wont need this soon, this is for switching tenants fix hack
 
+    var pending = false;
     $interval(function() {
         var modelId = $stateParams.modelId || '';
-        JobsStore.getJobs(null, modelId);
-    }, 60 * 1000); // 15 seconds
+        if (!pending) {
+            pending = true;
+            JobsStore.getJobs(null, modelId).then(function(response) {
+                pending = false;
+            });
+        }
+    }, 45 * 1000);
 })
 .service('JobsStore', function($q, JobsService) {
     var JobsStore = this;

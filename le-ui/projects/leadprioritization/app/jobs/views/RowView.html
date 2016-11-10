@@ -1,6 +1,7 @@
 <div class="expanded-{{jobRowExpanded}} {{jobType}} job-list-item">
     <div class="clearfix">
-        <span class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span data-ng-if="job.timestamp == null" class="columns two">N/A</span>
+        <span data-ng-if="job.timestamp != null" class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state != 'model'" ng-attr-data-stooltip="{{job.modelName}}">
             <a ng-if="job.modelId && job.modelName && !isPMML && !job.isDeleted"
                class="model-name" 
