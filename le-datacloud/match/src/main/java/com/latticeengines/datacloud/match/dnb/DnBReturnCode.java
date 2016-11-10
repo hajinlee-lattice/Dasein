@@ -4,6 +4,7 @@ public enum DnBReturnCode {
     OK("Ok"),
     DISCARD("Discard"),
     IN_PROGRESS("In Progress"),
+    UNAUTHORIZED("Unauthorized"),
     RATE_LIMITING("Rate Limiting"),
     TIMEOUT("Timeout"),
     INVALID_INPUT("Invalid Input"),

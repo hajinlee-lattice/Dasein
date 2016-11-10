@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,7 +56,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     protected abstract HttpEntity<String> constructEntity(T input, String token);
 
-    private void parseDnBHttpError(HttpClientErrorException ex, DataFlowContext context) {
+    protected void parseDnBHttpError(HttpClientErrorException ex, DataFlowContext context) {
         DnBReturnCode errCode = null;
         Boolean isNeedParseBody = false;
         switch (ex.getStatusCode()) {
@@ -77,21 +78,31 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         context.setProperty(DNB_RETURN_CODE, errCode);
     }
 
-    private DnBReturnCode parseErrorBody(String body) {
+    @SuppressWarnings("unchecked")
+    protected DnBReturnCode parseErrorBody(String body) {
         DnBReturnCode errCode;
-        String dnBErrorCode = (String) retrieveJsonValueFromResponse(resultIdJsonPath, body);
-        switch (dnBErrorCode) {
-        case "SC001":
-        case "SC003":
-            errCode = DnBReturnCode.EXPIRED;
-            break;
-        case "SC005":
-            errCode = DnBReturnCode.EXCEED_REQUEST_NUM;
-            break;
-        case "SC006":
-            errCode = DnBReturnCode.EXCEED_CONCURRENT_NUM;
-            break;
-        default:
+        try {
+            List<String> code = (List<String>) retrieveJsonValueFromResponse(resultIdJsonPath, body);
+            String dnBErrorCode = code.get(0);
+            switch (dnBErrorCode) {
+                case "SC001":
+                case "SC003":
+                    errCode = DnBReturnCode.EXPIRED;
+                    break;
+                case "SC002":
+                    errCode = DnBReturnCode.UNAUTHORIZED;
+                    break;
+                case "SC005":
+                    errCode = DnBReturnCode.EXCEED_REQUEST_NUM;
+                    break;
+                case "SC006":
+                    errCode = DnBReturnCode.EXCEED_CONCURRENT_NUM;
+                    break;
+                default:
+                    errCode = DnBReturnCode.UNKNOWN;
+            }
+        } catch (Exception ex) {
+            log.error(ex);
             errCode = DnBReturnCode.UNKNOWN;
         }
 

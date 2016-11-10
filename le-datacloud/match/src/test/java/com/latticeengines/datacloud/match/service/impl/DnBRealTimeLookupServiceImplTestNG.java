@@ -31,8 +31,9 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     private final static int THREAD_NUM = 20;
 
-    @Test(groups = "functional", dataProvider = "inputData", enabled = true)
-    public void testRealTimeLookupService(String name, String city, String state, String country, String message) {
+    @Test(groups = "functional", dataProvider = "entityInputData", enabled = true)
+    public void testRealTimeEntityLookupService(String name, String city, String state, String country,
+            String message) {
         MatchKeyTuple input = new MatchKeyTuple();
         input.setCountryCode(country);
         input.setName(name);
@@ -42,6 +43,15 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(input);
         log.info(res.getDuns() + " " + res.getConfidenceCode() + " " + res.getMatchGrade().getRawCode() + " "
                 + res.getDnbCode().getMessage());
+        Assert.assertEquals(res.getDnbCode().getMessage(), message);
+    }
+
+    @Test(groups = "functional", dataProvider = "emailInputData", enabled = true)
+    public void testRealTimeEmailLookupService(String email, String message) {
+        MatchKeyTuple input = new MatchKeyTuple();
+        input.setEmail(email);
+
+        DnBMatchContext res = dnBRealTimeLookupService.realtimeEmailLookup(input);
         Assert.assertEquals(res.getDnbCode().getMessage(), message);
     }
 
@@ -79,20 +89,24 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
             }
         }
 
-        for(int i = 0; i < THREAD_NUM; i++) {
-            if(messageList.get(i).equals(DnBReturnCode.EXCEED_CONCURRENT_NUM.getMessage())) {
+        for (int i = 0; i < THREAD_NUM; i++) {
+            if (messageList.get(i).equals(DnBReturnCode.EXCEED_CONCURRENT_NUM.getMessage())) {
                 Assert.assertTrue(true);
             }
         }
         Assert.assertTrue(false);
     }
 
-    @DataProvider(name = "inputData")
-    public static Object[][] getInputData() {
+    @DataProvider(name = "entityInputData")
+    public static Object[][] getEntityInputData() {
         return new Object[][] { { "Benchmark Blinds", "Gilbert", "Arizona", "US", DnBReturnCode.OK.getMessage() },
-                { "El Camino Machine Welding LLC", "Salinas", "California", "US",
-                        DnBReturnCode.OK.getMessage() },
+                { "El Camino Machine Welding LLC", "Salinas", "California", "US", DnBReturnCode.OK.getMessage() },
                 { "Cornerstone Alliance Church", "Canon City", "Colorado", "US", DnBReturnCode.OK.getMessage() },
                 { "  Gorman Manufacturing  ", "", "", "  US  ", DnBReturnCode.DISCARD.getMessage() } };
+    }
+
+    @DataProvider(name = "emailInputData")
+    public static Object[][] getEmailInputData() {
+        return new Object[][] { { "CRISTIANA_MAURICIO@DEACONESS.COM", DnBReturnCode.UNAUTHORIZED.getMessage() } };
     }
 }

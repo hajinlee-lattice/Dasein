@@ -18,6 +18,8 @@ import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupDispatche
 import com.latticeengines.datacloud.match.exposed.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 
+import static java.lang.Thread.sleep;
+
 public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(DnBBulkLookupServiceImplTestNG.class);
@@ -49,6 +51,14 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
             DnBMatchContext result = output.get(lookupRequestId);
             log.info("Request " + result.getLookupRequestId() + ": " + output.get(lookupRequestId).getDuns());
         }
+        dnBBulkLookupFetcher.getResult(info);
+        Assert.assertEquals(info.getDnbCode(), DnBReturnCode.RATE_LIMITING);
+        try {
+            sleep(70000);
+        } catch (InterruptedException e) {
+        }
+        dnBBulkLookupFetcher.getResult(info);
+        Assert.assertEquals(info.getDnbCode(), DnBReturnCode.OK);
     }
 
     static String[][] input = { { "Benchmark Blinds", "Gilbert", "Arizona", "US" },

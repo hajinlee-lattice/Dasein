@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
@@ -37,6 +38,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     @Value("${datacloud.dnb.realtime.url.prefix}")
     private String realTimeUrlPrefix;
 
+    @Value("${datacloud.dnb.realtime.email.lookup.url.format}")
+    private String emailLookupUrlFormat;
+
     @Value("${datacloud.dnb.authorization.header}")
     private String authorizationHeader;
 
@@ -49,12 +53,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     @Value("${datacloud.dnb.realtime.matchgrade.jsonpath}")
     private String matchGradeJsonPath;
 
-    @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
-    private String resultIdJsonPath;
-
-    @Value("${datacloud.dnb.realtime.transactionResult.jsonpath}")
-    private String transactionResultJsonPath;
-
     @Value("${datacloud.dnb.realtime.retry.maxattempts}")
     private int retries;
 
@@ -62,27 +60,64 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
 
     @Override
     public DnBMatchContext realtimeEntityLookup(MatchKeyTuple input) {
-        DataFlowContext context = null;
         DnBMatchContext output = new DnBMatchContext();
+        DnBReturnCode returnCode = null;
         for (int i = 0; i < retries; i++) {
-            context = executeLookup(input, DnBKeyType.REALTIME);
-            DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
+            DataFlowContext context = executeLookup(input, DnBKeyType.REALTIME);
+            returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
-                output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
-                log.debug("Finished dnb realtime lookup request status= " + returnCode);
+                if(returnCode == DnBReturnCode.OK || returnCode == DnBReturnCode.DISCARD) {
+                    output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
+                }
+                log.debug("Finished dnb realtime entity lookup request status= " + returnCode);
                 break;
             }
             dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
         }
-
-        output.setDnbCode(context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class));
+        output.setDnbCode(returnCode);
 
         return output;
     }
 
     @Override
     public DnBMatchContext realtimeEmailLookup(MatchKeyTuple input) {
-        return null;
+        DnBMatchContext output = new DnBMatchContext();
+        DnBReturnCode returnCode = null;
+        for (int i = 0; i < retries; i++) {
+            DataFlowContext context = executeEmailLookup(input, DnBKeyType.REALTIME);
+            returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
+            if (returnCode != DnBReturnCode.EXPIRED) {
+                if(returnCode == DnBReturnCode.OK || returnCode == DnBReturnCode.DISCARD) {
+                    output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
+                }
+                log.debug("Finished dnb realtime email lookup request status=" + returnCode);
+                break;
+            }
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
+        }
+
+        output.setDnbCode(returnCode);
+
+        return output;
+    }
+
+    private DataFlowContext executeEmailLookup(MatchKeyTuple input, DnBKeyType keyType) {
+        DataFlowContext context = new DataFlowContext();
+        String token = dnBAuthenticationService.requestToken(keyType);
+        String url = constructEmailLookupUrl(input);
+        try {
+            HttpEntity<String> entity = constructEntity(input, token);
+            ResponseEntity<String> response = sendRequestToDnB(url, entity);
+            parseSucceededResponse(response, context);
+        } catch (HttpClientErrorException ex) {
+            parseDnBHttpError(ex, context);
+        }
+
+        return context;
+    }
+
+    private String constructEmailLookupUrl(MatchKeyTuple tuple) {
+        return String.format(emailLookupUrlFormat, normalizeString(tuple.getEmail()));
     }
 
     @Override

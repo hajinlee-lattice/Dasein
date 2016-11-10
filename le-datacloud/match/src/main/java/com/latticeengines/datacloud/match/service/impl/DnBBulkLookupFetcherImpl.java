@@ -74,9 +74,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     @Value("${datacloud.dnb.bulk.service.number}")
     private int serviceNumber;
 
-    @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
-    private String resultIdJsonPath;
-
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
@@ -88,7 +85,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     @Override
     public Map<String, DnBMatchContext> getResult(DnBBulkMatchInfo info) {
 
-        DataFlowContext context = new DataFlowContext();
         if (!preValidation()) {
             info.setDnbCode(DnBReturnCode.RATE_LIMITING);
             return null;
@@ -96,14 +92,14 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
 
         Map<String, DnBMatchContext> output = new HashMap<String, DnBMatchContext>();
         for (int i = 0; i < retries; i++) {
-            context = executeLookup(info, DnBKeyType.BULKMATCH);
+            DataFlowContext context = executeLookup(info, DnBKeyType.BULKMATCH);
             DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
             if (returnCode != DnBReturnCode.EXPIRED) {
-                log.debug("Fetched result from DnB bulk match api. Status = " + returnCode);
+                log.debug("Fetched result from DnB bulk match api. Status=" + returnCode);
                 info.setDnbCode(returnCode);
                 if (returnCode == DnBReturnCode.OK) {
                     output = context.getProperty(DNB_MATCH_OUTPUT_LIST, Map.class);
-                    log.info("Successfully fetched results from dnb. Size = " + output.size() + " Timestamp="
+                    log.info("Successfully fetched results from dnb. Size= " + output.size() + " Timestamp="
                             + info.getTimestamp() + " ServiceId=" + info.getServiceBatchId());
                 }
                 break;
