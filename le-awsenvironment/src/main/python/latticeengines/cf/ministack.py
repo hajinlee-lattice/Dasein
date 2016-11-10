@@ -29,6 +29,40 @@ ALL_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,mo
 DEFAULT_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi"
 PROFILE = {}
 
+
+class CreateServiceThread (threading.Thread):
+    def __init__(self, stackname, app, ecr, ip, profile, region):
+        threading.Thread.__init__(self)
+        self.threadID = "%s-%s" % (stackname, app)
+        self.stackname = stackname
+        self.app = app
+        self.ecr = ecr
+        self.ip = ip
+        self.profile = profile
+        self.region = region
+
+    def run(self):
+        container = tomcat_container(self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
+        ledp = ECSVolume("ledp", "/etc/ledp")
+        scoringcache = ECSVolume("scoringcache", "/mnt/efs/scoringapi")
+        task = "%s-%s" % (self.stackname, self.app)
+        register_task(task, [container], [ledp, scoringcache])
+        create_service(self.stackname, self.app, task, 1)
+
+
+class DeleteServiceThread (threading.Thread):
+    def __init__(self, stackname, app):
+        threading.Thread.__init__(self)
+        self.threadID = "%s-%s" % (stackname, app)
+        self.stackname = stackname
+        self.app = app
+
+    def run(self):
+        delete_service(self.stackname, self.app)
+        deregister_task("%s-%s" % (self.stackname, self.app))
+
+
+
 def main():
     args = parse_args()
     args.func(args)
@@ -197,13 +231,14 @@ def bootstrap(environment, stackname, ip, apps, profile, region="us-east-1"):
     config = AwsEnvironment(environment)
     ecr_url = config.ecr_registry()
 
+    threads = []
     for app in apps.split(","):
-        container = tomcat_container(stackname, ecr_url, app, ip, profile, region=region)
-        ledp = ECSVolume("ledp", "/etc/ledp")
-        scoringcache = ECSVolume("scoringcache", "/mnt/efs/scoringapi")
-        task = "%s-%s" % (stackname, app)
-        register_task(task, [container], [ledp, scoringcache])
-        create_service(stackname, app, task, 1)
+        thread = CreateServiceThread(stackname, app, ecr_url, ip, profile, region)
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join(120)
 
 def tomcat_container(stackname, ecr_url, app, ip, profile_file, region="us-east-1"):
     profile = PROFILE[app]
@@ -238,18 +273,6 @@ def get_proxy_ip(stackname):
 
 def teardown_cli(args):
     teardown(args.stackname, completely=args.completely)
-
-
-class DeleteServiceThread (threading.Thread):
-    def __init__(self, stackname, app):
-        threading.Thread.__init__(self)
-        self.threadID = "%s-%s" % (stackname, app)
-        self.stackname = stackname
-        self.app = app
-
-    def run(self):
-        delete_service(self.stackname, self.app)
-        deregister_task("%s-%s" % (self.stackname, self.app))
 
 def teardown(stackname, completely=False):
     threads = []
