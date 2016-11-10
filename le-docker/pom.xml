@@ -9,17 +9,17 @@
 
     <properties>
         <component-name>docker</component-name>
-        <kafka.connect.docker.context>src/main/resources/kafka/le-kafka-connect</kafka.connect.docker.context>
-        <tomcat.docker.context>src/main/resources/tomcat/le-tomcat</tomcat.docker.context>
-        <config.docker.context>src/main/resources/tomcat/le-config</config.docker.context>
-        <matchapi.docker.context>src/main/resources/tomcat/le-matchapi</matchapi.docker.context>
-        <oauth2.docker.context>src/main/resources/tomcat/le-oauth2</oauth2.docker.context>
-        <playmaker.docker.context>src/main/resources/tomcat/le-playmaker</playmaker.docker.context>
-        <scoringapi.docker.context>src/main/resources/tomcat/le-scoringapi</scoringapi.docker.context>
-        <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
-        <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
-        <admin.docker.context>src/main/resources/tomcat/le-admin</admin.docker.context>
-        <pls.docker.context>src/main/resources/tomcat/le-pls</pls.docker.context>
+        <kafka.connect.docker.context>src/main/scripts/kafka/le-kafka-connect</kafka.connect.docker.context>
+        <tomcat.docker.context>src/main/scripts/tomcat/le-tomcat</tomcat.docker.context>
+        <config.docker.context>src/main/scripts/tomcat/le-config</config.docker.context>
+        <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
+        <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
+        <playmaker.docker.context>src/main/scripts/tomcat/le-playmaker</playmaker.docker.context>
+        <scoringapi.docker.context>src/main/scripts/tomcat/le-scoringapi</scoringapi.docker.context>
+        <express.docker.context>src/main/scripts/nodejs/le-express</express.docker.context>
+        <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
+        <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
+        <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
     </properties>
 
     <parent>
