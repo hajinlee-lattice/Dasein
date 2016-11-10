@@ -1,5 +1,6 @@
 package com.latticeengines.modelquality.service.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -21,14 +22,19 @@ public class BaseServiceImpl implements InitializingBean {
     private String plsApiHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
-    
+
     protected Map<String, String> getActiveStack() {
         return internalResourceRestApiProxy.getActiveStack();
     }
-    
-    protected String getVersion() {
 
-        Map<String, String> stackInfo = getActiveStack();
+    protected String getVersion() {
+        Map<String, String> stackInfo;
+        try {
+            stackInfo = getActiveStack();
+        } catch (Exception e) {
+            stackInfo = new HashMap<>();
+            stackInfo.put("CurrentStack", "");
+        }
         String stackName = stackInfo.get("CurrentStack");
         String version = versionManager.getCurrentVersionInStack(stackName).replace('/', '_');
         return version;
