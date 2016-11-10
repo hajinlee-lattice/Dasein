@@ -9,9 +9,9 @@ import os
 import threading
 
 from .consul import write_to_stack
-from .module.ecs import ContainerDefinition, TaskDefinition, ECSService
+from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import *
-from .module.stack import ECSStack, Stack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
+from .module.stack import ECSStack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
 from ..conf import AwsEnvironment
 from ..cw.logs import create_internal as create_log_group
@@ -95,26 +95,6 @@ def create_infra_template(stackname, instances, apps):
     haproxy = stack.create_service("haproxy", task, capacity=instances)
     stack.add_resource(haproxy)
 
-    return stack
-
-def create_app_template(environment, stackname, tag, apps, profile):
-    global PROFILE
-    PROFILE = load_profile()
-
-    stack = Stack("AWS CloudFormation template for mini-stack applications.")
-    stack.add_params([PARAM_ECS_CLUSTER_NAME, PARAM_HAPROXY_IP])
-
-    profile_vars = get_profile_vars(profile)
-    stack.add_params(profile_vars.values())
-    ip = PARAM_HAPROXY_IP.ref()
-    for app in apps.split(","):
-        # assume app == image
-        tomcat = tomcat_task(profile_vars, environment, stackname, app, app, ip, tag)
-        stack.add_resource(tomcat)
-        service = ECSService(app, PARAM_ECS_CLUSTER_NAME, tomcat, 1) \
-            .set_min_max_percent(50, 200) \
-            .depends_on(tomcat)
-        stack.add_resource(service)
     return stack
 
 def swagger_task(stackname, apps):
@@ -250,14 +230,14 @@ def tomcat_container(stackname, ecr_url, app, ip, profile_file, region="us-east-
     })
     container.publish_port(8080, profile["port"])
 
-    container.set_env("LE_CLIENT_ADDRESS", ip)
-    container.set_env("LE_SWLIB_DISABLED", "true")
-    container.set_env("LE_STACK", stackname)
-    container.set_env("CATALINA_OPTS", "-Xmx%dm" % profile["xmx"])
-
     params = get_profile_vars(profile_file)
+    params["LE_CLIENT_ADDRESS"] = ip
+    params["LE_SWLIB_DISABLED"] = "true"
+    params["LE_STACK"] = stackname
+    params["CATALINA_OPTS"] = "-Xmx%dm" % profile["xmx"]
     for k, v in params:
         container.set_env(k, v)
+
     container = container.mount("/etc/ledp", "ledp").mount("/var/cache/scoringapi", "scoringcache")
 
     return container
