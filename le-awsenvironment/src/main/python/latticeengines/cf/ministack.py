@@ -14,6 +14,7 @@ from .module.parameter import *
 from .module.stack import ECSStack, check_stack_not_exists, wait_for_stack_creation, teardown_stack
 from .module.template import TEMPLATE_DIR
 from ..conf import AwsEnvironment
+from ..cw.logs import clean_internal as clean_log_group
 from ..cw.logs import create_internal as create_log_group
 from ..ecs.container import Container
 from ..ecs.manage import register_task, deregister_task, create_service, delete_service
@@ -27,13 +28,14 @@ PARAM_EFS = Parameter("Efs", "EFS Id")
 
 ALL_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi,quartz,modelquality,propdata,dellebi"
 DEFAULT_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi"
-PROFILE = {}
+ALLOCATION = {}
 
 
 class CreateServiceThread (threading.Thread):
-    def __init__(self, stackname, app, ecr, ip, profile, region):
+    def __init__(self, environment, stackname, app, ecr, ip, profile, region):
         threading.Thread.__init__(self)
         self.threadID = "%s-%s" % (stackname, app)
+        self.environment = environment
         self.stackname = stackname
         self.app = app
         self.ecr = ecr
@@ -42,7 +44,7 @@ class CreateServiceThread (threading.Thread):
         self.region = region
 
     def run(self):
-        container = tomcat_container(self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
+        container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         scoringcache = ECSVolume("scoringcache", "/mnt/efs/scoringapi")
         task = "%s-%s" % (self.stackname, self.app)
@@ -61,8 +63,6 @@ class DeleteServiceThread (threading.Thread):
         delete_service(self.stackname, self.app)
         deregister_task("%s-%s" % (self.stackname, self.app))
 
-
-
 def main():
     args = parse_args()
     args.func(args)
@@ -80,9 +80,6 @@ def template(environment, stackname, instances, apps, upload=False):
         infra_stack.validate()
 
 def create_infra_template(stackname, instances, apps):
-    global PROFILE
-    PROFILE = load_profile()
-
     stack = ECSStack("AWS CloudFormation template for mini-stack infrastructure.", use_asgroup=False, instances=instances, efs=PARAM_EFS)
     stack.add_params([PARAM_EFS, PARAM_DOCKER_IMAGE_TAG])
 
@@ -98,13 +95,11 @@ def create_infra_template(stackname, instances, apps):
     return stack
 
 def swagger_task(stackname, apps):
-    profile = PROFILE["swagger"]
-
     container = ContainerDefinition("httpd", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
         "/latticeengines/swagger" ] ]}) \
-        .mem_mb("%d" % profile["mem"]) \
-        .publish_port(80, profile["port"]) \
+        .mem_mb("256") \
+        .publish_port(80, 8080) \
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
@@ -117,7 +112,6 @@ def swagger_task(stackname, apps):
     return task
 
 def haproxy_task(stackname, ec2s):
-    profile = PROFILE["haproxy"]
     tokens = []
     for ec2 in ec2s:
         tokens.append({ "Fn::GetAtt" : [ ec2.logical_id(), "PrivateIp" ]})
@@ -126,8 +120,8 @@ def haproxy_task(stackname, ec2s):
     container = ContainerDefinition("haproxy", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", PARAM_ENVIRONMENT.ref(), "EcrRegistry" ] },
         "/latticeengines/haproxy" ] ]}) \
-        .mem_mb("%d" % profile["mem"]) \
-        .publish_port(80, profile["port"]) \
+        .mem_mb("768") \
+        .publish_port(80, 80) \
         .publish_port(81, 81) \
         .set_logging({
         "LogDriver": "awslogs",
@@ -147,8 +141,8 @@ def provision_cli(args):
     provision(args.environment, args.stackname, args.tag, args.consul)
 
 def provision(environment, stackname, tag, consul):
-    global PROFILE
-    PROFILE = load_profile()
+    global ALLOCATION
+    ALLOCATION = load_allocation()
 
     config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
@@ -205,37 +199,51 @@ def bootstrap_cli(args):
     bootstrap(args.environment, args.stackname, args.ip, args.apps, args.profile)
 
 def bootstrap(environment, stackname, ip, apps, profile, region="us-east-1"):
-    global PROFILE
-    PROFILE = load_profile()
+    global ALLOCATION
+    ALLOCATION = load_allocation()
 
     config = AwsEnvironment(environment)
     ecr_url = config.ecr_registry()
 
     threads = []
     for app in apps.split(","):
-        thread = CreateServiceThread(stackname, app, ecr_url, ip, profile, region)
+        thread = CreateServiceThread(environment, stackname, app, ecr_url, ip, profile, region)
         thread.start()
         threads.append(thread)
 
     for thread in threads:
         thread.join(120)
 
-def tomcat_container(stackname, ecr_url, app, ip, profile_file, region="us-east-1"):
-    profile = PROFILE[app]
+def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, region="us-east-1"):
+    alloc = ALLOCATION[app]
     container = Container("tomcat", "%s/latticeengines/%s" % (ecr_url, app))
-    container.mem_mb(profile["mem"])
+    container.mem_mb(alloc["mem"])
+    if "cpu" in alloc:
+        container.cpu(alloc["cpu"])
     container.log("awslogs", {
         "awslogs-group": "ministack-%s" % stackname,
         "awslogs-region": region
     })
-    container.publish_port(8080, profile["port"])
+    container.publish_port(8080, alloc["port"])
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip
+
+    # TODO: change to https
+    protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
+    params["AWS_PLS_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_ADMIN_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_MICROSERVICE_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_SCORINGAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_MATCHAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_OAUTH_ADDRESS"] = "%s://%s/oauth2" % (protocol, ip)
+    params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/playmaker" % (protocol, ip)
+
     params["LE_SWLIB_DISABLED"] = "true"
     params["LE_STACK"] = stackname
-    params["CATALINA_OPTS"] = "-Xmx%dm" % profile["xmx"]
-    for k, v in params:
+    params["LE_ENVIRONMENT"] = environment
+    params["CATALINA_OPTS"] = "-Xmx%dm" % (int(alloc["mem"] * 0.9))
+    for k, v in params.items():
         container.set_env(k, v)
 
     container = container.mount("/etc/ledp", "ledp").mount("/var/cache/scoringapi", "scoringcache")
@@ -252,10 +260,14 @@ def get_proxy_ip(stackname):
             return value
 
 def teardown_cli(args):
-    teardown(args.stackname, completely=args.completely)
+    teardown(args.stackname, apps=args.apps, completely=args.completely)
 
-def teardown(stackname, completely=False):
+def teardown(stackname, apps=None, completely=False):
     threads = []
+
+    if (apps is None) or completely:
+        apps = ALL_APPS
+
     for app in ALL_APPS.split(","):
         thread = DeleteServiceThread(stackname, app)
         thread.start()
@@ -267,9 +279,13 @@ def teardown(stackname, completely=False):
     if completely:
         client = boto3.client('cloudformation')
         teardown_stack(client, stackname)
+        clean_log_group("ministack-%s" % stackname)
 
-def load_profile():
-    json_file = os.path.join(TEMPLATE_DIR, 'ministack', 'profile.json')
+def load_allocation(alloction_json=None):
+    if alloction_json is None:
+        json_file = os.path.join(TEMPLATE_DIR, 'ministack', 'allocation.json')
+    else:
+        json_file = alloction_json
     with open(json_file) as f:
         return json.loads(f.read())
 
@@ -310,7 +326,7 @@ def parse_args():
     parser1 = commands.add_parser("bootstrap")
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
-    parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of swagger apps.')
+    parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of apps to bootstrap.')
     parser1.add_argument('-i', dest='ip', type=str, help='IP of HAProxy.')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
@@ -318,8 +334,9 @@ def parse_args():
 
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
-    parser1.add_argument('--completely', dest='completely', action="store_true", help='completely tear down: including infrastructure')
+    parser1.add_argument('-a', dest='apps', type=str, help='comma separated list of apps to teardown.')
     parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
+    parser1.add_argument('--include-infra', dest='completely', action="store_true", help='completely tear down: including infrastructure')
     parser1.set_defaults(func=teardown_cli)
 
     args = parser.parse_args()

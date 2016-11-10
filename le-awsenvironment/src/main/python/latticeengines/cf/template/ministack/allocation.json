@@ -1,89 +1,69 @@
 {
-    "swagger": {
-        "mem": 512,
-        "port": 8080
-    },
-    "haproxy": {
-        "mem": 512,
-        "port": 80
-    },
-    "matchapi": {
-        "xmx": 3000,
-        "mem": 3096,
-        "port": 8076
-    },
-    "scoringapi": {
-        "xmx": 2000,
-        "mem": 2048,
-        "port": 8073
-    },
     "pls": {
-        "xmx": 2000,
+        "cpu": 512,
         "mem": 2048,
         "port": 8081
     },
     "admin": {
-        "xmx": 1000,
         "mem": 1024,
         "port": 8085
     },
+    "matchapi": {
+        "cpu": 512,
+        "mem": 3096,
+        "port": 8076
+    },
+    "scoringapi": {
+        "cpu": 1024,
+        "mem": 2048,
+        "port": 8073
+    },
     "oauth2": {
-        "xmx": 500,
         "mem": 512,
         "port": 8072
     },
     "playmaker": {
-        "xmx": 500,
         "mem": 512,
         "port": 8071
     },
     "eai": {
-        "xmx": 500,
         "mem": 512,
         "port": 9001
     },
     "metadata": {
-        "xmx": 1000,
         "mem": 1024,
         "port": 9002
     },
     "scoring": {
-        "xmx": 500,
         "mem": 512,
         "port": 9003
     },
     "modeling": {
-        "xmx": 500,
         "mem": 512,
         "port": 9004
     },
     "dataflowapi": {
-        "xmx": 500,
         "mem": 512,
         "port": 9005
     },
     "workflowapi": {
-        "xmx": 1000,
         "mem": 1024,
         "port": 9006
     },
     "quartz": {
-        "xmx": 500,
+        "cpu": 1024,
         "mem": 512,
         "port": 9007
     },
     "modelquality": {
-        "xmx": 500,
         "mem": 512,
         "port": 9008
     },
     "propdata": {
-        "xmx": 500,
         "mem": 512,
         "port": 9009
     },
     "dellebi": {
-        "xmx": 500,
         "mem": 512,
         "port": 9010
     }
