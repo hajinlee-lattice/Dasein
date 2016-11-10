@@ -25,7 +25,7 @@ def _read_from_consul(server, key):
     conn.request("GET", "/v1/kv/%s" % key)
     response = conn.getresponse()
     print response.status, response.reason
-    return response[0]["Value"]
+    return response.read()[0]["Value"]
 
 def _remove_from_consul(server, key):
     conn = httplib.HTTPConnection(server)
