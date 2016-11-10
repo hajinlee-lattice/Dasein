@@ -18,7 +18,6 @@
         <scoringapi.docker.context>src/main/resources/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
         <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
-        <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/resources/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/resources/tomcat/le-pls</pls.docker.context>
     </properties>
