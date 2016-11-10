@@ -30,6 +30,7 @@
         yarn.client.failover-sleep-base-ms=${hadoop.yarn.client.failover-sleep-base-ms}
         yarn.client.failover-sleep-max-ms=${hadoop.yarn.client.failover-sleep-max-ms}
         mapred.job.tracker=${hadoop.mapred.job.tracker}
+        mapreduce.framework.name=yarn
     </yarn:configuration>
 
 </beans>
