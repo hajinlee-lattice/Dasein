@@ -138,9 +138,9 @@ def haproxy_task(stackname, ec2s):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.tag, args.consul)
+    provision(args.environment, args.stackname, args.tag)
 
-def provision(environment, stackname, tag, consul):
+def provision(environment, stackname, tag):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -192,22 +192,23 @@ def provision(environment, stackname, tag, consul):
     wait_for_stack_creation(client, stackname)
 
     ip = get_proxy_ip(stackname)
-    if consul is not None:
-        write_to_stack(consul, environment, stackname, HAPROXY_KEY, ip)
+    consul = config.consul_server()
+    write_to_stack(consul, environment, stackname, HAPROXY_KEY, ip)
 
 def bootstrap_cli(args):
-    bootstrap(args.environment, args.stackname, args.ip, args.apps, args.profile, consul=args.consul)
+    bootstrap(args.environment, args.stackname, args.apps, args.profile)
 
-def bootstrap(environment, stackname, ip, apps, profile, consul=None, region="us-east-1"):
+def bootstrap(environment, stackname, apps, profile, region="us-east-1"):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
     config = AwsEnvironment(environment)
     ecr_url = config.ecr_registry()
 
-    if consul is not None:
-        ip = read_from_stack(consul, environment, stackname, HAPROXY_KEY)
-        print "Retrieve HAProxy IP from consul: %s" % ip
+
+    consul = config.consul_server()
+    ip = read_from_stack(consul, environment, stackname, HAPROXY_KEY)
+    print "Retrieve HAProxy IP from consul: %s" % ip
 
     threads = []
     for app in apps.split(","):
@@ -325,7 +326,6 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
-    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
@@ -333,7 +333,6 @@ def parse_args():
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of apps to bootstrap.')
     parser1.add_argument('-i', dest='ip', type=str, help='IP of HAProxy. need either ip or a consul address')
-    parser1.add_argument('-c', dest='consul', type=str, help='consul server address. need either ip or a consul address')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=bootstrap_cli)
@@ -341,7 +340,6 @@ def parse_args():
     parser1 = commands.add_parser("teardown")
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, help='comma separated list of apps to teardown.')
-    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.add_argument('--include-infra', dest='completely', action="store_true", help='completely tear down: including infrastructure')
     parser1.set_defaults(func=teardown_cli)
 

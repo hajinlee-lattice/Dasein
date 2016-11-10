@@ -95,6 +95,9 @@ class AwsEnvironment:
     def ssl_certificate_arn(self):
         return self._props['ssl.certificate.arn']
 
+    def consul_server(self):
+        return self._props['consul.server']
+
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry(),
