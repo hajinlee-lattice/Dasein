@@ -136,6 +136,9 @@ class ECSStack(Stack):
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
 
     def add_service(self, service_name, task, capacity=None):
+        self.add_resource(self.create_service(service_name, task, capacity=capacity))
+
+    def create_service(self, service_name, task, capacity=None):
         if capacity is None:
             capacity = PARAM_CAPACITY
 
@@ -148,7 +151,7 @@ class ECSStack(Stack):
             for ec2 in self._ec2s:
                 service.depends_on(ec2)
 
-        self.add_resource(service)
+        return service
 
     def get_ec2s(self):
         return self._ec2s
@@ -178,7 +181,7 @@ class ECSStack(Stack):
             ec2s.append(ec2)
 
             outputs["%sPrivateIp" % name] = {
-                "Description" : "DNS name for load balancer " + name,
+                "Description" : "Private IP for EC2 instance " + name,
                 "Value" : { "Fn::GetAtt" : [ ec2.logical_id(), "PrivateIp" ]}
             }
 
@@ -280,6 +283,8 @@ class ECSStack(Stack):
                                       "    if [ ! -z \"${az}\" ]; then\n",
                                       "        break;\n",
                                       "    fi;\n",
+                                      "    echo \"did not find availability zone, retry after 1 second\"\n",
+                                      "    sleep 1;\n",
                                       "done;\n",
                                       "efs_ip=`cat /tmp/${az}.ip`\n",
                                       "echo ${efs_ip}\n",
@@ -330,6 +335,8 @@ class ECSStack(Stack):
                                 "    if [ ! -z \"${instance_arn}\" ]; then\n",
                                 "        break;\n",
                                 "    fi;\n",
+                                "    echo \"did not find instance arn, retry after 1 second\"\n",
+                                "    sleep 1;\n",
                                 "done;\n",
                                 "region=", { "Ref" : "AWS::Region" }, "\n",
                                 "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"

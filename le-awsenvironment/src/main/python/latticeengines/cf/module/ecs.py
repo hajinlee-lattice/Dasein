@@ -15,7 +15,7 @@ class ECSCluster(Resource):
 class ECSService(Resource):
     def __init__(self, logicalId, ecscluster, task, init_count):
 
-        assert isinstance(ecscluster, ECSCluster)
+        assert isinstance(ecscluster, ECSCluster) or isinstance(ecscluster, Parameter)
         assert isinstance(task, TaskDefinition)
 
         assert isinstance(init_count, int) or isinstance(init_count, Parameter)

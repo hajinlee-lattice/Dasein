@@ -64,6 +64,8 @@ def ecs_metadata(ec2, ecscluster, efs):
                                   "    if [ ! -z \"${az}\" ]; then\n",
                                   "        break;\n",
                                   "    fi;\n",
+                                  "    echo \"did not find availability zone, retry after 1 second\"\n",
+                                  "    sleep 1;\n",
                                   "done;\n",
                                   "efs_ip=`cat /tmp/${az}.ip`\n",
                                   "echo ${efs_ip}\n",
@@ -114,6 +116,8 @@ def ecs_metadata(ec2, ecscluster, efs):
                             "    if [ ! -z \"${instance_arn}\" ]; then\n",
                             "        break;\n",
                             "    fi;\n",
+                            "    echo \"did not find instance arn, retry after 1 second\"\n",
+                            "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
                             "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition cadvisor --container-instances ${instance_arn} --region ${region}\n"

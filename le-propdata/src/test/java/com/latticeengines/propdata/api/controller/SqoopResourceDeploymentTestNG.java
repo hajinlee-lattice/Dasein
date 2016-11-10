@@ -54,16 +54,16 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private String jdbcUrl;
     private String sqlQuery;
 
-    @Value("${propdata.manage.url}")
+    @Value("${datacloud.manage.url}")
     private String dbUrl;
 
-    @Value("${propdata.manage.user}")
+    @Value("${datacloud.manage.user}")
     private String dbUser;
 
-    @Value("${propdata.manage.password.encrypted}")
+    @Value("${datacloud.manage.password.encrypted}")
     private String dbPassword;
 
-    @Value("${propdata.manage.driver}")
+    @Value("${datacloud.manage.driver}")
     private String dbDriver;
 
     @BeforeClass(groups = "deployment")
