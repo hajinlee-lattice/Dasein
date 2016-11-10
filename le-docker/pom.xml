@@ -17,6 +17,9 @@
         <scoringapi.docker.context>src/main/resources/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/resources/nodejs/le-express</express.docker.context>
         <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
+        <microservice.docker.context>src/main/resources/tomcat/le-microservice</microservice.docker.context>
+        <admin.docker.context>src/main/resources/tomcat/le-admin</admin.docker.context>
+        <pls.docker.context>src/main/resources/tomcat/le-pls</pls.docker.context>
     </properties>
 
     <parent>
@@ -54,6 +57,12 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-scoringapi/target/le-scoringapi-${project.version}.war"
                                       tofile="${project.basedir}/${scoringapi.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-pls/target/le-pls-${project.version}.war"
+                                      tofile="${project.basedir}/${pls.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-admin/target/le-admin-${project.version}.war"
+                                      tofile="${project.basedir}/${admin.docker.context}/webapps/ROOT.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/qacluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/qacluster_aws/latticeengines.properties"

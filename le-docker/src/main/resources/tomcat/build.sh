@@ -24,4 +24,12 @@ pushd le-scoringapi
 build_docker latticeengines/scoringapi
 popd
 
+pushd le-pls
+build_docker latticeengines/pls
+popd
+
+pushd le-admin
+build_docker latticeengines/admin
+popd
+
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

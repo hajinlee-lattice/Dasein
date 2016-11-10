@@ -28,4 +28,12 @@ pushd le-microservice
 bash build.sh
 popd
 
+pushd le-admin
+build_docker latticeengines/admin
+popd
+
+pushd le-pls
+build_docker latticeengines/pls
+popd
+
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
