@@ -52,7 +52,7 @@
               ng-if="col.type==='select'"
               placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
               ng-model="vm_analyticTest.analyticTest[col.key]"
-              ng-options="opt.name for opt in vm_analyticTest.entityOptions[col.key]">
+              ng-options="opt.name as opt.name for opt in vm_analyticTest.entityOptions[col.key]">
             </select>
             <button
               class="form-control"
