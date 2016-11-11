@@ -1,0 +1,64 @@
+<div class="metadata-component">
+    <ul class="filters">
+        <li>
+            <button ng-click="vm.editAll()" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i> edit all</button>
+        </li>
+        <li>
+            <input type="checkbox" id="enrichment" name="enrichment" ng-model="vm.show.enrichment" ng-change="vm.current = 1;" ng-checked="vm.show.enrichment" />
+            <label for="enrichment">enabled only</label>
+        </li>
+        <li>
+            <input type="checkbox" id="premium" name="premium" ng-model="vm.show.premium" ng-change="vm.current = 1;" ng-checked="vm.show.premium" />
+            <label for="premium">premium only</label>
+        </li>
+        <li>
+            <div class="ng-search">
+                <a class="button icon-button white-button" ng-click="vm.query.length ? vm.query = null : ''">
+                    <span class="fa fa-search" ng-show="!vm.query.length"></span>
+                    <span class="fa fa-times" ng-show="vm.query.length"></span>
+                </a>
+                <input type="text" class="form-control" placeholder="Search" ng-model="vm.query" ng-change="vm.current = 1" />
+            </div>
+        </li>
+    </ul>
+    <div ng-if="vm.loading">loading</div>
+    <form ng-model="vm.metadata_form">
+        <table class="metadata">
+            <tr>
+                <th>&nbsp;</th>
+                <th ng-repeat="(key, column) in vm.columns" ng-click="vm.order = (vm.order == key ? '-'+key : key); vm.current = 1;" ng-class="{'sorted':vm.order == key || vm.order == '-'+key}">
+                    {{column.label}}
+                    <span ng-if="vm.order != key && vm.order != '-'+key" class="fa fa-sort"></span>
+                    <span ng-if="vm.order == key || vm.order == '-'+key" class="fa fa-sort-{{ vm.order == key ? 'up' : 'down' }}"></span>
+                </th>
+            </tr>
+            <tr ng-repeat="(row, data) in (filteredList = (vm.metadata 
+                    | filter: {
+                        CanEnrich: (!vm.show.enrichment ? '' : true),
+                        IsPremium: (!vm.show.premium ? '' : true),
+                    })) 
+                    | orderBy: vm.order
+                    | filter: (vm.query.length ? vm.query : '') : false
+                    | startFrom: (vm.current - 1) * vm.pagesize 
+                    | limitTo: vm.pagesize">
+                <td><button ng-click="vm.edit_all = false; vm.edit[data.ColumnId] = !vm.edit[data.ColumnId]" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+                <td ng-repeat="(key, column) in vm.columns" class="type-{{vm.type(key)}}" title="{{vm.get(data[key])}}">
+                    <span ng-if="column.editable">
+                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="text" value="{{vm.get(data[key])}}" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" placeholder="{{key}}" />
+                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'checkbox'" type="checkbox" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-checked="{{data[key]}}" />
+                        <textarea ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'textarea'" type="textarea" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}">{{vm.get(data[key])}}</textarea>
+                    </span>
+                    <label ng-class="{hide: column.editable && (vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) != 'checkbox'}" for="input-{{row}}-{{key}}">{{vm.get(data[key])}}</label>
+                </td>
+            </tr>
+        </table>
+        <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls 
+                        current="vm.current" 
+                        max="vm.max = filteredList.length / vm.pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+    </form>
+</div>

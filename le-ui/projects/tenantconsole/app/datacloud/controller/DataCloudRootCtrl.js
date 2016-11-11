@@ -1,6 +1,7 @@
 angular.module('app.datacloud', [
     'app.datacloud.service.MetadataService',
-    'app.datacloud.controller.MetadataCtrl'
+    'app.datacloud.controller.MetadataCtrl',
+    'app.datacloud.controller.Metadata2Ctrl'
 ])
 .controller('DataCloudRootCtrl', function ($scope, $state, $rootScope) {
 

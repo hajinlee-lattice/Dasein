@@ -14,6 +14,9 @@ app.service('MainNavService', function(){
         if (stateName.indexOf("DATACLOUD") === 0) {
             return "DataCloud";
         }
+        if (stateName.indexOf("METADATA") === 0) {
+            return "Metadata";
+        }
         return "unknown";
     };
 });

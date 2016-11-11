@@ -206,6 +206,15 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 }
             }
         })
+        .state('DATACLOUD.METADATA2', {
+            url: '/metadata2',
+            views: {
+                'main@DATACLOUD': {
+                    templateUrl: 'app/datacloud/metadata2/view/Metadata2View.html',
+                    controller: 'Metadata2Ctrl'
+                }
+            }
+        })
         .state('NOWHERE', {
             url: '/',
             templateUrl: 'app/core/view/Http404View.html',
