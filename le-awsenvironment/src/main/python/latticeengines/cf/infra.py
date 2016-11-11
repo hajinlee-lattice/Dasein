@@ -140,10 +140,8 @@ def create_load_balancers(tg_map):
     resources.append(create_listener_rule(private_lsnr, tg_map["dataflowapi"], "/dataflows/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["scoring"], "/scoring/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["quartz"], "/quartz/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["dellebi"], "/dellebi/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
