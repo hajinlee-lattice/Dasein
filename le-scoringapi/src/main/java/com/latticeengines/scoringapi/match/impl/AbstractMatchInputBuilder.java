@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
@@ -73,7 +74,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         matchInput.setFields(fields);
         matchInput.setData(data);
 
-        matchInput.setFetchOnly(useFuzzyMatch);
+        matchInput.setFetchOnly(MatchTypeUtil.isValidForAccountMasterBasedMatch(matchInput.getDataCloudVersion()) && useFuzzyMatch);
         return matchInput;
     }
 
