@@ -11,6 +11,7 @@ from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
+from ..ec2.ec2 import register_ec2_to_targetgroup
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
@@ -26,13 +27,13 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.mode, args.profile, args.upload)
+    template(args.environment, args.stackname, args.mode, args.profile, args.instances, args.upload)
 
-def template(environment, stackname, mode, profile, upload=False):
+def template(environment, stackname, mode, profile, instances, upload=False):
 
     port = 3000 if mode == "EXTERNAL" else 3002
 
-    stack = create_template(profile, port)
+    stack = create_template(profile, instances, port)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -40,8 +41,8 @@ def template(environment, stackname, mode, profile, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile, port):
-    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.")
+def create_template(profile, instances, port):
+    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", use_asgroup=False, instances=instances)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
@@ -72,10 +73,10 @@ def express_task(profile_vars, port):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
+    provision(args.environment, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, tag=args.tag, public=args.public)
 
 
-def provision(environment, app, stackname, tgrp, profile, instance_type, mode, tag="latest", init_cap=2, max_cap=8, public=False):
+def provision(environment, stackname, tgrp, profile, instance_type, mode, tag="latest", public=False):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -83,14 +84,17 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, mode, t
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
     extra_params.append(PARAM_MEM.config(str(max_mem)))
 
-    extra_params.append(PARAM_DOCKER_IMAGE.config(app))
+    extra_params.append(PARAM_DOCKER_IMAGE.config("express"))
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
     extra_params.append(PARAM_INSTALL_MODE.config(mode))
 
     tgrp_arn = find_tgrp_arn(tgrp)
     config = AwsEnvironment(environment)
 
-    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
+    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=0, max_cap=0, public=public, instance_type=instance_type, additional_params=extra_params)
+
+    register_ec2_to_targetgroup(stackname, tgrp)
+
 
 def teardown_cli(args):
     teardown(args.stackname)
@@ -147,13 +151,13 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
+    parser1.add_argument('-n', dest='instances', type=int, default="1", help='number of instances.')
     parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
-    parser1.add_argument('-a', dest='app', type=str, required=True, help='application name (same as docker image name)')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
     parser1.add_argument('-g', dest='tgrp', type=str, required=True, help='name of the target group for load balancer')
@@ -161,8 +165,6 @@ def parse_args():
     parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
     parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
-    parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity')
-    parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
