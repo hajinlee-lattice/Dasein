@@ -150,6 +150,31 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return defer.promise;
     };
 
+    this.ExecuteAnalyticTest = function (analyticTestName) {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'PUT',
+            url: '/modelquality/analytictests/execute/' + (analyticTestName || ''),
+        }).success(function(data){
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
     // /modelquality/pipelines
     this.GetPipelines = function (pipelineName) {
         var defer = $q.defer();

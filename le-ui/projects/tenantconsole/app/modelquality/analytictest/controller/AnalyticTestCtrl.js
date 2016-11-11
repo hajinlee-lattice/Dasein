@@ -24,7 +24,9 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             ANALYTIC_TEST_TYPE: 'Test Type',
             ANALYTIC_TEST_TAG: 'Test Tag',
             DATASET_NAMES: 'Datasets',
-            NAME: 'Name'
+            NAME: 'Name',
+            RUN: 'Run',
+            ACTION: 'Action'
         },
         error: false,
         loading: false,
@@ -127,6 +129,27 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
                 }
             }
         });
+    };
+
+    vm.runTest = function (analyticTestName) {
+        ModelQualityService.ExecuteAnalyticTest(analyticTestName)
+            .then(function (result) {
+                var hasError = result.resultObj.reduce(function (acc, cur) {
+                    return acc || !!cur.errorMessage;
+                }, false);
+
+                if (hasError) {
+                    vm.error = true;
+                    vm.message = 'Error executing analytic test: ' + analyticTestName;
+                }
+            }).catch(function (error) {
+                vm.error = true;
+                if (error && error.errMsg) {
+                    vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+                } else {
+                    vm.message = 'Error executing analytic test: ' + analyticTestName;
+                }
+            });
     };
 
     function isValidateAnalyticTest (analyticTest) {

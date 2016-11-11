@@ -13,6 +13,7 @@
       <thead>
         <tr>
           <th ng-repeat="col in ::vm_analyticTest.columns">{{::vm_analyticTest.labels[col.key.toUpperCase()]}}</th>
+          <th>{{::vm_analyticTest.labels.ACTION}}</th>
         </tr>
       </thead>
       <tbody>
@@ -21,6 +22,9 @@
           | limitTo:vm_analyticTest.max">
           <td ng-repeat="col in ::vm_analyticTest.columns">
             {{analyticTest[col.key] | joinList:', '}}
+          </td>
+          <td>
+            <span ng-click="vm_analyticTest.runTest(analyticTest.name)" class="header-btn">{{::vm_analyticTest.labels.RUN}}<span>
           </td>
         </tr>
       </tbody>
