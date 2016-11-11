@@ -1,10 +1,10 @@
 package com.latticeengines.pls.service;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-
-import java.util.List;
 
 public interface ModelSummaryService {
 
@@ -23,6 +23,8 @@ public interface ModelSummaryService {
     List<ModelSummary> getAllByTenant(Tenant tenant);
 
     ModelSummary getModelSummary(String modelId);
+
+    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
 
     List<ModelSummary> getModelSummaries(String selection);
 }

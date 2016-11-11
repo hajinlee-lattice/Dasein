@@ -9,6 +9,7 @@ import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterRT
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.RTSScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -16,6 +17,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("rtsBulkScoreWorkflow")
 public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowConfiguration> {
 
+    @Autowired
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
+    
     @Autowired
     private RTSScoreEventTable score;
 
@@ -35,11 +39,10 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(score) //
+        return new WorkflowBuilder().next(matchDataCloudWorkflow).next(score) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
-
     }
 }

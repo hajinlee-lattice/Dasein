@@ -8,19 +8,25 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -37,6 +43,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+    
+    @Autowired
+    private MatchCommandProxy matchCommandProxy;
+    
+    @Value("${datacloud.match.use.fuzzy.match:false}")
+    private boolean useFuzzyMatch;
 
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
@@ -72,8 +84,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
             String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-
+        
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
@@ -81,8 +93,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
-
+        String dataCloudVersion = null;
+        if (modelSummary != null) {
+            dataCloudVersion = modelSummary.getDataCloudVersion();
+        }
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
+        MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -103,6 +119,13 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .enableDebug(enableDebug) //
                 .internalResourcePort(internalResourceHostPort) //
+                .matchJoinType(MatchJoinType.OUTER_JOIN) //
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
+                .matchDestTables("AccountMasterColumn") //
+                .columnSelection(Predefined.ID, "1.0.0") //
+                .dataCloudVersion(dataCloudVersion)
+                .skipMatchingStep(!useFuzzyMatch)
+                .matchClientDocument(matchClientDocument) //
                 .build();
     }
 }

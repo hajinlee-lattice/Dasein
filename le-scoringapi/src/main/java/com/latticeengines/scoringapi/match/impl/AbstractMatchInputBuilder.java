@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.StringUtils;
@@ -26,6 +27,9 @@ import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
+
+    @Value("${datacloud.match.use.fuzzy.match:false}")
+    private boolean useFuzzyMatch;
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //
@@ -69,6 +73,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         matchInput.setFields(fields);
         matchInput.setData(data);
 
+        matchInput.setFetchOnly(useFuzzyMatch);
         return matchInput;
     }
 

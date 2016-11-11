@@ -86,13 +86,12 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         String rootId = possibleId;
         String rootname = modelSummaryParser.parseOriginalName(modelSummary.getName());
 
-		ModelSummary dupModelSummary = modelSummaryEntityMgr.getByModelId(possibleId);
-		if (dupModelSummary != null && !existingIds.contains(dupModelSummary.getId())) {
+        ModelSummary dupModelSummary = modelSummaryEntityMgr.getByModelId(possibleId);
+        if (dupModelSummary != null && !existingIds.contains(dupModelSummary.getId())) {
             existingIds.add(dupModelSummary.getId());
-		}
+        }
         while (existingNames.contains(possibleName) || existingIds.contains(possibleId)) {
-            possibleName = modelSummary.getName().replace(rootname,
-                    rootname + "-" + String.format("%03d", ++version));
+            possibleName = modelSummary.getName().replace(rootname, rootname + "-" + String.format("%03d", ++version));
             possibleId = rootId + "-" + String.format("%03d", version);
             if (!existingIds.contains(possibleId) && modelSummaryEntityMgr.getByModelId(possibleId) != null) {
                 existingIds.add(possibleId);
@@ -102,13 +101,13 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (version > 0) {
             log.info(String.format("Change model name from \"%s\" to \"%s\" to avoid conflicts.",
                     modelSummary.getName(), possibleName));
-            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.",
-                    modelSummary.getId(), possibleId));
+            log.info(String.format("Change model id from \"%s\" to \"%s\" to avoid conflicts.", modelSummary.getId(),
+                    possibleId));
         }
 
         modelSummary.setId(possibleId);
-        modelSummary.setName(possibleName);    
-	}
+        modelSummary.setName(possibleName);
+    }
 
     public void updatePredictors(String modelId, AttributeMap attrMap) {
         if (modelId == null) {
@@ -153,6 +152,12 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             getModelSummaryTrainingFileState(summary);
         }
         return summary;
+    }
+
+    @Override
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument,
+            boolean validOnly) {
+        return modelSummaryEntityMgr.findByModelId(modelId, returnRelational, returnDocument, validOnly);
     }
 
     @Override

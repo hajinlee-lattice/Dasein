@@ -131,7 +131,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         testScoreMRTrainingData();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 1200000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTrainingDataUsingMR", enabled = true, timeOut = 2400000)
     public void testScoreTrainingDataUsingRTS() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
                 getRestAPIHostPort(), modelId));

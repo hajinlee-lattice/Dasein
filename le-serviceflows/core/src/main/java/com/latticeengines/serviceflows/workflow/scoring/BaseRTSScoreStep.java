@@ -68,6 +68,10 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
                 System.currentTimeMillis());
         scoringConfig.setTargetResultDir(targetPath.toString() + "/" + tableName);
         String inputTableName = configuration.getInputTableName();
+        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        if (eventTable != null && !StringUtils.isNotEmpty(eventTable.getName())) {
+            inputTableName = eventTable.getName();
+        }
         Table metadataTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
         scoringConfig.setMetadataTable(metadataTable);
         scoringConfig.setCustomerSpace(configuration.getCustomerSpace());

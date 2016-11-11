@@ -3,8 +3,13 @@ package com.latticeengines.leadprioritization.workflow;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
@@ -97,7 +102,48 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
+        public Builder matchType(MatchCommandType matchCommandType) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchType(matchCommandType);
+            return this;
+        }
+
+        public Builder matchDestTables(String destTables) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchDestTables(destTables);
+            return this;
+        }
+
+        public Builder matchJoinType(MatchJoinType matchJoinType) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchJoinType(matchJoinType);
+            return this;
+        }
+
+        public Builder columnSelection(ColumnSelection customizedColumnSelection) {
+            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(customizedColumnSelection);
+            return this;
+        }
+
+        public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
+            return this;
+        }
+
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            rtsBulkScoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
+            return this;
+        }
+
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            rtsBulkScoreWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            return this;
+        }
+
+        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchClientDocument(matchClientDocument);
+            return this;
+        }
+
         public ImportAndRTSBulkScoreWorkflowConfiguration build() {
+
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);
             configuration.add(rtsBulkScoreWorkflowConfigurationBuilder.build());
