@@ -382,11 +382,15 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             pipelineSteps.add(p);
         }
         Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName("ModelQualityDeploymentTest-2");
-        if (pipelineAlreadyExists != null)
+        if (pipelineAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete Pipeline \"%s\"", "ModelQualityDeploymentTest-2"));
             pipelineEntityMgr.delete(pipelineAlreadyExists);
+        }
         PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
-        if (pipelineStepAlreadyExists != null)
+        if (pipelineStepAlreadyExists != null) {
+            System.out.println(String.format("Attempting to delete PipelineStep \"%s\"", "assigncategorical"));
             pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+        }
         String newPipelineName = modelQualityProxy.createPipeline("ModelQualityDeploymentTest-2",
                 "ModelQualityDeploymentTest-2", pipelineSteps);
         return pipelineEntityMgr.findByName(newPipelineName);
