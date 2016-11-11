@@ -1,5 +1,6 @@
 package com.latticeengines.matchapi.controller;
 
+import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +54,7 @@ public class MatchCommandResource {
 
     @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @NoMetricsLog
     @ApiOperation(value = "Return the best matcher client to use. " +
             "Requires a query parameter \"rows\", which is the number of records to be matched.")
     public MatchClientDocument getBestMatchClient(@RequestParam(value = "rows", required = true) int numRows) {

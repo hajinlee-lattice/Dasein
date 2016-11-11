@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,6 +67,7 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
                             body, context.getRetryCount() + 1));
+                    SSLUtils.turnOffSslChecking();
                     return restTemplate.postForObject(url, body, returnValueClazz);
                 } catch (LedpException e) {
                     context.setExhaustedOnly();
@@ -91,6 +93,7 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
                             body, context.getRetryCount() + 1));
+                    SSLUtils.turnOffSslChecking();
                     restTemplate.put(url, body);
                     return null;
                 } catch (LedpException e) {
@@ -114,6 +117,7 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
                             context.getRetryCount() + 1));
+                    SSLUtils.turnOffSslChecking();
                     return restTemplate.getForObject(url, returnValueClazz);
                 } catch (LedpException e) {
                     context.setExhaustedOnly();
@@ -135,6 +139,7 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by deleting from url %s.  (Attempt=%d)", method, url,
                             context.getRetryCount() + 1));
+                    SSLUtils.turnOffSslChecking();
                     restTemplate.delete(url);
                     return null;
                 } catch (LedpException e) {
