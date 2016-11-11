@@ -250,7 +250,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
     params["AWS_SCORINGAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
     params["AWS_MATCHAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
     params["AWS_OAUTH_ADDRESS"] = "%s://%s/oauth2" % (protocol, ip)
-    params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/playmaker" % (protocol, ip)
+    params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/api" % (protocol, ip)
 
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment

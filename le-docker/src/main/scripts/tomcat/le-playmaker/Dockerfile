@@ -15,5 +15,5 @@ RUN mkdir ROOT \
     && rm -r -f ${CATALINA_HOME}/webapps/ROOT* \
     && cp -r ROOT ${CATALINA_HOME}/webapps/ROOT \
     && cp /application.properties ROOT/WEB-INF/classes/application.properties \
-    && cp -r ROOT ${CATALINA_HOME}/webapps/playmaker
+    && cp -r ROOT ${CATALINA_HOME}/webapps/api
 
