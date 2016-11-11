@@ -345,7 +345,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
                 metadata.setCanModel(true);
                 if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
                         || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
-                    metadata.setCanBis(true);
+                    metadata.setCanInsights(true);
                     if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)) {
                         metadata.setCanBis(true);
                     }
