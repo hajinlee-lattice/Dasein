@@ -13,7 +13,7 @@
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:datafabric-context.xml" />
-S
+
 
     <bean id="externalColumnDao" class="com.latticeengines.datacloud.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
