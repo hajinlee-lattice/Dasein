@@ -148,9 +148,9 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     };
 
     vm.swapSteps = function (a, b) {
-        var temp = vm.pipelinSteps[a];
-        vm.pipelinSteps[a] = vm.pipelinSteps[b];
-        vm.pipelinSteps[b] = temp;
+        var temp = vm.pipelineSteps[a];
+        vm.pipelineSteps[a] = vm.pipelineSteps[b];
+        vm.pipelineSteps[b] = temp;
     };
 
     vm.deleteStep = function (index) {
