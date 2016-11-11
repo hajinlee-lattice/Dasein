@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -82,7 +83,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         log.info("Data Cloud Version=" + dataCloudVersion);
         
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        
+        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(modelSummary.getDataCloudVersion()) || !useFuzzyMatch;
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -102,7 +103,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion)
-                .skipMatchingStep(!useFuzzyMatch)
+                .skipMatchingStep(skipIdMatch)
                 .matchClientDocument(matchClientDocument) //
                 .build();
     }
