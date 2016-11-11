@@ -43,7 +43,7 @@ public class DnBMatchContext implements Fact, Dimension {
         inputNameLocation.setCountryCode(matchKeyTuple.getCountryCode());
         inputNameLocation.setState(matchKeyTuple.getState());
         inputNameLocation.setPhoneNumber(matchKeyTuple.getPhoneNumber());
-        inputNameLocation.setZipCode(matchKeyTuple.getZipcode());
+        inputNameLocation.setZipcode(matchKeyTuple.getZipcode());
     }
 
     @MetricField(name = "Email")

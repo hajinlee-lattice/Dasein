@@ -27,8 +27,8 @@ public class NameLocation implements Fact {
     @JsonProperty("City")
     private String city;
 
-    @JsonProperty("ZipCode")
-    private String zipCode;
+    @JsonProperty("Zipcode")
+    private String zipcode;
 
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
@@ -78,13 +78,13 @@ public class NameLocation implements Fact {
         this.city = city;
     }
 
-    @MetricField(name = "ZipCode")
-    public String getZipCode() {
-        return zipCode;
+    @MetricField(name = "Zipcode")
+    public String getZipcode() {
+        return zipcode;
     }
 
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
     }
 
     @MetricField(name = "PhoneNumber")
@@ -108,7 +108,7 @@ public class NameLocation implements Fact {
             return StringUtils.equals(this.name, nameLocation.name)
                     && StringUtils.equals(this.city, nameLocation.city)
                     && StringUtils.equals(this.state, nameLocation.state)
-                    && StringUtils.equals(this.zipCode, nameLocation.zipCode)
+                    && StringUtils.equals(this.zipcode, nameLocation.zipcode)
                     && StringUtils.equals(this.country, nameLocation.country)
                     && StringUtils.equals(this.phoneNumber, nameLocation.phoneNumber);
         } else {
@@ -122,7 +122,7 @@ public class NameLocation implements Fact {
         toReturn += (name == null ? "null" : name);
         toReturn += (city == null ? "null" : city);
         toReturn += (state == null ? "null" : state);
-        toReturn += (zipCode == null ? "null" : zipCode);
+        toReturn += (zipcode == null ? "null" : zipcode);
         toReturn += (country == null ? "null" : country);
         toReturn += (phoneNumber == null ? "null" : phoneNumber);
         toReturn += ")";

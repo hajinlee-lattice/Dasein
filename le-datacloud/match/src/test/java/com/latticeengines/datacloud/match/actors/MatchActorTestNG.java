@@ -60,7 +60,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
         msg.setMatchTravelerContext(matchTravelerContext);
 
-        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);
+        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, false);
         Assert.assertNotNull(result);
         DnBMatchContext data = (DnBMatchContext) result.getResult();
         Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
@@ -84,7 +84,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
         msg.setMatchTravelerContext(matchTravelerContext);
 
-        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class);
+        Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, true);
         Assert.assertNotNull(result);
         DnBMatchContext data = (DnBMatchContext) result.getResult();
         Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
@@ -94,13 +94,15 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         actorSystem.setBatchMode(false);
     }
 
-    private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz) throws Exception {
+    private Object sendMessageToActor(Object msg, Class<? extends ActorTemplate> actorClazz, boolean batchMode)
+            throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
 
         ActorRef actorRef = actorSystem.getActorRef(actorClazz);
 
-        Timeout timeout = new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
+        Timeout timeout = batchMode ? new Timeout(new FiniteDuration(30, TimeUnit.MINUTES))
+                : new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
         Future<Object> future = Patterns.ask(actorRef, msg, timeout);
 
         Object result = Await.result(future, timeout.duration());

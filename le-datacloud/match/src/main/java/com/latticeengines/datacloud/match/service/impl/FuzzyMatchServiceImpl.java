@@ -169,7 +169,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             matchKeyTuple.setCountryCode(nameLocationInfo.getCountryCode());
             matchKeyTuple.setName(nameLocationInfo.getName());
             matchKeyTuple.setState(nameLocationInfo.getState());
-            matchKeyTuple.setZipcode(nameLocationInfo.getZipCode());
+            matchKeyTuple.setZipcode(nameLocationInfo.getZipcode());
             matchKeyTuple.setPhoneNumber(nameLocationInfo.getPhoneNumber());
         }
         if (!matchRecord.isPublicDomain()) {

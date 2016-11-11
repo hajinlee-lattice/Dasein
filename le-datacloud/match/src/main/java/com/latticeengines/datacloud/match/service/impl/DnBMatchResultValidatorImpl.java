@@ -10,7 +10,7 @@ import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
     public boolean validate(DnBMatchContext res) {
-        if (res.getConfidenceCode() < 7) {
+        if (res.getConfidenceCode() == null || res.getConfidenceCode() < 7) {
             res.setDuns(null);
             res.setDnbCode(DnBReturnCode.DISCARD);
             return false;
