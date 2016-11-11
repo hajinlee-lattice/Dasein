@@ -12,6 +12,10 @@ def register_ec2_to_targetgroup(stackname, tgrp):
 def find_ec2_ids(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
     ips = []
+
+    if stack.outputs is None:
+        return ips
+
     for output in stack.outputs:
         key = output['OutputKey']
         value = output['OutputValue']
