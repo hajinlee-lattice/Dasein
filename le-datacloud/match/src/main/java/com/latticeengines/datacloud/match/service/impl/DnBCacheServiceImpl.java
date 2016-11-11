@@ -12,21 +12,26 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
+import com.latticeengines.datacloud.match.entitymgr.DnBBlackCacheEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
+import com.latticeengines.datacloud.match.entitymgr.impl.DnBBlackCacheEntityMgrImpl;
 import com.latticeengines.datacloud.match.entitymgr.impl.DnBWhiteCacheEntityMgrImpl;
-import com.latticeengines.datacloud.match.service.DnBCacheLookupService;
+import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
-@Component("dnbCacheLookupService")
-public class DnBCacheLookupServiceImpl implements DnBCacheLookupService {
-    private static final Log log = LogFactory.getLog(DnBCacheLookupServiceImpl.class);
+@Component("dnbCacheService")
+public class DnBCacheServiceImpl implements DnBCacheService {
+    private static final Log log = LogFactory.getLog(DnBCacheServiceImpl.class);
 
     private Map<String, DnBWhiteCacheEntityMgr> whiteCacheEntityMgrs = new HashMap<String, DnBWhiteCacheEntityMgr>();
+
+    private Map<String, DnBBlackCacheEntityMgr> blackCacheEntityMgrs = new HashMap<String, DnBBlackCacheEntityMgr>();
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -36,6 +41,10 @@ public class DnBCacheLookupServiceImpl implements DnBCacheLookupService {
 
     @Autowired
     private FabricDataService dataService;
+
+    /*********************************
+     * White Cache
+     *********************************/
 
     @Override
     public DnBWhiteCache lookupWhiteCache(MatchKeyTuple matchKeyTuple, String dataCloudVersion) {
@@ -63,8 +72,8 @@ public class DnBCacheLookupServiceImpl implements DnBCacheLookupService {
             DnBWhiteCache output = outputs.get(i);
             if (output != null) {
                 output.parseCacheContext();
+                result.put(lookupRequestIds.get(i), output);
             }
-            result.put(lookupRequestIds.get(i), output);
         }
         return result;
     }
@@ -91,6 +100,7 @@ public class DnBCacheLookupServiceImpl implements DnBCacheLookupService {
         return caches;
     }
 
+    @Override
     public DnBWhiteCacheEntityMgr getWhiteCacheMgr(String version) {
         DnBWhiteCacheEntityMgr whiteCacheEntityMgr = whiteCacheEntityMgrs.get(version);
         if (whiteCacheEntityMgr == null)
@@ -113,5 +123,84 @@ public class DnBCacheLookupServiceImpl implements DnBCacheLookupService {
         }
 
         return whiteCacheEntityMgr;
+    }
+
+    /*********************************
+     * Black Cache
+     *********************************/
+
+    @Override
+    public DnBBlackCache lookupBlackCache(MatchKeyTuple matchKeyTuple, String dataCloudVersion) {
+        DnBBlackCache input = new DnBBlackCache(matchKeyTuple);
+        DnBBlackCache output = getBlackCacheMgr(dataCloudVersion).findByKey(input);
+        return output;
+    }
+
+    @Override
+    public Map<String, DnBBlackCache> batchLookupBlackCache(Map<String, MatchKeyTuple> matchKeyTuples,
+            String dataCloudVersion) {
+        List<String> keys = new ArrayList<String>();
+        List<String> lookupRequestIds = new ArrayList<String>();
+        for (String lookupRequestId : matchKeyTuples.keySet()) {
+            DnBBlackCache input = new DnBBlackCache(matchKeyTuples.get(lookupRequestId));
+            keys.add(input.getId());
+            lookupRequestIds.add(lookupRequestId);
+        }
+        List<DnBBlackCache> outputs = getBlackCacheMgr(dataCloudVersion).batchFindByKey(keys);
+        Map<String, DnBBlackCache> result = new HashMap<String, DnBBlackCache>();
+        for (int i = 0; i < outputs.size(); i++) {
+            DnBBlackCache output = outputs.get(i);
+            if (output != null) {
+                result.put(lookupRequestIds.get(i), output);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public DnBBlackCache addBlackCache(DnBMatchContext context, String dataCloudVersion) {
+        DnBBlackCache cache = new DnBBlackCache(
+                context.getInputNameLocation() != null ? context.getInputNameLocation() : new NameLocation(),
+                context.getInputEmail());
+        getBlackCacheMgr(dataCloudVersion).create(cache);
+        return cache;
+    }
+
+    @Override
+    public List<DnBBlackCache> batchAddBlackCache(List<DnBMatchContext> contexts, String dataCloudVersion) {
+        List<DnBBlackCache> caches = new ArrayList<DnBBlackCache>();
+        for (DnBMatchContext context : contexts) {
+            DnBBlackCache cache = new DnBBlackCache(
+                    context.getInputNameLocation() != null ? context.getInputNameLocation() : new NameLocation(),
+                    context.getInputEmail());
+            caches.add(cache);
+        }
+        getBlackCacheMgr(dataCloudVersion).batchCreate(caches);
+        return caches;
+    }
+
+    @Override
+    public DnBBlackCacheEntityMgr getBlackCacheMgr(String version) {
+        DnBBlackCacheEntityMgr blackCacheEntityMgr = blackCacheEntityMgrs.get(version);
+        if (blackCacheEntityMgr == null)
+            blackCacheEntityMgr = getBlackCacheMgrSync(version);
+        return blackCacheEntityMgr;
+    }
+
+    private synchronized DnBBlackCacheEntityMgr getBlackCacheMgrSync(String version) {
+        DnBBlackCacheEntityMgr blackCacheEntityMgr = blackCacheEntityMgrs.get(version);
+
+        if (blackCacheEntityMgr == null) {
+            DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(version);
+            if (dataCloudVersion == null) {
+                throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
+            }
+            log.info("Use " + version + " as full version of DnBBlackCache for " + version);
+            blackCacheEntityMgr = new DnBBlackCacheEntityMgrImpl(messageService, dataService, version);
+            blackCacheEntityMgr.init();
+            blackCacheEntityMgrs.put(version, blackCacheEntityMgr);
+        }
+
+        return blackCacheEntityMgr;
     }
 }
