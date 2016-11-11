@@ -83,7 +83,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         log.info("Data Cloud Version=" + dataCloudVersion);
         
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(modelSummary.getDataCloudVersion()) || !useFuzzyMatch;
+        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion) || !useFuzzyMatch;
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //

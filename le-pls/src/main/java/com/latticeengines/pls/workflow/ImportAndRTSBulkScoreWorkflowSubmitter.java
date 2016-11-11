@@ -100,7 +100,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         }
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(modelSummary.getDataCloudVersion()) || !useFuzzyMatch;
+        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion) || !useFuzzyMatch;
         
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
