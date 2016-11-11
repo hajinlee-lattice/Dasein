@@ -24,6 +24,9 @@ TOMCAT_APP_HEALTH_MAP = {
     "dataflowapi": "/workflowapi/v2/api-docs",
     "workflowapi": "/workflowapi/v2/api-docs",
     "quartz": "/quartz/v2/api-docs",
+    "modelqulaity": "/quartz/v2/api-docs",
+    "propdata": "/quartz/v2/api-docs",
+    "dellebi": "/quartz/v2/api-docs",
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
@@ -130,6 +133,7 @@ def create_load_balancers(tg_map):
 
     # listener rules
     resources.append(create_listener_rule(private_lsnr, tg_map["matchapi"], "/match/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["metadata"], "/metadata/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["eai"], "/eai/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["workflowapi"], "/workflows/*"))
@@ -137,7 +141,9 @@ def create_load_balancers(tg_map):
     resources.append(create_listener_rule(private_lsnr, tg_map["scoring"], "/scoring/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["modeling"], "/modeling/*"))
     resources.append(create_listener_rule(private_lsnr, tg_map["quartz"], "/quartz/*"))
-    resources.append(create_listener_rule(private_lsnr, tg_map["admin"], "/admin/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["modelquality"], "/modelquality/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["propdata"], "/propdata/*"))
+    resources.append(create_listener_rule(private_lsnr, tg_map["dellebi"], "/dellebi/*"))
 
     resources.append(create_listener_rule(public_lsnr, tg_map["pls"], "/pls/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
