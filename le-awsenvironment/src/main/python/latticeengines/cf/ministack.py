@@ -210,7 +210,6 @@ def bootstrap(environment, stackname, apps, profile, region="us-east-1"):
     config = AwsEnvironment(environment)
     ecr_url = config.ecr_registry()
 
-
     consul = config.consul_server()
     ip = read_from_stack(consul, environment, stackname, HAPROXY_KEY)
     print "Retrieve HAProxy IP from consul: %s" % ip
@@ -237,7 +236,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
         "awslogs-region": region
     })
     container.publish_port(8080, alloc["port"])
-    container.hostname(app)
+    container.hostname("%s-%s" % (stackname, app))
 
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip

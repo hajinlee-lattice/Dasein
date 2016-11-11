@@ -11,6 +11,7 @@ from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
+from ..cw.logs import create_internal as create_log_group
 from ..ec2.ec2 import register_ec2_to_targetgroup
 from ..elb.targetgroup import find_tgrp_arn
 
@@ -55,7 +56,7 @@ def tomcat_task(profile_vars):
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
-        .hostname(PARAM_DOCKER_IMAGE.ref()) \
+        .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, PARAM_DOCKER_IMAGE.ref()]]},) \
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
         .publish_port(1099, 1099) \
@@ -64,9 +65,7 @@ def tomcat_task(profile_vars):
         "Options": {
             "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
             "awslogs-region": { "Ref": "AWS::Region" }
-        }}) \
-        .set_env("CATALINA_OPTS", PARAM_DOCKER_IMAGE.ref()) \
-        .set_env("LE_SWLIB_DISABLED", "true")
+        }})
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
@@ -110,6 +109,8 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     sg = config.tomcat_sg()
 
     extra_params.append(PARAM_EFS.config(config.lpi_efs_id()))
+
+    create_log_group("docker-%s" % stackname)
 
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
 

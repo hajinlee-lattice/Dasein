@@ -28,7 +28,7 @@ TOMCAT_APP_HEALTH_MAP = {
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
     "oauth2": "/oauth2/health",
-    "playmaker": "/playmaker/health",
+    "playmaker": "/api/health",
     "pls": "/pls/health",
     "admin": "/admin/health"
 }
@@ -143,7 +143,7 @@ def create_load_balancers(tg_map):
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/score/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/scoreinternal/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
-    resources.append(create_listener_rule(public_lsnr, tg_map["playmaker"], "/playmaker/*"))
+    resources.append(create_listener_rule(public_lsnr, tg_map["playmaker"], "/api/*"))
 
     return resources, albs
 
