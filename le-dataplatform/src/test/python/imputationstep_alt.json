@@ -1,0 +1,15 @@
+{
+      "KeyWhenSortingByAscending": "5",
+      "Name": "imputationstep",
+      "MainClassName": "ImputationStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Numerical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "orderedDictContinuousColumns",
+        "imputationValues": "emptyDictionary",
+        "targetCol": "targetColumn"
+      },
+      "ColumnTransformFilePath": "imputationstep.py"
+}
