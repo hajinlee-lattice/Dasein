@@ -11,6 +11,7 @@ from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
+from ..cw.logs import create_internal as create_log_group
 from ..ec2.ec2 import register_ec2_to_targetgroup
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
@@ -73,10 +74,10 @@ def express_task(profile_vars, port):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, tag=args.tag, public=args.public)
+    provision(args.environment, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, args.instances, tag=args.tag, public=args.public)
 
 
-def provision(environment, stackname, tgrp, profile, instance_type, mode, tag="latest", public=False):
+def provision(environment, stackname, tgrp, profile, instance_type, mode, instances, tag="latest", public=False):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -91,7 +92,9 @@ def provision(environment, stackname, tgrp, profile, instance_type, mode, tag="l
     tgrp_arn = find_tgrp_arn(tgrp)
     config = AwsEnvironment(environment)
 
-    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=0, max_cap=0, public=public, instance_type=instance_type, additional_params=extra_params)
+    create_log_group("docker-%s" % stackname)
+
+    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=instances, max_cap=instances, public=public, instance_type=instance_type, additional_params=extra_params)
 
     register_ec2_to_targetgroup(stackname, tgrp)
 
@@ -164,6 +167,7 @@ def parse_args():
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.add_argument('-i', dest='instancetype', type=str, default='t2.medium', help='EC2 instance type')
     parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
+    parser1.add_argument('-n', dest='instances', type=int, default="1", help='number of instances.')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.set_defaults(func=provision_cli)
 
