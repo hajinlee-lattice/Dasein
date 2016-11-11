@@ -190,7 +190,6 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/modelquality/dashboard/controller/ModelQualityDashboardCtrl.js',
                         '<%= app.dir %>/app/modelquality/pipeline/controller/PipelineCtrl.js',
                         '<%= app.dir %>/app/modelquality/pipeline/controller/PipelineStepCtrl.js',
-                        '<%= app.dir %>/app/modelquality/analyticpipeline/controller/AnalyticPipelineCtrl.js',
                         '<%= app.dir %>/app/modelquality/analytictest/controller/AnalyticTestCtrl.js',
                         '<%= app.dir %>/app/modelquality/publishlatest/controller/PublishLatestCtrl.js',
                         '<%= app.dir %>/app/datacloud/controller/DataCloudRootCtrl.js',

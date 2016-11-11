@@ -1,7 +1,7 @@
 angular.module('app.modelquality.controller.PipelineCtrl', [
     'app.modelquality.controller.PipelineStepCtrl'
 ])
-.controller('PipelineCtrl', function ($scope, $state, $q, Pipelines, ModelQualityService) {
+.controller('PipelineCtrl', function ($scope, $state, $q, AnalyticPipelines, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -14,30 +14,58 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
             PIPELINE_DESCRIPTION: 'Pipeline Description',
             CANCEL: 'Clear',
             SAVE: 'Save',
-            LOAD_SAVING: 'Saving Pipeline...'
+            SPINNER_SAVING: 'Saving Pipeline...',
+            SPINNER_FETCHING: 'Fetching Pipeline...'
         },
-        pipelines: Pipelines.resultObj,
+        analyticPipelineProps: [
+            'name',
+            'algorithm_name',
+            'dataflow_name',
+            'pipeline_name',
+            'prop_data_name',
+            'sampling_name'
+        ],
+        analyticPipelines: AnalyticPipelines.resultObj,
         selectedPipeline: null,
-        pipeline: BasePipeline(),
+        pipelineSteps: [],
+        analyticPipeline: {},
         pipelineName: null,
         pipelineDescription: null,
         isCreatingStep: false,
         stepMetadata: null,
         loading: false,
         error: false,
-        message: null
+        message: null,
+        spinnerMsg: null
     });
 
-    vm.selectPipeline = function (pipeline) {
+    vm.selectPipeline = function (analyticPipeline) {
         vm.reset();
 
-        vm.selectedPipeline = pipeline;
-        vm.pipeline = angular.copy(pipeline);
-        vm.pipelineDescription = vm.pipeline.description;
+        vm.loading = true;
+        vm.spinnerMsg = vm.labels.SPINNER_FETCHING;
+
+        ModelQualityService.GetPipelineByName(analyticPipeline.pipeline_name)
+            .then(function (result) {
+                vm.selectedPipeline = analyticPipeline;
+                vm.analyticPipeline = angular.copy(vm.selectedPipeline);
+
+                vm.pipelineSteps = result.resultObj.pipeline_steps;
+                vm.pipelineDescription = result.resultObj.description;
+            }).catch(function (error) {
+                vm.error = true;
+                if (error && error.errMsg) {
+                    vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+                } else {
+                    vm.message = 'Failed to get Pipeline of ' + analyticPipeline.name;
+                }
+            }).finally(function () {
+                vm.loading = false;
+            });
     };
 
     vm.inspectMetadata = function (index) {
-        vm.stepMetadata = vm.pipeline.pipeline_steps[index];
+        vm.stepMetadata = vm.pipelineSteps[index];
     };
 
     vm.clearStepMetadata = function () {
@@ -45,23 +73,9 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     };
 
     vm.addStep = function (step) {
-        var indexOfStep = vm.pipelineIndexOfStep(step.Name);
-
-        if (indexOfStep > 0) {
-            vm.pipeline[indexOfStep] = step;
-        } else {
-            vm.pipeline.pipeline_steps.push(step);
+        if (pipelineIndexOfStep(step.Name) < 0) {
+            vm.pipelineSteps.push(step);
         }
-    };
-
-    vm.pipelineIndexOfStep = function (stepName) {
-        for (var i = 0; i < vm.pipeline.pipeline_steps.length; i++) {
-            if (vm.pipeline.pipeline_steps[i].Name === stepName) {
-                return i;
-            }
-        }
-
-        return -1;
     };
 
     vm.createStep = function () {
@@ -84,7 +98,9 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         vm.error = false;
         vm.message = null;
         vm.loading = true;
-        var newPipeline = vm.pipeline.pipeline_steps.map(function (step) {
+        vm.spinnerMsg = vm.labels.SPINNER_SAVING;
+
+        var newPipeline = vm.pipelineSteps.map(function (step) {
             if (step.isNewStep) {
                 return {
                     pipeline_step_dir: step.pipeline_step_dir
@@ -98,21 +114,11 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
 
         ModelQualityService.CreatePipeline(vm.pipelineName, vm.pipelineDescription, newPipeline)
             .then(function (result) {
-
-                if (result.resultObj) {
-                    return ModelQualityService.GetPipelineByName(result.resultObj.pipelineName);
-                } else {
-                    var defer = $q.defer();
-                    defer.reject(result);
-                    return defer.promise;
-                }
-
+                return ModelQualityService.GetPipelineByName(result.resultObj.pipelineName);
             }).then(function (result) {
+                vm.analyticPipeline.pipeline_name = result.resultObj.name;
 
-                vm.reset();
-                vm.message = result.resultObj.name + ' has been created.';
-                vm.pipelines.push(result.resultObj);
-
+                saveAnalyticPipeline();
             }).catch(function (error) {
                 vm.error = true;
                 if (error && error.errMsg) {
@@ -120,11 +126,8 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
                 } else {
                     vm.message = 'Unexpected error has occured. Please try again.';
                 }
-
-            }).finally(function () {
                 vm.loading = false;
             });
-
     };
 
     vm.cancelPipeline = function () {
@@ -134,7 +137,7 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     vm.reset = function () {
         vm.selectedPipeline = null;
         vm.pipelineName = null;
-        vm.pipeline = BasePipeline();
+        vm.pipeline = [];
         vm.pipelineDescription = null;
 
         vm.isCreatingStep = false;
@@ -142,27 +145,66 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         vm.loading = false;
         vm.message = null;
         vm.error = false;
-
     };
 
     vm.swapSteps = function (a, b) {
-        var temp = vm.pipeline.pipeline_steps[a];
-        vm.pipeline.pipeline_steps[a] = vm.pipeline.pipeline_steps[b];
-        vm.pipeline.pipeline_steps[b] = temp;
+        var temp = vm.pipelinSteps[a];
+        vm.pipelinSteps[a] = vm.pipelinSteps[b];
+        vm.pipelinSteps[b] = temp;
     };
 
     vm.deleteStep = function (index) {
-        var deleted = vm.pipeline.pipeline_steps.splice(index, 1);
+        var deleted = vm.pipelineSteps.splice(index, 1);
 
         if (vm.stepMetadata === deleted[0]) {
             vm.clearStepMetadata();
         }
     };
 
-    function BasePipeline() {
-        return {
-           pipeline_steps: []
-        };
+    function saveAnalyticPipeline () {
+        vm.analyticPipeline.name = vm.pipelineName;
+        if (!isValidPipeline()) {
+            vm.error = true;
+            vm.message = 'Invalid pipeline';
+            return;
+        }
+
+        ModelQualityService.CreateAnalyticPipeline(vm.analyticPipeline)
+            .then(function (result) {
+                vm.analyticPipelines.push(angular.copy(vm.analyticPipeline));
+
+                vm.reset();
+                vm.message = result.resultObj.pipelineName + ' has been created.';
+            }).catch(function (error) {
+                vm.error = true;
+
+                if (error && error.errMsg) {
+                  vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+                } else {
+                  vm.message = 'Error creating analytic pipeline';
+                }
+            }).finally(function () {
+                vm.loading = false;
+            });
     }
 
+    function pipelineIndexOfStep (stepName) {
+        for (var i = 0; i < vm.pipelineSteps.length; i++) {
+            if (vm.pipelineSteps[i].Name === stepName) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    function isValidPipeline() {
+      var valid = !!vm.pipelineName;
+
+      vm.analyticPipelineProps.forEach(function (prop) {
+        valid = valid && !!vm.analyticPipeline[prop];
+      });
+
+      return valid;
+    }
 });

@@ -149,38 +149,8 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 }
             },
             resolve: {
-                Pipelines: function (ModelQualityService) {
-                    return ModelQualityService.GetAllPipelines();
-                }
-            }
-        })
-        .state('MODELQUALITY.ANALYTICPIPELINE', {
-            url: '/analyticpipeline',
-            views: {
-                'main@MODELQUALITY': {
-                    templateUrl: 'app/modelquality/analyticpipeline/view/AnalyticPipelineView.html',
-                    controller: 'AnalyticPipelineCtrl',
-                    controllerAs: 'vm_analyticPipeline'
-                }
-            },
-            resolve: {
-                Algorithms: function (ModelQualityService) {
-                    return ModelQualityService.GetAllAlgorithms();
-                },
                 AnalyticPipelines: function (ModelQualityService) {
                     return ModelQualityService.GetAllAnalyticPipelines();
-                },
-                Pipelines: function (ModelQualityService) {
-                    return ModelQualityService.GetAllPipelines();
-                },
-                SamplingConfigs: function (ModelQualityService) {
-                    return ModelQualityService.GetAllSamplingConfigs();
-                },
-                Dataflows: function (ModelQualityService) {
-                    return ModelQualityService.GetAllDataflows();
-                },                
-                PropdataConfigs: function (ModelQualityService) {
-                    return ModelQualityService.GetAllPropdataConfigs();
                 }
             }
         })
@@ -202,9 +172,6 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 },
                 Datasets: function (ModelQualityService) {
                     return ModelQualityService.GetAllDatasets();
-                },
-                MatchTypes: function (ModelQualityService) {
-                    return ModelQualityService.GetMatchTypes();
                 },
                 AnalyticTestTypes: function (ModelQualityService) {
                     return ModelQualityService.GetAnalyticTestTypes();

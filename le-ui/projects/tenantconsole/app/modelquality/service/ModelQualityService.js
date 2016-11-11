@@ -315,6 +315,31 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetAlgorithms(algorithmName);
     };
 
+    this.LatestAlgorithm = function () {
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/modelquality/algorithms/latest'
+        }).success(function(data) {
+            result.success = true;
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
     // /modelquality/dataflows
     this.GetDataflows = function(dataflowName) {
         var defer = $q.defer();
@@ -347,6 +372,31 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
     this.GetDataflowByName = function (dataflowName) {
         return this.GetDataflows(dataflowName);
+    };
+
+    this.LatestDataflow = function () {
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/modelquality/dataflows/latest'
+        }).success(function(data) {
+            result.success = true;
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
     };
 
     // /modelquality/datasets/
@@ -447,17 +497,29 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetSamplingConfigs(samplingConfigName);
     };
 
-    this.GetMatchTypes = function () {
-        var types = [];
-        types.push({name: 'DNB'});
-        types.push({name: 'RTS'});
-        types.push({name: 'NOMATCH'});
+    this.LatestSamplingConfig = function () {
+        var defer = $q.defer();
 
-        return {
-            success: true,
-            resultObj: types,
+        var result = {
+            success: false,
+            resultObj: [],
             errMsg: null
         };
+
+        $http({
+            method: 'POST',
+            url: '/modelquality/samplingconfigs/latest'
+        }).success(function(data) {
+            result.success = true;
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
     };
 
     this.GetAnalyticTestTypes = function () {

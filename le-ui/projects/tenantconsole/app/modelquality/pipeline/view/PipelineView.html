@@ -2,7 +2,7 @@
   <div ng-class="vm_createPipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'">
     <h4>{{::vm_createPipeline.labels.PIPELINES}}</h4>
     <ul class="pipeline-list">
-      <li ng-repeat="pipeline in vm_createPipeline.pipelines"
+      <li ng-repeat="pipeline in vm_createPipeline.analyticPipelines"
         ng-class="{selected: vm_createPipeline.selectedPipeline === pipeline}"
         ng-click="vm_createPipeline.selectPipeline(pipeline)">
         {{::pipeline.name}}
@@ -12,14 +12,14 @@
   <div ng-class="vm_createPipeline.stepMetadata ? 'col-xs-5' : 'col-xs-8'">
     <div ng-if="vm_createPipeline.loading">
         <div class="loader"> </div>
-        <h2 class="text-center">{{::vm_createPipeline.labels.LOAD_SAVING}}</h2>
+        <h2 class="text-center">{{::vm_createPipeline.spinnerMsg}}</h2>
     </div>
     <div ng-if="vm_createPipeline.message" class="row">
       <p class="alert" ng-class="vm_createPipeline.error ? 'alert-danger' : 'alert-success'">
         {{::vm_createPipeline.message}}
       </p>
     </div>
-    <div ng-if="!vm_createPipeline.loading">
+    <div ng-if="!vm_createPipeline.loading && vm_createPipeline.selectedPipeline">
       <div class="row">
         <h4>{{::vm_createPipeline.labels.STEPS}}</h4>
         <form class="form-group">
@@ -28,10 +28,10 @@
           </label>
         </form>
         <ul class="pipeline-step-list">
-          <li ng-if="!vm_createPipeline.pipeline.pipeline_steps.length">
+          <li ng-if="!vm_createPipeline.pipelineSteps.length">
             {{::vm_createPipeline.labels.EMPTY_STEPS}}
           </li>
-          <li ng-repeat="step in vm_createPipeline.pipeline.pipeline_steps track by $index">
+          <li ng-repeat="step in vm_createPipeline.pipelineSteps track by $index">
             <span class="list-bullet">{{$index + 1}}:</span>{{step.Name}}
             <span class="align-right">
               <table class="align-right pipeline-editor">
@@ -68,20 +68,27 @@
         <hr>
       </div>
       <div class="row">
-        <form class="form-group">
-          <label>{{::vm_createPipeline.labels.PIPELINE_DESCRIPTION}}:</label>
-          <textarea class="container-fluid form-control" placeholder="{{::vm_createPipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_createPipeline.pipelineDescription"/>
-        </form>
+        <div class="col col-xs-6">
+          <form class="form-group">
+            <label>{{::vm_createPipeline.labels.PIPELINE_DESCRIPTION}}:</label>
+            <textarea class="container-fluid form-control resize-vertical" placeholder="{{::vm_createPipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_createPipeline.pipelineDescription"/>
+          </form>
+        </div>
+        <div class="col col-xs-6">
+<!--           Prop Data Config:
+          <select class="form-control" ng-model="vm_createPipeline.analyticPipeline.prop_data_name">
+          </select> -->
+        </div>
       </div>
       <div class="row">
         <hr>
       </div>
-    </div>
-    <div class="row" ng-if="!vm_createPipeline.loading">
-      <div class="pull-right">
-        <button class="btn btn-default"
-          ng-click="vm_createPipeline.savePipeline()">{{::vm_createPipeline.labels.SAVE}}</button>
-        <button class="btn" ng-click="vm_createPipeline.cancelPipeline()">{{::vm_createPipeline.labels.CANCEL}}</button>
+      <div class="row" ng-if="!vm_createPipeline.loading">
+        <div class="pull-right">
+          <button class="btn btn-default"
+            ng-click="vm_createPipeline.savePipeline()">{{::vm_createPipeline.labels.SAVE}}</button>
+          <button class="btn" ng-click="vm_createPipeline.cancelPipeline()">{{::vm_createPipeline.labels.CANCEL}}</button>
+        </div>
       </div>
     </div>
   </div>

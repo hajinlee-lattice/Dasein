@@ -3,7 +3,6 @@ angular.module('app.modelquality', [
     'app.modelquality.service.ModelQualityService',
     'app.modelquality.controller.ModelQualityDashboardCtrl',
     'app.modelquality.controller.PipelineCtrl',
-    'app.modelquality.controller.AnalyticPipelineCtrl',
     'app.modelquality.controller.AnalyticTestCtrl',
     'app.modelquality.controller.PublishLatestCtrl',
     'app.modelquality.directive.ModelQualityLineChart',

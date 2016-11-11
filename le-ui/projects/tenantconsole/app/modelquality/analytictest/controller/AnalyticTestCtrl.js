@@ -11,7 +11,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
     });
 
 })
-.controller('AnalyticTestCtrl', function ($scope, $uibModal, AnalyticTests, AnalyticPipelines, Datasets, MatchTypes, AnalyticTestTypes, ModelQualityService) {
+.controller('AnalyticTestCtrl', function ($scope, $uibModal, AnalyticTests, AnalyticPipelines, Datasets, AnalyticTestTypes, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -24,7 +24,6 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             ANALYTIC_TEST_TYPE: 'Test Type',
             ANALYTIC_TEST_TAG: 'Test Tag',
             DATASET_NAMES: 'Datasets',
-            MATCH_TYPE: 'Match Type',
             NAME: 'Name'
         },
         error: false,
@@ -36,14 +35,12 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
         entityOptions: {
             analytic_pipeline_names: AnalyticPipelines.resultObj,
             dataset_names: Datasets.resultObj,
-            match_type: MatchTypes.resultObj,
             analytic_test_type: AnalyticTestTypes.resultObj
         },
         columns: [
             {key:'name', type: 'input'},
             {key:'dataset_names', type: 'multi'},
             {key:'analytic_pipeline_names', type: 'multi'},
-            {key:'match_type', type: 'select'},
             {key:'analytic_test_type', type: 'select'},
             {key:'analytic_test_tag', type: 'input'}
         ]
@@ -150,7 +147,6 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
         return {
             name: null,
             dataset_names: [],
-            match_type: null,
             analytic_test_type: null,
             analytic_test_tag: null,
             analytic_pipeline_names: []

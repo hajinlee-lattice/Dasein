@@ -40,11 +40,27 @@
       <tbody>
         <tr>
           <td ng-repeat="col in ::vm_analyticTest.columns">
-            <input ng-if="col.type==='input'" type="text" placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}" class="form-control" ng-model="vm_analyticTest.analyticTest[col.key]"/>
-            <select ng-if="col.type==='select'" type="text" placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}" class="form-control" ng-model="vm_analyticTest.analyticTest[col.key]">
-              <option ng-repeat="opt in vm_analyticTest.entityOptions[col.key]" value="{{opt.name}}">{{::opt.name}}</option>
+            <input
+              class="form-control"
+              type="text"
+              ng-if="col.type==='input'"
+              placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
+              ng-model="vm_analyticTest.analyticTest[col.key]"/>
+            <select
+              class="form-control"
+              type="text"
+              ng-if="col.type==='select'"
+              placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
+              ng-model="vm_analyticTest.analyticTest[col.key]"
+              ng-options="opt.name for opt in vm_analyticTest.entityOptions[col.key]">
             </select>
-            <button ng-if="col.type==='multi'" placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}" class="form-control" ng-click="vm_analyticTest.multiSelect(vm_analyticTest.analyticTest, col.key)">{{vm_analyticTest.analyticTest[col.key].length}} selected</button>
+            <button
+              class="form-control"
+              placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
+              ng-if="col.type==='multi'"
+              ng-click="vm_analyticTest.multiSelect(vm_analyticTest.analyticTest, col.key)">
+              {{vm_analyticTest.analyticTest[col.key].length}} selected
+            </button>
           </td>
         </tr>
       </tbody>
