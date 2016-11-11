@@ -165,7 +165,7 @@ class EC2Instance(Resource):
             },
             "CreationPolicy": {
                 "ResourceSignal": {
-                    "Timeout": "PT20M"
+                    "Timeout": "PT10M"
                 }
             }
         }
@@ -245,7 +245,7 @@ class ECSInstance(EC2Instance):
             },
             "CreationPolicy": {
                 "ResourceSignal": {
-                    "Timeout": "PT20M"
+                    "Timeout": "PT10M"
                 }
             }
         }

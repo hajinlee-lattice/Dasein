@@ -10,6 +10,11 @@ fi
 
 export LE_PROPDIR=/etc/ledp
 
+if [ -f "/etc/internaladdr.txt" ]; then
+    export QUARTZ_EXECUTION_HOST=`cat /etc/internaladdr.txt`
+    echo QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}
+fi
+
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"
 export JAVA_OPTS="${JAVAOPTS} ${CATALINA_OPTS}"

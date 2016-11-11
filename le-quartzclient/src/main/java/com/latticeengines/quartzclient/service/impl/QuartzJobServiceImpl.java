@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.core.BaseJobHistoryEntityMgr;
@@ -34,6 +35,8 @@ public class QuartzJobServiceImpl implements QuartzJobService {
     private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
     private static Map<String, Boolean> jobActives = new HashMap<String, Boolean>();
+
+    private static final String QUARTZ_EXECUTION_HOST = "QUARTZ_EXECUTION_HOST";
 
     @Autowired
     private BaseJobHistoryEntityMgr jobHistoryEntityMgr;
@@ -121,7 +124,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
 
         TriggeredJobInfo triggeredJobInfo = new TriggeredJobInfo();
         triggeredJobInfo.setJobHandle(jobId);
-        triggeredJobInfo.setExecutionHost(getHostAddress());
+        triggeredJobInfo.setExecutionHost(getExecutionHost());
         return triggeredJobInfo;
     }
 
@@ -143,6 +146,15 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             return false;
         } else {
             return true;
+        }
+    }
+
+    private String getExecutionHost() {
+        String host = System.getenv(QUARTZ_EXECUTION_HOST);
+        if (StringUtils.isEmpty(host)) {
+            return getHostAddress();
+        } else {
+            return host;
         }
     }
 

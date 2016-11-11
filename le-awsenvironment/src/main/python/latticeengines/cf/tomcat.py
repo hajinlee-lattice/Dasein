@@ -73,13 +73,17 @@ def tomcat_task(profile_vars):
 
     ledp = Volume("ledp", "/etc/ledp")
     scoringcache = Volume("scoringcache", "/mnt/efs/scoringapi")
+    internalAddr = Volume("intAddr", "/etc/internaladdr.txt")
 
-    container = container.mount("/etc/ledp", ledp).mount("/var/cache/scoringapi", scoringcache)
+    container = container.mount("/etc/ledp", ledp) \
+        .mount("/var/cache/scoringapi", scoringcache) \
+        .mount("/etc/internaladdr.txt", internalAddr)
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
     task.add_volume(ledp)
     task.add_volume(scoringcache)
+    task.add_volume(internalAddr)
     return task
 
 def provision_cli(args):

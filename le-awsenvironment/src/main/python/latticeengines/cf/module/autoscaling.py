@@ -19,14 +19,14 @@ class AutoScalingGroup(Resource):
             },
             "CreationPolicy" : {
                 "ResourceSignal" : {
-                    "Timeout" : "PT15M"
+                    "Timeout" : "PT10M"
                 }
             },
             "UpdatePolicy": {
                 "AutoScalingRollingUpdate": {
                     "MinInstancesInService": "1",
                     "MaxBatchSize": "1",
-                    "PauseTime" : "PT15M",
+                    "PauseTime" : "PT10M",
                     "WaitOnResourceSignals": "true"
                 }
             }

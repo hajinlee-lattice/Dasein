@@ -48,9 +48,10 @@ class CreateServiceThread (threading.Thread):
         container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         scoringcache = ECSVolume("scoringcache", "/mnt/efs/scoringapi")
+        internalAddr = ECSVolume("intAddr", "/etc/internaladdr.txt")
         token = find_cluster_random_token(self.stackname)
         task = "%s-%s-%s" % (self.stackname, self.app, token)
-        register_task(task, [container], [ledp, scoringcache])
+        register_task(task, [container], [ledp, scoringcache, internalAddr])
         create_service(self.stackname, self.app, task, self.instances)
 
 
@@ -258,7 +259,9 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
     for k, v in params.items():
         container.set_env(k, v)
 
-    container = container.mount("/etc/ledp", "ledp").mount("/var/cache/scoringapi", "scoringcache")
+    container = container.mount("/etc/ledp", "ledp") \
+        .mount("/var/cache/scoringapi", "scoringcache") \
+        .mount("/etc/internaladdr.txt", "intAddr")
 
     return container
 
