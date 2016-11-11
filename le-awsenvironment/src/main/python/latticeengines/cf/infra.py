@@ -24,9 +24,9 @@ TOMCAT_APP_HEALTH_MAP = {
     "dataflowapi": "/workflowapi/v2/api-docs",
     "workflowapi": "/workflowapi/v2/api-docs",
     "quartz": "/quartz/v2/api-docs",
-    "modelqulaity": "/quartz/v2/api-docs",
-    "propdata": "/quartz/v2/api-docs",
-    "dellebi": "/quartz/v2/api-docs",
+    "modelquality": "/modelquality/v2/api-docs",
+    "propdata": "/propdata/v2/api-docs",
+    "dellebi": "/dellebi/v2/api-docs",
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
