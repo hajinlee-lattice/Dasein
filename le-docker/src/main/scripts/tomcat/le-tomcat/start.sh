@@ -8,11 +8,11 @@ if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     cp /tmp/conf/env/${LE_ENVIRONMENT}/latticeengines.properties /etc/ledp
 fi
 
-export LE_PROPDIR=/etc/ledp
+export LE_PROPDIR="/etc/ledp"
 
 if [ -f "/etc/internaladdr.txt" ]; then
     export QUARTZ_EXECUTION_HOST=`cat /etc/internaladdr.txt`
-    echo QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}
+    echo "QUARTZ_EXECUTION_HOST=${QUARTZ_EXECUTION_HOST}"
 fi
 
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"

@@ -18,7 +18,6 @@ function build_docker() {
 
 	rm -rf ${WORKSPACE}
 	mkdir -p ${WORKSPACE}/webapps
-	cp -r META-INF ${WORKSPACE}
 	cp webapps/${WAR}.war ${WORKSPACE}/webapps/${WAR}.war
 	cp Dockerfile ${WORKSPACE}
 

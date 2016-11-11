@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.controller;
+package com.latticeengines.oauth2.authserver;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -13,7 +13,6 @@ import com.latticeengines.common.exposed.version.VersionManager;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseMessageBuilder;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
@@ -34,8 +33,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2) //
                 .select() //
-                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.playmaker.controller")) //
-                .paths(PathSelectors.regex("/(playmaker|tenants)/.*")) //
+                .paths(PathSelectors.regex("/oauth/.*")) //
                 .build() //
                 .pathMapping("/") //
                 .apiInfo(apiInfo()) //
@@ -51,8 +49,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder() //
-                .title("Lattice Engines PlayMaker API") //
-                .description("This is the REST API for playmaker services.") //
+                .title("Lattice Engines OAuth2 API") //
+                .description("This is the REST API for oauth2 services.") //
                 .version(docVersionManager.getCurrentVersion()) //
                 .termsOfServiceUrl("termsofservice.html") //
                 .license("License") //

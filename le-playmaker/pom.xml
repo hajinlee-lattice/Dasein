@@ -204,11 +204,6 @@
             <version>${spring.version}</version><!--$NO-MVN-MAN-VER$-->
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>1.2.17</version>
-        </dependency>
 
     </dependencies>
 

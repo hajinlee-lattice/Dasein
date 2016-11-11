@@ -358,6 +358,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
                 && !groups.contains(ColumnSelection.Predefined.LeadEnrichment.name())) {
             metadata.setCanEnrich(true);
         }
+        metadata.setCanInternalEnrich(isInternalEnrichment());
 
         return metadata;
     }
