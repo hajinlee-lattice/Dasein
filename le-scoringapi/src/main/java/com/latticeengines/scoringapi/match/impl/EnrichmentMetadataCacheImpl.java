@@ -44,7 +44,7 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
                         .build(new CacheLoader<CustomerSpace, List<LeadEnrichmentAttribute>>() {
                             public List<LeadEnrichmentAttribute> load(CustomerSpace customerSpace) throws Exception {
                                 return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, null,
-                                        null, true);
+                                        null, true, true);
                             }
                         });
     }

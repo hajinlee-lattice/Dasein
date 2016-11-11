@@ -38,14 +38,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     @Test(groups = "deployment", enabled = true)
     public void cleanupAttributeSelectionBeforeTest() {
         List<LeadEnrichmentAttribute> existingSelection = internalResourceRestApiProxy
-                .getLeadEnrichmentAttributes(customerSpace, null, null, true);
+                .getLeadEnrichmentAttributes(customerSpace, null, null, true, false);
         Assert.assertNotNull(existingSelection);
         Assert.assertTrue(existingSelection.size() == 6);
 
         LeadEnrichmentAttributesOperationMap deselectedAttributeMap = createDeselectionMap(existingSelection);
         internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, deselectedAttributeMap);
         List<LeadEnrichmentAttribute> freshSelection = internalResourceRestApiProxy
-                .getLeadEnrichmentAttributes(customerSpace, null, null, null, true);
+                .getLeadEnrichmentAttributes(customerSpace, null, null, null, true, false);
         Assert.assertNotNull(freshSelection);
         Assert.assertTrue(freshSelection.size() == 0);
     }

@@ -54,9 +54,12 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
-    public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
-                null, null, false, null, null);
+    public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
+                null, null, considerInternalAttributes);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -73,10 +76,13 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
             @ApiParam(value = "category", required = true) //
-            @RequestParam String category) {
+            @RequestParam String category, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null,
-                category, null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, category, null, false,
+                null, null, considerInternalAttributes);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -91,10 +97,13 @@ public class EnrichmentResource {
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
             @ApiParam(value = "Update lead enrichment selection", required = true) //
-            @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
+            @RequestBody LeadEnrichmentAttributesOperationMap attributes, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        selectedAttrService.save(attributes, tenant,
-                getLeadEnrichmentPremiumAttributesLimitation(request));
+        selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request),
+                considerInternalAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH, //
@@ -124,13 +133,14 @@ public class EnrichmentResource {
             Integer offset, //
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
-            Integer max //
-    ) {
+            Integer max, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
-                subcategory, onlySelectedAttributes, offset, max);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+                onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/count", //
@@ -154,13 +164,14 @@ public class EnrichmentResource {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes//
-    ) {
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter,
-                categoryEnum, subcategory, onlySelectedAttributes);
+        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+                onlySelectedAttributes, considerInternalAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH
@@ -171,15 +182,18 @@ public class EnrichmentResource {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes) {
+            Boolean onlySelectedAttributes, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
         String fileName = onlySelectedAttributes != null && onlySelectedAttributes
                 ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
                 : String.format("enrichmentAttributes_%s.csv", dateString);
-        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName,
-                tenant, onlySelectedAttributes);
+        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName, tenant,
+                onlySelectedAttributes, considerInternalAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/premiumattributeslimitation", //
@@ -187,8 +201,7 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(
-            HttpServletRequest request) {
+    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
@@ -198,9 +211,12 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
-    public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
+    public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        return selectedAttrService.getSelectedAttributeCount(tenant);
+        return selectedAttrService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
     @RequestMapping(value = LEAD_ENRICH_PATH + "/selectedpremiumattributes/count", //
@@ -208,13 +224,16 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
-    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
+    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        return selectedAttrService.getSelectedAttributePremiumCount(tenant);
+        return selectedAttrService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
-    private boolean containsAtleastOneAttributeForCategory(
-            List<LeadEnrichmentAttribute> allAttributes, Category category) {
+    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
+            Category category) {
         if (!CollectionUtils.isEmpty(allAttributes)) {
             for (LeadEnrichmentAttribute attr : allAttributes) {
                 if (category.toString().equals(attr.getCategory())) {

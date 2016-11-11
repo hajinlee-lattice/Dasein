@@ -468,7 +468,7 @@ public class InternalResource extends InternalResourceBase {
     public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
             @PathVariable("tenantId") String tenantId) {
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, null, null,
-                false, null, null);
+                false, null, null, Boolean.FALSE);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -489,7 +489,7 @@ public class InternalResource extends InternalResourceBase {
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, tenantId, null, category,
-                null, false, null, null);
+                null, false, null, null, Boolean.FALSE);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -524,13 +524,15 @@ public class InternalResource extends InternalResourceBase {
             Integer offset, //
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
-            Integer max //
-    ) {
+            Integer max, //
+            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @RequestParam(value = "considerInternalAttributes", required = false) //
+            Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max);
+                onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
     @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/" + "count" + "/"
@@ -560,7 +562,7 @@ public class InternalResource extends InternalResourceBase {
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes);
+                onlySelectedAttributes, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/"
@@ -574,7 +576,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Map<String, Integer> limitationMap = selectedAttrService.getPremiumAttributesLimitation(tenant);
-        selectedAttrService.save(attributes, tenant, limitationMap);
+        selectedAttrService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/premiumattributeslimitation" + "/"
@@ -600,7 +602,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return selectedAttrService.getSelectedAttributeCount(tenant);
+        return selectedAttrService.getSelectedAttributeCount(tenant, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/selectedpremiumattributes/count"
@@ -613,7 +615,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return selectedAttrService.getSelectedAttributePremiumCount(tenant);
+        return selectedAttrService.getSelectedAttributePremiumCount(tenant, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/emails/createmodel/result/{result}/"

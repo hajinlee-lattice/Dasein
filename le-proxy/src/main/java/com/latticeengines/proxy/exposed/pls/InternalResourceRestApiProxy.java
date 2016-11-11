@@ -143,24 +143,31 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes) {
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, onlySelectedAttributes,
+                Boolean.FALSE);
+    }
+
+    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
+            String attributeDisplayNameFilter, Category category, //
+            Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, null,
-                onlySelectedAttributes);
+                onlySelectedAttributes, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, String subcategory, //
-            Boolean onlySelectedAttributes) {
+            Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, null, null);
+                onlySelectedAttributes, null, null, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, String subcategory, //
-            Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
-                    onlySelectedAttributes, offset, max);
+                    onlySelectedAttributes, offset, max, considerInternalAttributes);
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
@@ -174,11 +181,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
-            Category category, String subcategory, Boolean onlySelectedAttributes) {
+            Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
             String url = constructUrl("pls/internal/enrichment/lead/count", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
-                    onlySelectedAttributes, null, null);
+                    onlySelectedAttributes, null, null, considerInternalAttributes);
 
             log.debug("Get from " + url);
             return restTemplate.getForObject(url, Integer.class);
@@ -269,7 +276,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
+            Boolean considerInternalAttributes) {
         url += "?" + "onlySelectedAttributes" + "="
                 + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true : false);
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
@@ -287,6 +295,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         if (max != null) {
             url += "&" + "max" + "=" + max.intValue();
         }
+
+        if (considerInternalAttributes) {
+            url += "&" + "considerInternalAttributes" + "=" + considerInternalAttributes;
+        }
+
         return url;
     }
 }

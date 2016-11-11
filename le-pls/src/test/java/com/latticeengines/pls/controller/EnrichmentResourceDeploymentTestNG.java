@@ -236,6 +236,24 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEnrichmentList(selectedAttributeList);
     }
 
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
+    public void testGetLeadEnrichmentAttributesWithInternalEnrichment()
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false, true);
+        assertNotNull(combinedAttributeList);
+        assertFalse(combinedAttributeList.isEmpty());
+        assertEquals(combinedAttributeList.size(), totalLeadEnrichmentCount);
+
+        assertEnrichmentList(combinedAttributeList);
+
+        List<LeadEnrichmentAttribute> selectedAttributeList = getLeadEnrichmentAttributeList(true);
+        assertNotNull(selectedAttributeList);
+        assertFalse(selectedAttributeList.isEmpty());
+        assertEquals(selectedAttributeList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
+
+        assertEnrichmentList(selectedAttributeList);
+    }
+
     protected void assertEnrichmentList(List<LeadEnrichmentAttribute> attributeList) {
         for (LeadEnrichmentAttribute attr : attributeList) {
             Assert.assertNotNull(attr.getFieldType());
@@ -248,7 +266,8 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentAttributes" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testGetLeadEnrichmentAttributesWithInternalEnrichment" })
     public void testGetLeadEnrichmentPremiumAttributesLimitation() {
         checkLimitation();
     }
@@ -343,7 +362,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave()
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
-                SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE);
+                SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
@@ -355,7 +374,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
-                Category.TECHNOLOGY_PROFILE);
+                Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
@@ -367,7 +386,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
-                Category.TECHNOLOGY_PROFILE);
+                Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         assertTrue(combinedAttributeList.isEmpty());
 
@@ -379,7 +398,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 0);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(false, SEARCH_DISPLAY_NAME_STR2,
-                Category.TECHNOLOGY_PROFILE);
+                Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
 
@@ -392,7 +411,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 19);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR4,
-                Category.TECHNOLOGY_PROFILE);
+                Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR4 + " - " + attr.getDisplayName());
@@ -403,7 +422,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(combinedAttributeList.size(), 0);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR1,
-                Category.TECHNOLOGY_PROFILE);
+                Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
         assertTrue(combinedAttributeList.isEmpty());
 
@@ -461,15 +480,21 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        return getLeadEnrichmentAttributeList(onlySelectedAttr, null, null);
+        return getLeadEnrichmentAttributeList(onlySelectedAttr, false);
     }
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
-            String attributeDisplayNameFilter, Category category)
+            boolean considerInternalAttributes)
+            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+        return getLeadEnrichmentAttributeList(onlySelectedAttr, null, null, considerInternalAttributes);
+    }
+
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
+            String attributeDisplayNameFilter, Category category, boolean considerInternalAttributes)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/enrichment/lead";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
-                || category != null) {
+        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
+                || considerInternalAttributes) {
             url += "?";
         }
         if (onlySelectedAttr) {
@@ -480,6 +505,9 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         }
         if (category != null) {
             url += "category=" + category.toString() + "&";
+        }
+        if (considerInternalAttributes) {
+            url += "considerInternalAttributes=" + considerInternalAttributes + "&";
         }
 
         if (url.endsWith("&")) {

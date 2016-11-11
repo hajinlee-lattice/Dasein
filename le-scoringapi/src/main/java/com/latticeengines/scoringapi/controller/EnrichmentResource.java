@@ -119,7 +119,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
-                categoryEnum, subcategory, onlySelectedAttributes, offset, max);
+                categoryEnum, subcategory, onlySelectedAttributes, offset, max, false);
     }
 
     @RequestMapping(value = "/count", //
@@ -147,7 +147,7 @@ public class EnrichmentResource {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
-                categoryEnum, subcategory, onlySelectedAttributes);
+                categoryEnum, subcategory, onlySelectedAttributes, false);
     }
 
     @RequestMapping(value = "/premiumattributeslimitation", //

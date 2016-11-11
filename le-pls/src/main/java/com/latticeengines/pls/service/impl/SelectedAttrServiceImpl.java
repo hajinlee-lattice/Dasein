@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,8 +38,6 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 public class SelectedAttrServiceImpl implements SelectedAttrService {
     private static final String SPACE_DELIM = " ";
 
-    private static final Log log = LogFactory.getLog(SelectedAttrServiceImpl.class);
-
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
 
     private static final int MAX_SAVE_RETRY = 5;
@@ -62,15 +58,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     private TenantConfigServiceImpl tenantConfigService;
 
     @Override
-    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
-            Map<String, Integer> limitationMap) {
+    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
+            Boolean considerInternalAttributes) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         Integer premiumAttributeLimitation = getTotalMaxCount(limitationMap);
         checkAmbiguityInFieldNames(attributes);
 
-        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant);
+        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant,
+                considerInternalAttributes);
         int additionalPremiumAttrCount = 0;
-        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null,
+                considerInternalAttributes);
 
         final List<SelectedAttribute> addAttrList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(attributes.getSelectedAttributes())) {
@@ -116,46 +114,53 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
-            Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
+            Boolean considerInternalAttributes) {
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
-        List<String> selectedAttributeInternalNames = getselectedAttributeInternalNames(selectedAttributes);
-
-        // TODO - pass selectedAttributeInternalNames to columnSelection() to
-        // get metadata about only these names
         String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
                 currentDataCloudVersion);
 
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, offset, max);
+                onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
     @Override
     public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes) {
-        // TODO - update this to use efficient way to get count
+            String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant, attributeDisplayNameFilter, category,
-                subcategory, onlySelectedAttributes, null, null);
+                subcategory, onlySelectedAttributes, null, null, considerInternalAttributes);
         return (matchingAttr == null) ? 0 : matchingAttr.size();
     }
 
-    private List<String> getselectedAttributeInternalNames(List<SelectedAttribute> selectedAttributes) {
-        List<String> selectedAttributeInternalNames = new ArrayList<>();
-        for (SelectedAttribute attr : selectedAttributes) {
-            selectedAttributeInternalNames.add(attr.getColumnId());
+    @Override
+    public Integer getSelectedAttributeCount(Tenant tenant, Boolean considerInternalAttributes) {
+        return getSelectedAttrCount(tenant, Boolean.FALSE, considerInternalAttributes);
+    }
+
+    @Override
+    public Integer getSelectedAttributePremiumCount(Tenant tenant, Boolean considerInternalAttributes) {
+        return getSelectedAttrCount(tenant, Boolean.TRUE, considerInternalAttributes);
+    }
+
+    protected Integer getSelectedAttrCount(Tenant tenant, Boolean countOnlySelectedPremiumAttr,
+            Boolean considerInternalAttributes) {
+        List<LeadEnrichmentAttribute> attributeList = getAttributes(tenant, null, null, null, null, null, null,
+                considerInternalAttributes);
+        int count = 0;
+        for (LeadEnrichmentAttribute attr : attributeList) {
+            if (attr.getIsSelected()) {
+                if (countOnlySelectedPremiumAttr == Boolean.TRUE) {
+                    if (attr.getIsPremium()) {
+                        count++;
+                    }
+                } else {
+                    count++;
+                }
+            }
         }
-        return selectedAttributeInternalNames;
-    }
-
-    @Override
-    public Integer getSelectedAttributeCount(Tenant tenant) {
-        return selectedAttrEntityMgr.count(false);
-    }
-
-    @Override
-    public Integer getSelectedAttributePremiumCount(Tenant tenant) {
-        return selectedAttrEntityMgr.count(true);
+        return count;
     }
 
     @Override
@@ -168,14 +173,14 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
-            String fileName, Tenant tenant, Boolean isSelected) {
+            String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
         String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
                 currentDataCloudVersion);
         List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
 
         List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, null,
-                isSelected, null, null);
+                isSelected, null, null, considerInternalAttributes);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
                 getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
@@ -229,7 +234,8 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
             List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max) {
+            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
+            Boolean considerInternalAttributes) {
         if ((offset != null && offset < 0) || (max != null && max <= 0)) {
             // TODO - throw LEDP exception
             throw new RuntimeException("Invalid pagination option");
@@ -245,10 +251,14 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         List<String> searchTokens = getSearchTokens(attributeDisplayNameFilter);
 
         for (ColumnMetadata column : allColumns) {
-            if (onlySelectedAttributes == Boolean.TRUE) {
-                if (!selectedAttributeNames.contains(column.getColumnId())) {
-                    continue;
-                }
+            if (onlySelectedAttributes == Boolean.TRUE //
+                    && !selectedAttributeNames.contains(column.getColumnId())) {
+                continue;
+            }
+
+            if (considerInternalAttributes != Boolean.TRUE //
+                    && column.isCanInternalEnrich()) {
+                continue;
             }
 
             if (category != null) {
@@ -341,6 +351,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         attr.setCategory(column.getCategory().toString());
         attr.setSubcategory(column.getSubcategory() == null ? //
                 null : column.getSubcategory().toString());
+        attr.setIsInternal(column.isCanInternalEnrich());
         superimposedList.add(attr);
     }
 
