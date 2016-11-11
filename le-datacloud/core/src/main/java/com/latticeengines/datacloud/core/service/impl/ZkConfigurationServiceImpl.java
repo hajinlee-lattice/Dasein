@@ -36,10 +36,10 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private static final String DATASOURCES = "DataSources";
     private static final String STACKS = "Stacks";
 
-    @Value("${propdata.source.db.json:source_dbs_dev.json}")
+    @Value("${datacloud.source.db.json}")
     private String sourceDbsJson;
 
-    @Value("${propdata.target.db.json:target_dbs_dev.json}")
+    @Value("${datacloud.target.db.json}")
     private String targetDbsJson;
 
     @Value("${common.le.stack}")

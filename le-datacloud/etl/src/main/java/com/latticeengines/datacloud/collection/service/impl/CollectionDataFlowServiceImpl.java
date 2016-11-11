@@ -56,10 +56,10 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     private HGData hgData;
 
-    @Value("${propdata.collection.cascading.platform:tez}")
+    @Value("${datacloud.collection.cascading.platform}")
     protected String cascadingPlatform;
 
-    @Value("${propdata.collection.cascading.partitions:8}")
+    @Value("${datacloud.collection.cascading.partitions}")
     protected Integer cascadingPartitions;
 
     @Override

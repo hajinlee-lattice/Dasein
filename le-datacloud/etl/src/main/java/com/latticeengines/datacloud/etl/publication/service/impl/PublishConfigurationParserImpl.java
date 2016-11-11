@@ -33,40 +33,40 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     private static final String STAGE_SUFFIX = "_Stage";
     private static final String BACKUP_SUFFIX = "_Bak";
 
-    @Value("${propdata.collection.host}")
+    @Value("${datacloud.collection.host}")
     private String collectionHost;
 
-    @Value("${propdata.collection.port}")
+    @Value("${datacloud.collection.port}")
     private int collectionPort;
 
-    @Value("${propdata.collection.db}")
+    @Value("${datacloud.collection.db}")
     private String collectionDb;
 
-    @Value("${propdata.bulk.host}")
+    @Value("${datacloud.bulk.host}")
     private String bulkHost;
 
-    @Value("${propdata.bulk.port}")
+    @Value("${datacloud.bulk.port}")
     private int bulkPort;
 
-    @Value("${propdata.bulk.db}")
+    @Value("${datacloud.bulk.db}")
     private String bulkDb;
 
-    @Value("${propdata.test.host}")
+    @Value("${datacloud.test.host}")
     private String testHost;
 
-    @Value("${propdata.test.port}")
+    @Value("${datacloud.test.port}")
     private int testPort;
 
-    @Value("${propdata.test.db}")
+    @Value("${datacloud.test.db}")
     private String testDb;
 
-    @Value("${propdata.user}")
+    @Value("${datacloud.user}")
     private String dbUser;
 
-    @Value("${propdata.password.encrypted}")
+    @Value("${datacloud.password.encrypted}")
     private String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number:8}")
+    @Value("${datacloud.collection.sqoop.mapper.number}")
     private int numMappers;
 
     @Autowired

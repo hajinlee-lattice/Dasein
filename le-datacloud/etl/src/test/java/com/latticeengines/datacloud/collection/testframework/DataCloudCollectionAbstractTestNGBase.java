@@ -21,25 +21,25 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @ContextConfiguration(locations = { "classpath:test-datacloud-collection-context.xml" })
 public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Value("${propdata.test.env}")
+    @Value("${datacloud.test.env}")
     protected String testEnv;
 
-    @Value("${propdata.collection.host}")
+    @Value("${datacloud.collection.host}")
     private String dbHost;
 
-    @Value("${propdata.collection.port}")
+    @Value("${datacloud.collection.port}")
     private int dbPort;
 
-    @Value("${propdata.collection.db}")
+    @Value("${datacloud.collection.db}")
     private String db;
 
-    @Value("${propdata.user}")
+    @Value("${datacloud.user}")
     private String dbUser;
 
-    @Value("${propdata.password.encrypted}")
+    @Value("${datacloud.password.encrypted}")
     private String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number:4}")
+    @Value("${datacloud.collection.sqoop.mapper.number}")
     private int numMappers;
 
     @Autowired

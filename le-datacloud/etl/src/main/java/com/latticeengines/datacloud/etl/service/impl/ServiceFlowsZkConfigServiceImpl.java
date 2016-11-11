@@ -35,13 +35,13 @@ public class ServiceFlowsZkConfigServiceImpl implements ServiceFlowsZkConfigServ
     @Autowired
     List<Source> sources;
 
-    @Value("${propdata.source.db.json:source_dbs_dev.json}")
+    @Value("${datacloud.source.db.json:source_dbs_dev.json}")
     private String sourceDbsJson;
 
-    @Value("${propdata.target.db.json:target_dbs_dev.json}")
+    @Value("${datacloud.target.db.json:target_dbs_dev.json}")
     private String targetDbsJson;
 
-    @Value("${propdata.job.default.schedule:}")
+    @Value("${datacloud.job.default.schedule:}")
     String defaultCron;
 
     @PostConstruct

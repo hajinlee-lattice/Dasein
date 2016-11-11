@@ -27,10 +27,10 @@ public abstract class AbstractTransformationDataFlowService {
     @Value("${dataplatform.queue.scheme:legacy}")
     private String yarnQueueScheme;
 
-    @Value("${propdata.etl.cascading.platform:mr}")
+    @Value("${datacloud.etl.cascading.platform}")
     private String cascadingPlatform;
 
-    @Value("${propdata.collection.cascading.partitions:8}")
+    @Value("${datacloud.etl.cascading.partitions}")
     protected Integer cascadingPartitions;
 
     @Autowired

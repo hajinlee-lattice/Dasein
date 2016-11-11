@@ -21,7 +21,7 @@
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage"/>
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">${propdata.manage.dialect}</prop>
+                <prop key="hibernate.dialect">${datacloud.manage.dialect}</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
             </props>

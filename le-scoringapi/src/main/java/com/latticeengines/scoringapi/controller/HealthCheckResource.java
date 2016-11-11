@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.controller;
 
+import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +19,7 @@ public class HealthCheckResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Health check")
+    @NoMetricsLog
     public StatusDocument healthCheck() {
         // TODO Add actual health checking; right now it just checks that the
         // WAR has been initialized successfully.

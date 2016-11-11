@@ -29,13 +29,13 @@ public class PropDataTenantServiceImpl implements PropDataTenantService {
 
     private String tenantId = PropDataConstants.SERVICE_CUSTOMERSPACE;
 
-    @Value("${propdata.ga.username}")
+    @Value("${datacloud.ga.username}")
     private String username;
 
-    @Value("${propdata.ga.password.hash}")
+    @Value("${datacloud.ga.password.hash}")
     private String passwordHash;
 
-    @Value("${propdata.ga.password.encrypted}")
+    @Value("${datacloud.ga.password.encrypted}")
     private String password;
 
     public void bootstrapServiceTenant() {
