@@ -17,7 +17,11 @@ fi
 
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"
-export JAVA_OPTS="${JAVAOPTS} ${CATALINA_OPTS}"
+if [ ! -z "${CATALINA_OPTS}" ]; then
+    export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
+fi
 export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_COMMON_JAR
+
+echo ${JAVA_OPTS}
 
 ${CATALINA_HOME}/bin/catalina.sh run
