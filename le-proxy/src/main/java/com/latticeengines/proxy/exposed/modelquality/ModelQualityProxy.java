@@ -44,7 +44,7 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     public String createModelRun(ModelRunEntityNames modelRunEntityNames, String tenant, String username,
             String password, String apiHostPort) {
         String url = constructUrl(
-                "/modelruns/?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", //
+                "/modelruns/?tenant={tenant}&username={username}&password={password}&apiHostPort={apiHostPort}", 
                 tenant, username, password, apiHostPort);
         return post("createModelRun", url, modelRunEntityNames, String.class);
     }
@@ -69,48 +69,48 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
 
     @Override
     public String uploadPipelineStepMetadata(String fileName, String stepName, MultipartFile file) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepMetadata", url, file, String.class);
     }
 
     @Override
     public String uploadPipelineStepPythonScript(String fileName, String stepName, MultipartFile file) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/python?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/python?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepPythonScript", url, file, String.class);
     }
 
     @Override
     public String uploadPipelineStepRTSPythonScript(String fileName, String stepName, MultipartFile file) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepRTSPythonScript", url, file, String.class);
     }
 
     @Override
-    public String uploadPipelineStepMetadata(String fileName, //
-            String stepName, //
+    public String uploadPipelineStepMetadata(String fileName, 
+            String stepName, 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/metadata?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepMetadata", url, requestEntity, String.class);
     }
 
     @Override
-    public String uploadPipelineStepRTSPythonScript(String fileName, //
-            String stepName, //
+    public String uploadPipelineStepRTSPythonScript(String fileName, 
+            String stepName, 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/pythonrts?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepMetadata", url, requestEntity, String.class);
     }
 
     @Override
-    public String uploadPipelineStepPythonScript(String fileName, //
-            String stepName, //
+    public String uploadPipelineStepPythonScript(String fileName, 
+            String stepName, 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity) {
-        String url = constructUrl("/pipelines/pipelinestepfiles/python?fileName={fileName}&stepName={stepName}", //
+        String url = constructUrl("/pipelines/pipelinestepfiles/python?fileName={fileName}&stepName={stepName}", 
                 fileName, stepName);
         return post("uploadPipelineStepPythonScript", url, requestEntity, String.class);
     }
@@ -247,6 +247,13 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     public PropData createPropDataConfigFromProduction() {
         String url = constructUrl("/propdataconfigs/latest");
         return post("createPropDataConfigFromProduction", url, null, PropData.class);
+    }
+    
+    @Override
+    public List<PropData> createPropDataConfigFromProductionForUI(){
+        String url = constructUrl("/propdataconfigs/latestForUI");
+        PropData pd = null;
+        return post("createPropDataConfigFromProductionForUI", url, pd, List.class);        
     }
 
     @Override

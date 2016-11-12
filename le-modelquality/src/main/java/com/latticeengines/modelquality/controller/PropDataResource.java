@@ -57,6 +57,14 @@ public class PropDataResource implements ModelQualityPropDataInterface, CrudInte
     public PropData createPropDataConfigFromProduction() {
         return createForProduction();
     }
+    
+    @Override
+    @RequestMapping(value = "/latestForUI", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Create PropData configuration from production")
+    public List<PropData> createPropDataConfigFromProductionForUI() {
+        return propDataService.createLatestProductionPropDatasForUI();
+    }
 
     @Override
     @RequestMapping(value = "/{propDataConfigName:.*}", method = RequestMethod.GET)

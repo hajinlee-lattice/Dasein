@@ -13,5 +13,6 @@ public interface ModelQualityPropDataInterface {
     PropData createPropDataConfigFromProduction();
 
     PropData getPropDataConfigByName(String propDataConfigName);
-
+    
+    List<PropData> createPropDataConfigFromProductionForUI();
 }
