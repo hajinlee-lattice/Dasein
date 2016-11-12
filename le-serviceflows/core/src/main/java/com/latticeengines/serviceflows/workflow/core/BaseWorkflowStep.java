@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,7 +95,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @Override
     public boolean setup() {

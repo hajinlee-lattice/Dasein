@@ -2,7 +2,6 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -47,6 +46,7 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -67,7 +67,7 @@ public class ScoreCorrectnessService {
     private static final int THREADPOOL_SIZE = 15;
     private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 0.5;
     private static final double THRESHOLD = 0.000001;
-    private RestTemplate scoringRestTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate scoringRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @Value("${common.test.scoringapi.url}")
     private String scoreApiHostPort;

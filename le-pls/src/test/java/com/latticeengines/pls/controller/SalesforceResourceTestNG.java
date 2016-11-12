@@ -1,12 +1,19 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -57,7 +64,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     @Test(groups = { "functional", "deployment" })
     public void bisLP() throws Exception {
-        String url = getRestAPIHostPort() + "pls/salesforce/bis-lp";
+        String url = getRestAPIHostPort() + "/pls/salesforce/bis-lp";
         String redirectionURL = getRedirectionURL(url);
 
         SalesforceURL sfdcURL = salesforceURLEntityMgr.findByURLName(SalesforceURLConstants.BISLP_NAME);
@@ -68,7 +75,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     @Test(groups = { "functional", "deployment" })
     public void bisLPSandbox() throws Exception {
-        String url = getRestAPIHostPort() + "pls/salesforce/bis-lp-sandbox";
+        String url = getRestAPIHostPort() + "/pls/salesforce/bis-lp-sandbox";
         String redirectionURL = getRedirectionURL(url);
 
         SalesforceURL sfdcURL = salesforceURLEntityMgr.findByURLName(SalesforceURLConstants.BISLP_NAME);
@@ -80,7 +87,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     @Test(groups = { "functional", "deployment" })
     public void bisAP() throws Exception {
-        String url = getRestAPIHostPort() + "pls/salesforce/bis-ap";
+        String url = getRestAPIHostPort() + "/pls/salesforce/bis-ap";
         String redirectionURL = getRedirectionURL(url);
 
         SalesforceURL sfdcURL = salesforceURLEntityMgr.findByURLName(SalesforceURLConstants.BISAP_NAME);
@@ -91,7 +98,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     @Test(groups = { "functional", "deployment" })
     public void bisAPSandbox() throws Exception {
-        String url = getRestAPIHostPort() + "pls/salesforce/bis-ap-sandbox";
+        String url = getRestAPIHostPort() + "/pls/salesforce/bis-ap-sandbox";
         String redirectionURL = getRedirectionURL(url);
 
         SalesforceURL sfdcURL = salesforceURLEntityMgr.findByURLName(SalesforceURLConstants.BISAP_NAME);
@@ -103,15 +110,17 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
 
     private String getRedirectionURL(String url) throws Exception {
         String redirectionURL;
-
-        RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+        HttpClient noRedirectClient =
+                HttpClientBuilder.create().setRedirectStrategy(new NoRedirectStrategy()).build();
+        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(noRedirectClient));
         HttpHeaders requestHeaders = new HttpHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>("", requestHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+        System.out.println(String.format("%s: %d", url, responseEntity.getStatusCode().value()));
         Assert.assertEquals(HttpStatus.FOUND, responseEntity.getStatusCode());
         HttpHeaders responseHeaders = responseEntity.getHeaders();
         redirectionURL = responseHeaders.getLocation().toString();
-
+        System.out.println("got redirection url: " + redirectionURL);
         return redirectionURL;
     }
 
@@ -121,5 +130,13 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         sfdcURL.setURL(url);
         salesforceURLEntityMgr.create(sfdcURL);
         return sfdcURL;
+    }
+
+    private class NoRedirectStrategy extends DefaultRedirectStrategy {
+        @Override
+        public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws ProtocolException {
+            return false;
+        }
+
     }
 }

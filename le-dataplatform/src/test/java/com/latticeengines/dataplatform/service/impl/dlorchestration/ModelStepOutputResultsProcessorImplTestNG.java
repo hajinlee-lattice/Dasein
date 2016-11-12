@@ -8,6 +8,7 @@ import static org.testng.Assert.assertFalse;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     @Autowired
     private MetadataService metadataService;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     private ModelCommand command;
     private ModelCommandParameters commandParameters;

@@ -2,7 +2,6 @@ package com.latticeengines.modelquality.service.impl;
 
 import java.util.Arrays;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
@@ -88,7 +88,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     }
 
     private void setup() throws Exception {
-        restTemplate = SSLUtils.newSSLBlindRestTemplate();
+        restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
         Tenant tenant = new Tenant();
         tenant.setId(env.tenant);
         tenant.setName(CustomerSpace.parse(env.tenant).getTenantId());

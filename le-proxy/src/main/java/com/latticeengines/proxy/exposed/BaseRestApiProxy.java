@@ -16,7 +16,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
@@ -25,7 +25,7 @@ public abstract class BaseRestApiProxy {
 
 
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
     private String hostport;
     private String rootpath;
 

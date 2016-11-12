@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -78,7 +79,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     private static Date timeAnchor = new Date(1);
 

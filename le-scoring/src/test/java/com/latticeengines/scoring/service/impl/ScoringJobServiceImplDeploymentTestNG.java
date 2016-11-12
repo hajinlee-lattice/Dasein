@@ -3,6 +3,7 @@ package com.latticeengines.scoring.service.impl;
 import java.util.Arrays;
 import java.util.UUID;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
 
     protected static String customer = "Mulesoft_Relaunch_Deployment";
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @Override
     @BeforeClass(groups = "deployment")

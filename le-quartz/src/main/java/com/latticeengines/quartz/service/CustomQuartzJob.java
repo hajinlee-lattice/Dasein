@@ -3,6 +3,7 @@ package com.latticeengines.quartz.service;
 import java.net.URI;
 import java.util.Date;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
@@ -36,7 +37,7 @@ public class CustomQuartzJob extends QuartzJobBean {
 
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     public void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");

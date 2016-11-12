@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +30,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -67,7 +67,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private Camille camille;
     private String podId;
-    private RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
 
     @BeforeClass(groups = "cleanup")

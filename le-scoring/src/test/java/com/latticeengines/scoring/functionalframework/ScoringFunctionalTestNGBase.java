@@ -2,6 +2,7 @@ package com.latticeengines.scoring.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -27,7 +28,7 @@ public class ScoringFunctionalTestNGBase extends DataPlatformFunctionalTestNGBas
     @Autowired
     private ScoringOrderedEntityMgrListForDbClean scoringOrderedEntityMgrListForDbClean;
 
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @AfterClass(groups = { "functional", "functional.scheduler" })
     public void clearTables() {

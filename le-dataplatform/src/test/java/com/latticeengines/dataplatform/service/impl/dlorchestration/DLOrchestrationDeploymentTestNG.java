@@ -7,6 +7,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +61,7 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
 
     private StandaloneHttpServer httpServer;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     private static final String TEMP_EVENTTABLE = "DLOrchestrationDeploymentTestNG_eventtable";
 

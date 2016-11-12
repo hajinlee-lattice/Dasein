@@ -28,7 +28,7 @@ import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -73,7 +73,7 @@ public class ComponentOrchestrator {
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     public ComponentOrchestrator() {
     }

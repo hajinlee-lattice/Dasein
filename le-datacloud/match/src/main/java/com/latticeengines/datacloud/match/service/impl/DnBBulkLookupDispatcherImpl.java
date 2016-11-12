@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,7 +70,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<Map<St
     @Value("${datacloud.dnb.bulk.input.record.format}")
     private String recordFormat;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     private String dnBBulkApiBody;
 

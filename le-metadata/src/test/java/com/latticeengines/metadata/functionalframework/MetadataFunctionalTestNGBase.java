@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ import org.testng.Assert;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -62,7 +62,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Autowired
     protected Configuration yarnConfiguration;
 
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @Value("${metadata.test.functional.api:http://localhost:8080/}")
     private String hostPort;

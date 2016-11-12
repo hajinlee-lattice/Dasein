@@ -1,12 +1,12 @@
 package com.latticeengines.playmaker.controller;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
@@ -19,7 +19,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         super.beforeClass();
-        restTemplate = SSLUtils.newSSLBlindRestTemplate();
+        restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
     }
 
     @Test(groups = "deployment")

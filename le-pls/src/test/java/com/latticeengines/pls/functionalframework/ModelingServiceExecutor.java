@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -17,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -43,7 +43,7 @@ public class ModelingServiceExecutor {
 
     private String modelingServiceHdfsBaseDir;
 
-    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     private Configuration yarnConfiguration;
 

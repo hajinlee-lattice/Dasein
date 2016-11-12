@@ -33,7 +33,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -68,8 +68,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     public static final String generalPassword = "admin";
     public static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
-    protected RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     @Value("${security.test.api.hostport}")
     private String hostPort;

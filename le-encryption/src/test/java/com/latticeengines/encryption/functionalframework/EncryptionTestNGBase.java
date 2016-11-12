@@ -4,6 +4,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,8 +40,8 @@ public class EncryptionTestNGBase extends AbstractTestNGSpringContextTests {
     protected TenantService tenantService;
 
     protected GlobalAuthTestBed testBed;
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
-    protected RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
     protected Tenant mainTestTenant;
 
     protected void setTestBed(GlobalAuthTestBed testBed) {

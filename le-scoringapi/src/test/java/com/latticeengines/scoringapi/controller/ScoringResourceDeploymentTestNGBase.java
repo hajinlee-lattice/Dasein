@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -235,7 +236,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             String tenantIdentifier) {
         String url = constructUrl("/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
 
-        RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+        RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
         List<?> resultList = restTemplate.postForObject(url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {

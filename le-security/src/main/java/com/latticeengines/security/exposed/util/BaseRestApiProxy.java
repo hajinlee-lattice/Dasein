@@ -1,5 +1,6 @@
 package com.latticeengines.security.exposed.util;
 
+import com.latticeengines.common.exposed.util.RestTemplateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,7 +10,7 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 
 public abstract class BaseRestApiProxy {
 
-    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
 
     public abstract String getRestApiHostPort();
 
