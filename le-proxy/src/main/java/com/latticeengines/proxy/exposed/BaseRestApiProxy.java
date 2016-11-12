@@ -3,12 +3,10 @@ package com.latticeengines.proxy.exposed;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
@@ -20,6 +18,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
@@ -29,7 +28,7 @@ public abstract class BaseRestApiProxy {
 
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
     private static final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-            HttpClientBuilder.create().setConnectionManager(new PoolingHttpClientConnectionManager()).build());
+            HttpClientBuilder.create().setConnectionManager(SSLUtils.getTrustEveryThingConnectionMgr()).build());
 
     private RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
     private String hostport;
