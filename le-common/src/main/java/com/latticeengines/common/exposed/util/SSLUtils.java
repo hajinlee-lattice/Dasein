@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class SSLUtils {
     private static Log log = LogFactory.getLog(SSLUtils.class);
-    private static final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+    private static final HttpComponentsClientHttpRequestFactory sslBlindClientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
             HttpClientBuilder.create().setConnectionManager(getTrustEveryThingConnectionMgr()).build());
     private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
 
@@ -96,7 +96,7 @@ public class SSLUtils {
     }
 
     public static RestTemplate newSSLBlindRestTemplate() {
-        return new RestTemplate(clientHttpRequestFactory);
+        return new RestTemplate(sslBlindClientHttpRequestFactory);
     }
 
 }

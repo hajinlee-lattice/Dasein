@@ -94,12 +94,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
-    protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Override
     public boolean setup() {
         boolean result = super.setup();
-        SSLUtils.turnOffSslChecking();
         restTemplate.setInterceptors(addMagicAuthHeaders);
         return result;
     }

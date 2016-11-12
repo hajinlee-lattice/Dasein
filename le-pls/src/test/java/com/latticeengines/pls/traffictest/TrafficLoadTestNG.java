@@ -39,6 +39,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -216,7 +217,7 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBaseDeprecated {
                     final int userNum = j;
                     Future<List<Long>> future = executor.submit(new Callable<List<Long>>() {
 
-                        private RestTemplate restTemplate = new RestTemplate();
+                        private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
                         private TimeStamp startTime;
                         private TimeStamp finishTime;
                         private UserDocument userDoc;

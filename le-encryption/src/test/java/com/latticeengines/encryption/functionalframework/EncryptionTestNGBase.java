@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -38,8 +39,8 @@ public class EncryptionTestNGBase extends AbstractTestNGSpringContextTests {
     protected TenantService tenantService;
 
     protected GlobalAuthTestBed testBed;
-    protected RestTemplate restTemplate = new RestTemplate();
-    protected RestTemplate magicRestTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
     protected Tenant mainTestTenant;
 
     protected void setTestBed(GlobalAuthTestBed testBed) {

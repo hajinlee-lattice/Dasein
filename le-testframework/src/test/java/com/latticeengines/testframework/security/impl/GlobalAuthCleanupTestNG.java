@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -66,7 +67,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private Camille camille;
     private String podId;
-    private RestTemplate magicRestTemplate = new RestTemplate();
+    private RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
 
     @BeforeClass(groups = "cleanup")

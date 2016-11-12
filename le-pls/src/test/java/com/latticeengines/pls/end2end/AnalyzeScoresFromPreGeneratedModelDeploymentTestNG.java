@@ -12,7 +12,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -61,7 +60,6 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
 
     @Test(groups = "deployment.lp", enabled = true)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
-        SSLUtils.turnOffSslChecking();
         String pathToModelInputCsv = RESOURCE_BASE + "/" + fileName;
         scoreCorrectnessService.analyzeScores(TENANT_ID, pathToModelInputCsv, MODEL_ID, NUM_RECORDS_TO_SCORE);
     }

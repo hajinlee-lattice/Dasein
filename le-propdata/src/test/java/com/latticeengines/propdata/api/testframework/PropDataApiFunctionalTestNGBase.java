@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 
 public abstract class PropDataApiFunctionalTestNGBase extends PropDataApiAbstractTestNGBase {
 
-    protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Value("${propdata.api.functional.hostport}")
     private String hostPort;

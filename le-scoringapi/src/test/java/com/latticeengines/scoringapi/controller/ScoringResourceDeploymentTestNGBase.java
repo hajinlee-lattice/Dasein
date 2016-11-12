@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +22,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -234,7 +235,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             String tenantIdentifier) {
         String url = constructUrl("/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
 
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
         List<?> resultList = restTemplate.postForObject(url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {

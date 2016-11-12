@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -103,7 +104,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
     private String getRedirectionURL(String url) throws Exception {
         String redirectionURL;
 
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
         HttpHeaders requestHeaders = new HttpHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>("", requestHeaders);
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);

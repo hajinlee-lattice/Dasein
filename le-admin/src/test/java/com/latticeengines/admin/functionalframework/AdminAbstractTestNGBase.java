@@ -32,6 +32,7 @@ import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExterna
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -76,8 +77,8 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     @Value("${admin.test.contract}")
     protected String TestTenantId;
 
-    protected RestTemplate restTemplate = new RestTemplate();
-    protected RestTemplate magicRestTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(

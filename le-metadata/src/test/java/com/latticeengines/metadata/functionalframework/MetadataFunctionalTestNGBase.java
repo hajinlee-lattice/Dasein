@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Autowired
     protected Configuration yarnConfiguration;
 
-    protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Value("${metadata.test.functional.api:http://localhost:8080/}")
     private String hostPort;

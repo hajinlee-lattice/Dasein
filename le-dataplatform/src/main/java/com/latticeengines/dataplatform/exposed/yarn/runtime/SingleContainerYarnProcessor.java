@@ -34,7 +34,6 @@ import org.springframework.yarn.integration.ip.mind.MindAppmasterServiceClient;
 import org.springframework.yarn.integration.ip.mind.MindRpcSerializer;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -66,7 +65,6 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     @SuppressWarnings("unchecked")
     public SingleContainerYarnProcessor() {
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        SSLUtils.turnOffSslChecking();
     }
 
     public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,

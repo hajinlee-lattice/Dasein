@@ -2,6 +2,7 @@ package com.latticeengines.modelquality.service.impl;
 
 import java.util.Arrays;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,7 +88,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
     }
 
     private void setup() throws Exception {
-        restTemplate = new RestTemplate();
+        restTemplate = SSLUtils.newSSLBlindRestTemplate();
         Tenant tenant = new Tenant();
         tenant.setId(env.tenant);
         tenant.setName(CustomerSpace.parse(env.tenant).getTenantId());

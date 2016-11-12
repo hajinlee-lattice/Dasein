@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
@@ -68,7 +69,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<Map<St
     @Value("${datacloud.dnb.bulk.input.record.format}")
     private String recordFormat;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     private String dnBBulkApiBody;
 

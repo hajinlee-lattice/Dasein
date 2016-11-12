@@ -17,7 +17,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.parallel.Parallel;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -78,8 +77,6 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "manual")
     public void reconstitute() throws IOException {
-        SSLUtils.turnOffSslChecking();
-
         Deque<Entry> entries = findCandidateTables();
         Parallel.foreach(entries, new Parallel.Operation<Entry>() {
             @Override

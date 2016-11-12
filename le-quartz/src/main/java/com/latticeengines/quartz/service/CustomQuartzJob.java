@@ -1,23 +1,27 @@
 package com.latticeengines.quartz.service;
 
-import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
-import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
-import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
-import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
+import java.net.URI;
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.*;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SchedulerContext;
+import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.Date;
-
-import static com.latticeengines.common.exposed.util.SSLUtils.turnOffSslChecking;
+import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
+import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
+import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
+import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 public class CustomQuartzJob extends QuartzJobBean {
 
@@ -32,11 +36,10 @@ public class CustomQuartzJob extends QuartzJobBean {
 
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     public void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");
-        turnOffSslChecking();
     }
 
     @Override

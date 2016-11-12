@@ -40,6 +40,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.rest.URLUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -97,7 +98,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     protected InternalResourceRestApiProxy internalResourceProxy;
 
-    protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
     @Autowired

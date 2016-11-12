@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
@@ -56,7 +57,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     @Value("${datacloud.dnb.realtime.retry.maxattempts}")
     private int retries;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Override
     public DnBMatchContext realtimeEntityLookup(MatchKeyTuple input) {

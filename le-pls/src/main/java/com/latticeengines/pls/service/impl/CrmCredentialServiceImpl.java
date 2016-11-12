@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -174,7 +175,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         parameters.add("password", password);
         parameters.add("format", "json");
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
             String result = restTemplate.postForObject(url, parameters, String.class);
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(result);

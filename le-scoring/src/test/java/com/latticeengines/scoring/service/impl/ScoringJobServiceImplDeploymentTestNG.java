@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
@@ -21,7 +22,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
 
     protected static String customer = "Mulesoft_Relaunch_Deployment";
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Override
     @BeforeClass(groups = "deployment")

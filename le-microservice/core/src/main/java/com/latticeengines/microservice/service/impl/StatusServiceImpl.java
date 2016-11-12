@@ -57,7 +57,7 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     private static Set<String> monitoredApps = new ConcurrentSkipListSet<>();
 
@@ -78,12 +78,6 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Map<String, String> moduleStatus() {
-        try {
-            SSLUtils.turnOffSslChecking();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
         String[] microservices = microservicesStr.split(",");
         Map<String, String> status = new HashMap<>();
         Boolean overall = true;

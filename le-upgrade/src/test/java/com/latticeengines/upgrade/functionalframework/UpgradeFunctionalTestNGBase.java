@@ -51,8 +51,8 @@ public class UpgradeFunctionalTestNGBase  extends AbstractTestNGSpringContextTes
     protected static final String DL_URL = "https://data-pls.lattice-engines.com/Dataloader_PLS";
     protected static final CRMTopology TOPOLOGY = CRMTopology.MARKETO;
 
-    protected static RestTemplate magicRestTemplate = new RestTemplate();
-    protected static RestTemplate restTemplate = new RestTemplate();
+    protected static RestTemplate magicRestTemplate = SSLUtils.newSSLBlindRestTemplate();
+    protected static RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
     protected static MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader
             = new MagicAuthenticationHeaderHttpRequestInterceptor("");
     protected static AuthorizationHeaderHttpRequestInterceptor addAuthHeader

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -66,7 +67,7 @@ public class ScoreCorrectnessService {
     private static final int THREADPOOL_SIZE = 15;
     private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 0.5;
     private static final double THRESHOLD = 0.000001;
-    private RestTemplate scoringRestTemplate = new RestTemplate();
+    private RestTemplate scoringRestTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Value("${common.test.scoringapi.url}")
     private String scoreApiHostPort;

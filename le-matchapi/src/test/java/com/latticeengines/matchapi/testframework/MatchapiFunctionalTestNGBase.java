@@ -1,21 +1,18 @@
 package com.latticeengines.matchapi.testframework;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 
 public class MatchapiFunctionalTestNGBase extends MatchapiAbstractTestNGBase {
 
-    private HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-            HttpClientBuilder.create().build());
-    protected RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+    protected RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @Value("${matchapi.test.functional.hostport}")
     private String hostPort;

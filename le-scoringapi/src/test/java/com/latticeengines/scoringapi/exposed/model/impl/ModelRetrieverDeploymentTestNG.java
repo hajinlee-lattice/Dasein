@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
@@ -36,7 +35,6 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
      */
     @Test(groups = "deployment", enabled = false)
     public void downloadModelToLocal() throws Exception {
-        SSLUtils.turnOffSslChecking();
         String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/NPE/";
         File file = new File(localPathToPersist);
         file.mkdirs();

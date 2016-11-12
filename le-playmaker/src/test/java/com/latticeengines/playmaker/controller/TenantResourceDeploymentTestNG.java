@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.controller;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
@@ -18,7 +19,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         super.beforeClass();
-        restTemplate = new RestTemplate();
+        restTemplate = SSLUtils.newSSLBlindRestTemplate();
     }
 
     @Test(groups = "deployment")

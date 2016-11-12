@@ -18,6 +18,7 @@ import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNG
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.Base64Utils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -40,7 +41,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
-    public RestTemplate plsRestTemplate = new RestTemplate();
+    public RestTemplate plsRestTemplate = SSLUtils.newSSLBlindRestTemplate();
 
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
