@@ -59,6 +59,7 @@
     "build": "concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run adminbuild\"",
     "sass": "concurrently \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\"",
     "sentry": "concurrently \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\"",
+    "precommit": "npm run lint_admin",
     "//": "individual projects",
     "InstallCommon": "cd projects/common/ && npm install --production",
     "InstallPD": "cd projects/prospectdiscovery/ && npm install --production",
@@ -84,6 +85,7 @@
     "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
     "lpsentry": "cd projects/leadprioritization/ && grunt sentry",
     "loginsentry": "cd projects/login/ && grunt sentry",
-    "adminsentry": "cd projects/tenantconsole/ && grunt sentry"
+    "adminsentry": "cd projects/tenantconsole/ && grunt sentry",
+    "lint_admin": "cd projects/tenantconsole/ && grunt lint"
   }
 }
