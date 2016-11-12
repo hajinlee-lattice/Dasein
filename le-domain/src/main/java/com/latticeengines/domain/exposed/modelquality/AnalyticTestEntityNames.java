@@ -17,10 +17,6 @@ public class AnalyticTestEntityNames {
     @ApiModelProperty(required = true)
     private List<String> dataSetNames = new ArrayList<>();
 
-    @JsonProperty("match_type")
-    @ApiModelProperty(required = true)
-    private PropDataMatchType propDataMatchType;
-
     @JsonProperty("analytic_test_type")
     @ApiModelProperty
     private AnalyticTestType analyticTestType;
@@ -38,7 +34,6 @@ public class AnalyticTestEntityNames {
 
     public AnalyticTestEntityNames(AnalyticTest atest) {
         name = atest.getName();
-        propDataMatchType = atest.getPropDataMatchType();
         analyticTestTag = atest.getAnalyticTestTag();
         analyticTestType = atest.getAnalyticTestType();
         for (DataSet dataset : atest.getDataSets()) {
@@ -55,14 +50,6 @@ public class AnalyticTestEntityNames {
 
     public String getName() {
         return name;
-    }
-
-    public void setPropDataMatchType(PropDataMatchType propDataMatchType) {
-        this.propDataMatchType = propDataMatchType;
-    }
-
-    public PropDataMatchType getPropDataMatchType() {
-        return propDataMatchType;
     }
 
     public AnalyticTestType getAnalyticTestType() {

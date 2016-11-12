@@ -61,11 +61,6 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
         analyticTest.setName(analyticTestEntityNames.getName());
 
-        if (analyticTestEntityNames.getPropDataMatchType() == null) {
-            throw new LedpException(LedpCode.LEDP_35003, new String[] { "Propdata Match Type" });
-        }
-        analyticTest.setPropDataMatchType(analyticTestEntityNames.getPropDataMatchType());
-
         analyticTest.setAnalyticTestTag(analyticTestEntityNames.getAnalyticTestTag());
 
         if (analyticTestEntityNames.getAnalyticPipelineNames() == null
@@ -150,7 +145,6 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
 
         AnalyticTestEntityNames result = new AnalyticTestEntityNames();
         result.setName(atest.getName());
-        result.setPropDataMatchType(atest.getPropDataMatchType());
         result.setAnalyticTestType(atest.getAnalyticTestType());
         result.setAnalyticTestTag(atest.getAnalyticTestTag());
 
@@ -171,7 +165,6 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         for (AnalyticTest atest : analyticTestEntityMgr.findAll()) {
             AnalyticTestEntityNames atestName = new AnalyticTestEntityNames();
             atestName.setName(atest.getName());
-            atestName.setPropDataMatchType(atest.getPropDataMatchType());
             atestName.setAnalyticTestType(atest.getAnalyticTestType());
             atestName.setAnalyticTestTag(atest.getAnalyticTestTag());
             for (AnalyticPipeline ap : atest.getAnalyticPipelines()) {

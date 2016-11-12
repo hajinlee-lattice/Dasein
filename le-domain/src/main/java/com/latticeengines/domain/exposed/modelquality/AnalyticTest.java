@@ -42,10 +42,6 @@ public class AnalyticTest implements HasName, HasPid {
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
-    @JsonProperty("match_type")
-    @Column(name = "MATCH_TYPE", nullable = false)
-    private PropDataMatchType propDataMatchType;
-
     @JsonProperty("analytic_test_type")
     @Column(name = "ANALYTIC_TEST_TYPE", nullable = false)
     private AnalyticTestType analyticTestType = AnalyticTestType.Default;
@@ -90,14 +86,6 @@ public class AnalyticTest implements HasName, HasPid {
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    public PropDataMatchType getPropDataMatchType() {
-        return propDataMatchType;
-    }
-
-    public void setPropDataMatchType(PropDataMatchType propDataMatchType) {
-        this.propDataMatchType = propDataMatchType;
     }
 
     public AnalyticTestType getAnalyticTestType() {

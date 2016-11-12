@@ -89,5 +89,4 @@ public class AnalyticPipelineEntityNames {
     public String getSampling() {
         return sampling;
     }
-
 }

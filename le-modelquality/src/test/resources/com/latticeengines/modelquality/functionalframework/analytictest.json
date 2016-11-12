@@ -1,6 +1,5 @@
 {
     "name": "ModelQualityDeploymentTest",
-    "match_type": "DNB",
     "analytic_test_type": "Default",
     "analytic_pipeline_names": [
         "ModelQualityDeploymentTest",
