@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -12,12 +13,24 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-public class RestTemplateUtils {
+public class HttpClientUtils {
 
     private static final HttpComponentsClientHttpRequestFactory sslBlindHttpRequestFactory = sslBlindHttpRequestFactory();
 
-    public static RestTemplate newSSLBlindRestTemplate() {
+    /**
+     * gives a rest template using connection pool and ignore ssl.
+     */
+    public static RestTemplate newRestTemplate() {
         return new RestTemplate(sslBlindHttpRequestFactory);
+    }
+
+    /**
+     * gives a blocking http client using connection pool and ignor ssl.
+     */
+    static HttpClient newHttpClient() {
+        return HttpClientBuilder.create() //
+                .setConnectionManager(constructTrustEveryThingConnectionMgr(SSLUtils.newSslBlindSocketFactory())) //
+                .build();
     }
 
     private static HttpComponentsClientHttpRequestFactory sslBlindHttpRequestFactory() {

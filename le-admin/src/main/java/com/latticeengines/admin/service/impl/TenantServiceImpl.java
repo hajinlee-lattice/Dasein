@@ -37,7 +37,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.EmailUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -91,7 +91,7 @@ public class TenantServiceImpl implements TenantService {
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
 
-    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     public TenantServiceImpl() {
     }

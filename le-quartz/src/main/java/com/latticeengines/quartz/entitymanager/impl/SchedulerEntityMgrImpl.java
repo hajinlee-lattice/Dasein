@@ -8,8 +8,7 @@ import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -78,7 +77,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
     @Value("${quartz.scheduler.jobs.history.cleanup.trigger:0 0 5 * * ?}")
     private String jobHistoryCleanupJobCronTrigger;
 
-    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Override
     public Boolean addJob(String tenantId, JobConfig jobConfig) {

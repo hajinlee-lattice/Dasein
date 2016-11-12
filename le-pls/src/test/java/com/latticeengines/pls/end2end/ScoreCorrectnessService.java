@@ -46,7 +46,7 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -67,7 +67,7 @@ public class ScoreCorrectnessService {
     private static final int THREADPOOL_SIZE = 15;
     private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 0.5;
     private static final double THRESHOLD = 0.000001;
-    private RestTemplate scoringRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    private RestTemplate scoringRestTemplate = HttpClientUtils.newRestTemplate();
 
     @Value("${common.test.scoringapi.url}")
     private String scoreApiHostPort;

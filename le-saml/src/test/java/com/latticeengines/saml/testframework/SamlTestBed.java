@@ -30,7 +30,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -123,7 +123,7 @@ public abstract class SamlTestBed {
     }
 
     public RestTemplate getSamlRestTemplate() {
-        RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         HttpMessageConverter<?> formHttpMessageConverter = new FormHttpMessageConverter();
         HttpMessageConverter<?> stringHttpMessageConverter = new StringHttpMessageConverter();
         restTemplate.getMessageConverters().add(formHttpMessageConverter);

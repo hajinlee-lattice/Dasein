@@ -6,7 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
@@ -19,7 +19,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         super.beforeClass();
-        restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+        restTemplate = HttpClientUtils.newRestTemplate();
     }
 
     @Test(groups = "deployment")

@@ -19,6 +19,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
+@Deprecated
 public class HttpWithRetryUtils {
     static HttpTransport HTTPS_TRANSPORT = null;
     static HttpTransport HTTP_TRANSPORT = null;

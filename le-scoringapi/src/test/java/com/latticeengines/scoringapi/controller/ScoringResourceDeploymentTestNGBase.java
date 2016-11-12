@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,6 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -236,7 +235,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             String tenantIdentifier) {
         String url = constructUrl("/records?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
 
-        RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         List<?> resultList = restTemplate.postForObject(url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {

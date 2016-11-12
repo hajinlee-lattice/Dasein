@@ -36,7 +36,7 @@ import org.testng.annotations.Listeners;
 import com.latticeengines.common.exposed.query.ExistsRestriction;
 import com.latticeengines.common.exposed.query.Restriction;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
@@ -97,8 +97,8 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
             Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
 
     protected GlobalAuthTestBed testBed;
-    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
-    protected RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
     protected Tenant mainTestTenant;
 
     protected String marketoModelId;

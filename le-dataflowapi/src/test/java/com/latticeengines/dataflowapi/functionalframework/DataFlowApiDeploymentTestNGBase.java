@@ -7,8 +7,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -55,7 +54,7 @@ import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImp
 @ContextConfiguration(locations = { "classpath:test-dataflowapi-context.xml" })
 public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContextTests {
 
-    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Value("${common.test.microservice.url}")
     private String hostPort;

@@ -16,7 +16,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -43,7 +43,7 @@ public class ModelingServiceExecutor {
 
     private String modelingServiceHdfsBaseDir;
 
-    private RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     private Configuration yarnConfiguration;
 

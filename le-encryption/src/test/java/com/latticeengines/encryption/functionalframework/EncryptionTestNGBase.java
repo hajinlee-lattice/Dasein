@@ -4,7 +4,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -40,8 +39,8 @@ public class EncryptionTestNGBase extends AbstractTestNGSpringContextTests {
     protected TenantService tenantService;
 
     protected GlobalAuthTestBed testBed;
-    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
-    protected RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
     protected Tenant mainTestTenant;
 
     protected void setTestBed(GlobalAuthTestBed testBed) {

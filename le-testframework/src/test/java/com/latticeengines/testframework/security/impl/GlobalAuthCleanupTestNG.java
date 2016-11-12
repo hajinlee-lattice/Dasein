@@ -30,7 +30,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -67,7 +67,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private Camille camille;
     private String podId;
-    private RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    private RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
 
     @BeforeClass(groups = "cleanup")

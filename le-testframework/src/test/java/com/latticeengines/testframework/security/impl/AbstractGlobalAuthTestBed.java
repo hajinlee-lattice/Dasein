@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -44,8 +44,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     protected List<Tenant> testTenants = new ArrayList<>();
     private Integer mainTenantIdx = 0;
 
-    protected RestTemplate restTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
-    protected RestTemplate magicRestTemplate = RestTemplateUtils.newSSLBlindRestTemplate();
+    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();

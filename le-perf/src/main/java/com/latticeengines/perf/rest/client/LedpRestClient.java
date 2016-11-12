@@ -19,7 +19,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.RestTemplateUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -33,7 +33,7 @@ import com.latticeengines.perf.yarn.configuration.YarnConfigurationSettings;
 
 public class LedpRestClient {
 
-    private RestTemplate rt = RestTemplateUtils.newSSLBlindRestTemplate();
+    private RestTemplate rt = HttpClientUtils.newRestTemplate();
     private RetryTemplate rtt = new RetryTemplate();
     private static final Log log = LogFactory.getLog(LedpRestClient.class);
     private String restEndpointHost;
