@@ -76,7 +76,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     private List<Map<String, Object>> bulkResult;
     private List<Map<String, Object>> realtimeResult;
 
-    @Value("${propdata.test.correctness.rows}")
+    @Value("${datacloud.test.match.correctness.rows}")
     private Integer numRecords;
 
     @Autowired

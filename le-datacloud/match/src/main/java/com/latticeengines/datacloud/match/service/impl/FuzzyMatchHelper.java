@@ -64,7 +64,7 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext fetch(MatchContext context) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();
 
-        boolean fetchOnly = context.isSeekLatticeAccountIdOnly();
+        boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             if (useFuzzyMatch) {
                 try {
@@ -99,8 +99,8 @@ public class FuzzyMatchHelper implements DbHelper {
             ids.add(record.getLatticeAccountId());
         }
 
-        boolean latticeAccountIdOnly = context.isSeekLatticeAccountIdOnly();
-        if (!latticeAccountIdOnly) {
+        boolean idOnly = context.isSeekingIdOnly();
+        if (!idOnly) {
             Long startTime = System.currentTimeMillis();
             List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
 
@@ -140,7 +140,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        boolean latticeAccountIdOnly = context.isSeekLatticeAccountIdOnly();
+        boolean latticeAccountIdOnly = context.isSeekingIdOnly();
         if (!latticeAccountIdOnly) {
             for (InternalOutputRecord record : context.getInternalResults()) {
                 updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),

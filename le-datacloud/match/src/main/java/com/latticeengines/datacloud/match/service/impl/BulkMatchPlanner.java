@@ -24,7 +24,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
-            context.setSeekLatticeAccountIdOnly(true);
+            context.setSeekingIdOnly(true);
         }
         ColumnSelection columnSelection = parseColumnSelection(input);
         context.setColumnSelection(columnSelection);
