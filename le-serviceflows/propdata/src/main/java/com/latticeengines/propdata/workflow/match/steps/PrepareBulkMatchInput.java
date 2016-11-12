@@ -158,7 +158,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setGroupSize(groupSize);
         jobConfiguration.setThreadPoolSize(threadPoolSize);
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
-        jobConfiguration.setExcludePublicDomains(getConfiguration().getExcludePublicDomains());
+        jobConfiguration.setExcludeUnmatchedPublicDomain(getConfiguration().getExcludeUnmatchedPublicDomain());
+        jobConfiguration.setPublicDomainAsNormalDomain(getConfiguration().getPublicDomainAsNormalDomain());
         return jobConfiguration;
     }
 

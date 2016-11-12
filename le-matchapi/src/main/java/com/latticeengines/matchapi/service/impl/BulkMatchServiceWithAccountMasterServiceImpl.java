@@ -195,7 +195,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         parameters.setAccountMaster(ACCOUNT_MASTER_KEY + dataVersion.getAccountMasterHdfsVersion());
         parameters.setPublicDomainPath(PUBLIC_DOMAIN_KEY);
         parameters.setInputAvro(input.getTableName() + "_" + INPUT_AVRO_KEY);
-        parameters.setExcludePublicDomains(input.getExcludePublicDomains());
+        parameters.setExcludePublicDomains(input.getExcludeUnmatchedWithPublicDomain());
         parameters.setReturnUnmatched(input.getReturnUnmatched());
         parameters.setOutputSchemaPath(outputSchemaPath);
         parameters.setKeyMap(input.getKeyMap());

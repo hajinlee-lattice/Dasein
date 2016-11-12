@@ -34,7 +34,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean retainMatchTables;
 
-    private boolean excludePublicDomains = false;
+    private boolean excludeUnmatchedWithPublicDomain = false;
+    private boolean publicDomainAsNormalDomain = false;
 
     @NotNull
     private MatchCommandType matchCommandType;
@@ -145,14 +146,24 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.retainMatchTables = retainMatchTables;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public boolean isExcludePublicDomains() {
-        return excludePublicDomains;
+    @JsonProperty("exclude_unmatched_public_domain")
+    public boolean isExcludeUnmatchedWithPublicDomain() {
+        return excludeUnmatchedWithPublicDomain;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public void setExcludePublicDomains(boolean excludePublicDomains) {
-        this.excludePublicDomains = excludePublicDomains;
+    @JsonProperty("exclude_unmatched_public_domain")
+    public void setExcludeUnmatchedWithPublicDomain(boolean excludeUnmatchedWithPublicDomain) {
+        this.excludeUnmatchedWithPublicDomain = excludeUnmatchedWithPublicDomain;
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public boolean isPublicDomainAsNormalDomain() {
+        return publicDomainAsNormalDomain;
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public void setPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
+        this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
     @JsonProperty("match_queue")

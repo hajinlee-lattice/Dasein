@@ -104,7 +104,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
                     input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
-                    input.getExcludePublicDomains());
+                    input.getExcludeUnmatchedWithPublicDomain(), input.getPublicDomainAsNormalDomain());
             if (record != null) {
                 record.setColumnMatched(new ArrayList<Boolean>());
                 records.add(record);
@@ -151,7 +151,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
             int numInputFields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
-            Set<NameLocation> nameLocationSet, boolean excludePublicDomains) {
+            Set<NameLocation> nameLocationSet, boolean excludePublicDomains, boolean treatPublicDomainAsNormal) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -164,7 +164,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
-        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, excludePublicDomains, record);
+        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, excludePublicDomains, treatPublicDomainAsNormal,
+                record);
 
         if (excludePublicDomains && record.isPublicDomain()) {
             return null;
@@ -178,7 +179,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            Set<String> domainSet, boolean excludePublicDomains, InternalOutputRecord record) {
+            Set<String> domainSet, boolean excludeUnmatchedPublicDomain, boolean treadPublicDomainAsNormal,
+            InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
@@ -194,8 +196,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
                     record.setPublicDomain(true);
-                    if (excludePublicDomains) {
+                    if (excludeUnmatchedPublicDomain) {
                         log.warn("A record with public domain is excluded from input.");
+                        if (treadPublicDomainAsNormal) {
+                            record.setMatchEvenIsPublicDomain(true);
+                            domainSet.add(cleanDomain);
+                        }
                         return;
                     }
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
@@ -287,7 +293,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForLatticeAccountId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-                                    InternalOutputRecord record) {
+            InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.LatticeAccountID)) {
             List<Integer> idPosList = keyPositionMap.get(MatchKey.LatticeAccountID);
             try {

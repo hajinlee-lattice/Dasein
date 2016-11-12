@@ -35,6 +35,9 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
+        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
+            context.setSeekLatticeAccountIdOnly(true);
+        }
         MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);
         context.setOutput(output);
         context = scanInputData(input, context);

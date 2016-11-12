@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -37,9 +36,6 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     private MatchCommand matchCommand;
 
@@ -156,7 +152,9 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
 
         matchInput.setInputBuffer(inputBuffer);
 
-        matchInput.setExcludePublicDomains(getConfiguration().isExcludePublicDomains());
+        matchInput.setExcludeUnmatchedWithPublicDomain(getConfiguration().isExcludeUnmatchedWithPublicDomain());
+
+        matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
         return matchInput;
     }

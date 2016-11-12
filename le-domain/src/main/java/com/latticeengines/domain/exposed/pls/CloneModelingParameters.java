@@ -30,7 +30,7 @@ public class CloneModelingParameters {
     private List<DataRule> dataRules;
 
     @JsonProperty
-    private boolean excludePublicDomains = false;
+    private boolean excludeUnmatchedWithPublicDomain = false;
 
     @JsonProperty
     private boolean excludePropDataAttributes = false;
@@ -94,12 +94,12 @@ public class CloneModelingParameters {
         this.dataRules = dataRules;
     }
 
-    public boolean isExcludePublicDomains() {
-        return excludePublicDomains;
+    public boolean isExcludeUnmatchedWithPublicDomain() {
+        return excludeUnmatchedWithPublicDomain;
     }
 
-    public void setExcludePublicDomains(boolean excludePublicDomains) {
-        this.excludePublicDomains = excludePublicDomains;
+    public void setExcludeUnmatchedWithPublicDomain(boolean excludeUnmatchedWithPublicDomain) {
+        this.excludeUnmatchedWithPublicDomain = excludeUnmatchedWithPublicDomain;
     }
 
     public boolean isExcludePropDataAttributes() {

@@ -30,6 +30,7 @@ public class MatchContext implements Fact, Dimension {
     private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
+    private boolean seekLatticeAccountIdOnly;
     private Long numRows;
     private MatchEngine matchEngine;
 
@@ -122,6 +123,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setReturnUnmatched(boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    public boolean isSeekLatticeAccountIdOnly() {
+        return seekLatticeAccountIdOnly;
+    }
+
+    public void setSeekLatticeAccountIdOnly(boolean seekLatticeAccountIdOnly) {
+        this.seekLatticeAccountIdOnly = seekLatticeAccountIdOnly;
     }
 
     public Long getNumRows() {

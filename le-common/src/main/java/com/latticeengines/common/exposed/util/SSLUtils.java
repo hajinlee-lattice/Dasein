@@ -18,10 +18,13 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 public class SSLUtils {
     private static Log log = LogFactory.getLog(SSLUtils.class);
-
+    private static final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+            HttpClientBuilder.create().setConnectionManager(getTrustEveryThingConnectionMgr()).build());
     private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
 
     /**
@@ -59,8 +62,6 @@ public class SSLUtils {
 
     public static PoolingHttpClientConnectionManager getTrustEveryThingConnectionMgr() {
         try {
-            HttpClientBuilder b = HttpClientBuilder.create();
-
             final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
                 public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                     return null;
@@ -87,11 +88,15 @@ public class SSLUtils {
                     .register("https", sslSocketFactory)
                     .build();
 
-            return new PoolingHttpClientConnectionManager( socketFactoryRegistry);
+            return new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create a trust-everything connection manager ", e);
         }
 
+    }
+
+    public static RestTemplate newSSLBlindRestTemplate() {
+        return new RestTemplate(clientHttpRequestFactory);
     }
 
 }

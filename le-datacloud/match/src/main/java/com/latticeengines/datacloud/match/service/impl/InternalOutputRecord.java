@@ -12,6 +12,7 @@ class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;
     private Boolean isPublicDomain = false;
+    private boolean matchEvenIsPublicDomain;
     private String parsedDuns;
     private NameLocation parsedNameLocation;
     private String parsedEmail;
@@ -38,6 +39,14 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setPublicDomain(Boolean isPublicDomain) {
         this.isPublicDomain = isPublicDomain;
+    }
+
+    public boolean isMatchEvenIsPublicDomain() {
+        return matchEvenIsPublicDomain;
+    }
+
+    public void setMatchEvenIsPublicDomain(boolean matchEvenIsPublicDomain) {
+        this.matchEvenIsPublicDomain = matchEvenIsPublicDomain;
     }
 
     public String getParsedDuns() {

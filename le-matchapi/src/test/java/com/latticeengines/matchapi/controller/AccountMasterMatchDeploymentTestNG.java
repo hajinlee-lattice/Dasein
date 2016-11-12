@@ -242,7 +242,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setDataCloudVersion(DATA_CLOUD_VERSION);
-        matchInput.setExcludePublicDomains(false);
+        matchInput.setExcludeUnmatchedWithPublicDomain(false);
         matchInput.setTableName("AccountMasterTest");
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {

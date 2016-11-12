@@ -32,13 +32,12 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
     private int numRows;
 
-    private Boolean returnUnmatched = true;
-    private Boolean excludePublicDomains = false;
+    private Boolean returnUnmatched;
+    private Boolean excludeUnmatchedWithPublicDomain;
+    private Boolean publicDomainAsNormalDomain;
     private Boolean fetchOnly;
     private String decisionGraph;
     private Level logLevel;
-
-    private boolean latticeAccountIdOnly = false;
 
     private InputBuffer inputBuffer;
     private IOBufferType outputBufferType;
@@ -70,7 +69,7 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("ReturnUnmatched")
     public Boolean getReturnUnmatched() {
-        return returnUnmatched == null ? Boolean.FALSE : returnUnmatched;
+        return Boolean.TRUE.equals(returnUnmatched);
     }
 
     @JsonProperty("ReturnUnmatched")
@@ -81,24 +80,34 @@ public class MatchInput implements Fact, Dimension {
         }
     }
 
-    @JsonProperty("ExcludePublicDomains")
-    public Boolean getExcludePublicDomains() {
-        return excludePublicDomains == null ? Boolean.FALSE : excludePublicDomains;
+    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
+    public Boolean getExcludeUnmatchedWithPublicDomain() {
+        return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
     }
 
-    @JsonProperty("ExcludePublicDomains")
-    public void setExcludePublicDomains(Boolean excludePublicDomains) {
-        this.excludePublicDomains = Boolean.TRUE.equals(excludePublicDomains);
+    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
+    public void setExcludeUnmatchedWithPublicDomain(Boolean excludeUnmatchedWithPublicDomain) {
+        this.excludeUnmatchedWithPublicDomain = Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
     }
 
     @JsonProperty("FetchOnly")
     public Boolean getFetchOnly() {
-        return fetchOnly;
+        return Boolean.TRUE.equals(fetchOnly);
     }
 
     @JsonProperty("FetchOnly")
     public void setFetchOnly(Boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
+    }
+
+    @JsonProperty("PublicDomainAsNormalDomain")
+    public Boolean getPublicDomainAsNormalDomain() {
+        return Boolean.TRUE.equals(publicDomainAsNormalDomain);
+    }
+
+    @JsonProperty("PublicDomainAsNormalDomain")
+    public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+        this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
     @JsonProperty("DecisionGraph")
@@ -312,16 +321,6 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("BulkOnly")
     public void setBulkOnly(boolean bulkOnly) {
         this.bulkOnly = bulkOnly;
-    }
-
-    @JsonIgnore
-    public boolean isLatticeAccountIdOnly() {
-        return latticeAccountIdOnly;
-    }
-
-    @JsonIgnore
-    public void setLatticeAccountIdOnly(boolean latticeAccountIdOnly) {
-        this.latticeAccountIdOnly = latticeAccountIdOnly;
     }
 
     @Override

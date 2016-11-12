@@ -52,8 +52,13 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
-    public BulkMatchWorkflowSubmitter excludePublicDomains(Boolean exclude) {
-        builder = builder.excludePublicDomains(exclude);
+    public BulkMatchWorkflowSubmitter excludeUnmatchedPublicDomain(Boolean exclude) {
+        builder = builder.excludeUnmatchedPublicDomain(exclude);
+        return this;
+    }
+
+    public BulkMatchWorkflowSubmitter publicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+        builder = builder.publicDomainAsNormalDomain(publicDomainAsNormalDomain);
         return this;
     }
 

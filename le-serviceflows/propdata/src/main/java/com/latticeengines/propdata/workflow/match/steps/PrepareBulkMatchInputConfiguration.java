@@ -48,7 +48,9 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     private Boolean returnUnmatched;
 
     @NotNull
-    private Boolean excludePublicDomains;
+    private Boolean excludeUnmatchedPublicDomain;
+
+    private Boolean publicDomainAsNormalDomain;
 
     private Predefined predefinedSelection;
 
@@ -193,14 +195,24 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.returnUnmatched = returnUnmatched;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public Boolean getExcludePublicDomains() {
-        return excludePublicDomains;
+    @JsonProperty("exclude_unmathced_public_domain")
+    public Boolean getExcludeUnmatchedPublicDomain() {
+        return excludeUnmatchedPublicDomain;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public void setExcludePublicDomains(Boolean excludePublicDomains) {
-        this.excludePublicDomains = excludePublicDomains;
+    @JsonProperty("exclude_unmathced_public_domain")
+    public void setExcludeUnmatchedPublicDomain(Boolean excludeUnmatchedPublicDomain) {
+        this.excludeUnmatchedPublicDomain = excludeUnmatchedPublicDomain;
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public Boolean getPublicDomainAsNormalDomain() {
+        return Boolean.TRUE.equals(publicDomainAsNormalDomain);
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+        this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
     @JsonProperty("average_block_size")

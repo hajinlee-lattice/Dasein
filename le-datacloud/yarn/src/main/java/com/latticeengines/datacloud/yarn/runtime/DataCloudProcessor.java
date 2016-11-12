@@ -138,7 +138,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private String podId;
     private String dataCloudVersion;
     private Boolean returnUnmatched;
-    private Boolean excludePublicDomains;
+    private Boolean excludeUnmatchedWithPublicDomain;
+    private Boolean publicDomainAsNormalDomain;
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
 
@@ -157,7 +158,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             podId = jobConfiguration.getHdfsPodId();
             returnUnmatched = jobConfiguration.getReturnUnmatched();
-            excludePublicDomains = jobConfiguration.getExcludePublicDomains();
+            excludeUnmatchedWithPublicDomain = jobConfiguration.getExcludeUnmatchedPublicDomain();
+            publicDomainAsNormalDomain = jobConfiguration.getPublicDomainAsNormalDomain();
             HdfsPodContext.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
 
@@ -259,7 +261,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         matchInput.setFields(divider.getFields());
         matchInput.setKeyMap(keyMap);
         matchInput.setData(data);
-        matchInput.setExcludePublicDomains(excludePublicDomains);
+        matchInput.setExcludeUnmatchedWithPublicDomain(excludeUnmatchedWithPublicDomain);
+        matchInput.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
         matchInput.setDataCloudVersion(dataCloudVersion);
         return matchInput;
     }
@@ -381,7 +384,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (returnUnmatched) {
-            if (!excludePublicDomains && !blockSize.equals(count.intValue())) {
+            if (!excludeUnmatchedWithPublicDomain && !blockSize.equals(count.intValue())) {
                 throw new RuntimeException(String
                         .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
             }

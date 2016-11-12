@@ -22,8 +22,8 @@ import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttribute
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEventConfiguration;
-import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
@@ -189,9 +189,14 @@ public class MatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder excludePublicDomains(boolean excludePublicDomains) {
-            match.setExcludePublicDomains(excludePublicDomains);
+        public Builder excludeUnmatchedWithPublicDomain(boolean excludePublicDomains) {
+            match.setExcludeUnmatchedWithPublicDomain(excludePublicDomains);
             model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
+            return this;
+        }
+
+        public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
+            match.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
 

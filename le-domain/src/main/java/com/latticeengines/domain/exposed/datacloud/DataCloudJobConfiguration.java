@@ -32,7 +32,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String blockOperationUid;
     private String appName;
     private Boolean returnUnmatched;
-    private Boolean excludePublicDomains = Boolean.FALSE;
+    private Boolean excludeUnmatchedPublicDomain = Boolean.FALSE;
+    private Boolean publicDomainAsNormalDomain = Boolean.FALSE;
     private String yarnQueue;
     private Schema inputAvroSchema;
     private String dataCloudVersion;
@@ -210,14 +211,24 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.returnUnmatched = returnUnmatched;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public Boolean getExcludePublicDomains() {
-        return excludePublicDomains;
+    @JsonProperty("exclude_unmatched_public_domain")
+    public Boolean getExcludeUnmatchedPublicDomain() {
+        return excludeUnmatchedPublicDomain;
     }
 
-    @JsonProperty("exclude_public_domains")
-    public void setExcludePublicDomains(Boolean excludePublicDomains) {
-        this.excludePublicDomains = excludePublicDomains;
+    @JsonProperty("exclude_unmatched_public_domain")
+    public void setExcludeUnmatchedPublicDomain(Boolean excludeUnmatchedPublicDomain) {
+        this.excludeUnmatchedPublicDomain = excludeUnmatchedPublicDomain;
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public Boolean getPublicDomainAsNormalDomain() {
+        return publicDomainAsNormalDomain;
+    }
+
+    @JsonProperty("public_domain_as_normal_domain")
+    public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+        this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
     @JsonProperty("yarn_queue")

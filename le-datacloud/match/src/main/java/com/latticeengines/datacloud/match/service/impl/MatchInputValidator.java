@@ -113,7 +113,6 @@ public class MatchInputValidator {
 
     private static void validateColumnSelection(MatchInput input) {
         if (Predefined.ID.equals(input.getPredefinedSelection())) {
-            input.setLatticeAccountIdOnly(true);
             return;
         }
         if (input.getPredefinedSelection() == null && input.getCustomSelection() == null

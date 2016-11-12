@@ -117,7 +117,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                         parameters.getDeduplicationType())) //
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
-                .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
+                .treatPublicDomainAsNormalDomain(false) //TODO: hook up to UI
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //

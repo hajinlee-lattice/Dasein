@@ -95,7 +95,8 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
-                .excludePublicDomains(input.getExcludePublicDomains()) //
+                .excludeUnmatchedPublicDomain(input.getExcludeUnmatchedWithPublicDomain()) //
+                .publicDomainAsNormalDomain(input.getPublicDomainAsNormalDomain()) //
                 .submit();
         return matchCommandService.start(input, appId, rootOperationUid);
     }

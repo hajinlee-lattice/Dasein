@@ -168,7 +168,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
-            match.setExcludePublicDomains(excludePublicDomains);
+            match.setExcludeUnmatchedWithPublicDomain(excludePublicDomains);
             model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
             return this;
         }

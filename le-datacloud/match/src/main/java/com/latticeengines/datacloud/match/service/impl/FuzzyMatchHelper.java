@@ -64,7 +64,7 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext fetch(MatchContext context) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();
 
-        boolean fetchOnly = Boolean.TRUE.equals(context.getInput().getFetchOnly());
+        boolean fetchOnly = context.isSeekLatticeAccountIdOnly();
         if (!fetchOnly) {
             if (useFuzzyMatch) {
                 try {
@@ -78,7 +78,7 @@ public class FuzzyMatchHelper implements DbHelper {
                 for (InternalOutputRecord record : context.getInternalResults()) {
                     if (!record.isFailed()) {
                         if (record.isPublicDomain()
-                                && !Boolean.TRUE.equals(context.getInput().getExcludePublicDomains())) {
+                                && !Boolean.TRUE.equals(context.getInput().getExcludeUnmatchedWithPublicDomain())) {
                             accountLookupRequest.addLookupPair(null, record.getParsedDuns());
                         } else {
                             accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
@@ -99,7 +99,7 @@ public class FuzzyMatchHelper implements DbHelper {
             ids.add(record.getLatticeAccountId());
         }
 
-        boolean latticeAccountIdOnly = context.getInput().isLatticeAccountIdOnly();
+        boolean latticeAccountIdOnly = context.isSeekLatticeAccountIdOnly();
         if (!latticeAccountIdOnly) {
             Long startTime = System.currentTimeMillis();
             List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
@@ -140,7 +140,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext updateInternalResults(MatchContext context) {
-        boolean latticeAccountIdOnly = context.getInput().isLatticeAccountIdOnly();
+        boolean latticeAccountIdOnly = context.isSeekLatticeAccountIdOnly();
         if (!latticeAccountIdOnly) {
             for (InternalOutputRecord record : context.getInternalResults()) {
                 updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),

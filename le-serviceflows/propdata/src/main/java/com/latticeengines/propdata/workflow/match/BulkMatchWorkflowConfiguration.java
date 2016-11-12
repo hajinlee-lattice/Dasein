@@ -64,8 +64,13 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder excludePublicDomains(Boolean exlude) {
-            prepareConfig.setExcludePublicDomains(exlude);
+        public Builder excludeUnmatchedPublicDomain(Boolean exlude) {
+            prepareConfig.setExcludeUnmatchedPublicDomain(exlude);
+            return this;
+        }
+
+        public Builder publicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
+            prepareConfig.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
 

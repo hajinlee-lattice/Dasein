@@ -287,7 +287,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         // use avro file and without schema
         input = createAvroBulkMatchInput(false, null);
-        input.setExcludePublicDomains(true);
+        input.setExcludeUnmatchedWithPublicDomain(true);
         command = matchProxy.matchBulk(input, podId);
         appId = ConverterUtils.toApplicationId(command.getApplicationId());
         status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -306,7 +306,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         uploadTestAVro(avroDir, fileName);
 
         MatchInput input = createAvroBulkMatchInput(true, null);
-        // input.setExcludePublicDomains(true);
+        // input.setExcludeUnmatchedWithPublicDomain(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
 

@@ -6,9 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -27,10 +25,7 @@ public abstract class BaseRestApiProxy {
 
 
     private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
-    private static final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-            HttpClientBuilder.create().setConnectionManager(SSLUtils.getTrustEveryThingConnectionMgr()).build());
-
-    private RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+    private RestTemplate restTemplate = SSLUtils.newSSLBlindRestTemplate();
     private String hostport;
     private String rootpath;
 
@@ -66,7 +61,6 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
                             body, context.getRetryCount() + 1));
-                    SSLUtils.turnOffSslChecking();
                     return restTemplate.postForObject(url, body, returnValueClazz);
                 } catch (LedpException e) {
                     context.setExhaustedOnly();
@@ -92,7 +86,6 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
                             body, context.getRetryCount() + 1));
-                    SSLUtils.turnOffSslChecking();
                     restTemplate.put(url, body);
                     return null;
                 } catch (LedpException e) {
@@ -116,7 +109,6 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
                             context.getRetryCount() + 1));
-                    SSLUtils.turnOffSslChecking();
                     return restTemplate.getForObject(url, returnValueClazz);
                 } catch (LedpException e) {
                     context.setExhaustedOnly();
@@ -138,7 +130,6 @@ public abstract class BaseRestApiProxy {
                 try {
                     log.info(String.format("Invoking %s by deleting from url %s.  (Attempt=%d)", method, url,
                             context.getRetryCount() + 1));
-                    SSLUtils.turnOffSslChecking();
                     restTemplate.delete(url);
                     return null;
                 } catch (LedpException e) {
