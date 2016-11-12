@@ -194,9 +194,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         if (isEnableDebug) {
             log.info("Score in the debug mode");
             recordScoreResponse = internalScoringApiProxy.scorePercentileAndProbabilityRecords(scoreRequest,
-                    customerSpace);
+                    customerSpace, true, false);
         } else {
-            recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest, customerSpace);
+            recordScoreResponse = internalScoringApiProxy.scorePercentileRecords(scoreRequest, customerSpace, true,
+                    false);
         }
         long endTime = System.currentTimeMillis();
         long oneBatchTime = endTime - startTime;

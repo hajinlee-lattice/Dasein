@@ -287,6 +287,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         case DUNS:
             interpretedFields.setDuns(fieldName);
             break;
+        case LatticeAccountID:
+            interpretedFields.setLatticeAccountId(fieldName);
+            break;
         default:
             break;
         }

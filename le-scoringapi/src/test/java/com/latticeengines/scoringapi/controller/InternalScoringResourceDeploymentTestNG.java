@@ -93,7 +93,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         ObjectMapper om = new ObjectMapper();
         System.out.println(om.writeValueAsString(scoreRequest));
         ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
-                customerSpace.toString());
+                customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
@@ -104,7 +104,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         ScoreRequest scoreRequest = getScoreRequest();
         scoreRequest.setModelId(MODEL_ID);
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
-                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
         Assert.assertTrue(difference < 0.1);
@@ -119,7 +119,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         scoreRequest.setPerformEnrichment(true);
         System.out.println(om.writeValueAsString(scoreRequest));
         ScoreResponse scoreResponse = internalScoringApiProxy.scorePercentileRecord(scoreRequest,
-                customerSpace.toString());
+                customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
@@ -133,7 +133,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         scoreRequest.setModelId(MODEL_ID);
         scoreRequest.setPerformEnrichment(true);
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
-                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
         Assert.assertTrue(difference < 0.1);
@@ -152,7 +152,7 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         scoreRequest.setModelId(MODEL_ID);
 
         DebugScoreResponse scoreResponse = (DebugScoreResponse) internalScoringApiProxy
-                .scoreProbabilityRecord(scoreRequest, customerSpace.toString());
+                .scoreProbabilityRecord(scoreRequest, customerSpace.toString(), true, false);
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);

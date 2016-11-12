@@ -133,20 +133,15 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
     }
 
     @Override
-    public ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier) {
+    public ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl("/record?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
         return post("scorePercentileRecord", url, scoreRequest, ScoreResponse.class);
     }
 
     @Override
     public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier) {
-        return scorePercentileRecords(scoreRequest, tenantIdentifier, false);
-    }
-
-    @Override
-    public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier, boolean enrichInternalAttributes) {
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl(
                 "/records?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}",
                 tenantIdentifier, enrichInternalAttributes);
@@ -165,7 +160,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier) {
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl("/records/debug?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
         List<?> resultList = post("scorePercentileAndProbabilityRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
@@ -182,7 +177,8 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
     }
 
     @Override
-    public DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier) {
+    public DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
         String url = constructUrl("/record/debug?tenantIdentifier={tenantIdentifier}", tenantIdentifier);
         return post("scoreProbabilityRecord", url, scoreRequest, DebugScoreResponse.class);
     }

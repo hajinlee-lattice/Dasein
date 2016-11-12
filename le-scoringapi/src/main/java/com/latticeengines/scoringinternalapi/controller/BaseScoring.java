@@ -130,44 +130,44 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     protected ScoreResponse scorePercentileRecord(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace) {
-        return scoreRecord(request, scoreRequest, false, customerSpace);
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            String requestId) {
+        return scoreRecord(request, scoreRequest, false, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
-            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
-        return scorePercentileRecords(request, scoreRequest, customerSpace, false);
-    }
-
-    protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
-            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
-        return scoreRecords(request, scoreRequest, false, customerSpace, enrichInternalAttributes);
+            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes,
+            boolean performFetchOnlyForMatching, String requestId) {
+        return scoreRecords(request, scoreRequest, false, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
-            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace) {
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, false);
-    }
-
-    protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
-            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
-        return scoreRecords(request, scoreRequest, true, customerSpace, enrichInternalAttributes);
+            BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes,
+            boolean performFetchOnlyForMatching, String requestId) {
+        return scoreRecords(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace) {
-        return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace);
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            String requestId) {
+        return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
-            CustomerSpace customerSpace) {
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            String requestId) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequest));
             }
-            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug,
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
@@ -234,7 +234,8 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
-            boolean isDebug, CustomerSpace customerSpace, boolean enrichInternalAttributes) {
+            boolean isDebug, CustomerSpace customerSpace, boolean enrichInternalAttributes,
+            boolean performFetchOnlyForMatching, String requestId) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
@@ -250,7 +251,8 @@ public abstract class BaseScoring extends CommonBase {
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequests));
             }
-            response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug, enrichInternalAttributes);
+            response = scoreRequestProcessor.process(customerSpace, scoreRequests, isDebug, enrichInternalAttributes,
+                    performFetchOnlyForMatching, requestId);
 
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));

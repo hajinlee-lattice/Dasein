@@ -19,7 +19,9 @@ public interface MatchInputBuilder {
             Map<String, Object> record, //
             ModelSummary modelSummary, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean skipPredefinedSelection);
+            boolean skipPredefinedSelection, //
+            boolean performFetchOnlyForMatching, //
+            String requestId);
 
     MatchInput buildMatchInput(CustomerSpace space, //
             InterpretedFields interpreted, //
@@ -27,12 +29,16 @@ public interface MatchInputBuilder {
             ModelSummary modelSummary, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection, //
-            String overrideDataCloudVersion);
+            String overrideDataCloudVersion, //
+            boolean performFetchOnlyForMatching, //
+            String requestId);
 
     BulkMatchInput buildMatchInput(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             List<ModelSummary> originalOrderModelSummaryList, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean isHomogeneous, //
-            boolean skipPredefinedSelection);
+            boolean skipPredefinedSelection, //
+            boolean performFetchOnlyForMatching, //
+            String requestId);
 }

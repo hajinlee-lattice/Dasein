@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -88,9 +89,15 @@ public class InternalScoreResource extends BaseScoring {
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
-            String tenantIdentifier) {
+            String tenantIdentifier, //
+            @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
+            boolean enrichInternalAttributes, //
+            @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scorePercentileRecord(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -101,9 +108,13 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
-            boolean enrichInternalAttributes) {
+            boolean enrichInternalAttributes, //
+            @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -114,9 +125,13 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "tenantIdentifier", required = true) //
             String tenantIdentifier, //
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
-            boolean enrichInternalAttributes) {
+            boolean enrichInternalAttributes, //
+            @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -125,8 +140,14 @@ public class InternalScoreResource extends BaseScoring {
     public DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest, //
             @RequestParam(value = "tenantIdentifier", required = true) //
-            String tenantIdentifier) {
+            String tenantIdentifier, //
+            @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
+            boolean enrichInternalAttributes, //
+            @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
+            boolean performFetchOnlyForMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
-        return scoreProbabilityRecord(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId);
     }
 }

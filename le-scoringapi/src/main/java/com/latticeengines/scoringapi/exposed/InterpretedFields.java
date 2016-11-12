@@ -13,6 +13,7 @@ public class InterpretedFields {
     private String postalCode;
     private String phoneNumber;
     private String duns;
+    private String latticeAccountId;
 
     public String getRecordId() {
         return recordId;
@@ -100,6 +101,14 @@ public class InterpretedFields {
 
     public void setDuns(String duns) {
         this.duns = duns;
+    }
+
+    public String getLatticeAccountId() {
+        return latticeAccountId;
+    }
+
+    public void setLatticeAccountId(String latticeAccountId) {
+        this.latticeAccountId = latticeAccountId;
     }
 
 }

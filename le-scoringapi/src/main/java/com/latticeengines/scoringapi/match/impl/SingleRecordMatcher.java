@@ -38,7 +38,10 @@ public class SingleRecordMatcher extends AbstractMatcher {
             Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record, //
             ModelSummary modelSummary, //
-            boolean forEnrichment) {
+            boolean forEnrichment, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
@@ -59,8 +62,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                         buildAndExecuteMatch(space, interpreted, //
                                 fieldSchemas, record, //
                                 modelSummary, false, //
-                                null, //
-                                false, null);
+                                null, false, null, //
+                                performFetchOnlyForMatching, requestId);
                 result.putAll(matchResult);
             }
 
@@ -72,7 +75,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                             fieldSchemas, record, //
                             null, true, //
                             selectedLeadEnrichmentAttributes, true, //
-                            currentDataCloudVersion);
+                            currentDataCloudVersion, performFetchOnlyForMatching, //
+                            requestId);
 
             result.putAll(enrichmentResult);
 
@@ -81,7 +85,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
             // call regular match
             return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
                     record, modelSummary, forEnrichment, //
-                    selectedLeadEnrichmentAttributes, false, null);
+                    selectedLeadEnrichmentAttributes, false, null, //
+                    performFetchOnlyForMatching, requestId);
         }
     }
 
@@ -92,7 +97,9 @@ public class SingleRecordMatcher extends AbstractMatcher {
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
             boolean isHomogeneous, //
-            boolean enrichInternalAttributes) {
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         throw new NotImplementedException();
     }
 
@@ -101,11 +108,14 @@ public class SingleRecordMatcher extends AbstractMatcher {
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
             ModelSummary modelSummary, boolean forEnrichment, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean skipPredefinedSelection, String overrideDataCloudVersion) {
+            boolean skipPredefinedSelection, String overrideDataCloudVersion, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         MatchInput matchInput = buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
-                skipPredefinedSelection, overrideDataCloudVersion);
+                skipPredefinedSelection, overrideDataCloudVersion, //
+                performFetchOnlyForMatching, requestId);
 
         MatchOutput matchOutput = callMatch(matchInput);
 

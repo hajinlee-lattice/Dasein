@@ -44,25 +44,31 @@ public class BulkRecordMatcher extends AbstractMatcher {
     }
 
     @Override
-    public Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
-            InterpretedFields interpreted, //
+    public Map<String, Map<String, Object>> matchAndJoin(//
+            CustomerSpace space, InterpretedFields interpreted, //
             Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record, //
             ModelSummary modelSummary, //
-            boolean forEnrichment) {
+            boolean forEnrichment, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         throw new NotImplementedException();
     }
 
     @Override
-    public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
+    public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
+            CustomerSpace space, List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
             boolean isHomogeneous, //
-            boolean enrichInternalAttributes) {
-        Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = buildMatchInput(space,
-                partiallyOrderedParsedTupleList, uniqueFieldSchemasMap, originalOrderModelSummaryList, isHomogeneous,
-                enrichInternalAttributes);
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
+        Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
+                buildMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
+                        originalOrderModelSummaryList, isHomogeneous, enrichInternalAttributes,
+                        performFetchOnlyForMatching, requestId);
 
         Map<RecordModelTuple, Map<String, Map<String, Object>>> results = new HashMap<>();
 
@@ -79,7 +85,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
         }
 
         if (log.isInfoEnabled()) {
-            log.info("Completed post processing of matched result for " + results.size() + " match inputs");
+            log.info("Completed post processing of matched result for "//
+                    + results.size() + " match inputs");
         }
 
         return results;
@@ -156,8 +163,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous, //
-            boolean enrichInternalAttributes) {
+            boolean isHomogeneous, boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
                 initializeMatchInputMap(isHomogeneous);
 
@@ -166,7 +174,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
             prepareAndSetMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                    originalOrderModelSummaryList, matchInputMap, recordModelTuple, selectedLeadEnrichmentAttributes);
+                    originalOrderModelSummaryList, matchInputMap, recordModelTuple, selectedLeadEnrichmentAttributes,
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId);
         }
 
         return matchInputMap;
@@ -200,11 +209,14 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<ModelSummary> originalOrderModelSummaryList, //
             Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, //
             RecordModelTuple recordModelTuple, //
-            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes) {
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, //
+            String requestId) {
         ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList, recordModelTuple.getModelId());
 
         boolean shouldCallEnrichmentExplicitly = //
-                shouldCallEnrichmentExplicitly(modelSummary, recordModelTuple.getRecord().isPerformEnrichment(),
+                shouldCallEnrichmentExplicitly(modelSummary, //
+                        recordModelTuple.getRecord().isPerformEnrichment(), //
                         selectedLeadEnrichmentAttributes);
 
         if (shouldCallEnrichmentExplicitly) {
@@ -214,7 +226,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 MatchInput matchOnlyInput = buildMatchInput(space, //
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
-                        modelSummary, null, false, null);
+                        modelSummary, null, false, null, //
+                        performFetchOnlyForMatching, requestId);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
             }
@@ -225,7 +238,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
             MatchInput matchAMEnrichmentInput = buildMatchInput(space, recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
-                    true, currentDataCloudVersion);
+                    true, currentDataCloudVersion, //
+                    performFetchOnlyForMatching, requestId);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
         } else {
@@ -234,7 +248,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    null);
+                    null, performFetchOnlyForMatching, requestId);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null
@@ -246,9 +260,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
         }
     }
 
-    private void putInBulkMatchInput(String key,
-            Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, RecordModelTuple recordModelTuple,
-            MatchInput matchOnlyInput) {
+    private void putInBulkMatchInput(//
+            String key, Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, //
+            RecordModelTuple recordModelTuple, MatchInput matchOnlyInput) {
         Pair<BulkMatchInput, List<RecordModelTuple>> pair = matchInputMap.get(key);
 
         BulkMatchInput bulkMatchInput = pair.getKey();
@@ -269,7 +283,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
         recordModelTupleList.add(recordModelTuple);
     }
 
-    private Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> initializeMatchInputMap(boolean isHomogeneous) {
+    private Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> initializeMatchInputMap(//
+            boolean isHomogeneous) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = new HashMap<>();
 
         BulkMatchInput bulkInputWithRTSMatchOnly = new BulkMatchInput();
@@ -290,7 +305,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
     private void populateMatchInputMap(String key, BulkMatchInput bulkMatchInput,
             List<RecordModelTuple> tuplesForRTSMatchOnly,
-            Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, boolean isHomogeneous) {
+            Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, //
+            boolean isHomogeneous) {
         Pair<BulkMatchInput, List<RecordModelTuple>> pair = //
                 new MutablePair<BulkMatchInput, //
                 List<RecordModelTuple>>(bulkMatchInput, //

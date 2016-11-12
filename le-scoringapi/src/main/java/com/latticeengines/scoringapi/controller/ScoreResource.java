@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -80,7 +81,8 @@ public class ScoreResource extends BaseScoring {
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return scorePercentileRecord(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scorePercentileRecord(request, scoreRequest, customerSpace, false, false, requestId);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -89,7 +91,8 @@ public class ScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return scorePercentileRecords(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, false, false, requestId);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -99,7 +102,8 @@ public class ScoreResource extends BaseScoring {
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, false, false, requestId);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -108,6 +112,7 @@ public class ScoreResource extends BaseScoring {
     public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        return scoreProbabilityRecord(request, scoreRequest, customerSpace);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scoreProbabilityRecord(request, scoreRequest, customerSpace, false, false, requestId);
     }
 }

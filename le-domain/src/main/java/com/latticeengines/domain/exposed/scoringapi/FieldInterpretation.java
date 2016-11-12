@@ -19,5 +19,6 @@ public enum FieldInterpretation {
     Website, //
     CompanyName, //
     Industry, //
-    DUNS //
+    DUNS, //
+    LatticeAccountID //
 }

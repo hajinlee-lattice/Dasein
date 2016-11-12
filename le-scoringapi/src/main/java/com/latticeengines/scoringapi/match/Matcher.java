@@ -17,16 +17,21 @@ public interface Matcher {
 
     Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
             InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas,//
+            Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record, //
             ModelSummary modelSummary, //
-            boolean forEnrichment);
+            boolean forEnrichment, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId);
 
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
             List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous,//
-            boolean enrichInternalAttributes);
+            boolean isHomogeneous, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId);
 
 }

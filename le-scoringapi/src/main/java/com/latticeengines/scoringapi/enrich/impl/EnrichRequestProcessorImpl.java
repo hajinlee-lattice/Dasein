@@ -30,7 +30,7 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
     private static final Log log = LogFactory.getLog(EnrichRequestProcessorImpl.class);
 
     @Override
-    public EnrichResponse process(CustomerSpace space, EnrichRequest request) {
+    public EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId) {
         if (org.apache.commons.lang.StringUtils.isBlank(request.getDomain())) {
             throw new ScoringApiException(LedpCode.LEDP_31113);
         }
@@ -58,8 +58,9 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, Object> enrichmentAttributes = null;
 
-        Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space, interpreted,
-                fieldSchemas, record, null, true);
+        Map<String, Map<String, Object>> matchedRecordEnrichmentMap = //
+                getMatcher(false).matchAndJoin(space, interpreted, //
+                        fieldSchemas, record, null, true, false, false, requestId);
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {
             enrichmentAttributes = new HashMap<>();

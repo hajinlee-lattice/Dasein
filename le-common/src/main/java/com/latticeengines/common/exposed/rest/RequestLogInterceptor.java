@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.latticeengines.common.exposed.util.StringUtils;
+
 @Component("requestLogInterceptor")
 public class RequestLogInterceptor extends HandlerInterceptorAdapter {
 
@@ -65,5 +67,14 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     protected String getRequestId(HttpServletRequest request) {
         String identifier = UUID.randomUUID().toString();
         return identifier;
+    }
+
+    public static String getRequestIdentifierId(HttpServletRequest request) {
+        String requestId = "";
+        Object identifier = request.getAttribute(RequestLogInterceptor.IDENTIFIER_KEY);
+        if (!StringUtils.objectIsNullOrEmptyString(identifier)) {
+            requestId = String.valueOf(identifier);
+        }
+        return requestId;
     }
 }

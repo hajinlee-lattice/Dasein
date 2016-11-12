@@ -72,7 +72,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId) {
         split("requestPreparation");
         if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
@@ -111,7 +112,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
                     parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
-                    request.isPerformEnrichment());
+                    request.isPerformEnrichment(), enrichInternalAttributes, performFetchOnlyForMatching, requestId);
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
@@ -163,7 +164,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     @Override
     public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, //
-            boolean isDebug, boolean enrichInternalAttributes) {
+            boolean isDebug, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId) {
         List<RecordScoreResponse> scoreResponse = new ArrayList<>();
         String requestTimestamp = BaseScoring.dateFormat.format(new Date());
 
@@ -200,7 +201,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             if (!partiallyOrderedParsedTupleList.isEmpty()) {
                 Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
                         true).matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                                originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes);
+                                originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
+                                performFetchOnlyForMatching, requestId);
 
                 Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                         unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);

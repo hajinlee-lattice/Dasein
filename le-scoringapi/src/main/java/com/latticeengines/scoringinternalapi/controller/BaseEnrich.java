@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -38,7 +39,8 @@ public abstract class BaseEnrich extends CommonBase {
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(enrichRequest));
             }
-            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest);
+            String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+            EnrichResponse response = enrichRequestProcessor.process(customerSpace, enrichRequest, requestId);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
@@ -78,6 +80,5 @@ public abstract class BaseEnrich extends CommonBase {
 
         return metrics;
     }
-
 
 }

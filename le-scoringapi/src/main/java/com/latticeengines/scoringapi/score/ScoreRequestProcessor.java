@@ -10,8 +10,9 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 
 public interface ScoreRequestProcessor {
 
-    ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug);
+    ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId);
 
     List<RecordScoreResponse> process(CustomerSpace customerSpace, BulkRecordScoreRequest scoreRequests,
-            boolean isDebug, boolean enrichInternalAttributes);
+            boolean isDebug, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId);
 }

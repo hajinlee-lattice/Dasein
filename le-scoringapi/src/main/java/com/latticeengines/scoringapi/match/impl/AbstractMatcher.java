@@ -85,8 +85,8 @@ public abstract class AbstractMatcher implements Matcher {
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getPreMatchDomain()), nameLocationStr,
-                        errorMessages));
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getPreMatchDomain()),
+                        nameLocationStr, errorMessages));
             }
 
             mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
@@ -171,14 +171,18 @@ public abstract class AbstractMatcher implements Matcher {
             ModelSummary modelSummary, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection, //
-            String overrideDataCloudVersion) {
+            String overrideDataCloudVersion, //
+            boolean performFetchOnlyForMatching, //
+            String requestId) {
         MatchInputBuilder matchInputBuilder = //
                 getMatchInputBuilder(getDataCloudVersion(modelSummary));
         return matchInputBuilder.buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, //
-                overrideDataCloudVersion);
+                overrideDataCloudVersion, //
+                performFetchOnlyForMatching, //
+                requestId);
     }
 
     private List<Column> getCustomSelectionColumns(MatchInput matchInput) {

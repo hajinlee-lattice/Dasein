@@ -20,18 +20,18 @@ public interface InternalScoringApiInterface {
 
     int getModelCount(Date lastUpdateTime, boolean considerAllStatus, String tenantIdentifier);
 
-    ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier);
-
-    List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier);
+    ScoreResponse scorePercentileRecord(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 
     List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier,
-            boolean enrichInternalAttributes);
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 
-    DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier);
+    DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 
     List<ModelDetail> getPaginatedModels(Date start, boolean considerAllStatus, int offset, int maximum,
             String tenantIdentifier);
 
     List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier);
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 }

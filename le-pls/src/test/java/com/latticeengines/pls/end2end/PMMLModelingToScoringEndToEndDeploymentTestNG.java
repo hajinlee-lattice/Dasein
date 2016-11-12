@@ -212,7 +212,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         ScoreRequest request = new ScoreRequest();
         request.setModelId(modelId);
         request.setRecord(record);
-        DebugScoreResponse response = internalScoringApiProxy.scoreProbabilityRecord(request, tenantToAttach.getName());
+        DebugScoreResponse response = internalScoringApiProxy.scoreProbabilityRecord(request, tenantToAttach.getName(),
+                false, false);
         return response;
     }
 
@@ -227,7 +228,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
-                        TEST_FILE_DISPLAY_NAME), requestEntity, ResponseDocument.class);
+                        TEST_FILE_DISPLAY_NAME),
+                requestEntity, ResponseDocument.class);
         assertTrue(response.isSuccess());
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -255,8 +257,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = selfServiceModeling.getRestTemplate()
+                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -312,8 +314,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
-                byte[].class);
+                String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET,
+                entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
