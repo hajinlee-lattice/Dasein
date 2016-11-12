@@ -14,7 +14,7 @@ def restart_service(args):
 
 def restart_service_internal(cluster, service):
     cluster_arn = find_cluster(cluster)
-    service_arn = find_service(cluster_arn, service)
+    service_arn = find_service(cluster, service)
 
     count = count_tasks_in_service(cluster_arn, service_arn)
     update_tasks_count(cluster_arn, service_arn, 0)
