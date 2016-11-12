@@ -887,7 +887,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         ExecutionEngine engine = ExecutionEngine.get(engineType);
         DataFlowParameters parameters = dataFlowCtx.getProperty(DataFlowProperty.PARAMETERS, DataFlowParameters.class);
 
-        if ("FLINK".equalsIgnoreCase(engineType) && parameters.noFlink) {
+        if ("FLINK".equalsIgnoreCase(engineType) && (parameters != null && parameters.noFlink)) {
             engine = ExecutionEngine.get("TEZ");
             log.info("This dataflow cannot use flink engine, fall back to tez.");
         }

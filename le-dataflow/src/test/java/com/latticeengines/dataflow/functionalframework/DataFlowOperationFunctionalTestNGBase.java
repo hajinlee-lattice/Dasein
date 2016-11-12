@@ -10,6 +10,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 
@@ -62,6 +64,8 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
 
         FileSystem fs = FileSystem.get(configuration);
         doCopy(fs, entries);
+
+        Logger.getLogger("com.latticeengines.domain.exposed.util.AttributeUtils").setLevel(Level.WARN);
     }
 
     protected Map<String, Table> getSources() {
@@ -125,7 +129,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
-        ctx.setProperty(DataFlowProperty.ENGINE, "FLNK");
+        ctx.setProperty(DataFlowProperty.ENGINE, "FLINK");
         ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         return dataTransformationService.executeNamedTransformation(ctx, builder);
     }
