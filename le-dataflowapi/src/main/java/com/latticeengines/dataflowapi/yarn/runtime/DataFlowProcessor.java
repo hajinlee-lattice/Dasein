@@ -54,7 +54,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     @Value("${dataflowapi.checkpoint:false}")
     private boolean checkpoint;
 
-    @Value("${dataflowapi.engine:TEZ}")
+    @Value("${dataflowapi.engine}")
     private String engine;
 
     public DataFlowProcessor() {

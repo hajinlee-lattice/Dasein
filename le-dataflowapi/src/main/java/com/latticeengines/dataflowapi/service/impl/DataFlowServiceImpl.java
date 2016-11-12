@@ -25,13 +25,13 @@ public class DataFlowServiceImpl implements DataFlowService {
     @Autowired
     private JobService jobService;
 
-    @Value("${dataflowapi.engine:TEZ}")
+    @Value("${dataflowapi.engine}")
     private String cascadingEngine;
 
-    @Value("${dataflowapi.flink.vcores:2}")
+    @Value("${dataflowapi.flink.vcores}")
     private Integer flinkVcores;
 
-    @Value("${dataflowapi.flink.mem:4096}")
+    @Value("${dataflowapi.flink.mem}")
     private Integer flinkMemory;
 
     @Override
@@ -58,14 +58,17 @@ public class DataFlowServiceImpl implements DataFlowService {
 
         Properties containerProperties = new Properties();
         containerProperties.put("dataflowapiConfig", dataFlowConfig.toString());
-        if ("FLINK".equalsIgnoreCase(cascadingEngine)) {
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+
+        if ("FLINK".equalsIgnoreCase(cascadingEngine) && (dataFlowConfig.getDataFlowParameters() != null
+                && !dataFlowConfig.getDataFlowParameters().noFlink)) {
+            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkMemory));
             containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
             containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkMemory));
-        } else {
-            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-            containerProperties.put(ContainerProperty.MEMORY.name(), "4096");
         }
-        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);
         dataFlowJob.setContainerPropertiesObject(containerProperties);

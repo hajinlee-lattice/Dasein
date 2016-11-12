@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -42,6 +43,8 @@ import com.latticeengines.workflowapi.service.WorkflowContainerService;
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     private static final Log log = LogFactory.getLog(WorkflowContainerService.class);
+    private static final String DATACLOUD_SERVICE_ACCOUNT = "PropDataService.PropDataService.Production";
+    private static final String DATACLOUD_JOB_KEYWORD = "Transformation";
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -63,6 +66,15 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
     @Autowired
     private JobProxy jobProxy;
+
+    @Value("${datacloud.etl.cascading.platform}")
+    private String datacloudCascadingEngine;
+
+    @Value("${dataflowapi.flink.vcores}")
+    private Integer flinkVcores;
+
+    @Value("${dataflowapi.flink.mem}")
+    private Integer flinkMemory;
 
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
@@ -100,8 +112,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
-                LedpQueueAssigner.getWorkflowQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getWorkflowQueueNameForSubmission());
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.APP_NAME_SUFFIX.name(),
                 workflowConfig.getWorkflowName().replace(" ", "_"));
@@ -111,6 +122,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+
+        if ("FLINK".equalsIgnoreCase(datacloudCascadingEngine) && isDataCloudEtlJob(workflowConfig)) {
+            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(flinkVcores));
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(flinkVcores));
+            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(flinkVcores));
+        }
 
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);
@@ -128,8 +146,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobByApplicationId(
-            String applicationId) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobByApplicationId(String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
         if (workflowJob == null) {
             throw new LedpException(LedpCode.LEDP_28023, new String[] { applicationId });
@@ -137,8 +154,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(
-                    workflowJob);
+            com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
             return job;
         }
         return workflowService.getJob(workflowId);
@@ -157,13 +173,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         time1 = System.currentTimeMillis();
         for (WorkflowJob workflowJob : workflowJobs) {
-            if (workflowJob
-                    .getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
+            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
                 if (workflowId == null || (workflowJob.getStatus() != null
                         && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED))) {
-                    com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(
-                            workflowJob);
+                    com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
                     workflowIds.add(workflowId);
@@ -179,16 +193,15 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             log.info(String.format("Job load time. Loading jobs from workflow cache took: %.2f",
                     (System.currentTimeMillis() - time1) / 1000.0));
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s",
-                    workflowIds.toString(), e.getMessage()));
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
+                    e.getMessage()));
         }
 
         return jobs;
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobFromWorkflowJobAndYarn(
-            WorkflowJob workflowJob) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         Map<String, String> inputProperties = workflowJob.getInputContext();
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
@@ -199,8 +212,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         // get state first from database
-        if (workflowJob.getStatus() != null
-                && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
+        if (workflowJob.getStatus() != null && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
             job.setJobStatus(JobStatus.FAILED);
         } else {
             WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
@@ -209,8 +221,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid,
-            String type) {
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid, String type) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
         try {
@@ -224,8 +235,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 }
             }
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s",
-                    tenantPid, e.getMessage()));
+            log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s", tenantPid,
+                    e.getMessage()));
         }
 
         return jobs;
@@ -234,6 +245,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @VisibleForTesting
     void setJobProxy(JobProxy jobProxy) {
         this.jobProxy = jobProxy;
+    }
+
+    private boolean isDataCloudEtlJob(WorkflowConfiguration workflowConfig) {
+        String customer = workflowConfig.getCustomerSpace().toString();
+        String flowName = workflowConfig.getWorkflowName();
+        return DATACLOUD_SERVICE_ACCOUNT.equals(customer) && flowName.contains(DATACLOUD_JOB_KEYWORD);
     }
 
 }

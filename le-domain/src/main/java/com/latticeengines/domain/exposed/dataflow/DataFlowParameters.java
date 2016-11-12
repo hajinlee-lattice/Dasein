@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
@@ -43,6 +44,9 @@ import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 public class DataFlowParameters {
 
     private static final Log log = LogFactory.getLog(DataFlowParameters.class);
+
+    @JsonProperty("no_flink")
+    public boolean noFlink = false;
 
     @Transient
     @JsonIgnore

@@ -68,6 +68,7 @@
         <guava.version>16.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
+        <jackson.codehaus.version>1.9.13</jackson.codehaus.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <snowflake.jdbc.version>2.7.65</snowflake.jdbc.version>
         <joda.version>2.3</joda.version>

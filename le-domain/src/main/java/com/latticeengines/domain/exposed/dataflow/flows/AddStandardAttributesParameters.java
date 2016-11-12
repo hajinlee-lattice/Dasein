@@ -19,6 +19,7 @@ public class AddStandardAttributesParameters extends DataFlowParameters {
     public AddStandardAttributesParameters(String eventTable, TransformationGroup transformationGroup) {
         this.eventTable = eventTable;
         this.transformationGroup = transformationGroup;
+        this.noFlink = true;
     }
 
     /**
