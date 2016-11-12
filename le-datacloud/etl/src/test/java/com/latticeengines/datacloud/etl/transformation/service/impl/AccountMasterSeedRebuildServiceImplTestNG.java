@@ -219,7 +219,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && country
                                             .equals("DnB_01_COUNTRY")
                                     && domain.equals("c.com") && isPrimaryDomain.equals("Y"))
-                            || (latticeId.equals(6L) && primaryDuns.equals("DnB_01_PRIMARY_DUNS")
+                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS")
                                     && leCountry.equals("DnB_01_LE_COUNTRY")
                                     && companyPhone.equals("DnB_01_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_01_EMPLOYEE_RANGE")
