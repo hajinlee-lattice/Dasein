@@ -31,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.quartz.JobConfig;
@@ -326,6 +327,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                     log.info("Deleting job key " + jobKey + " before adding it.");
                     scheduler.deleteJob(jobKey);
                 }
+                log.info("Adding predeifined job with configuration " + JsonUtils.serialize(jobConfig));
                 addJob(PREDEFINED_JOB_GROUP, jobConfig, JobSourceType.DEFAULT, false);
                 return;
             } else {
