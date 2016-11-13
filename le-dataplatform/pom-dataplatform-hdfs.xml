@@ -57,10 +57,6 @@
                                     </location>
                                 </source>
                                 <source>
-                                    <location>../le-propdata/target/le-propdata-${le.rpm.version}-shaded.jar
-                                    </location>
-                                </source>
-                                <source>
                                     <location>../le-datacloud/yarn/target/le-datacloud-yarn-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>
