@@ -233,7 +233,8 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
         container.cpu(alloc["cpu"])
     container.log("awslogs", {
         "awslogs-group": "ministack-%s" % stackname,
-        "awslogs-region": region
+        "awslogs-region": region,
+        "awslogs-stream-prefix": app
     })
     container.publish_port(8080, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
