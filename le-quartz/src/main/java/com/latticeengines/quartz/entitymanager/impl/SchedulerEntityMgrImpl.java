@@ -8,7 +8,6 @@ import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -31,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.quartz.JobConfig;
@@ -273,8 +273,10 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             List<JobConfig> jobConfigs = (List<JobConfig>) appContext.getBean("predefinedJobs");
             for (JobConfig jobConfig : jobConfigs) {
                 if (enabledJobs.contains(jobConfig.getJobName())) {
+                    log.info("Trying to add predefined job " + jobConfig.getJobName());
                     addPredefinedJob(jobConfig);
                 } else {
+                    log.info("Trying to delete predefined job " + jobConfig.getJobName());
                     deletePredefinedJob(jobConfig);
                 }
             }
@@ -321,6 +323,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
             JobSource jobSource = jobSourceEntityMgr.getJobSourceType(PREDEFINED_JOB_GROUP, jobConfig.getJobName());
             if (jobSource == null || jobSource.getSourceType() == JobSourceType.DEFAULT) {
                 if (scheduler.checkExists(jobKey)) {
+                    log.info("Deleting job key " + jobKey + " before adding it.");
                     scheduler.deleteJob(jobKey);
                 }
                 addJob(PREDEFINED_JOB_GROUP, jobConfig, JobSourceType.DEFAULT, false);
