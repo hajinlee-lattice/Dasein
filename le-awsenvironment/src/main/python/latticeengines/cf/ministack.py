@@ -109,7 +109,8 @@ def swagger_task(stackname, apps):
         "LogDriver": "awslogs",
         "Options": {
             "awslogs-group": "ministack-%s" % stackname,
-            "awslogs-region": { "Ref": "AWS::Region" }
+            "awslogs-region": { "Ref": "AWS::Region" },
+            "awslogs-stream-prefix": "swagger"
         }}) \
         .set_env("SWAGGER_APPS", apps)
     task = TaskDefinition("swaggertask")
@@ -132,7 +133,8 @@ def haproxy_task(stackname, ec2s):
         "LogDriver": "awslogs",
         "Options": {
             "awslogs-group": "ministack-%s" % stackname,
-            "awslogs-region": { "Ref": "AWS::Region" }
+            "awslogs-region": { "Ref": "AWS::Region" },
+            "awslogs-stream-prefix": "haproxy"
         }}) \
         .set_env("HOSTS", ips)
     task = TaskDefinition("haproxytask")
