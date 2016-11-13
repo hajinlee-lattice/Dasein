@@ -32,7 +32,7 @@ su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/scripts /app/$VE
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/lib /app/$VERSION/dataplatform"
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/playmaker/* /app/$VERSION/playmaker"
 
-for microservice in 'dataflowapi' 'eai' 'workflowapi' 'propdata'
+for microservice in 'eai' 'dataflowapi' 'workflowapi'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$VERSION/$microservice/lib"
 done

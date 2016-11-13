@@ -8,8 +8,6 @@
 
     <properties>
         <component-name>monitor</component-name>
-        <le.common.version>3.0.0-SNAPSHOT</le.common.version>
-        <le.domain.version>3.0.0-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
@@ -23,7 +21,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
@@ -35,10 +33,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

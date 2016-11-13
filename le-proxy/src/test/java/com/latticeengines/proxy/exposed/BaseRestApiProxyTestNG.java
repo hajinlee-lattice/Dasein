@@ -9,19 +9,20 @@ import org.springframework.web.client.ResourceAccessException;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
-public class BaseRestApiProxyUnitTestNG extends AbstractTestNGSpringContextTests {
+public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private TestProxy testProxy;
 
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testUrlExpansion() {
         testProxy.testUrlExpansion();
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testRetry() {
         boolean thrown = false;
         try {
+            testProxy.setMaxAttempts(3);
             testProxy.testRetry();
         } catch (Exception e) {
             assertTrue(e instanceof ResourceAccessException);

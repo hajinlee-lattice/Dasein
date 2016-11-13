@@ -45,7 +45,7 @@ processErrors
 
 echo "" > /tmp/errors.txt
 
-for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'propdata|pddplnobld' 'dellebi|dedplnobld'
+for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'datacloud|dcdplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
@@ -56,7 +56,7 @@ do
 done
 wait
 
-for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'datacloud|dcdplnobld' 'microservice|microservicedplnobld'
+for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&

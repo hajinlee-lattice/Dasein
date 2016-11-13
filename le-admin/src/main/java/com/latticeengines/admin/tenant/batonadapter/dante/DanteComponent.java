@@ -1,24 +1,27 @@
 package com.latticeengines.admin.tenant.batonadapter.dante;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
-import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Component
 public class DanteComponent extends LatticeComponent {
@@ -32,8 +35,25 @@ public class DanteComponent extends LatticeComponent {
     @Value("${admin.dante.hosts:}")
     private String danteHosts;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     private LatticeComponentInstaller installer = new DanteInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DanteUpgrader();
+
+    private Map<String, RestApiClient> danteClients;
+
+    @PostConstruct
+    public void postConstruct() {
+        danteClients = new HashMap<>();
+        String[] hosts = danteHosts.split(",");
+        for (String host: hosts) {
+            if (StringUtils.isNotEmpty(host) && host.contains(":\\\\")) {
+                RestApiClient restApiClient = RestApiClient.newInternalClient(applicationContext, host);
+                danteClients.put(host, restApiClient);
+            }
+        }
+    }
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
@@ -76,16 +96,12 @@ public class DanteComponent extends LatticeComponent {
     }
 
     public void wakeUpAppPool() {
-        String[] hosts = danteHosts.split(",");
-        for (String host : hosts) {
-            if (StringUtils.isNotEmpty(host) && host.contains(":\\\\")) {
-                try {
-                    HttpClientWithOptionalRetryUtils.sendGetRequest(host, false,
-                            Collections.<BasicNameValuePair> emptyList());
-                    LOGGER.info("Wake up BIS server by sending a GET to " + host);
-                } catch (IOException e) {
-                    LOGGER.error("Waking up BIS server at " + host + " failed", e);
-                }
+        for (Map.Entry<String, RestApiClient> entry: danteClients.entrySet()) {
+            try {
+                entry.getValue().get("/") ;
+                LOGGER.info("Wake up BIS server by sending a GET to " + entry.getKey());
+            } catch (Exception e) {
+                LOGGER.error("Waking up BIS server at " + entry.getKey() + " failed", e);
             }
         }
     }

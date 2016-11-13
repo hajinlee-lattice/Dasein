@@ -12,7 +12,9 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 
 public class SSLUtils {
 
-    static SSLConnectionSocketFactory newSslBlindSocketFactory() {
+    static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();
+
+    private static SSLConnectionSocketFactory newSslBlindSocketFactory() {
         try {
             final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
                 public java.security.cert.X509Certificate[] getAcceptedIssuers() {

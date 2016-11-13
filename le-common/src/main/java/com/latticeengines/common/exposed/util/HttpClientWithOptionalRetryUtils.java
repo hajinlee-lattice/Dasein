@@ -18,6 +18,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 
 @SuppressWarnings("deprecation")
+@Deprecated
 public class HttpClientWithOptionalRetryUtils {
     private static final long MAX_WAIT_INTERVAL = 60000L;
     private static final int MAX_RETRIES = 12;
