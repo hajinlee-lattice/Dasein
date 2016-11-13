@@ -254,7 +254,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
 
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment
-    params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=256m" % (int(alloc["mem"] * 0.9))
+    params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 128 if alloc["mem"] <= 1024 else 256)
     for k, v in params.items():
         container.set_env(k, v)
 
