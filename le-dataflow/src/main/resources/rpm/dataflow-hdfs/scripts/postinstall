@@ -1,8 +1,16 @@
 #!/bin/bash
 echo 'Running Postinstall'
 
-echo 'check env var STACK_NAME'
-echo $STACK_NAME
+echo "getting environment information"
+echo $LE_ENVIRONMENT
+echo $LE_STACK
+echo $STACK_PROFILE
+echo $USE_AWS
+
+if [ "${USE_AWS}" = "true"  ]; then
+    LE_STACK="${LE_STACK}_aws"
+fi
+echo $LE_STACK
 
 JARFILE=`ls /tmp/app/dataflow/le-dataflow*-shaded.jar`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
@@ -13,8 +21,8 @@ if test $SNAPSHOT = "SNAPSHOT"
         VERSION=$VERSION-"SNAPSHOT"
 fi
 
-if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
-    VERSION=${STACK_NAME}/${VERSION}
+if [ ! -z "$LE_STACK" -a "$LE_STACK" != " " ]; then
+    VERSION=${LE_STACK}/${VERSION}
 fi
 
 echo $VERSION

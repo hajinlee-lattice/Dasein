@@ -4,7 +4,7 @@ source /etc/profile
 echo "getting environment information"
 echo "LE_ENVIRONMENT=${LE_ENVIRONMENT}"
 
-MS_MODULES=${MS_MODULES:=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}
+MS_MODULES=${MS_MODULES:=modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,sqoop,modelquality}
 MS_MODULES="ROOT,${MS_MODULES}"
 echo "MS_MODULES=${MS_MODULES}"
 

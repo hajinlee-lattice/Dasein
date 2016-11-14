@@ -1,9 +1,19 @@
 #!/bin/sh
 echo "examine environment vars"
+echo "getting environment information"
+echo $LE_ENVIRONMENT
+echo $LE_STACK
+echo $STACK_PROFILE
+echo $USE_AWS
+
+if [ "${USE_AWS}" = "true"  ]; then
+    LE_STACK="${LE_STACK}_aws"
+fi
+echo $LE_STACK
+
 HADOOP_CONF_DIR=/usr/hdp/current/hadoop-client/conf
 
 echo $HADOOP_CONF_DIR
-echo $LE_STACK
 
 JARFILE=`ls /tmp/swlib/le-swlib-*-shaded.jar`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
