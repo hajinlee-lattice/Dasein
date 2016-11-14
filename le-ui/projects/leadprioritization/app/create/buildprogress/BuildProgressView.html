@@ -1,10 +1,17 @@
 <section class="import-job-status ng-scope">
     <div class="row">
         <div class="columns eight offset-two box-outline">
-            <div class="section-header">
+            
+
+            <div class="section-header" data-ng-if="jobStatus != 'Completed'">
                 <h4>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE')}}</h4>
                 <h5>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_SUPPORTING_TITLE')}}</h5>
             </div>
+            <div class="section-header" data-ng-if="jobStatus == 'Completed'">
+                <h4>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_MAIN_TITLE_COMPLETED')}}</h4>
+            </div>
+
+
             <div class="section-header text-right">
                 <dl>
                     <dt>Job Started</dt>
@@ -75,6 +82,24 @@
                             </span>
                         </div>
                         <div data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</div>
+                    </dd>
+                </dl>
+                <dl>
+                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Scoring Training Set</dt>
+                    <dt data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</dt>
+                    <dd>
+                        <div class="progress-icon">
+                            <span data-ng-if="jobStepsRunningStates.score_training_set">
+                                <span class="loading-small"></span>
+                            </span>
+                            <span data-ng-if="jobStepsCompletedStates.score_training_set">
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span data-ng-if="stepFailed == 'score_training_set'">
+                                <i class="fa fa-warning"></i>
+                            </span>
+                        </div>
+                        <div data-ng-if="jobStepsCompletedStates.score_training_set">{{stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma'}}</div>
                     </dd>
                 </dl>
             </div>

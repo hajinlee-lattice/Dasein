@@ -16,7 +16,9 @@ angular
         "activateModel": "create_global_model",
         "runScoreTableDataFlow": "create_global_target_market", 
         "runAttributeLevelSummaryDataFlows": "create_global_target_market",
-        "score": "score_training_set" 
+        "score": "score_training_set",
+        "combineInputTableWithScore": "score_training_set",
+        "pivotScoreAndEvent": "score_training_set"
     }; 
     
     var dictionary = {
@@ -342,7 +344,7 @@ angular
     
     function getCompletedStepTimes(job, runningStep, completedSteps) {
         var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
-                "create_global_model": null, "create_global_target_market": null };
+                "create_global_model": null, "create_global_target_market": null, "score_training_set": null };
         var currStepIndex = 0;
         if (runningStep != "load_data" && completedSteps.indexOf("load_data") > -1) {
             currStepIndex += numStepsInGroup.load_data;

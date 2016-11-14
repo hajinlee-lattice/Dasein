@@ -21,13 +21,15 @@ angular.module('lp.create.import.job', [
     $scope.jobStepsRunningStates = {
         load_data: false, 
         generate_insights: false, 
-        create_global_target_market: false
+        create_global_target_market: false,
+        score_training_set: false
     };
 
     $scope.jobStepsCompletedStates = {
         load_data: false, 
         generate_insights: false, 
-        create_global_target_market: false
+        create_global_target_market: false,
+        score_training_set: false
     };
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
@@ -79,6 +81,8 @@ angular.module('lp.create.import.job', [
                     ceiling = 60;
                 } else if (job.stepRunning == 'create_global_target_market'){
                     ceiling = 80;
+                } else if (job.stepRunning == 'score_training_set') {
+                    ceiling = 90;
                 } else if (job.jobStatus == 'Completed') {
                     ceiling = 100;
                 }

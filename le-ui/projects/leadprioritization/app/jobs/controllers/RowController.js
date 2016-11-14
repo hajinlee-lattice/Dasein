@@ -77,12 +77,12 @@ angular
                 $scope.jobStepsRunningStates = { 
                     load_data: false, match_data: false, generate_insights: false, 
                     create_global_model: false, create_global_target_market: false,
-                    scoring_training_set: false
+                    score_training_set: false
                 };
                 $scope.jobStepsCompletedStates = { 
                     load_data: false, match_data: false, generate_insights: false, 
                     create_global_model: false, create_global_target_market: false,
-                    scoring_training_set: false
+                    score_training_set: false
                 };
             } else {
                 $scope.jobStepsRunningStates = $scope.statuses[job.id].running;
@@ -90,6 +90,7 @@ angular
                 $scope.stepsCompletedTimes = $scope.statuses[job.id].completedTimes;
                 $scope.stepFailed = $scope.statuses[job.id].stepFailed;
             }
+
             if ($scope.job.status == "Running") {
                 $scope.jobRunning = true;
                 periodicQueryJobStatus($scope.job.id);
