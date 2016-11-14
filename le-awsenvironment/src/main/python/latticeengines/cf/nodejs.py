@@ -34,7 +34,7 @@ def template(environment, stackname, mode, profile, instances, upload=False):
 
     port = 3000 if mode == "EXTERNAL" else 3002
 
-    stack = create_template(profile, instances, port)
+    stack = create_template(profile, instances, port, mode)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -42,17 +42,17 @@ def template(environment, stackname, mode, profile, instances, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile, instances, port):
+def create_template(profile, instances, port, mode):
     stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", use_asgroup=False, instances=instances)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = express_task(profile_vars, port)
+    task = express_task(profile_vars, port, mode)
     stack.add_resource(task)
     stack.add_service("express", task)
     return stack
 
-def express_task(profile_vars, port):
+def express_task(profile_vars, port, mode):
     container = ContainerDefinition("express", { "Fn::Join" : [ "", [
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
@@ -63,7 +63,7 @@ def express_task(profile_vars, port):
         "Options": {
             "awslogs-group": { "Fn::Join": [ "-", ["lpi", PARAM_LE_STACK.ref()]] },
             "awslogs-region": { "Ref": "AWS::Region" },
-            "awslogs-stream-prefix": PARAM_DOCKER_IMAGE_TAG.ref()
+            "awslogs-stream-prefix": "lpi" if mode == "EXTERNAL" else "admin-console"
         }}) \
         .set_env("INSTALL_MODE", PARAM_INSTALL_MODE.ref())
 
