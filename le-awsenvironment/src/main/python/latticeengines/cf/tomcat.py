@@ -62,7 +62,7 @@ def tomcat_task(profile_vars):
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": "lpi-%s" % profile_vars["LE_STACK"],
+            "awslogs-group": { "Fn::Join": [ "-", ["lpi", profile_vars["LE_STACK"].ref()]] },
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": PARAM_DOCKER_IMAGE.ref()
         }})
