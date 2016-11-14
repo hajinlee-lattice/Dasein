@@ -140,17 +140,20 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 'main@MODELQUALITY': {
                     templateUrl: 'app/modelquality/pipeline/view/PipelineView.html',
                     controller: 'PipelineCtrl',
-                    controllerAs: 'vm_createPipeline'
+                    controllerAs: 'vm_pipeline'
                 },
                 'createPipelineStep@MODELQUALITY.PIPELINE': {
                     templateUrl: 'app/modelquality/pipeline/view/PipelineStepView.html',
                     controller: 'PipelineStepCtrl',
-                    controllerAs: 'vm_createPipelineStep'
+                    controllerAs: 'vm_pipelineStep'
                 }
             },
             resolve: {
                 AnalyticPipelines: function (ModelQualityService) {
                     return ModelQualityService.GetAllAnalyticPipelines();
+                },
+                PropDataConfigs: function (ModelQualityService) {
+                    return ModelQualityService.PropDataLatestForUI();
                 }
             }
         })

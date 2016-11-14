@@ -1,7 +1,7 @@
 angular.module('app.modelquality.controller.PipelineCtrl', [
     'app.modelquality.controller.PipelineStepCtrl'
 ])
-.controller('PipelineCtrl', function ($scope, $state, $q, AnalyticPipelines, ModelQualityService) {
+.controller('PipelineCtrl', function ($scope, $state, $q, AnalyticPipelines, PropDataConfigs, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
@@ -12,6 +12,7 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
             EMPTY_STEPS: 'This pipeline has 0 steps',
             PIPELINE_NAME: 'Pipeline Name',
             PIPELINE_DESCRIPTION: 'Pipeline Description',
+            PROP_DATA_CONFIG: 'Prop Data Match Type',
             CANCEL: 'Clear',
             SAVE: 'Save',
             SPINNER_SAVING: 'Saving Pipeline...',
@@ -26,6 +27,7 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
             'sampling_name'
         ],
         analyticPipelines: AnalyticPipelines.resultObj,
+        propDataConfigs: PropDataConfigs.resultObj,
         selectedPipeline: null,
         pipelineSteps: [],
         analyticPipeline: {},
@@ -88,46 +90,44 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         vm.isCreatingStep = false;
     };
 
-    vm.savePipeline = function () {
+    vm.save = function () {
+        vm.error = false;
+        vm.message = null;
+        vm.spinnerMsg = vm.labels.SPINNER_SAVING;
+
         if (!vm.pipelineName) {
             vm.error = true;
             vm.message = 'Pipeline name is required';
             return;
         }
 
-        vm.error = false;
-        vm.message = null;
+        vm.analyticPipeline.name = vm.pipelineName;
+        vm.analyticPipeline.pipeline_name = vm.pipelineName;
+
+        if (!isValidAnalyticPipeline()) {
+            vm.error = true;
+            vm.message = 'Invalid pipeline';
+            return;
+        }
+
+        if (!isValidPropDataConfig()) {
+            vm.error = true;
+            vm.message = 'Invalid prop data config';
+            return;
+        }
+
         vm.loading = true;
-        vm.spinnerMsg = vm.labels.SPINNER_SAVING;
-
-        var newPipeline = vm.pipelineSteps.map(function (step) {
-            if (step.isNewStep) {
-                return {
-                    pipeline_step_dir: step.pipeline_step_dir
-                };
+        savePipeline().then(function (result) {
+            return saveAnalyticPipeline();
+        }).catch(function (error) {
+            vm.error = true;
+            if (error && error.errMsg) {
+                vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
             } else {
-                return {
-                    pipeline_step: step.Name
-                };
+                vm.message = 'Unexpected error has occured. Please try again.';
             }
+            vm.loading = false;
         });
-
-        ModelQualityService.CreatePipeline(vm.pipelineName, vm.pipelineDescription, newPipeline)
-            .then(function (result) {
-                return ModelQualityService.GetPipelineByName(result.resultObj.pipelineName);
-            }).then(function (result) {
-                vm.analyticPipeline.pipeline_name = result.resultObj.name;
-
-                saveAnalyticPipeline();
-            }).catch(function (error) {
-                vm.error = true;
-                if (error && error.errMsg) {
-                    vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
-                } else {
-                    vm.message = 'Unexpected error has occured. Please try again.';
-                }
-                vm.loading = false;
-            });
     };
 
     vm.cancelPipeline = function () {
@@ -161,30 +161,29 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         }
     };
 
-    function saveAnalyticPipeline () {
-        vm.analyticPipeline.name = vm.pipelineName;
-        if (!isValidPipeline()) {
-            vm.error = true;
-            vm.message = 'Invalid pipeline';
-            return;
-        }
+    function savePipeline () {
+        var newPipeline = vm.pipelineSteps.map(function (step) {
+            if (step.isNewStep) {
+                return {
+                    pipeline_step_dir: step.pipeline_step_dir
+                };
+            } else {
+                return {
+                    pipeline_step: step.Name
+                };
+            }
+        });
 
-        ModelQualityService.CreateAnalyticPipeline(vm.analyticPipeline)
+        return ModelQualityService.CreatePipeline(vm.pipelineName, vm.pipelineDescription, newPipeline);
+    }
+
+    function saveAnalyticPipeline () {
+        return ModelQualityService.CreateAnalyticPipeline(vm.analyticPipeline)
             .then(function (result) {
                 vm.analyticPipelines.push(angular.copy(vm.analyticPipeline));
 
                 vm.reset();
-                vm.message = result.resultObj.pipelineName + ' has been created.';
-            }).catch(function (error) {
-                vm.error = true;
-
-                if (error && error.errMsg) {
-                  vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
-                } else {
-                  vm.message = 'Error creating analytic pipeline';
-                }
-            }).finally(function () {
-                vm.loading = false;
+                vm.message = 'Analytic pipeline ' + result.resultObj.pipelineName + ' has been created.';
             });
     }
 
@@ -198,7 +197,7 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
         return -1;
     }
 
-    function isValidPipeline() {
+    function isValidAnalyticPipeline() {
       var valid = !!vm.pipelineName;
 
       vm.analyticPipelineProps.forEach(function (prop) {
@@ -206,5 +205,18 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
       });
 
       return valid;
+    }
+
+    function isValidPropDataConfig() {
+        valid = false;
+
+        for (var i = 0; i < vm.propDataConfigs.length; i++) {
+            if (vm.analyticPipeline.prop_data_name === vm.propDataConfigs[i].name) {
+                valid = true;
+                break;
+            }
+        }
+
+        return valid;
     }
 });

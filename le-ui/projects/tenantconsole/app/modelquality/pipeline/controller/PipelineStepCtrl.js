@@ -84,14 +84,14 @@ angular.module("app.modelquality.controller.PipelineStepCtrl", [
                 var dir = vm.validateAndGetPath(vm.stepName, pythonPath, metadataPath);
 
                 if (dir) {
-                    $scope.vm_createPipeline.addStep({
+                    $scope.vm_pipeline.addStep({
                         Name: vm.stepName,
                         pipeline_step_dir: dir,
                         isNewStep: true,
                     });
 
                     vm.clearForm();
-                    $scope.vm_createPipeline.isCreatingStep = false;
+                    $scope.vm_pipeline.isCreatingStep = false;
                 } else {
                     vm.error = true;
                     vm.message = 'Dir path error: expected same directory path but got' + pythonPath + ' and ' + metadataPath;

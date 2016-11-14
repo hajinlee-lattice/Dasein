@@ -488,6 +488,31 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetPropdataConfigs(propdataConfigName);
     };
 
+    this.PropDataLatestForUI = function () {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'POST',
+            url: '/modelquality/propdataconfigs/latestForUI'
+        }).success(function(data){
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
     // /modelquality/samplingconfigs/
     this.GetSamplingConfigs = function(samplingConfigName) {
         var defer = $q.defer();

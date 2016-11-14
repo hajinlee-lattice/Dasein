@@ -21,7 +21,7 @@
           | startFrom: ((vm_analyticTest.cur - 1) * vm_analyticTest.max)
           | limitTo:vm_analyticTest.max">
           <td ng-repeat="col in ::vm_analyticTest.columns">
-            {{analyticTest[col.key] | joinList:', '}}
+            {{::analyticTest[col.key] | joinList:', '}}
           </td>
           <td>
             <span ng-click="vm_analyticTest.runTest(analyticTest.name)" class="header-btn">{{::vm_analyticTest.labels.RUN}}<span>
@@ -90,7 +90,7 @@
     <ul>
       <li class="checkbox" ng-repeat="opt in options">
         <label>
-          <input type="checkbox" ng-model="selected[opt.name]" ng-checked="selected[opt.name]"/>{{opt.name}}
+          <input type="checkbox" ng-model="selected[opt.name]" ng-checked="selected[opt.name]"/>{{::opt.name}}
         </label>
       </li>
     </ul>
