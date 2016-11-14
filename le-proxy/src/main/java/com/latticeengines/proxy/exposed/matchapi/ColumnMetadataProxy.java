@@ -68,7 +68,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         if (StringUtils.isNotEmpty(compatibleVersion)) {
             url = constructUrl("/versions/latest?compatibleto={compatibleVersion}", compatibleVersion);
         } else {
-            url = "/versions/latest";
+            url = constructUrl("/versions/latest");
         }
         return get("latest version", url, DataCloudVersion.class);
     }
