@@ -23,7 +23,7 @@ fi
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 
-if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+if [ ! -z "$LE_STACK" -a "$LE_STACK" != " " ]; then
     VERSION=${LE_STACK}/${VERSION}
 fi
 
