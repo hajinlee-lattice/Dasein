@@ -44,6 +44,6 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId) {
         String apiToken = createAPIToken(tenantId);
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, CLIENT_ID_LP, appId);
-        return oAuth2RestTemplate.getAccessToken();
+        return OAuth2Utils.getAccessToken(oAuth2RestTemplate);
     }
 }

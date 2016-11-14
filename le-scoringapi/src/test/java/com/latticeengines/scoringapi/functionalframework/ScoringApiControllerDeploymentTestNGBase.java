@@ -116,7 +116,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
                         oAuthUser.getPassword(), CLIENT_ID_LP);
             }
-            OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
+            OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
             log.info(accessToken.getValue());
 
             System.out.println(accessToken.getValue());

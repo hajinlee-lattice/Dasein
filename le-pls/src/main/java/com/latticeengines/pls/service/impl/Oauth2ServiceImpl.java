@@ -29,8 +29,8 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
-    @Value("${common.playmaker.url}")
-    protected String playmakerUrl;
+    @Value("${common.oauth.url}")
+    protected String oauth2Url;
 
     @Override
     public String createAPIToken(String tenantId) {
@@ -51,16 +51,15 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
         OAuth2RestTemplate oAuth2RestTemplate = null;
 
         if (StringUtils.isEmpty(appId)) {
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(playmakerUrl, user.getUserId(),
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2Url, user.getUserId(),
                     user.getPassword(), CLIENT_ID_LP);
         } else {
             oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, CLIENT_ID_LP, appId);
         }
-
-        OAuth2AccessToken oAuth2AccessToken = oAuth2RestTemplate.getAccessToken();
-        Oauth2AccessToken oauth2AccessToken = new Oauth2AccessToken();
-        oauth2AccessToken.setAccessToken(oAuth2AccessToken.getValue());
-        oauth2AccessTokenEntityMgr.createOrUpdate(oauth2AccessToken, tenantId, appId);
-        return oAuth2AccessToken;
+        OAuth2AccessToken token1 = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        Oauth2AccessToken token2 = new Oauth2AccessToken();
+        token2.setAccessToken(token1.getValue());
+        oauth2AccessTokenEntityMgr.createOrUpdate(token2, tenantId, appId);
+        return token1;
     }
 }

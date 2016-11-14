@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -125,6 +126,11 @@ public class OAuth2Utils {
         OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);
         newRestTemplate.setRequestFactory(HttpClientUtils.getSslBlindRequestFactory());
         return newRestTemplate;
+    }
+
+    public static OAuth2AccessToken getAccessToken(OAuth2RestTemplate oAuth2RestTemplate) {
+        SSLUtils.turnOffSSL();
+        return oAuth2RestTemplate.getAccessToken();
     }
 
     public static String generatePassword() {

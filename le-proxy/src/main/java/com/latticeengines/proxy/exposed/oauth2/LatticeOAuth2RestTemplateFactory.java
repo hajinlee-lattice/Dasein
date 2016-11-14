@@ -17,11 +17,11 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 @Component
 public class LatticeOAuth2RestTemplateFactory {
 
-    @Value("${common.playmaker.url}")
-    private String playmakerUrl;
+    @Value("${common.oauth.url}")
+    private String oauthUrl;
 
     public OAuth2RestTemplate getOAuth2RestTemplate(OAuthUser oAuthUser, String clientId, String appId) {
-        return getOAuth2RestTemplate(oAuthUser, clientId, appId, playmakerUrl);
+        return getOAuth2RestTemplate(oAuthUser, clientId, appId, oauthUrl);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplate(OAuthUser oAuthUser, String clientId, String appId,
