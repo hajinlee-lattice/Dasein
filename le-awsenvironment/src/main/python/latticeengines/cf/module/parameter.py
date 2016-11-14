@@ -55,11 +55,11 @@ class InstanceTypeParameter(Parameter):
         "t2.micro",
         "t2.small",
         "t2.medium",
-        "m3.medium",
-        "m3.large",
-        "m3.xlarge",
         "m4.large",
         "m4.xlarge",
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
         "r3.large",
         "r3.xlarge"
     )
