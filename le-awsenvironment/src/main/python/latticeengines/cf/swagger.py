@@ -53,7 +53,7 @@ def swagger_task():
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": { "Fn:Join": ["-", ["lpi", PARAM_LE_STACK.ref()]] },
+            "awslogs-group": { "Fn::Join": ["-", ["lpi", PARAM_LE_STACK.ref()]] },
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": "swagger"
         }}) \

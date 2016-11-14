@@ -61,7 +61,7 @@ def express_task(profile_vars, port):
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": { "Fn:Join": ["-", ["lpi", PARAM_LE_STACK.ref()]] },
+            "awslogs-group": { "Fn::Join": [ "-", ["lpi", PARAM_LE_STACK.ref()]] },
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": PARAM_DOCKER_IMAGE_TAG.ref()
         }}) \
