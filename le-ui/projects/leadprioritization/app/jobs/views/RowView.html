@@ -123,7 +123,7 @@
 
                         </div>
                     </li>
-                    <li ng-class="(jobStepsCompletedStates.create_global_target_market) ? 'success' : ''">
+                    <li ng-class="{success : jobStepsCompletedStates.create_global_target_market, error : (stepFailed == 'create_global_target_market')}">
                         <div>
                                 
                             <span class="building-model">
@@ -138,7 +138,7 @@
 
                         </div>
                     </li>
-                    <li ng-class="(jobStepsCompletedStates.score_training_set) ? 'success' : ''">
+                    <li ng-class="{success : jobStepsCompletedStates.score_training_set, error : (stepFailed == 'score_training_set')}">
                         <div>
                                 
                             <span class="scoring-training-set">

@@ -90,7 +90,6 @@ angular
                 $scope.stepsCompletedTimes = $scope.statuses[job.id].completedTimes;
                 $scope.stepFailed = $scope.statuses[job.id].stepFailed;
             }
-
             if ($scope.job.status == "Running") {
                 $scope.jobRunning = true;
                 periodicQueryJobStatus($scope.job.id);

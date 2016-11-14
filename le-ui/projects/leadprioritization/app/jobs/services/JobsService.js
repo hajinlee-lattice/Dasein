@@ -26,25 +26,28 @@ angular
         'importMatchAndScoreWorkflow': {
         },*/
         'importMatchAndModelWorkflow': {
-            'importData': 'load_data',
-            'createEventTableReport': 'load_data',
-            'dedupEventTable': 'load_data',
-            'createPrematchEventTableReport': 'generate_insights',
-            'validatePrematchEventTable': 'generate_insights',
-            'matchDataCloud': 'generate_insights',
-            'processMatchResult': 'generate_insights', 
-            'addStandardAttributes': 'create_global_target_market',
-            'sample': 'create_global_target_market',
-            'exportData': 'create_global_target_market',
-            'setMatchSelection': 'create_global_target_market',
-            'writeMetadataFiles': 'create_global_target_market',
-            'profile': 'create_global_target_market',
-            'reviewModel': 'create_global_target_market',
-            'remediateDataRules': 'create_global_target_market',
-            'writeMetadataFiles': 'create_global_target_market',
-            'createModel': 'create_global_target_market',
+            'importData':                       'load_data',
+            'createEventTableReport':           'load_data',
+            'dedupEventTable':                  'load_data',
+            'createPrematchEventTableReport':   'generate_insights',
+            'validatePrematchEventTable':       'generate_insights',
+            'matchDataCloud':                   'generate_insights',
+            'processMatchResult':               'generate_insights', 
+            'addStandardAttributes':            'create_global_target_market',
+            'sample':                           'create_global_target_market',
+            'exportData':                       'create_global_target_market',
+            'setMatchSelection':                'create_global_target_market',
+            'writeMetadataFiles':               'create_global_target_market',
+            'profile':                          'create_global_target_market',
+            'reviewModel':                      'create_global_target_market',
+            'remediateDataRules':               'create_global_target_market',
+            'writeMetadataFiles':               'create_global_target_market',
+            'createModel':                      'create_global_target_market',
             'downloadAndProcessModelSummaries': 'create_global_target_market',
-            'persistDataRules': 'create_global_target_market'
+            'persistDataRules':                 'create_global_target_market',
+            'score':                            'score_training_set',
+            'combineInputTableWithScore':       'score_training_set',
+            'pivotScoreAndEvent':               'score_training_set'
         },
         'modelAndEmailWorkflow': {
             'dedupEventTable': 'create_global_target_market',
@@ -194,6 +197,7 @@ angular
                         completedTimes: getCompletedStepTimes(job, stepRunning, stepsCompleted),
                         reports: job.reports
                     };
+
                 });
 
                 deferred.resolve(result);
@@ -343,8 +347,7 @@ angular
     };
     
     function getCompletedStepTimes(job, runningStep, completedSteps) {
-        var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
-                "create_global_model": null, "create_global_target_market": null, "score_training_set": null };
+        var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null, "create_global_model": null, "create_global_target_market": null, "score_training_set": null };
         var currStepIndex = 0;
         if (runningStep != "load_data" && completedSteps.indexOf("load_data") > -1) {
             currStepIndex += numStepsInGroup.load_data;
