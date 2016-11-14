@@ -11,7 +11,6 @@ from .module.ecs import ContainerDefinition, TaskDefinition, Volume
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
-from ..cw.logs import create_internal as create_log_group
 from ..ec2.ec2 import register_ec2_to_targetgroup
 from ..elb.targetgroup import find_tgrp_arn
 
@@ -63,8 +62,9 @@ def tomcat_task(profile_vars):
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
-            "awslogs-region": { "Ref": "AWS::Region" }
+            "awslogs-group": "lpi-%s" % profile_vars["LE_STACK"],
+            "awslogs-region": { "Ref": "AWS::Region" },
+            "awslogs-stream-prefix": PARAM_DOCKER_IMAGE.ref()
         }})
 
     for k, p in profile_vars.items():
@@ -86,10 +86,10 @@ def tomcat_task(profile_vars):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public)
+    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public, le_stack=args.lestack)
 
 
-def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False):
+def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False, le_stack=None):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -110,9 +110,7 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
 
     extra_params.append(PARAM_EFS.config(config.lpi_efs_id()))
 
-    create_log_group("docker-%s" % stackname)
-
-    ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params)
+    ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 
     register_ec2_to_targetgroup(stackname, tgrp)
 
@@ -194,6 +192,7 @@ def parse_args():
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity. only honored when using auto scaling group.')
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity. only honored when using auto scaling group.')
+    parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")

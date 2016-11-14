@@ -359,7 +359,7 @@ class ECSStack(Stack):
         }
 
     @staticmethod
-    def provision(environment, s3cfpath, stackname, security_group, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium'):
+    def provision(environment, s3cfpath, stackname, security_group, tgrp, init_cap=2, max_cap=8, public=False, additional_params=(), instance_type='t2.medium', le_stack=None):
         #if not elb_not_busy(elb):
         #    return
 
@@ -394,6 +394,9 @@ class ECSStack(Stack):
 
         params += additional_params
 
+        if le_stack is None:
+            le_stack = stackname
+
         response = client.create_stack(
             StackName=stackname,
             TemplateURL='https://s3.amazonaws.com/%s' % os.path.join(config.cf_bucket(), s3cfpath, 'template.json'),
@@ -407,52 +410,15 @@ class ECSStack(Stack):
                 {
                     'Key': 'product',
                     'Value': 'lpi'
+                },
+                {
+                    'Key': 'le.stack',
+                    'Value': le_stack
                 }
             ]
         )
         print 'Got StackId: %s' % response['StackId']
         wait_for_stack_creation(client, stackname)
-        # toggle_healtch_check(elb)
-
-def toggle_healtch_check(elb):
-    """
-    sometimes when re-associate an elb to a new autoscaling group, it cannot find health instances.
-    need to toggle health check between tcp and http once or twice to make it work
-    :param elb:
-    :return:
-    """
-    client = boto3.client('elb')
-    desc = client.describe_load_balancers(LoadBalancerNames=[elb])['LoadBalancerDescriptions'][0]
-    hc = desc['HealthCheck']
-
-    print 'change health check of %s to tcp:80, and wait for 5 seconds.' % elb
-    client.configure_health_check(
-        LoadBalancerName=elb,
-        HealthCheck={
-            'Target': 'TCP:80',
-            'Timeout': 5,
-            'Interval': 30,
-            'UnhealthyThreshold': 2,
-            'HealthyThreshold': 10
-        }
-    )
-
-    time.sleep(5)
-
-    print 'resume health check of %s to its original setting:\n%s' % (elb, json.dumps(hc, indent=2, separators=(',', ': ')))
-    client.configure_health_check(
-        LoadBalancerName=elb,
-        HealthCheck=hc
-    )
-
-def elb_not_busy(elb):
-    elbs = boto3.client('elb').describe_load_balancers(LoadBalancerNames=[elb])
-    desc = elbs['LoadBalancerDescriptions'][0]
-    ins = desc['Instances']
-    if ins is not None and len(ins) > 0:
-        print "Load Balancer " + elb + " is busy:\n" + ins + "\nCannot use this elb for the stack to be provisioned"
-        return False
-    return True
 
 def check_stack_not_exists(client, stackname):
     print 'verifying stack name "%s"...' % stackname

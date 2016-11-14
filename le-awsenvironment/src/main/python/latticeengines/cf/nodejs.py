@@ -11,13 +11,13 @@ from .module.ecs import ContainerDefinition, TaskDefinition
 from .module.parameter import Parameter, EnvVarParameter
 from .module.stack import ECSStack, teardown_stack
 from ..conf import AwsEnvironment
-from ..cw.logs import create_internal as create_log_group
 from ..ec2.ec2 import register_ec2_to_targetgroup
 
 PARAM_DOCKER_IMAGE=Parameter("DockerImage", "Docker image to be deployed")
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 PARAM_INSTALL_MODE=Parameter("InstallMode", "INTERNAL or EXTERNAL")
+PARAM_LE_STACK=Parameter("LEStack", "The name of the parent LE_STACK")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -44,7 +44,7 @@ def template(environment, stackname, mode, profile, instances, upload=False):
 
 def create_template(profile, instances, port):
     stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", use_asgroup=False, instances=instances)
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE])
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = express_task(profile_vars, port)
@@ -61,8 +61,9 @@ def express_task(profile_vars, port):
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": { "Fn::Join" : ["", ["docker-", { "Ref" : "AWS::StackName" }]]},
-            "awslogs-region": { "Ref": "AWS::Region" }
+            "awslogs-group": { "Fn:Join": ["-", ["lpi", PARAM_LE_STACK.ref()]] },
+            "awslogs-region": { "Ref": "AWS::Region" },
+            "awslogs-stream-prefix": PARAM_DOCKER_IMAGE_TAG.ref()
         }}) \
         .set_env("INSTALL_MODE", PARAM_INSTALL_MODE.ref())
 
@@ -74,10 +75,10 @@ def express_task(profile_vars, port):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, args.instances, tag=args.tag, public=args.public)
+    provision(args.environment, args.stackname, args.tgrp, args.profile, args.instancetype, args.mode, args.instances, tag=args.tag, public=args.public, le_stack=args.lestack)
 
 
-def provision(environment, stackname, tgrp, profile, instance_type, mode, instances, tag="latest", public=False):
+def provision(environment, stackname, tgrp, profile, instance_type, mode, instances, tag="latest", public=False, le_stack=None):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -85,16 +86,18 @@ def provision(environment, stackname, tgrp, profile, instance_type, mode, instan
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
     extra_params.append(PARAM_MEM.config(str(max_mem)))
 
+    if le_stack is None:
+        le_stack = stackname
+
     extra_params.append(PARAM_DOCKER_IMAGE.config("express"))
     extra_params.append(PARAM_DOCKER_IMAGE_TAG.config(tag))
     extra_params.append(PARAM_INSTALL_MODE.config(mode))
+    extra_params.append(PARAM_LE_STACK.config(le_stack))
 
     tgrp_arn = find_tgrp_arn(tgrp)
     config = AwsEnvironment(environment)
 
-    create_log_group("docker-%s" % stackname)
-
-    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=instances, max_cap=instances, public=public, instance_type=instance_type, additional_params=extra_params)
+    ECSStack.provision(environment, s3_path(stackname), stackname, config.nodejs_sg(), tgrp_arn, init_cap=instances, max_cap=instances, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 
     register_ec2_to_targetgroup(stackname, tgrp)
 
@@ -169,6 +172,7 @@ def parse_args():
     parser1.add_argument('-m', dest='mode', type=str, default='EXTERNAL', help='INTERNAL or EXTERNAL. INTERNAL means admin console. EXTERNAL means lpi')
     parser1.add_argument('-n', dest='instances', type=int, default="1", help='number of instances.')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
+    parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")

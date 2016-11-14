@@ -16,6 +16,7 @@ from ..elb.targetgroup import find_tgrp_arn
 _S3_CF_PATH='cloudformation/swagger'
 
 PARAM_SWAGGER_APPS=Parameter("SwaggerApps", "List of apps for swagger.")
+PARAM_LE_STACK=Parameter("LEStack", "The name of the parent LE_STACK")
 
 def main():
     args = parse_args()
@@ -35,7 +36,7 @@ def template(environment, upload=False):
 
 def create_template():
     stack = ECSStack("AWS CloudFormation template for swagger ECS cluster.", use_asgroup=False, instances=1)
-    stack.add_param(PARAM_SWAGGER_APPS)
+    stack.add_params([PARAM_SWAGGER_APPS, PARAM_LE_STACK])
     task = swagger_task()
     stack.add_resource(task)
     stack.add_service("swagger", task, capacity=1)
@@ -52,8 +53,9 @@ def swagger_task():
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {
-            "awslogs-group": "docker-swagger",
-            "awslogs-region": { "Ref": "AWS::Region" }
+            "awslogs-group": { "Fn:Join": ["-", ["lpi", PARAM_LE_STACK.ref()]] },
+            "awslogs-region": { "Ref": "AWS::Region" },
+            "awslogs-stream-prefix": "swagger"
         }}) \
         .set_env("SWAGGER_APPS", PARAM_SWAGGER_APPS.ref()) \
         .set_env("JVMFLAGS", "-Xms1g -Xmx1700m")
@@ -62,9 +64,9 @@ def swagger_task():
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.apps, args.tgrp, public=args.public)
+    provision(args.environment, args.stackname, args.apps, args.tgrp, public=args.public, le_stack=args.lestack)
 
-def provision(environment, stackname, apps, tgrp, public=False):
+def provision(environment, stackname, apps, tgrp, public=False, le_stack=None):
     config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -77,6 +79,9 @@ def provision(environment, stackname, apps, tgrp, public=False):
         subnet1 = config.private_subnet_1()
         subnet2 = config.private_subnet_2()
         subnet3 = config.private_subnet_3()
+
+    if le_stack is None:
+        le_stack = stackname
 
     response = client.create_stack(
         StackName=stackname,
@@ -95,7 +100,8 @@ def provision(environment, stackname, apps, tgrp, public=False):
             PARAM_TARGET_GROUP.config(find_tgrp_arn(tgrp)),
             PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
             PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn()),
-            PARAM_SWAGGER_APPS.config(apps)
+            PARAM_SWAGGER_APPS.config(apps),
+            PARAM_LE_STACK.config(le_stack)
         ],
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',
@@ -135,6 +141,7 @@ def parse_args():
     parser1.add_argument('-g', dest='tgrp', type=str, required=True, help='name of the target group for load balancer')
     parser1.add_argument('-a', dest='apps', type=str, help='comma separated list of swagger apps.')
     parser1.add_argument('--public', dest='public', action='store_true', help='use public subnets')
+    parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
