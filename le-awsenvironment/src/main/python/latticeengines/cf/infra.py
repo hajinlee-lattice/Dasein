@@ -91,7 +91,7 @@ def create_taget_groups():
         tg_map[app] = tg
     return tgs, tg_map
 
-def create_load_balancers(tg_map):
+def create_load_balancers(tg_map, ui=False):
     albs = {}
     resources = []
 
@@ -111,25 +111,11 @@ def create_load_balancers(tg_map):
     resources.append(public_lb)
     albs["public"] = public_lb
 
-    # lpi
-    lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
-    lpi_lb.depends_on(tg_map["lpi"])
-    resources.append(lpi_lb)
-    albs["lpi"] = lpi_lb
-
-    # adminconsole
-    ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
-    ac_lb.depends_on(tg_map["adminconsole"])
-    resources.append(ac_lb)
-    albs["adminconsole"] = ac_lb
-
     # listeners
     private_lsnr = create_listener(private_lb, tg_map["swaggerprivate"])
     resources.append(private_lsnr)
     public_lsnr = create_listener(public_lb, tg_map["swaggerpublic"])
     resources.append(public_lsnr)
-    resources.append(create_listener(lpi_lb, tg_map["lpi"]))
-    resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
 
     # listener rules
     resources.append(create_listener_rule(private_lsnr, tg_map["matchapi"], "/match/*"))
@@ -148,6 +134,22 @@ def create_load_balancers(tg_map):
     resources.append(create_listener_rule(public_lsnr, tg_map["scoringapi"], "/scoreinternal/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["oauth2"], "/oauth2/*"))
     resources.append(create_listener_rule(public_lsnr, tg_map["playmaker"], "/api/*"))
+
+    if ui:
+        # lpi
+        lpi_lb = ApplicationLoadBalancer("lpi", PARAM_NODEJS_SECURITY_GROUP, [PARAM_PUBLIC_SUBNET_1, PARAM_PUBLIC_SUBNET_2, PARAM_PUBLIC_SUBNET_3])
+        lpi_lb.depends_on(tg_map["lpi"])
+        resources.append(lpi_lb)
+        albs["lpi"] = lpi_lb
+
+        # adminconsole
+        ac_lb = ApplicationLoadBalancer("adminconsole", PARAM_NODEJS_SECURITY_GROUP, [PARAM_SUBNET_1, PARAM_SUBNET_2, PARAM_SUBNET_3])
+        ac_lb.depends_on(tg_map["adminconsole"])
+        resources.append(ac_lb)
+        albs["adminconsole"] = ac_lb
+
+        resources.append(create_listener(lpi_lb, tg_map["lpi"]))
+        resources.append(create_listener(ac_lb, tg_map["adminconsole"]))
 
     return resources, albs
 
@@ -246,6 +248,7 @@ def parse_args():
     parser1 = commands.add_parser("template")
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
+    parser1.add_argument('--include-ui', dest='ui', action='store_true', help='include ui load balancers')
     parser1.set_defaults(func=template_cli)
 
     parser1 = commands.add_parser("provision")
