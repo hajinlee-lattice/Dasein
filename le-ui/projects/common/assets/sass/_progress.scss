@@ -474,9 +474,9 @@ Wizard Steps
 					}
 				}
 			}
-			span:last-child {
-				display: none;
-			}
+			// span:last-child {
+			// 	display: none;
+			// }
 			p {
 				margin-bottom: -5px;
 				font-size: 11px;
@@ -492,11 +492,11 @@ Wizard Steps
 			padding: 0 13px;
 			width: 22.6%;
 			margin-right: 1.95%;
-			.load-data, .match-cloud, .building-model, .scoring-training-set,
+			.load-data, .match-cloud, .building-model, .scoring-training-set, 
 			&.success .load-data, &.success .match-cloud, &.success .building-model, &.success .scoring-training-set,
 			&.error .load-data, &.error .match-cloud, &.error .building-model, &.error .scoring-training-set {
 				padding-left: 25px;
-				background-size: 20px;
+				background-size: 18px;
 			}
 			.load-data {
 			    background-image: url("/assets/images/ico-status-process-file-inactive.png");
@@ -557,7 +557,7 @@ Wizard Steps
 			.load-data, .match-cloud, .building-model, .scoring-training-set, 
 			&.success .load-data, &.success .match-cloud, &.success .building-model, &.success .scoring-training-set,
 			&.error .load-data, &.error .match-cloud, &.error .building-model, &.error .scoring-training-set {
-				background-size: 28px;
+				background-size: 18px;
 			}
 		}
 	}
@@ -596,7 +596,7 @@ Wizard Steps
 				.load-data, .match-cloud, .building-model, .scoring-training-set, 
 				&.success .load-data, &.success .match-cloud, &.success .building-model, &.success .scoring-training-set,
 				&.error .load-data, &.error .match-cloud, &.error .building-model, &.error .scoring-training-set {
-					padding-left: 40px;
+					padding-left: 24px;
 				}
 				.load-data {
 				    background-image: url("/assets/images/ico-status-process-file-inactive.png");

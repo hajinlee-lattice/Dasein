@@ -85,7 +85,7 @@
                     </dd>
                 </dl>
                 <dl>
-                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Scoring Training Set</dt>
+                    <dt data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</dt>
                     <dt data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</dt>
                     <dd>
                         <div class="progress-icon">
