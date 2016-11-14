@@ -49,13 +49,15 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
 
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
             String message = node.get("errorMsg").asText();
+
+            //TODo: temporary workaround. After finding out the root cause of json truncation, we should remove this.
+            if (message.contains("Could not read JSON: Unexpected end-of-input in VALUE_STRING")
+                    || message.contains("Could not read JSON: Unexpected end-of-input in character escape sequence")) {
+                throw new RuntimeException("Seems JSON IO was truncated: " + body);
+            }
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
-            if (body.contains("504 Gateway Time-out")) {
-                exception = new RemoteLedpException(body, status, LedpCode.LEDP_00002, "504 Gateway Time-out");
-            } else {
-                return false;
-            }
+            return false;
         }
         throw exception;
     }

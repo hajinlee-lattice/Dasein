@@ -245,6 +245,7 @@
         <module>dellebi</module>
         <module>quartz</module>
         <module>modelquality</module>
+        <module>sqoop</module>
     </modules>
 
 </project>

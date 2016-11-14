@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="sqoopTestDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${datacloud.manage.driver}"/>
+        <property name="jdbcUrl" value="${datacloud.manage.url}"/>
+        <property name="user" value="${datacloud.manage.user}" />
+        <property name="password" value="${datacloud.manage.password.encrypted}" />
+        <property name="acquireIncrement" value="4"/>
+        <property name="maxPoolSize" value="32"/>
+        <property name="checkoutTimeout" value="10000"/>
+        <property name="idleConnectionTestPeriod" value="10"/>
+        <property name="maxIdleTime" value="30"/>
+    </bean>
+
+    <bean id="sqoopTestJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="sqoopTestDataSource"/>
+
+</beans>

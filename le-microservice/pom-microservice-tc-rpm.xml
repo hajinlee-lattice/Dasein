@@ -77,6 +77,10 @@
                                     <location>modelquality/target/le-modelquality-microservice-${le.rpm.version}.war</location>
                                     <destination>modelquality.war</destination>
                                 </source>
+                                <source>
+                                    <location>sqoop/target/le-sqoop-microservice-${le.rpm.version}.war</location>
+                                    <destination>sqoop.war</destination>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

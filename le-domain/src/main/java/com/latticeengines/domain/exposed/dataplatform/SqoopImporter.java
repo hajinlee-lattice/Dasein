@@ -9,6 +9,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -27,6 +30,8 @@ public class SqoopImporter {
             "--as-avrodatafile", //
             "--compress"
     );
+
+    private static DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
     private String table;
     private String query;
@@ -206,6 +211,10 @@ public class SqoopImporter {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public String fullJobName() {
+        return StringUtils.join(Arrays.asList(getCustomer(), "sqoop-import", dateTimeFormatter.print(new DateTime())), "-");
     }
 
     public static class Builder {

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -19,6 +22,8 @@ public class SqoopExporter {
             "-Dmapreduce.job.running.map.limit=32",
             "-Dmapreduce.tasktracker.map.tasks.maximum=32"
     );
+
+    private static DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
 
     private String table;
     private String sourceDir;
@@ -165,6 +170,10 @@ public class SqoopExporter {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public String fullJobName() {
+        return org.apache.commons.lang.StringUtils.join(Arrays.asList(getCustomer(), "sqoop-export", dateTimeFormatter.print(new DateTime())), "-");
     }
 
     public static class Builder {

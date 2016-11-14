@@ -19,7 +19,6 @@ import org.springframework.web.util.UriTemplate;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
@@ -65,9 +64,7 @@ public abstract class BaseRestApiProxy {
                             body, context.getRetryCount() + 1));
                     return restTemplate.postForObject(url, body, returnValueClazz);
                 } catch (LedpException e) {
-                    if (!isJsonParsingException(e)) {
-                        context.setExhaustedOnly();
-                    }
+                    context.setExhaustedOnly();
                     logError(e, method);
                     throw e;
                 } catch (Exception e) {
@@ -93,9 +90,7 @@ public abstract class BaseRestApiProxy {
                     restTemplate.put(url, body);
                     return null;
                 } catch (LedpException e) {
-                    if (!isJsonParsingException(e)) {
-                        context.setExhaustedOnly();
-                    }
+                    context.setExhaustedOnly();
                     logError(e, method);
                     throw e;
                 } catch (Exception e) {
@@ -117,9 +112,7 @@ public abstract class BaseRestApiProxy {
                             context.getRetryCount() + 1));
                     return restTemplate.getForObject(url, returnValueClazz);
                 } catch (LedpException e) {
-                    if (!isJsonParsingException(e)) {
-                        context.setExhaustedOnly();
-                    }
+                    context.setExhaustedOnly();
                     logError(e, method);
                     throw e;
                 } catch (Exception e) {
@@ -141,9 +134,7 @@ public abstract class BaseRestApiProxy {
                     restTemplate.delete(url);
                     return null;
                 } catch (LedpException e) {
-                    if (!isJsonParsingException(e)) {
-                        context.setExhaustedOnly();
-                    }
+                    context.setExhaustedOnly();
                     logError(e, method);
                     throw e;
                 } catch (Exception e) {
@@ -214,16 +205,6 @@ public abstract class BaseRestApiProxy {
 
     public void setHostport(String hostport) {
         this.hostport = hostport;
-    }
-
-    private boolean isJsonParsingException(LedpException exception) {
-        if (exception instanceof RemoteLedpException) {
-            String remoteStackTrace = ((RemoteLedpException) exception).getRemoteStackTrace();
-            return remoteStackTrace.contains("Could not read JSON: Unexpected end-of-input in VALUE_STRING")
-                    || remoteStackTrace.contains("Could not read JSON: Unexpected end-of-input in character escape sequence");
-        } else {
-            return false;
-        }
     }
 
     @VisibleForTesting
