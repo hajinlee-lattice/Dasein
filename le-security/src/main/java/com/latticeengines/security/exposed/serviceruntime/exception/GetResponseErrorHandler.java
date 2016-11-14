@@ -52,8 +52,8 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
 
             // TODO: temporary workaround. After finding out the root cause of
             // json truncation, we should remove this.
-            if (message.contains("Could not read JSON: Unexpected end-of-input")
-                    || stackTraceString.contains("Could not read JSON: Unexpected end-of-input")) {
+            if (message.contains("Could not read JSON: Unexpected end-of-input") || (stackTraceString != null
+                    && stackTraceString.contains("Could not read JSON: Unexpected end-of-input"))) {
                 throw new RuntimeException("Seems JSON IO was truncated: " + body);
             }
             exception = new RemoteLedpException(stackTraceString, status, code, message);
