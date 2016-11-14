@@ -19,8 +19,8 @@ if test $SNAPSHOT = "SNAPSHOT"
         VERSION=$VERSION-"SNAPSHOT"
 fi
 
-if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
-    VERSION=${STACK_NAME}/${VERSION}
+if [ ! -z "$LE_STACK" -a "$LE_STACK" != " " ]; then
+    VERSION=${LE_STACK}/${VERSION}
 fi
 echo $VERSION
 
