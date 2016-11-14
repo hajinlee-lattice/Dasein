@@ -163,7 +163,7 @@ public class LoginResource {
     @ResponseBody
     @ApiOperation(value = "Logout the user")
     public SimpleBooleanResponse logout(HttpServletRequest request) {
-        String token = request.getHeader(request.getHeader(Constants.AUTHORIZATION));
+        String token = request.getHeader(Constants.AUTHORIZATION);
         if (StringUtils.isNotEmpty(token)) {
             sessionService.logout(new Ticket(token));
         }
