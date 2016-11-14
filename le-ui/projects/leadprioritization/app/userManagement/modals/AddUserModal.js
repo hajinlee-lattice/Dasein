@@ -42,12 +42,14 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
     if (currentLevel && currentLevel.ordinal == 4) {
         $scope.levelsToSelect = _.union($scope.levelsToSelect, [
+            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
             RightsUtility.accessLevel.INTERNAL_ADMIN.name,
             RightsUtility.accessLevel.SUPER_ADMIN.name
         ]);
     } else if (currentLevel && currentLevel.ordinal == 3) {
         $scope.levelsToSelect = _.union($scope.levelsToSelect, [
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.INTERNAL_ADMIN.name
         ]);
     }
 
