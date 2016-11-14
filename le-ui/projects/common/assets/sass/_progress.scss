@@ -496,6 +496,7 @@ Wizard Steps
 			&.success .load-data, &.success .match-cloud, &.success .building-model, &.success .scoring-training-set,
 			&.error .load-data, &.error .match-cloud, &.error .building-model, &.error .scoring-training-set {
 				padding-left: 25px;
+				padding-top: 21px;
 				background-size: 18px;
 			}
 			.load-data {
@@ -537,6 +538,9 @@ Wizard Steps
 				.scoring-training-set {
 				    background-image: url("/assets/images/ico-status-scoring-failed.png");
 				}
+			}
+			.fa-check {
+				padding-top: 10px;
 			}
 		}
 	}
