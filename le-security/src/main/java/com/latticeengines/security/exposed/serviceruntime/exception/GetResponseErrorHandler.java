@@ -51,7 +51,11 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             String message = node.get("errorMsg").asText();
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
-            return false;
+            if (body.contains("504 Gateway Time-out")) {
+                exception = new RemoteLedpException(body, status, LedpCode.LEDP_00002, "504 Gateway Time-out");
+            } else {
+                return false;
+            }
         }
         throw exception;
     }
