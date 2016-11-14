@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +43,9 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private MetadataColumnService<ExternalColumn> externalColumnService;
 
     private ConcurrentMap<Predefined, ColumnSelection> predefinedSelectionMap = new ConcurrentHashMap<>();
+
+    @Value("${datacloud.match.latest.rts.cache.version:1.0.0}")
+    private String latstRtsCache;
 
     @Autowired
     @Qualifier("taskScheduler")
@@ -82,7 +86,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         Map<String, Set<String>> partitionColumnMap = new HashMap<>();
         for (Column column : selection.getColumns()) {
             String colId = column.getExternalColumnId();
-            ExternalColumn col = externalColumnService.getMetadataColumn(colId, getCurrentVersion(null));
+            ExternalColumn col = externalColumnService.getMetadataColumn(colId, latstRtsCache);
             String partition = col.getTablePartition();
             if (partitionColumnMap.containsKey(partition)) {
                 partitionColumnMap.get(partition).add(col.getDefaultColumnName());

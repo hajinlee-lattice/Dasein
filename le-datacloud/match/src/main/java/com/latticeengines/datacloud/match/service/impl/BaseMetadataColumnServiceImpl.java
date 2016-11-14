@@ -91,7 +91,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
 
     @Override
     @Trace
-    @MatchStep
+    @MatchStep(threshold = 100L)
     public E getMetadataColumn(String columnId, String dataCloudVersion) {
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
         if (!whiteColumnCaches.containsKey(dataCloudVersion)
