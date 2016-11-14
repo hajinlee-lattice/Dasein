@@ -208,15 +208,12 @@ angular.module('app.modelquality.controller.PipelineCtrl', [
     }
 
     function isValidPropDataConfig() {
-        valid = false;
-
         for (var i = 0; i < vm.propDataConfigs.length; i++) {
             if (vm.analyticPipeline.prop_data_name === vm.propDataConfigs[i].name) {
-                valid = true;
-                break;
+                return true;
             }
         }
 
-        return valid;
+        return false;
     }
 });
