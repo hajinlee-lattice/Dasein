@@ -195,6 +195,7 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/datacloud/controller/DataCloudRootCtrl.js',
                         '<%= app.dir %>/app/datacloud/service/MetadataSrv.js',
                         '<%= app.dir %>/app/datacloud/metadata/controller/MetadataCtrl.js',
+                        '<%= app.dir %>/app/datacloud/metadata2/controller/Metadata2Ctrl.js',
                         '<%= app.dir %>/app/app.js'
                     ]
                 }
