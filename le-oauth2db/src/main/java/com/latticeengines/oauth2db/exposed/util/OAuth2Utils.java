@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -108,6 +109,7 @@ public class OAuth2Utils {
         resource.setClientId(clientId);
 
         resource.setGrantType("password");
+        authHostPort = authHostPort.endsWith("/") ? authHostPort.substring(0, authHostPort.length() - 1) : authHostPort;
         resource.setAccessTokenUri(authHostPort + "/oauth/token");
 
         DefaultAccessTokenRequest accessTokenRequest = new DefaultAccessTokenRequest();
@@ -121,6 +123,7 @@ public class OAuth2Utils {
         }
         OAuth2ClientContext context = new DefaultOAuth2ClientContext(accessTokenRequest);
         OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);
+        newRestTemplate.setRequestFactory(HttpClientUtils.getSslBlindRequestFactory());
         return newRestTemplate;
     }
 

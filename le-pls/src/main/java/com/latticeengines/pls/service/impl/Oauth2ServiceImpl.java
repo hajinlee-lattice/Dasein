@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,9 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
+    @Value("${common.playmaker.url}")
+    protected String playmakerUrl;
+
     @Override
     public String createAPIToken(String tenantId) {
         return oauth2RestApiProxy.createAPIToken(tenantId);
@@ -47,7 +51,7 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
         OAuth2RestTemplate oAuth2RestTemplate = null;
 
         if (StringUtils.isEmpty(appId)) {
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2RestApiProxy.getRestApiHostPort(), user.getUserId(),
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(playmakerUrl, user.getUserId(),
                     user.getPassword(), CLIENT_ID_LP);
         } else {
             oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, CLIENT_ID_LP, appId);

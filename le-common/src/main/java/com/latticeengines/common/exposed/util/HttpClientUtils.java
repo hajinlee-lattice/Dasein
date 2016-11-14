@@ -46,6 +46,10 @@ public class HttpClientUtils {
                 .build();
     }
 
+    public static HttpComponentsClientHttpRequestFactory getSslBlindRequestFactory() {
+        return SSL_BLIND_HC_FACTORY;
+    }
+
     private static PoolingHttpClientConnectionManager constructPoolingConnectionMgr(
             SSLConnectionSocketFactory sslSocketFactory) {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()

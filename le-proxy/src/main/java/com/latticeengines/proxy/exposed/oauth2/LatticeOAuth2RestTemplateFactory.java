@@ -2,7 +2,7 @@ package com.latticeengines.proxy.exposed.oauth2;
 
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
@@ -17,12 +17,11 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 @Component
 public class LatticeOAuth2RestTemplateFactory {
 
-    @Autowired
-    private Oauth2RestApiProxy oauth2RestApiProxy;
+    @Value("${common.playmaker.url}")
+    private String playmakerUrl;
 
     public OAuth2RestTemplate getOAuth2RestTemplate(OAuthUser oAuthUser, String clientId, String appId) {
-        String authHostPort = oauth2RestApiProxy.getRestApiHostPort();
-        return getOAuth2RestTemplate(oAuthUser, clientId, appId, authHostPort);
+        return getOAuth2RestTemplate(oAuthUser, clientId, appId, playmakerUrl);
     }
 
     public OAuth2RestTemplate getOAuth2RestTemplate(OAuthUser oAuthUser, String clientId, String appId,
