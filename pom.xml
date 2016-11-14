@@ -64,5 +64,6 @@
         <module>le-modelquality</module>
         <module>le-saml</module>
         <module>le-actors</module>
+        <module>le-sqoop</module>
     </modules>
 </project>

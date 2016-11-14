@@ -50,7 +50,7 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
             String message = node.get("errorMsg").asText();
 
-            //TODo: temporary workaround. After finding out the root cause of json truncation, we should remove this.
+            //TODO: temporary workaround. After finding out the root cause of json truncation, we should remove this.
             if (message.contains("Could not read JSON: Unexpected end-of-input in VALUE_STRING")
                     || message.contains("Could not read JSON: Unexpected end-of-input in character escape sequence")) {
                 throw new RuntimeException("Seems JSON IO was truncated: " + body);
