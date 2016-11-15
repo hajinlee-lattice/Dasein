@@ -22,10 +22,12 @@ import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.newrelic.api.agent.Trace;
 
-public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
+public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
+        implements MetadataColumnService<E> {
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
 
@@ -41,7 +43,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             public void run() {
                 loadCache();
             }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(13)), TimeUnit.MINUTES.toMillis(13));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(13)),
+                TimeUnit.MINUTES.toMillis(13));
     }
 
     @Override
@@ -52,6 +55,16 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     @Override
     public List<E> scan(String dataCloudVersion) {
         return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+    }
+
+    @Override
+    public void updateMetadataColumns(String dataCloudVersion,
+            List<ColumnMetadata> columnMetadatas) {
+        List<E> metadataColumns = new ArrayList<>();
+        for (ColumnMetadata columnMetadata : columnMetadatas) {
+            metadataColumns.add(updateSavedMetadataColumn(dataCloudVersion, columnMetadata));
+        }
+        getMetadataColumnEntityMgr().updateMetadataColumns(dataCloudVersion, metadataColumns);
     }
 
     @Override
@@ -75,7 +88,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
                 }
             }
         } else {
-            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
+            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache()
+                    .get(dataCloudVersion);
             for (String columnId : columnIds) {
                 if (blackColumnCache != null && blackColumnCache.contains(columnId)) {
                     toReturn.add(null);
@@ -128,7 +142,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             return null;
         }
         if (column == null) {
-            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache().get(dataCloudVersion);
+            ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache()
+                    .get(dataCloudVersion);
             if (blackColumnCache == null) {
                 blackColumnCache = new ConcurrentSkipListSet<String>();
                 getBlackColumnCache().put(dataCloudVersion, blackColumnCache);
@@ -161,7 +176,8 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             synchronized (getBlackColumnCache()) {
                 getBlackColumnCache().clear();
             }
-            log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
+            log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version="
+                    + dataCloudVersion);
         }
     }
 
@@ -172,5 +188,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     abstract protected ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
 
     abstract protected List<String> getAllVersions();
+
+    abstract protected E updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata);
 
 }

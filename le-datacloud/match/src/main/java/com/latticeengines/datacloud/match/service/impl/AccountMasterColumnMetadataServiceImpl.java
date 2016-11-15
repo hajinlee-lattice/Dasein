@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<AccountMasterColumn> {
 
     @Resource(name = "accountMasterColumnService")
-    private MetadataColumnService<AccountMasterColumn> accountmasterColumnService;
+    private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -26,7 +26,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
 
     @Override
     protected MetadataColumnService<AccountMasterColumn> getMetadataColumnService() {
-        return accountmasterColumnService;
+        return accountMasterColumnService;
     }
 
     @Override

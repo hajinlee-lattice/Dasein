@@ -207,22 +207,22 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
-    private String getApprovedUsage() {
+    public String getApprovedUsage() {
         return approvedUsage;
     }
 
     @JsonIgnore
-    private void setApprovedUsage(String approvedUsage) {
-        this.approvedUsage = approvedUsage;
+    public void setApprovedUsage(ApprovedUsage approvedUsage) {
+        this.approvedUsage = approvedUsage.getName();
     }
 
     @JsonIgnore
-    private String getGroups() {
+    public String getGroups() {
         return groups;
     }
 
     @JsonIgnore
-    private void setGroups(String groups) {
+    public void setGroups(String groups) {
         this.groups = groups;
     }
 
@@ -247,7 +247,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
-    private String getDiscretizationStrategy() {
+    public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
 
@@ -340,7 +340,8 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setMatchDestination(getMatchDestination());
 
         if (approvedUsages != null) {
-            if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
+            if (approvedUsages.contains(ApprovedUsage.MODEL)
+                    || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
                     || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
                 metadata.setCanModel(true);
                 if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)

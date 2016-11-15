@@ -19,15 +19,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.newrelic.api.agent.Trace;
 
-public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> implements ColumnMetadataService {
+public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
+        implements ColumnMetadataService {
 
     private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
 
@@ -36,6 +40,10 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Autowired
     @Qualifier("taskScheduler")
     private ThreadPoolTaskScheduler scheduler;
+
+    // Not used for now, will use when figured out logic
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     protected abstract boolean isLatestVersion(String dataCloudVersion);
 
@@ -49,11 +57,13 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
             public void run() {
                 loadCache();
             }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)), TimeUnit.MINUTES.toMillis(11));
+        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(11)),
+                TimeUnit.MINUTES.toMillis(11));
     }
 
     @Override
-    public List<ColumnMetadata> fromPredefinedSelection(Predefined predefined, String dataCloudVersion) {
+    public List<ColumnMetadata> fromPredefinedSelection(Predefined predefined,
+            String dataCloudVersion) {
         if (isLatestVersion(dataCloudVersion)) {
             return predefinedMetaDataCache.get(predefined);
         } else {
@@ -64,8 +74,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     @Override
     @Trace
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
-        List<E> metadataColumns = getMetadataColumnService().getMetadataColumns(selection.getColumnIds(),
-                dataCloudVersion);
+        List<E> metadataColumns = getMetadataColumnService()
+                .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);
 
         List<ColumnMetadata> metadatas = toColumnMetadata(metadataColumns);
         for (int i = 0; i < metadatas.size(); i++) {
@@ -74,7 +84,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
             if (StringUtils.isNotEmpty(overwrittenName)) {
                 metadata.setColumnName(overwrittenName);
             } else if (StringUtils.isEmpty(metadata.getColumnName())) {
-                throw new IllegalArgumentException(String.format("Cannot find column name for column No.%d", i));
+                throw new IllegalArgumentException(
+                        String.format("Cannot find column name for column No.%d", i));
             }
         }
         return metadatas;
@@ -82,8 +93,10 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
     abstract protected MetadataColumnService<E> getMetadataColumnService();
 
-    private List<ColumnMetadata> fromMetadataColumnService(Predefined selectionName, String dataCloudVersion) {
-        List<E> columns = getMetadataColumnService().findByColumnSelection(selectionName, dataCloudVersion);
+    private List<ColumnMetadata> fromMetadataColumnService(Predefined selectionName,
+            String dataCloudVersion) {
+        List<E> columns = getMetadataColumnService().findByColumnSelection(selectionName,
+                dataCloudVersion);
         return toColumnMetadata(columns);
     }
 
@@ -94,8 +107,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 ColumnMetadata columnMetadata = column.toColumnMetadata();
                 columnMetadataList.add(columnMetadata);
             } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to extract metadata from MetadataColumn [" + column.getColumnId() + "]", e);
+                throw new RuntimeException("Failed to extract metadata from MetadataColumn ["
+                        + column.getColumnId() + "]", e);
             }
         }
         return columnMetadataList;
@@ -107,14 +120,23 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public Schema getAvroSchema(Predefined selectionName, String recordName, String dataCloudVersion) {
-        List<ColumnMetadata> columnMetadatas = fromPredefinedSelection(selectionName, dataCloudVersion);
+    public void updateColumnMetadatas(String dataCloudVersion,
+            List<ColumnMetadata> columnMetadatas) {
+        validateColumnMetadatas(dataCloudVersion, columnMetadatas);
+        getMetadataColumnService().updateMetadataColumns(dataCloudVersion, columnMetadatas);
+    }
+
+    @Override
+    public Schema getAvroSchema(Predefined selectionName, String recordName,
+            String dataCloudVersion) {
+        List<ColumnMetadata> columnMetadatas = fromPredefinedSelection(selectionName,
+                dataCloudVersion);
         return getAvroSchemaFromColumnMetadatas(columnMetadatas, recordName, dataCloudVersion);
     }
 
     @Override
-    public Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName,
-            String dataCloudVersion) {
+    public Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas,
+            String recordName, String dataCloudVersion) {
         SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(recordName);
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
@@ -122,7 +144,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
             String fieldName = columnMetadata.getColumnName();
             fieldBuilder = fieldAssembler.name(StringUtils.strip(fieldName));
             fieldBuilder = fieldBuilder.prop("Tags", "[External]");
-            fieldBuilder = fieldBuilder.prop("ApprovedUsage", columnMetadata.getApprovedUsageString());
+            fieldBuilder = fieldBuilder.prop("ApprovedUsage",
+                    columnMetadata.getApprovedUsageString());
             if (StringUtils.isNotEmpty(columnMetadata.getDisplayName())) {
                 fieldBuilder = fieldBuilder.prop("DisplayName", columnMetadata.getDisplayName());
             }
@@ -130,22 +153,40 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
                 fieldBuilder = fieldBuilder.prop("Description", columnMetadata.getDescription());
             }
             if (columnMetadata.getCategory() != null) {
-                fieldBuilder = fieldBuilder.prop("Category", columnMetadata.getCategory().getName());
+                fieldBuilder = fieldBuilder.prop("Category",
+                        columnMetadata.getCategory().getName());
             }
             if (columnMetadata.getFundamentalType() != null) {
-                fieldBuilder = fieldBuilder.prop("FundamentalType", columnMetadata.getFundamentalType().getName());
+                fieldBuilder = fieldBuilder.prop("FundamentalType",
+                        columnMetadata.getFundamentalType().getName());
             }
             if (columnMetadata.getStatisticalType() != null) {
-                fieldBuilder = fieldBuilder.prop("StatisticalType", columnMetadata.getStatisticalType().getName());
+                fieldBuilder = fieldBuilder.prop("StatisticalType",
+                        columnMetadata.getStatisticalType().getName());
             }
             if (columnMetadata.getDiscretizationStrategy() != null) {
-                fieldBuilder = fieldBuilder.prop("DiscretizationStrategy", columnMetadata.getDiscretizationStrategy());
+                fieldBuilder = fieldBuilder.prop("DiscretizationStrategy",
+                        columnMetadata.getDiscretizationStrategy());
             }
             fieldBuilder = fieldBuilder.prop("Nullable", "true");
             Schema.Type type = getAvroTypeDataType(columnMetadata);
             AvroUtils.constructFieldWithType(fieldAssembler, fieldBuilder, type);
         }
         return fieldAssembler.endRecord();
+    }
+
+    private void validateColumnMetadatas(String dataCloudVersion,
+            List<ColumnMetadata> columnMetadatas) {
+        for (ColumnMetadata columnMetadata : columnMetadatas) {
+            if (columnMetadata.isCanBis()
+                    && (!columnMetadata.isCanInsights() || !columnMetadata.isCanModel())) {
+                throw new LedpException(LedpCode.LEDP_25026,
+                        new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
+            } else if (columnMetadata.isCanInsights() && !columnMetadata.isCanModel()) {
+                throw new LedpException(LedpCode.LEDP_25026,
+                        new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
+            }
+        }
     }
 
     private Schema.Type getAvroTypeDataType(ColumnMetadata columnMetadata) {
@@ -166,7 +207,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
         try {
             return AvroUtils.convertSqlTypeToAvro(dataType);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to convert to avro type from sql server data type " + dataType, e);
+            throw new RuntimeException(
+                    "Failed to convert to avro type from sql server data type " + dataType, e);
         }
     }
 
@@ -175,7 +217,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn> im
 
         for (Predefined selection : Predefined.values()) {
             try {
-                predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection, getLatestVersion()));
+                predefinedMetaDataCache.put(selection,
+                        fromMetadataColumnService(selection, getLatestVersion()));
             } catch (Exception e) {
                 log.error("Failed to load Cache! Type=" + selection, e);
             }

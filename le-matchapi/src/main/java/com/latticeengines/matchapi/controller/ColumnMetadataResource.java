@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,7 +41,8 @@ public class ColumnMetadataResource {
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         try {
-            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+            ColumnMetadataService columnMetadataService = beanDispatcher
+                    .getColumnMetadataService(dataCloudVersion);
             return columnMetadataService.fromPredefinedSelection(selectName, dataCloudVersion);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25006, e, new String[] { selectName.getName() });
@@ -56,9 +58,10 @@ public class ColumnMetadataResource {
 
     @RequestMapping(value = "/versions/latest", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get latest approved data cloud version. If query parameter compatibleto is provided. " +
-            "Will return latest approved version under the same major version.")
-    public DataCloudVersion latestVersion(@RequestParam(value = "compatibleto", required = false) String compatibleToVersion) {
+    @ApiOperation(value = "Get latest approved data cloud version. If query parameter compatibleto is provided. "
+            + "Will return latest approved version under the same major version.")
+    public DataCloudVersion latestVersion(
+            @RequestParam(value = "compatibleto", required = false) String compatibleToVersion) {
         if (StringUtils.isEmpty(compatibleToVersion)) {
             compatibleToVersion = versionEntityMgr.currentApprovedVersion().getVersion();
         }
@@ -68,9 +71,21 @@ public class ColumnMetadataResource {
     @RequestMapping(value = "/", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
-    public List<ColumnMetadata> getAllColumns(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+    public List<ColumnMetadata> getAllColumns(
+            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        ColumnMetadataService columnMetadataService = beanDispatcher
+                .getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.findAll(dataCloudVersion);
+    }
+
+    @RequestMapping(value = "/", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ApiOperation(value = "Update the columns for a specific cloud version")
+    public void updateColumnsForDataCloudVersion(
+            @RequestParam(value = "datacloudversion", required = true) String dataCloudVersion,
+            @RequestBody List<ColumnMetadata> columnMetadatas) {
+        ColumnMetadataService columnMetadataService = beanDispatcher
+                .getColumnMetadataService(dataCloudVersion);
+        columnMetadataService.updateColumnMetadatas(dataCloudVersion, columnMetadatas);
     }
 
 }

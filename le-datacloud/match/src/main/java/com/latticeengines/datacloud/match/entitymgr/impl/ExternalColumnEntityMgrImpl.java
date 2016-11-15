@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,20 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
 
     @Resource(name="externalColumnDao")
     private ExternalColumnDao externalColumnDao;
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @VisibleForTesting
+    public void create(ExternalColumn externalColumn) {
+        externalColumnDao.create(externalColumn);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    @VisibleForTesting
+    public void deleteByColumnIdAndDataCloudVersion(String columnId, String dataCloudVersion) {
+        // no-op
+    }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -42,6 +57,13 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ExternalColumn findById(String externalColumnId, String dataCloudVersion) {
         return externalColumnDao.findByField("ExternalColumnID", externalColumnId);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
+    public void updateMetadataColumns(String dataCloudVersion, List<ExternalColumn> metadataColumns) {
+        // no-op
+        return;
     }
 
 }

@@ -367,6 +367,7 @@ public enum LedpCode {
     LEDP_25023("Name and CountryCode are required in DnB realtime entity matching"), //
     LEDP_25024("Email is required in DnB realtime email matching"), //
     LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
+    LEDP_25026("Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

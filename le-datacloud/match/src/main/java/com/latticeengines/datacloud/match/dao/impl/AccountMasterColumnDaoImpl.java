@@ -11,8 +11,9 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryI
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 
 @Component("accountMasterColumnDao")
-public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<AccountMasterColumn> implements
-        AccountMasterColumnDao {
+public class AccountMasterColumnDaoImpl
+        extends BaseDaoWithAssignedSessionFactoryImpl<AccountMasterColumn>
+        implements AccountMasterColumnDao {
 
     @Override
     protected Class<AccountMasterColumn> getEntityClass() {
@@ -21,9 +22,24 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
 
     @SuppressWarnings("unchecked")
     @Override
+    public void deleteByIdByDataCloudVersion(String amColumnId, String dataCloudVersion) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<AccountMasterColumn> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "delete from %s where amColumnId = :amColumnId and dataCloudVersion = :dataCloudVersion",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("amColumnId", amColumnId);
+        query.setParameter("dataCloudVersion", dataCloudVersion);
+        query.executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<AccountMasterColumn> findByTag(String tag, String dataCloudVersion) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("from %s where groups like :tag and dataCloudVersion = :dataCloudVersion",
+        String queryStr = String.format(
+                "from %s where groups like :tag and dataCloudVersion = :dataCloudVersion",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
@@ -36,8 +52,8 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
     public AccountMasterColumn findById(String amColumnId, String dataCloudVersion) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format(
-                "from %s where amColumnId = :amColumnId and dataCloudVersion = :dataCloudVersion", getEntityClass()
-                        .getSimpleName());
+                "from %s where amColumnId = :amColumnId and dataCloudVersion = :dataCloudVersion",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("amColumnId", amColumnId);
         query.setParameter("dataCloudVersion", dataCloudVersion);
