@@ -168,14 +168,15 @@ class ECSStack(Stack):
         outputs = {}
         for n in xrange(instances):
             name = "EC2Instance%d" % (n + 1)
-            subnet = SUBNETS[(seed + n) % 3]
+            subnet_idx = (seed + n) % 3
+            subnet = SUBNETS[subnet_idx]
             ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet) \
                 .add_tag("Name", { "Ref" : "AWS::StackName" })
 
-            if n < len(ips):
-                ip = ips[n]
+            if subnet_idx < len(ips):
+                ip = ips[subnet_idx]
                 ec2.set_private_ip(ip)
 
             ec2s.append(ec2)
