@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -9,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -126,6 +128,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder transformationGroup(TransformationGroup transformationGroup) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
+            return this;
+        }
+
+        public Builder transformDefinitions(List<TransformDefinition> transforms) {
+            addStandardAttributes.setTransforms(transforms);
             return this;
         }
 

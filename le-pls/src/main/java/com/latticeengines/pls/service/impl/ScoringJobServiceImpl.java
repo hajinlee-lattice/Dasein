@@ -215,14 +215,14 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
 
         String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return scoreWorkflowSubmitter.submit(modelSummary.getId(), modelSummary.getTrainingTableName(),
+        return scoreWorkflowSubmitter.submit(modelSummary,
                 "Training Data", TransformationGroup.fromName(transformationGroupName)).toString();
     }
 
     private String scoreTestingData(String modelId, String fileName) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName,
+        return importMatchAndScoreWorkflowSubmitter.submit(modelSummary, fileName,
                 TransformationGroup.fromName(transformationGroupName)).toString();
     }
 

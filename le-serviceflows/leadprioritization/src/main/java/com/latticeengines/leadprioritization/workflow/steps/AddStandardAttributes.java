@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -19,9 +18,8 @@ public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConf
         AddStandardAttributesConfiguration configuration = getConfiguration();
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_with_std_attrib");
-        TransformationGroup transformationGroup = configuration.getTransformationGroup();
         configuration.setDataFlowParams(DataFlowFactory.getAddStandardAttributesParameters( //
-                eventTable.getName(), transformationGroup, configuration.getRuntimeParams()));
+                eventTable.getName(), configuration.getTransforms(), configuration.getRuntimeParams()));
     }
 
     @Override

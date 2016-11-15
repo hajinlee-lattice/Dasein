@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -7,6 +8,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -77,7 +79,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             scoreWorkflowConfigurationBuilder.modelId(modelId);
             return this;
         }
-        
+
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             scoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
             return this;
@@ -107,7 +109,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             scoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
-        
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             scoreWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
             return this;
@@ -140,6 +142,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder transformationGroup(TransformationGroup transformationGroup) {
             scoreWorkflowConfigurationBuilder.transformationGroup(transformationGroup);
+            return this;
+        }
+
+        public Builder transformDefinitions(List<TransformDefinition> transforms) {
+            scoreWorkflowConfigurationBuilder.transformDefinitions(transforms);
             return this;
         }
 

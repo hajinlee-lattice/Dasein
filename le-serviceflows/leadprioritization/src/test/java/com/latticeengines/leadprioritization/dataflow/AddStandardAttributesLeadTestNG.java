@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
@@ -27,7 +28,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
     @Test(groups = "functional")
     public void testAgainstStandardTransform() {
         AddStandardAttributesParameters parameters = new AddStandardAttributesParameters("EventTable",
-                TransformationGroup.STANDARD);
+                TransformationPipeline.getTransforms(TransformationGroup.STANDARD));
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Title_Level");
@@ -61,7 +62,7 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
     @Test(groups = "functional")
     public void testAgainstStandardAndPocTransform() {
         AddStandardAttributesParameters parameters = new AddStandardAttributesParameters("EventTable",
-                TransformationGroup.ALL);
+                TransformationPipeline.getTransforms(TransformationGroup.ALL));
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Title_Level");

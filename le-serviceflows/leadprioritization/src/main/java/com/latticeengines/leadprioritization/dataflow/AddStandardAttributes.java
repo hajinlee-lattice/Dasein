@@ -1,7 +1,6 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import java.util.Set;
-
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
 
         fixTransformArgumentsAndMetadata(eventTable);
 
-        Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
+        List<TransformDefinition> definitions = parameters.transforms;
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);

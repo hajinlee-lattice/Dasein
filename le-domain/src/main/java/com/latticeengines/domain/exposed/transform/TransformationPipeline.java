@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.transform;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
@@ -231,12 +234,12 @@ public class TransformationPipeline {
         stdPhoneEntropy.outputDisplayName = "Entropy of Phone Number";
     }
 
-    public static Set<TransformDefinition> getTransforms(TransformationGroup group) {
+    public static List<TransformDefinition> getTransforms(TransformationGroup group) {
         switch (group) {
         case NONE:
-            return new HashSet<>();
+            return Collections.emptyList();
         case ALL:
-            return ImmutableSet.<TransformDefinition>builder()//
+            return ImmutableList.<TransformDefinition> builder()//
                     .addAll(getStandardTransforms()) //
                     .addAll(getPocTransforms()).build();
         case POC:
@@ -247,8 +250,8 @@ public class TransformationPipeline {
         }
     }
 
-    public static Set<TransformDefinition> getStandardTransforms() {
-        Set<TransformDefinition> stdTransformDefinitions = ImmutableSet.<TransformDefinition>builder()
+    public static List<TransformDefinition> getStandardTransforms() {
+        List<TransformDefinition> stdTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbDsCompanynameEntropy) //
                 .add(stdLengthTitle) //
                 .add(stdLengthCompanyName) //
@@ -275,8 +278,8 @@ public class TransformationPipeline {
         return stdTransformDefinitions;
     }
 
-    public static Set<TransformDefinition> getPocTransforms() {
-        Set<TransformDefinition> pocTransformDefinitions = ImmutableSet.<TransformDefinition>builder()
+    public static List<TransformDefinition> getPocTransforms() {
+        List<TransformDefinition> pocTransformDefinitions = ImmutableList.<TransformDefinition> builder()
                 .add(stdVisidbEmailIsInvalid) //
                 .add(stdVisidbEmailLength) //
                 .add(stdVisidbEmailPrefixLength) //

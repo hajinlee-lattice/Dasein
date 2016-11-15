@@ -72,18 +72,11 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
                 "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
                         + "/models/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib/");
-        URL eventtableDatacompositionUrl = getClass()
-                .getClassLoader()
-                .getResource(
-                        RESOURCE_BASE
-                                + "/models/AccountModel/20a331e9-f18b-4358-8023-e44a36cb17dd/1459178858615_0234/enhancements/datacomposition.json");
-        HdfsUtils
-                .copyFromLocalToHdfs(
-                        yarnConfiguration,
-                        eventtableDatacompositionUrl.getPath(),
-                        "/user/s-analytics/customers/"
-                                + DEMO_CUSTOMERSPACE.toString()
-                                + "/data/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib-Event-Metadata/datacomposition.json");
+        URL eventtableDatacompositionUrl = getClass().getClassLoader().getResource(RESOURCE_BASE
+                + "/models/AccountModel/20a331e9-f18b-4358-8023-e44a36cb17dd/1459178858615_0234/enhancements/datacomposition.json");
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, eventtableDatacompositionUrl.getPath(),
+                "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
+                        + "/data/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib-Event-Metadata/datacomposition.json");
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -127,7 +120,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
 
     private void score(String modelId, String tableToScore) throws Exception {
         ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
-                tableToScore, TransformationGroup.STANDARD);
+                new Table(), tableToScore, TransformationGroup.STANDARD);
         WorkflowExecutionId workflowId = workflowService.start(scoreWorkflow.name(), configuration);
 
         waitForCompletion(workflowId);

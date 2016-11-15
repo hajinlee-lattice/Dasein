@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -41,29 +42,39 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String tableToScore, String sourceDisplayName,
+    public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,
             TransformationGroup transformationGroup) {
-        log.info(String.format(
-                "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s",
-                modelId, tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore,
-                sourceDisplayName, transformationGroup);
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                tableToScore) == null) {
-            throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
+        String modelId = modelSummary.getId();
+        String tableToScoreName = modelSummary.getTrainingTableName();
+
+        log.info(String.format(
+                "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
+                tableToScoreName, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
+
+        Table tableToScore = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScoreName);
+        if (tableToScore == null) {
+            throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScoreName });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId,
-                MultiTenantContext.getCustomerSpace().toString())) {
+        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
+
+        Table modelingEventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                modelSummary.getEventTableName());
+        if (modelingEventTable == null) {
+            throw new LedpException(LedpCode.LEDP_18098, new String[] { modelSummary.getEventTableName() });
+        }
+
+        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScoreName, modelingEventTable,
+                sourceDisplayName, transformationGroup);
 
         return workflowJobService.submit(configuration);
     }
 
-    public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
-            String sourceDisplayName, TransformationGroup transformationGroup) {
+    public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScoreName,
+            Table modelingEventTable, String sourceDisplayName, TransformationGroup transformationGroup) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
@@ -73,8 +84,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
         ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
         if (summary != null) {
-            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    summary.getDisplayName());
+            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, summary.getDisplayName());
         }
         Predefined selection = Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
@@ -95,19 +105,20 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .modelId(modelId) //
-                .inputTableName(tableToScore) //
-                .skipMatchingStep(summary.getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
+                .inputTableName(tableToScoreName) //
+                .skipMatchingStep(summary.getModelSummaryConfiguration()
+                        .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
-                .dataCloudVersion(dataCloudVersion)
-                .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename(
-                        "/" + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
-                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
+                .dataCloudVersion(dataCloudVersion).outputFileFormat(ExportFormat.CSV) //
+                .outputFilename("/"
+                        + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
+                        + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
+                .transformDefinitions(modelingEventTable.getRealTimeTransformationMetadata().getValue())//
                 .build();
     }
 }

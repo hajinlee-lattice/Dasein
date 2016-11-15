@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.modeling.factory;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -9,7 +10,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesPar
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class DataFlowFactory {
 
@@ -34,11 +35,11 @@ public class DataFlowFactory {
 
         log.info("Successfully configured the DataFlow");
     }
-    
+
     public static AddStandardAttributesParameters getAddStandardAttributesParameters(String eventTableName, //
-            TransformationGroup transformationGroup, Map<String, String> runTimeParams) {
-        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName, transformationGroup);
-        
+            List<TransformDefinition> transforms, Map<String, String> runTimeParams) {
+        AddStandardAttributesParameters params = new AddStandardAttributesParameters(eventTableName, transforms);
+
         if (runTimeParams != null && runTimeParams.containsKey(DATAFLOW_DO_SORT_FOR_ATTR_FLOW)) {
             params.doSort = true;
         } else {
