@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -78,14 +78,13 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     @Autowired
     private WorkflowProxy workflowProxy;
 
-    @Autowired
-    private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
-
     private Long jobId;
 
     private String applicationId;
 
     private static final int TOTAL_QUALIFIED_LINES = 1126;
+
+    private RestTemplate restTemplate;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -94,6 +93,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         tenantToAttach = testBed.getMainTestTenant();
         log.info("Test environment setup finished.");
         fileName = "Lattice_Relaunch_Small_NO_ID.csv";
+        restTemplate = testBed.getRestTemplate();
     }
 
     @SuppressWarnings("rawtypes")
@@ -226,7 +226,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
+        ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
                         TEST_FILE_DISPLAY_NAME),
                 requestEntity, ResponseDocument.class);
@@ -239,7 +239,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     public void scoreTestingData() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
                 sourceFile.getName()));
-        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+        applicationId = restTemplate.postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE", getRestAPIHostPort(), modelId,
                         sourceFile.getName()), //
                 null, String.class);
@@ -257,7 +257,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = selfServiceModeling.getRestTemplate()
+            List<Object> raw = restTemplate
                     .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
@@ -293,7 +293,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
     public void poll() {
         JobStatus terminal;
         while (true) {
-            Job job = selfServiceModeling.getRestTemplate().getForObject(
+            Job job = restTemplate.getForObject(
                     String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
             assertNotNull(job);
             jobId = job.getId();
@@ -309,11 +309,11 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     @Test(groups = "deployment.lp", dependsOnMethods = "poll")
     public void downloadCsv() throws IOException {
-        selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
+        ResponseEntity<byte[]> response = restTemplate.exchange(
                 String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET,
                 entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
@@ -321,7 +321,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
         assertTrue(results.length() > 0);
         CSVParser parser = null;
-        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStream is = new ByteArrayInputStream(response.getBody());
         InputStreamReader reader = new InputStreamReader(is);
         CSVFormat format = LECSVFormat.format;
         try {

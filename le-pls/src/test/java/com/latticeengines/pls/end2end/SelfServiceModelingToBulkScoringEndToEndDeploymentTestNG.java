@@ -48,7 +48,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -373,7 +372,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));
         assertTrue(results.length() > 0);
         CSVParser parser = null;
-        InputStream is = GzipUtils.decompressStream(new ByteArrayInputStream(response.getBody()));
+        InputStream is = new ByteArrayInputStream(response.getBody());
         InputStreamReader reader = new InputStreamReader(is);
         CSVFormat format = LECSVFormat.format;
         try {
