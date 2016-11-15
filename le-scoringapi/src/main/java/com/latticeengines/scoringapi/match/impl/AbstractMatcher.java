@@ -234,7 +234,7 @@ public abstract class AbstractMatcher implements Matcher {
                 record.put(fieldName, fieldValue);
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;
-                    if (isPublicDomain) {
+                    if (Boolean.TRUE == isPublicDomain) {
                         warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
                                 new String[] { Strings.nullToEmpty(outputRecord.getPreMatchDomain()) }));
                     }
