@@ -27,6 +27,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private String lookupRequestId;
 
+    public void copyMatchResult(DnBMatchContext result) {
+        duns = result.getDuns();
+        dnbCode = result.getDnbCode();
+        confidenceCode = result.getConfidenceCode();
+        matchGrade = result.getMatchGrade();
+        lookupRequestId = result.getLookupRequestId();
+    }
+
     @MetricFieldGroup
     public NameLocation getInputNameLocation() {
         return inputNameLocation;
@@ -42,6 +50,7 @@ public class DnBMatchContext implements Fact, Dimension {
         inputNameLocation.setCountry(matchKeyTuple.getCountry());
         inputNameLocation.setCountryCode(matchKeyTuple.getCountryCode());
         inputNameLocation.setState(matchKeyTuple.getState());
+        inputNameLocation.setCity(matchKeyTuple.getCity());
         inputNameLocation.setPhoneNumber(matchKeyTuple.getPhoneNumber());
         inputNameLocation.setZipcode(matchKeyTuple.getZipcode());
     }
@@ -118,20 +127,6 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setLookupRequestId(String lookupRequestId) {
         this.lookupRequestId = lookupRequestId;
-    }
-
-    public static class MatchGrade implements Fact {
-
-        private final String rawCode;
-
-        public MatchGrade(String rawCode) {
-            this.rawCode = rawCode;
-        }
-
-        @MetricField(name = "DnBMatchGrade")
-        public String getRawCode() {
-            return rawCode;
-        }
     }
 
 }

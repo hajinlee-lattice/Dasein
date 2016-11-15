@@ -1,34 +1,28 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static org.springframework.http.HttpStatus.OK;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.dnb.DnBAPIType;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component
-public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<MatchKeyTuple>
+public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMatchContext>
         implements DnBRealTimeLookupService {
     private static final Log log = LogFactory.getLog(DnBRealTimeLookupServiceImpl.class);
-
-    private static final String DNB_MATCH_OUTPUT = "DNB_MATCH_OUTPUT";
 
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
@@ -46,140 +40,139 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<Match
     private String authorizationHeader;
 
     @Value("${datacloud.dnb.realtime.duns.jsonpath}")
-    private String dunsJsonPath;
+    private String entityDunsJsonPath;
 
     @Value("${datacloud.dnb.realtime.confidencecode.jsonpath}")
-    private String confidenceCodeJsonPath;
+    private String entityConfidenceCodeJsonPath;
 
     @Value("${datacloud.dnb.realtime.matchgrade.jsonpath}")
-    private String matchGradeJsonPath;
+    private String entityMatchGradeJsonPath;
+
+    @Value("${datacloud.dnb.realtime.email.duns.jsonpath}")
+    private String emailDunsJsonPath;
 
     @Value("${datacloud.dnb.realtime.retry.maxattempts}")
     private int retries;
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-
     @Override
-    public DnBMatchContext realtimeEntityLookup(MatchKeyTuple input) {
-        DnBMatchContext output = new DnBMatchContext();
-        DnBReturnCode returnCode = null;
+    public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
-            DataFlowContext context = executeLookup(input, DnBKeyType.REALTIME);
-            returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
-            if (returnCode != DnBReturnCode.EXPIRED) {
-                if(returnCode == DnBReturnCode.OK || returnCode == DnBReturnCode.DISCARD) {
-                    output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
-                }
-                log.debug("Finished dnb realtime entity lookup request status= " + returnCode);
+            executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
+            if (context.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+                log.debug("DnB realtime entity matching request " + context.getLookupRequestId() + ": Status= "
+                        + context.getDnbCode());
                 break;
             }
             dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
         }
-        output.setDnbCode(returnCode);
-
-        return output;
-    }
-
-    @Override
-    public DnBMatchContext realtimeEmailLookup(MatchKeyTuple input) {
-        DnBMatchContext output = new DnBMatchContext();
-        DnBReturnCode returnCode = null;
-        for (int i = 0; i < retries; i++) {
-            DataFlowContext context = executeEmailLookup(input, DnBKeyType.REALTIME);
-            returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
-            if (returnCode != DnBReturnCode.EXPIRED) {
-                if(returnCode == DnBReturnCode.OK || returnCode == DnBReturnCode.DISCARD) {
-                    output = context.getProperty(DNB_MATCH_OUTPUT, DnBMatchContext.class);
-                }
-                log.debug("Finished dnb realtime email lookup request status=" + returnCode);
-                break;
-            }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
-        }
-
-        output.setDnbCode(returnCode);
-
-        return output;
-    }
-
-    private DataFlowContext executeEmailLookup(MatchKeyTuple input, DnBKeyType keyType) {
-        DataFlowContext context = new DataFlowContext();
-        String token = dnBAuthenticationService.requestToken(keyType);
-        String url = constructEmailLookupUrl(input);
-        try {
-            HttpEntity<String> entity = constructEntity(input, token);
-            ResponseEntity<String> response = sendRequestToDnB(url, entity);
-            parseSucceededResponse(response, context);
-        } catch (HttpClientErrorException ex) {
-            parseDnBHttpError(ex, context);
-        }
-
         return context;
     }
 
-    private String constructEmailLookupUrl(MatchKeyTuple tuple) {
-        return String.format(emailLookupUrlFormat, normalizeString(tuple.getEmail()));
+    @Override
+    public DnBMatchContext realtimeEmailLookup(DnBMatchContext context) {
+        for (int i = 0; i < retries; i++) {
+            executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_EMAIL);
+            if (context.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+                log.debug("DnB realtime email matching request " + context.getLookupRequestId() + ": Status= "
+                        + context.getDnbCode());
+                break;
+            }
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
+        }
+        return context;
     }
 
     @Override
-    protected HttpEntity<String> constructEntity(MatchKeyTuple input, String token) {
+    protected void parseResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
+        switch (apiType) {
+        case REALTIME_ENTITY:
+            context.setDuns((String) retrieveJsonValueFromResponse(entityDunsJsonPath, response));
+            context.setConfidenceCode((Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response));
+            context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response));
+            break;
+        case REALTIME_EMAIL:
+            context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response));
+            break;
+        default:
+            throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
+        }
+        context.setDnbCode(DnBReturnCode.OK);
+        dnbMatchResultValidator.validate(context);
+    }
+    
+    @Override
+    protected void parseError(Exception ex, DnBMatchContext context) {
+        if (ex instanceof HttpClientErrorException) {
+            HttpClientErrorException httpEx = (HttpClientErrorException) ex;
+            if (log.isDebugEnabled()) {
+                log.debug("HttpClientErrorException in DnB realtime request " + context.getLookupRequestId() + ": "
+                        + httpEx.getStatusText());
+            }
+            context.setDnbCode(parseDnBHttpError(httpEx));
+        } else if (ex instanceof LedpException) {
+            LedpException ledpEx = (LedpException) ex;
+            if (log.isDebugEnabled()) {
+                log.debug("LedpException in DnB realtime request " + context.getLookupRequestId() + ": "
+                        + ledpEx.getCode().getMessage());
+            }
+            context.setDnbCode(DnBReturnCode.BAD_REQUEST);
+        } else {
+            log.error("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
+                    + ex.getMessage());
+            ex.printStackTrace();
+            context.setDnbCode(DnBReturnCode.UNKNOWN);
+        }
+
+    }
+
+    @Override
+    protected HttpEntity<String> constructEntity(DnBMatchContext context, String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(authorizationHeader, token);
-        return new HttpEntity<>("", headers);
+        return new HttpEntity<String>("", headers);
     }
 
     @Override
-    protected void parseSucceededResponse(ResponseEntity<String> response, DataFlowContext context) {
-        if (response.getStatusCode() != OK) {
-            context.setProperty(DNB_RETURN_CODE, DnBReturnCode.UNKNOWN);
-            return;
+    protected String constructUrl(DnBMatchContext context, DnBAPIType apiType) {
+        switch (apiType) {
+        case REALTIME_ENTITY:
+            StringBuilder url = new StringBuilder();
+            url.append(realTimeUrlPrefix);
+            if (!StringUtils.isEmpty(context.getInputNameLocation().getName())) {
+                url.append("SubjectName=");
+                url.append(context.getInputNameLocation().getName());
+                url.append("&");
+            } else {
+                throw new LedpException(LedpCode.LEDP_25023);
+            }
+            if (!StringUtils.isEmpty(context.getInputNameLocation().getCountryCode())) {
+                url.append("CountryISOAlpha2Code=");
+                url.append(context.getInputNameLocation().getCountryCode());
+                url.append("&");
+            } else {
+                throw new LedpException(LedpCode.LEDP_25023);
+            }
+            if (!StringUtils.isEmpty(context.getInputNameLocation().getCity())) {
+                url.append("PrimaryTownName=");
+                url.append(context.getInputNameLocation().getCity());
+                url.append("&");
+            }
+            if (!StringUtils.isEmpty(context.getInputNameLocation().getState())) {
+                url.append("TerritoryName=");
+                url.append(context.getInputNameLocation().getState());
+                url.append("&");
+            }
+            url.append("cleansematch=true");
+            return url.toString();
+        case REALTIME_EMAIL:
+            if (!StringUtils.isEmpty(context.getInputEmail())) {
+                return String.format(emailLookupUrlFormat, context.getInputEmail());
+            } else {
+                throw new LedpException(LedpCode.LEDP_25024);
+            }
+        default:
+            throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
         }
-        String body = response.getBody();
-        DnBMatchContext output = new DnBMatchContext();
-        output.setDuns((String) retrieveJsonValueFromResponse(dunsJsonPath, body));
-        output.setConfidenceCode((Integer) retrieveJsonValueFromResponse(confidenceCodeJsonPath, body));
-        output.setMatchGrade((String) retrieveJsonValueFromResponse(matchGradeJsonPath, body));
-        output.setDnbCode(DnBReturnCode.OK);
-        dnbMatchResultValidator.validate(output);
-        context.setProperty(DNB_MATCH_OUTPUT, output);
-        context.setProperty(DNB_RETURN_CODE, output.getDnbCode());
-    }
 
-    @Override
-    protected ResponseEntity<String> sendRequestToDnB(String url, HttpEntity<String> entity) {
-        ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        return res;
-    }
-
-    @Override
-    protected String constructUrl(MatchKeyTuple tuple) {
-        StringBuilder url = new StringBuilder();
-        url.append(realTimeUrlPrefix);
-        String normalizedstr = normalizeString(tuple.getName());
-        if (normalizedstr.length() != 0) {
-            url.append("SubjectName=");
-            url.append(normalizedstr);
-            url.append("&");
-        }
-        normalizedstr = normalizeString(tuple.getCountryCode());
-        if (normalizedstr.length() != 0) {
-            url.append("CountryISOAlpha2Code=");
-            url.append(normalizedstr);
-            url.append("&");
-        }
-        normalizedstr = normalizeString(tuple.getCity());
-        if (normalizedstr.length() != 0) {
-            url.append("PrimaryTownName=");
-            url.append(normalizedstr);
-            url.append("&");
-        }
-        normalizedstr = normalizeString(tuple.getState());
-        if (normalizedstr.length() != 0) {
-            url.append("TerritoryName=");
-            url.append(normalizedstr);
-            url.append("&");
-        }
-        url.append("cleansematch=true");
-        return url.toString();
     }
 }

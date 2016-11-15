@@ -1,14 +1,9 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static org.springframework.http.HttpStatus.OK;
-
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,28 +11,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
-import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
+import com.latticeengines.datacloud.match.dnb.DnBAPIType;
+import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component
-public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMatchInfo>
+public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchMatchContext>
         implements DnBBulkLookupFetcher {
 
     private static final Log log = LogFactory.getLog(DnBBulkLookupFetcherImpl.class);
-
-    private static final String DNB_MATCH_OUTPUT_LIST = "DNB_MATCH_OUTPUT_LIST";
 
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;
@@ -78,38 +71,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     @Value("${datacloud.dnb.bulk.getresult.url.format}")
     private String getResultUrlFormat;
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-
     private static Date timeAnchor = new Date(1);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Map<String, DnBMatchContext> getResult(DnBBulkMatchInfo info) {
-
-        if (!preValidation()) {
-            info.setDnbCode(DnBReturnCode.RATE_LIMITING);
-            return null;
-        }
-
-        Map<String, DnBMatchContext> output = new HashMap<String, DnBMatchContext>();
-        for (int i = 0; i < retries; i++) {
-            DataFlowContext context = executeLookup(info, DnBKeyType.BULKMATCH);
-            DnBReturnCode returnCode = context.getProperty(DNB_RETURN_CODE, DnBReturnCode.class);
-            if (returnCode != DnBReturnCode.EXPIRED) {
-                log.debug("Fetched result from DnB bulk match api. Status=" + returnCode);
-                info.setDnbCode(returnCode);
-                if (returnCode == DnBReturnCode.OK) {
-                    output = context.getProperty(DNB_MATCH_OUTPUT_LIST, Map.class);
-                    log.info("Successfully fetched results from dnb. Size= " + output.size() + " Timestamp="
-                            + info.getTimestamp() + " ServiceId=" + info.getServiceBatchId());
-                }
-                break;
-            }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BULKMATCH);
-        }
-
-        return output;
-    }
 
     private boolean preValidation() {
         Date now = new Date();
@@ -121,57 +83,85 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     }
 
     @Override
-    protected HttpEntity<String> constructEntity(DnBBulkMatchInfo input, String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(authorizationHeader, token);
-        headers.add(applicationIdHeader, applicationId);
-        return new HttpEntity<>("", headers);
+    public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext) {
+
+        if (!preValidation()) {
+            batchContext.setDnbCode(DnBReturnCode.RATE_LIMITING);
+            return batchContext;
+        }
+
+        for (int i = 0; i < retries; i++) {
+            executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
+            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+                log.debug("Fetched result from DnB bulk match api. Status=" + batchContext.getDnbCode());
+                if (batchContext.getDnbCode() == DnBReturnCode.OK) {
+                    log.info("Successfully fetched results from dnb. Size= " + batchContext.getContexts().size()
+                            + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
+                            + batchContext.getServiceBatchId());
+                }
+                break;
+            }
+            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BATCH);
+        }
+        return batchContext;
     }
 
     @Override
-    protected void parseSucceededResponse(ResponseEntity<String> response, DataFlowContext context) {
-        if (response.getStatusCode() != OK) {
-            context.setProperty(DNB_RETURN_CODE, DnBReturnCode.UNKNOWN);
+    protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
+        if (ex instanceof HttpClientErrorException) {
+            HttpClientErrorException httpEx = (HttpClientErrorException) ex;
+            if (log.isDebugEnabled()) {
+                log.debug("HttpClientErrorException in DnB batch match fetching request: " + httpEx.getStatusText());
+            }
+            batchContext.setDnbCode(parseDnBHttpError(httpEx));
+        } else if (ex instanceof LedpException) {
+            LedpException ledpEx = (LedpException) ex;
+            if (log.isDebugEnabled()) {
+                log.debug("LedpException in DnB batch match fetching request: " + ledpEx.getCode().getMessage());
+            }
+            batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+        } else {
+            log.error("Unhandled exception in DnB batch match fetching request: " + ex.getMessage());
+            ex.printStackTrace();
+            batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
+        }
+    }
+
+    @Override
+    protected void parseResponse(String response, DnBBatchMatchContext batchContext, DnBAPIType apiType) {
+        DnBReturnCode returnCode = parseBatchProcessStatus(response);
+        batchContext.setDnbCode(returnCode);
+
+        if (batchContext.getDnbCode() != DnBReturnCode.OK) {
             return;
         }
 
-        String body = response.getBody();
-        DnBReturnCode returnCode = parseBatchProcessStatus(body);
-
-        if (returnCode != DnBReturnCode.OK) {
-            context.setProperty(DNB_RETURN_CODE, returnCode);
-            return;
-        }
-
-        Map<String, DnBMatchContext> outputList = new HashMap<String, DnBMatchContext>();
-        String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, body);
+        String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
         byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
         List<String> resultsList = Arrays.asList((new String(decodeResults)).split("\n"));
         for (String result : resultsList) {
             DnBMatchContext normalizedResult = normalizeOneRecord(result);
-            outputList.put(normalizedResult.getLookupRequestId(), normalizedResult);
+            DnBMatchContext context = batchContext.getContexts().get(normalizedResult.getLookupRequestId());
+            context.copyMatchResult(normalizedResult);
         }
-
-        context.setProperty(DNB_RETURN_CODE, returnCode);
-        context.setProperty(DNB_MATCH_OUTPUT_LIST, outputList);
+        for (String lookupRequestId : batchContext.getContexts().keySet()) {
+            if (batchContext.getContexts().get(lookupRequestId).getDnbCode() == null) {
+                batchContext.getContexts().get(lookupRequestId).setDnbCode(DnBReturnCode.UNMATCH);
+            }
+        }
     }
 
     private DnBReturnCode parseBatchProcessStatus(String body) {
-        DnBReturnCode returnCode;
         String dnBReturnCode = (String) retrieveXmlValueFromResponse(batchResultIdXpath, body);
         switch (dnBReturnCode) {
         case "BC005":
         case "BC007":
-            returnCode = DnBReturnCode.IN_PROGRESS;
-            break;
+            return DnBReturnCode.IN_PROGRESS;
         case "CM000":
-            returnCode = DnBReturnCode.OK;
-            break;
+            return DnBReturnCode.OK;
         default:
-            returnCode = DnBReturnCode.UNKNOWN;
+            return DnBReturnCode.UNKNOWN;
         }
-
-        return returnCode;
     }
 
     private DnBMatchContext normalizeOneRecord(String record) {
@@ -198,14 +188,16 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBulkMa
     }
 
     @Override
-    protected ResponseEntity<String> sendRequestToDnB(String url, HttpEntity<String> entity) {
-        ResponseEntity<String> res = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        return res;
+    protected String constructUrl(DnBBatchMatchContext batchContext, DnBAPIType apiType) {
+        return String.format(getResultUrlFormat, batchContext.getServiceBatchId(), officeID, serviceNumber,
+                DateTimeUtils.formatTZ(batchContext.getTimestamp()));
     }
 
     @Override
-    protected String constructUrl(DnBBulkMatchInfo info) {
-        return String.format(getResultUrlFormat, info.getServiceBatchId(), officeID, serviceNumber,
-                info.getTimestamp());
+    protected HttpEntity<String> constructEntity(DnBBatchMatchContext batchContext, String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(authorizationHeader, token);
+        headers.add(applicationIdHeader, applicationId);
+        return new HttpEntity<>("", headers);
     }
 }

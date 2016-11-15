@@ -17,96 +17,104 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
+import com.latticeengines.datacloud.match.dnb.DnBAPIType;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.proxy.exposed.RestApiClient;
 
 public abstract class BaseDnBLookupServiceImpl<T> {
     private static final Log log = LogFactory.getLog(BaseDnBLookupServiceImpl.class);
 
-    protected static final String DNB_RETURN_CODE = "DNB_RETURN_CODE";
-
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
+
+    private RestApiClient dnbClient = new RestApiClient();
 
     @Value("${datacloud.dnb.realtime.resultid.jsonpath}")
     private String resultIdJsonPath;
 
-    public DataFlowContext executeLookup(T input, DnBKeyType keyType) {
-        DataFlowContext context = new DataFlowContext();
-        String token = dnBAuthenticationService.requestToken(keyType);
-        String url = constructUrl(input);
-        try {
-            HttpEntity<String> entity = constructEntity(input, token);
-            ResponseEntity<String> response = sendRequestToDnB(url, entity);
-            parseSucceededResponse(response, context);
-        } catch (HttpClientErrorException ex) {
-            parseDnBHttpError(ex, context);
-        }
+    protected abstract String constructUrl(T context, DnBAPIType apiType);
 
-        return context;
+    protected abstract HttpEntity<String> constructEntity(T context, String token);
+
+    protected abstract void parseResponse(String response, T context, DnBAPIType apiType);
+
+    protected abstract void parseError(Exception ex, T context);
+    
+    public void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
+        try {
+            String token = dnBAuthenticationService.requestToken(keyType);
+            String url = constructUrl(context, apiType);
+            HttpEntity<String> entity = constructEntity(context, token);
+            String response = sendRequest(url, entity, apiType);
+            parseResponse(response, context, apiType);
+        } catch (Exception ex) {
+            parseError(ex, context);
+        }
     }
 
-    protected abstract HttpEntity<String> constructEntity(T input, String token);
+    protected String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
+        if (apiType == DnBAPIType.AUTHENTICATION || apiType == DnBAPIType.REALTIME_ENTITY
+                || apiType == DnBAPIType.REALTIME_EMAIL || apiType == DnBAPIType.BATCH_FETCH) {
+            return dnbClient.get(entity, url);
+        } else {
+            return dnbClient.post(entity, url);
+        }
+    }
 
-    protected void parseDnBHttpError(HttpClientErrorException ex, DataFlowContext context) {
-        DnBReturnCode errCode = null;
-        Boolean isNeedParseBody = false;
+    protected DnBReturnCode parseDnBHttpError(HttpClientErrorException ex) {
         switch (ex.getStatusCode()) {
         case REQUEST_TIMEOUT:
-            errCode = DnBReturnCode.TIMEOUT;
-            break;
-        case NOT_FOUND:
-            errCode = DnBReturnCode.NO_RESULT;
-            break;
+            return DnBReturnCode.TIMEOUT;
         case BAD_REQUEST:
-            errCode = DnBReturnCode.BAD_REQUEST;
-            break;
+            return DnBReturnCode.BAD_REQUEST;
+        case NOT_FOUND:
+            return DnBReturnCode.UNMATCH;
         default:
-            isNeedParseBody = true;
+            return parseErrorBody(ex.getResponseBodyAsString());
         }
-        if (isNeedParseBody) {
-            errCode = parseErrorBody(ex.getResponseBodyAsString());
-        }
-        context.setProperty(DNB_RETURN_CODE, errCode);
     }
 
     @SuppressWarnings("unchecked")
     protected DnBReturnCode parseErrorBody(String body) {
-        DnBReturnCode errCode;
         try {
             List<String> code = (List<String>) retrieveJsonValueFromResponse(resultIdJsonPath, body);
             String dnBErrorCode = code.get(0);
             switch (dnBErrorCode) {
-                case "SC001":
-                case "SC003":
-                    errCode = DnBReturnCode.EXPIRED;
-                    break;
-                case "SC002":
-                    errCode = DnBReturnCode.UNAUTHORIZED;
-                    break;
-                case "SC005":
-                    errCode = DnBReturnCode.EXCEED_REQUEST_NUM;
-                    break;
-                case "SC006":
-                    errCode = DnBReturnCode.EXCEED_CONCURRENT_NUM;
-                    break;
-                default:
-                    errCode = DnBReturnCode.UNKNOWN;
+            case "SC001":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC002":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC003":
+                return DnBReturnCode.EXPIRED;
+            case "SC004":
+                return DnBReturnCode.EXPIRED;
+            case "SC005":
+                return DnBReturnCode.EXCEED_REQUEST_NUM;
+            case "SC006":
+                return DnBReturnCode.EXCEED_CONCURRENT_NUM;
+            case "SC007":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC008":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC009":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC012":
+                return DnBReturnCode.UNAUTHORIZED;
+            case "SC014":
+                return DnBReturnCode.UNAUTHORIZED;
+            default:
+                return DnBReturnCode.UNKNOWN;
             }
         } catch (Exception ex) {
-            log.error(ex);
-            errCode = DnBReturnCode.UNKNOWN;
+            return DnBReturnCode.UNKNOWN;
         }
-
-        return errCode;
     }
 
     protected Object retrieveJsonValueFromResponse(String jsonPath, String body) {
@@ -128,18 +136,4 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
         return result;
     }
-
-    protected String normalizeString(String str) {
-        if (str == null) {
-            return "";
-        }
-
-        return str.trim();
-    }
-
-    protected abstract void parseSucceededResponse(ResponseEntity<String> response, DataFlowContext context);
-
-    protected abstract ResponseEntity<String> sendRequestToDnB(String url, HttpEntity<String> entity);
-
-    protected abstract String constructUrl(T input);
 }

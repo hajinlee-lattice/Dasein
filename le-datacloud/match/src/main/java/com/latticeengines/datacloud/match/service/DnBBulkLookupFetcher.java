@@ -1,10 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
-import java.util.Map;
-
-import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
+import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 
 public interface DnBBulkLookupFetcher {
-    public Map<String, DnBMatchContext> getResult(DnBBulkMatchInfo info);
+    public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext);
 }

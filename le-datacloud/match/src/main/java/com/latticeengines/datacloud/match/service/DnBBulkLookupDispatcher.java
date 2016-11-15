@@ -1,10 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
-import java.util.Map;
-
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.dnb.DnBBulkMatchInfo;
+import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 
 public interface DnBBulkLookupDispatcher {
-    public DnBBulkMatchInfo sendRequest(Map<String, MatchKeyTuple> input);
+    public DnBBatchMatchContext sendRequest(DnBBatchMatchContext bulkMatchContext);
 }

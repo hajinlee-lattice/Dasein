@@ -1,17 +1,22 @@
 package com.latticeengines.datacloud.match.dnb;
 
-import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DnBBulkMatchInfo {
+public class DnBBatchMatchContext {
 
     private String serviceBatchId;
 
-    // Format: yyyy-MM-dd'T'HH:mm:ss.S'Z'
-    private String timestamp;
+    private Date timestamp;
 
     private DnBReturnCode dnbCode;
 
-    private List<String> lookupRequestIds;
+    private Map<String, DnBMatchContext> contexts;
+
+    public DnBBatchMatchContext() {
+        contexts = new HashMap<String, DnBMatchContext>();
+    }
 
     public String getServiceBatchId() {
         return serviceBatchId;
@@ -21,11 +26,11 @@ public class DnBBulkMatchInfo {
         this.serviceBatchId = serviceBatchId;
     }
 
-    public String getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -37,11 +42,12 @@ public class DnBBulkMatchInfo {
         this.dnbCode = dnbCode;
     }
 
-    public List<String> getLookupRequestIds() {
-        return lookupRequestIds;
+    public Map<String, DnBMatchContext> getContexts() {
+        return contexts;
     }
 
-    public void setLookupRequestIds(List<String> lookupRequestIds) {
-        this.lookupRequestIds = lookupRequestIds;
+    public void setContexts(Map<String, DnBMatchContext> contexts) {
+        this.contexts = contexts;
     }
+
 }

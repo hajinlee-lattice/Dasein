@@ -364,6 +364,9 @@ public enum LedpCode {
     LEDP_25020("Failed to get current version for predefined column selection [{0}]"), //
     LEDP_25021("unsupported_match_version_type", "Unsupported match version {0}"), //
     LEDP_25022("InputSourceConfig is not FileInputSourceConfig"), //
+    LEDP_25023("Name and CountryCode are required in DnB realtime entity matching"), //
+    LEDP_25024("Email is required in DnB realtime email matching"), //
+    LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

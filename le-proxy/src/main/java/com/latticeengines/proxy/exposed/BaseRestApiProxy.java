@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -38,6 +40,11 @@ public abstract class BaseRestApiProxy {
 
     @Value("${proxy.retry.maxAttempts:10}")
     private int maxAttempts;
+
+    // Used to call external API because there is no standardized error handler
+    protected BaseRestApiProxy() {
+
+    }
 
     protected BaseRestApiProxy(String hostport) {
         this(hostport, null);
@@ -73,6 +80,16 @@ public abstract class BaseRestApiProxy {
                 }
             }
         });
+    }
+
+    protected <T> T postForEntity(final String method, final String url, final HttpEntity<?> entity,
+            final Class<T> returnValueClazz) {
+        log.info(String.format("Invoking %s by posting from url %s with http headers.", method, url));
+        try {
+            return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     private void logError(Exception e, String method) {
@@ -121,6 +138,36 @@ public abstract class BaseRestApiProxy {
                 }
             }
         });
+    }
+
+    protected <T> T get(final String method, final String url, final HttpEntity<?> entity,
+            final Class<T> returnValueClazz) {
+        log.info(String.format("Invoking %s by getting from url %s with http headers.", method, url));
+        try {
+            return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
+        } catch (Exception e) {
+            throw e;
+        }
+        /*
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(new RetryCallback<T, RuntimeException>() {
+            @Override
+            public T doWithRetry(RetryContext context) throws RuntimeException {
+                try {
+                    log.info(String.format("Invoking %s by getting from url %s with http headers.  (Attempt=%d)",
+                            method, url, context.getRetryCount() + 1));
+                    return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
+            }
+        });
+        */
     }
 
     protected void delete(final String method, final String url) {
