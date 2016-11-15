@@ -86,7 +86,8 @@ def provision(environment, stackname):
             PARAM_CAPACITY.config("2"),
             PARAM_MAX_CAPACITY.config("2"),
             PARAM_TARGET_GROUP.config("arn:aws:iam::028036828464:target-group/dummy"),
-            PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name())
+            PARAM_ECS_INSTANCE_PROFILE_NAME.config(config.ecs_instance_profile_name()),
+            PARAM_ECS_INSTANCE_PROFILE_ARN.config(config.ecs_instance_profile_arn())
         ],
         TimeoutInMinutes=60,
         OnFailure='ROLLBACK',
