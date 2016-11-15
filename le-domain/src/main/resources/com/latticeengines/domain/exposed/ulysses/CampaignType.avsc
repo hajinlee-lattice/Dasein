@@ -1,0 +1,22 @@
+{
+  "name": "campaignType",
+  "type": "record",
+  "doc": null,
+  "tableName": null,
+  "fields": [
+    {
+      "name": "%s",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "type": {
+        "type": "array",
+        "items": %s
+      }
+    }
+  ]
+}

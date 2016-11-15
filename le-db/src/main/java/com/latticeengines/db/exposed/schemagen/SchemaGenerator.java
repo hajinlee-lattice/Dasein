@@ -186,7 +186,7 @@ public class SchemaGenerator {
         List<Class<?>> classes = new ArrayList<>();
         File directory = null;
         try {
-            log.info("retreiving classes for package name:" + packageName);
+            log.info("retrieving classes for package name:" + packageName);
             ClassLoader cld = Thread.currentThread().getContextClassLoader();
             if (cld == null) {
                 throw new ClassNotFoundException("Can't get class loader.");
@@ -233,13 +233,19 @@ public class SchemaGenerator {
                         Enumeration<JarEntry> jarEntries = jarFile.entries();
                         while (jarEntries.hasMoreElements()) {
                             JarEntry jarEntry = jarEntries.nextElement();
+                            
+                            if (!jarEntry.getName().endsWith(".class")) {
+                                continue;
+                            }
                             // strip off file entry name
                             String jarPackage = jarEntry.getName().substring(0, jarEntry.getName().lastIndexOf('/'));
+                            
                             // only process specific package, not sub-package
                             if (!jarEntry.isDirectory() && jarPackage.equalsIgnoreCase(packageName.replace('.', '/'))) {
                                 // remove .class extension
                                 String fullyClassname = jarEntry.getName()
                                         .substring(0, jarEntry.getName().length() - 6);
+                                
                                 classes.add(Class.forName(fullyClassname.replace('/', '.')));
                                 if (log.isDebugEnabled()) {
                                     log.debug("adding class: " + fullyClassname);

@@ -1,0 +1,63 @@
+{
+  "name": "scoreAndEnrichmentType",
+  "type": "record",
+  "doc": null,
+  "tableName": null,
+  "fields": [
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "long",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "double",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "columnName": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    {
+      "name": "%s",
+      "type": {
+        "type": "array",
+        "items": %s
+      }
+    }
+  ]
+}

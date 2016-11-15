@@ -1,0 +1,17 @@
+{
+  "name": "insightType",
+  "type": "record",
+  "fields": [
+    {
+      "name": "%s",
+      "type": "string"
+    },
+    {
+      "name": "%s",
+      "type": {
+        "type": "array",
+        "items": %s
+      }
+    }
+  ]
+}

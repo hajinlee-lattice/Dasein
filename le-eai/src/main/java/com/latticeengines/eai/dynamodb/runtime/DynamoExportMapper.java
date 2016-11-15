@@ -161,10 +161,16 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     private void constructDataStore() {
         Schema fabricSchema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
-        String dynamoProp = DynamoUtil.constructAttributes(entityClass);
+
+        String dynamoProp = DynamoUtil.constructIndex(entityClass);
+        if (dynamoProp != null) {
+            fabricSchema.addProp(DynamoUtil.KEYS, dynamoProp);
+        }
+        dynamoProp = DynamoUtil.constructAttributes(entityClass);
         if (dynamoProp != null) {
             fabricSchema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
+
         dataStore = new DynamoDataStoreImpl(client, repo, recordType, fabricSchema);
     }
 

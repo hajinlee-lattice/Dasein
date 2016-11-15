@@ -62,10 +62,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private String store;
 
-    private String repository;
-
-    private String recordType;
-
     private String topic;
 
     private TopicScope scope;
@@ -76,12 +72,15 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private Schema schema;
 
-    private FabricDataStore dataStore;
+    private String repository;
+
+    private String recordType;
+
+    protected FabricDataStore dataStore;
 
     private Class<T> entityClass;
 
     public BaseFabricEntityMgrImpl(Builder builder) {
-
         this.store = builder.store;
         this.repository = builder.repository;
         this.recordType = builder.recordType;
@@ -89,15 +88,18 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.topic = builder.topic;
         this.scope = builder.scope;
         this.disabled = false;
-        if (builder.messageService != null)
+        
+        if (builder.messageService != null) {
             this.messageService = builder.messageService;
-        if (builder.dataService != null)
+        }
+        if (builder.dataService != null) {
             this.dataService = builder.dataService;
+        }
     }
 
+    @Override
     @PostConstruct
     public void init() {
-
         log.info("Initializing Datafabric " + topic);
 
         if (disabled) {
@@ -114,8 +116,13 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         String redisIndex = RedisUtil.constructIndex(entityClass);
         schema.addProp(INDEX, redisIndex);
 
+        // add dynamo key attributes
+        String dynamoProp = DynamoUtil.constructIndex(entityClass);
+        if (dynamoProp != null) {
+            schema.addProp(DynamoUtil.KEYS, dynamoProp);
+        }
         // add dynamo attributes
-        String dynamoProp = DynamoUtil.constructAttributes(entityClass);
+        dynamoProp = DynamoUtil.constructAttributes(entityClass);
         if (dynamoProp != null) {
             schema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
@@ -129,11 +136,12 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             consumers = new HashMap<>();
         }
     }
-
+    
     @Override
     public void create(T entity) {
-        if (disabled)
+        if (disabled) {
             return;
+        }
         GenericRecord record = entityToRecord(entity);
         dataStore.createRecord(entity.getId(), record);
     }
@@ -328,7 +336,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
         return new ArrayList<>(uniqueIds);
     }
-
+    
     public class BaseFabricEntityStreamProc implements FabricStreamProc {
 
         FabricEntityProcessor processor;
@@ -340,6 +348,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             ;
         }
 
+        @Override
         public void processRecord(String type, String id, GenericRecord record) {
             if (!type.equals(recordType)) {
                 return;
@@ -398,5 +407,20 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             this.dataService = dataService;
             return this;
         }
+    }
+
+    @Override
+    public String getRepository() {
+        return repository;
+    }
+
+    @Override
+    public String getRecordType() {
+        return recordType;
+    }
+
+    @Override
+    public Map<String, Object> findAttributesByKey(String id) {
+        return dataStore.findAttributes(id);
     }
 }

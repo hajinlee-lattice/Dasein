@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -732,5 +734,26 @@ public class AvroUtils {
             throw new UnsupportedOperationException("remove is not applicable to this iterator.");
         }
     }
+
+    public static String buildSchema(String avscFile, Object... params) {
+        InputStream is = ClassLoader.getSystemResourceAsStream(avscFile);
+        if (is == null) {
+            return null;
+        }
+        String s;
+        try {
+            s = StreamUtils.copyToString(is, Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Object[] p = new Object[params.length];
+        int i = 0;
+        for (Object o : params) {
+            p[i++] = o;
+        }
+        String schema = String.format(s, p);
+        return schema;
+    }
+
 
 }

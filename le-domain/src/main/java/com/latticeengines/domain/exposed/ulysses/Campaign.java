@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.ulysses;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -14,9 +15,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericData.Array;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -25,6 +31,9 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
+import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -35,7 +44,31 @@ import com.latticeengines.domain.exposed.security.Tenant;
     uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class Campaign implements HasPid, HasName, HasTenantId {
+public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Campaign> {
+    
+    public static final String NAME = "name";
+    public static final String INSIGHTS = "insights";
+    public static final String CAMPAIGN_ID = "campaign_id";
+    
+    private static String[] schemas;
+    private static Schema avroSchema;
+    
+    static {
+        schemas = buildSchemas();
+        
+        if (schemas[2] != null) {
+            avroSchema = new Schema.Parser().parse(schemas[2]);
+        }
+        
+        if (schemas[1] != null) {
+            Insight.setAvroSchema(new Schema.Parser().parse(schemas[1]));
+        }
+        
+        if (schemas[0] != null) {
+            InsightSection.setAvroSchema(new Schema.Parser().parse(schemas[0]));
+        }
+    }
+
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +76,7 @@ public class Campaign implements HasPid, HasName, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("name")
+    @JsonProperty(NAME)
     @Column(name = "NAME", nullable = false)
     private String name;
 
@@ -63,8 +96,9 @@ public class Campaign implements HasPid, HasName, HasTenantId {
     @Column(name = "SEGMENT_NAME")
     private List<String> segments = new ArrayList<>();
     
-    @JsonProperty("insights")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "campaign")
+    @JsonProperty(INSIGHTS)
+    @DynamoAttribute(INSIGHTS)
+    @Transient
     private List<Insight> insights = new ArrayList<>();
 
     @JsonIgnore
@@ -73,7 +107,15 @@ public class Campaign implements HasPid, HasName, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
     
-
+    @JsonProperty(CAMPAIGN_ID)
+    @Column(name = "CAMPAIGN_ID", nullable = false)
+    private String campaignId;
+    
+    public Campaign() {
+        if (campaignId == null) {
+            campaignId = UUID.randomUUID().toString();
+        }
+    }
     @Override
     public Long getPid() {
         return pid;
@@ -147,4 +189,69 @@ public class Campaign implements HasPid, HasName, HasTenantId {
         this.insights = insights;
     }
 
+    @Override
+    public String getId() {
+        return campaignId;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.campaignId = id;
+    }
+
+    @Override
+    public GenericRecord toFabricAvroRecord(String recordType) {
+        Schema schema = getSchema(recordType);
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        builder.set(NAME, getName());
+        try {
+            List<GenericRecord> data = new ArrayList<>();
+            for (Insight insight : getInsights()) {
+                GenericRecord datum = insight.toFabricAvroRecord(recordType);
+                data.add(datum);
+            }
+            builder.set(INSIGHTS, data);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize attributes", e);
+        }
+        return builder.build();
+    }
+
+    @Override
+    public Schema getSchema(String recordType) {
+        return avroSchema;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Campaign fromFabricAvroRecord(GenericRecord record) {
+        setName((record.get(NAME).toString()));
+        GenericData.Array<GenericRecord> insightRecords = (Array<GenericRecord>) record.get(INSIGHTS);
+        List<Insight> insights = new ArrayList<>();
+        Insight dummy = new Insight();
+        for (GenericRecord r : insightRecords) {
+            insights.add(dummy.fromFabricAvroRecord(r));
+        }
+        setInsights(insights);
+        return this;
+    }
+
+    @Override
+    public Campaign fromHdfsAvroRecord(GenericRecord record) {
+        return fromFabricAvroRecord(record);
+    }
+
+    protected static String[] buildSchemas() {
+        String[] schemas = new String[3];
+        
+        schemas[0] = AvroUtils.buildSchema("com/latticeengines/domain/exposed/ulysses/InsightSectionListType.avsc", //
+                InsightSection.DESCRIPTION, InsightSection.HEADLINE, InsightSection.TIP, //
+                InsightSection.ATTRIBUTES, InsightSection.INSIGHT_SOURCE_TYPE);
+        schemas[1] = AvroUtils.buildSchema("com/latticeengines/domain/exposed/ulysses/InsightListType.avsc", //
+                Insight.NAME, Insight.INSIGHT_SECTIONS, schemas[0]);
+        schemas[2] = AvroUtils.buildSchema("com/latticeengines/domain/exposed/ulysses/CampaignType.avsc", //
+                Campaign.NAME, Campaign.INSIGHTS, schemas[1]);
+        return schemas;
+    }
 }

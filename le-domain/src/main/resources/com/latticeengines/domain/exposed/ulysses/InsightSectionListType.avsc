@@ -1,0 +1,26 @@
+{
+  "name": "insightSectionType",
+  "type": "record",
+  "fields": [
+    {
+      "name": "%s",
+      "type": "string"
+    },
+    {
+      "name": "%s",
+      "type": "string"
+    },
+    {
+      "name": "%s",
+      "type": "string"
+    },
+    {
+      "name": "%s",
+      "type": "string"
+    },
+    {
+      "name": "%s",
+      "type": "string"
+    }
+  ]
+}

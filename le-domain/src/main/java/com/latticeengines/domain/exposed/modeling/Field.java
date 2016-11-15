@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.modeling;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,6 +14,14 @@ public class Field implements HasName {
     private String columnName;
     private int sqlType;
     private List<String> typeInfo;
+    
+    public Field() {
+    }
+    
+    public Field(String name, String type) {
+        this.name = name;
+        this.typeInfo = Arrays.asList(new String[] { type, "null" });
+    }
 
     @Override
     @JsonProperty("name")

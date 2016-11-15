@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 @Component("accountLookupService")
 public class AccountLookupServiceImpl implements AccountLookupService {
 
-    @SuppressWarnings("unused")
 	private  static final Log log = LogFactory.getLog(AccountLookupServiceImpl.class);
 
     private Map<String, AccountLookupEntryMgr> lookupMgrs;
@@ -76,6 +75,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         return accountMgr.batchFindByKey(accountIds);
     }
 
+    @Override
     public AccountLookupEntryMgr getLookupMgr(String version) {
         AccountLookupEntryMgr lookupMgr = lookupMgrs.get(version);
         if (lookupMgr == null)
@@ -105,6 +105,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         return lookupMgr;
     }
 
+    @Override
     public LatticeAccountMgr getAccountMgr(String version) {
         LatticeAccountMgr accountMgr = accountMgrs.get(version);
 

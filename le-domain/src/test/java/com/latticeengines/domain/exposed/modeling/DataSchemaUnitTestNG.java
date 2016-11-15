@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 
+import org.apache.avro.Schema;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -17,16 +18,16 @@ public class DataSchemaUnitTestNG {
         schema.setType("record");
         Field sepalLength = new Field();
         sepalLength.setName("sepal_length");
-        sepalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        sepalLength.setType(Arrays.<String> asList(new String[] { "float", "null" }));
         Field sepalWidth = new Field();
         sepalWidth.setName("sepal_width");
-        sepalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        sepalWidth.setType(Arrays.<String> asList(new String[] { "float", "null" }));
         Field petalLength = new Field();
         petalLength.setName("petal_length");
-        petalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        petalLength.setType(Arrays.<String> asList(new String[] { "float", "null" }));
         Field petalWidth = new Field();
         petalWidth.setName("petal_width");
-        petalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
+        petalWidth.setType(Arrays.<String> asList(new String[] { "float", "null" }));
         Field category = new Field();
         category.setName("category");
         category.setType(Arrays.<String> asList(new String[] { "string", "null" }));
@@ -38,6 +39,9 @@ public class DataSchemaUnitTestNG {
         schema.addField(category);
 
         String jsonString = schema.toString();
+        
+        // test that the generated schema is avro parseable
+        new Schema.Parser().parse(jsonString);
         DataSchema deserializedSchema = JsonUtils.deserialize(jsonString, DataSchema.class);
         assertEquals(deserializedSchema.toString(), jsonString);
     }

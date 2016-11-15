@@ -79,6 +79,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
                  " index " + redisIndex);
     }
 
+    @Override
     public void createRecord(String id, GenericRecord record) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
@@ -87,10 +88,12 @@ public class RedisDataStoreImpl implements FabricDataStore {
         jedisPool.returnResource(jedis);
     }
 
+    @Override
     public void updateRecord(String id, GenericRecord record) {
         createRecord(id, record);
     }
 
+    @Override
     public void createRecords(Map<String, GenericRecord> records) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
@@ -100,6 +103,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         jedisPool.returnResource(jedis);
     }
 
+    @Override
     public GenericRecord findRecord(String id) {
         Jedis jedis = jedisPool.getResource();
         String key = buildKey(id);
@@ -109,6 +113,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         return record;
     }
 
+    @Override
     public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
         Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
         Jedis jedis = jedisPool.getResource();
@@ -128,6 +133,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
     }
 
 
+    @Override
     public List<GenericRecord> findRecords(Map<String, String> properties)  {
         Jedis jedis = jedisPool.getResource();
 
@@ -151,6 +157,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         return records;
     }
 
+    @Override
     public void deleteRecord(String id, GenericRecord record)  {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
@@ -240,6 +247,11 @@ public class RedisDataStoreImpl implements FabricDataStore {
             builder.append(FIELD + field + VALUE + value);
         }
         return builder.toString();
+    }
+
+    @Override
+    public Map<String, Object> findAttributes(String id) {
+        throw new UnsupportedOperationException();
     }
 
 }
