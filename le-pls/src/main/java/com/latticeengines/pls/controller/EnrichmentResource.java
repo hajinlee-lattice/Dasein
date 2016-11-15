@@ -22,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -54,12 +57,9 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
-    public List<String> getLeadEnrichmentCategories(HttpServletRequest request, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+    public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
-                null, null, considerInternalAttributes);
+                null, null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -76,13 +76,10 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
             @ApiParam(value = "category", required = true) //
-            @RequestParam String category, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+            @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
         List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, category, null, false,
-                null, null, considerInternalAttributes);
+                null, null);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
             subcategories.add(attr.getSubcategory());
@@ -97,11 +94,11 @@ public class EnrichmentResource {
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
             @ApiParam(value = "Update lead enrichment selection", required = true) //
-            @RequestBody LeadEnrichmentAttributesOperationMap attributes, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+            @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request),
                 considerInternalAttributes);
     }
@@ -133,11 +130,11 @@ public class EnrichmentResource {
             Integer offset, //
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
-            Integer max, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+            Integer max) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
@@ -164,11 +161,11 @@ public class EnrichmentResource {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+            Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, considerInternalAttributes);
@@ -182,11 +179,11 @@ public class EnrichmentResource {
             @ApiParam(value = "Should get only selected attribute", //
                     required = false) //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
-            Boolean onlySelectedAttributes, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+            Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
         String fileName = onlySelectedAttributes != null && onlySelectedAttributes
@@ -212,7 +209,7 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
+            @ApiParam(value = "Consider internal attributes", required = false) //
             @RequestParam(value = "considerInternalAttributes", required = false) //
             Boolean considerInternalAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
@@ -224,11 +221,11 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
-    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request, //
-            @ApiParam(value = "Consider only internal attributes", required = false) //
-            @RequestParam(value = "considerInternalAttributes", required = false) //
-            Boolean considerInternalAttributes) {
+    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         return selectedAttrService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
