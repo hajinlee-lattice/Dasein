@@ -18,7 +18,7 @@ public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowServ
     @Override
     public DataFlow createLatestProductionDataFlow() {
         String version = getVersion();
-        String dataFlowName = "PRODUCTION-" + version;
+        String dataFlowName = "PRODUCTION-" + version.replace('/', '_');
         DataFlow dataFlow = dataFlowEntityMgr.findByName(dataFlowName);
 
         if (dataFlow != null) {

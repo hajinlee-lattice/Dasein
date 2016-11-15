@@ -31,7 +31,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
     @Override
     public PropData createLatestProductionPropData() {
         String version = getVersion();
-        String propDataName = "PRODUCTION-" + version;
+        String propDataName = "PRODUCTION-" + version.replace('/', '_');
         PropData propData = propDataEntityMgr.findByName(propDataName);
 
         if (propData != null) {

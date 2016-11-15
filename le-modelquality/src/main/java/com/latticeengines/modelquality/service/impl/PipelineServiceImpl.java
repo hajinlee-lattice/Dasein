@@ -50,7 +50,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     @Override
     public Pipeline createLatestProductionPipeline() {
         String version = getVersion();
-        String pipelineName = "PRODUCTION-" + version;
+        String pipelineName = "PRODUCTION-" + version.replace('/', '_');
         Pipeline pipeline = pipelineEntityMgr.findByName(pipelineName);
 
         if (pipeline != null) {

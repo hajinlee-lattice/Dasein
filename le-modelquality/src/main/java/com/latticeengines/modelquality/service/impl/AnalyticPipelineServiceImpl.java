@@ -94,7 +94,7 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
     @Override
     public AnalyticPipeline createLatestProductionAnalyticPipeline() {
         String version = getVersion();
-        String analyticPipelineName = production + "-" + version;
+        String analyticPipelineName = production + "-" + version.replace('/', '_');
         AnalyticPipeline analyticPipeline = analyticPipelineEntityMgr.findByName(analyticPipelineName);
         
         if(analyticPipeline != null)

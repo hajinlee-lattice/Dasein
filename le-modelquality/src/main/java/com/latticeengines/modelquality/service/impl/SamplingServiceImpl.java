@@ -19,7 +19,7 @@ public class SamplingServiceImpl extends BaseServiceImpl implements SamplingServ
     @Override
     public Sampling createLatestProductionSamplingConfig() {
         String version = getVersion();
-        String samplingName = "PRODUCTION-" + version;
+        String samplingName = "PRODUCTION-" + version.replace('/', '_');
         
         Sampling sampling = samplingEntityMgr.findByName(samplingName);
         

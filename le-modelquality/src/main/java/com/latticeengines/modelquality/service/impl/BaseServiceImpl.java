@@ -36,7 +36,7 @@ public class BaseServiceImpl implements InitializingBean {
             stackInfo.put("CurrentStack", "");
         }
         String stackName = stackInfo.get("CurrentStack");
-        String version = versionManager.getCurrentVersionInStack(stackName).replace('/', '_');
+        String version = versionManager.getCurrentVersionInStack(stackName);
         return version;
     }
 
