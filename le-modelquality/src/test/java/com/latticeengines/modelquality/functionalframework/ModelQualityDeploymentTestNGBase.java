@@ -117,10 +117,10 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
         List<ModelRun> existingModelRuns = modelRunEntityMgr.findAll();
         for (ModelRun aModelRun : existingModelRuns) {
-            AnalyticPipelineEntityNames anAnalyticPipelineEntityNames = modelQualityProxy
-                    .getAnalyticPipelineByName(aModelRun.getAnalyticPipeline().getName());
-            if (anAnalyticPipelineEntityNames.getName().equals(analyticPipelineEntityNames.getName()) //
-                    || anAnalyticPipelineEntityNames.getName().equals(analyticPipline2Name)) {
+            AnalyticPipeline anAnalyticPipeline = analyticPipelineEntityMgr
+                    .findByName(aModelRun.getAnalyticPipeline().getName());
+            if (anAnalyticPipeline.getName().equals(analyticPipelineEntityNames.getName()) //
+                    || anAnalyticPipeline.getName().equals(analyticPipline2Name)) {
                 System.out.println(String.format("Attempting to delete ModelRun \"%s\"", aModelRun.getName()));
                 modelRunEntityMgr.delete(aModelRun);
             }
@@ -386,11 +386,29 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             System.out.println(String.format("Attempting to delete Pipeline \"%s\"", "ModelQualityDeploymentTest-2"));
             pipelineEntityMgr.delete(pipelineAlreadyExists);
         }
+
+        List<Pipeline> existingPipelines = pipelineEntityMgr.findAll();
+        List<Pipeline> pipelinesToDelete = new ArrayList<>();
+        for (Pipeline thePipeline : existingPipelines) {
+            List<PipelineStep> thePipelineSteps = thePipeline.getPipelineSteps();
+            for (PipelineStep theStep : thePipelineSteps) {
+                if (theStep.getName().equals("assigncategorical")) {
+                    pipelinesToDelete.add(thePipeline);
+                    break;
+                }
+            }
+        }
+        for (Pipeline thePipeline : pipelinesToDelete) {
+            System.out.println(String.format("Attempting to delete Pipeline \"%s\"", thePipeline.getName()));
+            pipelineEntityMgr.delete(thePipeline);
+        }
+
         PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
         if (pipelineStepAlreadyExists != null) {
             System.out.println(String.format("Attempting to delete PipelineStep \"%s\"", "assigncategorical"));
             pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
         }
+
         String newPipelineName = modelQualityProxy.createPipeline("ModelQualityDeploymentTest-2",
                 "ModelQualityDeploymentTest-2", pipelineSteps);
         return pipelineEntityMgr.findByName(newPipelineName);
