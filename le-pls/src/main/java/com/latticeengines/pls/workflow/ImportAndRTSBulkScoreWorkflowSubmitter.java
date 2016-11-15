@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
@@ -47,8 +46,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private MatchCommandProxy matchCommandProxy;
     
-    private boolean useFuzzyMatch = false;
-
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
@@ -98,8 +95,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         }
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion) || !useFuzzyMatch;
-        
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -124,7 +119,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion)
-                .skipMatchingStep(skipIdMatch)
                 .matchClientDocument(matchClientDocument) //
                 .build();
     }

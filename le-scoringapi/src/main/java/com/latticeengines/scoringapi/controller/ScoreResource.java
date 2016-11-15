@@ -1,5 +1,8 @@
 package com.latticeengines.scoringapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.text.ParseException;
 import java.util.List;
 
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -26,10 +31,6 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 import com.wordnik.swagger.annotations.ApiParam;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
@@ -55,7 +56,8 @@ public class ScoreResource extends BaseScoring {
     @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
-    public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
+    public List<ModelDetail> getPaginatedModels(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -68,7 +70,8 @@ public class ScoreResource extends BaseScoring {
     @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
-    public int getModelCount(HttpServletRequest request,
+    public int getModelCount(
+            HttpServletRequest request,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
             @ApiParam(value = "Should consider models in any status or only in active status", required = true) @RequestParam(value = "considerAllStatus", required = true) boolean considerAllStatus)
             throws ParseException {
@@ -89,10 +92,13 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
-            @RequestBody BulkRecordScoreRequest scoreRequest) {
+            @RequestBody BulkRecordScoreRequest scoreRequest,
+            @RequestParam(value = "enrichInternalAttributes", required = false) String enrichInternalAttributes,
+            @RequestParam(value = "performFetchOnlyForMatching", required = false) String performFetchOnlyForMatching
+            ) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scorePercentileRecords(request, scoreRequest, customerSpace, false, false, requestId);
+        return scorePercentileRecords(request, scoreRequest, customerSpace, "true".equals(enrichInternalAttributes), "true".equals(performFetchOnlyForMatching), requestId);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -100,10 +106,12 @@ public class ScoreResource extends BaseScoring {
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
     public List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request, //
-            @RequestBody BulkRecordScoreRequest scoreRequest) {
+            @RequestBody BulkRecordScoreRequest scoreRequest,
+            @RequestParam(value = "enrichInternalAttributes", required = false) String enrichInternalAttributes,
+            @RequestParam(value = "performFetchOnlyForMatching", required = false) String performFetchOnlyForMatching) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
-        return scoreRecordsDebug(request, scoreRequest, customerSpace, false, false, requestId);
+        return scoreRecordsDebug(request, scoreRequest, customerSpace, "true".equals(enrichInternalAttributes), "true".equals(performFetchOnlyForMatching), requestId);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")

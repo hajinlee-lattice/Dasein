@@ -27,9 +27,6 @@ import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
-    // TODO - lei will remove useFuzzyMatch
-    private boolean useFuzzyMatch = false;
-
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //
             InterpretedFields interpreted, //
@@ -76,9 +73,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         matchInput.setFields(fields);
         matchInput.setData(data);
 
-        matchInput.setFetchOnly(
-                // TODO - lei will remove useFuzzyMatch
-                useFuzzyMatch || performFetchOnlyForMatching);
+        matchInput.setFetchOnly(performFetchOnlyForMatching);
         matchInput.setRootOperationUid(requestId);
         return matchInput;
     }
@@ -105,20 +100,19 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                 if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
 
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
-                                    recordModelTuple.getParsedData().getKey(), modelSummary,
-                                    selectedLeadEnrichmentAttributes, skipPredefinedSelection,
-                                    performFetchOnlyForMatching, requestId));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
+                                    .getParsedData().getKey(), modelSummary, selectedLeadEnrichmentAttributes,
+                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId));
                 } else {
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
-                                    recordModelTuple.getParsedData().getKey(), modelSummary, null,
-                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
+                                    .getParsedData().getKey(), modelSummary, null, skipPredefinedSelection,
+                                    performFetchOnlyForMatching, requestId));
                 }
             } else {
                 matchInputList.add(//
-                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
-                                recordModelTuple.getParsedData().getKey(), modelSummary, null, //
+                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
+                                .getParsedData().getKey(), modelSummary, null, //
                                 skipPredefinedSelection, performFetchOnlyForMatching, requestId));
             }
         }

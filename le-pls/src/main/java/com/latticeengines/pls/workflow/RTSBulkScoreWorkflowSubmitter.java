@@ -8,7 +8,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -41,8 +39,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private MatchCommandProxy matchCommandProxy;
     
-    private boolean useFuzzyMatch = false;
-
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {
         log.info(String.format(
@@ -82,7 +78,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         log.info("Data Cloud Version=" + dataCloudVersion);
         
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        boolean skipIdMatch = !MatchTypeUtil.isValidForAccountMasterBasedMatch(dataCloudVersion) || !useFuzzyMatch;
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -102,7 +97,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion)
-                .skipMatchingStep(skipIdMatch)
                 .matchClientDocument(matchClientDocument) //
                 .build();
     }
