@@ -5,7 +5,9 @@
       <li ng-repeat="pipeline in vm_pipeline.analyticPipelines"
         ng-class="{selected: vm_pipeline.selectedPipeline === pipeline}"
         ng-click="vm_pipeline.selectPipeline(pipeline)">
-        {{::pipeline.name}}
+        <div>
+          {{::pipeline.name}}
+        </div>
       </li>
     </ul>
   </div>
