@@ -96,20 +96,20 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getContacts(String tenantName, long start, int offset, int maximum,
-            List<Integer> contactIds) {
+            List<Integer> contactIds, List<Integer> accountIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds);
+        List<Map<String, Object>> contacts = dao.getContacts(start, offset, maximum, contactIds, accountIds);
         Map<String, Object> result = wrapResult(contacts);
         return result;
     }
 
     @Override
-    public Map<String, Object> getContactCount(String tenantName, long start, List<Integer> contactIds) {
+    public Map<String, Object> getContactCount(String tenantName, long start, List<Integer> contactIds, List<Integer> accountIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getContactCount(start, contactIds));
+        result.put(COUNT_KEY, dao.getContactCount(start, contactIds, accountIds));
         return result;
     }
 

@@ -41,9 +41,9 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayGroupCount(String tenantName, long start);
 
-    Map<String, Object> getContacts(String tenantName, long start, int offset, int maximum, List<Integer> contactIds);
+    Map<String, Object> getContacts(String tenantName, long start, int offset, int maximum, List<Integer> contactIds, List<Integer> accountIds);
 
-    Map<String, Object> getContactCount(String tenantName, long start, List<Integer> contactIds);
+    Map<String, Object> getContactCount(String tenantName, long start, List<Integer> contactIds, List<Integer> accountIds);
 
     Map<String, Object> getContactExtensionColumnCount(String tenantName);
 

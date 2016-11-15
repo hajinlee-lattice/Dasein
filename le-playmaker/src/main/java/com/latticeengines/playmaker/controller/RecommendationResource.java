@@ -1,5 +1,9 @@
 package com.latticeengines.playmaker.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "Playmaker recommendation api", description = "REST resource for getting playmaker recomendationss")
 @Configuration
@@ -168,10 +168,11 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Contact Id whose contacts are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds,
+            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getContacts(tenantName, start, offset, maximum, contactIds);
+        return playmakerRecommendationMgr.getContacts(tenantName, start, offset, maximum, contactIds, accountIds);
     }
 
     @RequestMapping(value = "/contactcount", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -180,10 +181,11 @@ public class RecommendationResource extends SpringBootServletInitializer {
     public Map<String, Object> getContactCount(
             HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "Contact Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
+            @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds,
+            @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        return playmakerRecommendationMgr.getContactCount(tenantName, start, contactIds);
+        return playmakerRecommendationMgr.getContactCount(tenantName, start, contactIds, accountIds);
     }
 
     @RequestMapping(value = "/contactextensions", method = RequestMethod.GET, headers = "Accept=application/json")

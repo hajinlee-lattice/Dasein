@@ -35,9 +35,9 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     int getPlayGroupCount(long start);
 
-    List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds);
+    List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds, List<Integer> accountIds);
 
-    int getContactCount(long start, List<Integer> contactIds);
+    int getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds);
 
     List<Map<String, Object>> getContactExtensionSchema();
 

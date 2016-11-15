@@ -178,22 +178,47 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getContacts() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), 1000, 0, 100,
-                null);
+                null, null);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> contacts = (List<Map<String, Object>>) result
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
         Assert.assertTrue(contacts.size() > 0);
     }
+    
+    @Test(groups = "functional", enabled = true)
+    public void getContactsWithAccountIds() throws Exception {
+        List<Integer> accountIds = new ArrayList<>();
+        accountIds.add(10);
+        accountIds.add(12);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getContacts(tenant.getTenantName(), 1000, 0, 100,
+                null, accountIds);
+        Assert.assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> contacts = (List<Map<String, Object>>) result
+        .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+        Assert.assertTrue(contacts.size() > 0);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getContactCountWithAccountIds() throws Exception {
+
+        List<Integer> accountIds = new ArrayList<>();
+        accountIds.add(10);
+        accountIds.add(12);
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), 1000,
+                null, accountIds);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
 
     @Test(groups = "functional", enabled = true)
     public void getContactCount() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getContactCount(tenant.getTenantName(), 1000,
-                null);
+                null, null);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
-
+    
     @Test(groups = "functional", enabled = true)
     public void getContactExtensions() throws Exception {
 

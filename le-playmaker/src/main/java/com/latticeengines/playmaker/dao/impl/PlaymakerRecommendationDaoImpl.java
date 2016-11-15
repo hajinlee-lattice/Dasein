@@ -420,7 +420,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds) {
+    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds, List<Integer> accountIds) {
         String sql = "SELECT * FROM (SELECT C.[LEContact_ID] AS ID, C.[External_ID] AS ExternalID, C.[Display_Name] AS Name, C.[Account_ID] AS AccountID, "
                 + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone,"
                 + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
@@ -430,7 +430,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + getSfdcContactIDFromLEContact()
                 + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], C.[LEContact_ID] ) RowNum "
-                + getContactFromWhereClause(contactIds)
+                + getContactFromWhereClause(contactIds, accountIds)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
@@ -439,23 +439,29 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(contactIds)) {
             source.addValue("contactIds", contactIds);
         }
+        if (!CollectionUtils.isEmpty(accountIds)) {
+            source.addValue("accountIds", accountIds);
+        }
 
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         return results;
     }
 
     @Override
-    public int getContactCount(long start, List<Integer> contactIds) {
-        String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds);
+    public int getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
+        String sql = "SELECT COUNT(*) " + getContactFromWhereClause(contactIds, accountIds);
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);
         if (!CollectionUtils.isEmpty(contactIds)) {
             source.addValue("contactIds", contactIds);
         }
+        if (!CollectionUtils.isEmpty(accountIds)) {
+            source.addValue("accountIds", accountIds);
+        }
         return queryForObject(sql, source, Integer.class);
     }
 
-    private String getContactFromWhereClause(List<Integer> contactIds) {
+    private String getContactFromWhereClause(List<Integer> contactIds, List<Integer> accountIds) {
         String whereClause = "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 "
                 + "%s AND DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
 
@@ -465,6 +471,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         } else {
             extraFilter.append("AND C.[LEContact_ID] IN (:contactIds) ");
         }
+        if (CollectionUtils.isEmpty(accountIds)) {
+            extraFilter.append("");
+        } else {
+            extraFilter.append("AND C.[Account_ID] IN (:accountIds) ");
+        }
+        
         return String.format(whereClause, extraFilter.toString());
     }
 
