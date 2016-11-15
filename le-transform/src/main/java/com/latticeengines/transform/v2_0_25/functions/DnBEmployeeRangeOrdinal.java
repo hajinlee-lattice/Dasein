@@ -10,14 +10,14 @@ import com.latticeengines.transform.exposed.metadata.StatisticalType;
 import com.latticeengines.transform.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
-public class DnBRevenueRangeOrdinal implements RealTimeTransform {
+public class DnBEmployeeRangeOrdinal implements RealTimeTransform {
 
-    private static final long serialVersionUID = 2101388118521954639L;
+    private static final long serialVersionUID = -361652189091168052L;
 
-    public DnBRevenueRangeOrdinal() {
+    public DnBEmployeeRangeOrdinal() {
     }
 
-    public DnBRevenueRangeOrdinal(String modelPath) {
+    public DnBEmployeeRangeOrdinal(String modelPath) {
     }
 
     @Override
@@ -34,29 +34,31 @@ public class DnBRevenueRangeOrdinal implements RealTimeTransform {
             return null;
         }
 
-        String revenueRange = ((String) value).trim();
+        String employeeRange = ((String) value).trim();
 
-        switch (revenueRange) {
-        case "0-1M":
+        switch (employeeRange) {
+        case "0":
             return 0;
-        case "1-10M":
+        case "1-10":
             return 10;
-        case "11-50M":
+        case "11-50":
             return 20;
-        case "51-100M":
+        case "51-100":
             return 30;
-        case "101-250M":
+        case "101-200":
             return 40;
-        case "251-500M":
+        case "201-500":
             return 50;
-        case "501M-1B":
+        case "501-1000":
             return 60;
-        case "1-5B":
+        case "1001-2500":
             return 70;
-        case "5B-10B":
+        case "2501-5000":
             return 80;
-        case ">10B":
+        case "5001-10,000":
             return 90;
+        case ">10,000":
+            return 100;
         default:
             return -100;
         }
@@ -69,8 +71,8 @@ public class DnBRevenueRangeOrdinal implements RealTimeTransform {
         metadata.setCategory(Category.FIRMOGRAPHICS);
         metadata.setFundamentalType(FundamentalType.NUMERIC);
         metadata.setStatisticalType(StatisticalType.ORDINAL);
-        metadata.setDescription("Ordinal value for revenue range");
-        metadata.setDisplayName("Revenue Range Ordinal");
+        metadata.setDescription("Ordinal value for employee range");
+        metadata.setDisplayName("Employee Range Ordinal");
         metadata.setTags(Tag.EXTERNAL_TRANSFORM);
         return metadata;
     }

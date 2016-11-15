@@ -53,10 +53,11 @@ public class TransformationPipeline {
             new LinkedHashMap<String, Object>());
 
     public static TransformDefinition stdVisidbDsPdFundingstageOrdered = new TransformDefinition(
-            "StdVisidbDsPdFundingstageOrdered", "FundingStage1", FieldType.INTEGER, new LinkedHashMap<String, Object>());
+            "StdVisidbDsPdFundingstageOrdered", "FundingStage1", FieldType.INTEGER,
+            new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition stdVisidbDsTitleIsacademic = new TransformDefinition(
-            "StdVisidbDsTitleIsacademic", "Title_IsAcademic", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
+    public static TransformDefinition stdVisidbDsTitleIsacademic = new TransformDefinition("StdVisidbDsTitleIsacademic",
+            "Title_IsAcademic", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
 
     public static TransformDefinition stdVisidbDsFirstnameSameasLastname = new TransformDefinition(
             "StdVisidbDsFirstnameSameasLastname", "FirstName_SameAs_LastName", FieldType.BOOLEAN,
@@ -72,7 +73,8 @@ public class TransformationPipeline {
             "EmailLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
 
     public static TransformDefinition stdVisidbEmailPrefixLength = new TransformDefinition(
-            "StdVisidbDsEmailPrefixlength", "EmailPrefixLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
+            "StdVisidbDsEmailPrefixlength", "EmailPrefixLength", FieldType.INTEGER,
+            new LinkedHashMap<String, Object>());
 
     public static TransformDefinition stdVisidbNameLength = new TransformDefinition("StdVisidbDsNamelength",
             "NameLength", FieldType.INTEGER, new LinkedHashMap<String, Object>());
@@ -97,8 +99,8 @@ public class TransformationPipeline {
             "StdVisidbDsStateIsCanadianProvince", "StateIsCanadianProvince", FieldType.BOOLEAN,
             new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition stdVisidbStateIsInFarWest = new TransformDefinition(
-            "StdVisidbDsStateIsInFarWest", "StateIsInFarWest", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
+    public static TransformDefinition stdVisidbStateIsInFarWest = new TransformDefinition("StdVisidbDsStateIsInFarWest",
+            "StateIsInFarWest", FieldType.BOOLEAN, new LinkedHashMap<String, Object>());
 
     public static TransformDefinition stdVisidbStateIsInGreatLakes = new TransformDefinition(
             "StdVisidbDsStateIsInGreatLakes", "StateIsInGreatLakes", FieldType.BOOLEAN,
@@ -127,17 +129,23 @@ public class TransformationPipeline {
             "StdVisidbDsStateIsInSouthWest", "StateIsInSouthWest", FieldType.BOOLEAN,
             new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition dnbNaicsSector = new TransformDefinition(
-            "DnBNaicsSector", "NaicsSector", FieldType.STRING, new LinkedHashMap<String, Object>());
+    public static TransformDefinition dnbNaicsSector = new TransformDefinition("DnBNaicsSector", "NaicsSector",
+            FieldType.STRING, new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition dnbNaicsSubsector = new TransformDefinition(
-            "DnBNaicsSubsector", "NaicsSubsector", FieldType.STRING, new LinkedHashMap<String, Object>());
+    public static TransformDefinition dnbNaicsSubsector = new TransformDefinition("DnBNaicsSubsector", "NaicsSubsector",
+            FieldType.STRING, new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition dnbNaicsIndustryGroup = new TransformDefinition(
-            "DnBNaicsIndustryGroup", "NaicsIndustryGroup", FieldType.STRING, new LinkedHashMap<String, Object>());
+    public static TransformDefinition dnbNaicsIndustryGroup = new TransformDefinition("DnBNaicsIndustryGroup",
+            "NaicsIndustryGroup", FieldType.STRING, new LinkedHashMap<String, Object>());
 
-    public static TransformDefinition dnbSicCategory = new TransformDefinition(
-            "DnBSicCategory", "SicCategory", FieldType.STRING, new LinkedHashMap<String, Object>());
+    public static TransformDefinition dnbSicCategory = new TransformDefinition("DnBSicCategory", "SicCategory",
+            FieldType.STRING, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition dnbRevenueRangeOrdinal = new TransformDefinition("DnBRevenueRangeOrdinal",
+            "RevenueRangeOrdinal", FieldType.INTEGER, new LinkedHashMap<String, Object>());
+
+    public static TransformDefinition dnbEmployeeRangeOrdinal = new TransformDefinition("DnBEmployeeRangeOrdinal",
+            "EmployeeRangeOrdinal", FieldType.INTEGER, new LinkedHashMap<String, Object>());
 
     static {
         setArguments();
@@ -156,7 +164,6 @@ public class TransformationPipeline {
         stdVisidbDsPdAlexaRelatedlinksCount.arguments.put("column", "AlexaRelatedLinks");
 
         stdPhoneEntropy.arguments.put("column", InterfaceName.PhoneNumber.name());
-
 
         stdVisidbAlexaMonthssinceonline.arguments.put("column", "AlexaOnlineSince");
         stdVisidbDsPdModelactionOrdered.arguments.put("column", "ModelAction");
@@ -210,6 +217,8 @@ public class TransformationPipeline {
         dnbNaicsSubsector.arguments.put("column", "LE_NAICS_CODE");
         dnbNaicsIndustryGroup.arguments.put("column", "LE_NAICS_CODE");
         dnbSicCategory.arguments.put("column", "LE_SIC_CODE");
+        dnbRevenueRangeOrdinal.arguments.put("column", "LE_REVENUE_RANGE");
+        dnbEmployeeRangeOrdinal.arguments.put("column", "LE_EMPLOYEE_RANGE");
     }
 
     public static void setDisplayName() {
@@ -227,7 +236,7 @@ public class TransformationPipeline {
         case NONE:
             return new HashSet<>();
         case ALL:
-            return ImmutableSet.<TransformDefinition> builder()//
+            return ImmutableSet.<TransformDefinition>builder()//
                     .addAll(getStandardTransforms()) //
                     .addAll(getPocTransforms()).build();
         case POC:
@@ -239,7 +248,7 @@ public class TransformationPipeline {
     }
 
     public static Set<TransformDefinition> getStandardTransforms() {
-        Set<TransformDefinition> stdTransformDefinitions = ImmutableSet.<TransformDefinition> builder()
+        Set<TransformDefinition> stdTransformDefinitions = ImmutableSet.<TransformDefinition>builder()
                 .add(stdVisidbDsCompanynameEntropy) //
                 .add(stdLengthTitle) //
                 .add(stdLengthCompanyName) //
@@ -260,12 +269,14 @@ public class TransformationPipeline {
                 .add(dnbNaicsSubsector) //
                 .add(dnbNaicsIndustryGroup) //
                 .add(dnbSicCategory) //
+                .add(dnbRevenueRangeOrdinal) //
+                .add(dnbEmployeeRangeOrdinal) //
                 .build();
         return stdTransformDefinitions;
     }
 
     public static Set<TransformDefinition> getPocTransforms() {
-        Set<TransformDefinition> pocTransformDefinitions = ImmutableSet.<TransformDefinition> builder()
+        Set<TransformDefinition> pocTransformDefinitions = ImmutableSet.<TransformDefinition>builder()
                 .add(stdVisidbEmailIsInvalid) //
                 .add(stdVisidbEmailLength) //
                 .add(stdVisidbEmailPrefixLength) //
