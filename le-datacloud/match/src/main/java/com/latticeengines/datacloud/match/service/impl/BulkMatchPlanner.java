@@ -23,12 +23,14 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         MatchContext context = new MatchContext();
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
-        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
+        ColumnSelection columnSelection = parseColumnSelection(input);
+        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())
+                || (columnSelection.getColumnIds().size() == 1
+                        && MatchConstants.LID_FIELD.equals(columnSelection.getColumnIds().get(0)))) {
             context.setSeekingIdOnly(true);
         }
-        ColumnSelection columnSelection = parseColumnSelection(input);
         context.setColumnSelection(columnSelection);
-        context.setReturnUnmatched(input.getReturnUnmatched());
+        context.setReturnUnmatched(true);
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
         MatchOutput output = initializeMatchOutput(input, columnSelection, null);
         context.setOutput(output);

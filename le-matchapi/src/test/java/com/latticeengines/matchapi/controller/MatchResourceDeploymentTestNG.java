@@ -75,8 +75,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
-
-        input.setReturnUnmatched(false);
         output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
@@ -96,8 +94,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         input.setDataCloudVersion("2.0.0");
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
-
-        input.setReturnUnmatched(false);
         output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
@@ -198,7 +194,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             MatchInput input = prepareSimpleMatchInput(resolveKeyMap, //
                     domains.get(i % domains.size()), //
                     false, true, null);
-            input.setReturnUnmatched(false);
             input.setDataCloudVersion(dataCloudVersion);
             inputList.add(input);
         }
@@ -214,7 +209,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             mockData.add(Arrays.asList(row));
         }
         MatchInput input = new MatchInput();
-        input.setReturnUnmatched(true);
 
         if (setUnionSelection) {
             UnionSelection us = new UnionSelection();
@@ -232,7 +226,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
         }
         input.setData(mockData);
-        input.setReturnUnmatched(true);
         return input;
     }
 
@@ -243,7 +236,6 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
 
-        input.setReturnUnmatched(false);
         output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);

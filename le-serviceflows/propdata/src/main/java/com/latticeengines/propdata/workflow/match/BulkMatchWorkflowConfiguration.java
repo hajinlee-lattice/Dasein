@@ -46,6 +46,9 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setDataCloudVersion(matchInput.getDataCloudVersion());
             prepareConfig.setCustomizedSelection(matchInput.getCustomSelection());
             prepareConfig.setYarnQueue(matchInput.getYarnQueue());
+            prepareConfig.setUseRealTimeProxy(matchInput.getUseRealTimeProxy());
+            prepareConfig.setRealTimeProxyUrl(matchInput.getRealTimeProxyUrl());
+            prepareConfig.setRealTimeThreadPoolSize(matchInput.getRealTimeThreadPoolSize());
             return this;
         }
 

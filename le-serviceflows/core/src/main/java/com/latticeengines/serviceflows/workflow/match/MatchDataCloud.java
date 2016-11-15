@@ -112,11 +112,7 @@ public class MatchDataCloud extends BaseWorkflowStep<MatchStepConfiguration> {
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         switch (configuration.getMatchJoinType()) {
-        case INNER_JOIN:
-            matchInput.setReturnUnmatched(false);
-            break;
         case OUTER_JOIN:
-            matchInput.setReturnUnmatched(true);
             break;
         default:
             throw new UnsupportedOperationException("Unknown join type " + configuration.getMatchJoinType());

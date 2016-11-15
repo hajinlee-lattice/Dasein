@@ -357,6 +357,11 @@ public class ExternalColumn implements HasPid, Serializable, MetadataColumn {
         if (getExternalColumnID().startsWith("TechIndicator") && Category.TECHNOLOGY_PROFILE.equals(getCategory())) {
             metadata.setIsPremium(Boolean.TRUE);
         }
+
+        if (metadata.getDataType() != null && metadata.getDataType().contains("VARCHAR")) {
+            metadata.setJavaClass(String.class.getSimpleName());
+        }
+
         return metadata;
     }
 

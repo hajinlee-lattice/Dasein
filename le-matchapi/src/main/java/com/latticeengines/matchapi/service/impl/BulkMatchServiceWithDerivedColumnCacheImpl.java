@@ -89,7 +89,7 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         ApplicationId appId = submitter //
                 .matchInput(input) //
-                .returnUnmatched(input.getReturnUnmatched()) //
+                .returnUnmatched(true) //
                 .hdfsPodId(hdfsPodId) //
                 .rootOperationUid(rootOperationUid) //
                 .workflowProxy(workflowProxy) //

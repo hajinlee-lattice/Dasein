@@ -62,6 +62,10 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
 
     private String dataCloudVersion;
 
+    private Boolean useRealTimeProxy;
+    private String realTimeProxyUrl;
+    private Integer realTimeThreadPoolSize;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -235,5 +239,34 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.yarnQueue = yarnQueue;
     }
 
+    @JsonProperty("use_real_time_proxy")
+    public Boolean getUseRealTimeProxy() {
+        return useRealTimeProxy;
+    }
+
+    @JsonProperty("use_real_time_proxy")
+    public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
+        this.useRealTimeProxy = useRealTimeProxy;
+    }
+
+    @JsonProperty("real_time_proxy_url")
+    public String getRealTimeProxyUrl() {
+        return realTimeProxyUrl;
+    }
+
+    @JsonProperty("real_time_proxy_url")
+    public void setRealTimeProxyUrl(String realTimeProxyUrl) {
+        this.realTimeProxyUrl = realTimeProxyUrl;
+    }
+
+    @JsonProperty("real_time_thread_pool_size")
+    public Integer getRealTimeThreadPoolSize() {
+        return realTimeThreadPoolSize;
+    }
+
+    @JsonProperty("real_time_thread_pool_size")
+    public void setRealTimeThreadPoolSize(Integer realTimeThreadPoolSize) {
+        this.realTimeThreadPoolSize = realTimeThreadPoolSize;
+    }
 }
 

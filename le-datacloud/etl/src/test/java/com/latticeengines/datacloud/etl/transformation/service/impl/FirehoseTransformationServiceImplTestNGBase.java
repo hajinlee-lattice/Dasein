@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public abstract class FirehoseTransformationServiceImplTestNGBase<T extends TransformationConfiguration>
         extends TransformationServiceImplTestNGBase<T> {
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testTransformation() {
         uploadBaseGZFile();
         TransformationProgress progress = createNewProgress();
@@ -21,7 +21,7 @@ public abstract class FirehoseTransformationServiceImplTestNGBase<T extends Tran
         cleanupProgressTables();
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testTransformation" })
+    @Test(groups = "functional", dependsOnMethods = { "testTransformation" }, enabled = false)
     public void testTransformationWithBadData() {
         uploadBadBaseGZFile();
         TransformationProgress progress = createNewProgress();

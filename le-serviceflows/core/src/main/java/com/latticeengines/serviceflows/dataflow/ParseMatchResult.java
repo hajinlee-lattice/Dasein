@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.datacloud.match.ParseMatchResultParameters;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
@@ -22,9 +22,13 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         sourceCols = parameters.sourceColumns;
         Node source = addSource(parameters.sourceTableName);
         FieldList[] fields = sourceFields(source);
-        FieldList retainFields = retainFields(source);
-        source = source.retain(retainFields);
-        return source.rename(fields[0], fields[1]);
+        if (fields == null) {
+            return source;
+        } else {
+            FieldList retainFields = retainFields(source);
+            source = source.retain(retainFields);
+            return source.rename(fields[0], fields[1]);
+        }
     }
 
     private FieldList[] sourceFields(Node source) {
@@ -52,7 +56,11 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
                 }
             }
         }
-        return new FieldList[] { new FieldList(originalFields), new FieldList(newFields) };
+        if (originalFields.length > 0) {
+            return new FieldList[]{new FieldList(originalFields), new FieldList(newFields)};
+        } else {
+            return null;
+        }
     }
 
     private FieldList retainFields(Node source) {

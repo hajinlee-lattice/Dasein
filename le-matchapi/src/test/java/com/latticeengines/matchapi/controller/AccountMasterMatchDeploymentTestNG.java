@@ -254,7 +254,6 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
             inputBuffer.setSchema(inputSchema);
         }
         matchInput.setInputBuffer(inputBuffer);
-        matchInput.setReturnUnmatched(true);
 
         matchInput.setPredefinedSelection(Predefined.RTS);
         ColumnSelection customSelection = new ColumnSelection();

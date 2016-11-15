@@ -19,71 +19,81 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
-    private String hdfsPodId;
-    private Integer blockSize;
-    private Integer groupSize;
-    private Integer threadPoolSize;
-    private String avroPath;
-    private Predefined predefinedSelection;
-    private String predefinedSelectionVersion;
-    private ColumnSelection customizedSelection;
-    private Map<MatchKey, List<String>> keyMap;
-    private String rootOperationUid;
-    private String blockOperationUid;
-    private String appName;
-    private Boolean returnUnmatched;
-    private Boolean excludeUnmatchedPublicDomain = Boolean.FALSE;
-    private Boolean publicDomainAsNormalDomain = Boolean.FALSE;
-    private String yarnQueue;
-    private Schema inputAvroSchema;
-    private String dataCloudVersion;
-
     @JsonProperty("hdfs_pod_id")
+    private String hdfsPodId;
+    @JsonProperty("block_size")
+    private Integer blockSize;
+    @JsonProperty("group_size")
+    private Integer groupSize;
+    @JsonProperty("thread_pool_size")
+    private Integer threadPoolSize;
+    @JsonProperty("avro_path")
+    private String avroPath;
+    @JsonProperty("predefined_selection")
+    private Predefined predefinedSelection;
+    @JsonProperty("customized_selection")
+    private ColumnSelection customizedSelection;
+    @JsonProperty("key_map")
+    private Map<MatchKey, List<String>> keyMap;
+    @JsonProperty("root_operation_uid")
+    private String rootOperationUid;
+    @JsonProperty("block_operation_uid")
+    private String blockOperationUid;
+    @JsonProperty("app_name")
+    private String appName;
+    @JsonProperty("yarn_queue")
+    private String yarnQueue;
+    @JsonProperty("data_cloud_version")
+    private String dataCloudVersion;
+    @JsonProperty("realtime_proxy_url")
+    private String realTimeProxyUrl;
+
+    private Schema inputAvroSchema;
+
+    @JsonProperty("exclude_unmatched_public_domain")
+    private Boolean excludeUnmatchedPublicDomain = Boolean.FALSE;
+    @JsonProperty("public_domain_as_normal_domain")
+    private Boolean publicDomainAsNormalDomain = Boolean.FALSE;
+    @JsonProperty("use_realtime_proxy")
+    private Boolean useRealTimeProxy = Boolean.FALSE;
+
+
     public String getHdfsPodId() {
         return hdfsPodId;
     }
 
-    @JsonProperty("hdfs_pod_id")
     public void setHdfsPodId(String hdfsPodId) {
         this.hdfsPodId = hdfsPodId;
     }
 
-    @JsonProperty("block_size")
     public Integer getBlockSize() {
         return blockSize;
     }
 
-    @JsonProperty("block_size")
     public void setBlockSize(Integer blockSize) {
         this.blockSize = blockSize;
     }
 
-    @JsonProperty("group_size")
     public Integer getGroupSize() {
         return groupSize;
     }
 
-    @JsonProperty("group_size")
     public void setGroupSize(Integer groupSize) {
         this.groupSize = groupSize;
     }
 
-    @JsonProperty("thread_pool_size")
     public Integer getThreadPoolSize() {
         return threadPoolSize;
     }
 
-    @JsonProperty("thread_pool_size")
     public void setThreadPoolSize(Integer threadPoolSize) {
         this.threadPoolSize = threadPoolSize;
     }
 
-    @JsonProperty("avro_path")
     public String getAvroPath() {
         return avroPath;
     }
 
-    @JsonProperty("avro_path")
     public void setAvroPath(String avroPath) {
         this.avroPath = avroPath;
     }
@@ -121,124 +131,100 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.inputAvroSchema = inputAvroSchema;
     }
 
-    @JsonProperty("predefined_selection")
     public Predefined getPredefinedSelection() {
         return predefinedSelection;
     }
 
-    @JsonProperty("predefined_selection")
     public void setPredefinedSelection(Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
     }
-
-    @JsonProperty("predefined_selection_version")
-    public String getPredefinedSelectionVersion() {
-        return predefinedSelectionVersion;
-    }
-
-    @JsonProperty("predefined_selection_version")
-    public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
-        this.predefinedSelectionVersion = predefinedSelectionVersion;
-    }
     
-    @JsonProperty("data_cloud_version")
     public String getDataCloudVersion() {
         return dataCloudVersion;
     }
 
-    @JsonProperty("data_cloud_version")
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
 
-    @JsonProperty("customized_selection")
     public ColumnSelection getCustomizedSelection() {
         return customizedSelection;
     }
 
-    @JsonProperty("customized_selection")
     public void setCustomizedSelection(ColumnSelection customizedSelection) {
         this.customizedSelection = customizedSelection;
     }
 
-    @JsonProperty("key_map")
     public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }
 
-    @JsonProperty("key_map")
     public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
         this.keyMap = keyMap;
     }
 
-    @JsonProperty("root_operation_uid")
     public String getRootOperationUid() {
         return rootOperationUid;
     }
 
-    @JsonProperty("root_operation_uid")
     public void setRootOperationUid(String rootOperationUid) {
         this.rootOperationUid = rootOperationUid;
     }
 
-    @JsonProperty("block_operation_uid")
     public String getBlockOperationUid() {
         return blockOperationUid;
     }
 
-    @JsonProperty("block_operation_uid")
     public void setBlockOperationUid(String blockOperationUid) {
         this.blockOperationUid = blockOperationUid;
     }
 
-    @JsonProperty("app_name")
     public String getAppName() {
         return appName;
     }
 
-    @JsonProperty("app_name")
     public void setAppName(String appName) {
         this.appName = appName;
     }
 
-    @JsonProperty("return_unmatched")
-    public Boolean getReturnUnmatched() {
-        return returnUnmatched;
-    }
-
-    @JsonProperty("return_unmatched")
-    public void setReturnUnmatched(Boolean returnUnmatched) {
-        this.returnUnmatched = returnUnmatched;
-    }
-
-    @JsonProperty("exclude_unmatched_public_domain")
     public Boolean getExcludeUnmatchedPublicDomain() {
         return excludeUnmatchedPublicDomain;
     }
 
-    @JsonProperty("exclude_unmatched_public_domain")
     public void setExcludeUnmatchedPublicDomain(Boolean excludeUnmatchedPublicDomain) {
         this.excludeUnmatchedPublicDomain = excludeUnmatchedPublicDomain;
     }
 
-    @JsonProperty("public_domain_as_normal_domain")
     public Boolean getPublicDomainAsNormalDomain() {
         return publicDomainAsNormalDomain;
     }
 
-    @JsonProperty("public_domain_as_normal_domain")
     public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
         this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
-    @JsonProperty("yarn_queue")
     public String getYarnQueue() {
         return yarnQueue;
     }
 
-    @JsonProperty("yarn_queue")
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
+    }
+
+    public String getRealTimeProxyUrl() {
+        return realTimeProxyUrl;
+    }
+
+    public void setRealTimeProxyUrl(String realTimeProxyUrl) {
+        this.realTimeProxyUrl = realTimeProxyUrl;
+    }
+
+    public Boolean getUseRealTimeProxy() {
+        return useRealTimeProxy;
+    }
+
+    public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
+        this.useRealTimeProxy = useRealTimeProxy;
     }
 
     @Override

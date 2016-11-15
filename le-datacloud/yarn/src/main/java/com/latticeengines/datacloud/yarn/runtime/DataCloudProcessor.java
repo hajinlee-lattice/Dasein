@@ -27,6 +27,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +59,7 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
+import com.latticeengines.datacloud.match.service.impl.MatchConstants;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -72,6 +74,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("dataCloudProcessor")
@@ -83,6 +86,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private static final String LONG = Long.class.getSimpleName();
     private static final String FLOAT = Float.class.getSimpleName();
     private static final String DOUBLE = Double.class.getSimpleName();
+    private static final String STRING = String.class.getSimpleName();
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.buffer";
     private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
 
@@ -133,6 +137,9 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Value("${datacloud.yarn.num.travelers}")
     private int numTravelers;
 
+    @Autowired
+    private MatchProxy matchProxy;
+
     private BlockDivider divider;
     private Tenant tenant;
     private Predefined predefinedSelection;
@@ -154,6 +161,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Boolean publicDomainAsNormalDomain;
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
+    private boolean useProxy = false;
 
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
@@ -171,7 +179,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             receivedAt = new Date();
 
             podId = jobConfiguration.getHdfsPodId();
-            returnUnmatched = jobConfiguration.getReturnUnmatched();
+            returnUnmatched = true;
             excludeUnmatchedWithPublicDomain = jobConfiguration.getExcludeUnmatchedPublicDomain();
             publicDomainAsNormalDomain = jobConfiguration.getPublicDomainAsNormalDomain();
             HdfsPodContext.changeHdfsPodId(podId);
@@ -192,7 +200,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             tenant = new Tenant(space.toString());
 
             predefinedSelection = jobConfiguration.getPredefinedSelection();
-            predefinedSelectionVersion = jobConfiguration.getPredefinedSelectionVersion();
+            predefinedSelectionVersion = "1.0";
             customizedSelection = jobConfiguration.getCustomizedSelection();
 
             keyMap = jobConfiguration.getKeyMap();
@@ -200,16 +208,29 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(10));
             log.info(String.format("Set timeout to be %.2f for %d records", (timeOut / 60000.0), blockSize));
 
+            useProxy = Boolean.TRUE.equals(jobConfiguration.getUseRealTimeProxy());
+            if (useProxy) {
+                String overwritingProxyUrl = jobConfiguration.getRealTimeProxyUrl();
+                if (StringUtils.isNotEmpty(overwritingProxyUrl)) {
+                    matchProxy.setHostport(overwritingProxyUrl);
+                }
+                log.info("Using real-time match proxy at " + matchProxy.getHostport());
+            }
+
             Integer groupSize = jobConfiguration.getGroupSize();
-            Integer numThreads = jobConfiguration.getThreadPoolSize();
             if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
                 // for actor system bulk match, match records one by one
                 groupSize = 1;
-                numThreads = numTravelers;
             } else {
                 if (groupSize == null || groupSize < 1) {
                     groupSize = sqlGroupSize;
                 }
+            }
+
+            Integer numThreads = jobConfiguration.getThreadPoolSize();
+            if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion) && !useProxy) {
+                numThreads = numTravelers;
+            } else {
                 if (numThreads == null || numThreads < 1) {
                     numThreads = sqlThreadPool;
                 }
@@ -236,7 +257,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                     if (this.matchInput == null) {
                         this.matchInput = JsonUtils.deserialize(JsonUtils.serialize(input), MatchInput.class);
                     }
-                    Future<MatchContext> future = executor.submit(new BulkMatchCallable(input));
+
+                    Future<MatchContext> future;
+                    if (useProxy) {
+                        future = executor.submit(new RealTimeMatchCallable(input));
+                    } else {
+                        future = executor.submit(new BulkMatchCallable(input));
+                    }
                     futures.add(future);
                 }
                 if (futures.size() >= numTravelers) {
@@ -301,14 +328,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             setProgress(0.07f + 0.9f * rows / blockSize);
             log.info("Processed " + rows + " out of " + blockSize + " rows.");
         }
-        
+
         futures.removeAll(toDelete);
     }
 
     private MatchInput constructMatchInputFromData(List<List<Object>> data) {
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(rootOperationUid);
-        matchInput.setReturnUnmatched(returnUnmatched);
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
         matchInput.setPredefinedVersion(predefinedSelectionVersion);
@@ -320,6 +346,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         matchInput.setExcludeUnmatchedWithPublicDomain(excludeUnmatchedWithPublicDomain);
         matchInput.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
         matchInput.setDataCloudVersion(dataCloudVersion);
+
+        if (useProxy) {
+            matchInput.setSkipKeyResolution(true);
+        }
+
         return matchInput;
     }
 
@@ -334,12 +365,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         List<OutputRecord> recordsWithErrors = new ArrayList<>();
         // per record error might cause out of memory
         // TODO:: change to stream to output file on the fly
-//        for (OutputRecord record : groupOutput.getResult()) {
-//            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
-//                record.setOutput(null);
-//                recordsWithErrors.add(record);
-//            }
-//        }
+        // for (OutputRecord record : groupOutput.getResult()) {
+        // if (record.getErrorMessages() != null &&
+        // !record.getErrorMessages().isEmpty()) {
+        // record.setOutput(null);
+        // recordsWithErrors.add(record);
+        // }
+        // }
         groupOutput.setResult(recordsWithErrors);
 
         blockOutput = MatchUtils.mergeOutputs(blockOutput, groupOutput);
@@ -367,8 +399,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
-                if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
-                    value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
+                if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)
+                        || fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD)) {
+                    if (fields.get(i).name().startsWith("Source_")) {
+                        value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
+                    } else {
+                        value = matchDeclaredType(value, fields.get(i).name());
+                    }
                 }
                 builder.set(fields.get(i), value);
             }
@@ -397,6 +434,9 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             return value;
         }
         String javaClass = metadataColumn.getJavaClass();
+        if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
+            return String.valueOf(value);
+        }
         if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
             return Integer.valueOf(String.valueOf(value));
         }
@@ -431,7 +471,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             log.info("Using provided input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         }
-        inputSchema = prefixFieldName(inputSchema, "Source_");
+        inputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
         return (Schema) AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
     }
 
@@ -471,12 +511,21 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         }
     }
 
-    private Schema prefixFieldName(Schema schema, String prefix) {
+    private Schema prefixFieldName(Schema schema, Schema offendingSchema, String prefix) {
         SchemaBuilder.RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(schema.getName());
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
+        Set<String> offendingFields = new HashSet<>();
+        for (Schema.Field field : offendingSchema.getFields()) {
+            offendingFields.add(field.name().toUpperCase());
+        }
         for (Schema.Field field : schema.getFields()) {
-            fieldBuilder = fieldAssembler.name(prefix + field.name());
+            if (offendingFields.contains(field.name().toUpperCase())) {
+                // name conflict
+                fieldBuilder = fieldAssembler.name(prefix + field.name());
+            } else {
+                fieldBuilder = fieldAssembler.name(field.name());
+            }
             @SuppressWarnings("deprecation")
             Map<String, String> props = field.props();
             for (Map.Entry<String, String> entry : props.entrySet()) {
@@ -515,7 +564,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         public MatchContext call() {
             HdfsPodContext.changeHdfsPodId(podId);
             try {
-                Thread.sleep(new Random().nextInt(1500));
+                Thread.sleep(new Random().nextInt(200));
             } catch (InterruptedException e) {
                 // ignore
             }
@@ -526,6 +575,31 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         private MatchContext matchBlock(MatchInput input) {
             MatchContext matchContext = matchPlanner.plan(input);
             return matchExecutor.execute(matchContext);
+        }
+
+    }
+
+    private class RealTimeMatchCallable implements Callable<MatchContext> {
+
+        private MatchInput matchInput;
+
+        RealTimeMatchCallable(MatchInput matchInput) {
+            this.matchInput = matchInput;
+        }
+
+        @Override
+        public MatchContext call() {
+            HdfsPodContext.changeHdfsPodId(podId);
+            return matchBlock(matchInput);
+        }
+
+        @MatchStep
+        private MatchContext matchBlock(MatchInput input) {
+            MatchContext matchContext = new MatchContext();
+            matchContext.setInput(input);
+            MatchOutput output = matchProxy.matchRealTime(input);
+            matchContext.setOutput(output);
+            return matchContext;
         }
 
     }

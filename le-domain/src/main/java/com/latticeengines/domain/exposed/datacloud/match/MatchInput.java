@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,15 +33,17 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
     private int numRows;
 
-    private Boolean returnUnmatched;
     private Boolean excludeUnmatchedWithPublicDomain;
     private Boolean publicDomainAsNormalDomain;
     private Boolean fetchOnly;
+    private Boolean skipKeyResolution;
     private String decisionGraph;
     private Level logLevel;
 
-    private InputBuffer inputBuffer;
-    private IOBufferType outputBufferType;
+    private String rootOperationUid;
+    private String tableName;
+    private boolean bulkOnly;
+    private String matchEngine;
 
     // optional, but better to provide. if not, will be resolved from the fields
     private Map<MatchKey, List<String>> keyMap;
@@ -52,33 +55,18 @@ public class MatchInput implements Fact, Dimension {
 
     // if not provided, pick latest
     private String predefinedVersion;
-
     private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
-
-    private String matchEngine;
     private Integer numSelectedColumns;
 
     // only applicable for bulk match
+    private InputBuffer inputBuffer;
+    private IOBufferType outputBufferType;
     private String yarnQueue;
 
-    private String rootOperationUid;
-
-    private String tableName;
-
-    private boolean bulkOnly;
-
-    @JsonProperty("ReturnUnmatched")
-    public Boolean getReturnUnmatched() {
-        return Boolean.TRUE.equals(returnUnmatched);
-    }
-
-    @JsonProperty("ReturnUnmatched")
-    public void setReturnUnmatched(Boolean returnUnmatched) {
-        this.returnUnmatched = returnUnmatched;
-        if (this.returnUnmatched == null) {
-            this.returnUnmatched = Boolean.FALSE;
-        }
-    }
+    // testing via real time proxy
+    private Boolean useRealTimeProxy;
+    private String realTimeProxyUrl;
+    private Integer realTimeThreadPoolSize;
 
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
@@ -110,6 +98,16 @@ public class MatchInput implements Fact, Dimension {
         this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
     }
 
+    @JsonProperty("SkipKeyResolution")
+    public Boolean getSkipKeyResolution() {
+        return skipKeyResolution;
+    }
+
+    @JsonProperty("SkipKeyResolution")
+    public void setSkipKeyResolution(Boolean skipKeyResolution) {
+        this.skipKeyResolution = skipKeyResolution;
+    }
+
     @JsonProperty("DecisionGraph")
     public String getDecisionGraph() {
         return decisionGraph;
@@ -120,14 +118,28 @@ public class MatchInput implements Fact, Dimension {
         this.decisionGraph = decisionGraph;
     }
 
-    @JsonProperty("LogLevel")
+    @JsonIgnore
     public Level getLogLevel() {
         return logLevel;
     }
 
-    @JsonProperty("LogLevel")
+    @JsonIgnore
     public void setLogLevel(Level logLevel) {
         this.logLevel = logLevel;
+    }
+
+    @JsonProperty("LogLevel")
+    private String getLogLevelAsString() {
+        return logLevel != null ? logLevel.toString() : null;
+    }
+
+    @JsonProperty("LogLevel")
+    private void setLogLevelByString(String logLevel) {
+        if (StringUtils.isNotEmpty(logLevel)) {
+            this.logLevel = Level.toLevel(logLevel);
+        } else {
+            this.logLevel = null;
+        }
     }
 
     @JsonProperty("KeyMap")
@@ -321,6 +333,40 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("BulkOnly")
     public void setBulkOnly(boolean bulkOnly) {
         this.bulkOnly = bulkOnly;
+    }
+
+    @JsonProperty("UseRealTimeProxy")
+    public Boolean getUseRealTimeProxy() {
+        return useRealTimeProxy;
+    }
+
+    @JsonProperty("UseRealTimeProxy")
+    public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
+        this.useRealTimeProxy = useRealTimeProxy;
+    }
+
+    @JsonProperty("RealTimeProxyUrl")
+    public String getRealTimeProxyUrl() {
+        return realTimeProxyUrl;
+    }
+
+    @JsonProperty("RealTimeProxyUrl")
+    public void setRealTimeProxyUrl(String realTimeProxyUrl) {
+        this.realTimeProxyUrl = realTimeProxyUrl;
+    }
+
+    @JsonProperty("RealTimeThreadPoolSize")
+    public Integer getRealTimeThreadPoolSize() {
+        return realTimeThreadPoolSize;
+    }
+
+    @JsonProperty("RealTimeThreadPoolSize")
+    public void setRealTimeThreadPoolSize(Integer realTimeThreadPoolSize) {
+        this.realTimeThreadPoolSize = realTimeThreadPoolSize;
+    }
+
+    public static String getDefaultDatacloudVersion() {
+        return DEFAULT_DATACLOUD_VERSION;
     }
 
     @Override

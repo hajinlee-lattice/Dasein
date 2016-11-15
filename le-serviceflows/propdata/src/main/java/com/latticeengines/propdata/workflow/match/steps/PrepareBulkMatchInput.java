@@ -136,18 +136,21 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     private DataCloudJobConfiguration generateJobConfiguration() {
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(getConfiguration().getHdfsPodId());
-        jobConfiguration.setReturnUnmatched(getConfiguration().getReturnUnmatched());
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(getConfiguration().getCustomerSpace());
         jobConfiguration.setPredefinedSelection(getConfiguration().getPredefinedSelection());
         jobConfiguration.setDataCloudVersion(getConfiguration().getDataCloudVersion());
-        jobConfiguration.setPredefinedSelectionVersion(getConfiguration().getPredefinedSelectionVersion());
         jobConfiguration.setCustomizedSelection(getConfiguration().getCustomizedSelection());
         jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
         jobConfiguration.setExcludeUnmatchedPublicDomain(getConfiguration().getExcludeUnmatchedPublicDomain());
         jobConfiguration.setPublicDomainAsNormalDomain(getConfiguration().getPublicDomainAsNormalDomain());
+        if (Boolean.TRUE.equals(getConfiguration().getUseRealTimeProxy())) {
+            jobConfiguration.setUseRealTimeProxy(getConfiguration().getUseRealTimeProxy());
+            jobConfiguration.setRealTimeProxyUrl(getConfiguration().getRealTimeProxyUrl());
+            jobConfiguration.setThreadPoolSize(getConfiguration().getRealTimeThreadPoolSize());
+        }
         return jobConfiguration;
     }
 

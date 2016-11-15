@@ -266,7 +266,6 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private Future<MatchOutput> singleRun(List<Object> row, ExecutorService executor) {
             final MatchInput input = new MatchInput();
-            input.setReturnUnmatched(true);
             input.setPredefinedSelection(Predefined.RTS);
             input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
@@ -349,7 +348,6 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private MatchInput constructMatchInput() {
             MatchInput matchInput = new MatchInput();
-            matchInput.setReturnUnmatched(true);
             matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             matchInput.setPredefinedSelection(Predefined.RTS);
             AvroInputBuffer inputBuffer = new AvroInputBuffer();

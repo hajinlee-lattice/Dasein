@@ -89,12 +89,17 @@ public class MatchInputValidator {
     }
 
     private static Map<MatchKey, List<String>> resolveKeyMap(MatchInput input) {
-        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
-        if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
-            for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
-                log.debug("Overwriting key map entry " + JsonUtils.serialize(entry));
-                keyMap.put(entry.getKey(), entry.getValue());
+        Map<MatchKey, List<String>> keyMap = input.getKeyMap();
+        if (!Boolean.TRUE.equals(input.getSkipKeyResolution())) {
+            keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
+            if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
+                for (Map.Entry<MatchKey, List<String>> entry : input.getKeyMap().entrySet()) {
+                    log.debug("Overwriting key map entry " + JsonUtils.serialize(entry));
+                    keyMap.put(entry.getKey(), entry.getValue());
+                }
             }
+        } else if (keyMap == null || keyMap.isEmpty()) {
+            throw new IllegalArgumentException("Have to provide a key map, when skipping automatic key resolution.");
         }
 
         for (List<String> fields : keyMap.values()) {

@@ -18,7 +18,6 @@ public class TestMatchInputUtils {
 
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, List<String> inputFields, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
-        input.setReturnUnmatched(true);
         input.setPredefinedSelection(Predefined.RTS);
         input.setTenant(new Tenant("PD_Test"));
         input.setFields(inputFields);

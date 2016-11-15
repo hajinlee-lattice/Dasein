@@ -69,7 +69,7 @@
             Quota = True
             TargetMarket = True
             UseAccountMaster = True
-            UseDnbRtsAndModeling = False
+            UseDnbRtsAndModeling = True
             UseEloquaSettings = True
             UseMarketoSettings = True
             UseSalesforceSetting = True

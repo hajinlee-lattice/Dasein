@@ -60,7 +60,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
         }
         MatchContext matchContext = matchPlanner.plan(input, metadatas, skipExecutionPlanning);
         matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
-        matchContext.setReturnUnmatched(input.getReturnUnmatched());
+        matchContext.setReturnUnmatched(true);
         return matchContext;
     }
 
