@@ -86,6 +86,6 @@
     "lpsentry": "cd projects/leadprioritization/ && grunt sentry",
     "loginsentry": "cd projects/login/ && grunt sentry",
     "adminsentry": "cd projects/tenantconsole/ && grunt sentry",
-    "lint_admin": "cd projects/tenantconsole/ && grunt lint"
+    "lint_admin": "cd projects/tenantconsole/ && grunt lint || true"
   }
 }
