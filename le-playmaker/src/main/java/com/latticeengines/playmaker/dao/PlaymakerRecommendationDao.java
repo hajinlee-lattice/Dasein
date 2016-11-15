@@ -13,7 +13,7 @@ public interface PlaymakerRecommendationDao extends GenericDao {
     List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds);
 
     List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds,
-            String filterBy, Long recStart, String columns);
+            String filterBy, Long recStart, String columns, boolean hasSfdcContactId);
 
     List<Map<String, Object>> getAccountExtensionSchema();
 
@@ -46,8 +46,5 @@ public interface PlaymakerRecommendationDao extends GenericDao {
     List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<Integer> contactIds);
 
     int getContactExtensionColumnCount();
-
-    List<Map<String, Object>> getAccountExtensionsWithContacts(long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy, Long recStart, String columns);
 
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.controller;
+package com.latticeengines.playmaker.swagger;
 
 import static com.google.common.collect.Lists.newArrayList;
 

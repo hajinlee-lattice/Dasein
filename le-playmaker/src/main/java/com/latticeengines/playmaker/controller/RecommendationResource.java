@@ -118,33 +118,12 @@ public class RecommendationResource extends SpringBootServletInitializer {
                     + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
                     + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
             @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart,
-            @ApiParam(value = "columns are selected column names for output; column names are delimited by a comma.", required = false) @RequestParam(value = "columns", required = false) String columns) {
+            @ApiParam(value = "columns are selected column names for output; column names are delimited by a comma.", required = false) @RequestParam(value = "columns", required = false) String columns,
+            @ApiParam(value = "true - populate column SfdcContactId, false - does NOT populate column SfdcContactId", required = false) @RequestParam(value = "hasSfdcContactId", required = false) String hasSfdcContactId) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensions(tenantName, start,
-                offset, maximum, accountIds, filterBy, recStart, columns);
-        return accountExtensions;
-    }
-
-    @RequestMapping(value = "/accountextensionscontacts", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get account extensions with Contact Ids returned, this is special case to /accountextensions. Note: if SFDC Id begins with 001, SfdcAccountId is populated, "
-            + "if SFDC Id begins with 003, the SfdcContactId is polulated.")
-    public Map<String, Object> getAccountExtensionsWithContacts(
-            HttpServletRequest request,
-            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
-            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds,
-            @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
-                    + "are also its predefined values. NOTE: in terms of Recommendations and NoRecommendations, parameter recStart needs to be used to locate recommendations modified since recStart. "
-                    + "This is mutual exclusive to accountId.", required = false) @RequestParam(value = "filterBy", required = false) String filterBy,
-            @ApiParam(value = "The Last Modification date in unix timestamp on Recommendation, only used together with filterBy=Recommendations or NoRecommendations", required = false) @RequestParam(value = "recStart", required = false) Long recStart,
-            @ApiParam(value = "columns are selected column names for output; column names are delimited by a comma.", required = false) @RequestParam(value = "columns", required = false) String columns) {
-
-        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensionsWithContacts(tenantName,
-                start, offset, maximum, accountIds, filterBy, recStart, columns);
+                offset, maximum, accountIds, filterBy, recStart, columns, "true".equals(hasSfdcContactId));
         return accountExtensions;
     }
 
