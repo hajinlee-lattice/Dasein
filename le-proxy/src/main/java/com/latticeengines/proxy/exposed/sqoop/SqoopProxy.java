@@ -12,7 +12,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class SqoopProxy extends BaseRestApiProxy {
 
     public SqoopProxy() {
-        super(PropertyUtils.getProperty("common.test.sqoop.url"), "/sqoop/jobs");
+        super(PropertyUtils.getProperty("common.sqoop.url"), "/sqoop/jobs");
     }
 
     public AppSubmission importTable(SqoopImporter importer) {
