@@ -1,6 +1,5 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -19,27 +17,24 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationMetadata;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
-import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("addStandardAttributes")
 public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
 
-    private static final String DOMAIN = "__Domain";
     private static final Log log = LogFactory.getLog(AddStandardAttributes.class);
 
     @Override
     public Node construct(AddStandardAttributesParameters parameters) {
         Node eventTable = addSource(parameters.eventTable);
+        Node last = eventTable;
 
         fixTransformArgumentsAndMetadata(eventTable);
-
-        Node last = fixStdLengthDomainArgs(eventTable);
 
         Set<TransformDefinition> definitions = TransformationPipeline.getTransforms(parameters.transformationGroup);
 
         for (TransformDefinition definition : definitions) {
             resolveDuplicateName(eventTable, definition);
-            last = addFunction(last, definition);
+            last = addFunction(last, eventTable, definition);
         }
 
         if (parameters.doSort) {
@@ -48,26 +43,25 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
             last = last.sort("InternalId", true);
         }
 
-        return last.discard(new FieldList(DOMAIN));
+        return last;
     }
 
     private void fixTransformArgumentsAndMetadata(Node eventTable) {
+        fixStdLengthDomainArgs(eventTable);
         fixStdVisidbDsIndustryGroupArgs(eventTable);
     }
 
-    private Node fixStdLengthDomainArgs(Node eventTable) {
-        Node newEventTableWithDomain = eventTable;
-        List<String> fieldNames = eventTable.getFieldNames();
-        if (fieldNames.contains(InterfaceName.Domain.toString())
-                || fieldNames.contains(InterfaceName.Website.toString())
-                || fieldNames.contains(InterfaceName.Email.toString())) {
-            newEventTableWithDomain = DataFlowUtils.extractDomain(eventTable, DOMAIN);
-            TransformationPipeline.stdLengthDomain.arguments.put("column", DOMAIN);
+    private void fixStdLengthDomainArgs(Node eventTable) {
+        Attribute emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Email);
+
+        if (emailOrWebsite == null) {
+            emailOrWebsite = eventTable.getSourceAttribute(InterfaceName.Website);
+        }
+        if (emailOrWebsite != null) {
+            TransformationPipeline.stdLengthDomain.arguments.put("column", emailOrWebsite.getName());
         } else {
             TransformationPipeline.stdLengthDomain.arguments.put("column", "");
         }
-
-        return newEventTableWithDomain;
     }
 
     private void fixStdVisidbDsIndustryGroupArgs(Node eventTable) {
@@ -102,9 +96,10 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         }
     }
 
-    private Node addFunction(Node last, TransformDefinition definition) {
+    private Node addFunction(Node last, Node eventTable, TransformDefinition definition) {
         for (Object value : definition.arguments.values()) {
-            if (!last.getFieldNames().contains(String.valueOf(value))) {
+            Attribute attr = eventTable.getSourceAttribute(String.valueOf(value));
+            if (attr == null) {
                 log.info(String.format("Excluding field %s (function %s) because some source columns are not available",
                         definition.output, definition.name));
                 return last;
