@@ -64,7 +64,9 @@ class BlockDivider {
             data.add(row);
         }
         count += data.size();
-        log.info("Read a group of " + data.size() + " rows.");
+        if (data.size() > 1) {
+            log.info("Read a group of " + data.size() + " rows.");
+        }
         return data;
     }
 

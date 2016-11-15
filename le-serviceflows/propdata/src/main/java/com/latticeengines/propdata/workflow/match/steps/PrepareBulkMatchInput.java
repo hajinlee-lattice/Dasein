@@ -38,17 +38,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Value("${datacloud.match.max.num.blocks:4}")
+    @Value("${datacloud.match.max.num.blocks}")
     private Integer maxNumBlocks;
-
-    @Value("${datacloud.match.num.threads:4}")
-    private Integer threadPoolSize;
-
-    @Value("${datacloud.match.group.size:20}")
-    private Integer groupSize;
-
-    @Value("${datacloud.match.use.fuzzy.match:false}")
-    private boolean useFuzzyMatch;
 
     private String avroGlobs;
 
@@ -72,8 +63,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer[] determineBlockSizes(Long count) {
-        if (MatchUtils.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())
-                && useFuzzyMatch) {
+        if (MatchUtils.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())) {
             return new Integer[] { count.intValue() };
         } else {
             return divideIntoNumBlocks(count, determineNumBlocks(count));
@@ -155,8 +145,6 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setCustomizedSelection(getConfiguration().getCustomizedSelection());
         jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
-        jobConfiguration.setGroupSize(groupSize);
-        jobConfiguration.setThreadPoolSize(threadPoolSize);
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
         jobConfiguration.setExcludeUnmatchedPublicDomain(getConfiguration().getExcludeUnmatchedPublicDomain());
         jobConfiguration.setPublicDomainAsNormalDomain(getConfiguration().getPublicDomainAsNormalDomain());

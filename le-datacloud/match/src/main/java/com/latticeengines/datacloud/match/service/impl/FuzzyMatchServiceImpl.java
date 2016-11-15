@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
@@ -44,12 +43,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Autowired
     private MatchActorSystem actorSystem;
 
-    @Value("${datacloud.match.default.log.level.realtime:DEBUG}")
-    private Level defaultRealTimeLogLevel;
-
-    @Value("${datacloud.match.default.log.level.bulk:INFO}")
-    private Level defaultBulkLogLevel;
-
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel) throws Exception {
@@ -78,7 +71,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         List<FuzzyMatchHistory> fuzzyMatchHistories = new ArrayList<>();
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
         if (logLevel == null) {
-            logLevel = actorSystem.isBatchMode() ? defaultBulkLogLevel : defaultRealTimeLogLevel;
+            logLevel = Level.INFO;
         }
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
@@ -90,7 +83,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchRecord.setLatticeAccountId((String) traveler.getResult());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
                 if (traveler.getDnBMatchContexts() != null) {
-                    for (DnBMatchContext dnBMatchContext: traveler.getDnBMatchContexts()) {
+                    for (DnBMatchContext dnBMatchContext : traveler.getDnBMatchContexts()) {
                         dnBMatchHistories.add(new DnBMatchHistory(dnBMatchContext));
                     }
                 }
@@ -152,8 +145,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     if (logEntry.getThrowable() == null) {
                         record.log(logEntry.getMessage());
                     } else {
-                        record.log(logEntry.getMessage() + "\n"
-                                + StringEscapeUtils.escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
+                        record.log(logEntry.getMessage() + "\n" + StringEscapeUtils
+                                .escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
                     }
                 }
             }

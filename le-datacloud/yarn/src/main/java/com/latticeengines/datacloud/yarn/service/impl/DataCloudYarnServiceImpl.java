@@ -14,6 +14,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
@@ -42,6 +43,12 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
 
     @Value("${datacloud.yarn.container.vcores}")
     private int yarnContainerVCores;
+
+    @Value("${datacloud.yarn.container.mem.mb.actors}")
+    private int yarnContainerMemoryActors;
+
+    @Value("${datacloud.yarn.container.vcores.actors}")
+    private int yarnContainerVCoresActors;
 
     @Override
     public ApplicationId submitPropDataJob(DataCloudJobConfiguration jobConfiguration) {
@@ -77,17 +84,25 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), queueName);
-        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
-        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
-
         if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
             appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
         }
 
         Properties containerProperties = new Properties();
         containerProperties.put(DataCloudProperty.DATACLOUD_CONFIG, jobConfiguration.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
-        containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
+
+        if (MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getDataCloudVersion())) {
+            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(yarnContainerMemoryActors));
+            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCoresActors));
+            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(yarnContainerMemoryActors));
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCoresActors));
+        } else {
+            appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
+            appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
+            containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(yarnContainerMemory));
+            containerProperties.put(ContainerProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCores));
+        }
+
         containerProperties.put(ContainerProperty.PRIORITY.name(), "2");
 
         propDataJob.setAppMasterPropertiesObject(appMasterProperties);

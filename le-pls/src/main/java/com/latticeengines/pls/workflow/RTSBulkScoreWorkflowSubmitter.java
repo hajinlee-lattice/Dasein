@@ -41,8 +41,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private MatchCommandProxy matchCommandProxy;
     
-    @Value("${datacloud.match.use.fuzzy.match:false}")
-    private boolean useFuzzyMatch;
+    private boolean useFuzzyMatch = false;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {

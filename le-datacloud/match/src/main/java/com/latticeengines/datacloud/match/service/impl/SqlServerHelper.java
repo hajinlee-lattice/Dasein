@@ -288,7 +288,7 @@ public class SqlServerHelper implements DbHelper {
 
     private String constructSqlQueryForFetching(Set<String> involvedPartitions, Set<String> targetColumns,
             Collection<String> latticeAccountIds) {
-        String sql = String.format("SELECT p1.[%s]", MatchConstants.LID_FIELD);
+        String sql = String.format("SELECT CONVERT(NVARCHAR(10), p1.[%s])", MatchConstants.LID_FIELD);
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
         sql += "\nWHERE p1.[" + MatchConstants.LID_FIELD + "] IN ('" + StringUtils.join(latticeAccountIds, "', '")

@@ -8,7 +8,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -48,8 +47,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private MatchCommandProxy matchCommandProxy;
     
-    @Value("${datacloud.match.use.fuzzy.match:false}")
-    private boolean useFuzzyMatch;
+    private boolean useFuzzyMatch = false;
 
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);

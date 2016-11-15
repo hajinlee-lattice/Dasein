@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
@@ -21,7 +20,6 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -43,9 +41,6 @@ public class FuzzyMatchHelper implements DbHelper {
     @Autowired
     private FuzzyMatchService fuzzyMatchService;
 
-    @Value("${datacloud.match.use.fuzzy.match:false}")
-    private boolean useFuzzyMatch;
-
     @Override
     public boolean accept(String version) {
         return MatchUtils.isValidForAccountMasterBasedMatch(version);
@@ -66,31 +61,11 @@ public class FuzzyMatchHelper implements DbHelper {
 
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
-            if (useFuzzyMatch) {
-                try {
-                    fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                            dataCloudVersion, context.getInput().getDecisionGraph(), context.getInput().getLogLevel());
-                } catch (Exception e) {
-                    log.error("Failed to run fuzzy match.", e);
-                }
-            } else {
-                AccountLookupRequest accountLookupRequest = new AccountLookupRequest(dataCloudVersion);
-                for (InternalOutputRecord record : context.getInternalResults()) {
-                    if (!record.isFailed()) {
-                        if (record.isPublicDomain()
-                                && !Boolean.TRUE.equals(context.getInput().getExcludeUnmatchedWithPublicDomain())) {
-                            accountLookupRequest.addLookupPair(null, record.getParsedDuns());
-                        } else {
-                            accountLookupRequest.addLookupPair(record.getParsedDomain(), record.getParsedDuns());
-                        }
-                    }
-                }
-                List<String> ids = accountLookupService.batchLookupIds(accountLookupRequest);
-                for (int i = 0; i < ids.size(); i++) {
-                    String latticeAccountId = ids.get(i);
-                    InternalOutputRecord record = context.getInternalResults().get(i);
-                    record.setLatticeAccountId(latticeAccountId);
-                }
+            try {
+                fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
+                        dataCloudVersion, context.getInput().getDecisionGraph(), context.getInput().getLogLevel());
+            } catch (Exception e) {
+                log.error("Failed to run fuzzy match.", e);
             }
         }
 

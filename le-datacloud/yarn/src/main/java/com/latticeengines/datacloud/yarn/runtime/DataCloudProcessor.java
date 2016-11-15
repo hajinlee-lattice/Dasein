@@ -4,16 +4,23 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -77,6 +84,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private static final String FLOAT = Float.class.getSimpleName();
     private static final String DOUBLE = Double.class.getSimpleName();
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.buffer";
+    private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
 
     @Autowired
     private ApplicationContext appContext;
@@ -107,9 +115,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Autowired
     private MatchActorSystem matchActorSystem;
 
-    @Value("${datacloud.match.use.fuzzy.match:false}")
-    private boolean useFuzzyMatch;
-
     private ColumnMetadataService columnMetadataService;
 
     @Autowired
@@ -119,6 +124,15 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Autowired
     private MetricService metricService;
 
+    @Value("${datacloud.match.num.threads}")
+    private Integer sqlThreadPool;
+
+    @Value("${datacloud.match.bulk.group.size}")
+    private Integer sqlGroupSize;
+
+    @Value("${datacloud.yarn.num.travelers}")
+    private int numTravelers;
+
     private BlockDivider divider;
     private Tenant tenant;
     private Predefined predefinedSelection;
@@ -127,13 +141,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
     private String rootOperationUid;
-    private String blockOperationUid;
     private String avroPath, outputAvro, outputJson;
     private MatchOutput blockOutput;
     private Date receivedAt;
     private Schema outputSchema;
     private Schema inputSchema;
-    private Integer numThreads;
     private MatchInput matchInput;
     private String podId;
     private String dataCloudVersion;
@@ -142,6 +154,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Boolean publicDomainAsNormalDomain;
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
+
+    private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
@@ -164,7 +178,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             log.info("Use PodId=" + podId);
 
             rootOperationUid = jobConfiguration.getRootOperationUid();
-            blockOperationUid = jobConfiguration.getBlockOperationUid();
+            String blockOperationUid = jobConfiguration.getBlockOperationUid();
             outputAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid).toString();
             outputJson = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid).toString();
 
@@ -183,9 +197,23 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
-            Integer groupSize = useFuzzyMatch ? matchActorSystem.getMaxAllowedRecordCount()
-                    : jobConfiguration.getGroupSize();
-            numThreads = useFuzzyMatch ? 1 : jobConfiguration.getThreadPoolSize();
+            Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(10));
+            log.info(String.format("Set timeout to be %.2f for %d records", (timeOut / 60000.0), blockSize));
+
+            Integer groupSize = jobConfiguration.getGroupSize();
+            Integer numThreads = jobConfiguration.getThreadPoolSize();
+            if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
+                // for actor system bulk match, match records one by one
+                groupSize = 1;
+                numThreads = numTravelers;
+            } else {
+                if (groupSize == null || groupSize < 1) {
+                    groupSize = sqlGroupSize;
+                }
+                if (numThreads == null || numThreads < 1) {
+                    numThreads = sqlThreadPool;
+                }
+            }
             ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
             avroPath = jobConfiguration.getAvroPath();
@@ -196,27 +224,36 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
 
-            Integer rowsProcessed = 0;
             setProgress(0.07f);
-
-            List<MatchInput> matchInputs = getInputs();
-            while (!matchInputs.isEmpty()) {
-                log.info("Processing " + matchInputs.size() + " groups concurrently.");
-                List<Future<MatchContext>> futures = new ArrayList<>();
-                for (MatchInput matchInput : matchInputs) {
-                    Future<MatchContext> future = executor.submit(new MatchCallable(matchInput));
+            Long startTime = System.currentTimeMillis();
+            Set<Future<MatchContext>> futures = new HashSet<>();
+            this.matchInput = null;
+            while (divider.hasNextGroup()) {
+                if (futures.size() < numTravelers) {
+                    // create new input object for each record
+                    MatchInput input = constructMatchInputFromData(divider.nextGroup());
+                    // cache an input to generate output metric
+                    if (this.matchInput == null) {
+                        this.matchInput = JsonUtils.deserialize(JsonUtils.serialize(input), MatchInput.class);
+                    }
+                    Future<MatchContext> future = executor.submit(new BulkMatchCallable(input));
                     futures.add(future);
                 }
-                for (Future<MatchContext> future : futures) {
-                    MatchContext matchContext = future.get();
-                    processMatchOutput(matchContext.getOutput());
-                    rowsProcessed += matchContext.getInput().getNumRows();
-                    setProgress(0.07f + 0.9f * rowsProcessed / blockSize);
-                    log.info("Processed " + rowsProcessed + " out of " + blockSize + " rows.");
+                if (futures.size() >= numTravelers) {
+                    consumeFutures(futures);
                 }
-                matchInputs = getInputs();
             }
 
+            while (!futures.isEmpty()) {
+                consumeFutures(futures);
+                if (System.currentTimeMillis() - startTime > timeOut) {
+                    throw new RuntimeException(String.format("Did not finish matching %d rows in %.2f minutes.",
+                            blockSize, timeOut / 60000.0));
+                }
+            }
+
+            log.info(String.format("Finished matching %d rows in %.2f minutes.", blockSize,
+                    (System.currentTimeMillis() - startTime) / 60000.0));
             finalizeBlock();
         } catch (Exception e) {
             String rootOperationUid = jobConfiguration.getRootOperationUid();
@@ -234,19 +271,38 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         return null;
     }
 
-    private List<MatchInput> getInputs() {
-        List<MatchInput> matchInputs = new ArrayList<>();
-        for (int i = 0; i < numThreads; i++) {
-            if (divider.hasNextGroup()) {
-                MatchInput input = constructMatchInputFromData(divider.nextGroup());
-                matchInputs.add(input);
-                // cache an input to generate output metric
-                this.matchInput = input;
-            } else {
-                break;
+    private void consumeFutures(Collection<Future<MatchContext>> futures) {
+        List<Future<MatchContext>> toDelete = new ArrayList<>();
+
+        MatchContext combinedContext = null;
+        for (Future<MatchContext> future : futures) {
+            MatchContext context;
+            try {
+                context = future.get(100, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException | InterruptedException | ExecutionException e) {
+                continue;
+            }
+
+            // always skip this future if it has not timed out.
+            toDelete.add(future);
+
+            if (context != null) {
+                if (combinedContext == null) {
+                    combinedContext = context;
+                } else {
+                    combinedContext.getOutput().getResult().addAll(context.getOutput().getResult());
+                }
+                rowsProcessed.addAndGet(context.getInput().getNumRows());
             }
         }
-        return matchInputs;
+        if (combinedContext != null && !combinedContext.getOutput().getResult().isEmpty()) {
+            processMatchOutput(combinedContext.getOutput());
+            int rows = rowsProcessed.get();
+            setProgress(0.07f + 0.9f * rows / blockSize);
+            log.info("Processed " + rows + " out of " + blockSize + " rows.");
+        }
+        
+        futures.removeAll(toDelete);
     }
 
     private MatchInput constructMatchInputFromData(List<List<Object>> data) {
@@ -276,14 +332,16 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         }
 
         List<OutputRecord> recordsWithErrors = new ArrayList<>();
-        for (OutputRecord record : groupOutput.getResult()) {
-            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
-                record.setOutput(null);
-                recordsWithErrors.add(record);
-            }
-        }
-
+        // per record error might cause out of memory
+        // TODO:: change to stream to output file on the fly
+//        for (OutputRecord record : groupOutput.getResult()) {
+//            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
+//                record.setOutput(null);
+//                recordsWithErrors.add(record);
+//            }
+//        }
         groupOutput.setResult(recordsWithErrors);
+
         blockOutput = MatchUtils.mergeOutputs(blockOutput, groupOutput);
         log.info("Merge group output into block output.");
     }
@@ -370,7 +428,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             log.info("Using extracted input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         } else {
-            log.info("Using provited input schema: \n"
+            log.info("Using provided input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         }
         inputSchema = prefixFieldName(inputSchema, "Source_");
@@ -441,15 +499,15 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, outputJson);
             FileUtils.deleteQuietly(new File(MATCHOUTPUT_BUFFER_FILE));
         } catch (Exception e) {
-            log.error("Failed to save matchoutput json.", e);
+            log.error("Failed to save match output json.", e);
         }
     }
 
-    private class MatchCallable implements Callable<MatchContext> {
+    private class BulkMatchCallable implements Callable<MatchContext> {
 
         private MatchInput matchInput;
 
-        MatchCallable(MatchInput matchInput) {
+        BulkMatchCallable(MatchInput matchInput) {
             this.matchInput = matchInput;
         }
 
