@@ -1,10 +1,11 @@
 angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.services.SessionService'
+    'mainApp.core.services.SessionService',
+    'lp.jobs'
 ])
 .controller('AdminInfoSummaryWidgetController', function (
-    $scope, ResourceUtility, ThresholdExplorerService, BrowserStorageUtility, FeatureFlagService
+    $scope, ResourceUtility, ThresholdExplorerService, BrowserStorageUtility, FeatureFlagService, JobsStore
 ) {
 	FeatureFlagService.GetAllFlags().then(function(result) {
 		var flags = FeatureFlagService.Flags();
@@ -31,7 +32,18 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     for (var i = 0; i < propertyLength; i++) {
         if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == ResourceUtility.getString("MODEL_TRAINING_FILE_PATH")) {
             $scope.TrainingFilePath = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value;
+        } else if (data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.option == "WorkflowJobId") {
+            $scope.workflowJobId = data.ModelDetails.ModelSummaryProvenanceProperties[i].ModelSummaryProvenanceProperty.value;
         }
+    }
+
+    $scope.modelCreationJobFinished = false;
+    if ($scope.workflowJobId != null) {
+        JobsStore.getJob($scope.workflowJobId).then(function(job) {
+            if (job != null && job.jobStatus == "Completed") {
+                $scope.modelCreationJobFinished = true;
+            }
+        });
     }
 
     $scope.exportThresholdClicked = function () {

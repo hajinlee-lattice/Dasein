@@ -54,10 +54,10 @@
                             : ResourceUtility.getString('MODEL_ADMIN_SCORED_ACCOUNTS_LABEL')}}</td>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_SCORED_TRAINING_FILE')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/scoredeventtablecsv/score?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a data-ng-if="modelCreationJobFinished" href="/files/datafiles/scoredeventtablecsv/score?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a data-ng-if="!modelCreationJobFinished">N/A</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_BUCKET_TOOL')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="/files/datafiles/scoredeventtablecsv/pivot?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a data-ng-if="modelCreationJobFinished" href="/files/datafiles/scoredeventtablecsv/pivot?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a data-ng-if="!modelCreationJobFinished">N/A</a>
                     </td>
                 </tr>
                 <tr ng-if="!IsPmml">
