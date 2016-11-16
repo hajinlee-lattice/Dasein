@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Lob;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -61,6 +62,7 @@ public class JobHistory implements HasPid, Serializable {
 
     @JsonProperty("error_message")
     @Column(name = "ErrorMessage", nullable = true)
+    @Lob
     private String errorMessage;
 
     @JsonProperty("execution_host")
