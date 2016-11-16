@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.log4j.Level;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.StringUtils;
@@ -35,11 +36,11 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         return buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
-                skipPredefinedSelection, null, performFetchOnlyForMatching, requestId);
+                skipPredefinedSelection, null, performFetchOnlyForMatching, requestId, isDebugMode);
     }
 
     @Override
@@ -51,7 +52,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean skipPredefinedSelection, //
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         MatchInput matchInput = new MatchInput();
 
         setMatchKeyMap(interpreted, record, matchInput);
@@ -75,6 +76,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
         matchInput.setFetchOnly(performFetchOnlyForMatching);
         matchInput.setRootOperationUid(requestId);
+        if (isDebugMode) {
+            matchInput.setLogLevel(Level.DEBUG);
+        }
         return matchInput;
     }
 
@@ -86,7 +90,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean isHomogeneous, //
             boolean skipPredefinedSelection, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         BulkMatchInput bulkInput = new BulkMatchInput();
         List<MatchInput> matchInputList = new ArrayList<>();
         bulkInput.setInputList(matchInputList);
@@ -100,20 +104,21 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                 if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
 
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                    .getParsedData().getKey(), modelSummary, selectedLeadEnrichmentAttributes,
-                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                    recordModelTuple.getParsedData().getKey(), modelSummary,
+                                    selectedLeadEnrichmentAttributes, skipPredefinedSelection,
+                                    performFetchOnlyForMatching, requestId, isDebugMode));
                 } else {
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                    .getParsedData().getKey(), modelSummary, null, skipPredefinedSelection,
-                                    performFetchOnlyForMatching, requestId));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                    recordModelTuple.getParsedData().getKey(), modelSummary, null,
+                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
                 }
             } else {
                 matchInputList.add(//
                         buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
                                 .getParsedData().getKey(), modelSummary, null, //
-                                skipPredefinedSelection, performFetchOnlyForMatching, requestId));
+                                skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
             }
         }
         return bulkInput;

@@ -112,7 +112,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
                     parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
-                    request.isPerformEnrichment(), enrichInternalAttributes, performFetchOnlyForMatching, requestId);
+                    request.isPerformEnrichment(), enrichInternalAttributes, performFetchOnlyForMatching, requestId,
+                    isDebug);
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
@@ -202,7 +203,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
                         true).matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                                 originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
-                                performFetchOnlyForMatching, requestId);
+                                performFetchOnlyForMatching, requestId, isDebug);
 
                 Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                         unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);

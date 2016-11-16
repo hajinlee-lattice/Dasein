@@ -41,7 +41,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean forEnrichment, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
@@ -63,7 +63,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                                 fieldSchemas, record, //
                                 modelSummary, false, //
                                 null, false, null, //
-                                performFetchOnlyForMatching, requestId);
+                                performFetchOnlyForMatching, requestId, isDebugMode);
                 result.putAll(matchResult);
             }
 
@@ -76,7 +76,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                             null, true, //
                             selectedLeadEnrichmentAttributes, true, //
                             currentDataCloudVersion, performFetchOnlyForMatching, //
-                            requestId);
+                            requestId, isDebugMode);
 
             result.putAll(enrichmentResult);
 
@@ -86,7 +86,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
                     record, modelSummary, forEnrichment, //
                     selectedLeadEnrichmentAttributes, false, null, //
-                    performFetchOnlyForMatching, requestId);
+                    performFetchOnlyForMatching, requestId, isDebugMode);
         }
     }
 
@@ -99,7 +99,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         throw new NotImplementedException();
     }
 
@@ -110,12 +110,12 @@ public class SingleRecordMatcher extends AbstractMatcher {
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection, String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         MatchInput matchInput = buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, //
-                performFetchOnlyForMatching, requestId);
+                performFetchOnlyForMatching, requestId, isDebugMode);
 
         MatchOutput matchOutput = callMatch(matchInput);
 

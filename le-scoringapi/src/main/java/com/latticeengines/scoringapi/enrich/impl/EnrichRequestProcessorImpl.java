@@ -60,7 +60,7 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, Map<String, Object>> matchedRecordEnrichmentMap = //
                 getMatcher(false).matchAndJoin(space, interpreted, //
-                        fieldSchemas, record, null, true, false, false, requestId);
+                        fieldSchemas, record, null, true, false, false, requestId, false);
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {
             enrichmentAttributes = new HashMap<>();

@@ -23,7 +23,7 @@ public interface Matcher {
             boolean forEnrichment, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId);
+            String requestId, boolean isDebugMode);
 
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
@@ -32,6 +32,6 @@ public interface Matcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId);
+            String requestId, boolean isDebugMode);
 
 }

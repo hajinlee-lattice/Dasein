@@ -173,7 +173,7 @@ public abstract class AbstractMatcher implements Matcher {
             boolean skipPredefinedSelection, //
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         MatchInputBuilder matchInputBuilder = //
                 getMatchInputBuilder(getDataCloudVersion(modelSummary));
         return matchInputBuilder.buildMatchInput(space, interpreted, //
@@ -182,7 +182,7 @@ public abstract class AbstractMatcher implements Matcher {
                 skipPredefinedSelection, //
                 overrideDataCloudVersion, //
                 performFetchOnlyForMatching, //
-                requestId);
+                requestId, isDebugMode);
     }
 
     private List<Column> getCustomSelectionColumns(MatchInput matchInput) {

@@ -52,7 +52,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean forEnrichment, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         throw new NotImplementedException();
     }
 
@@ -64,11 +64,11 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
                 buildMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                         originalOrderModelSummaryList, isHomogeneous, enrichInternalAttributes,
-                        performFetchOnlyForMatching, requestId);
+                        performFetchOnlyForMatching, requestId, isDebugMode);
 
         Map<RecordModelTuple, Map<String, Map<String, Object>>> results = new HashMap<>();
 
@@ -165,7 +165,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<ModelSummary> originalOrderModelSummaryList, //
             boolean isHomogeneous, boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
                 initializeMatchInputMap(isHomogeneous);
 
@@ -175,7 +175,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
             prepareAndSetMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                     originalOrderModelSummaryList, matchInputMap, recordModelTuple, selectedLeadEnrichmentAttributes,
-                    enrichInternalAttributes, performFetchOnlyForMatching, requestId);
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebugMode);
         }
 
         return matchInputMap;
@@ -211,7 +211,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             RecordModelTuple recordModelTuple, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, //
-            String requestId) {
+            String requestId, boolean isDebugMode) {
         ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList, recordModelTuple.getModelId());
 
         boolean shouldCallEnrichmentExplicitly = //
@@ -227,7 +227,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
                         modelSummary, null, false, null, //
-                        performFetchOnlyForMatching, requestId);
+                        performFetchOnlyForMatching, requestId, isDebugMode);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
             }
@@ -239,7 +239,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
                     true, currentDataCloudVersion, //
-                    performFetchOnlyForMatching, requestId);
+                    performFetchOnlyForMatching, requestId, isDebugMode);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
         } else {
@@ -248,7 +248,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    null, performFetchOnlyForMatching, requestId);
+                    null, performFetchOnlyForMatching, requestId, isDebugMode);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null
