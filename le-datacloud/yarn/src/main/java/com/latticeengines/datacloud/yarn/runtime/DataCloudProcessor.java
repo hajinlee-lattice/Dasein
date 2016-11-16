@@ -314,7 +314,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             toDelete.add(future);
 
             if (context != null) {
-                log.info(JsonUtils.serialize(context));
                 if (combinedContext == null) {
                     combinedContext = context;
                 } else {
