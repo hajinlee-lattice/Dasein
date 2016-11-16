@@ -95,10 +95,41 @@ angular
                 }
             }
         }) 
+        .state('home.campaigns', {
+            url: '/campaigns',
+            params: {
+                pageTitle: 'Workshop',
+                pageIcon: 'ico-model'
+            },
+            resolve: {
+                CampaignList: function($q, CampaignStore) {
+                    var deferred = $q.defer();
+
+                    CampaignStore.getCampaigns(true).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/ModelListView.html'
+                },
+                "main@": {
+                    controller: 'CampaignListController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/campaigns/views/CampaignListView.html'
+                }
+            }
+        })
         .state('home.models', {
             url: '/models',
             params: {
-                pageTitle: 'My Models',
+                pageTitle: 'Workshop',
                 pageIcon: 'ico-model'
             },
             resolve: {
@@ -130,7 +161,7 @@ angular
             url: '/history',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'My Models'
+                pageTitle: 'Workshop'
             },
             views: {
                 "navigation@": {
@@ -604,7 +635,7 @@ angular
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    template: '<style>iframe {background: #f5f5f5}</style><section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
                 }   
             }
         })

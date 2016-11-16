@@ -31,7 +31,7 @@
             </a>
         </li>
         <li ng-if="showRefineAndClone && !IsPmml" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.leads" analytics-on="click" analytics-event="" data-ng-if='sourceType=="SalesforceLead"'>
+            <a ui-sref="home.model.leads" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}" data-ng-if='sourceType=="SalesforceLead"'>
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}">
                     <span class="ico ico-leads ico-light-gray"></span>
                 </span>
@@ -45,7 +45,7 @@
             </a>
         </li>
         <li ng-if="showModelSummary && !Uploaded" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.summary" analytics-on="click" analytics-event="">
+            <a ui-sref="home.model.summary" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}">
                     <span class="ico ico-datatable ico-light-gray"></span>
                 </span>
@@ -53,7 +53,7 @@
             </a>
         </li>
         <li ng-if="showAlerts && !IsPmml" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.alerts" analytics-on="click" analytics-event="">
+            <a ui-sref="home.model.alerts" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}">
                     <span class="ico ico-alerts ico-light-gray"></span>
                 </span>
@@ -61,7 +61,7 @@
             </a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.jobs" analytics-on="click" analytics-event="">
+            <a ui-sref="home.model.jobs" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}">
                     <span class="ico ico-scoring ico-light-gray"></span>
                 </span>
@@ -69,10 +69,10 @@
             </a>
         </li>
         <li ng-if="!IsPmml && showReviewModel" ui-sref-active="active">
-            <a ui-sref="home.model.review.columns" analytics-on="click" analytics-event=""><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}"><span class="ico ico-datatable ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}</span></a>
+            <a ui-sref="home.model.review.columns" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}"><span class="ico ico-datatable ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REVIEW')}}</span></a>
         </li>
         <li ng-if="showRefineAndClone && !IsPmml && !Uploaded" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.model.refine" analytics-on="click" analytics-event=""><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"><span class="ico ico-refine ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
+            <a ui-sref="home.model.refine" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}"><span class="ico ico-refine ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</span></a>
         </li>
     </ul>
     <button class="open-button open">

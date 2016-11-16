@@ -1,0 +1,25 @@
+<div class="container">
+    <section id="main-content" class="container lp-campaign-list">
+
+        <div class="row">
+            <ul class="twelve columns campaign-list">
+                <li 
+                    data-campaign-list-tile-widget
+                    class="campaign"
+                    ng-repeat="campaign in campaigns"
+                    data="campaign">
+                </li>
+                <li>
+                    <button 
+                        type="button" 
+                        class="button new-tile-button"
+                        ng-click="vm.createCampaignClick($event)">
+                        <span>&#43;</span>
+                        Create Campaign
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+    </section>
+</div>

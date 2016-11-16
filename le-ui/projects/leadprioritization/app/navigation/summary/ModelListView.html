@@ -1,7 +1,10 @@
 <div class="summary blue-fire" ng-controller="SidebarRootController">
     <div class="nav">
         <div class="button angled-button active" ui-sref-active-eq="active">
-            <a ui-sref="home.models"><span>Model List</span></a>
+            <a ui-sref="home.campaigns"><span>Campaigns</span></a>
+        </div>
+        <div class="button angled-button active" ui-sref-active-eq="active">
+            <a ui-sref="home.models"><span>Models</span></a>
         </div>
         <div class="button angled-button" ui-sref-active="active" ng-if="showModelCreationHistory">
             <a ui-sref="home.models.history"><span>{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_HISTORY')}}</span></a>
