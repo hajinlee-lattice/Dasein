@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.match.service;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
@@ -12,26 +11,24 @@ import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
 
 public interface DnBCacheService {
     // White Cache
-    DnBWhiteCacheEntityMgr getWhiteCacheMgr(String version);
+    DnBWhiteCacheEntityMgr getWhiteCacheMgr();
 
-    DnBWhiteCache lookupWhiteCache(MatchKeyTuple matchKeyTuple, String dataCloudVersion);
+    DnBWhiteCache lookupWhiteCache(DnBMatchContext context);
 
-    Map<String, DnBWhiteCache> batchLookupWhiteCache(Map<String, MatchKeyTuple> matchKeyTuples,
-            String dataCloudVersion);
+    Map<String, DnBWhiteCache> batchLookupWhiteCache(Map<String, DnBMatchContext> contexts);
 
-    DnBWhiteCache addWhiteCache(DnBMatchContext context, String dataCloudVersion);
+    DnBWhiteCache addWhiteCache(DnBMatchContext context);
 
-    List<DnBWhiteCache> batchAddWhiteCache(List<DnBMatchContext> contexts, String dataCloudVersion);
+    List<DnBWhiteCache> batchAddWhiteCache(List<DnBMatchContext> contexts);
 
     // Black Cache
-    DnBBlackCacheEntityMgr getBlackCacheMgr(String version);
+    DnBBlackCacheEntityMgr getBlackCacheMgr();
 
-    DnBBlackCache lookupBlackCache(MatchKeyTuple matchKeyTuple, String dataCloudVersion);
+    DnBBlackCache lookupBlackCache(DnBMatchContext context);
 
-    Map<String, DnBBlackCache> batchLookupBlackCache(Map<String, MatchKeyTuple> matchKeyTuples,
-            String dataCloudVersion);
+    Map<String, DnBBlackCache> batchLookupBlackCache(Map<String, DnBMatchContext> contexts);
 
-    DnBBlackCache addBlackCache(DnBMatchContext context, String dataCloudVersion);
+    DnBBlackCache addBlackCache(DnBMatchContext context);
 
-    List<DnBBlackCache> batchAddBlackCache(List<DnBMatchContext> contexts, String dataCloudVersion);
+    List<DnBBlackCache> batchAddBlackCache(List<DnBMatchContext> contexts);
 }

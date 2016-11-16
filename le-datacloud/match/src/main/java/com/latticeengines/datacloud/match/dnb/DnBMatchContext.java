@@ -27,6 +27,12 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private String lookupRequestId;
 
+    private DnBMatchStrategy matchStrategy;
+
+    public DnBMatchContext() {
+        inputNameLocation = new NameLocation();
+    }
+
     public void copyMatchResult(DnBMatchContext result) {
         duns = result.getDuns();
         dnbCode = result.getDnbCode();
@@ -90,6 +96,10 @@ public class DnBMatchContext implements Fact, Dimension {
         this.matchGrade = new DnBMatchGrade(matchGrade);
     }
 
+    public void setMatchGrade(DnBMatchGrade matchGrade) {
+        this.matchGrade = matchGrade;
+    }
+
     @MetricField(name = "DnbCode")
     public String getDnbCodeAsString() {
         return dnbCode.getMessage();
@@ -127,6 +137,18 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setLookupRequestId(String lookupRequestId) {
         this.lookupRequestId = lookupRequestId;
+    }
+
+    public DnBMatchStrategy getMatchStrategy() {
+        return matchStrategy;
+    }
+
+    public void setMatchStrategy(DnBMatchStrategy matchStrategy) {
+        this.matchStrategy = matchStrategy;
+    }
+
+    public enum DnBMatchStrategy {
+        EMAIL, ENTITY
     }
 
 }

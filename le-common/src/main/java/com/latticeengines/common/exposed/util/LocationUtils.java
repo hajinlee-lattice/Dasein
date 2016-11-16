@@ -52,7 +52,7 @@ public class LocationUtils {
                 { "HONG KONG",
                         new String[] { "HONG KONG", "HONGKONG", "CHINA HONG KONG", "HONG KONG CHINA",
                                 "HONG KONG SAR" } }, //
-                { "IRELAND", new String[] { "IRELAND", "REPUBLIC IRELAND" } }, //
+                { "IRELAND", new String[] { "IRELAND", "REPUBLIC IRELAND", "IRELAND REPUBLIC" } }, //
                 { "KOREA REPUBLIC",
                         new String[] { "KOREA REPUBLIC", "SOUTH KOREA", "KOREA", "S KOREA", "REPUBLIC KOREA" } }, //
                 { "KOREA DEMOCRATIC PEOPLE S REPUBLIC",
@@ -109,7 +109,7 @@ public class LocationUtils {
                 { "UNITED KINGDOM",
                         new String[] { "UNITED KINGDOM", "UNITED KINGDOM GREAT BRITAIN NORTHERN IRELAND",
                                 "GREAT BRITAIN", "GREAT BRITAIN UK", "NORTHERN IRELAND", "WALES",
-                                "UNITED KINGDOM GREAT BRITAIN", "UK", "U K", "SCOTLAND", "ROYAUME UNI" } }, //
+                                "UNITED KINGDOM GREAT BRITAIN", "UK", "U K", "SCOTLAND", "ROYAUME UNI", "ENGLAND" } }, //
                 { "UNITED STATES MINOR OUTLYING IS",
                         new String[] { "UNITED STATES MINOR OUTLYING IS", "BAKER", "BAKER IS", "HOWLAND", "HOWLAND IS",
                                 "JARVIS", "JARVIS IS", "JOHNSTON ATOLL", "KINGMAN REEF", "MIDWAY", "MIDWAY IS",

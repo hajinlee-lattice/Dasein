@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.dnb;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchCache;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
@@ -23,26 +22,18 @@ public class DnBBlackCache extends MatchCache<DnBBlackCache> {
 
     }
 
-    public DnBBlackCache(NameLocation nameLocation, String email) {
+    public DnBBlackCache(NameLocation nameLocation) {
         getKeyTokenValues().put(NAME_TOKEN, nameLocation.getName());
         getKeyTokenValues().put(COUNTRY_CODE_TOKEN, nameLocation.getCountryCode());
         getKeyTokenValues().put(STATE_TOKEN, nameLocation.getState());
         getKeyTokenValues().put(CITY_TOKEN, nameLocation.getCity());
         getKeyTokenValues().put(ZIPCODE_TOKEN, nameLocation.getZipcode());
         getKeyTokenValues().put(PHONE_TOKEN, nameLocation.getPhoneNumber());
+        buildId();
+    }
+
+    public DnBBlackCache(String email) {
         getKeyTokenValues().put(EMAIL_TOKEN, email);
         buildId();
     }
-
-    public DnBBlackCache(MatchKeyTuple matchKeyTuple) {
-        getKeyTokenValues().put(NAME_TOKEN, matchKeyTuple.getName());
-        getKeyTokenValues().put(COUNTRY_CODE_TOKEN, matchKeyTuple.getCountryCode());
-        getKeyTokenValues().put(STATE_TOKEN, matchKeyTuple.getState());
-        getKeyTokenValues().put(CITY_TOKEN, matchKeyTuple.getCity());
-        getKeyTokenValues().put(ZIPCODE_TOKEN, matchKeyTuple.getZipcode());
-        getKeyTokenValues().put(PHONE_TOKEN, matchKeyTuple.getPhoneNumber());
-        getKeyTokenValues().put(EMAIL_TOKEN, matchKeyTuple.getEmail());
-        buildId();
-    }
-
 }

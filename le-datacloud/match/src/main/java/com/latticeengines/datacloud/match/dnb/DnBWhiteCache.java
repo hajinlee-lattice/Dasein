@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.match.dnb;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchCache;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
@@ -36,7 +35,7 @@ public class DnBWhiteCache extends MatchCache<DnBWhiteCache> {
 
     }
 
-    public DnBWhiteCache(NameLocation nameLocation, String email, String duns, Integer confidenceCode,
+    public DnBWhiteCache(NameLocation nameLocation, String duns, Integer confidenceCode,
             DnBMatchGrade matchGrade) {
         getKeyTokenValues().put(NAME_TOKEN, nameLocation.getName());
         getKeyTokenValues().put(COUNTRY_CODE_TOKEN, nameLocation.getCountryCode());
@@ -44,6 +43,25 @@ public class DnBWhiteCache extends MatchCache<DnBWhiteCache> {
         getKeyTokenValues().put(CITY_TOKEN, nameLocation.getCity());
         getKeyTokenValues().put(ZIPCODE_TOKEN, nameLocation.getZipcode());
         getKeyTokenValues().put(PHONE_TOKEN, nameLocation.getPhoneNumber());
+        buildId();
+        Map<String, Object> cacheContext = new HashMap<String, Object>();
+        cacheContext.put(DUNS, duns);
+        cacheContext.put(CONFIDENCE_CODE, confidenceCode);
+        cacheContext.put(MATCH_GRADE, matchGrade.getRawCode());
+        setCacheContext(cacheContext);
+    }
+
+    public DnBWhiteCache(NameLocation nameLocation) {
+        getKeyTokenValues().put(NAME_TOKEN, nameLocation.getName());
+        getKeyTokenValues().put(COUNTRY_CODE_TOKEN, nameLocation.getCountryCode());
+        getKeyTokenValues().put(STATE_TOKEN, nameLocation.getState());
+        getKeyTokenValues().put(CITY_TOKEN, nameLocation.getCity());
+        getKeyTokenValues().put(ZIPCODE_TOKEN, nameLocation.getZipcode());
+        getKeyTokenValues().put(PHONE_TOKEN, nameLocation.getPhoneNumber());
+        buildId();
+    }
+
+    public DnBWhiteCache(String email, String duns, Integer confidenceCode, DnBMatchGrade matchGrade) {
         getKeyTokenValues().put(EMAIL_TOKEN, email);
         buildId();
         Map<String, Object> cacheContext = new HashMap<String, Object>();
@@ -53,14 +71,8 @@ public class DnBWhiteCache extends MatchCache<DnBWhiteCache> {
         setCacheContext(cacheContext);
     }
 
-    public DnBWhiteCache(MatchKeyTuple matchKeyTuple) {
-        getKeyTokenValues().put(NAME_TOKEN, matchKeyTuple.getName());
-        getKeyTokenValues().put(COUNTRY_CODE_TOKEN, matchKeyTuple.getCountryCode());
-        getKeyTokenValues().put(STATE_TOKEN, matchKeyTuple.getState());
-        getKeyTokenValues().put(CITY_TOKEN, matchKeyTuple.getCity());
-        getKeyTokenValues().put(ZIPCODE_TOKEN, matchKeyTuple.getZipcode());
-        getKeyTokenValues().put(PHONE_TOKEN, matchKeyTuple.getPhoneNumber());
-        getKeyTokenValues().put(EMAIL_TOKEN, matchKeyTuple.getEmail());
+    public DnBWhiteCache(String email) {
+        getKeyTokenValues().put(EMAIL_TOKEN, email);
         buildId();
     }
 
@@ -83,5 +95,4 @@ public class DnBWhiteCache extends MatchCache<DnBWhiteCache> {
     public DnBMatchGrade getMatchGrade() {
         return matchGrade;
     }
-
 }
