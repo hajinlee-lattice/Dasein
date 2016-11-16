@@ -239,7 +239,6 @@ angular
                 $scope.job.source = jobStatus.source;
                 $scope.job.applicationId = jobStatus.applicationId;
                 $scope.job.applicationLogUrl = jobStatus.applicationLogUrl;
-                $scope.job.timestamp = jobStatus.startTimestamp;
                 $scope.isPMML = (['PmmlModel'].indexOf(jobStatus.modelType) > -1);
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;

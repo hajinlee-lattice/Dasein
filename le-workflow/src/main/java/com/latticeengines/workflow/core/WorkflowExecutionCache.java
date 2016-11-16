@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -124,7 +125,7 @@ public class WorkflowExecutionCache {
             Job job = new Job();
             job.setId(workflowId.getId());
             job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
-            job.setStartTimestamp(workflowStatus.getStartTime());
+            job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
             job.setReports(getReports(workflowJob));

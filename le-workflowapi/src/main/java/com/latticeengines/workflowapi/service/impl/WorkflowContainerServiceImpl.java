@@ -163,15 +163,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Override
     public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid) {
         Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-        long time1 = System.currentTimeMillis();
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
-        log.info(String.format("Job load time. Getting workflow jobs took: %.2f",
-                (System.currentTimeMillis() - time1) / 1000.0));
 
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
-        time1 = System.currentTimeMillis();
         for (WorkflowJob workflowJob : workflowJobs) {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
@@ -184,14 +180,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 }
             }
         }
-        log.info(String.format("Job load time. Get workflow job from yarn took: %.2f",
-                (System.currentTimeMillis() - time1) / 1000.0));
 
         try {
-            time1 = System.currentTimeMillis();
             jobs.addAll(workflowService.getJobs(workflowIds));
-            log.info(String.format("Job load time. Loading jobs from workflow cache took: %.2f",
-                    (System.currentTimeMillis() - time1) / 1000.0));
         } catch (Exception e) {
             log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
                     e.getMessage()));

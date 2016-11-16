@@ -73,8 +73,10 @@ angular
                     for (var i=0; i<response.length; i++) {
                         var job = response[i];
 
-                        JobsStore.addJobMap(job.id, job);
-                        JobsStore.addJob(job, modelId);
+                        if (job.startTimestamp != null) {
+                            JobsStore.addJobMap(job.id, job);
+                            JobsStore.addJob(job, modelId);
+                        }
                     }
                 }
                 

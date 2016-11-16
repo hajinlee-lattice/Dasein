@@ -77,15 +77,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public Job find(String jobId) {
-        long time1 = System.currentTimeMillis();
         Job job = workflowProxy.getWorkflowExecution(jobId);
-        log.info(String.format("Job load time. getting job from workflow api took: %.2f",
-                (System.currentTimeMillis() - time1) / 1000.0));
-
-        time1 = System.currentTimeMillis();
         updateJobWithModelSummary(job);
-        log.info(String.format("Job load time. Update job with modelsummary took: %.2f",
-                (System.currentTimeMillis() - time1) / 1000.0));
         return job;
     }
 
