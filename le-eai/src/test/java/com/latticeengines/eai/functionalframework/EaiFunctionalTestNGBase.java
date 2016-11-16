@@ -45,7 +45,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -71,6 +70,7 @@ import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -86,7 +86,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     private YarnClient defaultYarnClient;
 
     @Autowired
-    private MetadataService metadataService;
+    private SqoopMetadataService sqoopMetadataService;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -161,7 +161,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
         // if Table contains duplicate column names or column with empty name,
         // here it will throw exception
-        DataSchema schema = metadataService.createDataSchema(creds, fileName);
+        DataSchema schema = sqoopMetadataService.createDataSchema(creds, fileName);
 
         Table file = new Table();
         file.setName(fileName);
