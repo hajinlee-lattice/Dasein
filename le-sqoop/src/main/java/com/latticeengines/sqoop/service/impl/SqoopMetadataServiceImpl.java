@@ -2,8 +2,13 @@ package com.latticeengines.sqoop.service.impl;
 
 import java.io.IOException;
 import org.apache.avro.Schema;
-import org.apache.sqoop.manager.DefaultManagerFactory;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -20,9 +25,14 @@ import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 @Component("sqoopMetadataService")
 public class SqoopMetadataServiceImpl implements SqoopMetadataService {
 
+    private static final Log log = LogFactory.getLog(SqoopMetadataServiceImpl.class);
+
     @Autowired
     private DbMetadataService dbMetadataService;
-    
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
     private AvroSchemaGenerator avroSchemaGenerator;
 
     @Override
@@ -39,17 +49,19 @@ public class SqoopMetadataServiceImpl implements SqoopMetadataService {
             options.setDriverClassName(dbCreds.getDriverClass());
         }
 
-        ConnManager connManager = getConnectionManager(options);
-        avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
         try {
+            ConnManager connManager = getConnectionManager(options);
+            avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
             return avroSchemaGenerator.generate();
         } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
     
-    public ConnManager getConnectionManager(SqoopOptions options) {
+    public ConnManager getConnectionManager(SqoopOptions options) throws IOException {
         JobData data = new JobData(options, null);
-        return new DefaultManagerFactory().accept(data);
+        ConnManager connManager = new ConnFactory(yarnConfiguration).getManager(data);
+        return connManager;
     }
 }
