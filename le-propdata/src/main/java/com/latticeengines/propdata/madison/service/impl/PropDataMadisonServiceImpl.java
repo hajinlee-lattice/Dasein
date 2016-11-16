@@ -33,7 +33,6 @@ import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("propDataMadisonService")
 public class PropDataMadisonServiceImpl implements PropDataMadisonService {
@@ -50,9 +49,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     @Autowired
     protected Configuration yarnConfiguration;
-
-    @Autowired
-    private SqoopJobService propDataJobService;
 
     @Autowired
     @Qualifier("propdataMadisonJdbcTemplate")
@@ -507,7 +503,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     void cleanupTargetRawData(Date date) throws Exception {
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String tableName = getTableName(date);
 
         jdbcTemplate.execute("DROP TABLE " + tableName);
