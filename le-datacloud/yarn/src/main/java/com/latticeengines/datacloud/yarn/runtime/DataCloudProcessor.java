@@ -369,7 +369,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 // record.setOutput(null);
                 // recordsWithErrors.add(record);
                 for (String msg: record.getErrorMessages()) {
-                    log.warn(String.format("%d: %s", record.getRowNumber(), msg));
+                    log.warn(msg);
                 }
             }
         }

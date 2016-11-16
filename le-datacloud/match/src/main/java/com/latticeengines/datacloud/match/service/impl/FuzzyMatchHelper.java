@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,8 +71,13 @@ public class FuzzyMatchHelper implements DbHelper {
         }
 
         List<String> ids = new ArrayList<>();
+        int notNullIds = 0;
         for (InternalOutputRecord record : context.getInternalResults()) {
-            ids.add(record.getLatticeAccountId());
+            String latticeAccountId = record.getLatticeAccountId();
+            ids.add(latticeAccountId);
+            if (StringUtils.isNotEmpty(latticeAccountId)) {
+                notNullIds++;
+            }
         }
 
         boolean idOnly = context.isSeekingIdOnly();
@@ -85,8 +91,10 @@ public class FuzzyMatchHelper implements DbHelper {
                 record.setLatticeAccount(account);
             }
 
-            log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
-                    System.currentTimeMillis() - startTime, accounts.size()));
+            if (notNullIds > 0) {
+                log.info(String.format("Fetched %d accounts from dynamodb. Duration=%d Rows=%d", accounts.size(),
+                        System.currentTimeMillis() - startTime, accounts.size()));
+            }
         }
         return context;
     }
