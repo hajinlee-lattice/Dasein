@@ -363,15 +363,16 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         }
 
         List<OutputRecord> recordsWithErrors = new ArrayList<>();
-        // per record error might cause out of memory
-        // TODO:: change to stream to output file on the fly
-        // for (OutputRecord record : groupOutput.getResult()) {
-        // if (record.getErrorMessages() != null &&
-        // !record.getErrorMessages().isEmpty()) {
-        // record.setOutput(null);
-        // recordsWithErrors.add(record);
-        // }
-        // }
+        for (OutputRecord record : groupOutput.getResult()) {
+            if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
+                // TODO: per record error might cause out of memory. change to stream to output file on the fly
+                // record.setOutput(null);
+                // recordsWithErrors.add(record);
+                for (String msg: record.getErrorMessages()) {
+                    log.warn(msg);
+                }
+            }
+        }
         groupOutput.setResult(recordsWithErrors);
 
         blockOutput = MatchUtils.mergeOutputs(blockOutput, groupOutput);
