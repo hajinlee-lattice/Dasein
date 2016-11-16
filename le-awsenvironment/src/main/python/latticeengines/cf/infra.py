@@ -181,9 +181,9 @@ def add_outputs(albs):
 
 def provision_cli(args):
     teardown(args.stack)
-    provision(args.environment, args.stack, args.consul)
+    provision(args.environment, args.stack)
 
-def provision(environment, stackname, consul=None):
+def provision(environment, stackname):
     config = AwsEnvironment(environment)
     client = boto3.client('cloudformation')
     check_stack_not_exists(client, stackname)
@@ -221,10 +221,10 @@ def provision(environment, stackname, consul=None):
     print 'Got StackId: %s' % response['StackId']
     wait_for_stack_creation(client, stackname)
 
-    if consul is not None:
-        albs = get_albs(stackname)
-        for k, v in albs.items():
-            write_to_stack(consul, environment, stackname, k, v)
+    consul = config.consul_server()
+    albs = get_albs(stackname)
+    for k, v in albs.items():
+        write_to_stack(consul, environment, stackname, k, v)
 
 def get_albs(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
@@ -254,7 +254,6 @@ def parse_args():
     parser1 = commands.add_parser("provision")
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stack', type=str, required=True, help='the LE_STACK to be created')
-    parser1.add_argument('-c', dest='consul', type=str, help='consul server address')
     parser1.set_defaults(func=provision_cli)
 
     args = parser.parse_args()

@@ -241,6 +241,8 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
     container.publish_port(8080, alloc["port"])
     container.hostname("%s-%s" % (stackname, app))
 
+    config = AwsEnvironment(environment)
+
     params = get_profile_vars(profile_file)
     params["LE_CLIENT_ADDRESS"] = ip
     params["HAPROXY_ADDRESS"] = ip
@@ -254,7 +256,7 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, reg
     params["AWS_MATCHAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
     params["AWS_OAUTH_ADDRESS"] = "%s://%s/oauth2" % (protocol, ip)
     params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/api" % (protocol, ip)
-    params["AWS_SQOOP_ADDRESS"] = "%s://%s" % (protocol, ip)
+    params["AWS_SQOOP_ADDRESS"] = config.sqoop_server()
 
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment
