@@ -68,6 +68,12 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
     }
 
     @Override
+    public List<E> getUpToDateMetadataColumns(List<String> columnIds, String dataCloudVersion) {
+        loadCache();
+        return getMetadataColumns(columnIds, dataCloudVersion);
+    }
+
+    @Override
     @Trace
     @MatchStep
     public List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion) {

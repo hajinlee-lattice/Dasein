@@ -76,19 +76,13 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
         List<E> metadataColumns = getMetadataColumnService()
                 .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);
+        return toColumnMetadata(metadataColumns);
+    }
 
-        List<ColumnMetadata> metadatas = toColumnMetadata(metadataColumns);
-        for (int i = 0; i < metadatas.size(); i++) {
-            ColumnMetadata metadata = metadatas.get(i);
-            String overwrittenName = selection.getColumns().get(i).getColumnName();
-            if (StringUtils.isNotEmpty(overwrittenName)) {
-                metadata.setColumnName(overwrittenName);
-            } else if (StringUtils.isEmpty(metadata.getColumnName())) {
-                throw new IllegalArgumentException(
-                        String.format("Cannot find column name for column No.%d", i));
-            }
-        }
-        return metadatas;
+    @Override
+    public List<ColumnMetadata> fromSelectionUpdated(ColumnSelection selection, String dataCloudVersion) {
+        List<E> metadataColumns = getMetadataColumnService().getUpToDateMetadataColumns(selection.getColumnIds(), dataCloudVersion);
+        return toColumnMetadata(metadataColumns);
     }
 
     abstract protected MetadataColumnService<E> getMetadataColumnService();
