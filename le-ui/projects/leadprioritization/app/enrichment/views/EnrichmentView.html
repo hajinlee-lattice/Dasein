@@ -123,7 +123,10 @@
                     ng-class="{'active': enrichment.IsSelected}">
                         <div class="box-inner">
                             <div class="header">
-                                <div class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
+                                <div ng-if="::enrichment.Subcategory" class="ico">
+                                    <img ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" />
+                                </div>
+                                <div ng-if="::!enrichment.Subcategory" class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
                                 <ul class="categories">
                                     <li ng-if="::enrichment.Category">{{::enrichment.Category}}</li>
                                     <li ng-if="::enrichment.Subcategory">{{::enrichment.Subcategory}}</li>
