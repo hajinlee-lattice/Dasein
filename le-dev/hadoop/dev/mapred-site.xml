@@ -8,5 +8,17 @@
         <name>mapreduce.job.user.classpath.first</name>
         <value>true</value>
     </property>
+    <property>
+        <name>mapreduce.jobhistory.done-dir</name>
+        <value>/mr-history/done</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.intermediate-done-dir</name>
+        <value>/mr-history/tmp</value>
+    </property>
+    <property>
+        <name>mapreduce.jobtracker.jobhistory.completed.location</name>
+        <value>/mr-history/done</value>
+    </property>
 </configuration>
 
