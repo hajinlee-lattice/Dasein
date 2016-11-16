@@ -31,6 +31,9 @@
         yarn.client.failover-sleep-max-ms=${hadoop.yarn.client.failover-sleep-max-ms}
         mapred.job.tracker=${hadoop.mapred.job.tracker}
         mapreduce.framework.name=yarn
+        mapreduce.jobhistory.done-dir=/mr-history/done
+        mapreduce.jobhistory.intermediate-done-dir=/mr-history/tmp
+        mapreduce.jobtracker.jobhistory.completed.location=/mr-history/done
     </yarn:configuration>
 
 </beans>
