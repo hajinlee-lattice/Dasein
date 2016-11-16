@@ -52,10 +52,12 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             }
             matchKeyTuple.setDuns(res.getDuns());
             if (res.getDnbCode() != DnBReturnCode.OK) {
-                traveler.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + traveler
-                        + ": " + res.getDnbCode().getMessage() + " (ConfidenceCode = " + res.getConfidenceCode()
-                        + ", MatchGrade = " + res.getMatchGrade() == null ? "null"
-                                : res.getMatchGrade().getRawCode() + ")");
+                traveler.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + traveler //
+                        + ": " + res.getDnbCode().getMessage() //
+                        + " (ConfidenceCode = " //
+                        + (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()) //
+                        + ", MatchGrade = " //
+                        + (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()) + ")"); //
             }
             traveler.getDnBMatchContexts().add(res);
             response.setResult(null);
