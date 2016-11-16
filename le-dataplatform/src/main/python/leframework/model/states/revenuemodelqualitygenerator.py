@@ -84,14 +84,17 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             totalRevenue = float(sum([valSpent[i] for i in indRankInBin]))
             MaxTotalRevenue = float(sum([valSpent[i] for i in indValueInBin]))
             if MaxTotalRevenue > 0 and len(ix) > 0 :
-                return float(lenOverlap) / len(ix), totalRevenue / MaxTotalRevenue
+                return float(lenOverlap) / len(ix), totalRevenue / MaxTotalRevenue, totalRevenue, MaxTotalRevenue
             else:
-                return 0.0 , 0.0
-        percMaxCount, percTotalRev = zip(*[evalRev(.01 * i) for i in range(0, 100)])
+                return 0.0, 0.0, 0.0, 0.0
+        percMaxCount, percTotalRev, totalRevenue, MaxTotalRevenue = zip(*[evalRev(.01 * i) for i in range(1, 101)])
 
         results = {}
         results["percMaxCount"] = percMaxCount
         results["percTotalRev"] = percTotalRev
+        results["totalRevenue"] = totalRevenue
+        results["MaxTotalRevenue"] = MaxTotalRevenue
+        
 
         return results
 
@@ -111,6 +114,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
         results = {}
         results["auc"] = auc
+        results['conversionRate'] = totalEvents/len(event)
         results["outputLiftCurve"] = outPutLiftCurve
 
         return results
