@@ -3,7 +3,7 @@ angular
 .run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
     $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
-        if (fromState.name == 'home.models' && toState.name == 'home') {
+        if (fromState.name == 'home.campaigns' && toState.name == 'home') {
             evt.preventDefault();
             window.open("/login", "_self");
         }
@@ -86,7 +86,7 @@ angular
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
                             
-                            $state.go('home.models', { 
+                            $state.go('home.campaigns', { 
                                 tenantName: Tenant.DisplayName
                             });
                         }
@@ -166,6 +166,9 @@ angular
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/ModelListView.html'
                 },
                 "main@": {
                     templateUrl: 'app/models/views/ModelCreationHistoryView.html'
