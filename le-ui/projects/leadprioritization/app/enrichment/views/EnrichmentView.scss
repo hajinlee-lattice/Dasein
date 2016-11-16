@@ -542,6 +542,11 @@
                                 transform: translateY(-50%);
                             }
                         }
+                        &.internal {
+                            background-color: #9e73df;
+                            border: solid 1px #7a4fb0;
+                            color: white;
+                        }
                     }
                 }
                 h2 {
