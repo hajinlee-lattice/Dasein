@@ -125,7 +125,9 @@ public class WorkflowExecutionCache {
             Job job = new Job();
             job.setId(workflowId.getId());
             job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
-            job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+            if (workflowJob.getStartTimeInMillis() != null) {
+                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+            }
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
             job.setReports(getReports(workflowJob));
