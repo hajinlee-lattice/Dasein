@@ -30,6 +30,7 @@ public abstract class Traveler {
     private String originalLocation;
     private String anchorActorLocation;
     private StopWatch stopWatch;
+    private Level logLevel = Level.DEBUG;
 
     public Traveler(String rootOperationUid) {
         travelerId = UUID.randomUUID().toString();
@@ -85,6 +86,10 @@ public abstract class Traveler {
         this.originalLocation = originalLocation;
     }
 
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
+    }
+
     public String getNextLocationFromVisitingQueue() {
         return visitingQueue.poll();
     }
@@ -119,19 +124,27 @@ public abstract class Traveler {
     }
 
     public void warn(String message, Throwable throwable) {
-        travelStory.add(new TravelLog(Level.WARN, throwable, prefixByAge(message)));
+        if (Level.WARN.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.WARN, throwable, prefixByAge(message)));
+        }
     }
 
     public void warn(String message) {
-        travelStory.add(new TravelLog(Level.WARN, prefixByAge(message)));
+        if (Level.WARN.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.WARN, prefixByAge(message)));
+        }
     }
 
     public void info(String message) {
-        travelStory.add(new TravelLog(Level.INFO, prefixByAge(message)));
+        if (Level.INFO.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.INFO, prefixByAge(message)));
+        }
     }
 
     public void debug(String message) {
-        travelStory.add(new TravelLog(Level.DEBUG, prefixByAge(message)));
+        if (Level.DEBUG.isGreaterOrEqual(logLevel)) {
+            travelStory.add(new TravelLog(Level.DEBUG, prefixByAge(message)));
+        }
     }
 
     private String prefixByAge(String message) {

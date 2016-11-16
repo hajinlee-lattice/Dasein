@@ -57,6 +57,10 @@
                                     </location>
                                 </source>
                                 <source>
+                                    <location>../le-sqoop/target/le-sqoop-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
                                     <location>../le-datacloud/yarn/target/le-datacloud-yarn-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>

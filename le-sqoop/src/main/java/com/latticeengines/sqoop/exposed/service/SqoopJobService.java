@@ -1,4 +1,4 @@
-package com.latticeengines.sqoop.service;
+package com.latticeengines.sqoop.exposed.service;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 

@@ -40,8 +40,9 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
                     Response response = new Response();
                     response.setRequestId(lookupRequestId);
                     response.setResult(result);
-
-                    log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+                    }
                     actorSystem.sendResponse(response, returnAddress);
                 } else {
                     acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);

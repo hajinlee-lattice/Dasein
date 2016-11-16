@@ -62,7 +62,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         synchronized (unsubmittedReqs) {
             unsubmittedReqs.offer(matchContext);
         }
-        log.debug("Accepted request " + matchContext.getLookupRequestId());
+        if (log.isDebugEnabled()) {
+            log.debug("Accepted request " + matchContext.getLookupRequestId());
+        }
     }
 
     @Override
@@ -89,7 +91,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             break;
                         }
                     }
-                    log.debug("Is unsubmittedReqs empty? " + unsubmittedReqs.isEmpty());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Is unsubmittedReqs empty? " + unsubmittedReqs.isEmpty());
+                    }
                 }
             }
             if (!batchContexts.isEmpty()) {
@@ -111,7 +115,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             synchronized (submittedReqs) {
                 DnBBatchMatchContext submittedReq = submittedReqs.peek();
                 if (submittedReq != null) {
-                    log.debug("Fetching status for batched request " + submittedReq.getServiceBatchId());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Fetching status for batched request " + submittedReq.getServiceBatchId());
+                    }
                     submittedReq = dnbBulkLookupFetcher.getResult(submittedReq);
                     if (submittedReq.getDnbCode() == DnBReturnCode.OK) {
                         processMatchResult(submittedReq, true);
@@ -128,15 +134,19 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         processMatchResult(submittedReq, false);
                         submittedReqs.poll();
                     }
-                    log.debug("Status for batched request " + submittedReq.getServiceBatchId() + ": "
-                            + submittedReq.getDnbCode().getMessage());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Status for batched request " + submittedReq.getServiceBatchId() + ": "
+                                + submittedReq.getDnbCode().getMessage());
+                    }
                 }
             }
             break;
         default:
             break;
         }
-        log.debug(submittedReqs.size() + " batched requests are waiting for DnB batch api to return results");
+        if (log.isDebugEnabled()) {
+            log.debug(submittedReqs.size() + " batched requests are waiting for DnB batch api to return results");
+        }
     }
 
     private void processMatchResult(DnBBatchMatchContext batchContext, boolean success) {
@@ -157,7 +167,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         Response response = new Response();
         response.setRequestId(lookupRequestId);
         response.setResult(result);
-        log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        if (log.isDebugEnabled()) {
+            log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        }
         actorSystem.sendResponse(response, returnAddress);
     }
 }

@@ -74,7 +74,9 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     @Override
     protected void processTimerMessage(TimerMessage msg) {
         // handle timer message
-        log.debug("Got timer call: " + msg.getContext().toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Got timer call: " + msg.getContext().toString());
+        }
         Thread th = new Thread(createLookupRunnable((BulkLookupStrategy) msg.getContext()));
         th.start();
     }

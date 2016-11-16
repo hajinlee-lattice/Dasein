@@ -18,6 +18,7 @@
     <modules>
         <module>le-dataplatform</module>
         <module>le-scoring</module>
+        <module>le-sqoop</module>
         <module>le-dataflow</module>
         <module>le-dataflowapi</module>
         <module>le-serviceflows</module>

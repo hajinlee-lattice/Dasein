@@ -12,11 +12,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
+import com.latticeengines.datacloud.etl.publication.metadata.SQLServerMetadataProvider;
 import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
 import com.latticeengines.datacloud.etl.service.SourceColumnService;
 import com.latticeengines.datacloud.etl.service.SourceService;
-import com.latticeengines.db.service.impl.metadata.MetadataProvider;
-import com.latticeengines.db.service.impl.metadata.SQLServerMetadataProvider;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
@@ -231,7 +230,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     @Override
     public JdbcTemplate getJdbcTemplate(PublishToSqlConfiguration sqlConfiguration) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        MetadataProvider metadataProvider = new SQLServerMetadataProvider();
+        SQLServerMetadataProvider metadataProvider = new SQLServerMetadataProvider();
         String connection = metadataProvider.getConnectionString(getDbCreds(sqlConfiguration));
         dataSource.setUrl(connection);
         dataSource.setDriverClassName(SQLSERVER_DRIVER_CLASS);

@@ -30,16 +30,20 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                     request.getMatchTravelerContext().getDataCloudVersion());
             accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
-            if (StringUtils.isNotEmpty(result)) {
+            if (StringUtils.isNotEmpty(result) && log.isDebugEnabled()) {
                 log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
                         + " Lattice Account Id=" + result);
             } else {
                 // may not be able to handle empty string
                 result = null;
-                log.debug("Didn't get anything from dynamodb for " + lookupRequestId);
+                if (log.isDebugEnabled()) {
+                    log.debug("Didn't get anything from dynamodb for " + lookupRequestId);
+                }
             }
         } else {
-            log.debug("Skip lookup into dynamodb for " + lookupRequestId);
+            if (log.isDebugEnabled()) {
+                log.debug("Skip lookup into dynamodb for " + lookupRequestId);
+            }
         }
 
         return result;
@@ -50,15 +54,16 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
     protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
         Object result = null;
-        if (request instanceof DataSourceLookupRequest) {
-            result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
+        if (request != null) {
+            result = lookupFromService(lookupRequestId, request);
         }
 
         Response response = new Response();
         response.setRequestId(lookupRequestId);
         response.setResult(result);
-
-        log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        if (log.isDebugEnabled()) {
+            log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        }
         actorSystem.sendResponse(response, returnAddress);
     }
 

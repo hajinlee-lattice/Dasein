@@ -57,7 +57,7 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.service.SqoopJobService;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

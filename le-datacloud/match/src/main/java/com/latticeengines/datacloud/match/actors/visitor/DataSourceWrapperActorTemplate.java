@@ -43,13 +43,19 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
             if (shouldDoAsyncLookup()) {
                 String lookupId = UUID.randomUUID().toString();
                 requestMap.put(lookupId, request);
-                log.debug(self() + " received an async request from " + sender());
+                if (log.isDebugEnabled()) {
+                    log.debug(self() + " received an async request from " + sender());
+                }
                 dataSourceLookupService.asyncLookup(lookupId, request, self().path().toSerializationFormat());
             } else {
-                log.debug(self() + " received a sync request from " + sender());
+                if (log.isDebugEnabled()) {
+                    log.debug(self() + " received a sync request from " + sender());
+                }
                 Response response = dataSourceLookupService.syncLookup(request);
                 response.setTravelerContext(request.getMatchTravelerContext());
-                log.debug(self() + " is sending back a sync response to " + sender());
+                if (log.isDebugEnabled()) {
+                    log.debug(self() + " is sending back a sync response to " + sender());
+                }
                 sender().tell(response, self());
             }
         } else if (msg instanceof Response) {
@@ -70,7 +76,9 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
 
     private void sendResponseToCaller(DataSourceLookupRequest request, Response response) {
         ActorRef callerMicroEngineActorRef = context().actorFor(request.getCallerMicroEngineReference());
-        log.debug(self() + " is sending back an async response to " + callerMicroEngineActorRef);
+        if (log.isDebugEnabled()) {
+            log.debug(self() + " is sending back an async response to " + callerMicroEngineActorRef);
+        }
         callerMicroEngineActorRef.tell(response, self());
     }
 }

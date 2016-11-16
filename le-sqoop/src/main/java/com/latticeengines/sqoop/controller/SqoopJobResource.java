@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
-import com.latticeengines.sqoop.service.SqoopJobService;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

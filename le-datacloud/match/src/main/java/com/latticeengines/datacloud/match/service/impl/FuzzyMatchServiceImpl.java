@@ -50,6 +50,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
         List<Future<Object>> matchFutures = new ArrayList<>();
+        if (logLevel == null) {
+            logLevel = Level.INFO;
+        }
 
         for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
@@ -58,21 +61,18 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             } else {
                 MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
                 MatchTraveler travelContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
+                travelContext.setLogLevel(logLevel);
                 matchRecord.setTravelerId(travelContext.getTravelerId());
                 travelContext.setDataCloudVersion(dataCloudVersion);
                 if (StringUtils.isNotEmpty(decisionGraph)) {
                     travelContext.setDecisionGraph(decisionGraph);
                 }
-
                 matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
             }
         }
 
         List<FuzzyMatchHistory> fuzzyMatchHistories = new ArrayList<>();
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
-        if (logLevel == null) {
-            logLevel = Level.INFO;
-        }
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
             if (future != null) {
@@ -139,15 +139,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private void dumpTravelStory(InternalOutputRecord record, MatchTraveler traveler, Level level) {
         for (TravelLog logEntry : traveler.getTravelStory()) {
             if (logEntry.getLevel().isGreaterOrEqual(level)) {
-                if (Level.DEBUG.equals(logEntry.getLevel()) || Level.INFO.equals(logEntry.getLevel())) {
+                if (logEntry.getThrowable() == null) {
                     record.log(logEntry.getMessage());
-                } else if (Level.WARN.equals(logEntry.getLevel())) {
-                    if (logEntry.getThrowable() == null) {
-                        record.log(logEntry.getMessage());
-                    } else {
-                        record.log(logEntry.getMessage() + "\n" + StringEscapeUtils
-                                .escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
-                    }
+                } else {
+                    record.log(logEntry.getMessage() + "\n" + StringEscapeUtils
+                            .escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
                 }
             }
         }

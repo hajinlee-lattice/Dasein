@@ -37,7 +37,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                 if (logCheckInNOut()) {
                     traveler.checkIn(getClass().getSimpleName());
                 }
-                log.debug(self() + " received traveler " + traveler);
+                if (log.isDebugEnabled()) {
+                    log.debug(self() + " received traveler " + traveler);
+                }
 
                 setOriginalSender(traveler, sender());
                 boolean hasSentMessageToDataSourceActor = process(traveler);
@@ -49,7 +51,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
             } else if (msg instanceof Response) {
                 Response response = (Response) msg;
                 traveler = response.getTravelerContext();
-                log.debug(self() + " received a response for traveler " + traveler + ": " + response.getResult());
+                if (log.isDebugEnabled()) {
+                    log.debug(self() + " received a response for traveler " + traveler + ": " + response.getResult());
+                }
                 process(response);
             }
 
@@ -74,7 +78,9 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
         if (logCheckInNOut()) {
             traveler.checkOut(getClass().getSimpleName(), getActorName(nextActorRef));
         }
-        log.debug(self() + " is sending traveler " + traveler + " to " + nextActorRef);
+        if (log.isDebugEnabled()) {
+            log.debug(self() + " is sending traveler " + traveler + " to " + nextActorRef);
+        }
         nextActorRef.tell(traveler, currentActorRef);
     }
 

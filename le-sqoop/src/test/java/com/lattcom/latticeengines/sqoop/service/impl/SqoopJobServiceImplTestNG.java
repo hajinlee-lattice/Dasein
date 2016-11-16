@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqooop.functionalframework.SqoopFunctionalTestNGBase;
-import com.latticeengines.sqoop.service.SqoopJobService;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 

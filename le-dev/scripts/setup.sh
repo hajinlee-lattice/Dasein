@@ -45,7 +45,7 @@ processErrors
 
 echo "" > /tmp/errors.txt
 
-for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'datacloud|dcdplnobld'
+for servicecmd in 'dataplatform|dpdplnobld' 'sqoop|sqdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
@@ -56,7 +56,7 @@ do
 done
 wait
 
-for servicecmd in 'workflow|wfdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
+for servicecmd in 'datacloud|dcdplnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'dellebi|dedplnobld'
 do
     service=`echo $servicecmd | cut -d \| -f 1` &&
     cmd=`echo $servicecmd | cut -d \| -f 2` &&
@@ -97,9 +97,9 @@ else
     ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
 fi
 
-echo "Rebuild admin war"
-pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
-processErrors
+#echo "Rebuild admin war"
+#pushd $WSHOME/le-admin; mvn -DskipTests clean install; popd;
+#processErrors
 
 if [ "${LE_ENVIRONMENT}" = "devcluster" ]; then
     VERSION=`leversion`

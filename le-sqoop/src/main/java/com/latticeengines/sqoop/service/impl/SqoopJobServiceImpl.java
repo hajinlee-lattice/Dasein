@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.service.SqoopJobService;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @SuppressWarnings("deprecation")
 @Component("sqoopJobService")
