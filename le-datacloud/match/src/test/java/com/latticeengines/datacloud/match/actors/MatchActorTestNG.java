@@ -45,7 +45,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
     @Autowired
     private MatchActorSystem actorSystem;
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "dnb"})
     public void testDnBActorNonBatchMode() throws Exception {
         actorSystem.setBatchMode(false);
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
@@ -69,7 +69,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         Assert.assertEquals(data.getMatchGrade().getRawCode(), MATCH_GRADE);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testDnBActorNonBatchMode" })
+    @Test(groups = "dnb", dependsOnMethods = { "testDnBActorNonBatchMode" })
     public void testDnBActorBatchMode() throws Exception {
         actorSystem.setBatchMode(true);
         DataSourceLookupRequest msg = new DataSourceLookupRequest();
