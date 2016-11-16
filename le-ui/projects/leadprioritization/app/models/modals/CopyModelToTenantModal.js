@@ -93,7 +93,7 @@ angular.module('mainApp.models.modals.CopyModelToTenantModal', [
                     vm.modal_change_state('copied');
                 } else {
                     vm.modal_change_state('error');
-                    vm.copying_error = result.resultErrors;
+                    vm.copying_error = "There was a problem copying your model. This wasn't your fault. Please contact Lattice if this problem persists.";
                 }
             });
         }

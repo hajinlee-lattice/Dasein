@@ -24,6 +24,11 @@
     }
     .model-copy-dialog {
         width: auto;
+        &.error {
+            .lists-container {
+                max-width: 500px;
+            }
+        }
         .list-container {
             @include flex-container();
             -webkit-flex-direction: column;
