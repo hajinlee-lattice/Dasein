@@ -1,15 +1,11 @@
-package com.latticeengines.dataplatform.service.impl.metadata;
+package com.latticeengines.db.service.impl.metadata;
 
 import java.util.List;
 
-import org.apache.sqoop.manager.GenericJdbcManager;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 
-@SuppressWarnings("deprecation")
 public class GenericJdbcMetadataProvider extends MetadataProvider {
 
     @Override
@@ -20,11 +16,6 @@ public class GenericJdbcMetadataProvider extends MetadataProvider {
     @Override
     public String getDriverName() {
         return "Generic JDBC Driver";
-    }
-
-    @Override
-    public ConnManager getConnectionManager(SqoopOptions options) {
-        return new GenericJdbcManager(options.getDriverClassName(), options);
     }
 
     @Override

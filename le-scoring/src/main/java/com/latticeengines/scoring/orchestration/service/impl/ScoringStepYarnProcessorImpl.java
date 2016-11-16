@@ -2,6 +2,7 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.service.JobNameService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
@@ -44,23 +45,21 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
+import com.latticeengines.sqoop.service.SqoopJobService;
 
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImpl.class);
 
+//    @Autowired
+//    private SqoopProxy sqoopProxy;
+    
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
-    private JobService jobService;
-
-    @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
-    private JobNameService jobNameService;
+    private DbMetadataService dbMetadataService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -85,9 +84,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
@@ -130,7 +126,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String table = scoringCommand.getTableName();
         String tenant = getTenant(scoringCommand);
         String targetDir = customerBaseDir + "/" + tenant + "/scoring/" + table + "/data";
-        metadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
+        dbMetadataService.addPrimaryKeyColumn(scoringJdbcTemplate, table, PID);
         try {
             String scoringTableDir = customerBaseDir + "/" + tenant + "/scoring/" + table;
             if (HdfsUtils.fileExists(yarnConfiguration, scoringTableDir)) {
@@ -140,9 +136,21 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
         }
-        ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, scoringCreds,
-                LedpQueueAssigner.getScoringQueueNameForSubmission(), tenant, Arrays.asList(PID), "");
-        return appId;
+//         ApplicationId appId = sqoopSyncJobService.importData(table,
+//         targetDir, scoringCreds,
+//         LedpQueueAssigner.getScoringQueueNameForSubmission(), tenant,
+//         Arrays.asList(PID), "");
+//         return appId;
+
+        SqoopImporter importer = new SqoopImporter.Builder() //
+                .setTable(table) //
+                .setTargetDir(targetDir)//
+                .setDbCreds(scoringCreds) //
+                .setQueue(LedpQueueAssigner.getScoringQueueNameForSubmission())//
+                .setCustomer(tenant)//
+                .setSplitColumn(PID)//
+                .build();//
+        return sqoopJobService.importData(importer);
     }
 
     private ApplicationId score(ScoringCommand scoringCommand) {
@@ -156,7 +164,17 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetTable = createNewTable(scoringCommand);
         String tenant = getTenant(scoringCommand);
         String sourceDir = customerBaseDir + "/" + tenant + "/scoring/" + scoringCommand.getTableName() + "/scores";
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, tenant);
+//         ApplicationId appId = sqoopSyncJobService.exportData(targetTable,
+//         sourceDir, scoringCreds, queue, tenant);
+
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setQueue(queue)//
+                .setTable(targetTable) //
+                .setSourceDir(sourceDir) //
+                .setDbCreds(scoringCreds) //
+                .setCustomer(tenant)//
+                .build();
+        ApplicationId appId = sqoopJobService.exportData(exporter);
 
         saveStateBeforeFinishStep(scoringCommand, targetTable);
         return appId;
@@ -170,7 +188,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private String createNewTable(ScoringCommand scoringCommand) {
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
-        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
+        dbMetadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;
     }
 
@@ -205,7 +223,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(ScoringProperty.LOG_DIR.name(), scoringMapperLogDir);
 
         String tableName = scoringCommand.getTableName();
-        List<String> modelGuids = metadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
+        List<String> modelGuids = dbMetadataService.getDistinctColumnValues(scoringJdbcTemplate, tableName,
                 ScoringDaemonService.MODEL_GUID);
         List<String> modelUrls = ScoringJobUtil.findModelUrlsToLocalize(yarnConfiguration, tenant, customerBaseDir,
                 modelGuids, Boolean.FALSE.booleanValue());

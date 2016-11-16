@@ -25,11 +25,11 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
@@ -92,7 +92,7 @@ public class ModelCommandCallable implements Callable<Long> {
     @SuppressWarnings("unused")
     private int featuresThreshold = -1;
 
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     public ModelCommandCallable() {
     }
@@ -118,7 +118,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
         this.featuresThreshold = builder.featuresThreshold;
-        this.metadataService = builder.metadataService;
+        this.dbMetadataService = builder.dbMetadataService;
 
         assert (modelCommand != null);
         assert (yarnConfiguration != null);
@@ -139,7 +139,7 @@ public class ModelCommandCallable implements Callable<Long> {
         assert (rowWarnThreshold != -1);
         assert (positiveEventFailThreshold != -1);
         assert (positiveEventWarnThreshold != -1);
-        assert (metadataService != null);
+        assert (dbMetadataService != null);
 
     }
 
@@ -206,9 +206,9 @@ public class ModelCommandCallable implements Callable<Long> {
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
 
             JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-            Long rowSize = metadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
-            Long dataSize = metadataService.getDataSize(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
-            Integer columnSize = metadataService.getColumnCount(dlOrchestrationJdbcTemplate,
+            Long rowSize = dbMetadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+            Long dataSize = dbMetadataService.getDataSize(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+            Integer columnSize = dbMetadataService.getColumnCount(dlOrchestrationJdbcTemplate,
                     modelCommand.getEventTable());
             modelCommandLogService.log(modelCommand, "Data Size: " + readableFileSize(dataSize) + " Row count: "
                     + rowSize + " Column count: " + columnSize);
@@ -252,8 +252,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private boolean validateDataSize(ModelCommandParameters commandParameters) throws SQLException {
         JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-        Long rowCount = metadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
-        Long positiveEventCount = metadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate,
+        Long rowCount = dbMetadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+        Long positiveEventCount = dbMetadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate,
                 modelCommand.getEventTable(), commandParameters.getEventColumnName());
 
         if (rowCount < rowFailThreshold || positiveEventCount < positiveEventFailThreshold) {
@@ -453,7 +453,7 @@ public class ModelCommandCallable implements Callable<Long> {
         int positiveEventFailThreshold;
         int positiveEventWarnThreshold;
         int featuresThreshold;
-        MetadataService metadataService;
+        DbMetadataService dbMetadataService;
 
         public Builder() {
         }
@@ -558,8 +558,8 @@ public class ModelCommandCallable implements Callable<Long> {
             return this;
         }
 
-        public Builder metadataService(MetadataService metadataService) {
-            this.metadataService = metadataService;
+        public Builder dbMetadataService(DbMetadataService dbMetadataService) {
+            this.dbMetadataService = dbMetadataService;
             return this;
         }
     }

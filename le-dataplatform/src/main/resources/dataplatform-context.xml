@@ -33,4 +33,5 @@
     <import resource="classpath:swlib-context.xml" />
     <import resource="classpath:common-component-context.xml" />
     <import resource="classpath:common-threadpool-context.xml" />
+    <import resource="classpath:sqoop-context.xml" />
 </beans>

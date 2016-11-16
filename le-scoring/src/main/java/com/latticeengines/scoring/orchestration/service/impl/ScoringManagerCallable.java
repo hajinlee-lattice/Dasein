@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
@@ -32,7 +32,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
     private AsyncTaskExecutor scoringProcessorExecutor;
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
     private Configuration yarnConfiguration;
     private JdbcTemplate scoringJdbcTemplate;
     private ApplicationContext appContext;
@@ -45,7 +45,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         this.scoringProcessorExecutor = builder.getScoringProcessorExecutor();
         this.scoringCommandEntityMgr = builder.getScoringCommandEntityMgr();
         this.scoringCommandResultEntityMgr = builder.getScoringCommandResultEntityMgr();
-        this.metadataService = builder.getMetadataService();
+        this.dbMetadataService = builder.getDbMetadataService();
         this.yarnConfiguration = builder.getConfiguration();
         this.scoringJdbcTemplate = builder.getJdbcTemplate();
         this.appContext = builder.getApplicationContext();
@@ -84,7 +84,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         DateTime dt = new DateTime(DateTimeZone.UTC);
         for (ScoringCommand scoringCommand : consumedCommands) {
             if (scoringCommand.getPopulated().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
-                metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
+                dbMetadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                 if (enableCleanHdfs && scoringCommand.getConsumed() != null) {
                     cleanHdfs(scoringCommand);
                 }
@@ -95,7 +95,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         List<ScoringCommandResult> consumedResultCommands = scoringCommandResultEntityMgr.getConsumed();
         for (ScoringCommandResult scoringCommandResult : consumedResultCommands) {
             if (scoringCommandResult.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < dt.getMillis()) {
-                metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName());
+                dbMetadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName());
                 scoringCommandResultEntityMgr.delete(scoringCommandResult);
             }
         }
@@ -116,7 +116,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
         private AsyncTaskExecutor scoringProcessorExecutor;
         private ScoringCommandEntityMgr scoringCommandEntityMgr;
         private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-        private MetadataService metadataService;
+        private DbMetadataService dbMetadataService;
         private Configuration yarnConfiguration;
         private JdbcTemplate scoringJdbcTemplate;
         private ApplicationContext appContext;
@@ -143,8 +143,8 @@ public class ScoringManagerCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder metadataService(MetadataService metadataService) {
-            this.metadataService = metadataService;
+        public Builder metadataService(DbMetadataService dbMetadataService) {
+            this.dbMetadataService = dbMetadataService;
             return this;
         }
 
@@ -190,8 +190,8 @@ public class ScoringManagerCallable implements Callable<Boolean> {
             return scoringCommandResultEntityMgr;
         }
 
-        public MetadataService getMetadataService() {
-            return metadataService;
+        public DbMetadataService getDbMetadataService() {
+            return dbMetadataService;
         }
 
         public Configuration getConfiguration() {

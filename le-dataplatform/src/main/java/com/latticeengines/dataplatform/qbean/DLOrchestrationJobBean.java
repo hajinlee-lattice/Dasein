@@ -13,13 +13,13 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.DLOrchestrationCallable;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.DebugProcessorImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
@@ -93,7 +93,7 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
     private int featuresThreshold = -1;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Value("${dataplatform.dlorchestrationjob.max.pool.size}")
     private int maxPoolSize;
@@ -112,7 +112,7 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
                 .debugProcessorImpl(debugProcessorImpl)
                 .dlOrchestrationJobTaskExecutor(taskExecutor)
                 .featuresThreshold(featuresThreshold)
-                .metadataService(metadataService)
+                .dbMetadataService(dbMetadataService)
                 .modelCommandEntityMgr(modelCommandEntityMgr)
                 .modelCommandLogService(modelCommandLogService)
                 .modelCommandResultEntityMgr(modelCommandResultEntityMgr)

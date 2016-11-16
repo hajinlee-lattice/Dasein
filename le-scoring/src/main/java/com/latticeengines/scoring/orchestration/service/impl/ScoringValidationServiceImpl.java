@@ -3,8 +3,7 @@ package com.latticeengines.scoring.orchestration.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
@@ -15,7 +14,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringValidationService
 public class ScoringValidationServiceImpl implements ScoringValidationService {
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -28,7 +27,7 @@ public class ScoringValidationServiceImpl implements ScoringValidationService {
     }
 
     private void validateTotal(ScoringCommand scoringCommand) {
-        long total = metadataService.getRowCount(scoringJdbcTemplate, scoringCommand.getTableName());
+        long total = dbMetadataService.getRowCount(scoringJdbcTemplate, scoringCommand.getTableName());
         if (total != scoringCommand.getTotal()) {
             throw new LedpException(LedpCode.LEDP_20016);
         }
@@ -38,14 +37,14 @@ public class ScoringValidationServiceImpl implements ScoringValidationService {
     }
 
     private void validateModelGuid(ScoringCommand scoringCommand) {
-        if (!metadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
+        if (!dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
                 ScoringDaemonService.MODEL_GUID)) {
             throw new LedpException(LedpCode.LEDP_20004);
         }
     }
 
     private void validateLeadId(ScoringCommand scoringCommand) {
-        if (!metadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
+        if (!dbMetadataService.checkIfColumnExists(scoringJdbcTemplate, scoringCommand.getTableName(),
                 ScoringDaemonService.UNIQUE_KEY_COLUMN)) {
             throw new LedpException(LedpCode.LEDP_20003);
         }

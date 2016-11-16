@@ -4,6 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.db.service.impl.metadata.MetadataProvider;
+import com.latticeengines.db.service.impl.metadata.SQLServerMetadataProvider;
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 

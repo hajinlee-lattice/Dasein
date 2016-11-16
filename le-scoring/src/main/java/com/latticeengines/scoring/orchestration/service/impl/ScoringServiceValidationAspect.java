@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
@@ -29,11 +29,11 @@ public class ScoringServiceValidationAspect {
     private JdbcTemplate scoringJdbcTemplate;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     public void validateScoreResult(ScoringCommand scoringCommand){
         ScoringCommandState state = scoringCommandStateEntityMgr.findByScoringCommandAndStep(scoringCommand, ScoringCommandStep.EXPORT_DATA);
         ScoringCommandResult result = scoringCommandResultEntityMgr.findByKey(state.getLeadOutputQueuePid());
-        scoringCommandLogService.log(scoringCommand, "Populated: " + metadataService.getRowCount(scoringJdbcTemplate, result.getTableName()) + " rows of score result");
+        scoringCommandLogService.log(scoringCommand, "Populated: " + dbMetadataService.getRowCount(scoringJdbcTemplate, result.getTableName()) + " rows of score result");
     }
 }

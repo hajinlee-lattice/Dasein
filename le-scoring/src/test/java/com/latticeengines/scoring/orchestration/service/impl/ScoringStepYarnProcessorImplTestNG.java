@@ -19,7 +19,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
@@ -60,9 +59,6 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
     private String outputTable;
@@ -82,11 +78,11 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
 
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant + "/scoring";
         HdfsUtils.rmdir(yarnConfiguration, path);
@@ -103,8 +99,8 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         if (outputTable != null) {
-            metadataService.dropTable(scoringJdbcTemplate, outputTable);
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, outputTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             clearTables();
         }
         try {
@@ -139,8 +135,8 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         ScoringCommandResult scoringCommandResult = scoringCommandResultEntityMgr
                 .findByKey(state.getLeadOutputQueuePid());
         outputTable = scoringCommandResult.getTableName();
-        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, testInputTable),
-                metadataService.getRowCount(scoringJdbcTemplate, outputTable));
+        assertEquals(dbMetadataService.getRowCount(scoringJdbcTemplate, testInputTable),
+                dbMetadataService.getRowCount(scoringJdbcTemplate, outputTable));
     }
 
 }

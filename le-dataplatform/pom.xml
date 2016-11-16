@@ -24,6 +24,7 @@
         <le.security.version>3.0.0-SNAPSHOT</le.security.version>
         <le.quartzclient.version>3.0.0-SNAPSHOT</le.quartzclient.version>
         <le.hadoop.version>3.0.0-SNAPSHOT</le.hadoop.version>
+        <le.sqoop.version>3.0.0-SNAPSHOT</le.sqoop.version>
         <exec.maven.version>1.3.2</exec.maven.version>
     </properties>
 
@@ -560,24 +561,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.10.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derbyclient</artifactId>
-            <version>10.10.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derbynet</artifactId>
-            <version>10.10.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>${sqljdbc4.version}</version>
@@ -586,12 +569,6 @@
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.csvjdbc</groupId>
-            <artifactId>csvjdbc</artifactId>
-            <version>1.0.28</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -619,10 +596,16 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>${sqoop.version}</version>
-            <scope>provided</scope>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-sqoop</artifactId>
+            <version>${le.sqoop.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-sqoop</artifactId>
+            <version>${le.sqoop.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.newrelic.agent.java</groupId>

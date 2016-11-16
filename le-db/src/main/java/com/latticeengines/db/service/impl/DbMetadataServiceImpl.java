@@ -1,4 +1,4 @@
-package com.latticeengines.sqoop.service.impl;
+package com.latticeengines.db.service.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,31 +14,18 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.db.exposed.service.DbMetadataService;
+import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.sqoop.exposed.service.MetadataService;
-import com.latticeengines.sqoop.service.impl.metadata.MetadataProvider;
 
-@Component("metadataService")
-public class MetadataServiceImpl implements MetadataService {
+@Component("dbMetadataService")
+public class DbMetadataServiceImpl implements DbMetadataService {
 
     private Map<String, MetadataProvider> metadataProviders;
 
     @Autowired
     public void setMetadataProviders(@Value("#{metadataProviders}") Map<String, MetadataProvider> metadataProviders) {
         this.metadataProviders = metadataProviders;
-    }
-
-    @Override
-    public DataSchema createDataSchema(DbCreds creds, String tableName) {
-        return new DataSchema(getAvroSchema(creds, tableName));
-    }
-
-    @Override
-    public Schema getAvroSchema(DbCreds creds, String tableName) {
-        String dbType = creds.getDbType();
-        MetadataProvider provider = metadataProviders.get(dbType);
-        return provider.getSchema(creds, tableName);
     }
 
     @Override
@@ -187,5 +173,12 @@ public class MetadataServiceImpl implements MetadataService {
     public List<String> getDistinctColumnValues(JdbcTemplate jdbcTemplate, String tableName, String column) {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.getDistinctColumnValues(jdbcTemplate, tableName, column);
+    }
+    
+    @Override
+    public String getConnectionString(DbCreds creds) {
+        String dbType = creds.getDbType();
+        MetadataProvider provider = metadataProviders.get(dbType);
+        return provider.getConnectionString(creds);
     }
 }

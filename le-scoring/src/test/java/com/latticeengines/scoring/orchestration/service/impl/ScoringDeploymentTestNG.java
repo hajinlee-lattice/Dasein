@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
@@ -59,7 +59,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -82,18 +82,18 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     public void setup() throws Exception {
         customer = getClass().getSimpleName().toString();
         tenant = CustomerSpace.parse(customer).toString();
-        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
-            metadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
+            dbMetadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
         }
 
-        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_BASE_TABLE_NAME))) {
-            metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME,
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_BASE_TABLE_NAME))) {
+            dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME,
                     LEAD_INPUT_BASE_TABLE_NAME);
         } else {
             throw new Exception("The lead input base table for scoringDeploymentTest does not exist.");
         }
 
-        if (CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
+        if (CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME))) {
             throw new Exception("Could not find the lead input base table for scoringDeploymentTest: " + LEAD_INPUT_TABLE_NAME);
         }
 
@@ -111,8 +111,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void cleanup() throws Exception {
         if (outputTable != null) {
-            metadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
-            metadataService.dropTable(scoringJdbcTemplate, outputTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME);
+            dbMetadataService.dropTable(scoringJdbcTemplate, outputTable);
             // clean up the rows in four tables
             scoringCommandEntityMgr.delete(scoringCommand);
             scoringCommandLogEntityMgr.delete(scoringCommand);
@@ -164,8 +164,8 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
                 + scoringCommandStateEntityMgr.findByScoringCommand(scoringCommand).size());
 
         outputTable = scoringCommandEntityMgr.findByKey(scoringCommand).getTableName();
-        assertEquals(metadataService.getRowCount(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME),
-                metadataService.getRowCount(scoringJdbcTemplate, outputTable));
+        assertEquals(dbMetadataService.getRowCount(scoringJdbcTemplate, LEAD_INPUT_TABLE_NAME),
+                dbMetadataService.getRowCount(scoringJdbcTemplate, outputTable));
 
     }
 }

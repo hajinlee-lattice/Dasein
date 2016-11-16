@@ -8,9 +8,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -25,7 +25,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
     private ModelingService modelingService;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dataSourceHost;
@@ -60,7 +60,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         config.setCreds(creds);
         config.setTable("TestTableWithBadColumnNames");
 
-        jdbcTemplate = metadataService.constructJdbcTemplate(creds);
+        jdbcTemplate = dbMetadataService.constructJdbcTemplate(creds);
         dropTable(config.getTable());
     }
 
@@ -73,7 +73,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
     }
 
     private void dropTable(String table) {
-        metadataService.dropTable(jdbcTemplate, table);
+        dbMetadataService.dropTable(jdbcTemplate, table);
     }
 
     @Test(groups = "functional.platform")

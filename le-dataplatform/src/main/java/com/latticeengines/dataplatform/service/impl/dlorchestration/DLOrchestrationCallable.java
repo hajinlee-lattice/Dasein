@@ -17,11 +17,11 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.newrelic.api.agent.Trace;
@@ -51,7 +51,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
     private int positiveEventFailThreshold;
     private int positiveEventWarnThreshold;
     private int featuresThreshold;
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
     private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
     public DLOrchestrationCallable(Builder builder) {
@@ -76,7 +76,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
         this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
         this.featuresThreshold = builder.featuresThreshold;
-        this.metadataService = builder.metadataService;
+        this.dbMetadataService = builder.dbMetadataService;
         this.modelDownloadFlagEntityMgr = builder.modelDownloadFlagEntityMgr;
     }
 
@@ -112,7 +112,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
                     .rowWarnThreshold(rowWarnThreshold) //
                     .positiveEventFailThreshold(positiveEventFailThreshold) //
                     .positiveEventWarnThreshold(positiveEventWarnThreshold) //
-                    .featuresThreshold(featuresThreshold).metadataService(metadataService);
+                    .featuresThreshold(featuresThreshold).dbMetadataService(dbMetadataService);
             String tenantId = CustomerSpace.parse(modelCommand.getDeploymentExternalId()).toString();
             modelDownloadFlagEntityMgr.addDownloadFlag(tenantId);
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
@@ -157,7 +157,7 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
         private int positiveEventFailThreshold;
         private int positiveEventWarnThreshold;
         private int featuresThreshold;
-        private MetadataService metadataService;
+        private DbMetadataService dbMetadataService;
         private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
         public Builder() {
@@ -269,8 +269,8 @@ public class DLOrchestrationCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder metadataService(MetadataService metadataService) {
-            this.metadataService = metadataService;
+        public Builder dbMetadataService(DbMetadataService dbMetadataService) {
+            this.dbMetadataService = dbMetadataService;
             return this;
         }
 

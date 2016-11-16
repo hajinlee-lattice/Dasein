@@ -39,7 +39,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -105,9 +104,6 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
-    @Autowired
-    private MetadataService metadataService;
-    
     @Value("${scoring.test.table}")
     private String testInputTable;
 
@@ -125,10 +121,10 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         modelingModelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/";
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
     @Test(groups = "functional")
@@ -410,7 +406,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         try {
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
             HdfsUtils.rmdir(yarnConfiguration, path);
         } catch (Exception e) {
             log.error(e.getMessage());

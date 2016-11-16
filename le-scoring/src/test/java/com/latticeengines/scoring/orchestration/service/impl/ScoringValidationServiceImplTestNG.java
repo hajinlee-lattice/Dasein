@@ -13,7 +13,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -26,9 +25,6 @@ public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGB
 
     @Value("${scoring.test.table}")
     private String testInputTable;
-
-    @Autowired
-    private MetadataService metadataService;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
@@ -57,12 +53,12 @@ public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGB
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
     @Test(groups = "functional")
     public void testValidateTotal() throws Exception {
-        int totalCommandNumber = Integer.parseInt(metadataService.getRowCount(scoringJdbcTemplate, inputLeadsTable)
+        int totalCommandNumber = Integer.parseInt(dbMetadataService.getRowCount(scoringJdbcTemplate, inputLeadsTable)
                 .toString());
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, totalCommandNumber, new Timestamp(System.currentTimeMillis()));
@@ -117,7 +113,7 @@ public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGB
     @AfterClass(enabled = true, alwaysRun = true)
     public void cleanup() {
         try {
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
@@ -44,6 +43,7 @@ import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 /**
@@ -67,7 +67,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private ModelStepRetrieveMetadataProcessorImpl modelStepRetrieveMetadataProcessor;
 
     @Autowired
-    private MetadataService metadataService;
+    private SqoopMetadataService sqoopMetadataService;
 
     private Model model = null;
 
@@ -133,7 +133,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     private Pair<String[], Integer[]> getTableColumnMetadata() {
-        DataSchema schema = metadataService.createDataSchema(getCreds(), "Q_EventTable_Nutanix");
+        DataSchema schema = sqoopMetadataService.createDataSchema(getCreds(), "Q_EventTable_Nutanix");
         List<Field> fields = schema.getFields();
         String[] cols = new String[fields.size()];
         Integer[] types = new Integer[fields.size()];

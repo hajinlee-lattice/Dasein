@@ -15,13 +15,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
@@ -86,7 +86,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     private int positiveEventWarnThreshold;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -127,7 +127,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 .rowWarnThreshold(this.rowWarnThreshold) //
                 .positiveEventFailThreshold(this.positiveEventFailThreshold) //
                 .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
-                .metadataService(this.metadataService);
+                .dbMetadataService(this.dbMetadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
 
@@ -165,7 +165,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 .rowWarnThreshold(this.rowWarnThreshold) //
                 .positiveEventFailThreshold(this.positiveEventFailThreshold) //
                 .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
-                .metadataService(this.metadataService);
+                .dbMetadataService(this.dbMetadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
@@ -219,7 +219,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 .positiveEventFailThreshold(this.positiveEventFailThreshold) //
                 .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
                 .featuresThreshold(30)
-                .metadataService(this.metadataService);
+                .dbMetadataService(this.dbMetadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);

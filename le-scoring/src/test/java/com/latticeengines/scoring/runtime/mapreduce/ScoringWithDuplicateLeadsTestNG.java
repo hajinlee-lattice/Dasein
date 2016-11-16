@@ -23,13 +23,10 @@ import org.testng.annotations.Test;
 import org.springframework.util.CollectionUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
-import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 
@@ -52,16 +49,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
     private static String tenant;
 
     @Autowired
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
-    private DbCreds scoringCreds;
-
-    @Autowired
     private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MetadataService metadataService;
 
     @Value("${scoring.test.table}")
     private String testInputTable;
@@ -77,10 +65,10 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
 
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoring/data/"
@@ -125,7 +113,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
             HdfsUtils.rmdir(yarnConfiguration, path);
             HdfsUtils.rmdir(yarnConfiguration, scorePath);
             HdfsUtils.rmdir(yarnConfiguration, modelPath);
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

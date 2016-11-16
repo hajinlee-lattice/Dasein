@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -29,7 +29,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -64,7 +64,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
         builder.cleanUpInterval(cleanUpInterval)
                 .customerBaseDir(customerBaseDir)
                 .enableCleanHdfs(enableCleanHdfs)
-                .metadataService(metadataService)
+                .metadataService(dbMetadataService)
                 .scoringCommandEntityMgr(scoringCommandEntityMgr)
                 .scoringCommandResultEntityMgr(scoringCommandResultEntityMgr)
                 .scoringJdbcTemplate(scoringJdbcTemplate)

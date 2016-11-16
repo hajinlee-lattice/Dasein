@@ -1,10 +1,15 @@
-package com.latticeengines.dataplatform.service.impl.metadata;
+package com.latticeengines.db.service.impl.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.latticeengines.db.service.impl.metadata.GenericJdbcMetadataProvider;
+import com.latticeengines.db.service.impl.metadata.MetadataProvider;
+import com.latticeengines.db.service.impl.metadata.MySQLServerMetadataProvider;
+import com.latticeengines.db.service.impl.metadata.SQLServerMetadataProvider;
 
 @Configuration
 public class MetadataProviderMapping {

@@ -25,14 +25,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.MetadataService;
 import com.latticeengines.sqoop.service.SqoopJobService;
 
+@SuppressWarnings("deprecation")
 @Component("sqoopJobService")
 public class SqoopJobServiceImpl implements SqoopJobService {
 
@@ -51,7 +52,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     public ApplicationId exportData(SqoopExporter exporter) {
         Configuration yarnConfiguration = exporter.getYarnConfiguration();
@@ -71,11 +72,11 @@ public class SqoopJobServiceImpl implements SqoopJobService {
             }
         }
         cmds.add("--connect");
-        cmds.add(metadataService.getConnectionUrl(exporter.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionUrl(exporter.getDbCreds()));
         cmds.add("--username");
-        cmds.add(metadataService.getConnectionUserName(exporter.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionUserName(exporter.getDbCreds()));
         cmds.add("--password");
-        cmds.add(metadataService.getConnectionPassword(exporter.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionPassword(exporter.getDbCreds()));
         cmds.add("--table");
         cmds.add(exporter.getTable());
         cmds.add("--mapreduce-job-name");
@@ -150,11 +151,11 @@ public class SqoopJobServiceImpl implements SqoopJobService {
             }
         }
         cmds.add("--connect");
-        cmds.add(metadataService.getConnectionUrl(importer.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionUrl(importer.getDbCreds()));
         cmds.add("--username");
-        cmds.add(metadataService.getConnectionUserName(importer.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionUserName(importer.getDbCreds()));
         cmds.add("--password");
-        cmds.add(metadataService.getConnectionPassword(importer.getDbCreds()));
+        cmds.add(dbMetadataService.getConnectionPassword(importer.getDbCreds()));
 
         if (SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
             cmds.add("--table");
@@ -287,7 +288,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
 
     private static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
-            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/dataplatform/lib", version),
+            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/sqoop/lib", version),
                     ".*.jar$");
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

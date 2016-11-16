@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl.metadata;
+package com.latticeengines.db.service.impl.metadata;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -7,12 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.MySQLManager;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.db.service.impl.metadata.MetadataProvider;
 
-@SuppressWarnings("deprecation")
 public class MySQLServerMetadataProvider extends MetadataProvider {
 
     public MySQLServerMetadataProvider() {
@@ -28,10 +25,6 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     // return replaceUrlWithParamsAndTestConnection(url, getDriverClass(),
     // creds);
     // }
-
-    public ConnManager getConnectionManager(SqoopOptions options) {
-        return new MySQLManager(options);
-    }
 
     @Override
     public Long getRowCount(JdbcTemplate jdbcTemplate, String tableName) {

@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl;
+package com.lattcom.latticeengines.sqoop.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
@@ -22,56 +22,51 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqooop.functionalframework.SqoopFunctionalTestNGBase;
+import com.latticeengines.sqoop.service.SqoopJobService;
 
-public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
+public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(SqoopSyncJobServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(SqoopJobServiceImplTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
+    private SqoopJobService sqoopJobService;
 
-    @Value("${dataplatform.test.dellebi.datatarget.host}")
-    private String targetJdbcHost;
+    private String targetJdbcHost = "10.51.15.145";
 
-    @Value("${dataplatform.test.dellebi.datatarget.port}")
-    private String targetJdbcPort;
+    private String targetJdbcPort = "1433";
 
-    @Value("${dataplatform.test.dellebi.datatarget.dbname}")
-    private String targetJdbcDb;
+    private String targetJdbcDb = "DELL_EBI_STAGE_FINAL_USE_DEV";
 
-    @Value("${dataplatform.test.dellebi.datatarget.type}")
-    private String targetJdbcType;
+    private String targetJdbcType = "SQLServer";
 
-    @Value("${dataplatform.test.dellebi.datatarget.user}")
-    private String targetJdbcUser;
+    private String targetJdbcUser = "hadoop";
 
-    @Value("${dataplatform.test.dellebi.datatarget.password.encrypted}")
-    private String targetJdbcPassword;
+    private String targetJdbcPassword = CipherUtils.decrypt("8xuq8yYNOoNtHQpFel/J7w==");
 
-    @BeforeClass(groups = "functional.platform")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
+        HdfsUtils.rmdir(yarnConfiguration, "/tmp/sqoopFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromDB");
     }
 
-    @AfterClass(groups = "functional.platform")
+    @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
 
@@ -92,10 +87,10 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional.platform", enabled = false)
+    @Test(groups = "functional", enabled = false)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -244,10 +239,11 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .setCustomer("Nutanix").setSplitColumn("Nutanix_EventTable_Clean").setNumMappers(1)
                 .setProperties(props).setSync(false).build();
 
-        ApplicationId appId = sqoopSyncJobService.importData(importer);
+        ApplicationId appId = sqoopJobService.importData(importer);
 
         log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
+                appId, 600);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile", new HdfsFilenameFilter() {
@@ -285,10 +281,10 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional.platform", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServerWithEnclosure() throws Exception {
         URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
         String targetTable = "STG_WARRANTY_GLOBAL";
         String sourceDir = "/tmp/Warranty_Dell.txt";
         List<String> targetColumns = Arrays.asList("ORDER_BUSINESS_UNIT_ID", "LOCAL_CHANNEL", "SERVICE_TAG_ID",
@@ -306,18 +302,19 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .setCustomer("DellEbi_Warranty").setExportColumns(targetColumns).setNumMappers(1)
                 .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).setSync(false).build();
 
-        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
+                appId, 600);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
     }
 
-    @Test(groups = "functional.platform", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServerWithDelimiter() throws Exception {
         URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
 
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell_Delimiter.txt";
@@ -332,18 +329,19 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns)
                 .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).build();
 
-        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
+                appId, 600);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
     }
 
-    @Test(groups = "functional.platform", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void exportDataToSQLServer() throws Exception {
         URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell.txt";
         List<String> targetColumns = Arrays.asList("MFG_NAME", "SUBCLASS_DESC", "ITM_SHRT_DESC", "MFG_PART_NUM");
@@ -354,10 +352,11 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
                 .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns).build();
 
-        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
-        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
+                appId, 600);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
     }

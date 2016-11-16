@@ -43,9 +43,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
@@ -54,6 +52,8 @@ import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.ModelValidationService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
@@ -75,7 +75,10 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorit
 import com.latticeengines.domain.exposed.modeling.algorithm.DataReviewAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
+import com.latticeengines.sqoop.service.SqoopJobService;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
@@ -94,13 +97,16 @@ public class ModelingServiceImpl implements ModelingService {
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
-
-    @Autowired
-    private MetadataService metadataService;
+    private SqoopMetadataService sqoopMetadataService;
 
     @Autowired
     private VersionManager versionManager;
+
+    @Autowired
+    private SqoopProxy sqoopProxy;
+    
+    @Autowired
+    private SqoopJobService sqoopJobService;
 
     @Resource(name = "parallelDispatchService")
     private DispatchService dispatchService;
@@ -132,26 +138,38 @@ public class ModelingServiceImpl implements ModelingService {
             targetDir = model.getDataHdfsPath();
         }
 
+        SqoopImporter.Builder builder = new SqoopImporter.Builder() //
+                .setTargetDir(targetDir)//
+                .setDbCreds(config.getCreds()) //
+                .setQueue(assignedQueue)//
+                .setCustomer(model.getCustomer())//
+                .setSplitColumn(StringUtils.join(config.getKeyCols(), ","))//
+                .setTable(config.getTable());
         if (config.getQuery() != null) {
-            return sqoopSyncJobService.importDataForQuery(config.getQuery(), //
-                    targetDir, //
-                    config.getCreds(), //
-                    assignedQueue, //
-                    model.getCustomer(), //
-                    config.getKeyCols(), //
-                    null);
+            builder.setQuery(config.getQuery());
+        } else {
+            builder.setColumnsToInclude(Arrays
+                    .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
         }
-        return sqoopSyncJobService.importData(model.getTable(), targetDir, config.getCreds(), assignedQueue,
-                model.getCustomer(), config.getKeyCols(),
-                columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
+        return sqoopJobService.importData(builder.build());
+
     }
 
     @Override
     public ApplicationId exportData(ExportConfiguration config) {
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-
-        return sqoopSyncJobService.exportData(config.getTable(), config.getHdfsDirPath(), config.getCreds(),
-                assignedQueue, config.getCustomer());
+        //
+        // return sqoopSyncJobService.exportData(config.getTable(),
+        // config.getHdfsDirPath(), config.getCreds(),
+        // assignedQueue, config.getCustomer());
+        SqoopExporter exporter = new SqoopExporter.Builder() //
+                .setQueue(assignedQueue)//
+                .setTable(config.getTable()) //
+                .setSourceDir(config.getHdfsDirPath()) //
+                .setDbCreds(config.getCreds()) //
+                .setCustomer(config.getCustomer())//
+                .build();
+        return sqoopJobService.exportData(exporter);
     }
 
     @Override
@@ -177,10 +195,8 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
-        properties.setProperty(
-                MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
-                        versionManager.getCurrentVersionInStack(stackName)));
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil
+                .getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersionInStack(stackName)));
 
         return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()), properties);
     }
@@ -208,8 +224,8 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setMapperSize(dispatchService.getNumberOfProfilingMappers(dataProfileConfig
-                .isParallelEnabled()));
+        dataProfileAlgorithm
+                .setMapperSize(dispatchService.getNumberOfProfilingMappers(dataProfileConfig.isParallelEnabled()));
         if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
             dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
         } else {
@@ -365,8 +381,8 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void setupModelProperties(Model model) {
         model.setId(UUID.randomUUID().toString());
-        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
-                + model.getId());
+        model.setModelHdfsDir(
+                customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/" + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
         model.setMetadataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getMetadataTable());
     }
@@ -384,8 +400,8 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void validateModelInputData(Model model) throws Exception {
         try {
-            ModelValidationService validator = ModelValidationService.get(model.getModelDefinition().getAlgorithms()
-                    .get(0).getName());
+            ModelValidationService validator = ModelValidationService
+                    .get(model.getModelDefinition().getAlgorithms().get(0).getName());
             validator.validate(model);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -462,7 +478,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     private String getScriptPathWithVersion(String script) {
         String afterPart = StringUtils.substringAfter(script, "/app");
-        
+
         // If this is empty, it means it's a customer supplied pipeline driver
         if (afterPart.equals("")) {
             return script;
@@ -475,7 +491,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (c_stack_and_version.matches()) {
             return script;
         }
-        
+
         return "/app/" + versionManager.getCurrentVersionInStack(stackName) + afterPart;
     }
 
@@ -557,8 +573,8 @@ public class ModelingServiceImpl implements ModelingService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
-        appMasterProperties
-                .put(dispatchService.getMapSizeKeyName(model.isParallelEnabled()), algorithm.getMapperSize());
+        appMasterProperties.put(dispatchService.getMapSizeKeyName(model.isParallelEnabled()),
+                algorithm.getMapperSize());
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);
@@ -644,8 +660,7 @@ public class ModelingServiceImpl implements ModelingService {
             }
             dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
 
-            List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath,
-                    "profile.avro");
+            List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath, "profile.avro");
             if (avroMetadataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
@@ -784,11 +799,11 @@ public class ModelingServiceImpl implements ModelingService {
     private String columnsToInclude(String table, DbCreds creds, Map<String, String> properties) {
         StringBuilder lb = new StringBuilder();
         try {
-            DataSchema dataSchema = metadataService.createDataSchema(creds, table);
+            DataSchema dataSchema = sqoopMetadataService.createDataSchema(creds, table);
             List<Field> fields = dataSchema.getFields();
 
-            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS
-                    .getValue(properties));
+            boolean excludeTimestampCols = Boolean
+                    .parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
             boolean first = true;
             for (Field field : fields) {
 
@@ -801,7 +816,8 @@ public class ModelingServiceImpl implements ModelingService {
                 // We can start including TIMESTAMP and TIME columns by
                 // explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
                 // in the load configuration.
-                if (excludeTimestampCols && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
+                if (excludeTimestampCols
+                        && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
                     continue;
                 }
                 String name = field.getName();

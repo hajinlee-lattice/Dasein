@@ -1,33 +1,23 @@
-package com.latticeengines.sqoop.service.impl.metadata;
+package com.latticeengines.db.service.impl.metadata;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sqoop.orm.AvroSchemaGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 
-import com.cloudera.sqoop.SqoopOptions;
-import com.cloudera.sqoop.manager.ConnManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
-@SuppressWarnings("deprecation")
 public abstract class MetadataProvider {
-
-    private AvroSchemaGenerator avroSchemaGenerator;
 
     public abstract String getName();
 
     public abstract String getDriverName();
-
-    public abstract ConnManager getConnectionManager(SqoopOptions options);
 
     public abstract Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
 
@@ -51,23 +41,6 @@ public abstract class MetadataProvider {
     public abstract String getConnectionUserName(DbCreds creds);
 
     public abstract String getConnectionPassword(DbCreds creds);
-
-    public Schema getSchema(DbCreds dbCreds, String tableName) {
-        SqoopOptions options = new SqoopOptions();
-        options.setConnectString(getConnectionString(dbCreds));
-
-        if (!StringUtils.isEmpty(dbCreds.getDriverClass())) {
-            options.setDriverClassName(dbCreds.getDriverClass());
-        }
-
-        ConnManager connManager = getConnectionManager(options);
-        avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
-        try {
-            return avroSchemaGenerator.generate();
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
     public String replaceUrlWithParamsAndTestConnection(String url, String driverClass, DbCreds creds) {
         Connection conn = null;

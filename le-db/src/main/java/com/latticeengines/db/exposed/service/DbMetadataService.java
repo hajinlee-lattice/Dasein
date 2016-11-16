@@ -1,18 +1,11 @@
-package com.latticeengines.dataplatform.exposed.service;
+package com.latticeengines.db.exposed.service;
+
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
-import org.apache.avro.Schema;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.latticeengines.domain.exposed.modeling.DataSchema;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-
-public interface MetadataService {
-
-    DataSchema createDataSchema(DbCreds creds, String tableName);
-
-    Schema getAvroSchema(DbCreds creds, String tableName);
+public interface DbMetadataService {
 
     String getJdbcConnectionUrl(DbCreds creds);
 
@@ -51,4 +44,6 @@ public interface MetadataService {
     String getConnectionPassword(DbCreds creds);
 
     String getConnectionUserName(DbCreds creds);
+
+    String getConnectionString(DbCreds creds);
 }

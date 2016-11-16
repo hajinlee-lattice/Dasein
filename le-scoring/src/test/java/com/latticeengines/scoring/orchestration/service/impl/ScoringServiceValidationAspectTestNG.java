@@ -17,7 +17,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
 
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 
@@ -31,9 +30,6 @@ public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestN
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
-
-    @Autowired
-    private ScoringStepProcessor scoringStepFinishProcessor;
 
     @Autowired
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;

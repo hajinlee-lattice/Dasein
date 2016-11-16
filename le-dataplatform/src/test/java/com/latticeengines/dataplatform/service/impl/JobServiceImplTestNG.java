@@ -43,13 +43,13 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.service.SqoopJobService;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -64,7 +65,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private JobService jobService;
 
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
     private Configuration hadoopConfiguration;
@@ -375,9 +376,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
                 .clearTextPassword(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = sqoopSyncJobService.importData("iris", baseDir + "/tmp/import", creds,
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), "Dell",
-                Arrays.<String> asList(new String[] { "ID" }), "");
+        SqoopImporter importer = new SqoopImporter.Builder()//
+                .setTable("iris")//
+                .setTargetDir(baseDir + "/tmp/import") //
+                .setDbCreds(creds)//
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())//
+                .setCustomer("Dell")//
+                .setSplitColumn("ID")//
+                .build();
+        
+        
+        ApplicationId appId = sqoopJobService.importData(importer);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, baseDir + "/tmp/import",

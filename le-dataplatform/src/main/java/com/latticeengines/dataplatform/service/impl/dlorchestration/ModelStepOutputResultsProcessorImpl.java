@@ -19,10 +19,10 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -72,7 +72,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     private ModelCommandLogService modelCommandLogService;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
@@ -288,10 +288,10 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
-        metadataService.dropTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
-        metadataService.createNewTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(),
+        dbMetadataService.dropTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+        dbMetadataService.createNewTable(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(),
                 CREATE_OUTPUT_TABLE_SQL);
-        metadataService.insertRow(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), INSERT_OUTPUT_TABLE_SQL,
+        dbMetadataService.insertRow(dlOrchestrationJdbcTemplate, modelCommand.getEventTable(), INSERT_OUTPUT_TABLE_SQL,
                 output.getId(), output.getCommandId(), output.getSampleSize(), output.getAlgorithm(),
                 output.getJsonPath(), output.getTimestamp());
     }

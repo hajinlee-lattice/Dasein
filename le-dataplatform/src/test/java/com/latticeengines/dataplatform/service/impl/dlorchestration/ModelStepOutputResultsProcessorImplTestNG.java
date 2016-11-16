@@ -23,11 +23,11 @@ import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscribe
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -58,7 +58,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private ModelingService modelingService;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -108,14 +108,14 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
 
-        metadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
+        dbMetadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
         dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
-        metadataService.createNewTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE, "(Id int)");
+        dbMetadataService.createNewTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE, "(Id int)");
     }
 
     @AfterMethod(groups = { "functional" })
     public void cleanup() throws Exception {
-        metadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
+        dbMetadataService.dropTable(dlOrchestrationJdbcTemplate, TEMP_EVENTTABLE);
         HdfsUtils.rmdir(yarnConfiguration, resultDirectory);
         HdfsUtils.rmdir(yarnConfiguration, metadataDirectory);
         super.clearTables();

@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -28,7 +28,7 @@ public class ModelingServiceValidationAspect {
     private BeanValidationService beanValidationService;
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
 
     @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.loadData(..)) "
             + " && args(config)")
@@ -68,8 +68,8 @@ public class ModelingServiceValidationAspect {
     }
 
     void validateEventTableColumnNames(LoadConfiguration config) {
-        JdbcTemplate jdbcTemplate = metadataService.constructJdbcTemplate(config.getCreds());
-        List<String> columnNames = metadataService.getColumnNames(jdbcTemplate, config.getTable());
+        JdbcTemplate jdbcTemplate = dbMetadataService.constructJdbcTemplate(config.getCreds());
+        List<String> columnNames = dbMetadataService.getColumnNames(jdbcTemplate, config.getTable());
         for (String columnName : columnNames) {
             validateColumnName(columnName);
         }

@@ -3,7 +3,6 @@ package com.latticeengines.scoring.runtime.mapreduce;
 import java.sql.Timestamp;
 
 import org.springframework.util.CollectionUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,8 +11,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
@@ -33,13 +30,7 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
     private String customerBaseDir;
 
     @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
     private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MetadataService metadataService;
 
     // need do change it according to the customer
     private static final String customer = "Nutanix_TEST_DELL";
@@ -59,10 +50,10 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
         // environments.
         inputLeadsTable = getClass().getSimpleName() + "__LeadsTable";
         CustomerSpace.parse(customer).toString();
-        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
     @Test(groups = "functional", enabled = false)
@@ -79,7 +70,7 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         try {
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

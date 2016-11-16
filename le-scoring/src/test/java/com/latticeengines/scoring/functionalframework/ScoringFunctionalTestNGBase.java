@@ -16,6 +16,7 @@ import org.testng.annotations.AfterClass;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -26,6 +27,9 @@ public class ScoringFunctionalTestNGBase extends DataPlatformFunctionalTestNGBas
 
     @Autowired
     private ScoringOrderedEntityMgrListForDbClean scoringOrderedEntityMgrListForDbClean;
+    
+    @Autowired
+    protected DbMetadataService dbMetadataService;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 

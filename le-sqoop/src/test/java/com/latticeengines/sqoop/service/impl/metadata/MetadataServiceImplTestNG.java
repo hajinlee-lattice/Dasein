@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl;
+package com.latticeengines.sqoop.service.impl.metadata;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -14,31 +14,35 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
+import com.latticeengines.sqooop.functionalframework.SqoopFunctionalTestNGBase;
+import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 
-public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
+public class MetadataServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
     @Autowired
-    private MetadataService metadataService;
+    private DbMetadataService dbMetadataService;
+
+    @Autowired
+    private SqoopMetadataService sqoopMetadataService;
 
     private NetworkServerControl serverControl;
 
-    @BeforeClass(groups = "functional.platform")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         serverControl = new NetworkServerControl();
         serverControl.start(null);
     }
 
-    @AfterClass(groups = "functional.platform")
+    @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        serverControl.shutdown();
+        // serverControl.shutdown();
     }
 
-    @Test(groups = { "functional.platform", "functional.production" }, enabled = true)
+    @Test(groups = { "functional" }, enabled = true)
     public void getDataTypes() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("10.41.1.250") //
@@ -49,8 +53,8 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         DbCreds creds = new DbCreds(builder);
 
-        DataSchema schema = metadataService.createDataSchema(creds, "Play_11_Training_WithRevenue");
-        Schema avroSchema = metadataService.getAvroSchema(creds, "Play_11_Training_WithRevenue");
+        DataSchema schema = sqoopMetadataService.createDataSchema(creds, "Play_11_Training_WithRevenue");
+        Schema avroSchema = sqoopMetadataService.getAvroSchema(creds, "Play_11_Training_WithRevenue");
 
         for (Field field : schema.getFields()) {
             String fieldName = field.getName();
@@ -71,7 +75,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     }
 
-    @Test(groups = { "functional.platform" }, enabled = true)
+    @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrl() {
         String url = "jdbc:sqlserver://10.41.1.250:1433;databaseName=SP_7_Tests;user=root;password=welcome";
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -79,14 +83,14 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         DbCreds creds = new DbCreds(builder);
 
-        assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
-        assertEquals(metadataService.getConnectionUrl(creds),
+        assertEquals(dbMetadataService.getJdbcConnectionUrl(creds), url);
+        assertEquals(dbMetadataService.getConnectionUrl(creds),
                 "jdbc:sqlserver://10.41.1.250:1433;databaseName=SP_7_Tests");
-        assertEquals(metadataService.getConnectionUserName(creds), "root");
-        assertEquals(metadataService.getConnectionPassword(creds), "welcome");
+        assertEquals(dbMetadataService.getConnectionUserName(creds), "root");
+        assertEquals(dbMetadataService.getConnectionPassword(creds), "welcome");
     }
 
-    @Test(groups = { "functional.platform" }, enabled = true)
+    @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClass() {
         String url = "jdbc:derby://localhost:1527/testdb;create=true";
         String driver = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -94,25 +98,25 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         builder.jdbcUrl(url).driverClass(driver);
         DbCreds creds = new DbCreds(builder);
 
-        assertEquals(metadataService.getJdbcConnectionUrl(creds), url);
+        assertEquals(dbMetadataService.getJdbcConnectionUrl(creds), url);
     }
 
-    @Test(groups = { "functional.platform" }, enabled = true)
+    @Test(groups = { "functional" }, enabled = true)
     public void getJdbcConnectionUrlUsingUrlAndDriverClassForFile() throws Exception {
         AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
-        assertEquals(metadataService.getJdbcConnectionUrl(dbInfo.getKey()), dbInfo.getValue());
+        assertEquals(dbMetadataService.getJdbcConnectionUrl(dbInfo.getKey()), dbInfo.getValue());
     }
 
-    @Test(groups = { "functional.platform" }, enabled = false)
+    @Test(groups = { "functional" }, enabled = false)
     public void createDataSchema() throws Exception {
         AbstractMap.SimpleEntry<DbCreds, String> dbInfo = buildCredsForFile();
-        DataSchema schema = metadataService.createDataSchema(dbInfo.getKey(), "Nutanix");
+        DataSchema schema = sqoopMetadataService.createDataSchema(dbInfo.getKey(), "Nutanix");
         assertTrue(schema.getFields().size() > 0);
     }
 
     private AbstractMap.SimpleEntry<DbCreds, String> buildCredsForFile() {
         URL inputUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+                .getSystemResource("com/latticeengines/sqoop/service/impl/files");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();

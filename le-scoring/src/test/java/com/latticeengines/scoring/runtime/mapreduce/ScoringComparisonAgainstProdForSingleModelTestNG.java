@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -40,8 +39,6 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
-import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 
@@ -51,9 +48,6 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
     private static final Log log = LogFactory.getLog(ScoringComparisonAgainstProdForSingleModelTestNG.class);
-
-    @Autowired
-    private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
     @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
@@ -72,16 +66,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private String testInputTable;
 
     @Autowired
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
-
-    @Autowired
     private DbCreds scoringCreds;
 
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
-
-    @Autowired
-    private MetadataService metadataService;
 
     private String inputLeadsTable;
 
@@ -100,10 +88,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
-        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
 
         // upload lead files to HDFS
@@ -163,10 +151,10 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + CustomerSpace.parse(customerName)
                 + "/scoring");
         scoringJdbcTemplate.setDataSource(new DriverManagerDataSource(resultJdbcUrl));
-        if (!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, scoreResTable))) {
-            metadataService.dropTable(scoringJdbcTemplate, scoreResTable);
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, scoreResTable))) {
+            dbMetadataService.dropTable(scoringJdbcTemplate, scoreResTable);
         }
-        metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
+        dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, scoreResTable, scoreTargetTable);
 
         ScoringCommand scoringCommand = new ScoringCommand(customerName, ScoringCommandStatus.POPULATED, scoreResTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
@@ -342,7 +330,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
             HdfsUtils.rmdir(yarnConfiguration, path);
             HdfsUtils.rmdir(yarnConfiguration, scorePath);
             HdfsUtils.rmdir(yarnConfiguration, modelPath);
-            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+            dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
