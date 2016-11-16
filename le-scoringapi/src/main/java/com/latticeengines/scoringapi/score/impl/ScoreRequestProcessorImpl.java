@@ -108,12 +108,15 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         Map<String, Object> readyToTransformRecord = null;
         Map<String, Object> enrichmentAttributes = null;
 
+        List<String> matchLogs = new ArrayList<>();
+        List<String> matchErrorLogs = new ArrayList<>();
+
         if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
             Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
                     parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
                     request.isPerformEnrichment(), enrichInternalAttributes, performFetchOnlyForMatching, requestId,
-                    isDebug);
+                    isDebug, matchLogs, matchErrorLogs);
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
@@ -139,7 +142,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         ScoreResponse scoreResponse = null;
         if (isDebug) {
             scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                    readyToTransformRecord);
+                    readyToTransformRecord, matchLogs, matchErrorLogs);
         } else {
             scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
         }
@@ -198,12 +201,15 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap = new HashMap<>();
             Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap = new HashMap<>();
+            Map<RecordModelTuple, List<String>> unorderedMatchLogMap = new HashMap<>();
+            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap = new HashMap<>();
 
             if (!partiallyOrderedParsedTupleList.isEmpty()) {
                 Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
                         true).matchAndJoin(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                                 originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
-                                performFetchOnlyForMatching, requestId, isDebug);
+                                performFetchOnlyForMatching, requestId, isDebug, unorderedMatchLogMap,
+                                unorderedMatchErrorLogMap);
 
                 Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                         unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
@@ -233,10 +239,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             if (isDebug) {
                 scoreResponse = generateDebugScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap);
+                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, unorderedMatchLogMap,
+                        unorderedMatchErrorLogMap);
             } else {
                 scoreResponse = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, false);
+                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, false, null, null);
             }
 
             if (log.isInfoEnabled()) {
@@ -360,12 +367,15 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
             List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap) {
+            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
+            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
+            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
         int idx = 0;
 
         List<RecordScoreResponse> debugResponseList = new ArrayList<>();
         List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true);
+                originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true, unorderedMatchLogMap,
+                unorderedMatchErrorLogMap);
         try {
             for (RecordScoreResponse recordResponse : result) {
                 DebugRecordScoreResponse debugRecordResponse = new DebugRecordScoreResponse(recordResponse);
@@ -375,6 +385,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     RecordModelTuple tuple = originalOrderParsedTupleList.get(idx++);
                     Map<String, Object> value = unorderedTransformedRecords.get(tuple);
                     transformedDataMap.put(scoreModelTuple.getModelId(), value);
+                    debugRecordResponse.setMatchLogs(unorderedMatchLogMap.get(tuple));
+                    debugRecordResponse.setMatchErrorMessages(unorderedMatchErrorLogMap.get(tuple));
                 }
 
                 debugRecordResponse.setTransformedRecordMap(transformedDataMap);
@@ -392,7 +404,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
             List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap, boolean isDebugMode) {
+            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap, boolean isDebugMode,
+            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
+            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
         Map<String, RecordScoreResponse> responseMap = new HashMap<>();
         List<RecordScoreResponse> responseList = new ArrayList<>();
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
@@ -430,7 +444,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                             scoringArtifacts.getModelJsonType());
                     if (isDebugMode) {
                         resp = ModelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                                null);
+                                null, unorderedMatchLogMap.get(tuple), unorderedMatchErrorLogMap.get(tuple));
                     } else {
                         resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
                     }

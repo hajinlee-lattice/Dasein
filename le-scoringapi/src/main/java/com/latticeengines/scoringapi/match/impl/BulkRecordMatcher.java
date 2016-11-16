@@ -52,7 +52,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean forEnrichment, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         throw new NotImplementedException();
     }
 
@@ -64,7 +65,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            Map<RecordModelTuple, List<String>> matchLogMap, //
+            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
                 buildMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                         originalOrderModelSummaryList, isHomogeneous, enrichInternalAttributes,
@@ -81,7 +84,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
             BulkMatchOutput matchOutput = executeMatch(pair.getKey());
 
-            postProcessMatchOutput(pair, matchOutput, results, uniqueFieldSchemasMap);
+            postProcessMatchOutput(pair, matchOutput, results, uniqueFieldSchemasMap, matchLogMap, matchErrorLogMap);
         }
 
         if (log.isInfoEnabled()) {
@@ -92,24 +95,33 @@ public class BulkRecordMatcher extends AbstractMatcher {
         return results;
     }
 
-    private void postProcessMatchOutput(Pair<BulkMatchInput, List<RecordModelTuple>> pair, //
+    private void postProcessMatchOutput(//
+            Pair<BulkMatchInput, List<RecordModelTuple>> pair, //
             BulkMatchOutput matchOutput, //
             Map<RecordModelTuple, Map<String, Map<String, Object>>> results, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap) {
+            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
+            Map<RecordModelTuple, List<String>> matchLogMap, //
+            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
         int idx = 0;
 
         List<MatchOutput> outputList = matchOutput.getOutputList();
 
         for (RecordModelTuple tuple : pair.getValue()) {
+            List<String> matchLogs = new ArrayList<>();
+            List<String> matchErrorLogs = new ArrayList<>();
             postProcessSingleMatchOutput(pair, results, uniqueFieldSchemasMap, //
-                    idx++, outputList, tuple);
+                    idx++, outputList, tuple, matchLogs, matchErrorLogs);
+            matchLogMap.put(tuple, matchLogs);
+            matchErrorLogMap.put(tuple, matchErrorLogs);
         }
     }
 
-    private void postProcessSingleMatchOutput(Pair<BulkMatchInput, List<RecordModelTuple>> pair,
-            Map<RecordModelTuple, Map<String, Map<String, Object>>> results,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, int idx, List<MatchOutput> outputList,
-            RecordModelTuple tuple) {
+    private void postProcessSingleMatchOutput(//
+            Pair<BulkMatchInput, List<RecordModelTuple>> pair, //
+            Map<RecordModelTuple, Map<String, Map<String, Object>>> results, //
+            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
+            int idx, List<MatchOutput> outputList, RecordModelTuple tuple, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         Map<String, Map<String, Object>> tupleResult = results.get(tuple);
         if (tupleResult == null) {
             tupleResult = new HashMap<>();
@@ -124,7 +136,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
         Map<String, FieldSchema> fieldSchemas = uniqueFieldSchemasMap.get(modelId);
 
         Map<String, Object> matchedRecordResult = new HashMap<>(tuple.getParsedData().getKey());
-        getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput, tupleOutput);
+        getRecordFromMatchOutput(fieldSchemas, matchedRecordResult, matchInput, tupleOutput, //
+                matchLogs, matchErrorLogs);
 
         boolean setEnrichmentData = false;
         if (matchInput.getUnionSelection() != null) {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +42,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean forEnrichment, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
@@ -63,7 +65,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                                 fieldSchemas, record, //
                                 modelSummary, false, //
                                 null, false, null, //
-                                performFetchOnlyForMatching, requestId, isDebugMode);
+                                performFetchOnlyForMatching, requestId, isDebugMode, //
+                                matchLogs, matchErrorLogs);
                 result.putAll(matchResult);
             }
 
@@ -76,7 +79,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                             null, true, //
                             selectedLeadEnrichmentAttributes, true, //
                             currentDataCloudVersion, performFetchOnlyForMatching, //
-                            requestId, isDebugMode);
+                            requestId, isDebugMode, //
+                            matchLogs, matchErrorLogs);
 
             result.putAll(enrichmentResult);
 
@@ -86,7 +90,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
             return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
                     record, modelSummary, forEnrichment, //
                     selectedLeadEnrichmentAttributes, false, null, //
-                    performFetchOnlyForMatching, requestId, isDebugMode);
+                    performFetchOnlyForMatching, requestId, isDebugMode, //
+                    matchLogs, matchErrorLogs);
         }
     }
 
@@ -99,7 +104,9 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous, //
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            Map<RecordModelTuple, List<String>> matchLogMap, //
+            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
         throw new NotImplementedException();
     }
 
@@ -110,7 +117,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
             boolean skipPredefinedSelection, String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         MatchInput matchInput = buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
@@ -119,7 +127,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
 
         MatchOutput matchOutput = callMatch(matchInput);
 
-        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput);
+        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput, matchLogs, matchErrorLogs);
 
         Map<String, Map<String, Object>> resultMap = new HashMap<>();
 

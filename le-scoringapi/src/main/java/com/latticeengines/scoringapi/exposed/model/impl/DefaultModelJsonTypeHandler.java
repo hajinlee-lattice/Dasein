@@ -175,14 +175,16 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     @Override
     public DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts, //
-            Map<String, Object> transformedRecord, //
-            Map<String, Object> matchedRecord) {
+            Map<String, Object> transformedRecord, Map<String, Object> matchedRecord, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         DebugScoreResponse debugScoreResponse = new DebugScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbability());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
         debugScoreResponse.setTransformedRecord(transformedRecord);
         debugScoreResponse.setMatchedRecord(matchedRecord);
+        debugScoreResponse.setMatchLogs(matchLogs);
+        debugScoreResponse.setMatchErrorMessages(matchErrorLogs);
 
         return debugScoreResponse;
     }

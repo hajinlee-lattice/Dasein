@@ -35,7 +35,8 @@ public interface ModelJsonTypeHandler {
     ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord);
 
     DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
-            Map<String, Object> transformedRecord, Map<String, Object> matchedRecord);
+            Map<String, Object> transformedRecord, Map<String, Object> matchedRecord, List<String> matchLogs,
+            List<String> matchErrorLogs);
 
     ScoringApiException checkForMissingEssentialFields(String recordId, String modelId, boolean hasOneOfDomain,
             boolean hasCompanyName, boolean hasCompanyState, List<String> missingMatchFields);

@@ -73,8 +73,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
             Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
 
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                modelIdSelectionMap.put(modelId, uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary()
-                        .getPredefinedSelection());
+                modelIdSelectionMap.put(modelId,
+                        uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary().getPredefinedSelection());
             }
 
             recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
@@ -178,14 +178,15 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     public void testGenerateDebugScoreResponse() {
         List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl.generateDebugScoreResponse(
                 uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList,
-                unorderedLeadEnrichmentMap);
+                unorderedLeadEnrichmentMap, new HashMap<RecordModelTuple, List<String>>(),
+                new HashMap<RecordModelTuple, List<String>>());
 
         Assert.assertNotNull(recordScoreResponseDebugList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getScore());
-        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability().doubleValue() != recordScoreResponseDebugList
-                .get(0).getScores().get(0).getScore().doubleValue());
+        Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability()
+                .doubleValue() != recordScoreResponseDebugList.get(0).getScores().get(0).getScore().doubleValue());
 
         checkScoreResultList(recordScoreResponseDebugList, true);
 
@@ -195,14 +196,15 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
     public void testGenerateScoreResponse() {
         List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl.generateScoreResponse(
                 uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList,
-                unorderedLeadEnrichmentMap, true);
+                unorderedLeadEnrichmentMap, true, new HashMap<RecordModelTuple, List<String>>(),
+                new HashMap<RecordModelTuple, List<String>>());
 
         Assert.assertNotNull(recordScoreResponseList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
         Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getProbability());
         Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getScore());
-        Assert.assertTrue(recordScoreResponseList.get(0).getScores().get(0).getProbability().doubleValue() != recordScoreResponseList
-                .get(0).getScores().get(0).getScore().doubleValue());
+        Assert.assertTrue(recordScoreResponseList.get(0).getScores().get(0).getProbability()
+                .doubleValue() != recordScoreResponseList.get(0).getScores().get(0).getScore().doubleValue());
 
         checkScoreResultList(recordScoreResponseList, false);
     }

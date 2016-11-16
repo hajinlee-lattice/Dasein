@@ -68,13 +68,26 @@ public abstract class AbstractMatcher implements Matcher {
     protected void getRecordFromMatchOutput(Map<String, FieldSchema> fieldSchemas, //
             Map<String, Object> record, //
             MatchInput matchInput, //
-            MatchOutput matchOutput) {
+            MatchOutput matchOutput, //
+            List<String> matchLogs, List<String> matchErrorLogs) {
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH,
                     new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
         } else {
             List<String> matchFieldNames = matchOutput.getOutputFields();
             OutputRecord outputRecord = matchOutput.getResult().get(0);
+
+            if (outputRecord != null //
+                    && CollectionUtils.isEmpty(matchLogs) //
+                    && CollectionUtils.isEmpty(matchErrorLogs)) {
+                if (!CollectionUtils.isEmpty(outputRecord.getMatchLogs())) {
+                    matchLogs.addAll(outputRecord.getMatchLogs());
+                }
+                if (!CollectionUtils.isEmpty(outputRecord.getErrorMessages())) {
+                    matchErrorLogs.addAll(outputRecord.getErrorMessages());
+                }
+            }
+
             String nameLocationStr = "";
             if (outputRecord.getPreMatchNameLocation() != null) {
                 nameLocationStr = JsonUtils.serialize(outputRecord.getPreMatchNameLocation());
