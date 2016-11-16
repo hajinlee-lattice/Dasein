@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchMatchContext>
         implements DnBBulkLookupFetcher {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DnBBulkLookupFetcherImpl.class);
 
     @Autowired
