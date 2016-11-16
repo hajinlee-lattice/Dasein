@@ -634,11 +634,12 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    controller: function(urls) { 
+                    controller: function(urls, $scope, $stateParams) { 
+                        $scope.id = $stateParams.id;
                         $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                            .html('<iframe src="' + urls.scoring_settings_url + '&credentialId=' + $scope.id + '"></iframe>');
                     },
-                    template: '<style>iframe {background: #f5f5f5}</style><section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
                 }   
             }
         })
