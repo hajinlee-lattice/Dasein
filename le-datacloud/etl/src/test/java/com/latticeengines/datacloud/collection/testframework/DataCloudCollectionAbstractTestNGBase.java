@@ -13,9 +13,10 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-datacloud-collection-context.xml" })
@@ -49,7 +50,7 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private SqoopSyncJobService sqoopService;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -71,8 +72,16 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
         DbCreds creds = new DbCreds(builder);
-        sqoopService.exportDataSync(destTable, avroDir, creds, assignedQueue,
-                customer + "-upload-" + destTable, numMappers, null);
+        SqoopExporter exporter = new SqoopExporter.Builder()//
+                .setTable(destTable)//
+                .setSourceDir(avroDir)//
+                .setDbCreds(creds)//
+                .setQueue(assignedQueue)//
+                .setCustomer(customer + "-upload-" + destTable) //
+                .setNumMappers(numMappers)//
+                .build();
+        
+        sqoopJobService.exportData(exporter);
     }
 
     @SuppressWarnings("unused")

@@ -6,16 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.service.SqoopService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("sqlService")
 public class SqoopServiceImpl implements SqoopService {
 
     @Autowired
-    private SqoopSyncJobService sqoopService;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -24,14 +24,14 @@ public class SqoopServiceImpl implements SqoopService {
     public ApplicationId importTable(SqoopImporter importer) {
         importer.setYarnConfiguration(yarnConfiguration);
         importer.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        return sqoopService.importData(importer);
+        return sqoopJobService.importData(importer);
     }
 
     @Override
     public ApplicationId exportTable(SqoopExporter exporter) {
         exporter.setYarnConfiguration(yarnConfiguration);
         exporter.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        return sqoopService.exportData(exporter);
+        return sqoopJobService.exportData(exporter);
     }
 
 }
