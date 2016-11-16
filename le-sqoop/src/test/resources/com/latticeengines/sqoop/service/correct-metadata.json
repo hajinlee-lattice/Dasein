@@ -1,0 +1,90 @@
+{
+  "ErrorMessage": null,
+  "Metadata": [
+    {
+      "ApprovedUsage": [
+        "ModelAndModelInsights"
+      ],
+      "ColumnName": "Activity_Count_Click_Email",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Email Clicks (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Email Clicks (Marketwo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "ApprovedUsage": [
+        "Model"
+      ],
+      "ColumnName": "Activity_Count_Click_Link",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Web-Link Clicks (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Web-Link Clicks (Marketo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    },
+    {
+      "ApprovedUsage": [
+        "ModelAndAllInsights"
+      ],
+      "ColumnName": "Activity_Count_Email_Bounced_Soft",
+      "DataQuality": null,
+      "DataSource": null,
+      "DataType": "Integer",
+      "Description": "Number of Soft Email Bounces (Marketo)",
+      "DisplayDiscretizationStrategy": "{\"geometric\": { \"minValue\":1,\"multiplierList\":[2,2.5,2],\"minSamples\":100,\"minFreq\":0.01,\"maxBuckets\":5,\"maxPercentile\":1}}",
+      "DisplayName": "Email Bounces, Soft (Marketo)",
+      "Extensions": [
+        {
+          "Key": "Category",
+          "Value": "Marketing Activity"
+        }
+      ],
+      "FundamentalType": "numeric",
+      "LastTimeSourceUpdated": null,
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": "ratio",
+      "Tags": [
+        "Internal"
+      ]
+    }
+  ],
+  "Status": 3
+}

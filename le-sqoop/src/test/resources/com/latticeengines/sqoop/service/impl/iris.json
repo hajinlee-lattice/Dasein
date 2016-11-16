@@ -1,0 +1,12 @@
+{
+    "name":"IrisDataSet",
+    "fields":
+    [
+        {"name":"sepal_length","type":["float","0.0"]},
+        {"name":"sepal_width","type":["float","0.0"]},
+        {"name":"petal_length","type":["float","0.0"]},
+        {"name":"petal_width","type":["float","0.0"]},
+        {"name":"category","type":["int","0"]}
+    ],
+    "type":"record"
+}

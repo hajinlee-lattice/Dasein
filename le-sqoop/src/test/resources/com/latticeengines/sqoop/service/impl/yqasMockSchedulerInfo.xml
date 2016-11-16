@@ -1,0 +1,84 @@
+<scheduler>
+	<schedulerInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fairScheduler">
+		<rootQueue>
+			<queueName>root</queueName>
+			<childQueues>
+					<queueName>root.PriorityNoLeaves</queueName>
+			</childQueues>
+			<childQueues>
+				<queueName>root.Priority0</queueName>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority0.0</queueName>
+					<numPendingApps>5</numPendingApps>
+					<numActiveApps>5</numActiveApps>
+				</childQueues>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority0.1</queueName>
+					<numPendingApps>4</numPendingApps>
+					<numActiveApps>4</numActiveApps>
+				</childQueues>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority0.2</queueName>
+					<numPendingApps>3</numPendingApps>
+					<numActiveApps>3</numActiveApps>
+				</childQueues>				
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority0.3</queueName>
+					<numPendingApps>1</numPendingApps>
+					<numActiveApps>1</numActiveApps>
+				</childQueues>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority0.4</queueName>
+					<numPendingApps>2</numPendingApps>
+					<numActiveApps>2</numActiveApps>
+				</childQueues>				
+				<childQueues>
+					<queueName>root.Priority0.MapReduce</queueName>
+					<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+						<queueName>root.Priority0.MapReduce.0</queueName>
+						<numPendingApps>20</numPendingApps>
+						<numActiveApps>10</numActiveApps>
+					</childQueues>
+					<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+						<queueName>root.Priority0.MapReduce.1</queueName>
+						<numPendingApps>0</numPendingApps>
+						<numActiveApps>0</numActiveApps>
+					</childQueues>
+					<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+						<queueName>root.Priority0.MapReduce.2</queueName>
+						<numPendingApps>20</numPendingApps>
+						<numActiveApps>10</numActiveApps>
+					</childQueues>
+					<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+						<queueName>root.Priority0.MapReduce.3</queueName>
+						<numPendingApps>20</numPendingApps>
+						<numActiveApps>10</numActiveApps>
+					</childQueues>
+					<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+						<queueName>root.Priority0.MapReduce.4</queueName>
+						<numPendingApps>20</numPendingApps>
+						<numActiveApps>10</numActiveApps>
+					</childQueues>																				
+				</childQueues>
+			</childQueues>
+			<childQueues>
+				<queueName>root.Priority1</queueName>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority1.0</queueName>
+					<numPendingApps>5</numPendingApps>
+					<numActiveApps>5</numActiveApps>
+				</childQueues>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority1.1</queueName>
+					<numPendingApps>5</numPendingApps>
+					<numActiveApps>5</numActiveApps>
+				</childQueues>
+				<childQueues xsi:type="fairSchedulerLeafQueueInfo">
+					<queueName>root.Priority1.2</queueName>
+					<numPendingApps>5</numPendingApps>
+					<numActiveApps>5</numActiveApps>
+				</childQueues>				
+			</childQueues>			
+		</rootQueue>
+	</schedulerInfo>
+</scheduler>
