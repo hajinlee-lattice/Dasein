@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -27,6 +26,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class ExportAndReportService {
 
@@ -80,7 +80,7 @@ public class ExportAndReportService {
     private JobService jobService;
 
     @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -129,7 +129,7 @@ public class ExportAndReportService {
                 .addExtraOption(optionalEnclosureValue).build();
 
         try {
-            ApplicationId appId = sqoopSyncJobService.exportData(exporter);
+            ApplicationId appId = sqoopJobService.exportData(exporter);
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
 
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {

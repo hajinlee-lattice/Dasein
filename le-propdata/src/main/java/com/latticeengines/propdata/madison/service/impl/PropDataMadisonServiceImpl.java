@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.etl.service.SqoopService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -32,6 +31,7 @@ import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("propDataMadisonService")
 public class PropDataMadisonServiceImpl implements PropDataMadisonService {
@@ -50,7 +50,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private SqoopSyncJobService propDataJobService;
+    private SqoopJobService propDataJobService;
 
     @Autowired
     protected SqoopService sqoopService;
@@ -428,8 +428,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private void truncateNewTable(String assignedQueue) {
         String sql = "TRUNCATE TABLE " + getTableNew();
-        propDataJobService.eval(sql, assignedQueue, getJobName() + "-truncateNewTable",
-                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+//        propDataJobService.eval(sql, assignedQueue, getJobName() + "-truncateNewTable",
+//                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
     private String getOutputDir(String sourceDir) {
@@ -467,12 +467,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
                 .clearTextPassword(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
-        propDataJobService.eval("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
-                        + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
-                connectionString);
-        propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
-                + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
-                + "-uploadRawDataCreateTable", connectionString);
+//        propDataJobService.eval("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName
+//                        + "') AND type in (N'U')) DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
+//                connectionString);
+//        propDataJobService.eval("SELECT TOP 0 ID AS ID1, * INTO " + tableName + " FROM " + targetRawTable
+//                + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
+//                + "-uploadRawDataCreateTable", connectionString);
         log.info("Uploading today's data, targetTable=" + tableName);
 
         SqoopExporter exporter = new SqoopExporter.Builder()
@@ -496,8 +496,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
         }
 
-        propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
-                + "-uploadRawDataMergeTable", connectionString);
+//        propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
+//                + "-uploadRawDataMergeTable", connectionString);
 
         HdfsUtils.writeToFile(yarnConfiguration, getExportSuccessFile(todayIncrementalPath), "EXPORT_SUCCESS");
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
@@ -508,8 +508,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         String tableName = getTableName(date);
 
-        propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
-                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+//        propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable",
+//                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
     String getTableName(Date date) throws Exception {
@@ -520,8 +520,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     void swapTargetTables(String assignedQueue) {
         List<String> sqls = buildSqls(targetTable);
-        propDataJobService.eval(StringUtils.join(sqls, ";"), assignedQueue, getJobName() + "-swapTables",
-                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+//        propDataJobService.eval(StringUtils.join(sqls, ";"), assignedQueue, getJobName() + "-swapTables",
+//                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
     }
 
     private List<String> buildSqls(String targetTable) {
