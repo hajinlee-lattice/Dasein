@@ -97,6 +97,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 .get(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
         Assert.assertNotNull(enableInternalEnrichmentAttributesFeatureFlag);
 
+        FeatureFlagDefinition enableFuzzyMatchFlag = defaultFeatureFlagMap
+                .get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
+        Assert.assertNotNull(enableFuzzyMatchFlag);
+
         FeatureFlagDefinition enableDataProfilingV2FeatureFlag = defaultFeatureFlagMap
                 .get(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName());
         Assert.assertNotNull(enableDataProfilingV2FeatureFlag);

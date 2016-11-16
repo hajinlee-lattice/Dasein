@@ -169,6 +169,10 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getDocumentation(),
                 enableInternalEnrichmentAttributesProdSet, true);
+        FeatureFlagDefinition enableFuzzyMatchFlag = createDefaultFeatureFlag(
+                LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName(),
+                LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getDocumentation(),
+                enableInternalEnrichmentAttributesProdSet, true);
         FeatureFlagDefinition enableDataProfilingV2FeatureFlag = createDefaultFeatureFlag(
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
                 LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getDocumentation(), enableDataProfilingV2ProdSet, true);
@@ -197,6 +201,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
                 enableLatticeMarketoCredentialPageFeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName(),
                 enableInternalEnrichmentAttributesFeatureFlag);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName(),
+                enableFuzzyMatchFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName(),
                 enableDataProfilingV2FeatureFlag);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName(), enableDataEncryption);
