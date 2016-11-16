@@ -1,5 +1,10 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -44,141 +49,52 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertTrue(
                 defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length + PlsFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
-        FeatureFlagDefinition danteFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.DANTE.getName());
-        Assert.assertNotNull(danteFeatureFlag);
 
-        FeatureFlagDefinition quotaFeatureFlag = defaultFeatureFlagMap.get(LatticeFeatureFlag.QUOTA.getName());
-        Assert.assertNotNull(quotaFeatureFlag);
+        Collection<LatticeFeatureFlag> expectedPdFlags = Arrays.asList(LatticeFeatureFlag.QUOTA,
+                LatticeFeatureFlag.TARGET_MARKET, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL);
+        Collection<LatticeFeatureFlag> expectedCgFlags = Collections
+                .singleton(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
+        Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
+        Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
+        expectedNonLpiFlags.addAll(expectedLp2Flags);
+        expectedNonLpiFlags.addAll(expectedPdFlags);
+        expectedNonLpiFlags.addAll(expectedCgFlags);
+        expectedNonLpiFlags.remove(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
 
-        FeatureFlagDefinition targetMarketFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.TARGET_MARKET.getName());
-        Assert.assertNotNull(targetMarketFeatureFlag);
+        for (LatticeFeatureFlag latticeFeatureFlag : LatticeFeatureFlag.values()) {
+            FeatureFlagDefinition flagDefinition = defaultFeatureFlagMap.get(latticeFeatureFlag.getName());
+            Assert.assertNotNull(flagDefinition,
+                    "Did not find definition for lattice feature flag " + latticeFeatureFlag.getName());
+            Assert.assertNotNull(flagDefinition.getDisplayName(),
+                    "Lattice feature flag " + latticeFeatureFlag.getName() + " has empty display name");
+            Assert.assertNotNull(flagDefinition.getDocumentation(),
+                    "Lattice feature flag " + latticeFeatureFlag.getName() + " has empty documentation");
 
-        FeatureFlagDefinition createDefaultFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
-        Assert.assertNotNull(createDefaultFeatureFlag);
+            if (!expectedNonLpiFlags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getAvailableProducts().contains(LatticeProduct.LPA3),
+                        latticeFeatureFlag.getName() + " should be included in the product "
+                                + LatticeProduct.LPA3.getName() + ", but it is not.");
+            }
 
-        FeatureFlagDefinition enablePocTransformFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_POC_TRANSFORM.getName());
-        Assert.assertNotNull(enablePocTransformFeatureFlag);
+            if (expectedPdFlags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getAvailableProducts().contains(LatticeProduct.PD),
+                        latticeFeatureFlag.getName() + " should be included in the product "
+                                + LatticeProduct.PD.getName() + ", but it is not.");
+            }
 
-        FeatureFlagDefinition useSalesforceSettingsFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_SALESFORCE_SETTINGS.getName());
-        Assert.assertNotNull(useSalesforceSettingsFeatureFlag);
+            if (expectedLp2Flags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getAvailableProducts().contains(LatticeProduct.LPA),
+                        latticeFeatureFlag.getName() + " should be included in the product "
+                                + LatticeProduct.LPA.getName() + ", but it is not.");
+            }
 
-        FeatureFlagDefinition useMarketoSettingsFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_MARKETO_SETTINGS.getName());
-        Assert.assertNotNull(useMarketoSettingsFeatureFlag);
+            if (expectedCgFlags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getAvailableProducts().contains(LatticeProduct.CG),
+                        latticeFeatureFlag.getName() + " should be included in the product "
+                                + LatticeProduct.CG.getName() + ", but it is not.");
+            }
 
-        FeatureFlagDefinition useEloquaSettingsFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_ELOQUA_SETTINGS.getName());
-        Assert.assertNotNull(useEloquaSettingsFeatureFlag);
-
-        FeatureFlagDefinition allowPivotFileFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ALLOW_PIVOT_FILE.getName());
-        Assert.assertNotNull(allowPivotFileFeatureFlag);
-
-        FeatureFlagDefinition useAccountMasterFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_ACCOUNT_MASTER.getName());
-        Assert.assertNotNull(useAccountMasterFeatureFlag);
-
-        FeatureFlagDefinition useDnbRtsAndModelingFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName());
-        Assert.assertNotNull(useDnbRtsAndModelingFeatureFlag);
-
-        FeatureFlagDefinition enableLatticeMarketoCredentialPageFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE.getName());
-        Assert.assertNotNull(enableLatticeMarketoCredentialPageFeatureFlag);
-
-        FeatureFlagDefinition enableDataEncryptionFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName());
-
-        FeatureFlagDefinition enableInternalEnrichmentAttributesFeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
-        Assert.assertNotNull(enableInternalEnrichmentAttributesFeatureFlag);
-
-        FeatureFlagDefinition enableFuzzyMatchFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
-        Assert.assertNotNull(enableFuzzyMatchFlag);
-
-        FeatureFlagDefinition enableDataProfilingV2FeatureFlag = defaultFeatureFlagMap
-                .get(LatticeFeatureFlag.ENABLE_DATA_PROFILING_V2.getName());
-        Assert.assertNotNull(enableDataProfilingV2FeatureFlag);
-
-        Assert.assertTrue(danteFeatureFlag.getConfigurable()
-                && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
-                && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(!quotaFeatureFlag.getConfigurable()
-                && quotaFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
-                && quotaFeatureFlag.getDisplayName() != null && quotaFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(!targetMarketFeatureFlag.getConfigurable()
-                && targetMarketFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
-                && targetMarketFeatureFlag.getDisplayName() != null
-                && targetMarketFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(!createDefaultFeatureFlag.getConfigurable()
-                && createDefaultFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
-                && createDefaultFeatureFlag.getDisplayName() != null
-                && createDefaultFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(enablePocTransformFeatureFlag.getConfigurable()
-                && enablePocTransformFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enablePocTransformFeatureFlag.getDisplayName() != null
-                && enablePocTransformFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(useSalesforceSettingsFeatureFlag.getConfigurable()
-                && useSalesforceSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && useSalesforceSettingsFeatureFlag.getDisplayName() != null
-                && useSalesforceSettingsFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(useMarketoSettingsFeatureFlag.getConfigurable()
-                && useMarketoSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && useMarketoSettingsFeatureFlag.getDisplayName() != null
-                && useMarketoSettingsFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(useEloquaSettingsFeatureFlag.getConfigurable()
-                && useEloquaSettingsFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && useEloquaSettingsFeatureFlag.getDisplayName() != null
-                && useEloquaSettingsFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(allowPivotFileFeatureFlag.getConfigurable()
-                && allowPivotFileFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && allowPivotFileFeatureFlag.getDisplayName() != null
-                && allowPivotFileFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(useAccountMasterFeatureFlag.getConfigurable()
-                && useAccountMasterFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && useAccountMasterFeatureFlag.getDisplayName() != null
-                && useAccountMasterFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(useDnbRtsAndModelingFeatureFlag.getConfigurable()
-                && useDnbRtsAndModelingFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && useDnbRtsAndModelingFeatureFlag.getDisplayName() != null
-                && useDnbRtsAndModelingFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(enableLatticeMarketoCredentialPageFeatureFlag.getConfigurable()
-                && enableLatticeMarketoCredentialPageFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enableLatticeMarketoCredentialPageFeatureFlag.getDisplayName() != null
-                && enableLatticeMarketoCredentialPageFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(enableDataEncryptionFeatureFlag.getConfigurable()
-                && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enableDataEncryptionFeatureFlag.getAvailableProducts().contains(LatticeProduct.CG)
-                && enableDataEncryptionFeatureFlag.getDisplayName() != null
-                && enableDataEncryptionFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(enableInternalEnrichmentAttributesFeatureFlag.getConfigurable()
-                && enableInternalEnrichmentAttributesFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enableInternalEnrichmentAttributesFeatureFlag.getDisplayName() != null
-                && enableInternalEnrichmentAttributesFeatureFlag.getDocumentation() != null);
-
-        Assert.assertTrue(enableDataProfilingV2FeatureFlag.getConfigurable()
-                && enableDataProfilingV2FeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
-                && enableDataProfilingV2FeatureFlag.getDisplayName() != null
-                && enableDataProfilingV2FeatureFlag.getDocumentation() != null);
-
+        }
     }
 
     @Test(groups = "functional")

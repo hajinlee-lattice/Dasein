@@ -67,9 +67,9 @@
             EnableLatticeMarketoCredentialPage = False
             EnablePocTransform = False
             EnableDataEncryption = False
+            EnableCampaignUI = False
             Quota = True
             TargetMarket = True
-            UseAccountMaster = True
             UseDnbRtsAndModeling = True
             UseEloquaSettings = True
             UseMarketoSettings = True

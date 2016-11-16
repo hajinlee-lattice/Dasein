@@ -518,7 +518,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
     
     function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings" || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings" || featureFlag.DisplayName === "UseDnbRtsAndModeling") {
+        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings" || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings") {
             return true;
         }
         if (!featureFlag.Configurable) {
