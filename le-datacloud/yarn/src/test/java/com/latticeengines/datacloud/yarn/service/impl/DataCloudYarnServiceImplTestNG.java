@@ -63,8 +63,8 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         jobConfiguration.setName("DataCloudMatchBlock");
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
         jobConfiguration.setAvroPath(avroPath);
-        jobConfiguration.setPredefinedSelection(Predefined.ID);
-        jobConfiguration.setDataCloudVersion("1.0.0");
+        jobConfiguration.setPredefinedSelection(Predefined.RTS);
+        jobConfiguration.setDataCloudVersion(latestDataCloudVersion);
         jobConfiguration.setKeyMap(keyMap);
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());

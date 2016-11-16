@@ -73,6 +73,7 @@ public class FuzzyMatchHelper implements DbHelper {
         List<String> ids = new ArrayList<>();
         int notNullIds = 0;
         for (InternalOutputRecord record : context.getInternalResults()) {
+            log.info(record);
             String latticeAccountId = record.getLatticeAccountId();
             ids.add(latticeAccountId);
             if (StringUtils.isNotEmpty(latticeAccountId)) {

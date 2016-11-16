@@ -24,9 +24,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         assignAndValidateColumnSelectionVersion(input);
         context.setInput(input);
         ColumnSelection columnSelection = parseColumnSelection(input);
-        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())
-                || (columnSelection.getColumnIds().size() == 1
-                        && MatchConstants.LID_FIELD.equals(columnSelection.getColumnIds().get(0)))) {
+        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             context.setSeekingIdOnly(true);
         }
         context.setColumnSelection(columnSelection);

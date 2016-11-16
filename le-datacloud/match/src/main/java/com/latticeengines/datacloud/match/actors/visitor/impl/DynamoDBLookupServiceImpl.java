@@ -30,9 +30,11 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                     request.getMatchTravelerContext().getDataCloudVersion());
             accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
-            if (StringUtils.isNotEmpty(result) && log.isDebugEnabled()) {
-                log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
-                        + " Lattice Account Id=" + result);
+            if (StringUtils.isNotEmpty(result)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
+                            + " Lattice Account Id=" + result);
+                }
             } else {
                 // may not be able to handle empty string
                 result = null;
@@ -51,8 +53,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
 
     // Just temporary. Will change to bucketing strategy
     @Override
-    protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
-            String returnAddress) {
+    protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request, String returnAddress) {
         Object result = null;
         if (request != null) {
             result = lookupFromService(lookupRequestId, request);

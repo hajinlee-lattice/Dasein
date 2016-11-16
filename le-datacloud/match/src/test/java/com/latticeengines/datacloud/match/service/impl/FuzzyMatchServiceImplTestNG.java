@@ -43,7 +43,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private MetricService metricService;
 
-    @Test(groups = "pending", enabled = false)
+    @Test(groups = "pending", enabled = true)
     public void testSingleTraverse() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
@@ -56,7 +56,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             matchRecord.setParsedDomain(VALID_DOMAIN);
 
             service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "DragonClaw", Level.DEBUG);
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "Trilogy", Level.DEBUG);
 
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
@@ -74,13 +74,13 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         }
     }
 
-    @Test(groups = "pending", dataProvider = "actorTestData", enabled = true)
-    public void testRealTimeActorSystem(int numRequests, boolean batchMode) throws Exception {
+    @Test(groups = "functional", dataProvider = "actorTestData")
+    public void testActorSystem(int numRequests, boolean batchMode) throws Exception {
         actorSystem.setBatchMode(batchMode);
 
         if (!batchMode) {
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
-            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
+            LogManager.getLogger("com.latticeengines.datacloud.match.actors").setLevel(Level.DEBUG);
             LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.DEBUG);
         }
 
@@ -112,8 +112,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             }
             Assert.assertFalse(hasError, "There are errors, see logs above.");
         } finally {
-            LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.INFO);
+            LogManager.getLogger("com.latticeengines.datacloud.match.actors").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
         }
@@ -121,7 +121,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     @DataProvider(name = "actorTestData")
     public Object[][] provideActorTestData() {
-        return new Object[][] { { 1000, true }, // 1000 match in batch mode
+        return new Object[][] {
+                { 1000, true }, // 1000 match in batch mode
                 { 100, false }, // 100 match in realtime mode
         };
     }

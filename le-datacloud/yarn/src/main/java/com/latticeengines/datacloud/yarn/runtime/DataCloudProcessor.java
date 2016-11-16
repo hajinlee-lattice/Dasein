@@ -206,7 +206,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
             Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(10));
-            log.info(String.format("Set timeout to be %.2f for %d records", (timeOut / 60000.0), blockSize));
+            log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
 
             useProxy = Boolean.TRUE.equals(jobConfiguration.getUseRealTimeProxy());
             if (useProxy) {
@@ -314,6 +314,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             toDelete.add(future);
 
             if (context != null) {
+                log.info(JsonUtils.serialize(context));
                 if (combinedContext == null) {
                     combinedContext = context;
                 } else {
@@ -337,7 +338,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         matchInput.setRootOperationUid(rootOperationUid);
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
-        matchInput.setPredefinedVersion(predefinedSelectionVersion);
+        matchInput.setPredefinedVersion("1.0");
         matchInput.setCustomSelection(customizedSelection);
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         matchInput.setFields(divider.getFields());
@@ -382,8 +383,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private void writeDataToAvro(List<OutputRecord> outputRecords) throws IOException {
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
-            if (!(returnUnmatched || outputRecord.isMatched()) || outputRecord.getOutput() == null
-                    || outputRecord.getOutput().isEmpty()) {
+            if (outputRecord.getOutput() == null || outputRecord.getOutput().isEmpty()) {
                 continue;
             }
 
@@ -400,13 +400,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
-                if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)
-                        || fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD)) {
-                    if (fields.get(i).name().startsWith("Source_")) {
-                        value = matchDeclaredType(value, fields.get(i).name().replace("Source_", ""));
-                    } else {
-                        value = matchDeclaredType(value, fields.get(i).name());
-                    }
+                if (fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD) && !(value instanceof String)) {
+                    value = String.valueOf(value);
+                }
+                if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
+                    value = matchDeclaredType(value, fields.get(i).name());
                 }
                 builder.set(fields.get(i), value);
             }

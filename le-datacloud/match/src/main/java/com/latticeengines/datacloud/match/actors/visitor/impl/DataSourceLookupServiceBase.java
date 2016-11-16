@@ -47,7 +47,6 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
                 } else {
                     acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
                 }
-
             }
         };
         return task;

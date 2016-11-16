@@ -35,9 +35,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
         context.setInput(input);
-        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())
-                || (columnSelection.getColumnIds().size() == 1
-                && MatchConstants.LID_FIELD.equals(columnSelection.getColumnIds().get(0)))) {
+        if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             context.setSeekingIdOnly(true);
         }
         MatchOutput output = initializeMatchOutput(input, columnSelection, metadatas);

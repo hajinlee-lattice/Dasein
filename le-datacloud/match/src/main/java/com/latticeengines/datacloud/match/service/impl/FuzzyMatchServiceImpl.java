@@ -56,7 +56,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         for (T record : matchRecords) {
             InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            if (!StringUtils.isEmpty(matchRecord.getLatticeAccountId()) || matchRecord.isFailed()) {
+            if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId()) || matchRecord.isFailed()) {
                 matchFutures.add(null);
             } else {
                 MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
@@ -80,7 +80,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 // in initialization
                 MatchTraveler traveler = (MatchTraveler) Await.result(future, timeout.duration());
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
-                matchRecord.setLatticeAccountId((String) traveler.getResult());
+                String result = (String) traveler.getResult();
+                matchRecord.setLatticeAccountId(result);
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
                 if (traveler.getDnBMatchContexts() != null) {
                     for (DnBMatchContext dnBMatchContext : traveler.getDnBMatchContexts()) {
