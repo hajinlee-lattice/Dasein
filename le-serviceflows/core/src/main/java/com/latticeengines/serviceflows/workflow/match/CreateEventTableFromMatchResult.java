@@ -117,6 +117,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         config.setCustomer(configuration.getCustomerSpace().toString());
         config.setKeyCols(Arrays.<String> asList(new String[] { "Source_" + idColumn.getName() }));
         config.setTargetHdfsDir(hdfsTargetPath);
+        config.setTable(matchTableName);
 
         AppSubmission submission = modelProxy.loadData(config);
         waitForAppId(submission.getApplicationIds().get(0));
