@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
@@ -232,6 +233,15 @@ public class BulkRecordMatcher extends AbstractMatcher {
                         recordModelTuple.getRecord().isPerformEnrichment(), //
                         selectedLeadEnrichmentAttributes);
 
+        String currentDataCloudVersion = null;
+        if (modelSummary != null && StringUtils.isNotBlank(modelSummary.getDataCloudVersion())) {
+            currentDataCloudVersion = modelSummary.getDataCloudVersion() == null ? null
+                    : columnMetadataProxy
+                            .latestVersion(//
+                                    modelSummary.getDataCloudVersion())//
+                            .getVersion();
+        }
+
         if (shouldCallEnrichmentExplicitly) {
             // call regular match (without enrichment) if modelSummary is not
             // null
@@ -239,7 +249,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 MatchInput matchOnlyInput = buildMatchInput(space, //
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
-                        modelSummary, null, false, null, //
+                        modelSummary, null, false, currentDataCloudVersion, //
                         performFetchOnlyForMatching, requestId, isDebugMode);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
@@ -247,11 +257,19 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
             // call enrichment (without predefined column selection) against
             // AccountMaster only
-            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+
+            // for explicit enrichment call, use latest data cloud version (2.*)
+            // by passing null in the api
+            String currentDataCloudVersionForEnrichment = //
+                    columnMetadataProxy
+                            .latestVersion(//
+                                    null)//
+                            .getVersion();
+
             MatchInput matchAMEnrichmentInput = buildMatchInput(space, recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
-                    true, currentDataCloudVersion, //
+                    true, currentDataCloudVersionForEnrichment, //
                     performFetchOnlyForMatching, requestId, isDebugMode);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
@@ -261,7 +279,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    null, performFetchOnlyForMatching, requestId, isDebugMode);
+                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null

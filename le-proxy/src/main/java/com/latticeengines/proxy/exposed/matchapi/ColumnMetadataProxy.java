@@ -29,6 +29,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private static final String DEFAULT = "default";
 
     private LoadingCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
+    private LoadingCache<String, DataCloudVersion> latestDataCloudVersionCache;
 
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
@@ -39,9 +40,23 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                         if (DEFAULT.equals(dataCloudVersion)) {
                             dataCloudVersion = "";
                         }
-                        List<ColumnMetadata> columns= requestColumnSelection(Predefined.Enrichment, dataCloudVersion);
+                        List<ColumnMetadata> columns = requestColumnSelection(Predefined.Enrichment, dataCloudVersion);
                         log.info("Loaded " + columns.size() + " columns into LoadingCache.");
                         return columns;
+                    }
+                });
+
+        latestDataCloudVersionCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, DataCloudVersion>() {
+                    @Override
+                    public DataCloudVersion load(String compatibleVersion) throws Exception {
+                        if (DEFAULT.equals(compatibleVersion)) {
+                            compatibleVersion = "";
+                        }
+                        DataCloudVersion latestVersion = requestLatestVersion(compatibleVersion);
+                        log.info("Loaded latest version for compatibleVersion '" + compatibleVersion
+                                + "' into LoadingCache: " + latestVersion == null ? null : latestVersion.getVersion());
+                        return latestVersion;
                     }
                 });
     }
@@ -64,21 +79,23 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     @Override
     public DataCloudVersion latestVersion(String compatibleVersion) {
-        String url;
-        if (StringUtils.isNotEmpty(compatibleVersion)) {
-            url = constructUrl("/versions/latest?compatibleto={compatibleVersion}", compatibleVersion);
-        } else {
-            url = constructUrl("/versions/latest");
+        try {
+            if (StringUtils.isEmpty(compatibleVersion)) {
+                compatibleVersion = DEFAULT;
+            }
+            return latestDataCloudVersionCache.get(compatibleVersion);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get latest version for dataCloudVersion " //
+                    + compatibleVersion + " from loading cache.", e);
         }
-        return get("latest version", url, DataCloudVersion.class);
     }
 
     @SuppressWarnings({ "unchecked" })
     private List<ColumnMetadata> requestColumnSelection(Predefined selectName, String dataCloudVersion) {
         String url = constructUrl("/predefined/{selectName}", String.valueOf(selectName.name()));
         if (StringUtils.isNotBlank(dataCloudVersion)) {
-            url = constructUrl("/predefined/{selectName}?datacloudversion={dataCloudVersion}", String.valueOf(selectName.name()),
-                    dataCloudVersion);
+            url = constructUrl("/predefined/{selectName}?datacloudversion={dataCloudVersion}",
+                    String.valueOf(selectName.name()), dataCloudVersion);
         }
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
         List<ColumnMetadata> metadataList = new ArrayList<>();
@@ -98,4 +115,14 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return metadataList;
     }
 
+    private DataCloudVersion requestLatestVersion(String compatibleVersion) {
+        String url;
+        if (StringUtils.isNotBlank(compatibleVersion)) {
+            url = constructUrl("/versions/latest?compatibleto={compatibleVersion}", compatibleVersion);
+        } else {
+            url = constructUrl("/versions/latest");
+        }
+        DataCloudVersion latestVersion = get("latest version", url, DataCloudVersion.class);
+        return latestVersion;
+    }
 }

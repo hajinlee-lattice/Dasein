@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +55,15 @@ public class SingleRecordMatcher extends AbstractMatcher {
                     forEnrichment, selectedLeadEnrichmentAttributes);
         }
 
+        String currentDataCloudVersion = null;
+        if (modelSummary != null && StringUtils.isNotBlank(modelSummary.getDataCloudVersion())) {
+            currentDataCloudVersion = modelSummary.getDataCloudVersion() == null ? null
+                    : columnMetadataProxy
+                            .latestVersion(//
+                                    modelSummary.getDataCloudVersion())//
+                            .getVersion();
+        }
+
         if (shouldCallEnrichmentExplicitly) {
             Map<String, Map<String, Object>> result = new HashMap<>();
             // call regular match (without enrichment) if modelSummary is not
@@ -64,7 +73,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                         buildAndExecuteMatch(space, interpreted, //
                                 fieldSchemas, record, //
                                 modelSummary, false, //
-                                null, false, null, //
+                                null, false, currentDataCloudVersion, //
                                 performFetchOnlyForMatching, requestId, isDebugMode, //
                                 matchLogs, matchErrorLogs);
                 result.putAll(matchResult);
@@ -72,13 +81,21 @@ public class SingleRecordMatcher extends AbstractMatcher {
 
             // call enrichment (without predefined column selection) against
             // AccountMaster only
-            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+
+            // for explicit enrichment call, use latest data cloud version (2.*)
+            // by passing null in the api
+            String currentDataCloudVersionForEnrichment = //
+                    columnMetadataProxy
+                            .latestVersion(//
+                                    null)//
+                            .getVersion();
+
             Map<String, Map<String, Object>> enrichmentResult = //
                     buildAndExecuteMatch(space, interpreted, //
                             fieldSchemas, record, //
                             null, true, //
                             selectedLeadEnrichmentAttributes, true, //
-                            currentDataCloudVersion, performFetchOnlyForMatching, //
+                            currentDataCloudVersionForEnrichment, performFetchOnlyForMatching, //
                             requestId, isDebugMode, //
                             matchLogs, matchErrorLogs);
 
@@ -89,7 +106,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             // call regular match
             return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
                     record, modelSummary, forEnrichment, //
-                    selectedLeadEnrichmentAttributes, false, null, //
+                    selectedLeadEnrichmentAttributes, false, currentDataCloudVersion, //
                     performFetchOnlyForMatching, requestId, isDebugMode, //
                     matchLogs, matchErrorLogs);
         }
