@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -18,8 +19,6 @@ import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class MetadataCascade {
     private static final Logger log = Logger.getLogger(MetadataCascade.class);
