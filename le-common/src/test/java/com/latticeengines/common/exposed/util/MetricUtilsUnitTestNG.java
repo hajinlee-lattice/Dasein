@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -320,6 +321,11 @@ public class MetricUtilsUnitTestNG {
                     return "default";
                 }
             };
+        }
+
+        @Override
+        public Collection<String> excludeSystemTags() {
+            return Collections.emptySet();
         }
 
         public Collection<MetricStore> getMetricStores() {
