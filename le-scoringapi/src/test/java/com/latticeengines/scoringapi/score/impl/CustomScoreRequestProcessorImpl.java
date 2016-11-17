@@ -15,12 +15,12 @@ public class CustomScoreRequestProcessorImpl extends ScoreRequestProcessorImpl {
     private HashMap<String, List<Warning>> warningMap = new HashMap<>();
 
     @Override
-    List<Warning> getWarnings(String recordId) {
+    protected List<Warning> getWarnings(String recordId) {
         return warningMap.get(recordId);
     }
 
     @Override
-    void addWarning(WarningCode code, String recordId, List<String> fields, String modelId) {
+    protected void addWarning(WarningCode code, String recordId, List<String> fields, String modelId) {
         List<Warning> warningList = warningMap.get(recordId);
         if (warningList == null) {
             warningList = new ArrayList<>();

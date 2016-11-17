@@ -27,6 +27,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -88,6 +90,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         requestInfo.put("ModelType",
                 (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
 
+        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+
         Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getFieldSchemas();
         split("retrieveModelArtifacts");
 
@@ -111,7 +115,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         List<String> matchLogs = new ArrayList<>();
         List<String> matchErrorLogs = new ArrayList<>();
 
-        if (!ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType())) {
+        if (shouldSkipMatching) {
+            Map<String, Object> formattedRecord = parsedRecordAndInterpretedFields.getKey();
+            addMissingFields(fieldSchemas, formattedRecord);
+            readyToTransformRecord = formattedRecord;
+        } else {
             Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
                     parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
@@ -124,10 +132,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             if (request.isPerformEnrichment()) {
                 enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
             }
-        } else {
-            Map<String, Object> formattedPmmlRecord = parsedRecordAndInterpretedFields.getKey();
-            addMissingFields(fieldSchemas, formattedPmmlRecord);
-            readyToTransformRecord = formattedPmmlRecord;
         }
 
         if (enrichmentAttributes == null) {
@@ -191,11 +195,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             split("parseRecord");
 
             List<RecordModelTuple> partiallyOrderedParsedTupleList = new ArrayList<>();
-            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
+            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList = new ArrayList<>();
             List<RecordModelTuple> partiallyOrderedBadRecordList = new ArrayList<>();
 
             extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList,
-                    partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList);
+                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList);
             List<ModelSummary> originalOrderModelSummaryList = extractModelSummaries(originalOrderParsedTupleList,
                     uniqueScoringArtifactsMap);
 
@@ -219,11 +223,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
                 unorderedLeadEnrichmentMap = bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT);
             }
-            if (!partiallyOrderedPmmlParsedRecordList.isEmpty()) {
-                Map<RecordModelTuple, Map<String, Object>> unorderedFormattedPmmlRecordMap = format(
-                        partiallyOrderedPmmlParsedRecordList);
-                addMissingFields(uniqueFieldSchemasMap, unorderedFormattedPmmlRecordMap, originalOrderParsedTupleList);
-                unorderedCombinedRecordMap.putAll(unorderedFormattedPmmlRecordMap);
+            if (!partiallyOrderedParsedRecordWithoutMatchReqList.isEmpty()) {
+                Map<RecordModelTuple, Map<String, Object>> unorderedFormattedRecordWithoutMatchReqMap = format(
+                        partiallyOrderedParsedRecordWithoutMatchReqList);
+                addMissingFields(uniqueFieldSchemasMap, unorderedFormattedRecordWithoutMatchReqMap,
+                        originalOrderParsedTupleList);
+                unorderedCombinedRecordMap.putAll(unorderedFormattedRecordWithoutMatchReqMap);
             }
             if (!partiallyOrderedBadRecordList.isEmpty()) {
                 Map<RecordModelTuple, Map<String, Object>> partiallyOrderedBadRecordMap = generateMapForBadRecords(
@@ -309,43 +314,47 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     private Map<RecordModelTuple, Map<String, Object>> format(
-            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList) {
+            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList) {
         Map<RecordModelTuple, Map<String, Object>> formattedMap = new HashMap<>();
-        for (RecordModelTuple tuple : partiallyOrderedPmmlParsedRecordList) {
+        for (RecordModelTuple tuple : partiallyOrderedParsedRecordWithoutMatchReqList) {
             formattedMap.put(tuple, tuple.getParsedData().getKey());
         }
         return formattedMap;
     }
 
-    void extractParsedList(List<RecordModelTuple> parsedTupleList, //
+    protected void extractParsedList(List<RecordModelTuple> parsedTupleList, //
             Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList, //
+            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
             List<RecordModelTuple> partiallyOrderedBadRecordList) {
         for (RecordModelTuple tuple : parsedTupleList) {
             extractParsedTuple(scoringArtifactsMap, partiallyOrderedParsedTupleList,
-                    partiallyOrderedPmmlParsedRecordList, partiallyOrderedBadRecordList, tuple);
+                    partiallyOrderedParsedRecordWithoutMatchReqList, partiallyOrderedBadRecordList, tuple);
         }
     }
 
     private void extractParsedTuple(Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList, //
+            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
             List<RecordModelTuple> partiallyOrderedBadRecordList, RecordModelTuple tuple) {
         // put this tuple in either partiallyOrderedPmmlParsedRecordList or in
         // partiallyOrderedParsedTupleList based on model json type
+
+        String modelId = tuple.getModelId();
+        ScoringArtifacts scoringArtifacts = scoringArtifactsMap.get(modelId).getValue();
+        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+
         if (tuple.getException() != null || //
                 scoringArtifactsMap.get(tuple.getModelId()).getValue() == null) {
             partiallyOrderedBadRecordList.add(tuple);
-        } else if (ModelJsonTypeHandler.PMML_MODEL
-                .equals(scoringArtifactsMap.get(tuple.getModelId()).getValue().getModelJsonType())) {
-            partiallyOrderedPmmlParsedRecordList.add(tuple);
+        } else if (shouldSkipMatching) {
+            partiallyOrderedParsedRecordWithoutMatchReqList.add(tuple);
         } else {
             partiallyOrderedParsedTupleList.add(tuple);
         }
     }
 
-    List<ModelSummary> extractModelSummaries(List<RecordModelTuple> originalOrderParsedTupleList,
+    protected List<ModelSummary> extractModelSummaries(List<RecordModelTuple> originalOrderParsedTupleList,
             Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap) {
         List<ModelSummary> originalOrderModelSummaryList = new ArrayList<>();
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
@@ -363,7 +372,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return originalOrderModelSummaryList;
     }
 
-    List<RecordScoreResponse> generateDebugScoreResponse(
+    protected List<RecordScoreResponse> generateDebugScoreResponse(
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
             List<RecordModelTuple> originalOrderParsedTupleList,
@@ -400,7 +409,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         }
     }
 
-    List<RecordScoreResponse> generateScoreResponse(
+    protected List<RecordScoreResponse> generateScoreResponse(
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
             List<RecordModelTuple> originalOrderParsedTupleList,
@@ -509,7 +518,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return schema;
     }
 
-    Map<RecordModelTuple, Map<String, Object>> transform(
+    protected Map<RecordModelTuple, Map<String, Object>> transform(
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
             List<RecordModelTuple> originalOrderParsedTupleList) {
@@ -532,7 +541,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return resultMap;
     }
 
-    void addMissingFields(Map<String, Map<String, FieldSchema>> fieldSchemasMap, //
+    protected void addMissingFields(Map<String, Map<String, FieldSchema>> fieldSchemasMap, //
             Map<RecordModelTuple, Map<String, Object>> matchedRecords, //
             List<RecordModelTuple> parsedTupleList) {
         for (RecordModelTuple tuple : matchedRecords.keySet()) {
@@ -542,7 +551,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         }
     }
 
-    List<RecordModelTuple> checkForMissingFields(
+    protected List<RecordModelTuple> checkForMissingFields(
             Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<String, Map<String, FieldSchema>> fieldSchemasMap, BulkRecordScoreRequest request) {
         List<RecordModelTuple> recordAndFieldList = new ArrayList<>();
@@ -604,7 +613,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return missingEssentialFieldsOrBadModelException;
     }
 
-    void fetchModelArtifacts(CustomerSpace space, List<Record> records,
+    protected void fetchModelArtifacts(CustomerSpace space, List<Record> records,
             Map<String, java.util.Map.Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap) {
         // extract a set of unique modelIds across all modelIds
@@ -764,16 +773,29 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return datascienceTransformedRecord;
     }
 
-    List<Warning> getWarnings(String recordId) {
+    protected List<Warning> getWarnings(String recordId) {
         return warnings.getWarnings(recordId);
     }
 
-    void addWarning(WarningCode code, String recordId, List<String> fields, String modelId) {
+    protected void addWarning(WarningCode code, String recordId, List<String> fields, String modelId) {
         warnings.addWarning(recordId,
                 new Warning(code, new String[] { getWarningPrefix(modelId) + Joiner.on(",").join(fields) }));
     }
 
-    String getWarningPrefix(String modelId) {
+    protected String getWarningPrefix(String modelId) {
         return StringUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
+    }
+
+    private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {
+        ModelSummaryProvenance provenance = scoringArtifacts.getModelSummary().getModelSummaryConfiguration();
+        boolean shouldSkipMatching = false;
+        if (scoringArtifacts.getModelSummary().getModelSummaryProvenanceProperties()
+                .contains(ProvenancePropertyName.ExcludePropdataColumns)) {
+            shouldSkipMatching = provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns);
+        }
+        boolean isPmmlModel = ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType());
+
+        shouldSkipMatching = shouldSkipMatching || isPmmlModel;
+        return shouldSkipMatching;
     }
 }
