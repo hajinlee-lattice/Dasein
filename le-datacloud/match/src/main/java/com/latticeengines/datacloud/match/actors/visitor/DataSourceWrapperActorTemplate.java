@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +22,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
     @Qualifier("matchActorSystem")
     protected MatchActorSystem matchActorSystem;
 
-    private static Map<String, DataSourceLookupRequest> requestMap = new HashMap<>();
+    private static final ConcurrentMap<String, DataSourceLookupRequest> requestMap = new ConcurrentHashMap<>();
 
     protected abstract DataSourceLookupService getDataSourceLookupService();
 
@@ -60,6 +60,9 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
         } else if (msg instanceof Response) {
             Response response = (Response) msg;
             String lookupId = response.getRequestId();
+            if (!requestMap.containsKey(lookupId)) {
+                log.error(String.format("LookupRequestId %s does not exist in requestMap!", lookupId));
+            }
             DataSourceLookupRequest request = requestMap.remove(lookupId);
             response.setTravelerContext(request.getMatchTravelerContext());
             sendResponseToCaller(request, response);
