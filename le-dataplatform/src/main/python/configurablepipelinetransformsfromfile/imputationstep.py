@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import json
 import os
 import pandas as pd
 import random as rd
@@ -28,10 +29,10 @@ class ImputationStep(PipelineStep):
         return [(create_column(k, "FLOAT"), [k]) for k, _ in self.columns.iteritems()]
 
     def getRTSMainModule(self):
-        return "replace_null_value"
+        return "replace_null_value_v2"
 
     def getRTSArtifacts(self):
-        return [("imputations.txt", self.imputationFilePath)]
+        return [("imputations.json", self.imputationFilePath)]
 
     def transform(self, dataFrame, configMetadata, test):
         if len(self.imputationValues) == 0:
@@ -46,8 +47,8 @@ class ImputationStep(PipelineStep):
         return dataFrame
 
     def __writeRTSArtifacts(self):
-        with open("imputations.txt", "w") as fp:
-            fp.write(str(self.imputationValues))
+        with open("imputations.json", "wb") as fp:
+            json.dump(self.imputationValues, fp)
             self.imputationFilePath = os.path.abspath(fp.name)
 
     def __getNullValues(self, dataFrame):

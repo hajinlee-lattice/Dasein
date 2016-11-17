@@ -3,6 +3,7 @@ Description:
 
     This step will pivot the list of columns by retrieving the metadata from our config metadata structure
 '''
+import json
 import math
 import os
 
@@ -166,18 +167,18 @@ class PivotStep(PipelineStep):
     def __writeRTSArtifacts(self):
         if len(self.columnsToPivot) == 0:
             return
-        with open("pivotvalues.txt", "w") as fp:
-            fp.write(str(self.columnsToPivot))
+        with open("pivotvalues.json", "wb") as fp:
+            json.dump(self.columnsToPivot, fp)
             self.pivotValuesFilePath = os.path.abspath(fp.name)
 
     def getOutputColumns(self):
         return [(create_column(k, "INTEGER"), [v[0], k]) for k, v in self.columnsToPivot.items()]
 
     def getRTSMainModule(self):
-        return "pivot"
+        return "pivot_v2"
 
     def getRTSArtifacts(self):
-        return [("pivotvalues.txt", self.pivotValuesFilePath)]
+        return [("pivotvalues.json", self.pivotValuesFilePath)]
 
     def doColumnCheck(self):
         return False
