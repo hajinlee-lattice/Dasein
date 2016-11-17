@@ -63,7 +63,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
-        avroDataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.avro");
+        avroDataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file3.avro");
     }
 
     @Test(groups = "functional", dataProvider = "getPropertiesProvider")
