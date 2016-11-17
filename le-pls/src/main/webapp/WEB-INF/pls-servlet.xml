@@ -7,7 +7,6 @@
 
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:pls-context.xml" />
     <import resource="classpath:quartzclient-context.xml"/>
     <import resource="classpath:common-properties-context.xml" />
     <bean class="com.latticeengines.pls.swagger.SwaggerConfig" />
