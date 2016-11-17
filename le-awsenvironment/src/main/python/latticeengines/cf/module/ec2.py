@@ -68,7 +68,8 @@ def ecs_metadata(ec2, ecscluster, efs):
                                   "    sleep 1;\n",
                                   "done;\n",
                                   "efs_ip=`cat /tmp/${az}.ip`\n",
-                                  "echo ${efs_ip}\n",
+                                  "echo ${efs_ip} > /etc/efsip.txt\n",
+                                  "cat /etc/efsip.txt\n",
                                   "echo \"${efs_ip}:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0\" >> /etc/fstab \n"
                                   ]
                             ]

@@ -125,6 +125,10 @@ class ContainerDefinition(Template):
             self._template["Links"].append("%s:%s" % (container.get_name(), alias))
         return self
 
+    def privileged(self):
+        self._template["Privileged"] = "true"
+        return self
+
     def cpu(self, cpu_unit):
         # 1 core = 1024 cpu unit
         self._template["Cpu"] = cpu_unit

@@ -43,6 +43,9 @@ class Container(Template):
             'options': options
         }
 
+    def privileged(self):
+        self._template["privileged"] = True
+
     def mount(self, path, source, readonly=False):
         if "mountPoints" not in self._template:
             self._template["mountPoints"] = []

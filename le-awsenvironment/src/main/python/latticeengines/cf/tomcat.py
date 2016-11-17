@@ -65,23 +65,24 @@ def tomcat_task(profile_vars):
             "awslogs-group": { "Fn::Join": [ "-", ["lpi", profile_vars["LE_STACK"].ref()]] },
             "awslogs-region": { "Ref": "AWS::Region" },
             "awslogs-stream-prefix": PARAM_DOCKER_IMAGE.ref()
-        }})
+        }}) \
+        .privileged()
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
 
     ledp = Volume("ledp", "/etc/ledp")
-    scoringcache = Volume("scoringcache", "/mnt/efs/scoringapi")
+    efsip = Volume("efsip", "/etc/efsip.txt")
     internalAddr = Volume("intAddr", "/etc/internaladdr.txt")
 
     container = container.mount("/etc/ledp", ledp) \
-        .mount("/var/cache/scoringapi", scoringcache) \
+        .mount("/etc/efsip.txt", efsip) \
         .mount("/etc/internaladdr.txt", internalAddr)
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
     task.add_volume(ledp)
-    task.add_volume(scoringcache)
+    task.add_volume(efsip)
     task.add_volume(internalAddr)
     return task
 
