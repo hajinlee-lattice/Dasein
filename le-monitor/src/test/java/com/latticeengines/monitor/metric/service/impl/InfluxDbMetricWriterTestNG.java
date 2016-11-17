@@ -160,6 +160,11 @@ public class InfluxDbMetricWriterTestNG extends AbstractTestNGSpringContextTests
             return fieldGroup;
         }
 
+        @Override
+        public Collection<String> excludeSystemTags() {
+            return Collections.emptySet();
+        }
+
         public RetentionPolicy getRetentionPolicy() {
             return RetentionPolicyImpl.ONE_HOUR;
         }
