@@ -479,22 +479,6 @@ angular
                 }   
             }
         })
-        .state('home.marketosettings.credentials', {
-            url: '/credentials',
-            params: {
-                pageIcon: 'ico-marketo',
-                pageTitle: 'Marketo Profiles'
-            },
-            views: {
-                "main@": {
-                    controller: function(urls) {
-                        $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
-                    },
-                    template: '<div id="sureshot_iframe_container"></div>'
-                }   
-            }
-        })
         .state('home.marketosettings.create', {
             url: '/create',
             params: {
@@ -638,6 +622,60 @@ angular
                         $scope.id = $stateParams.id;
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '&credentialId=' + $scope.id + '"></iframe>');
+                    },
+                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                }   
+            }
+        })
+        .state('home.marketosettings.credentials', {
+            url: '/credentials',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Profiles'
+            },
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_APIKEY';
+                        }
+                    },
+                    controller: function($scope, $state) {
+                        $scope.state = 'home.marketosettings.edit';
+                    },
+                    templateUrl: 'app/navigation/summary/SureShotTabs.html'
+                },
+                "main@": {
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
+                    },
+                    template: '<div id="sureshot_iframe_container"></div>'
+                }   
+            }
+        })
+        .state('home.marketosettings.activemodels', {
+            url: '/activemodels',
+            params: {
+                pageIcon: 'ico-marketo',
+                pageTitle: 'Marketo Profiles'
+            },
+            views: { 
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SUMMARY_MARKETO_MODELS';
+                        }
+                    },
+                    controller: function($scope, $stateParams, $state) {
+                        $scope.state = $state.current.name;
+                    },
+                    templateUrl: 'app/navigation/summary/SureShotTabs.html'
+                },
+                "main@": {
+                    controller: function(urls) { 
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                     },
                     template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
                 }   
