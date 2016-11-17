@@ -24,14 +24,13 @@ public class StringTruncateFunction extends BaseOperation implements Function {
     }
 
     @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall )
-    {
+    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         String value = arguments.getString(fieldName);
         if (StringUtils.isNotEmpty(value) && value.length() > targetLength) {
-            functionCall.getOutputCollector().add( new Tuple(value.substring(0, targetLength)) );
+            functionCall.getOutputCollector().add(new Tuple(value.substring(0, targetLength)));
         } else {
-            functionCall.getOutputCollector().add( new Tuple(value) );
+            functionCall.getOutputCollector().add(new Tuple(value));
         }
     }
 

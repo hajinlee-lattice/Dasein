@@ -18,6 +18,7 @@ import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class MetadataCascade {

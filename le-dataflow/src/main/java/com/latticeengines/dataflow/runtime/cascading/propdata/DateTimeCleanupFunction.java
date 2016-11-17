@@ -1,11 +1,11 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
+
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 
 /**
  * This function removes clearly out of range timestamps

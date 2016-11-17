@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataflow.exposed.builder.MetadataCascade;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 
 public class MetadataCascadeUnitTestNG {

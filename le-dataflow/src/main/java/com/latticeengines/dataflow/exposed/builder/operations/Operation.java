@@ -3,10 +3,10 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public abstract class Operation {
     public static class Input {

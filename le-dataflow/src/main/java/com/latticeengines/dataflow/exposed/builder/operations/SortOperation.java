@@ -3,13 +3,13 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.pipe.GroupBy;
-import cascading.pipe.Pipe;
-import cascading.tuple.Fields;
-
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
+
+import cascading.pipe.GroupBy;
+import cascading.pipe.Pipe;
+import cascading.tuple.Fields;
 
 public class SortOperation extends Operation {
     public SortOperation(Input prior, String field, boolean descending) {

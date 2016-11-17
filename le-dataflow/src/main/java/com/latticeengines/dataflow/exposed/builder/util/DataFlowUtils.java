@@ -8,6 +8,15 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 
+import com.google.common.base.Joiner;
+import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+
 import cascading.operation.Aggregator;
 import cascading.operation.aggregator.Average;
 import cascading.operation.aggregator.Count;
@@ -17,15 +26,6 @@ import cascading.operation.aggregator.MaxValue;
 import cascading.operation.aggregator.MinValue;
 import cascading.operation.aggregator.Sum;
 import cascading.tuple.Fields;
-
-import com.google.common.base.Joiner;
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class DataFlowUtils {
     public static List<FieldMetadata> getIntersection(List<String> partial, List<FieldMetadata> full) {

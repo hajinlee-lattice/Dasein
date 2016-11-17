@@ -3,14 +3,14 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
 import cascading.pipe.HashJoin;
 import cascading.pipe.Pipe;
 import cascading.pipe.assembly.AverageBy;
 import cascading.pipe.assembly.CountBy;
 import cascading.tuple.Fields;
-
-import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class AggregationOperation extends Operation {
     public AggregationOperation(Input lhs, Aggregation aggregation) {

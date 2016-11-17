@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.tuple.Fields;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.PivotBuffer;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.tuple.Fields;
 
 public class PivotOperation extends Operation {
 

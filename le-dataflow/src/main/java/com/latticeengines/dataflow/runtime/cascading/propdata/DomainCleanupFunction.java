@@ -3,7 +3,6 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import org.apache.commons.lang.StringUtils;
 
-
 import com.latticeengines.common.exposed.util.DomainUtils;
 
 import cascading.operation.Function;

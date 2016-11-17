@@ -30,9 +30,9 @@ public class MappingFunction extends BaseOperation implements Function {
         TupleEntry arguments = functionCall.getArguments();
         String source = arguments.getString(sourceField);
         if (valueMap.containsKey(source)) {
-            functionCall.getOutputCollector().add( new Tuple(valueMap.get(source)));
+            functionCall.getOutputCollector().add(new Tuple(valueMap.get(source)));
         } else {
-            functionCall.getOutputCollector().add( Tuple.size(1) );
+            functionCall.getOutputCollector().add(Tuple.size(1));
         }
 
     }

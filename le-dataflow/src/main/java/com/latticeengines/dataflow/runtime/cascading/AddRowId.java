@@ -13,7 +13,7 @@ import cascading.tuple.Tuple;
 public class AddRowId extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -266552390572921248L;
-    
+
     private final String table;
 
     @ConstructorProperties({ "fieldDeclaration" })
@@ -21,7 +21,7 @@ public class AddRowId extends BaseOperation implements Function {
         super(0, fieldDeclaration);
         this.table = table;
     }
-    
+
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         flowProcess.increment("LATTICE", table, 1L);

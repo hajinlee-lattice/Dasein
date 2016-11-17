@@ -1,12 +1,12 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
-import cascading.pipe.Each;
-import cascading.pipe.Pipe;
-import cascading.tuple.Fields;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.pipe.Each;
+import cascading.pipe.Pipe;
+import cascading.tuple.Fields;
 
 public class AddFieldOperation extends Operation {
 

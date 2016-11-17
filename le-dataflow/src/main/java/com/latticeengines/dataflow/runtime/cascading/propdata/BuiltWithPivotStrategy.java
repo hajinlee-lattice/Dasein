@@ -10,12 +10,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import cascading.tuple.TupleEntry;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.TupleEntry;
 
 public class BuiltWithPivotStrategy implements PivotStrategy {
 

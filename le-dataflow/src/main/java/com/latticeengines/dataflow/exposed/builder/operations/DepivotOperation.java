@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cascading.pipe.Each;
-import cascading.tuple.Fields;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.DepivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.SimpleDepivotStragegyImpl;
 import com.latticeengines.dataflow.runtime.cascading.DepivotFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.pipe.Each;
+import cascading.tuple.Fields;
 
 public class DepivotOperation extends Operation {
 

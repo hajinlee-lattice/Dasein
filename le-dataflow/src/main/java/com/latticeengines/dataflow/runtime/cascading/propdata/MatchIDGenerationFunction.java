@@ -2,6 +2,8 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -9,8 +11,6 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 
 @SuppressWarnings("rawtypes")
 public class MatchIDGenerationFunction extends BaseOperation implements Function {

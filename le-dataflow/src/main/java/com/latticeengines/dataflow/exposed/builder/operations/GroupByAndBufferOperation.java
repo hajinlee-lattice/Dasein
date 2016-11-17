@@ -3,15 +3,15 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.api.client.util.Lists;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
 import cascading.operation.Buffer;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import com.google.api.client.util.Lists;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class GroupByAndBufferOperation extends Operation {
     @SuppressWarnings("rawtypes")

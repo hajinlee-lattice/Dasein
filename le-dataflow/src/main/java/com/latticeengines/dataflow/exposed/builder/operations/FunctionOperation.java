@@ -5,16 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
 import cascading.operation.Function;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
-
-import com.google.common.collect.Lists;
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
-import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 public class FunctionOperation extends Operation {
 

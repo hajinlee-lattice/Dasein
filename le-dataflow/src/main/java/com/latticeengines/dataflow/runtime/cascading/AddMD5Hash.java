@@ -21,24 +21,23 @@ public class AddMD5Hash extends BaseOperation implements Function {
     public AddMD5Hash(Fields fieldDeclaration) {
         super(0, fieldDeclaration);
     }
-    
+
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         String data = "";
         TupleEntry entry = functionCall.getArguments();
         for (int i = 0; i < entry.getFields().size(); i++) {
             if (i > 0) {
-                data += "|"; 
+                data += "|";
             }
             Object tupleValue = entry.getTuple().getObject(i);
-            
+
             if (tupleValue == null) {
                 tupleValue = "<null>";
             }
             data += tupleValue.toString();
         }
-        
-        
+
         functionCall.getOutputCollector().add(new Tuple(DigestUtils.md5Hex(data)));
     }
 

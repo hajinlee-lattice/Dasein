@@ -22,12 +22,11 @@ public class AddFieldFunction extends BaseOperation implements Function {
     }
 
     @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall )
-    {
+    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         Object value = strategy.compute(arguments);
-        if (value !=  null) {
-            functionCall.getOutputCollector().add( new Tuple(value) );
+        if (value != null) {
+            functionCall.getOutputCollector().add(new Tuple(value));
         }
     }
 

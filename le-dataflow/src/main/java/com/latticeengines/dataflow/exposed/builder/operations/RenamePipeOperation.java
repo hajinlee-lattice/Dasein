@@ -1,8 +1,8 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
-import cascading.pipe.Pipe;
-
 import com.google.api.client.util.Lists;
+
+import cascading.pipe.Pipe;
 
 public class RenamePipeOperation extends Operation {
 

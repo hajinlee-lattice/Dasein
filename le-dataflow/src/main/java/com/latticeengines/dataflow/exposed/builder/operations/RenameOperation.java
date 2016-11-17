@@ -3,12 +3,12 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 import java.util.ArrayList;
 import java.util.List;
 
-import cascading.pipe.Pipe;
-import cascading.pipe.assembly.Rename;
-
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Rename;
 
 public class RenameOperation extends Operation {
     public RenameOperation(Input prior, FieldList previousNames, FieldList newNames) {

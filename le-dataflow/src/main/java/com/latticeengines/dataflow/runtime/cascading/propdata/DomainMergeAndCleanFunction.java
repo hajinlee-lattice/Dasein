@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.latticeengines.common.exposed.util.DomainUtils;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -11,8 +13,6 @@ import cascading.operation.FunctionCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.common.exposed.util.DomainUtils;
 
 @SuppressWarnings("rawtypes")
 public class DomainMergeAndCleanFunction extends BaseOperation implements Function {

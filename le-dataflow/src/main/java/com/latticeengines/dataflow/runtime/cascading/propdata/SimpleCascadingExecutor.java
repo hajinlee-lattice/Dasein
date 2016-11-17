@@ -13,6 +13,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
@@ -25,10 +29,6 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
-
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class SimpleCascadingExecutor {
     private static final Log log = LogFactory.getLog(SimpleCascadingExecutor.class);

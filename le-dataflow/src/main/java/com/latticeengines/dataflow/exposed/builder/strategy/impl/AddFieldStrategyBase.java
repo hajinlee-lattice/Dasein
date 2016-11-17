@@ -1,10 +1,10 @@
 package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
-import cascading.tuple.Fields;
-import cascading.tuple.TupleEntry;
-
 import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
 
 public abstract class AddFieldStrategyBase implements AddFieldStrategy {
 
