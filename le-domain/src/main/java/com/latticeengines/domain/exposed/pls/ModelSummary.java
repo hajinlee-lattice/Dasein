@@ -93,6 +93,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String modelType;
     private List<ModelSummaryProvenanceProperty> modelSummaryProvenanceProperties = new ArrayList<>();
     private String dataCloudVersion;
+    boolean isMatch;
     private String moduleName;
     private Double crossValidatedMean;
     private Double crossValidatedStd;
@@ -639,4 +640,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
     }
+
+    @Transient
+    public boolean isMatch() {
+        return isMatch;
+    }
+
+    @Transient
+    public void setMatch(boolean isMatch) {
+        this.isMatch = isMatch;
+    }
+    
 }

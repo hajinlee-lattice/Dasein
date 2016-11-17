@@ -191,6 +191,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
                     String dataCloudVersion = provenance.get("Data_Cloud_Version").asText();
                     summary.setDataCloudVersion(dataCloudVersion);
                 }
+                if (provenance.has("Exclude_Propdata_Columns")) {
+                    String skipMatch = provenance.get("Exclude_Propdata_Columns").asText();
+                    summary.setMatch("false".equals(skipMatch));
+                }
             }
             JsonNode meanNode = details.get("CrossValidatedMeanOfModelAccuracy");
             if (meanNode != null) {

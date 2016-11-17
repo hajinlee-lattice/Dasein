@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -90,9 +91,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
         String dataCloudVersion = null;
+        boolean skipIdMatch = true;
         if (modelSummary != null) {
             dataCloudVersion = modelSummary.getDataCloudVersion();
+            skipIdMatch = !modelSummary.isMatch();
         }
+        skipIdMatch = skipIdMatch || ModelType.PMML.equals(modelSummary.getModelType());
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
@@ -119,6 +123,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion)
+                .skipMatchingStep(skipIdMatch)
                 .matchClientDocument(matchClientDocument) //
                 .build();
     }
