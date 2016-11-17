@@ -23,12 +23,14 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
         return dataSetDao;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataSet dataSet) {
         dataSet.setName(dataSet.getName().replace('/', '_'));
-        for (ScoringDataSet scoringDataSet : dataSet.getScoringDataSets()) {
-            scoringDataSet.setDataSet(dataSet);
+        if (dataSet.getScoringDataSets() != null && dataSet.getScoringDataSets().size() > 0) {
+            for (ScoringDataSet scoringDataSet : dataSet.getScoringDataSets()) {
+                scoringDataSet.setDataSet(dataSet);
+            }
         }
         dataSetDao.create(dataSet);
     }
@@ -37,6 +39,12 @@ public class DataSetEntityMgrImpl extends BaseEntityMgrImpl<DataSet> implements 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataSet findByName(String name) {
         return dataSetDao.findByField("NAME", name);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataSet findByTenantAndTrainingSet(String tenantID, String trainingSetFilePath) {
+        return dataSetDao.findByTenantAndTrainingSet(tenantID, trainingSetFilePath);
     }
 
 }

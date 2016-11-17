@@ -21,7 +21,7 @@ public class BaseServiceImpl implements InitializingBean {
     @Value("${common.pls.url}")
     private String plsApiHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+    protected InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     protected Map<String, String> getActiveStack() {
         return internalResourceRestApiProxy.getActiveStack();

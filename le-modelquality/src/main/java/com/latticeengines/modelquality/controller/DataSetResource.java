@@ -9,11 +9,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
+import com.latticeengines.domain.exposed.modelquality.DataSetTenantType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
+import com.latticeengines.modelquality.service.DataSetService;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataSetInterface;
 
 import io.swagger.annotations.Api;
@@ -29,6 +35,9 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
 
     @Autowired
     private DataSetEntityMgr dataSetEntityMgr;
+    
+    @Autowired
+    private DataSetService dataSetService;
 
     @Override
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -47,15 +56,49 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
+    @RequestMapping(value = "/createFromTenant", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Insert new DataSet for given tenant")
+    public String createDataSetFromTenant(@RequestParam("tenantId") String tenantName,
+            @RequestParam("tenantType") DataSetTenantType tenantType,
+            @RequestParam(value = "modelID", required = false) String modelID,
+            @RequestParam(value = "schemaInterpretation", required = false) SchemaInterpretation schemaInterpretation,
+            @RequestParam(value = "playExternalID", required = false) String playExternalID) {
+        switch(tenantType){
+        case LP2:
+            if(modelID == null || modelID.isEmpty()){
+                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LP2"});
+            }
+            if(schemaInterpretation == null){
+                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "SchemaInterpretation", "LP2"});
+            }
+            dataSetService.createDataSetFromLP2Tenant(tenantName, modelID, schemaInterpretation);
+            break;
+        case LPI:
+            if(modelID == null || modelID.isEmpty()){
+                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LPI"});
+            }
+            if(schemaInterpretation == null){
+                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "SchemaInterpretation", "LPI"});
+            }
+            dataSetService.createDataSetFromLPITenant(tenantName, modelID, schemaInterpretation);
+            break;
+        case PLAYMAKER:
+            if(playExternalID == null || playExternalID.isEmpty()){
+                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Play ExternalID", "PLAYMAKER"});
+            }
+            dataSetService.createDataSetFromPlaymakerTenant(tenantName, playExternalID);
+        }
+        return null;
+        
+    }
+
+    @Override
     @RequestMapping(value = "/{dataSetName:.*}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get DataSet by name")
     public DataSet getDataSetByName(@PathVariable String dataSetName) {
         return getByName(dataSetName);
-    }
-
-    public DataSet createForProduction() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
