@@ -1,10 +1,11 @@
+import pandas as pd
 import math
-from numpy import floor, log10
+from numpy import floor, log10, ceil
 from numpy.random import choice
 
 from itertools import compress, product
 from sklearn.metrics.cluster.supervised import entropy
-from scipy.stats import kurtosis
+from scipy.stats import kurtosis, skew
 
 # generates the ordering of column data so we can sort event vector the same way
 def orderedIndicies(x, descending = False):
@@ -114,26 +115,15 @@ def createBinsByStepSize(xList, xListLen, stepSize, numPtsInBin):
                 binIdx.append(posCurr)
     return binIdx
 
-
 # split into roughly equally sized buckets
 def createRawBins(xList, eventList, rawSplits):    
     xListLen = len(xList)
     divider = 3
     stepSize = int(xListLen/(rawSplits*divider))
-    numPtsInBin = stepSize * divider    
+    numPtsInBin = stepSize * divider
     #if there is not enough data, no bucketing is needed
     if stepSize == 0:
         binIdx = [0, len(xList)]
-    #if rawbinnum >= # unique values, put each value in a bin
-    #binIdx contains the index in xList where each bucket starts 
-    elif rawSplits >= len(set(xList)):
-        binIdx = []
-        previous_val = None
-        for idx, x in enumerate(xList):
-            if x != previous_val:
-                binIdx.append(idx)
-                previous_val = x
-        binIdx.append(xListLen)
     # all other cases - make bins by step size
     else:        
         binIdx = createBinsByStepSize(xList, xListLen, stepSize, numPtsInBin)
@@ -143,17 +133,11 @@ def identifySpecialValues(columnData, eventVector, minSpecialValRatio, forUI=Fal
     specialValues = []
     if any(math.isnan(x) for x in columnData):
         specialValues.append(None)
-    if 0 in columnData:
-        if not forUI:
-            specialValues.append(0)
-        elif min(columnData) == 0:
-            specialValues.append(0)
+    if (not forUI) and (0 in columnData):
+        specialValues.append(0)
     oneCnt = columnData.count(1)
-    if oneCnt >= minSpecialValRatio * len(columnData):
-        if not forUI:
-            specialValues.append(1)
-        elif forUI and min([x for x in columnData if x != 0]) == 1:
-            specialValues.append(1)
+    if (not forUI) and oneCnt >= minSpecialValRatio * len(columnData):
+        specialValues.append(1)
     return specialValues
 
 def addBucketsToOutput(bandsDict, mins, maxes, splCnts, evtCnts):
@@ -179,10 +163,10 @@ def processSpecialValues(columnData, eventVector, specialValues):
     
     return xListToBucket, eventListToBucket, bandsDict
     
-def createRegularBuckets(xListToBucket, eventListToBucket, minPtsToBucket, sigThreshold,
+def createRegularBuckets(xListToBucket, eventListToBucket, totalCnt, minPtsToBucket, sigThreshold,
                          rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets, 
                          forUI, kurtThreshold, tailSize, numTailBuckets, sizeThreshold, 
-                         liftThreshold):
+                         liftThreshold, evevtDiffThreshold):
     #all values are the same, or list empty
     if len(set(xListToBucket)) == 0:
         bktStats, bucketMins, bucketMaxes = [], [], []
@@ -206,12 +190,13 @@ def createRegularBuckets(xListToBucket, eventListToBucket, minPtsToBucket, sigTh
         #fix fat tails for UI
         if forUI:
             #consider kurtosis, tails, lift, min bcket size etc
-            highKurtosis = kurtosis(xListToBucket) >= kurtThreshold
-            minNumBuckets = minNumBuckets + 1
-            binIndex, bktStats = combineUIBuckets(binIndex, bktStats, sigThreshold, 
-                                        minNumBuckets, maxNumBuckets, highKurtosis,
+            highKurtosis = kurtosis(xListToBucket, fisher=False) >= kurtThreshold
+            positiveSkew = skew(xListToBucket) >= 0
+            binIndex, bktStats = combineUIBuckets(binIndex, bktStats, totalCnt, sigThreshold, 
+                                        minNumBuckets, maxNumBuckets, highKurtosis, positiveSkew,
                                         tailSize, numTailBuckets, sizeThreshold, 
-                                        liftThreshold)
+                                        liftThreshold, evevtDiffThreshold)
+            
         else:
             # combine bins directly
             binIndex, bktStats = combineBuckets(binIndex, bktStats, sigThreshold, 
@@ -220,7 +205,6 @@ def createRegularBuckets(xListToBucket, eventListToBucket, minPtsToBucket, sigTh
         bucketMins = [xListToBucket_ord[binIndex[i]] for i in range(len(binIndex)-1)]
         bucketMaxes = [xListToBucket_ord[binIndex[i+1]-1] for i in range(len(binIndex)-1)]
     return bktStats, bucketMins, bucketMaxes
-
     
 def addVariablesToOutput(bandsDict, eventVector):
     #global stats used for later calculation
@@ -259,7 +243,6 @@ def combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, maxNumBucket
     while currNumBuckets > minNumBuckets:
         minSig = min(sigList)
         if not forUI and minSig >= sigThreshold:
-            print "all buckets have significance larger than current threshold %s" % sigThreshold
             break
         else:
             # find an index to delete, to avoid bias, delete a random one of multiple mins exist
@@ -279,45 +262,64 @@ def combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, maxNumBucket
             currNumBuckets = currNumBuckets - 1
             if currNumBuckets <= maxNumBuckets:
                 #print rateTupleList
-                break           
+                break
     return binIndex, bktStats
 
-def combineUIBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, maxNumBuckets,
-                     highKurtosis, tailSize, numTailBuckets, sizeThreshold, liftThreshold):
+def combineUIBuckets(binIndex, bktStats, totalCnt, sigThreshold, minNumBuckets, maxNumBuckets,
+                     highKurtosis, positiveSkew, tailSize, numTailBuckets, sizeThreshold, 
+                     liftThreshold, evevtDiffThreshold):
     # check current number of buckets
     currNumBuckets = len(bktStats)
     if currNumBuckets <= max(minNumBuckets, 1):
         return binIndex, bktStats
-    splCnt = sum([x[0] for x in bktStats])
+
     # combines by significance, bucket the tail separately if high kurtosis
     if highKurtosis:
         tailCnts = 0
         binIndexTail = []
         bktStatsTail = []
-        while tailCnts < tailSize * splCnt:
-            binIndexTail = [binIndex.pop()] + binIndexTail
-            bktToTail = bktStats.pop()
-            tailCnts = tailCnts + bktToTail[0]
-            bktStatsTail = [bktToTail] + bktStatsTail
-        binIndexTail = [binIndex[-1]] + binIndexTail
+        if positiveSkew:
+            while tailCnts < tailSize * totalCnt:
+                binIndexTail = [binIndex.pop()] + binIndexTail
+                bktInTail = bktStats.pop()
+                tailCnts = tailCnts + bktInTail[0]
+                bktStatsTail = [bktInTail] + bktStatsTail
+            binIndexTail = [binIndex[-1]] + binIndexTail
+        else: #tail is just head in this case
+            while tailCnts < tailSize * totalCnt:
+                binIndexTail = binIndexTail + [binIndex.pop(0)]
+                bktInTail = bktStats.pop(0)
+                tailCnts = tailCnts + bktInTail[0]
+                bktStatsTail = bktStatsTail + [bktInTail]
+            binIndexTail = binIndexTail + [binIndex[0]]
+
         binIndexTail, bktStatsTail = combineBuckets(binIndexTail, bktStatsTail, sigThreshold, 
-                                                    minNumBuckets=numTailBuckets, 
+                                                    minNumBuckets=1, 
                                                     maxNumBuckets=numTailBuckets, forUI=True)
         minNumBuckets = minNumBuckets - len(bktStatsTail)
         maxNumBuckets = maxNumBuckets - len(bktStatsTail)
+        maxNumBuckets = max(1, maxNumBuckets)
+        minNumBuckets = max(1, minNumBuckets)
         binIndex, bktStats = combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, 
                                             maxNumBuckets, forUI=True)
 
-        binIndex, bktStats = removeSmallBucketsByLift(binIndex, bktStats, splCnt, minNumBuckets, 
+        binIndex, bktStats = removeSmallBucketsByLift(binIndex, bktStats, totalCnt, minNumBuckets, 
                                                       sizeThreshold, liftThreshold)
-        binIndex = binIndex + binIndexTail[1:]
-        bktStats = bktStats + bktStatsTail
+        removeInsignificantBucketsByEventCount(binIndex, bktStats, minNumBuckets,evevtDiffThreshold)
+        if positiveSkew:
+            binIndex = binIndex + binIndexTail[1:]
+            bktStats = bktStats + bktStatsTail
+        else:
+            binIndex = binIndexTail[:-1] + binIndex
+            bktStats = bktStatsTail + bktStats
 
     else:
         binIndex, bktStats = combineBuckets(binIndex, bktStats, sigThreshold, minNumBuckets, 
                                             maxNumBuckets, forUI=True)
-        binIndex, bktStats = removeSmallBucketsByLift(binIndex, bktStats, splCnt, minNumBuckets, 
+        binIndex, bktStats = removeSmallBucketsByLift(binIndex, bktStats, totalCnt, minNumBuckets, 
                                                       sizeThreshold, liftThreshold)
+        binIndex, bktStats = removeInsignificantBucketsByEventCount(binIndex, bktStats, 
+                                                                    minNumBuckets,evevtDiffThreshold)
     
     return binIndex, bktStats
 
@@ -337,21 +339,47 @@ def getLiftDiff(bkta, bktb, threshold):
         return rateB/rateA
 
 # remove small buckets
-def removeSmallBucketsByLift(binIndex, bktStats, splCnt, minNumBuckets, sizeThreshold, liftThreshold):
+def removeSmallBucketsByLift(binIndex, bktStats, totalCnt, minNumBuckets, sizeThreshold, liftThreshold):
     tryDelete = True
     while tryDelete:
-        sizes = [1.0 * x[0] / splCnt for x in bktStats]
+        sizes = [1.0 * x[0] / totalCnt for x in bktStats]
         liftDiffs = [getLiftDiff(bktStats[b],bktStats[b+1], liftThreshold) for b in range(len(bktStats)-1)]
         indicesToDel = []
         for idx, ld in enumerate(liftDiffs):
             if ld < liftThreshold and  (sizes[idx] < sizeThreshold or sizes[idx+1] < sizeThreshold):
-                indicesToDel.append(idx)
-        if indicesToDel:
-            indexToDel = choice(indicesToDel, 1)[0]
+                indicesToDel.append(tuple([ld, idx]))
+        if indicesToDel and len(bktStats) > minNumBuckets:
+            indicesToDel.sort()
+            indexToDel = indicesToDel[0][1]
             binIndex, bktStats = deleteIndex(binIndex, bktStats, indexToDel)
         else:
             tryDelete = False
     return binIndex, bktStats           
+
+def getEventDiff(bkta, bktb):
+    cntA, posA = bkta
+    cntB, posB = bktb
+    avgRate = (posA + posB) / (cntA + cntB)
+    expPosA = avgRate * cntA
+    expPosB = avgRate * cntB
+    evtDiff = abs((posA - expPosA) - (posB - expPosB))
+    return evtDiff
+
+def removeInsignificantBucketsByEventCount(binIndex, bktStats, minNumBuckets,evevtDiffThreshold):
+    tryDelete = True
+    while tryDelete:
+        eventDiffs = [getEventDiff(bktStats[b],bktStats[b+1]) for b in range(len(bktStats)-1)]
+        indicesToDel = []
+        for idx, evtdiff in enumerate(eventDiffs):
+            if evtdiff < evevtDiffThreshold:
+                indicesToDel.append(tuple([evtdiff, idx]))
+        if indicesToDel and len(bktStats) > minNumBuckets:
+            indicesToDel.sort()
+            indexToDel = indicesToDel[0][1]
+            binIndex, bktStats = deleteIndex(binIndex, bktStats, indexToDel)
+        else:
+            tryDelete = False
+    return binIndex, bktStats
 
 # make boundaries continuous
 def makeBoundariesContinuous(mins, maxes):
@@ -374,26 +402,30 @@ def calculateMutualInfoBinary(splCnts, posCnts):
     return mi_components
     
 def getBucketsAndStats(columnData, eventVector, rawBinNumber = 200, minPtsToBucket = 50,
-                       minSpecialValRatio = 0.02, minRegBucketSize = 20,
+                       minSpecialValRatio = 0.02, minRegBucketSize = 20, minRegBucketRatio = 0.01,
                        sigThreshold = 8, minNumBuckets = 3, maxNumBuckets = 7, forUI = False,
                        kurtThreshold=3, numTailBuckets=2, tailSize=0.05, sizeThreshold=0.05,
-                       liftThreshold=1.8, fixBoundaries=False):
-
+                       liftThreshold=1.8, fixBoundaries=False, evevtDiffThreshold=10):
+    totalCnt = len(columnData)
     # process special values
     specialValues = identifySpecialValues(columnData, eventVector, minSpecialValRatio, forUI)    
     xListToBucket, eventListToBucket, bandsDict = processSpecialValues(columnData, eventVector, specialValues)
     maxNumBuckets = maxNumBuckets - len(bandsDict["min"])
+    minNumBuckets = minNumBuckets - len(bandsDict["min"])
+    maxNumBuckets = max(1, maxNumBuckets)
+    minNumBuckets = max(1, minNumBuckets)
     # use round edges
     if forUI and fixBoundaries:
-        maxVal, xListToBucket = truncateToFixedBoundaries(xListToBucket)
+        maxValFixBound, xListToBucket = truncateToFixedBoundaries(xListToBucket)
     elif forUI:
         xListToBucket = [roundTo(x, 2) for x in xListToBucket]
     # add regular buckets
+    minRegBucketSize = max(minRegBucketSize, ceil(minRegBucketRatio * len(columnData)))
     bktStats, bucketMins, bucketMaxes = createRegularBuckets(xListToBucket, 
-                         eventListToBucket, minPtsToBucket, sigThreshold,
+                         eventListToBucket, totalCnt, minPtsToBucket, sigThreshold,
                          rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets, 
                          forUI, kurtThreshold, tailSize, numTailBuckets, sizeThreshold, 
-                         liftThreshold)
+                         liftThreshold, evevtDiffThreshold)
     bandsDict = addBucketsToOutput(bandsDict
                                    ,bucketMins
                                    ,bucketMaxes
@@ -402,7 +434,7 @@ def getBucketsAndStats(columnData, eventVector, rawBinNumber = 200, minPtsToBuck
     if forUI:
         # make boundaries continuous
         if fixBoundaries:
-            bandsDict["max"][-1] = maxVal
+            bandsDict["max"][-1] = maxValFixBound
         bandsDict["min"], bandsDict["max"] = makeBoundariesContinuous(bandsDict["min"], bandsDict["max"])
     # add additional variables such as uncertainty coefficient etc.
     bandsDict = addVariablesToOutput(bandsDict, eventVector)

@@ -1,12 +1,10 @@
 from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
-import itertools
 import json
 import logging
 import math
 from pandas.core.common import isnull
-from sklearn.metrics.cluster.supervised import entropy
 import sys
 
 from scipy import stats
@@ -404,17 +402,25 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         # Apply bucketing with specified parameters for MI
         bandsDictMI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 200,
                        minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 20,
-                       sigThreshold = 8, minNumBuckets = 3, maxNumBuckets = 7, forUI = False,
-                       kurtThreshold=3, numTailBuckets=2, tailSize=0.03, sizeThreshold=0.05, 
-                       liftThreshold=1.8, fixBoundaries=False)
+                       minRegBucketRatio = 0.005, sigThreshold = 8, minNumBuckets = 3, 
+                       maxNumBuckets = 10, forUI = False, kurtThreshold=3, numTailBuckets=3, 
+                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8, 
+                       fixBoundaries=False, evevtDiffThreshold=10)
         # use different parameters for UI buckets
         # if colname is in revenue or employees, fix boundaries
-        fixbound = colName in ["BusinessEstimatedAnnualSales", "BusinessEstimatedEmployees"]
-        bandsDictUI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 200,
+        fixBoundCols = ["BusinessEstimatedAnnualSales", "BusinessEstimatedEmployees",
+                        "EMPLOYEES_HERE", "EMPLOYEES_TOTAL", "LE_EMPLOYEE_RANGE",
+                        "LE_NUMBER_OF_LOCATIONS", "NUMBER_OF_FAMILY_MEMBERS",
+                        "SALES_VOLUME_LOCAL_CURRENCY", "SALES_VOLUME_US_DOLLARS",
+                        "Total_Amount_Raised"]
+        fixBoundCols = [x.lower() for x in fixBoundCols]
+        fixbound = colName.lower() in fixBoundCols
+        bandsDictUI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 100,
                        minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 20,
-                       sigThreshold = 8, minNumBuckets = 3, maxNumBuckets = 7, forUI = False,
-                       kurtThreshold=3, numTailBuckets=2, tailSize=0.03, sizeThreshold=0.05, 
-                       liftThreshold=1.8, fixBoundaries=fixbound)
+                       minRegBucketRatio = 0.01, sigThreshold = 8, minNumBuckets = 3, 
+                       maxNumBuckets = 7, forUI = True, kurtThreshold=3, numTailBuckets=3, tailSize=0.03, 
+                       sizeThreshold=0.05, 
+                       liftThreshold=1.8, fixBoundaries=fixbound, evevtDiffThreshold=10)
         diagnostics["BucketingStrategy"] = "UnifiedBucketer"
         index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriterFull['Model'], bandsDictMI,
                                                         mean, median, kurtosis, skewness, colName, otherMetadata, index)
@@ -565,7 +571,7 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attrib
         summary["HighUCColumns"] = ",".join(highUCColumns)
     return summary
 
-def uncertaintyCoefficient(mi, entropy):
-    if mi == None or entropy == 0:
+def uncertaintyCoefficient(mi, entropyVal):
+    if mi == None or entropyVal == 0:
         return None
-    return mi / entropy
+    return mi / entropyVal
