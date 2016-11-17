@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
@@ -50,6 +49,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     }
 
     @Override
+    protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
+            String returnAddress) {
+        if (!isBatchMode()) {
+            DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId,
+                    (DataSourceLookupRequest) request);
+            sendResponse(lookupRequestId, result, returnAddress);
+        } else {
+            acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
+        }
+    }
+
     protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
@@ -68,8 +78,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     }
 
     @Override
-    public void bulkLookup(BulkLookupStrategy timerType) {
-        switch (timerType) {
+    public void bulkLookup(BulkLookupStrategy bulkLookupStrategy) {
+        switch (bulkLookupStrategy) {
         case DISPATCHER:
             List<DnBBatchMatchContext> batchContexts = new ArrayList<DnBBatchMatchContext>();
             synchronized (unsubmittedReqs) {
@@ -142,7 +152,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
             break;
         default:
-            break;
+            throw new UnsupportedOperationException(
+                    "BulkLookupStrategy " + bulkLookupStrategy.name() + " is not supported in DnB bulk match");
         }
         if (log.isDebugEnabled()) {
             log.debug(submittedReqs.size() + " batched requests are waiting for DnB batch api to return results");
@@ -163,13 +174,5 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
     }
 
-    private void sendResponse(String lookupRequestId, DnBMatchContext result, String returnAddress) {
-        Response response = new Response();
-        response.setRequestId(lookupRequestId);
-        response.setResult(result);
-        if (log.isDebugEnabled()) {
-            log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
-        }
-        actorSystem.sendResponse(response, returnAddress);
-    }
+
 }

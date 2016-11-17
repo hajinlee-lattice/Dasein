@@ -13,11 +13,11 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     private static final Log log = LogFactory.getLog(DataSourceLookupServiceBase.class);
 
     @Autowired
-    protected MatchActorSystem actorSystem;
+    private MatchActorSystem actorSystem;
 
     abstract protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request);
 
-    abstract protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
+    abstract protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress);
 
     @Override
@@ -31,21 +31,11 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         Runnable task = new Runnable() {
             @Override
             public void run() {
-                if (!actorSystem.isBatchMode()) {
-                    Object result = null;
-                    if (request instanceof DataSourceLookupRequest) {
-                        result = lookupFromService(lookupRequestId, (DataSourceLookupRequest) request);
-                    }
-
-                    Response response = new Response();
-                    response.setRequestId(lookupRequestId);
-                    response.setResult(result);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
-                    }
-                    actorSystem.sendResponse(response, returnAddress);
+                if (request instanceof DataSourceLookupRequest) {
+                    asyncLookupFromService(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
                 } else {
-                    acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
+                    sendResponse(lookupRequestId, null, returnAddress);
+                    log.error("Request type is not supported in DataSourceLookupService");
                 }
             }
         };
@@ -60,6 +50,20 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
             response.setResult(result);
         }
         return response;
+    }
+
+    protected void sendResponse(String lookupRequestId, Object result, String returnAddress) {
+        Response response = new Response();
+        response.setRequestId(lookupRequestId);
+        response.setResult(result);
+        if (log.isDebugEnabled()) {
+            log.debug("Returned response for " + lookupRequestId + " to " + returnAddress);
+        }
+        actorSystem.sendResponse(response, returnAddress);
+    }
+
+    protected boolean isBatchMode() {
+        return actorSystem.isBatchMode();
     }
 
 }

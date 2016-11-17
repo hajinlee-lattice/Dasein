@@ -8,6 +8,6 @@ public interface DataSourceLookupService {
 
     Response syncLookup(Object request);
 
-    void bulkLookup(BulkLookupStrategy stratedy);
+    void bulkLookup(BulkLookupStrategy bulkLookupStrategy);
 
 }
