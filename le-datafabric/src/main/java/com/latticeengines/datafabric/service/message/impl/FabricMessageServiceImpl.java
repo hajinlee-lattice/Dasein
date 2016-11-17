@@ -51,7 +51,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
 
     private Schema msgKeySchema;
 
-    public FabricMessageServiceImpl(String brokers, String zkConnect, String schemaUrl, String stack, String environment) {
+    public FabricMessageServiceImpl(String brokers, String zkConnect, String schemaUrl, String stack,
+            String environment) {
         this.brokers = brokers;
         this.zkConnect = zkConnect;
         this.schemaRegUrl = schemaUrl;
@@ -148,7 +149,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             if (!AdminUtils.topicExists(zkUtils, derivedTopic)) {
                 AdminUtils.createTopic(zkUtils, derivedTopic, numPartitions, numRepls, new Properties(),
                         RackAwareMode.Enforced$.MODULE$);
-                log.info("Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
+                log.info(
+                        "Topic created. name: " + topic + "partitions: " + numPartitions + "replications: " + numRepls);
             } else {
                 log.info("Topic exists. name " + topic);
             }

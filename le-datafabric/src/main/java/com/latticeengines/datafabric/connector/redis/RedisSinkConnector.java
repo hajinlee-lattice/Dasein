@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RedisSinkConnector is a Kafka Connect Connector implementation that ingest data from Kafka to Redis.
+ * RedisSinkConnector is a Kafka Connect Connector implementation that ingest
+ * data from Kafka to Redis.
  */
 public class RedisSinkConnector extends Connector {
 

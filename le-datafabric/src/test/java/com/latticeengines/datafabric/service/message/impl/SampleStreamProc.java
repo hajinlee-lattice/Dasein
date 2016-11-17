@@ -21,4 +21,3 @@ public class SampleStreamProc implements FabricStreamProc {
         messageCount++;
     }
 }
-

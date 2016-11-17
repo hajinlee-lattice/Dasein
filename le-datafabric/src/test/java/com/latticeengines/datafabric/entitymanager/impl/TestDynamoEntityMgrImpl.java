@@ -4,7 +4,7 @@ import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
-class TestDynamoEntityMgrImpl extends BaseFabricEntityMgrImpl<TestDynamoEntity>  {
+class TestDynamoEntityMgrImpl extends BaseFabricEntityMgrImpl<TestDynamoEntity> {
 
     static final String RECORD_TYPE = "testRecord";
 

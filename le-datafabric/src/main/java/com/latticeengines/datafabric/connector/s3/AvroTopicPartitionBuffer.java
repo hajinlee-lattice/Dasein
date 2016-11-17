@@ -60,12 +60,12 @@ class AvroTopicPartitionBuffer {
         List<GenericRecord> genericRecords = new ArrayList<>();
         Schema schema = null;
         Long lastOffset = -1L;
-        for (SinkRecord record: records) {
+        for (SinkRecord record : records) {
             schema = avroData.fromConnectSchema(record.valueSchema());
             Long thisOffset = record.kafkaOffset();
             if (!offsets.contains(thisOffset)) {
                 GenericRecord value = (GenericRecord) //
-                        avroData.fromConnectData(record.valueSchema(), record.value());
+                avroData.fromConnectData(record.valueSchema(), record.value());
                 genericRecords.add(value);
                 lastOffset = Math.max(lastOffset, thisOffset);
                 offsets.add(thisOffset);

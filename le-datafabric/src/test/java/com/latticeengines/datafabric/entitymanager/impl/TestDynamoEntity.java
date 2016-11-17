@@ -24,7 +24,7 @@ public class TestDynamoEntity implements FabricEntity<TestDynamoEntity> {
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}"+ "]}",
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
             RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, JSON_ATTRIBUTES, MAP_ATTRIBUTES);
 
     @Id

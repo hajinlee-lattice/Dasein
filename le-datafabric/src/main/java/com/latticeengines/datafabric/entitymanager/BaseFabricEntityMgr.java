@@ -18,7 +18,7 @@ public interface BaseFabricEntityMgr<T> {
     T findByKey(T entity);
 
     T findByKey(String id);
-    
+
     Map<String, Object> findAttributesByKey(String id);
 
     List<T> batchFindByKey(List<String> ids);
@@ -35,8 +35,8 @@ public interface BaseFabricEntityMgr<T> {
 
     boolean isDisabled();
 
-    public void init();
-    
+    void init();
+
     String getRepository();
 
     String getRecordType();

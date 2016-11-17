@@ -25,17 +25,18 @@ public class FabricDataServiceImpl implements FabricDataService {
     @Autowired
     RedisDataServiceProvider redisService;
 
-
     public FabricDataServiceImpl() {
-         log.info("Initing fabric data service");
+        log.info("Initing fabric data service");
     }
 
     public FabricDataStore constructDataStore(String store, String repository, String recordType, Schema schema) {
 
         FabricDataStore dataStore = null;
 
-        if (serviceProviders == null) initServiceProviders();
-        FabricDataServiceProvider dsp  = serviceProviders.get(store);;
+        if (serviceProviders == null)
+            initServiceProviders();
+        FabricDataServiceProvider dsp = serviceProviders.get(store);
+        ;
         if (dsp != null) {
             log.info("Initialize data store " + store + " repo " + repository);
             dataStore = dsp.constructDataStore(repository, recordType, schema);
@@ -45,7 +46,8 @@ public class FabricDataServiceImpl implements FabricDataService {
     }
 
     synchronized public void addServiceProvider(FabricDataServiceProvider dsp) {
-        if (serviceProviders == null) initServiceProviders();
+        if (serviceProviders == null)
+            initServiceProviders();
         serviceProviders.put(dsp.getName(), dsp);
     }
 

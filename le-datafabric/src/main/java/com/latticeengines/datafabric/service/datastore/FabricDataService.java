@@ -5,6 +5,6 @@ import org.apache.avro.Schema;
 public interface FabricDataService {
 
     FabricDataStore constructDataStore(String store, String repository, String recordType, Schema schema);
-    void addServiceProvider(FabricDataServiceProvider dsp); 
-}
 
+    void addServiceProvider(FabricDataServiceProvider dsp);
+}

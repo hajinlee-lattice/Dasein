@@ -72,7 +72,8 @@ public class ErrorEntityToHdfsConnectorTestNG extends DataFabricFunctionalTestNG
                         scope(TopicScope.PRIVATE). //
                         processor(processor). //
                         numThreads(1));
-        RecordKey key = new RecordKey.Builder().id("1").customerSpace("c").recordType(recordType).producer("producer").build();
+        RecordKey key = new RecordKey.Builder().id("1").customerSpace("c").recordType(recordType).producer("producer")
+                .build();
 
         for (int i = 0; i < 16; i++) {
             GenericRecord value = new GenericData.Record(valueSchema);

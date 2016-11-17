@@ -14,7 +14,8 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
 
 /**
- * S3SinkConnector flushes a Kafka topic to a S3 path in chunks, it will be extended to Snowflake or Reshift connector.
+ * S3SinkConnector flushes a Kafka topic to a S3 path in chunks, it will be
+ * extended to Snowflake or Reshift connector.
  */
 public class S3SinkConnector extends Connector {
 

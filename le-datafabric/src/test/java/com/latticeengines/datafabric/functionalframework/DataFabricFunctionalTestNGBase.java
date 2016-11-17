@@ -23,4 +23,3 @@ public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSprin
     protected FabricDataService dataService;
 
 }
-

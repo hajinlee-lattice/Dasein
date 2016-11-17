@@ -125,7 +125,7 @@ public class S3SinkTask extends SinkTask {
 
     private void commitBuffers() {
         Set<TopicPartition> assignment = context.assignment();
-        for (TopicPartition tp: assignment) {
+        for (TopicPartition tp : assignment) {
             commitBuffer(tp);
         }
     }

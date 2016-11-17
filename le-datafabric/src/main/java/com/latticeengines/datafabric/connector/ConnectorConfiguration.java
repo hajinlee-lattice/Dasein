@@ -17,7 +17,7 @@ public abstract class ConnectorConfiguration extends AbstractConfig {
 
     private static final WorkerProperty<Integer> SCHEMA_CACHE_SIZE = new WorkerProperty<Integer>("schema.cache.size",
             "The size of the schema cache used in the Avro converter.", "Schema Cache Size").setDefaultValue(1000) //
-            .setWidth(ConfigDef.Width.SHORT);
+                    .setWidth(ConfigDef.Width.SHORT);
 
     private static final String SCHEMA_GROUP = "Schema";
 
@@ -40,9 +40,10 @@ public abstract class ConnectorConfiguration extends AbstractConfig {
             throw new RuntimeException(String.format("Group %s is not defined.", group));
         }
 
-        for (Map.Entry<String, List<String>> entry: tmpGroups.get().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : tmpGroups.get().entrySet()) {
             if (entry.getValue().contains(property.getKey())) {
-                throw new RuntimeException(String.format("Property %s is already added to group  %s.", property.getKey(), group));
+                throw new RuntimeException(
+                        String.format("Property %s is already added to group  %s.", property.getKey(), group));
             }
         }
 

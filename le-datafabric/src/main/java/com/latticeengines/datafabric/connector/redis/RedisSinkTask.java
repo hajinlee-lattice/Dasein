@@ -80,14 +80,17 @@ public class RedisSinkTask extends SinkTask {
         avroRecords = new HashMap<String, GenericRecord>();
 
         try {
-            for (SinkRecord record: records) {
-                Struct value = (Struct)record.value();
-                Struct key = (Struct)record.key();
-                if ((value == null) || (key == null)) continue;
-                GenericRecord valueRec = (GenericRecord)avroData.fromConnectData(value.schema(), value);
-                GenericRecord keyRec = (GenericRecord)avroData.fromConnectData(key.schema(), key);
-                String id = keyRec.get("id").toString();;
-                String recordType = keyRec.get("record").toString();;
+            for (SinkRecord record : records) {
+                Struct value = (Struct) record.value();
+                Struct key = (Struct) record.key();
+                if ((value == null) || (key == null))
+                    continue;
+                GenericRecord valueRec = (GenericRecord) avroData.fromConnectData(value.schema(), value);
+                GenericRecord keyRec = (GenericRecord) avroData.fromConnectData(key.schema(), key);
+                String id = keyRec.get("id").toString();
+                ;
+                String recordType = keyRec.get("record").toString();
+                ;
                 log.debug("Redis Connector Got record " + recordType + " id " + id + "\n");
                 if (!recordType.equals(this.recordType))
                     continue;

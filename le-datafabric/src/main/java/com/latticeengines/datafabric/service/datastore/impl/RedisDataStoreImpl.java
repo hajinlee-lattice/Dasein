@@ -75,8 +75,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         if (redisIndex != null) {
             this.indexes = RedisUtil.getIndex(redisIndex);
         }
-        log.info("Constructed redis data store repo " + repository + " record " + recordType +
-                 " index " + redisIndex);
+        log.info("Constructed redis data store repo " + repository + " record " + recordType + " index " + redisIndex);
     }
 
     @Override
@@ -124,7 +123,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         List<Object> results = pipeline.syncAndReturnAll();
         for (int i = 0; i < results.size(); i++) {
             String id = idList.get(i);
-            GenericRecord record = jsonToAvro((String)results.get(i));
+            GenericRecord record = jsonToAvro((String) results.get(i));
             if (record != null) {
                 records.put(id, record);
             }
@@ -132,25 +131,24 @@ public class RedisDataStoreImpl implements FabricDataStore {
         return records;
     }
 
-
     @Override
-    public List<GenericRecord> findRecords(Map<String, String> properties)  {
+    public List<GenericRecord> findRecords(Map<String, String> properties) {
         Jedis jedis = jedisPool.getResource();
 
         String index = buildQuery(properties);
         Set<String> recordKeys = jedis.smembers(index);
         Pipeline pipeline = jedis.pipelined();
         for (String key : recordKeys) {
-             pipeline.get(key);
+            pipeline.get(key);
         }
         List<Object> results = pipeline.syncAndReturnAll();
 
         List<GenericRecord> records = new ArrayList<GenericRecord>();
         for (Object obj : results) {
-             GenericRecord record = jsonToAvro((String)obj);
-             if (record != null) {
-                 records.add(record);
-             }
+            GenericRecord record = jsonToAvro((String) obj);
+            if (record != null) {
+                records.add(record);
+            }
         }
         jedisPool.returnResource(jedis);
 
@@ -158,7 +156,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public void deleteRecord(String id, GenericRecord record)  {
+    public void deleteRecord(String id, GenericRecord record) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
         deleteRecordInternal(pipeline, id, record);
@@ -168,7 +166,8 @@ public class RedisDataStoreImpl implements FabricDataStore {
     private void createRecordInternal(Pipeline pipeline, String id, GenericRecord record) {
         String key = buildKey(id);
         pipeline.set(key, avroToJson(record));
-        if (indexes == null) return;
+        if (indexes == null)
+            return;
         for (List<String> index : indexes.values()) {
             String indexKey = buildIndex(record, index);
             pipeline.sadd(indexKey, key);

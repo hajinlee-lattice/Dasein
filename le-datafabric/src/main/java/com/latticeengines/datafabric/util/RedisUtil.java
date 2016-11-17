@@ -14,11 +14,9 @@ import org.apache.commons.lang.StringUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 
-
 public class RedisUtil {
 
     public static final String INDEX = "REDISINDEX";
-
 
     public static Schema getSchema(Class<?> entityClass) {
         Schema schema = ReflectData.get().getSchema(entityClass);
@@ -34,7 +32,7 @@ public class RedisUtil {
 
     @SuppressWarnings("unchecked")
     public static Map<String, List<String>> getIndex(String indexString) {
-        Map<String, List<String>> indexes = (Map<String, List<String>>)JsonUtils.deserialize(indexString, Map.class);
+        Map<String, List<String>> indexes = (Map<String, List<String>>) JsonUtils.deserialize(indexString, Map.class);
         return indexes;
     }
 
@@ -42,21 +40,21 @@ public class RedisUtil {
         HashMap<String, List<String>> indexes = new HashMap<String, List<String>>();
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(RedisIndex.class)) {
-                RedisIndex annotation = (RedisIndex)field.getAnnotation(RedisIndex.class);
+                RedisIndex annotation = (RedisIndex) field.getAnnotation(RedisIndex.class);
                 String[] indexNames = StringUtils.split(annotation.name(), ",");
                 for (String indexName : indexNames) {
-                     List<String> index = (List<String>)indexes.get(indexName);
-                     if (index == null) {
-                         index = new ArrayList<String>();
-                         indexes.put(indexName, index);
-                     }
-                     index.add(field.getName());
+                    List<String> index = (List<String>) indexes.get(indexName);
+                    if (index == null) {
+                        index = new ArrayList<String>();
+                        indexes.put(indexName, index);
+                    }
+                    index.add(field.getName());
                 }
             }
         }
 
         for (List<String> index : indexes.values()) {
-             Collections.sort(index);
+            Collections.sort(index);
         }
         return JsonUtils.serialize(indexes);
     }

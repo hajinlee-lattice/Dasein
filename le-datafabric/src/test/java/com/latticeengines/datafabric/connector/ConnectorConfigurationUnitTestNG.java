@@ -46,7 +46,7 @@ public class ConnectorConfigurationUnitTestNG {
 
     private static class Connector1 extends ConnectorConfiguration {
         private static ConfigDef config;
-       
+
         @SuppressWarnings("unused")
         public static ConfigDef getConfig() {
             return config;

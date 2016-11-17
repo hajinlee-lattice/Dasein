@@ -18,7 +18,6 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.util.Pool;
 
-
 @Component("redisDataService")
 public class RedisDataServiceProvider implements FabricDataServiceProvider {
 
@@ -48,8 +47,8 @@ public class RedisDataServiceProvider implements FabricDataServiceProvider {
     public RedisDataServiceProvider() {
     }
 
-
-    public RedisDataServiceProvider(String master, String redisServers, int redisPort, int maxActives, boolean haEnabled) {
+    public RedisDataServiceProvider(String master, String redisServers, int redisPort, int maxActives,
+            boolean haEnabled) {
         this.redisMaster = master;
         this.redisServers = redisServers;
         this.redisPort = redisPort;
@@ -59,7 +58,8 @@ public class RedisDataServiceProvider implements FabricDataServiceProvider {
     }
 
     synchronized private void init() {
-        if (initialized) return;
+        if (initialized)
+            return;
 
         log.info("Initialize data service with server " + redisServers + " port " + redisPort);
         JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -83,15 +83,16 @@ public class RedisDataServiceProvider implements FabricDataServiceProvider {
 
     public FabricDataStore constructDataStore(String repository, String recordType, Schema schema) {
 
-        FabricDataStore dataStore  = null;
+        FabricDataStore dataStore = null;
         log.info("Initialize Dynamo data store " + repository + " " + recordType);
-        if (!initialized) init();
+        if (!initialized)
+            init();
 
         dataStore = new RedisDataStoreImpl(jedisPool, repository, recordType, schema);
         return dataStore;
     }
 
     public String getName() {
-         return name;
+        return name;
     }
 }

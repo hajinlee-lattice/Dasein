@@ -63,14 +63,13 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
     }
 
     @Test(groups = "dynamo")
-    public void testCreateFindDelete() throws  Exception {
+    public void testCreateFindDelete() throws Exception {
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("key1", "value1");
         attributes.put("key2", "value2");
         attributes.put("key3", 123L);
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(attributes));
-
 
         TestDynamoEntity entity = new TestDynamoEntity();
         entity.setId("12345");

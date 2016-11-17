@@ -16,7 +16,6 @@ public class DynamoUtil {
     public static final String KEYS = "DYNAMOKEYS";
     public static final String ATTRIBUTES = "DYNAMOATTRIBUTES";
 
-
     public static DynamoIndex getIndex(String keyString) {
         if (keyString == null) {
             return null;

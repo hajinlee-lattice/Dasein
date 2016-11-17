@@ -88,7 +88,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.topic = builder.topic;
         this.scope = builder.scope;
         this.disabled = false;
-        
+
         if (builder.messageService != null) {
             this.messageService = builder.messageService;
         }
@@ -136,7 +136,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             consumers = new HashMap<>();
         }
     }
-    
+
     @Override
     public void create(T entity) {
         if (disabled) {
@@ -329,14 +329,14 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private List<String> dedupIds(List<String> ids) {
         Set<String> uniqueIds = new HashSet<>();
-        for (String id: ids) {
+        for (String id : ids) {
             if (StringUtils.isNotEmpty(id)) {
                 uniqueIds.add(id);
             }
         }
         return new ArrayList<>(uniqueIds);
     }
-    
+
     public class BaseFabricEntityStreamProc implements FabricStreamProc {
 
         FabricEntityProcessor processor;

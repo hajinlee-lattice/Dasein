@@ -36,7 +36,6 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     int messageCount = 0;
     int invalidMessages = 0;
 
-
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
         topic = "demoEntityTopic";
@@ -49,14 +48,8 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         messageService.createTopic(topic, TopicScope.PRIVATE, 1, 1);
         messageService.createTopic(topicToConnect, TopicScope.PRIVATE, 1, 1);
 
-
-        SampleFabricEntityMgr.Builder builder= new SampleFabricEntityMgr.Builder().
-                                                           messageService(messageService).
-                                                           dataService(dataService).
-                                                           topic(topic).
-                                                           store(store).
-                                                           repository(repository).
-                                                           recordType(recordType);
+        SampleFabricEntityMgr.Builder builder = new SampleFabricEntityMgr.Builder().messageService(messageService)
+                .dataService(dataService).topic(topic).store(store).repository(repository).recordType(recordType);
 
         entityManager = new SampleFabricEntityMgr(builder);
         entityManager.init();
@@ -72,27 +65,27 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     public void tearDown() throws Exception {
 
         entityManager.removeConsumer(group, 12000);
-//       if (messageService.topicExists(topic)) {
-//           messageService.deleteTopic(topic, false);
-//       }
-//       if (messageService.topicExists(topicToConnect)) {
-//           messageService.deleteTopic(topicToConnect, false);
-//       }
+        // if (messageService.topicExists(topic)) {
+        // messageService.deleteTopic(topic, false);
+        // }
+        // if (messageService.topicExists(topicToConnect)) {
+        // messageService.deleteTopic(topicToConnect, false);
+        // }
     }
-
 
     @Test(groups = "functional", enabled = false)
     public void testCreateAndFindAndDelete() throws Exception {
 
         List<SampleEntity> entities = createEntities(16);
 
-        for (SampleEntity entity: entities) {
-             entityManager.create(entity);
+        for (SampleEntity entity : entities) {
+            entityManager.create(entity);
         }
 
-        List<SampleEntity> results = new ArrayList<SampleEntity>();;
-        for (SampleEntity entity: entities) {
-             results.add(entityManager.findByKey(entity));
+        List<SampleEntity> results = new ArrayList<SampleEntity>();
+        ;
+        for (SampleEntity entity : entities) {
+            results.add(entityManager.findByKey(entity));
         }
 
         compareEntities(entities, results);
@@ -107,7 +100,6 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     @Test(groups = "functional", enabled = true)
     public void testPublishAndConsume() throws Exception {
 
-
         List<SampleEntity> entities = createEntities(16);
 
         processor.entityCount = 0;
@@ -115,13 +107,13 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
 
         // if (true) return;
 
-        for (SampleEntity entity: entities) {
-             entityManager.publish(entity);
+        for (SampleEntity entity : entities) {
+            entityManager.publish(entity);
         }
 
         try {
             Thread.sleep(4000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
 
@@ -134,23 +126,25 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     @Test(groups = "functional", enabled = false)
     public void testConnector() throws Exception {
 
-        if (!connectorEnabled) return;
+        if (!connectorEnabled)
+            return;
 
         List<SampleEntity> entities = createEntities(16);
 
-        for (SampleEntity entity: entities) {
-             entityManager.publish(entity);
+        for (SampleEntity entity : entities) {
+            entityManager.publish(entity);
         }
 
         try {
             Thread.sleep(4000);
-        } catch(InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
 
-        List<SampleEntity> results = new ArrayList<SampleEntity>();;
-        for (SampleEntity entity: entities) {
-             results.add(entityManager.findByKey(entity));
+        List<SampleEntity> results = new ArrayList<SampleEntity>();
+        ;
+        for (SampleEntity entity : entities) {
+            results.add(entityManager.findByKey(entity));
         }
 
         compareEntities(entities, results);
@@ -171,7 +165,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         public void process(Object obj) {
             log.info("Process entity " + entityCount + "\n");
             entityCount++;
-            SampleEntity entity = (SampleEntity)obj;
+            SampleEntity entity = (SampleEntity) obj;
             if (!entity.getCompany().equals("myCompany"))
                 invalidEntities++;
             else if (!entity.getLatticeId().equals(latticeId))
@@ -182,50 +176,51 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     private List<SampleEntity> createEntities(int numEntities) {
         List<SampleEntity> entities = new ArrayList<SampleEntity>();
         for (int i = 0; i < numEntities; i++) {
-             SampleEntity entity = new SampleEntity();
-             entity.setId(i+"");
-             entity.setCompany("myCompany");
-             entity.setLatticeId(latticeId);
-             entity.setName("name" + i);
-             entities.add(entity);
+            SampleEntity entity = new SampleEntity();
+            entity.setId(i + "");
+            entity.setCompany("myCompany");
+            entity.setLatticeId(latticeId);
+            entity.setName("name" + i);
+            entities.add(entity);
         }
         return entities;
     }
 
     private void deleteEntities(List<SampleEntity> entities) {
 
-        for (SampleEntity entity: entities) {
-             entityManager.delete(entity);
+        for (SampleEntity entity : entities) {
+            entityManager.delete(entity);
         }
 
-        for (SampleEntity entity: entities) {
-             Assert.assertEquals(entityManager.findByKey(entity), null);
+        for (SampleEntity entity : entities) {
+            Assert.assertEquals(entityManager.findByKey(entity), null);
         }
         List<SampleEntity> results = entityManager.findByLatticeId(latticeId);
         Assert.assertEquals(results.size(), 0);
     }
 
     private void compareEntities(List<SampleEntity> sources, List<SampleEntity> dests) {
-         Assert.assertEquals(sources.size(), dests.size());
-         Iterator<SampleEntity> srcItr = sources.iterator();
-         Iterator<SampleEntity> destItr = dests.iterator();
-         while (srcItr.hasNext()) {
-             SampleEntity src = srcItr.next();
-             SampleEntity dest = destItr.next();
-             Assert.assertEquals(src.getId(), dest.getId());
-             Assert.assertEquals(src.getName(), dest.getName());
-             Assert.assertEquals(src.getLatticeId(), dest.getLatticeId());
+        Assert.assertEquals(sources.size(), dests.size());
+        Iterator<SampleEntity> srcItr = sources.iterator();
+        Iterator<SampleEntity> destItr = dests.iterator();
+        while (srcItr.hasNext()) {
+            SampleEntity src = srcItr.next();
+            SampleEntity dest = destItr.next();
+            Assert.assertEquals(src.getId(), dest.getId());
+            Assert.assertEquals(src.getName(), dest.getName());
+            Assert.assertEquals(src.getLatticeId(), dest.getLatticeId());
         }
     }
+
     private void validateEntities(List<SampleEntity> entities, int number) {
 
-         Assert.assertEquals(entities.size(), number);
-         Iterator<SampleEntity> srcItr = entities.iterator();
-         while (srcItr.hasNext()) {
-             SampleEntity src = srcItr.next();
-             Assert.assertTrue(src.getName().startsWith("name"));
-             Assert.assertEquals(src.getLatticeId(), latticeId);
-             Assert.assertEquals(src.getCompany(), "myCompany");
+        Assert.assertEquals(entities.size(), number);
+        Iterator<SampleEntity> srcItr = entities.iterator();
+        while (srcItr.hasNext()) {
+            SampleEntity src = srcItr.next();
+            Assert.assertTrue(src.getName().startsWith("name"));
+            Assert.assertEquals(src.getLatticeId(), latticeId);
+            Assert.assertEquals(src.getCompany(), "myCompany");
         }
     }
 }

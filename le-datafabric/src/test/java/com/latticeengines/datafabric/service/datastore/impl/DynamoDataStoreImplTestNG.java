@@ -1,6 +1,5 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +52,7 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
         ListTablesResult result = client.listTables();
         System.out.println("Tables: " + result.getTableNames());
     }
+
     @AfterClass(groups = "dynamo")
     public void teardown() {
         dynamoService.deleteTable(tableName);
@@ -60,16 +60,14 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
 
     @Test(groups = "dynamo")
     public void testCreateDelete() {
-        Schema schema = new Schema.Parser().parse(String.format("{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"ID\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"Value\",\"type\":[\"string\",\"null\"]}" + "]}", RECORD_TYPE));
+        Schema schema = new Schema.Parser()
+                .parse(String.format("{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
+                        + "{\"name\":\"ID\",\"type\":[\"string\",\"null\"]},"
+                        + "{\"name\":\"Value\",\"type\":[\"string\",\"null\"]}" + "]}", RECORD_TYPE));
 
         DynamoDataStoreImpl dataStore = new DynamoDataStoreImpl(client, repo, RECORD_TYPE, schema);
 
-        Object[][] data = new Object[][] {
-                {"1", "value1"},
-                {"2", "value2"}
-        };
+        Object[][] data = new Object[][] { { "1", "value1" }, { "2", "value2" } };
 
         List<String> ids = new ArrayList<>();
 

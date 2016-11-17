@@ -27,7 +27,6 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.utils.VerifiableProperties;
 
-
 public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
     private static final Log log = LogFactory.getLog(SimpleFabricMessageConsumerImpl.class);
@@ -58,7 +57,8 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
         this.numThreads = builder.numThreads;
         this.autoStart = builder.autoStart;
         this.processor = builder.processor;
-        if (builder.messageService != null) this.messageService = builder.messageService;
+        if (builder.messageService != null)
+            this.messageService = builder.messageService;
 
         this.derivedTopic = messageService.deriveTopic(topic, scope);
         this.props = createConsumerConfig();
@@ -68,7 +68,6 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
     }
 
     public void start() {
-
 
         consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
 
@@ -82,14 +81,15 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
         // Create decoders for key and value
         KafkaAvroDecoder avroDecoder = new KafkaAvroDecoder(vProps);
 
-        Map<String, List<KafkaStream<Object, Object>>> consumerMap =
-            consumer.createMessageStreams(topicCountMap, avroDecoder, avroDecoder);
+        Map<String, List<KafkaStream<Object, Object>>> consumerMap = consumer.createMessageStreams(topicCountMap,
+                avroDecoder, avroDecoder);
         List<KafkaStream<Object, Object>> streams = consumerMap.get(derivedTopic);
 
         executor = Executors.newFixedThreadPool(numThreads);
 
         try {
-//            Constructor<?> constructor = streamProcClass.getConstructor(KafkaStream);
+            // Constructor<?> constructor =
+            // streamProcClass.getConstructor(KafkaStream);
             // Create stream processors and bind them to threads
             for (final KafkaStream<Object, Object> stream : streams) {
                 FabricStreamRunnable runnable = new FabricStreamRunnable(stream, processor);
@@ -101,17 +101,18 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
     }
 
     public void stop(int waitTime) {
-        if (consumer != null) consumer.shutdown();
-        if (executor != null) executor.shutdown();
+        if (consumer != null)
+            consumer.shutdown();
+        if (executor != null)
+            executor.shutdown();
         try {
             if (!executor.awaitTermination(waitTime, TimeUnit.MILLISECONDS)) {
-                log.info( "Timed out waiting for consumer threads to shut down, exiting uncleanly");
+                log.info("Timed out waiting for consumer threads to shut down, exiting uncleanly");
             }
         } catch (InterruptedException e) {
             log.info("Interrupted during shutdown, exiting uncleanly");
         }
     }
-
 
     private Properties createConsumerConfig() {
         Properties props = new Properties();
@@ -120,16 +121,17 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
         props.put("schema.registry.url", messageService.getSchemaRegUrl());
         props.put("specific.avro.reader", false);
 
-        // We configure the consumer to avoid committing offsets and to always start consuming from beginning of topic
-        // This is not a best practice, but we want the example consumer to show results when running it again and again
-//        props.put("auto.commit.enable", autoCommit);
+        // We configure the consumer to avoid committing offsets and to always
+        // start consuming from beginning of topic
+        // This is not a best practice, but we want the example consumer to show
+        // results when running it again and again
+        // props.put("auto.commit.enable", autoCommit);
         props.put("auto.offset.reset", "smallest");
 
         return props;
     }
 
     private class FabricStreamRunnable implements Runnable {
-
 
         private KafkaStream<Object, Object> stream;
         private FabricStreamProc processor;
@@ -144,8 +146,8 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
             while (it.hasNext()) {
                 MessageAndMetadata<Object, Object> record = it.next();
-                GenericRecord key = (GenericRecord)record.key();
-                GenericRecord value = (GenericRecord)record.message();
+                GenericRecord key = (GenericRecord) record.key();
+                GenericRecord value = (GenericRecord) record.message();
                 if (key.get("record") == null) {
                     continue;
                 }
@@ -156,7 +158,6 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
             }
         }
     }
-
 
     public static class Builder {
 

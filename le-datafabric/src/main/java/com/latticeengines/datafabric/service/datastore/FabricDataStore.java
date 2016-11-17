@@ -20,8 +20,7 @@ public interface FabricDataStore {
     List<GenericRecord> findRecords(Map<String, String> properties);
 
     void deleteRecord(String id, GenericRecord record);
-    
+
     Map<String, Object> findAttributes(String id);
 
 }
-

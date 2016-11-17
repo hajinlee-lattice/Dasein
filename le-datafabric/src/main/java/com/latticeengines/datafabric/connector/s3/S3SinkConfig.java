@@ -21,14 +21,14 @@ public class S3SinkConfig extends ConnectorConfiguration {
             "prefix in S3 key. CAUTION: all objects under prefix will be cleaned up when connector startup",
             "S3 Prefix");
     static final WorkerProperty<Boolean> S3_CLEANUP = new WorkerProperty<Boolean>("s3.cleanup",
-            "Cleanup the S3 destination upon connector startup.",
-            "Cleanup S3 destination").setDefaultValue(Boolean.FALSE);
+            "Cleanup the S3 destination upon connector startup.", "Cleanup S3 destination")
+                    .setDefaultValue(Boolean.FALSE);
     static final WorkerProperty<String> AWS_ACCESS_KEY_ID = new WorkerProperty<String>("aws.access.key.id",
             "aws access key id. must also specify aws.secret.key", "AWS AccessKey ID") //
-            .setImportance(ConfigDef.Importance.LOW);
+                    .setImportance(ConfigDef.Importance.LOW);
     static final WorkerProperty<String> AWS_SECRET_KEY = new WorkerProperty<String>("aws.secret.key",
             "aws secret key. must also specify aws.access.key.id", "AWS Secret Key") //
-            .setImportance(ConfigDef.Importance.LOW);
+                    .setImportance(ConfigDef.Importance.LOW);
 
     static {
         String S3_GROUP = "S3";
@@ -49,10 +49,7 @@ public class S3SinkConfig extends ConnectorConfiguration {
         super(config, props);
     }
 
-
     public static void main(String[] args) {
         System.out.println(config.toRst());
     }
 }
-
-

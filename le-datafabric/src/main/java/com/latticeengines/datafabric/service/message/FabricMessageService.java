@@ -23,5 +23,3 @@ public interface FabricMessageService {
 
     GenericRecord buildKey(RecordKey recordKey);
 }
-
-

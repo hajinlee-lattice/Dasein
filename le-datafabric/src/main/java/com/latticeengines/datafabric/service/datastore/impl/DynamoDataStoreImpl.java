@@ -54,7 +54,7 @@ import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 public class DynamoDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(DynamoDataStoreImpl.class);
-    
+
     private static final String ERRORMESSAGE = //
             "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
 
@@ -157,7 +157,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         }
         return record;
     }
-    
+
     @Override
     public void createRecords(Map<String, GenericRecord> records) {
         DynamoDB dynamoDB = new DynamoDB(client);
@@ -198,7 +198,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         try {
             BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
             do {
-                // Check for unprocessed keys which could happen if you exceed provisioned throughput
+                // Check for unprocessed keys which could happen if you exceed
+                // provisioned throughput
                 Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
 
                 if (outcome.getUnprocessedItems().size() != 0) {
@@ -360,7 +361,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     public static String buildTableName(String repository, String recordType) {
         return REPO + repository + RECORD + recordType;
     }
-    
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Object convertAvroToJavaType(Object avroInstance) {
         if (avroInstance instanceof List) {
@@ -372,25 +373,23 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         } else if (avroInstance instanceof GenericData.Record) {
             GenericData.Record r = (GenericData.Record) avroInstance;
             Map<String, Object> map = new HashMap<>();
-            
+
             for (Schema.Field f : r.getSchema().getFields()) {
                 map.put(f.name(), convertAvroToJavaType(r.get(f.name())));
             }
-            
+
             return map;
         }
-        
+
         return avroInstance;
     }
-
-    
 
     private Item buildItem(String id, GenericRecord record) {
         Map<String, Object> attrMap = new HashMap<>();
 
         attrMap.put(ID, id);
         attrMap.put(BLOB, avroToBytes(record));
-        
+
         if (tableAttributes != null) {
             for (String attr : tableAttributes.getNames()) {
                 attrMap.put(attr, convertAvroToJavaType(record.get(attr)));
@@ -449,7 +448,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 if (attrNames.contains(entry.getKey())) {
                     map.put(entry.getKey(), entry.getValue());
                 }
-            } 
+            }
         } catch (NoSuchMethodError e) {
             log.info("The table name is " + tableName);
             log.info("The key is " + id);

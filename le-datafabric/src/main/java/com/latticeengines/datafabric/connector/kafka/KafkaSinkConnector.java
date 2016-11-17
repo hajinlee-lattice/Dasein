@@ -14,8 +14,8 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
 
 /**
- * KafkaSinkConnector is a Kafka Connect Connector implementation that ingest data from one Kafka cluster
- * to another Kafka cluster.
+ * KafkaSinkConnector is a Kafka Connect Connector implementation that ingest
+ * data from one Kafka cluster to another Kafka cluster.
  */
 public class KafkaSinkConnector extends Connector {
 

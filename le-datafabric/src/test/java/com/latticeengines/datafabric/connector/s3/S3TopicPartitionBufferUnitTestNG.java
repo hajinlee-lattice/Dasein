@@ -21,10 +21,9 @@ public class S3TopicPartitionBufferUnitTestNG {
     public void testCleanConstruct() throws IOException {
         TopicPartition tp = new TopicPartition("topic1", 2);
         Schema schema = new Schema.Parser().parse( //
-                "{\"type\":\"record\",\"name\":\"TestRecord\",\"doc\":\"Testing data\","
-                + "\"fields\":[" //
-                + "{\"name\":\"key\",\"type\":\"string\"}, " //
-                + "{\"name\":\"value\",\"type\":\"string\"}]}");
+                "{\"type\":\"record\",\"name\":\"TestRecord\",\"doc\":\"Testing data\"," + "\"fields\":[" //
+                        + "{\"name\":\"key\",\"type\":\"string\"}, " //
+                        + "{\"name\":\"value\",\"type\":\"string\"}]}");
         AvroTopicPartitionBuffer writer = new AvroTopicPartitionBuffer(tp);
         writer.setSchema(schema);
 
@@ -43,7 +42,7 @@ public class S3TopicPartitionBufferUnitTestNG {
         File expected = new File(S3SinkConstants.TMP_ROOT + "/topic1/2.avro");
         Assert.assertTrue(expected.isFile());
         records = AvroUtils.readFromLocalFile(expected.getAbsolutePath());
-        for (GenericRecord record: records) {
+        for (GenericRecord record : records) {
             String key = record.get("key").toString();
             String value = record.get("value").toString();
             Assert.assertEquals(key.replace("key", "value"), value);
