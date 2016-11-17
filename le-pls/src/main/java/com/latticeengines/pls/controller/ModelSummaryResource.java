@@ -206,6 +206,7 @@ public class ModelSummaryResource {
     @RequestMapping(value = "/metadata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get metadata for the event table used for the specified model")
+    @PreAuthorize("hasRole('View_PLS_Refine_Clone')")
     public List<VdbMetadataField> getMetadata(@PathVariable String modelId) {
         return modelMetadataService.getMetadata(modelId);
     }

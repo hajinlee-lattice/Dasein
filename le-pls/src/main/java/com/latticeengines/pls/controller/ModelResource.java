@@ -114,6 +114,7 @@ public class ModelResource {
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Clones and remodels with the specified model name.")
+    @PreAuthorize("hasRole('Edit_PLS_Refine_Clone')")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),

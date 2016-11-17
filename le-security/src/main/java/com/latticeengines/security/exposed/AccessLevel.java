@@ -25,6 +25,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
+            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.VIEW_PLS_QUOTAS //
     ) //
     ), //
@@ -49,6 +50,9 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
+            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
+            GrantedRight.VIEW_PLS_REFINE_CLONE, //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
     ) //
     ), //
@@ -69,6 +73,9 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
+            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
+            GrantedRight.VIEW_PLS_REFINE_CLONE, //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_PLS_QUOTAS //
     ) //
     ), //
@@ -96,6 +103,9 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
+            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
+            GrantedRight.VIEW_PLS_REFINE_CLONE, //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -124,6 +134,9 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS, //
+            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
+            GrantedRight.VIEW_PLS_REFINE_CLONE, //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
     )); //
 
