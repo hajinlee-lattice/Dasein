@@ -41,6 +41,22 @@ public class DnBMatchContext implements Fact, Dimension {
         lookupRequestId = result.getLookupRequestId();
     }
 
+    public void copyResultFromWhiteCache(DnBWhiteCache whiteCache) {
+        duns = whiteCache.getDuns();
+        dnbCode = DnBReturnCode.OK;
+        confidenceCode = whiteCache.getConfidenceCode();
+        matchGrade = whiteCache.getMatchGrade();
+        hitWhiteCache = true;
+    }
+
+    public void copyResultFromBlackCache(DnBBlackCache blackCache) {
+        duns = null;
+        dnbCode = DnBReturnCode.UNMATCH;
+        confidenceCode = null;
+        matchGrade = null;
+        hitBlackCache = true;
+    }
+
     @MetricFieldGroup
     public NameLocation getInputNameLocation() {
         return inputNameLocation;

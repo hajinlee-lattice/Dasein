@@ -10,6 +10,8 @@ import com.latticeengines.datacloud.match.entitymgr.DnBBlackCacheEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
 
 public interface DnBCacheService {
+    void addCache(DnBMatchContext context);
+
     // White Cache
     DnBWhiteCacheEntityMgr getWhiteCacheMgr();
 

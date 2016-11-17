@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
+import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
 import com.latticeengines.datacloud.match.entitymgr.DnBBlackCacheEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
@@ -43,6 +44,15 @@ public class DnBCacheServiceImpl implements DnBCacheService {
 
     @Autowired
     private FabricDataService dataService;
+
+    public void addCache(DnBMatchContext context) {
+        if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
+            addWhiteCache(context);
+        }
+        if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
+            addBlackCache(context);
+        }
+    }
 
     /*********************************
      * White Cache

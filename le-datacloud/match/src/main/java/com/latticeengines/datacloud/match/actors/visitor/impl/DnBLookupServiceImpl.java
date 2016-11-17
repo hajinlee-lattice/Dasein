@@ -16,10 +16,13 @@ import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
+import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
+import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 
 @Component("dnBLookupService")
@@ -35,6 +38,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
+    @Autowired
+    private DnBCacheService dnbCacheService;
+
     private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<String, String>();
     private final Queue<DnBMatchContext> unsubmittedReqs = new ConcurrentLinkedQueue<DnBMatchContext>();
     private final Queue<DnBBatchMatchContext> submittedReqs = new ConcurrentLinkedQueue<DnBBatchMatchContext>();
@@ -42,10 +48,23 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Override
     protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
-        DnBMatchContext matchContext = new DnBMatchContext();
-        matchContext.setLookupRequestId(lookupRequestId);
-        matchContext.setInputNameLocation(matchKeyTuple);
-        return dnbRealTimeLookupService.realtimeEntityLookup(matchContext);
+        DnBMatchContext context = new DnBMatchContext();
+        context.setLookupRequestId(lookupRequestId);
+        context.setInputNameLocation(matchKeyTuple);
+        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+        if (whiteCache != null) {
+            context.copyResultFromWhiteCache(whiteCache);
+            return context;
+        }
+        DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
+        if (blackCache != null) {
+            context.copyResultFromBlackCache(blackCache);
+            return context;
+        }
+        context = dnbRealTimeLookupService.realtimeEntityLookup(context);
+        dnbCacheService.addCache(context);
+        return context;
     }
 
     @Override
@@ -63,17 +82,31 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
-        DnBMatchContext matchContext = new DnBMatchContext();
-        matchContext.setLookupRequestId(lookupRequestId);
-        matchContext.setInputNameLocation(matchKeyTuple);
+        DnBMatchContext context = new DnBMatchContext();
+        context.setLookupRequestId(lookupRequestId);
+        context.setInputNameLocation(matchKeyTuple);
+        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+        if (whiteCache != null) {
+            context.copyResultFromWhiteCache(whiteCache);
+            sendResponse(lookupRequestId, context, returnAddress);
+            return;
+        }
+        DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
+        if (blackCache != null) {
+            context.copyResultFromBlackCache(blackCache);
+            sendResponse(lookupRequestId, context, returnAddress);
+            return;
+        }
+
         synchronized (reqReturnAddrs) {
             reqReturnAddrs.put(lookupRequestId, returnAddress);
         }
         synchronized (unsubmittedReqs) {
-            unsubmittedReqs.offer(matchContext);
+            unsubmittedReqs.offer(context);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Accepted request " + matchContext.getLookupRequestId());
+            log.debug("Accepted request " + context.getLookupRequestId());
         }
     }
 
@@ -165,6 +198,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
             if (!success) {
                 context.setDnbCode(batchContext.getDnbCode());
+            } else {
+                dnbCacheService.addCache(context);
             }
             sendResponse(lookupRequestId, context, reqReturnAddrs.get(lookupRequestId));
             synchronized (reqReturnAddrs) {
