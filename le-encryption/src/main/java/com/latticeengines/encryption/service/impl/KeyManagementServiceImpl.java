@@ -1,5 +1,6 @@
 package com.latticeengines.encryption.service.impl;
 
+import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
@@ -39,6 +40,10 @@ public class KeyManagementServiceImpl implements KeyManagementService {
     }
 
     public void createKey(CustomerSpace space) {
+        if (!EncryptionGlobalState.isEnabled()) {
+            return;
+        }
+
         log.info(String.format("Creating key for %s", space));
         if (keyPolicy == null || keyPolicy.equals(KeyPolicy.MASTER)) {
             return;
@@ -60,6 +65,10 @@ public class KeyManagementServiceImpl implements KeyManagementService {
 
     @Override
     public void deleteKey(CustomerSpace space) {
+        if (!EncryptionGlobalState.isEnabled()) {
+            return;
+        }
+
         if (keyPolicy == null || keyPolicy.equals(KeyPolicy.MASTER)) {
             return;
         }
