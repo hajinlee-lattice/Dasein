@@ -107,27 +107,30 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             DataCloudJobConfiguration jobConfiguration = generateJobConfiguration();
             jobConfiguration.setBlockSize(blockSize);
             jobConfiguration.setBlockOperationUid(blockOperationUid);
-            String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
-                    jobConfiguration.getBlockOperationUid()).toString();
-            jobConfiguration.setAvroPath(targetFile);
+            if (blocks.length == 1) {
+                jobConfiguration.setAvroPath(avroGlobs);
+            } else {
+                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
+                        jobConfiguration.getBlockOperationUid()).toString();
+                jobConfiguration.setAvroPath(targetFile);
+                List<GenericRecord> data = new ArrayList<>();
+                while (data.size() < blockSize && iterator.hasNext()) {
+                    data.add(iterator.next());
+                }
+                try {
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, data);
+                    log.info("Write a block of " + AvroUtils.count(yarnConfiguration, targetFile) + " rows to "
+                            + targetFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
                     .getApplicationId();
             jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]",
                     getConfiguration().getCustomerSpace().toString(), appId, blockIdx, blocks.length));
             configurations.add(jobConfiguration);
-
-            List<GenericRecord> data = new ArrayList<>();
-            while (data.size() < blockSize && iterator.hasNext()) {
-                data.add(iterator.next());
-            }
-            try {
-                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, data);
-                log.info("Write a block of " + AvroUtils.count(yarnConfiguration, targetFile) + " rows to "
-                        + targetFile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         return configurations;

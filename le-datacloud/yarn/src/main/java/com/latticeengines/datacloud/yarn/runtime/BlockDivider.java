@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.Schema;
-import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +29,7 @@ class BlockDivider {
         this.yarnConfiguration = yarnConfiguration;
         this.groupSize = groupSize;
         readSchema();
-        FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(avroPath));
-        iterator = reader.iterator();
+        iterator = AvroUtils.iterator(yarnConfiguration, avroPath);
     }
 
     List<String> getFields() {

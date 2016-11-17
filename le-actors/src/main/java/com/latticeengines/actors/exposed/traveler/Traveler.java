@@ -179,7 +179,7 @@ public abstract class Traveler {
         stopWatch.stop();
     }
 
-    private Long age() {
+    protected Long age() {
         stopWatch.split();
         Long age = stopWatch.getSplitTime();
         stopWatch.unsplit();

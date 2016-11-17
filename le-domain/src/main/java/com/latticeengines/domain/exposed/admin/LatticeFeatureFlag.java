@@ -16,7 +16,6 @@ public enum LatticeFeatureFlag {
     USE_MARKETO_SETTINGS("UseMarketoSettings", "Use Marketo settings"), //
     USE_ELOQUA_SETTINGS("UseEloquaSettings", "Use Eloqua settings"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
-    USE_ACCOUNT_MASTER("UseAccountMaster", "Use Account Master"), //
     ENABLE_CAMPAIGN_UI("EnableCampaignUI", "Enable Campaign UI"), //
     USE_DNB_RTS_AND_MODELING("UseDnbRtsAndModeling", "User DNB RTS and Modeling"), //
     ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE("EnableLatticeMarketoCredentialPage",

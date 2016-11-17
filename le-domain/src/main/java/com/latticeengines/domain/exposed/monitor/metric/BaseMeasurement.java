@@ -21,4 +21,8 @@ public abstract class BaseMeasurement<F extends Fact, D extends Dimension> imple
     public Collection<MetricStore> getMetricStores() {
         return Collections.<MetricStore> singleton(MetricStoreImpl.INFLUX_DB);
     }
+
+    public Collection<String> excludeSystemTags() {
+        return Collections.emptySet();
+    }
 }

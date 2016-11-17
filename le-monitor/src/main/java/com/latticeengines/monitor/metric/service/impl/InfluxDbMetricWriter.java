@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -128,13 +129,15 @@ public class InfluxDbMetricWriter implements MetricWriter {
             if (needToWrite) {
                 try {
                     final BatchPoints batchPoints = generateBatchPoints(db, measurements, fieldMaps);
-                    monitorExecutor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            getInfluxDB().write(batchPoints);
-                            log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
-                        }
-                    });
+                    if (batchPoints != null) {
+                        monitorExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                getInfluxDB().write(batchPoints);
+                                log.debug("Write " + batchPoints.getPoints().size() + " points to influxDB.");
+                            }
+                        });
+                    }
                 } catch (Exception e) {
                     log.error("Failed to write metric.", e);
                 }
@@ -164,10 +167,19 @@ public class InfluxDbMetricWriter implements MetricWriter {
 
     private <F extends Fact, D extends Dimension> BatchPoints generateBatchPoints(MetricDB db,
             List<? extends Measurement<F, D>> measurements, List<Map<String, Object>> fieldMaps) {
+        if (measurements == null || measurements.isEmpty()) {
+            return null;
+        }
+
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
-        builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
-        builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
-        if (StringUtils.isNotEmpty(stack)) {
+        Collection<String> excludedSystemTags = measurements.get(0).excludeSystemTags();
+        if (!excludedSystemTags.contains(MetricUtils.TAG_HOST)) {
+            builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
+        }
+        if (!excludedSystemTags.contains(MetricUtils.TAG_ENVIRONMENT)) {
+            builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
+        }
+        if (StringUtils.isNotEmpty(stack) && !excludedSystemTags.contains(MetricUtils.TAG_STACK)) {
             builder.tag(MetricUtils.TAG_STACK, stack);
         }
         RetentionPolicy policy = RetentionPolicyImpl.DEFAULT;

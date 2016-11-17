@@ -119,7 +119,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.USE_MARKETO_SETTINGS, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.USE_ELOQUA_SETTINGS, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_PIVOT_FILE, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_ACCOUNT_MASTER, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);

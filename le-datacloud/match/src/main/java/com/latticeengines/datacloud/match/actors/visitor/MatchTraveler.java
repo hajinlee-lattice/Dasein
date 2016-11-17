@@ -16,6 +16,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private String dataCloudVersion;
     private String decisionGraph;
     private String lastStop;
+    private Double totalTravelTime;
 
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
@@ -99,6 +100,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setLastStop(String lastStop) {
         this.lastStop = lastStop;
+    }
+
+    @MetricField(name = "TravelTime", fieldType = MetricField.FieldType.DOUBLE)
+    public Double getTotalTravelTime() {
+        return totalTravelTime;
+    }
+
+    public void recordTotalTime() {
+        this.totalTravelTime = age().doubleValue();
     }
 
     @Override

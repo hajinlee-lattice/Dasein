@@ -12,4 +12,5 @@ public interface Measurement<F extends Fact, D extends Dimension> {
 
     Collection<MetricStore> getMetricStores();
 
+    Collection<String> excludeSystemTags();
 }
