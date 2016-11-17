@@ -248,6 +248,17 @@ angular
                 if (jobStatus.jobStatus == "Running") {
                     $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
                     $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
+
+                    if ($scope.jobStepsCompletedStates["score_training_set"]) {
+                        $scope.jobStepsCompletedStates['generate_insights'] = true;
+                        $scope.jobStepsCompletedStates['create_global_target_market'] = true;
+
+                        $scope.jobStepsRunningStates['generate_insights'] = false;
+                        $scope.jobStepsRunningStates['create_global_target_market'] = false;
+
+                        $scope.jobStepsRunningStates['score_training_set'] = true;
+                        $scope.jobStepsCompletedStates['score_training_set'] = false;
+                    }
                 }
                 
                 if ($scope.jobType.toLowerCase() == "importmatchandscoreworkflow" || $scope.jobType.toLowerCase() == "importandrtsbulkscoreworkflow"
@@ -259,6 +270,9 @@ angular
                 $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                 var stepFailed = jobStatus.stepFailed;
+                if ((stepFailed == "generate_insights" || stepFailed == "create_global_target_market") && $scope.jobStepsCompletedStates["score_training_set"]) {
+                    stepFailed = "score_training_set";
+                }
                 if (stepFailed) {
                     $scope.jobStepsRunningStates[stepFailed] = false;
                     $scope.jobStepsCompletedStates[stepFailed] = false;
