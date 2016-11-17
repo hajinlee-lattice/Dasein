@@ -70,8 +70,20 @@
       },
       "ColumnTransformFilePath": "imputationstep.py"
     },
-    "FeatureSelectionStep": {
+    "HighNumberUniqueValuesRemovalStep": {
       "KeyWhenSortingByAscending": "6",
+      "Name": "highnumberuniquevaluesremovalstep",
+      "MainClassName": "HighNumberUniqueValuesRemovalStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "maxNumberUniqueValues": 200,
+        "categoricalColumns": "categoricalColumns"
+      },
+      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
+    },
+    "FeatureSelectionStep": {
+      "KeyWhenSortingByAscending": "7",
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -84,7 +96,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": "7",
+      "KeyWhenSortingByAscending": "8",
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",
