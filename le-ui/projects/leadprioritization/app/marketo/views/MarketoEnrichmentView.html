@@ -133,7 +133,7 @@
                             <li class="box" 
                                 ng-repeat="enrichment in (filteredList = (vm.enrichments
                                 | orderBy: 'FieldName'
-                                | filter: { 'IsSelected': true })) 
+                                | filter: { 'IsSelected': true, IsInternal: false})) 
                                 | startFrom: (vm.current - 1) * vm.pagesize 
                                 | limitTo: vm.pagesize" 
                                 ng-class="{'active': enrichment.IsSelected}">
