@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.actors.visitor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +40,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
             DataSourceLookupService dataSourceLookupService = getDataSourceLookupService();
 
             if (shouldDoAsyncLookup()) {
-                String lookupId = UUID.randomUUID().toString();
+                String lookupId = request.getMatchTravelerContext().getTravelerId();
                 requestMap.put(lookupId, request);
                 if (log.isDebugEnabled()) {
                     log.debug(self() + " received an async request from " + sender());
