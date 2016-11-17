@@ -125,7 +125,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
-                .dataCloudVersion(getDataCloudVersion()).matchColumnSelection(Predefined.getDefaultSelection(), null)
+                .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
+                .matchColumnSelection(Predefined.getDefaultSelection(), null)
                 .moduleName(modelSummary.getModuleName()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
@@ -139,10 +140,10 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         return builder.build();
     }
 
-    private String getDataCloudVersion() {
+    private String getDataCloudVersion(String dataCloudVersion) {
         if (useDnBFlagFromZK()) {
             // retrieve latest version from matchapi
-            return columnMetadataProxy.latestVersion(null).getVersion();
+            return columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
         }
         return null;
     }
