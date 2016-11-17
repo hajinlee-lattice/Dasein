@@ -110,6 +110,8 @@ public class CustomQuartzJob extends QuartzJobBean {
             if (triggeredJobInfo != null) {
                 jobHandle = triggeredJobInfo.getJobHandle();
                 executionHost = triggeredJobInfo.getExecutionHost();
+            } else {
+                log.error("Triggered job info is null!");
             }
             jobHistory.setTriggeredJobHandle(jobHandle);
             jobHistory.setExecutionHost(executionHost);
@@ -124,6 +126,8 @@ public class CustomQuartzJob extends QuartzJobBean {
                 if (triggeredJobInfo != null) {
                     jobHandle = triggeredJobInfo.getJobHandle();
                     executionHost = triggeredJobInfo.getExecutionHost();
+                } else {
+                    log.error("Triggered job info is null!");
                 }
                 jobHistory.setTriggeredJobHandle(jobHandle);
                 jobHistory.setExecutionHost(executionHost);

@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +53,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
         QuartzJobBean jobBean = (QuartzJobBean) appCtx.getBean(predefinedJobType);
         if (jobBean == null) {
             log.error("Can not find the bean related to the predefined job type!");
-            return null;
+            throw new LedpException(LedpCode.LEDP_30001, new String[]{predefinedJobType});
         } else {
             return runJobInternal(jobArgs, jobBean.getCallable(jobArgs.getJobArguments()));
         }
@@ -164,6 +167,7 @@ public class QuartzJobServiceImpl implements QuartzJobService {
             hostName = InetAddress.getLocalHost().getHostName();
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw new LedpException(LedpCode.LEDP_30002, e);
         }
         return hostName;
     }

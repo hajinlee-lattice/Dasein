@@ -295,23 +295,22 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
         JobKey jobKey = new JobKey("jobHistoryCleanupJob", BACKGROUND_JOB_GROUP);
         try {
             if (scheduler.checkExists(jobKey)) {
-                log.info("Job history clean up job already exists");
-                return;
-            } else {
-                JobDetail jobDetail = JobBuilder
-                        .newJob(com.latticeengines.quartz.service.JobHistoryCleanupJob.class)
-                        .withIdentity(jobKey)
-                        .build();
-                jobDetail.getJobDataMap().put(JobHistoryCleanupJob.RETAININGDAYS, jobHistoryRetainingDays);
-                CronTrigger trigger = TriggerBuilder
-                        .newTrigger()
-                        .withIdentity("jobHistoryCleanupJob" + TRIGGER_SUFFIX, BACKGROUND_JOB_GROUP)
-                        .withSchedule(CronScheduleBuilder
-                                .cronSchedule(jobHistoryCleanupJobCronTrigger)
-                                .withMisfireHandlingInstructionDoNothing())
-                        .build();
-                scheduler.scheduleJob(jobDetail, trigger);
+                scheduler.deleteJob(jobKey);
+                log.info("Job history clean up job already exists, delete the job and add again.");
             }
+            JobDetail jobDetail = JobBuilder
+                    .newJob(com.latticeengines.quartz.service.JobHistoryCleanupJob.class)
+                    .withIdentity(jobKey)
+                    .build();
+            jobDetail.getJobDataMap().put(JobHistoryCleanupJob.RETAININGDAYS, jobHistoryRetainingDays);
+            CronTrigger trigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity("jobHistoryCleanupJob" + TRIGGER_SUFFIX, BACKGROUND_JOB_GROUP)
+                    .withSchedule(CronScheduleBuilder
+                            .cronSchedule(jobHistoryCleanupJobCronTrigger)
+                            .withMisfireHandlingInstructionDoNothing())
+                    .build();
+            scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             log.error(e.getMessage());
         }
