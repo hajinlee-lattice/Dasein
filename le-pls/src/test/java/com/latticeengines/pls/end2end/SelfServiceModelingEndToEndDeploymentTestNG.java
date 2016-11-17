@@ -116,8 +116,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         if (enableDnBFeatureFlag
                 && !BooleanUtils.toBoolean(System.getenv("DNB_RTS_AND_MODELING_DISABLED"))) {
-            featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(),
-                    new Boolean(true));
+            featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), true);
         }
         log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);

@@ -47,6 +47,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
@@ -119,6 +120,9 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Autowired
     private MatchActorSystem matchActorSystem;
 
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
+
     private ColumnMetadataService columnMetadataService;
 
     @Autowired
@@ -137,13 +141,18 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Value("${datacloud.yarn.num.travelers}")
     private int numTravelers;
 
+    @Value("${datacloud.match.fuzzymatch.decision.graph}")
+    private String fuzzyMatchGraph;
+
+    @Value("${datacloud.match.default.decision.graph}")
+    private String defaultGraph;
+
     @Autowired
     private MatchProxy matchProxy;
 
     private BlockDivider divider;
     private Tenant tenant;
     private Predefined predefinedSelection;
-    private String predefinedSelectionVersion;
     private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
@@ -162,6 +171,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
     private boolean useProxy = false;
+    private String decisionGraph;
 
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
@@ -200,8 +210,18 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             tenant = new Tenant(space.toString());
 
             predefinedSelection = jobConfiguration.getPredefinedSelection();
-            predefinedSelectionVersion = "1.0";
             customizedSelection = jobConfiguration.getCustomizedSelection();
+
+            decisionGraph = jobConfiguration.getDecisionGraph();
+            if (StringUtils.isEmpty(decisionGraph)) {
+                if (zkConfigurationService.fuzzyMatchEnabled(space)) {
+                    decisionGraph = fuzzyMatchGraph;
+                } else {
+                    decisionGraph = defaultGraph;
+                }
+            }
+            log.info("Use decision graph " + decisionGraph);
+
 
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
@@ -250,7 +270,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             Set<Future<MatchContext>> futures = new HashSet<>();
             this.matchInput = null;
             while (divider.hasNextGroup()) {
-                if (futures.size() < numTravelers) {
+                if (futures.size() < numThreads) {
                     // create new input object for each record
                     MatchInput input = constructMatchInputFromData(divider.nextGroup());
                     // cache an input to generate output metric
@@ -266,7 +286,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                     }
                     futures.add(future);
                 }
-                if (futures.size() >= numTravelers) {
+                if (futures.size() >= numThreads) {
                     consumeFutures(futures);
                 }
             }
@@ -343,6 +363,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         matchInput.setFields(divider.getFields());
         matchInput.setKeyMap(keyMap);
         matchInput.setData(data);
+        matchInput.setDecisionGraph(decisionGraph);
         matchInput.setExcludeUnmatchedWithPublicDomain(excludeUnmatchedWithPublicDomain);
         matchInput.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
         matchInput.setDataCloudVersion(dataCloudVersion);

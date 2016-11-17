@@ -1,7 +1,9 @@
 package com.latticeengines.serviceflows.dataflow;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -21,58 +23,54 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
     public Node construct(ParseMatchResultParameters parameters) {
         sourceCols = parameters.sourceColumns;
         Node source = addSource(parameters.sourceTableName);
-        FieldList[] fields = sourceFields(source);
-        if (fields == null) {
-            return source;
-        } else {
-            FieldList retainFields = retainFields(source);
+
+        List<String> conflictingFields = findConflictingFields(source);
+
+        if (!conflictingFields.isEmpty()) {
+            FieldList retainFields = retainFields(source, conflictingFields);
             source = source.retain(retainFields);
-            return source.rename(fields[0], fields[1]);
+            FieldList[] renameFieldLists = renameFields(conflictingFields);
+            source = source.rename(renameFieldLists[0], renameFieldLists[1]);
         }
+
+        return source;
     }
 
-    private FieldList[] sourceFields(Node source) {
-        List<FieldMetadata> fms = source.getSchema();
-        List<FieldMetadata> sourceFields = new ArrayList<>();
+    private List<String> findConflictingFields(Node node) {
+        List<FieldMetadata> fms = node.getSchema();
+        Set<String> fieldsInAvro = new HashSet<>();
         for (FieldMetadata fm : fms) {
-            if (fm.getFieldName().startsWith(SOURCE_PREFIX)
-                    && sourceCols.contains(fm.getFieldName().substring(SOURCE_PREFIX.length()))) {
-                sourceFields.add(fm);
-            }
+            fieldsInAvro.add(fm.getFieldName());
         }
 
-        String[] originalFields = new String[sourceFields.size()];
-        String[] newFields = new String[sourceFields.size()];
-
-        for (int i = 0; i < sourceFields.size(); i++) {
-            String fieldName = sourceFields.get(i).getFieldName();
-            String newFieldName = fieldName.substring(SOURCE_PREFIX.length());
-            if (sourceCols.contains(newFieldName)) {
-                originalFields[i] = fieldName;
-                newFields[i] = fieldName.substring(SOURCE_PREFIX.length());
-                // Don't remove the Source prefix if there's a name collision.
-                if (source.getFieldNames().contains(newFields[i])) {
-                    newFields[i] = fieldName;
-                }
+        List<String> conflictingFields = new ArrayList<>();
+        for (String sourceCol: sourceCols) {
+            if (fieldsInAvro.contains(sourceCol) && fieldsInAvro.contains(SOURCE_PREFIX + sourceCol)) {
+                conflictingFields.add(sourceCol);
             }
         }
-        if (originalFields.length > 0) {
-            return new FieldList[]{new FieldList(originalFields), new FieldList(newFields)};
-        } else {
-            return null;
-        }
+        return  conflictingFields;
     }
 
-    private FieldList retainFields(Node source) {
-        List<FieldMetadata> fms = source.getSchema();
+    private FieldList retainFields(Node node, List<String> conflictingFields) {
+        List<FieldMetadata> fms = node.getSchema();
         List<String> retainFieldNames = new ArrayList<>();
         for (FieldMetadata fm : fms) {
-            if (!fm.getFieldName().startsWith(SOURCE_PREFIX)
-                    || sourceCols.contains(fm.getFieldName().substring(SOURCE_PREFIX.length()))) {
+            if (!conflictingFields.contains(fm.getFieldName())) {
                 retainFieldNames.add(fm.getFieldName());
             }
         }
         return new FieldList(retainFieldNames.toArray(new String[retainFieldNames.size()]));
+    }
+
+    private FieldList[] renameFields(List<String> conflictingFields) {
+        FieldList fieldsWithOutPrefix = new FieldList(conflictingFields.toArray(new String[conflictingFields.size()]));
+        String[] namesWithPrefix = new String [conflictingFields.size()];
+        for (int i = 0; i < conflictingFields.size(); i++) {
+            namesWithPrefix[i] = SOURCE_PREFIX + conflictingFields.get(i);
+        }
+        FieldList fieldsWithPrefix = new FieldList(namesWithPrefix);
+        return new FieldList[]{ fieldsWithPrefix, fieldsWithOutPrefix };
     }
 
 }

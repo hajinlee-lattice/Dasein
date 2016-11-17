@@ -10,8 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -33,46 +32,38 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private AccountLookupService accountLookupService;
 
-    private ExecutorService executor;
-
-    @Value("${datacloud.match.dynamo.fetchers.num:16}")
+    @Value("${datacloud.match.dynamo.fetchers.num}")
     private Integer fetcherNum;
 
-    @Value("${datacloud.match.num.dynamo.fetchers.batch.num:4}")
+    @Value("${datacloud.match.num.dynamo.fetchers.batch.num}")
     private Integer batchFetcherNum;
 
-    @Value("${datacloud.match.dynamo.fetchers.size:25}")
-    private Integer fetcherSize;
+    @Value("${datacloud.match.dynamo.fetchers.chunk.size}")
+    private Integer chunkSize;
 
-    private boolean fetchersInitiated = false;
+    private final AtomicBoolean fetchersInitiated = new AtomicBoolean(false);
 
-    private boolean enableFetchers = false;
+    private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, DataSourceLookupRequest> reqs = new ConcurrentHashMap<>();
+    private final Queue<String> pendingReqIds = new ConcurrentLinkedQueue<>();
 
-    private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<String, String>();
-    private final ConcurrentMap<String, DataSourceLookupRequest> reqs = new ConcurrentHashMap<String, DataSourceLookupRequest>();
-    private final Queue<String> pendingReqIds = new ConcurrentLinkedQueue<String>();
+    private void initExecutors() {
+        synchronized (fetchersInitiated) {
+            if (fetchersInitiated.get()) {
+                // do nothing if fetcher executors are already started
+                return;
+            }
 
-    @PostConstruct
-    private void postConstruct() {
-        initExecutors();
-    }
+            log.info("Initialize dynamo fetcher executors.");
+            Integer num = isBatchMode() ? batchFetcherNum : fetcherNum;
+            ExecutorService executor = Executors.newFixedThreadPool(num);
 
-    public void initExecutors() {
-        if (fetchersInitiated) {
-            // do nothing if fetcher executors are already started
-            return;
+            for (int i = 0; i < num; i++) {
+                executor.submit(new Fetcher());
+            }
+
+            fetchersInitiated.set(true);
         }
-
-        log.info("Initialize dynamo fetcher executors.");
-        Integer num = isBatchMode() ? batchFetcherNum : fetcherNum;
-        executor = Executors.newFixedThreadPool(num);
-
-        for (int i = 0; i < num; i++) {
-            executor.submit(new Fetcher());
-        }
-
-        fetchersInitiated = true;
-        enableFetchers = true;
     }
 
 
@@ -122,22 +113,26 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             return;
         }
 
-        if (!enableFetchers) {
-            if (log.isDebugEnabled()) {
-                log.debug("Fetcher is not enabled. Skip bucketing.");
-            }
-            String result = lookupFromService(lookupRequestId, request);
-            sendResponse(lookupRequestId, result, returnAddress);
-            return;
+//        if (isBatchMode()) {
+//            if (log.isDebugEnabled()) {
+//                log.debug("In batch mode, skip bucketing.");
+//            }
+//            String result = lookupFromService(lookupRequestId, request);
+//            sendResponse(lookupRequestId, result, returnAddress);
+//            return;
+//        }
+
+        if (!fetchersInitiated.get()) {
+            initExecutors();
         }
 
         reqReturnAddrs.put(lookupRequestId, returnAddress);
         reqs.put(lookupRequestId, request);
         pendingReqIds.offer(lookupRequestId);
         synchronized (pendingReqIds) {
-            if (pendingReqIds.size() > 0 && pendingReqIds.size() <= fetcherSize) {
+            if (pendingReqIds.size() > 0 && pendingReqIds.size() <= chunkSize) {
                 pendingReqIds.notify();
-            } else if (pendingReqIds.size() > fetcherSize) {
+            } else if (pendingReqIds.size() > chunkSize) {
                 pendingReqIds.notifyAll();
             }
         }
@@ -157,7 +152,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                             log.error(e);
                         }
                     }
-                    for (int i = 0; i < Math.min(pendingReqIds.size(), fetcherSize); i++) {
+                    for (int i = 0; i < Math.min(pendingReqIds.size(), chunkSize); i++) {
                         String lookupRequestId = pendingReqIds.poll();
                         DataSourceLookupRequest req = reqs.get(lookupRequestId);
                         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) req.getInputData();

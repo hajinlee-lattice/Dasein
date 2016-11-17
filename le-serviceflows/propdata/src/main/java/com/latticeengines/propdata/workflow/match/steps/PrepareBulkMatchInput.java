@@ -144,6 +144,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
+        jobConfiguration.setDecisionGraph(getConfiguration().getDecisionGraph());
         jobConfiguration.setExcludeUnmatchedPublicDomain(getConfiguration().getExcludeUnmatchedPublicDomain());
         jobConfiguration.setPublicDomainAsNormalDomain(getConfiguration().getPublicDomainAsNormalDomain());
         if (Boolean.TRUE.equals(getConfiguration().getUseRealTimeProxy())) {

@@ -13,9 +13,11 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -23,6 +25,7 @@ import com.latticeengines.datacloud.match.service.CountryCodeService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -47,12 +50,35 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private CountryCodeService countryCodeService;
 
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
+
+    @Value("${datacloud.match.fuzzymatch.decision.graph}")
+    private String fuzzyMatchGraph;
+
+    @Value("${datacloud.match.default.decision.graph}")
+    private String defaultGraph;
+
     void assignAndValidateColumnSelectionVersion(MatchInput input) {
         if (input.getPredefinedSelection() != null) {
             ColumnSelectionService columnSelectionService = beanDispatcher
                     .getColumnSelectionService(input.getDataCloudVersion());
             input.setPredefinedVersion(validateOrAssignPredefinedVersion(columnSelectionService,
                     input.getPredefinedSelection(), input.getPredefinedVersion()));
+        }
+    }
+
+    void setDecisionGraph(MatchInput input) {
+        String decisionGraph = input.getDecisionGraph();
+        if (StringUtils.isEmpty(decisionGraph)) {
+            CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
+            if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
+                decisionGraph = fuzzyMatchGraph;
+            } else {
+                decisionGraph = defaultGraph;
+            }
+            input.setDecisionGraph(decisionGraph);
+            log.info("Did not specify decision graph, use the default one: " + decisionGraph);
         }
     }
 

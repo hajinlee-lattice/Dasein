@@ -43,6 +43,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String appName;
     @JsonProperty("yarn_queue")
     private String yarnQueue;
+    @JsonProperty("decision_graph")
+    private String decisionGraph;
     @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
     @JsonProperty("realtime_proxy_url")
@@ -209,6 +211,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
+    }
+
+    public String getDecisionGraph() {
+        return decisionGraph;
+    }
+
+    public void setDecisionGraph(String decisionGraph) {
+        this.decisionGraph = decisionGraph;
     }
 
     public String getRealTimeProxyUrl() {

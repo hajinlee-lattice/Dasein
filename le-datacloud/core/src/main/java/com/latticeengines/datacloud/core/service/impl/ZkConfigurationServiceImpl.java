@@ -5,6 +5,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -79,6 +83,17 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             return connections;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+
+    public boolean fuzzyMatchEnabled(CustomerSpace customerSpace) {
+        try {
+            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
+            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.name()) && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.name())));
+        } catch (Exception e) {
+            log.error("Error when retrieving feature flags for " +  customerSpace, e);
+            return false;
         }
     }
 

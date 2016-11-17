@@ -61,6 +61,7 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     private String yarnQueue;
 
     private String dataCloudVersion;
+    private String decisionGraph;
 
     private Boolean useRealTimeProxy;
     private String realTimeProxyUrl;
@@ -237,6 +238,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @JsonProperty("yarn_queue")
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
+    }
+
+    @JsonProperty("decision_graph")
+    public String getDecisionGraph() {
+        return decisionGraph;
+    }
+
+    @JsonProperty("decision_graph")
+    public void setDecisionGraph(String decisionGraph) {
+        this.decisionGraph = decisionGraph;
     }
 
     @JsonProperty("use_real_time_proxy")
