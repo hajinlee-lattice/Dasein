@@ -59,7 +59,6 @@ angular
             };
 
             $scope.$on("updateAsCancelledJob", function(event, args){
-                JobsService.cancelJob(args);
                 $scope.cancelClicked = true;
                 if(job.id === args) {
                     job.cancelling = true;
