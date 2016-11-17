@@ -82,6 +82,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
                 matchRecord.setLatticeAccountId(result);
+                traveler.setBatchMode(actorSystem.isBatchMode());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
                 if (traveler.getDnBMatchContexts() != null) {
                     for (DnBMatchContext dnBMatchContext : traveler.getDnBMatchContexts()) {

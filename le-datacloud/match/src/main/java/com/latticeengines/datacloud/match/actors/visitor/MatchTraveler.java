@@ -16,12 +16,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private String dataCloudVersion;
     private String decisionGraph;
     private String lastStop;
-    private Double totalTravelTime;
 
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
     private Boolean isMatched = false;
     private Boolean isProcessed = false;
+
+    // only for metric purpose
+    private Double totalTravelTime;
+    private Boolean isBatchMode = false;
 
     public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
         super(rootOperationUid);
@@ -109,6 +112,15 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void recordTotalTime() {
         this.totalTravelTime = age().doubleValue();
+    }
+
+    @MetricTag(tag = "Mode")
+    public String getMode() {
+        return isBatchMode ? "Batch" : "RealTime";
+    }
+
+    public void setBatchMode(Boolean batchMode) {
+        isBatchMode = batchMode;
     }
 
     @Override
