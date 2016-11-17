@@ -85,7 +85,10 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             AccountLookupRequest accountLookupRequest = new AccountLookupRequest(
                     request.getMatchTravelerContext().getDataCloudVersion());
             accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
+            Long startTime = System.currentTimeMillis();
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
+            log.info(String.format("Fetched results from Dynamo for 1 sync requests (DataCloudVersion=%s) Duration=%d",
+                    request.getMatchTravelerContext().getDataCloudVersion(), System.currentTimeMillis() - startTime));
             if (StringUtils.isNotEmpty(result)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
@@ -151,8 +154,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                         try {
                             pendingReqIds.wait();
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            log.error(e);
                         }
                     }
                     for (int i = 0; i < Math.min(pendingReqIds.size(), fetcherSize); i++) {
@@ -172,13 +174,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                     }
                 }
                 for (String dataCloudVersion : lookupReqWithVersion.keySet()) {
+                    Long startTime = System.currentTimeMillis();
                     List<String> results = accountLookupService
                             .batchLookupIds(lookupReqWithVersion.get(dataCloudVersion));
                     List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Fetched results from Dynamo for " + reqIds.size() + " requests (DataCloudVersion="
-                                + dataCloudVersion + ")");
-                    }
+                    log.info(String.format(
+                            "Fetched results from Dynamo for %d async requests (DataCloudVersion=%s) Duration=%d",
+                            reqIds.size(), dataCloudVersion, System.currentTimeMillis() - startTime));
                     if (results.size() != reqIds.size()) {
                         log.error("Dynamo lookup failed to return complete matching results");
                     }

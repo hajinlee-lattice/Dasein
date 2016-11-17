@@ -94,7 +94,9 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
         for (int i = 0; i < retries; i++) {
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
             if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
-                log.debug("Fetched result from DnB bulk match api. Status=" + batchContext.getDnbCode());
+                if (log.isDebugEnabled()) {
+                    log.debug("Fetched result from DnB bulk match api. Status=" + batchContext.getDnbCode());
+                }
                 if (batchContext.getDnbCode() == DnBReturnCode.OK) {
                     log.info("Successfully fetched results from dnb. Size= " + batchContext.getContexts().size()
                             + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
