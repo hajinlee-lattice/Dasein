@@ -23,13 +23,13 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
     DataSetEntityMgr dataSetEntityMgr;
     
     @Override
-    public String createDataSetFromLP2Tenant(String tenantId, String modelID, SchemaInterpretation schemaInterpretation){
-        return createDataSetFromLPTenant(tenantId, modelID, schemaInterpretation, "2.0");
+    public String createDataSetFromLP2Tenant(String tenantId, String modelID){
+        return createDataSetFromLPTenant(tenantId, modelID, "2.0");
     }
     
     @Override
-    public String createDataSetFromLPITenant(String tenantId, String modelID, SchemaInterpretation schemaInterpretation){
-        return createDataSetFromLPTenant(tenantId, modelID, schemaInterpretation, "3.0");
+    public String createDataSetFromLPITenant(String tenantId, String modelID){
+        return createDataSetFromLPTenant(tenantId, modelID, "3.0");
     }
     
     @Override
@@ -37,15 +37,26 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
         throw new NotImplementedException("Playmaker tenants are not yet supported");
     }
 
-    private String createDataSetFromLPTenant(String tenantId, String modelID, SchemaInterpretation schemaInterpretation,
-            String string) {
-        String trainingFileCsvPath = findTrainingFileCSVPath(tenantId, modelID);
+    private String createDataSetFromLPTenant(String tenantId, String modelID, String version) {
+
+        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelID,
+                CustomerSpace.parse(tenantId));
+        if(modelSummary == null){
+            throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelID});
+        }
+        String trainingFilePath = modelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TrainingFilePath, "");
         
-        if(trainingFileCsvPath == null || trainingFileCsvPath.isEmpty()){
+        if(trainingFilePath == null || trainingFilePath.isEmpty()){
             throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelID});
         }
         
-        DataSet dataset = dataSetEntityMgr.findByTenantAndTrainingSet(tenantId, trainingFileCsvPath);
+        if(modelSummary.getSourceSchemaInterpretation() == null || modelSummary.getSourceSchemaInterpretation().isEmpty()){
+            throw new LedpException(LedpCode.LEDP_35006, new String[] {tenantId, modelID});
+        }
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation());
+        
+        DataSet dataset = dataSetEntityMgr.findByTenantAndTrainingSet(tenantId, trainingFilePath);
         if(dataset != null){
             return dataset.getName();
         }
@@ -54,27 +65,13 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
         dataset.setName(tenantId+"_"+modelID);
         dataset.setDataSetType(DataSetType.FILE);
         dataset.setSchemaInterpretation(schemaInterpretation);
-        dataset.setTrainingSetHdfsPath(trainingFileCsvPath);
+        dataset.setTrainingSetHdfsPath(trainingFilePath);
         dataset.setIndustry("Unknown");
         Tenant tenant = new Tenant(tenantId);
-        tenant.setUiVersion("2.0");
+        tenant.setUiVersion(version);
         dataset.setTenant(tenant);
         
         dataSetEntityMgr.create(dataset);
         return dataset.getName();
     }
-
-    private String findTrainingFileCSVPath(String tenantId, String modelID) {
-        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelID,
-                CustomerSpace.parse(tenantId));
-        if(modelSummary == null){
-            return null;
-        }
-        
-        String trainingFilePath = modelSummary.getModelSummaryConfiguration()
-                .getString(ProvenancePropertyName.TrainingFilePath, "");
-        return trainingFilePath;
-    }
-
-
 }

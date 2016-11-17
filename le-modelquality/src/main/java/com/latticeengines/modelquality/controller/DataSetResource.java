@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.DataSetTenantType;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
 import com.latticeengines.modelquality.service.DataSetService;
 import com.latticeengines.network.exposed.modelquality.ModelQualityDataSetInterface;
@@ -62,26 +61,19 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     public String createDataSetFromTenant(@RequestParam("tenantId") String tenantName,
             @RequestParam("tenantType") DataSetTenantType tenantType,
             @RequestParam(value = "modelID", required = false) String modelID,
-            @RequestParam(value = "schemaInterpretation", required = false) SchemaInterpretation schemaInterpretation,
             @RequestParam(value = "playExternalID", required = false) String playExternalID) {
         switch(tenantType){
         case LP2:
             if(modelID == null || modelID.isEmpty()){
                 throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LP2"});
             }
-            if(schemaInterpretation == null){
-                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "SchemaInterpretation", "LP2"});
-            }
-            dataSetService.createDataSetFromLP2Tenant(tenantName, modelID, schemaInterpretation);
+            dataSetService.createDataSetFromLP2Tenant(tenantName, modelID);
             break;
         case LPI:
             if(modelID == null || modelID.isEmpty()){
                 throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LPI"});
             }
-            if(schemaInterpretation == null){
-                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "SchemaInterpretation", "LPI"});
-            }
-            dataSetService.createDataSetFromLPITenant(tenantName, modelID, schemaInterpretation);
+            dataSetService.createDataSetFromLPITenant(tenantName, modelID);
             break;
         case PLAYMAKER:
             if(playExternalID == null || playExternalID.isEmpty()){

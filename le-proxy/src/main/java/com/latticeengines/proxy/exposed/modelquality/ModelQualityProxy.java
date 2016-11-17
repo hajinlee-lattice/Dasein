@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAlgorithmInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticPipelineInterface;
 import com.latticeengines.network.exposed.modelquality.ModelQualityAnalyticTestInterface;
@@ -184,10 +183,10 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
 
     @Override
     public String createDataSetFromTenant(String tenantName, DataSetTenantType tenantType, String modelID,
-            SchemaInterpretation schemaInterpretation, String playExternalID) {
+            String playExternalID) {
         String url = constructUrl(
-                "/datasets/createFromTenant?tenantId={tenantId}&tenantType={tenantType}&modelID={modelID}&schemaInterpretation={schemaInterpretation}&playExternalID={playExternalID}",
-                tenantName, tenantType, modelID, schemaInterpretation, playExternalID);
+                "/datasets/createFromTenant?tenantId={tenantId}&tenantType={tenantType}&modelID={modelID}&playExternalID={playExternalID}",
+                tenantName, tenantType, modelID, playExternalID);
         return post("createDataSet", url, null, String.class);
     }
 

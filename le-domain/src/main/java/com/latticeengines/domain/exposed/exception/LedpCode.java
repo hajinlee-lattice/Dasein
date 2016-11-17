@@ -510,7 +510,8 @@ public enum LedpCode {
     LEDP_35002("{0} with name {1} already exists"), 
     LEDP_35003("{0} cannot be empty"),
     LEDP_35004("{0} cannot be empty for {1} type tenant"),
-    LEDP_35005("Training set not found in HDFS for Tenant: {0} and modelID: {1}");
+    LEDP_35005("Training set not found in HDFS for Tenant: {0} and modelID: {1}"),
+    LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}");
 
     private String message;
 
