@@ -45,6 +45,8 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private URL metadataUrl;
 
     private URL dataUrl;
+    
+    private URL avroDataUrl;
 
     @Autowired
     private JobService jobService;
@@ -61,6 +63,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
+        avroDataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.avro");
     }
 
     @Test(groups = "functional", dataProvider = "getPropertiesProvider")
@@ -76,7 +79,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
         fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(
-                new File(dataUrl.getPath()).getParentFile(), "file2") }));
+                new File(avroDataUrl.getPath()).getParentFile(), "file2") }));
         fileImportConfig.setProperties(properties);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);

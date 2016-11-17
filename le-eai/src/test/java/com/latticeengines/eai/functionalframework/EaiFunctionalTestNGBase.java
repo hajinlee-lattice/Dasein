@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.avro.Schema.Type;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
@@ -28,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,24 +53,17 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
-import com.latticeengines.domain.exposed.modeling.DataSchema;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -84,9 +77,6 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     @Autowired
     private YarnClient defaultYarnClient;
-
-    @Autowired
-    private SqoopMetadataService sqoopMetadataService;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -153,79 +143,11 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     }
 
     protected Table createFile(File destDir, String fileName) {
-        String url = String.format("jdbc:relique:csv:%s", destDir.getPath());
-        String driver = "org.relique.jdbc.csv.CsvDriver";
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
-        DbCreds creds = new DbCreds(builder);
-
-        // if Table contains duplicate column names or column with empty name,
-        // here it will throw exception
-        DataSchema schema = sqoopMetadataService.createDataSchema(creds, fileName);
-
-        Table file = new Table();
-        file.setName(fileName);
-        file.setInterpretation(SchemaInterpretation.SalesforceLead.name());
-        for (Field field : schema.getFields()) {
-            Attribute attr = new Attribute();
-            attr.setDisplayName(field.getColumnName());
-            attr.setNullable(true);
-            if (attr.getDisplayName().equals("LEAD")) {
-                attr.setName(InterfaceName.Id.name());
-                attr.setInterfaceName(InterfaceName.Id);
-                attr.setPhysicalDataType(Type.STRING.name());
-                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Id.name()));
-                attr.setNullable(false);
-            }
-            if (attr.getDisplayName().equals("Country")) {
-                attr.setName(InterfaceName.Country.name());
-                attr.setInterfaceName(InterfaceName.Country);
-                attr.setPhysicalDataType(Type.STRING.name());
-                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Email.name()));
-            }
-            if (attr.getDisplayName().equals("Company")) {
-                attr.setName(InterfaceName.CompanyName.name());
-                attr.setInterfaceName(InterfaceName.CompanyName);
-                attr.setPhysicalDataType(Type.STRING.name());
-            }
-            if (attr.getDisplayName().equals("Email")) {
-                attr.setName(InterfaceName.Email.name());
-                attr.setInterfaceName(InterfaceName.Email);
-                attr.setPhysicalDataType(Type.STRING.name());
-                attr.setNullable(false);
-            }
-            if (attr.getDisplayName().equals("City")) {
-                attr.setInterfaceName(InterfaceName.City);
-                attr.setName(InterfaceName.City.name());
-                attr.setPhysicalDataType(Type.STRING.name());
-                attr.addValidator(new RequiredIfOtherFieldIsEmpty(InterfaceName.Email.name()));
-            }
-            if (attr.getDisplayName().equals("DS CompanyName Length")) {
-                attr.setName("DS_CompanyName_Length");
-                attr.setPhysicalDataType(Type.INT.name());
-            }
-            if (attr.getDisplayName().equals("DS CompanyName Entropy")) {
-                attr.setName("DS_CompanyName_Entropy");
-                attr.setPhysicalDataType(Type.FLOAT.name());
-            }
-            if (attr.getDisplayName().equals("Last Modified Date")) {
-                attr.setInterfaceName(InterfaceName.LastModifiedDate);
-                attr.setName(InterfaceName.LastModifiedDate.name());
-                attr.setPhysicalDataType(Type.LONG.name());
-                attr.setLogicalDataType(LogicalDataType.Date);
-            }
-            if (attr.getDisplayName().equals("kickboxDisposable")) {
-                attr.setName("kickboxDisposable");
-                attr.setPhysicalDataType(Type.BOOLEAN.name());
-            }
-            if (attr.getDisplayName().equals("string column")) {
-                attr.setName("string_column");
-                attr.setPhysicalDataType(Type.STRING.name());
-            }
-            file.addAttribute(attr);
-        }
-
-        return file;
+        Configuration conf = new Configuration();
+        conf.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+        Table table = MetadataConverter.getTable(conf, destDir.getPath());
+        table.setName(fileName);
+        return table;
     }
 
     protected void verifyAllDataNotNullWithNumRows(Configuration config, Table table, int expectedNumRows)

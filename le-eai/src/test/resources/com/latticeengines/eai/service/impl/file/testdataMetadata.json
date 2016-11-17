@@ -41,6 +41,43 @@
       "ApprovedUsage": [
         "None"
       ],
+      "ColumnName": "InternalId",
+      "DataQuality": null,
+      "DataSource": [
+        "File"
+      ],
+      "DataType": "Long",
+      "Description": "",
+      "DisplayDiscretizationStrategy": null,
+      "DisplayName": "InternalId",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "NVarChar(255)"
+        },
+        {
+          "Key": "IsCustom",
+          "Value": "False"
+        }
+      ],
+      "FundamentalType": "Unknown",
+      "LastTimeSourceUpdated": [
+        {
+          "DateTime": "/Date(1355780243000)/",
+          "OffsetMinutes": 0
+        }
+      ],
+      "MostRecentUpdateDate": {
+        "DateTime": "/Date(-62135596800000)/",
+        "OffsetMinutes": 0
+      },
+      "StatisticalType": null,
+      "Tags": null
+    },
+    {
+      "ApprovedUsage": [
+        "None"
+      ],
       "ColumnName": "Country",
       "DataQuality": null,
       "DataSource": [
