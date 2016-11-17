@@ -79,12 +79,13 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
         fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(
-                new File(avroDataUrl.getPath()).getParentFile(), "file2") }));
+                new File(avroDataUrl.getPath()), "file2") }));
         fileImportConfig.setProperties(properties);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
 
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
+
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
 
         eaiMetadataService.updateTableSchema(tables, ctx);
