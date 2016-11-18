@@ -78,12 +78,17 @@ public class EmailTemplateBuilder {
         PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
         PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
         PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
-        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"),
-        SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html"), //
+        PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), SECURITY_GLOBALAUTH_EMAIL_TEMPLATE(
+                "security_globalauth_email_template.html"), //
         PLS_JOB_SUCCESS("pls_job_success.html"), //
-        PLS_JOB_ERROR("pls_job_error.html"),
-        PLS_JOB_SUCCESS_INTERNAL("pls_job_success_internal.html"),
-        PLS_JOB_ERROR_INTERNAL("pls_job_error_internal.html");
+        PLS_JOB_ERROR("pls_job_error.html"), PLS_JOB_SUCCESS_INTERNAL(
+                "pls_job_success_internal.html"), PLS_JOB_ERROR_INTERNAL(
+                        "pls_job_error_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS(
+                                "pls_internal_attribute_enrich_success.html"), //
+        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR(
+                "pls_internal_attribute_enrich_error.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL(
+                        "pls_internal_attribute_enrich_success_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL(
+                                "pls_internal_attribute_enrich_error_internal.html");
 
         private final static String templateRoot = "com/latticeengines/security/";
         private final String templateFile;

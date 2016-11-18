@@ -2,7 +2,9 @@ package com.latticeengines.serviceflows.workflow.scoring;
 
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -12,17 +14,22 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -36,13 +43,36 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
     @Autowired
     private MetadataProxy metadataProxy;
 
+    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
     @Override
     public void execute() {
 
         log.info("Inside RTS Bulk Score execute()");
         Map.Entry<RTSBulkScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
         RTSBulkScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(scoringConfig.getInternalResourceHostPort());
+
+        CustomerSpace customerSpace = scoringConfig.getCustomerSpace();
+
+        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+
+        List<String> internalAttributes = getSelectedInternalEnrichmentAttributes(customerSpace,
+                enrichmentEnabledForInternalAttributes);
         String appId = scoringProxy.submitBulkScoreJob(scoringConfig).getApplicationIds().get(0);
+
+        if (!internalAttributes.isEmpty()) {
+            executionContext.put(//
+                    WorkflowContextConstants.Outputs//
+                            .ENRICHMENT_FOR_INTERNAL_ATTRIBUTES_ATTEMPTED, //
+                    Boolean.TRUE);
+            executionContext.put(//
+                    WorkflowContextConstants.Outputs//
+                            .INTERNAL_ENRICHMENT_ATTRIBUTES_LIST, //
+                    JsonUtils.serialize(internalAttributes));
+        }
+
         waitForAppId(appId);
 
         saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
@@ -54,6 +84,23 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private List<String> getSelectedInternalEnrichmentAttributes(CustomerSpace customerSpace,
+            boolean enrichmentEnabledForInternalAttributes) {
+        List<LeadEnrichmentAttribute> leadEnrichmentAttributeList = internalResourceRestApiProxy
+                .getLeadEnrichmentAttributes(customerSpace, null, null, Boolean.TRUE,
+                        enrichmentEnabledForInternalAttributes);
+
+        List<String> internalAttributes = new ArrayList<>();
+
+        for (LeadEnrichmentAttribute attribute : leadEnrichmentAttributeList) {
+            if (attribute.getIsInternal()) {
+                internalAttributes.add(attribute.getFieldName());
+            }
+        }
+
+        return internalAttributes;
     }
 
     private Map.Entry<RTSBulkScoringConfiguration, String> buildScoringConfig() {

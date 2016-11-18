@@ -691,6 +691,47 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/enrichment/internal/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after enrichment of internal attributes")
+    public void sendPlsInternalEnrichmentEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
+            HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        String modelId = emailInfo.getModelId();
+        if (modelId != null && !modelId.isEmpty()) {
+            for (User user : users) {
+                if (user.getEmail().equals(emailInfo.getUserId())) {
+                    String tenantName = tenantService.findByTenantId(tenantId).getName();
+                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
+                    if (modelSummary != null) {
+                        String modelName = modelSummary.getDisplayName();
+                        if (result.equals("COMPLETED")) {
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl,
+                                        tenantName, modelName, true, emailInfo.getExtraInfoList());
+                            } else {
+                                emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl,
+                                        tenantName, modelName, false, emailInfo.getExtraInfoList());
+                            }
+                        } else {
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
+                                        modelName, true, emailInfo.getExtraInfoList());
+                            } else {
+                                emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
+                                        modelName, false, emailInfo.getExtraInfoList());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @RequestMapping(value = "/currentstack", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get current active stack")

@@ -1,6 +1,7 @@
 package com.latticeengines.monitor.exposed.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.mail.Multipart;
 
@@ -10,8 +11,7 @@ import com.latticeengines.domain.exposed.security.User;
 
 public interface EmailService {
 
-    void sendSimpleEmail(String subject, Object content, String contentType,
-            Collection<String> recipients);
+    void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients);
 
     void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients);
 
@@ -46,16 +46,24 @@ public interface EmailService {
 
     void sendPlsValidateMetadataErrorEmail(User user, String hostport);
 
-    void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
+    void sendPlsCreateModelCompletionEmail(User user, String hostport, String tenantName, String modelName,
+            boolean internal);
 
-    void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
+    void sendPlsCreateModelErrorEmail(User user, String hostport, String tenantName, String modelName,
+            boolean internal);
 
     void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
+
+    void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName, String modelName,
+            boolean internal, List<String> internalAttributes);
+
+    void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName, String modelName,
+            boolean internal, List<String> internalAttributes);
 
     void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
     void sendPlsOnetimeSfdcAccessTokenEmail(User user, String tenantId, String accessToken);
 
-    void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username,
-            String password, String emailAddress, EmailSettings settings);
+    void sendGlobalAuthForgetCredsEmail(String firstName, String lastName, String username, String password,
+            String emailAddress, EmailSettings settings);
 }

@@ -194,6 +194,16 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public void sendPlsEnrichInternalAttributeEmail(String result, String tenantId, AdditionalEmailInfo info) {
+        try {
+            String url = constructUrl("pls/internal/emails/enrichment/internal/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, info);
+        } catch (Exception e) {
+            throw new RuntimeException("sendScoreEmail: Remote call failure", e);
+        }
+    }
+
     public void createModelSummary(ModelSummary modelSummary, CustomerSpace customerSpace) {
         try {
             String url = constructUrl("pls/internal/modelsummaries", customerSpace.toString());

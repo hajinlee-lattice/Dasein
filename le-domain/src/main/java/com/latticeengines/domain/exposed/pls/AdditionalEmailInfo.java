@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AdditionalEmailInfo {
@@ -10,7 +13,13 @@ public class AdditionalEmailInfo {
     @JsonProperty("model_id")
     private String modelId;
 
-    public AdditionalEmailInfo(){
+    @JsonProperty("extra_info_list")
+    private List<String> extraInfoList;
+
+    @JsonProperty("extra_info_map")
+    private Map<String, String> extraInfoMap;
+
+    public AdditionalEmailInfo() {
 
     }
 
@@ -28,5 +37,21 @@ public class AdditionalEmailInfo {
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
+    }
+
+    public List<String> getExtraInfoList() {
+        return extraInfoList;
+    }
+
+    public void setExtraInfoList(List<String> extraInfoList) {
+        this.extraInfoList = extraInfoList;
+    }
+
+    public Map<String, String> getExtraInfoMap() {
+        return extraInfoMap;
+    }
+
+    public void setExtraInfoMap(Map<String, String> extraInfoMap) {
+        this.extraInfoMap = extraInfoMap;
     }
 }
