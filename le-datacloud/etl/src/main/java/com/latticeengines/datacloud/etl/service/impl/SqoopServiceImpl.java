@@ -2,20 +2,21 @@ package com.latticeengines.datacloud.etl.service.impl;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("sqlService")
 public class SqoopServiceImpl implements SqoopService {
 
     @Autowired
-    private SqoopJobService sqoopJobService;
+    private SqoopProxy sqoopProxy;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -24,14 +25,14 @@ public class SqoopServiceImpl implements SqoopService {
     public ApplicationId importTable(SqoopImporter importer) {
         importer.setYarnConfiguration(yarnConfiguration);
         importer.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        return sqoopJobService.importData(importer);
+        return ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
     }
 
     @Override
     public ApplicationId exportTable(SqoopExporter exporter) {
         exporter.setYarnConfiguration(yarnConfiguration);
         exporter.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        return sqoopJobService.exportData(exporter);
+        return ConverterUtils.toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
     }
 
 }

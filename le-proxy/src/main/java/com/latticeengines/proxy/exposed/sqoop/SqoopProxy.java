@@ -15,12 +15,12 @@ public class SqoopProxy extends BaseRestApiProxy {
         super(PropertyUtils.getProperty("common.sqoop.url"), "/sqoop/jobs");
     }
 
-    public AppSubmission importTable(SqoopImporter importer) {
+    public AppSubmission importData(SqoopImporter importer) {
         String url = constructUrl("/import");
         return post("import-table", url, importer, AppSubmission.class);
     }
 
-    public AppSubmission exportTable(SqoopExporter exporter) {
+    public AppSubmission exportData(SqoopExporter exporter) {
         String url = constructUrl("/export");
         return post("import-table", url, exporter, AppSubmission.class);
     }

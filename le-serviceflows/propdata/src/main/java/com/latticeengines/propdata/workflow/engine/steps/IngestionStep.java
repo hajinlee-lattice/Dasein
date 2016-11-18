@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
+import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
@@ -36,7 +37,6 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("ingestionStep")
@@ -53,7 +53,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private EaiProxy eaiProxy;
 
     @Autowired
-    private InternalProxy sqoopProxy;
+    private SqoopService sqoopService;
 
     private YarnClient yarnClient;
 
@@ -171,8 +171,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             otherOptions.add(sqlToTextConfig.getFieldTerminatedBy());
         }
         importer.setOtherOptions(otherOptions);
-        AppSubmission submission = sqoopProxy.importTable(importer);
-        ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
+        ApplicationId appId = sqoopService.importTable(importer);
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus != FinalApplicationStatus.SUCCEEDED) {

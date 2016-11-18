@@ -103,7 +103,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${tez.guava.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Spring Framework Dependencies -->

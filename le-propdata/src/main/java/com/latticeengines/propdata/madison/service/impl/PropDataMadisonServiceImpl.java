@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -33,6 +32,7 @@ import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("propDataMadisonService")
 public class PropDataMadisonServiceImpl implements PropDataMadisonService {
@@ -55,7 +55,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    protected SqoopService sqoopService;
+    protected SqoopJobService sqoopJobService;
 
     @Value("${propdata.madison.datasource.url}")
     private String sourceJdbcUrl;
@@ -161,7 +161,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     .setSync(false)
                     .build();
 
-            ApplicationId appId = sqoopService.importTable(importer);
+            ApplicationId appId = sqoopJobService.importData(importer);
             FinalApplicationStatus status =
                     YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
@@ -295,7 +295,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .setNumMappers(1)
                         .setSync(false)
                         .build();
-                ApplicationId appId = sqoopService.importTable(importer);
+                ApplicationId appId = sqoopJobService.importData(importer);
                 FinalApplicationStatus status =
                         YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
                 if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
@@ -417,7 +417,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .addExtraOption("--batch")
                 .build();
 
-        ApplicationId appId = sqoopService.exportTable(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter);
         FinalApplicationStatus status =
                 YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
@@ -487,7 +487,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .addExtraOption("--batch")
                 .build();
 
-        ApplicationId appId = sqoopService.exportTable(exporter);
+        ApplicationId appId = sqoopJobService.exportData(exporter);
         FinalApplicationStatus status =
                 YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {

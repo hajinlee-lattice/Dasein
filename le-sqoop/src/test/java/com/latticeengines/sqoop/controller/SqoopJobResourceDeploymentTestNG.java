@@ -108,7 +108,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setTable(sqlTable) //
                 .setSourceDir(AVRO_DIR) //
                 .setDbCreds(new DbCreds(credsBuilder)).build();
-        AppSubmission submission = sqoopProxy.exportTable(exporter);
+        AppSubmission submission = sqoopProxy.exportData(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, 600);
@@ -132,7 +132,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setSplitColumn("LE_Last_Upload_Date") //
                 .setDbCreds(new DbCreds(credsBuilder)) //
                 .build();
-        AppSubmission submission = sqoopProxy.importTable(impoter);
+        AppSubmission submission = sqoopProxy.importData(impoter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, 600);
@@ -156,7 +156,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .addExtraOption("--input-optionally-enclosed-by") //
                 .addExtraOption("\"") //
                 .build();
-        AppSubmission submission = sqoopProxy.exportTable(exporter);
+        AppSubmission submission = sqoopProxy.exportData(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, 600);
@@ -190,7 +190,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
         otherOptions.add("--fields-terminated-by");
         otherOptions.add(",");
         importer.setOtherOptions(otherOptions);
-        AppSubmission submission = sqoopProxy.importTable(importer);
+        AppSubmission submission = sqoopProxy.importData(importer);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, 600);

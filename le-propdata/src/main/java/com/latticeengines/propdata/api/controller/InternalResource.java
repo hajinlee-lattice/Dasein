@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.network.exposed.propdata.InternalInterface;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
@@ -29,7 +30,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class InternalResource extends InternalResourceBase implements InternalInterface {
 
     @Autowired
-    private SqoopService sqoopService;
+    private SqoopProxy sqoopProxy;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {
@@ -48,8 +49,8 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     public AppSubmission importTable(@RequestBody SqoopImporter importer, HttpServletRequest request) {
         checkHeader(request);
         importer.setSync(false);
-        ApplicationId applicationId = sqoopService.importTable(importer);
-        return new AppSubmission(Collections.singletonList(applicationId));
+        importer.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        return sqoopProxy.importData(importer);
     }
 
     @RequestMapping(value = "/sqoopexports", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -59,8 +60,8 @@ public class InternalResource extends InternalResourceBase implements InternalIn
     public AppSubmission exportTable(@RequestBody SqoopExporter exporter, HttpServletRequest request) {
         checkHeader(request);
         exporter.setSync(false);
-        ApplicationId applicationId = sqoopService.exportTable(exporter);
-        return new AppSubmission(Collections.singletonList(applicationId));
+        exporter.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        return sqoopProxy.exportData(exporter);
     }
 
 }

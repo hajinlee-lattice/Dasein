@@ -10,7 +10,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,7 +19,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
 import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
-import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
@@ -30,7 +29,6 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlC
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration.PublicationStrategy;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
-import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("publish")
@@ -47,7 +45,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
     private PublicationProgressService progressService;
 
     @Autowired
-    private InternalProxy internalProxy;
+    private SqoopService sqoopService;
 
     @Autowired
     private PublishConfigurationParser configurationParser;
@@ -109,8 +107,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         }
 
         SqoopExporter exporter = configurationParser.constructSqoopExporter(pubConfig, getConfiguration().getAvroDir());
-        AppSubmission appSub = internalProxy.exportTable(exporter);
-        ApplicationId appId = ConverterUtils.toApplicationId(appSub.getApplicationIds().get(0));
+        ApplicationId appId = sqoopService.exportTable(exporter);
         FinalApplicationStatus finalStatus = waitForApplicationToFinish(appId);
         if (FinalApplicationStatus.SUCCEEDED.equals(finalStatus)) {
             progress = progressService.update(progress).progress(0.95f).commit();
@@ -141,8 +138,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
         SqoopExporter exporter = configurationParser.constructSqoopExporter(sqlConfiguration,
                 getConfiguration().getAvroDir());
-        AppSubmission appSub = internalProxy.exportTable(exporter);
-        ApplicationId appId = ConverterUtils.toApplicationId(appSub.getApplicationIds().get(0));
+        ApplicationId appId = sqoopService.exportTable(exporter);
         FinalApplicationStatus finalStatus = waitForApplicationToFinish(appId);
         if (FinalApplicationStatus.SUCCEEDED.equals(finalStatus)) {
             progress = progressService.update(progress).progress(0.95f).commit();

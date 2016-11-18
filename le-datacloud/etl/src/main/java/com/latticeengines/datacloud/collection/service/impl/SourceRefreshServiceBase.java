@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -54,9 +53,6 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     @Autowired
     protected SqoopService sqoopService;
-
-    @Autowired
-    protected InternalProxy sqoopProxy;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
