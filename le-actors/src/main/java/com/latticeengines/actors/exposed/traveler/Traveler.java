@@ -15,6 +15,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 
+import com.latticeengines.domain.exposed.actors.VisitingHistory;
+
 public abstract class Traveler {
 
     private static final Log log = LogFactory.getLog(Traveler.class);
@@ -159,12 +161,13 @@ public abstract class Traveler {
         checkpoints.put(site, age());
     }
 
-    public void checkOut(String site, String nextSite) {
+    public VisitingHistory checkOut(String site, String nextSite) {
         if (checkpoints.containsKey(site)) {
             Long duration = age() - checkpoints.get(site);
             debug(String.format("Spend Duration=%d ms at %s, and is now heading to %s", duration, site, nextSite));
-            // TODO: generate a metric data point
+            return generateVisitingMetric(site, duration);
         }
+        return null;
     }
 
     public void start() {
@@ -184,6 +187,10 @@ public abstract class Traveler {
         Long age = stopWatch.getSplitTime();
         stopWatch.unsplit();
         return age;
+    }
+
+    protected VisitingHistory generateVisitingMetric(String site, Long duration) {
+        return new VisitingHistory( this.travelerId, site, duration);
     }
 
     @Override

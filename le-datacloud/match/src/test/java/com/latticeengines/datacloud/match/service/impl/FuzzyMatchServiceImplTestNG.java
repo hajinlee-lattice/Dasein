@@ -77,6 +77,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
     @Test(groups = "functional", dataProvider = "actorTestData")
     public void testActorSystem(int numRequests, boolean batchMode) throws Exception {
         actorSystem.setBatchMode(batchMode);
+        metricService.enable();
 
         if (!batchMode) {
             LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);
@@ -116,6 +117,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             LogManager.getLogger("com.latticeengines.datacloud.match.actors").setLevel(Level.INFO);
             LogManager.getLogger("com.latticeengines.actors.exposed.traveler").setLevel(Level.INFO);
             actorSystem.setBatchMode(false);
+            metricService.disable();
         }
     }
 

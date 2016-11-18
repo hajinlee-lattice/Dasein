@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
+import java.util.Collections;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -9,10 +13,15 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.visitor.VisitorActorTemplate;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
+import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.actors.VisitingHistory;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.actor.ActorRef;
 
 public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorTemplate> extends VisitorActorTemplate {
+
+    private static final Log log = LogFactory.getLog(MicroEngineActorTemplate.class);
 
     protected abstract Class<T> getDataSourceActorClz();
 
@@ -66,6 +75,18 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     @Override
     protected String getActorName(ActorRef actorRef) {
         return matchActorSystem.getActorName(actorRef);
+    }
+
+    @Override
+    protected void writeVisitingHistory(VisitingHistory history) {
+        try {
+            MeasurementMessage<VisitingHistory> message = new MeasurementMessage<>();
+            message.setMeasurements(Collections.singletonList(history));
+            message.setMetricDB(MetricDB.LDC_Match);
+            matchActorSystem.getMetricActor().tell(message, null);
+        } catch (Exception e) {
+            log.warn("Failed to extract output metric.", e);
+        }
     }
 
     protected MatchKeyTuple prepareInputData(MatchKeyTuple input) {
