@@ -516,9 +516,13 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         }
         console.log("parseFeatureFlagDefinitions" + $scope.availableProducts);
     }
-    
+
     function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings" || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings") {
+        if (featureFlag.DisplayName === "Dante"
+            || featureFlag.DisplayName === "UseSalesforceSettings"
+            || featureFlag.DisplayName === "UseMarketoSettings"
+            || featureFlag.DisplayName === "UseEloquaSettings"
+            || featureFlag.DisplayName === "EnablePocTransform" ) {
             return true;
         }
         if (!featureFlag.Configurable) {
