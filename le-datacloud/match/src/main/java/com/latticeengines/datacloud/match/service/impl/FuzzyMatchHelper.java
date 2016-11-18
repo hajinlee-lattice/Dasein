@@ -179,11 +179,11 @@ public class FuzzyMatchHelper implements DbHelper {
             String dataCloudVersion) {
         Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
                 .getDecodeParameters(columnSelection, dataCloudVersion);
-
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
         for (Column column : columnSelection.getColumns()) {
+            String columnId = column.getExternalColumnId();
             String columnName = column.getColumnName();
 
             Map<String, Object> decodedAttributes = new HashMap<>();
@@ -195,14 +195,15 @@ public class FuzzyMatchHelper implements DbHelper {
                 decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
             }
 
-            if (amAttributes.containsKey(columnName)) {
-                queryResult.put(columnName, amAttributes.get(columnName));
-            } else if (decodedAttributes.containsKey(columnName)) {
-                queryResult.put(columnName, decodedAttributes.get(columnName));
+            if (amAttributes.containsKey(columnId)) {
+                queryResult.put(columnName, amAttributes.get(columnId));
+            } else if (decodedAttributes.containsKey(columnId)) {
+                queryResult.put(columnName, decodedAttributes.get(columnId));
             } else {
                 queryResult.put(columnName, null);
             }
         }
+
         return queryResult;
     }
 

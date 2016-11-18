@@ -70,6 +70,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -264,6 +265,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             inputSchema = jobConfiguration.getInputAvroSchema();
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
+            log.info("Using output schema: \n"
+                    + JsonUtils.pprint(JsonUtils.deserialize(outputSchema.toString(), JsonNode.class)));
 
             setProgress(0.07f);
             Long startTime = System.currentTimeMillis();
@@ -356,9 +359,12 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(rootOperationUid);
         matchInput.setTenant(tenant);
-        matchInput.setPredefinedSelection(predefinedSelection);
-        matchInput.setPredefinedVersion("1.0");
-        matchInput.setCustomSelection(customizedSelection);
+        if (predefinedSelection == null) {
+            matchInput.setCustomSelection(customizedSelection);
+        } else {
+            matchInput.setPredefinedSelection(predefinedSelection);
+            matchInput.setPredefinedVersion("1.0");
+        }
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         matchInput.setFields(divider.getFields());
         matchInput.setKeyMap(keyMap);
@@ -481,7 +487,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
     @MatchStep
     private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
-        Schema outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+        Schema outputSchema;
+        if (predefinedSelection == null) {
+            List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(customizedSelection, dataCloudVersion);
+            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName, dataCloudVersion);
+        } else {
+            outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+        }
         if (inputSchema == null) {
             inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
             log.info("Using extracted input schema: \n"

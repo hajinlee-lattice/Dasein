@@ -82,7 +82,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
     @Override
     public List<String> getMatchedColumns(ColumnSelection selection) {
-        return selection.getColumnNames();
+        return selection.getColumnIds();
     }
 
     @Override

@@ -151,7 +151,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
             ConcurrentSkipListSet<String> blackColumnCache = getBlackColumnCache()
                     .get(dataCloudVersion);
             if (blackColumnCache == null) {
-                blackColumnCache = new ConcurrentSkipListSet<String>();
+                blackColumnCache = new ConcurrentSkipListSet<>();
                 getBlackColumnCache().put(dataCloudVersion, blackColumnCache);
             }
             blackColumnCache.add(columnId);
@@ -159,7 +159,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn>
         } else {
             ConcurrentMap<String, E> whiteColumnCache = getWhiteColumnCache().get(dataCloudVersion);
             if (whiteColumnCache == null) {
-                whiteColumnCache = new ConcurrentHashMap<String, E>();
+                whiteColumnCache = new ConcurrentHashMap<>();
                 getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
             }
             whiteColumnCache.put(columnId, column);
