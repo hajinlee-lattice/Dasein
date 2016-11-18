@@ -49,7 +49,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
         deleteLocalEntities();
         super.setup();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, tenantName);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null);
     }
 
     @Override
@@ -71,6 +71,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
             DataSet thisDataset = modelQualityProxy.getDataSetByName(dataset.getName());
             thisDataset.setName(dataSetName);
+            thisDataset.setTenant(mainTestTenant);
             thisDataset.setTrainingSetHdfsPath( //
                     "/Pods/Default/Services/ModelQuality/" + csvFile);
             DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(thisDataset.getName());
@@ -81,7 +82,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
-            thisPropData.setDataCloudVersion("2.0.1");
+            thisPropData.setDataCloudVersion("2.0.0");
             PropData propDataAlreadyExists = propDataEntityMgr.findByName(thisPropData.getName());
             if (propDataAlreadyExists != null)
                 propDataEntityMgr.delete(propDataAlreadyExists);
