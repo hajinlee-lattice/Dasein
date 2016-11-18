@@ -265,8 +265,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             inputSchema = jobConfiguration.getInputAvroSchema();
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
-            log.info("Using output schema: \n"
-                    + JsonUtils.pprint(JsonUtils.deserialize(outputSchema.toString(), JsonNode.class)));
 
             setProgress(0.07f);
             Long startTime = System.currentTimeMillis();
