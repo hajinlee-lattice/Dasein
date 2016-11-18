@@ -44,11 +44,25 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     if (userLevel.ordinal <= 1) {
         // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     	//$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
-    	$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name];
+    	$scope.levelsToSelect = [
+            RightsUtility.accessLevel.EXTERNAL_USER.name
+        ];
     } else if (currentLevel.ordinal == 3) {
-        $scope.levelsToSelect = [RightsUtility.accessLevel.INTERNAL_USER.name, RightsUtility.accessLevel.INTERNAL_ADMIN.name];
+        $scope.levelsToSelect = [
+            RightsUtility.accessLevel.EXTERNAL_USER.name,
+            RightsUtility.accessLevel.INTERNAL_USER.name, 
+            RightsUtility.accessLevel.INTERNAL_USER.name, 
+            RightsUtility.accessLevel.INTERNAL_ADMIN.name
+        ];
     } else if (currentLevel.ordinal == 4) {
-    	$scope.levelsToSelect = [RightsUtility.accessLevel.INTERNAL_USER.name, RightsUtility.accessLevel.INTERNAL_ADMIN.name, RightsUtility.accessLevel.SUPER_ADMIN.name];
+        console.log(RightsUtility.accessLevel);
+    	$scope.levelsToSelect = [
+            RightsUtility.accessLevel.EXTERNAL_USER.name,
+            RightsUtility.accessLevel.INTERNAL_USER.name, 
+            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.INTERNAL_ADMIN.name, 
+            RightsUtility.accessLevel.SUPER_ADMIN.name
+        ];
     }
 
     $scope.saveInProgress = false;
