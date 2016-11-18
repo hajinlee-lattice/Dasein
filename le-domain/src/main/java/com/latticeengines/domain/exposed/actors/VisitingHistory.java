@@ -21,6 +21,7 @@ public class VisitingHistory extends BaseMeasurement<VisitingHistory, VisitingHi
     private final Long duration;
     private final String travelerId;
     private Boolean rejected = false;
+    private String actorSystemMode;
     private static final Set<String> excludedSystemTags = Collections.singleton(MetricUtils.TAG_HOST);
 
     public VisitingHistory(String travelerId, String site, Long duration) {
@@ -55,6 +56,15 @@ public class VisitingHistory extends BaseMeasurement<VisitingHistory, VisitingHi
 
     public void setRejected(Boolean rejected) {
         this.rejected = rejected;
+    }
+
+    @MetricTag(tag = "ActorSystemMode")
+    public String getActorSystemMode() {
+        return actorSystemMode;
+    }
+
+    public void setActorSystemMode(String actorSystemMode) {
+        this.actorSystemMode = actorSystemMode;
     }
 
     @Override

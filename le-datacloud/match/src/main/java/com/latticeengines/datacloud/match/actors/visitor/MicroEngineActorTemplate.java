@@ -80,6 +80,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
     @Override
     protected void writeVisitingHistory(VisitingHistory history) {
         try {
+            history.setActorSystemMode(matchActorSystem.isBatchMode() ? "Batch" : "Realtime");
             MeasurementMessage<VisitingHistory> message = new MeasurementMessage<>();
             message.setMeasurements(Collections.singletonList(history));
             message.setMetricDB(MetricDB.LDC_Match);
