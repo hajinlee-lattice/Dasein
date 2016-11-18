@@ -43,6 +43,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
+import com.latticeengines.dataflow.runtime.cascading.DenormalizeIntoListBuffer;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -51,6 +52,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
+
+import cascading.tuple.Fields;
 
 public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBase {
 
@@ -829,4 +832,67 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         FileUtils.deleteQuietly(new File(fileName));
     }
 
+    @Test(groups = "functional", enabled = false)
+    public void testDenormalize() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        Object[][] data = new Object[][] { //
+                { "dom1.com", "x", 1, 123L }, //
+                { "dom2.com", "y", 2, 123L }, //
+                { "dom3.com", "z", 3, 123L }, //
+                { "dom4.com", "b", 4, 124L }, //
+                { "dom5.com", "a", 5, 124L }, //
+        };
+        uploadAvro(data, avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node node = addSource("Feature");
+                List<FieldMetadata> fms = Arrays.asList(new FieldMetadata("ListFeature", List.class), //
+                        new FieldMetadata("Timestamp", Long.class));
+                return node.groupByAndBuffer(new FieldList("Timestamp"), //
+                        new DenormalizeIntoListBuffer(new Fields("Timestamp", "ListFeature")), fms);
+            }
+        });
+
+        for (GenericRecord record : readOutput()) {
+            String domain = record.get("Domain").toString();
+            switch (domain) {
+            case "dom1.com":
+                Assert.assertEquals(record.get("f1").toString(), "No");
+                Assert.assertEquals(record.get("f2").toString(), "Yes");
+                Assert.assertEquals(record.get("f3").toString(), "No");
+                Assert.assertEquals(record.get("f4").toString(), "Yes");
+                Assert.assertEquals(record.get("g1").toString(), "Yes");
+                Assert.assertEquals(record.get("g2").toString(), "No");
+                Assert.assertEquals(record.get("g3").toString(), "Yes");
+                Assert.assertEquals(record.get("g4").toString(), "No");
+                break;
+            case "dom2.com":
+                Assert.assertEquals(record.get("f1").toString(), "Yes");
+                Assert.assertEquals(record.get("f2").toString(), "No");
+                Assert.assertEquals(record.get("f3").toString(), "Yes");
+                Assert.assertEquals(record.get("f4").toString(), "No");
+                Assert.assertEquals(record.get("g1").toString(), "No");
+                Assert.assertEquals(record.get("g2").toString(), "Yes");
+                Assert.assertEquals(record.get("g3").toString(), "No");
+                Assert.assertEquals(record.get("g4").toString(), "Yes");
+                break;
+            case "dom3.com":
+                Assert.assertNull(record.get("f1"));
+                Assert.assertNull(record.get("f2"));
+                Assert.assertNull(record.get("f3"));
+                Assert.assertNull(record.get("f4"));
+                Assert.assertNull(record.get("g1"));
+                Assert.assertNull(record.get("g2"));
+                Assert.assertNull(record.get("g3"));
+                Assert.assertNull(record.get("g4"));
+                break;
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
 }
