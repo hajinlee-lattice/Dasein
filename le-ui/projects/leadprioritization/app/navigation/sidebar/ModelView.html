@@ -30,7 +30,7 @@
                 <span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</span>
             </a>
         </li>
-        <li ng-if="showRefineAndClone && !IsPmml" role="presentation" ui-sref-active="active">
+        <li ng-if="showSampleLeads && !IsPmml" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.leads" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}" data-ng-if='sourceType=="SalesforceLead"'>
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}">
                     <span class="ico ico-leads ico-light-gray"></span>

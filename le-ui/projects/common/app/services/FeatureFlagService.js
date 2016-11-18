@@ -30,7 +30,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     var flags = {
         CHANGE_MODEL_NAME: 'ChangeModelNames',
         DELETE_MODEL: 'DeleteModels',
-        REFINE_CLONE: 'RefineClone',
+
         REVIEW_MODEL: 'ReviewModel',
         UPLOAD_JSON: 'UploadSummaryJson',
 
@@ -133,9 +133,13 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     function GetFlag(flag) { return flagValues[flag] || false; }
 
     function UpdateFlagsBasedOnRights() {
+
+        UpdateFlag(flags.VIEW_SAMPLE_LEADS, RightsUtility.currentUserMay("View", "Sample_Leads"));
+        UpdateFlag(flags.VIEW_REFINE_CLONE, RightsUtility.currentUserMay("View", "Refine_Clone"));
+        UpdateFlag(flags.EDIT_REFINE_CLONE, RightsUtility.currentUserMay("Edit", "Refine_Clone"));
+
         UpdateFlag(flags.CHANGE_MODEL_NAME, RightsUtility.currentUserMay("Edit", "Models"));
         UpdateFlag(flags.DELETE_MODEL, RightsUtility.currentUserMay("Edit", "Models"));
-        UpdateFlag(flags.REFINE_CLONE, RightsUtility.currentUserMay("Edit", "Users"));
         UpdateFlag(flags.REVIEW_MODEL, false);
         UpdateFlag(flags.UPLOAD_JSON, RightsUtility.currentUserMay("Create", "Models"));
 

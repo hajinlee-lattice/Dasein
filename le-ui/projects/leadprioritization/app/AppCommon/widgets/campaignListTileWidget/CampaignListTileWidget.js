@@ -22,7 +22,7 @@ angular.module('mainApp.appCommon.widgets.CampaignListTileWidget', [
 
             $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
             $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
-            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.REFINE_CLONE);
+            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
 

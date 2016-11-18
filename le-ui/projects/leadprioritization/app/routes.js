@@ -206,8 +206,9 @@ angular
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
                             $scope.showAlerts = 0; // disable for all (PLS-1670) FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
-                            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.REFINE_CLONE);
+                            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
                             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
+                            $scope.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
                         });
                         
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
