@@ -1,7 +1,12 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
@@ -56,19 +60,19 @@ public class MatchActorSystem {
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
 
-    @Value("${datacloud.match.actor.datasource.default.threadpool.count.min:8}")
+    @Value("${datacloud.match.actor.datasource.default.threadpool.count.min}")
     private Integer defaultThreadpoolCountMin;
 
-    @Value("${datacloud.match.actor.datasource.default.threadpool.count.max:32}")
+    @Value("${datacloud.match.actor.datasource.default.threadpool.count.max}")
     private Integer defaultThreadpoolCountMax;
 
-    @Value("${datacloud.match.actor.datasource.default.threadpool.queue.size:32}")
+    @Value("${datacloud.match.actor.datasource.default.threadpool.queue.size}")
     private Integer defaultThreadpoolQueueSize;
 
     @Autowired
     private ActorFactory actorFactory;
 
-    private ThreadPoolTaskExecutor dataSourceServiceExecutor;
+    private ExecutorService dataSourceServiceExecutor;
 
     private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
@@ -145,7 +149,7 @@ public class MatchActorSystem {
         return maxAllowedRecordCount.get();
     }
 
-    public ThreadPoolTaskExecutor getDataSourceServiceExecutor() {
+    public ExecutorService getDataSourceServiceExecutor() {
         return dataSourceServiceExecutor;
     }
 
@@ -190,10 +194,8 @@ public class MatchActorSystem {
 
     private void initDefaultDataSourceThreadPool() {
         log.info("Initialize default data source thread pool.");
-        dataSourceServiceExecutor = new ThreadPoolTaskExecutor();
-        dataSourceServiceExecutor.setCorePoolSize(defaultThreadpoolCountMin);
-        dataSourceServiceExecutor.setMaxPoolSize(defaultThreadpoolCountMax);
-        dataSourceServiceExecutor.setQueueCapacity(defaultThreadpoolQueueSize);
-        dataSourceServiceExecutor.initialize();
+        BlockingQueue<Runnable> runnableQueue = new ArrayBlockingQueue<Runnable>(defaultThreadpoolQueueSize);
+        dataSourceServiceExecutor = new ThreadPoolExecutor(defaultThreadpoolCountMin, defaultThreadpoolCountMax, 1,
+                TimeUnit.MINUTES, runnableQueue);
     }
 }

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.TimerMessage;
@@ -79,7 +79,7 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
             log.debug("Got timer call: " + msg.getContext().toString());
         }
 
-        ThreadPoolTaskExecutor executor = matchActorSystem.getDataSourceServiceExecutor();
+        ExecutorService executor = matchActorSystem.getDataSourceServiceExecutor();
         Runnable task = createLookupRunnable((BulkLookupStrategy) msg.getContext());
         executor.execute(task);
     }
