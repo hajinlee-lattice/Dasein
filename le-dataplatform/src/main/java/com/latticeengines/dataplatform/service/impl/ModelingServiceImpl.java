@@ -147,6 +147,7 @@ public class ModelingServiceImpl implements ModelingService {
                 .setTable(config.getTable());
         if (config.getQuery() != null) {
             builder.setQuery(config.getQuery());
+            builder.setMode(SqoopImporter.Mode.QUERY);
         } else {
             builder.setColumnsToInclude(Arrays
                     .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
