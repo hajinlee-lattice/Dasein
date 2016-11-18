@@ -458,7 +458,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return this.GetDatasets(datasetName);
     };
 
-    this.CreateDatasetFromTenant = function (tenantType, tenantId, modelId, playExternalId) {
+    this.CreateDatasetFromTenant = function (tenantType, tenantId, sourceId) {
 
         var defer = $q.defer();
 
@@ -471,13 +471,12 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         var params = {
             tenantType: tenantType,
             tenantId: tenantId,
-            modelID: modelId,
-            playExternalID: playExternalId
+            sourceId: sourceId
         };
 
         $http({
             method: 'POST',
-            url: '/modelquality/datasets/createFromTenant',
+            url: '/modelquality/datasets/create',
             params: params,
             transformResponse: [function (data, headers, status) {
                 // why is this api returning a string!
@@ -504,14 +503,6 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         });
 
         return defer.promise;
-    };
-
-    this.CreateDatasetFromTenantByModelId = function (tenantType, tenantId, modelId) {
-        return this.CreateDatasetFromTenant(tenantType, tenantId, modelId, undefined);
-    };
-
-    this.CreateDatasetFromTenantByPlayExternalId = function (tenantType, tenantId, playExternalId) {
-        return this.CreateDatasetFromTenant(tenantType, tenantId, undefined, playExternalId);
     };
 
     // /modelquality/propdataconfigs/

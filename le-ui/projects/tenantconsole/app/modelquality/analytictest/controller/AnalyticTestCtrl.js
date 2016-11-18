@@ -44,7 +44,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
 
         $scope.message = 'Creating' + datasetMsg;
 
-        ModelQualityService.CreateDatasetFromTenantByModelId(tenantType, tenantId, modelId).then(function (result) {
+        ModelQualityService.CreateDatasetFromTenant(tenantType, tenantId, modelId).then(function (result) {
             $scope.clear();
 
             return ModelQualityService.GetDatasetByName(result.datasetName);
