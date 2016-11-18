@@ -68,7 +68,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
     }
 
-    @Test(groups = "functional", dataProvider = "fileDataProvider", enabled=false)
+    @Test(groups = "functional", dataProvider = "fileDataProvider", enabled=true)
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"
@@ -111,7 +111,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     }
 
-    @Test(groups = "functional", dataProvider = "startDateFileDataProvider", enabled = false)
+    @Test(groups = "functional", dataProvider = "startDateFileDataProvider")
     public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail";
@@ -156,7 +156,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider", enabled = false)
+    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider", enabled = true)
     public void testFilteredTypeFile(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail,Order_Summary,SKU_Global,SKU_Manufacturer,"
@@ -190,14 +190,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
                 { "./src/test/resources/tgt_all_account_cust_1_20160404_034341.zip", "SMB", false },
                 { "./src/test/resources/fiscal_day_calendar_1_20151125_200027.zip", "SMB", false },
                 { "./src/test/resources/global_sku_lookup_1_20151007_035025.zip", "SMB", false },
-                { "./src/test/resources/tgt_all_chnl_hier_1_20151125_201055.zip", "SMB", false },
-                { "./src/test/resources/tgt_itm_cls_code_lattice_ext_1_20151129_020123.zip", "SMB", false },
-                { "./src/test/resources/tgt_lat_order_summary_global_1_20151126_201516.zip", "SMB", false },
-                { "./src/test/resources/tgt_lattice_mfg_ext_1_20151216_020122.zip", "SMB", false },
-                { "./src/test/resources/tgt_order_detail_global_1_20151127_235435.zip", "SMB", false },
-                { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", false },
-                { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true },
-                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "SMB", false }
+                { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true }
 
         };
     }
