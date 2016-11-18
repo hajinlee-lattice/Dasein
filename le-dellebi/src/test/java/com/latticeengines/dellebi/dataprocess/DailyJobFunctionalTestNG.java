@@ -68,7 +68,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         HdfsUtils.rmdir(configuration, dataHadoopWorkingPath);
     }
 
-    @Test(groups = "functional", dataProvider = "fileDataProvider")
+    @Test(groups = "functional", dataProvider = "fileDataProvider", enabled=false)
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"
@@ -111,7 +111,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     }
 
-    @Test(groups = "functional", dataProvider = "startDateFileDataProvider")
+    @Test(groups = "functional", dataProvider = "startDateFileDataProvider", enabled = false)
     public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail";
@@ -156,7 +156,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider")
+    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider", enabled = false)
     public void testFilteredTypeFile(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail,Order_Summary,SKU_Global,SKU_Manufacturer,"
