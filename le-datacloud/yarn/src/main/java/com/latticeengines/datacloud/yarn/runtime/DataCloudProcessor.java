@@ -32,7 +32,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -493,7 +492,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
         }
         if (inputSchema == null) {
-            inputSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+            inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
             log.info("Using extracted input schema: \n"
                     + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
         } else {
