@@ -187,7 +187,7 @@ public class SqoopExporter {
         private String javaColumnTypeMappings;
         private List<String> exportColumns = new ArrayList<>();
         private Configuration yarnConfiguration;
-        private boolean sync = true;
+        private boolean sync = false;
         private List<String> hadoopArgs = new ArrayList<>();
         private List<String> otherOptions = new ArrayList<>();
 

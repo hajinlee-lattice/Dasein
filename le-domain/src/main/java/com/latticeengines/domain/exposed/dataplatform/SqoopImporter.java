@@ -231,7 +231,7 @@ public class SqoopImporter {
         private Properties properties;
         private int numMappers = 0;
         private Configuration yarnConfiguration;
-        private boolean sync = true;
+        private boolean sync = false;
         private List<String> hadoopArgs = new ArrayList<>();
         private List<String> otherOptions = new ArrayList<>(defaultOptions);
 
