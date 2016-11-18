@@ -79,8 +79,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
     }
 
-    protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request,
-            String returnAddress) {
+    protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request, String returnAddress) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
         context.setLookupRequestId(lookupRequestId);
@@ -99,12 +98,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             return;
         }
 
-        synchronized (reqReturnAddrs) {
-            reqReturnAddrs.put(lookupRequestId, returnAddress);
-        }
-        synchronized (unsubmittedReqs) {
-            unsubmittedReqs.offer(context);
-        }
+        reqReturnAddrs.put(lookupRequestId, returnAddress);
+
+        unsubmittedReqs.offer(context);
+
         if (log.isDebugEnabled()) {
             log.debug("Accepted request " + context.getLookupRequestId());
         }
@@ -143,14 +140,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 for (DnBBatchMatchContext batchContext : batchContexts) {
                     batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
                     if (batchContext.getDnbCode() == DnBReturnCode.OK) {
-                        synchronized (submittedReqs) {
-                            submittedReqs.offer(batchContext);
-                        }
+                        submittedReqs.offer(batchContext);
                     } else {
                         processMatchResult(batchContext, false);
                     }
                 }
-
 
             }
             break;
@@ -202,12 +196,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 dnbCacheService.addCache(context);
             }
             sendResponse(lookupRequestId, context, reqReturnAddrs.get(lookupRequestId));
-            synchronized (reqReturnAddrs) {
-                reqReturnAddrs.remove(lookupRequestId);
-            }
-
+            reqReturnAddrs.remove(lookupRequestId);
         }
     }
-
 
 }

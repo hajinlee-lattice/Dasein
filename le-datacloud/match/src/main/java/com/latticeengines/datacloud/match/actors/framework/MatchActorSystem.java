@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
@@ -55,8 +56,19 @@ public class MatchActorSystem {
     @Value("${datacloud.match.metricActor.actor.cardinality:4}")
     private int metricActorCardinality;
 
+    @Value("${datacloud.match.actor.datasource.default.threadpool.count.min:8}")
+    private Integer defaultThreadpoolCountMin;
+
+    @Value("${datacloud.match.actor.datasource.default.threadpool.count.max:32}")
+    private Integer defaultThreadpoolCountMax;
+
+    @Value("${datacloud.match.actor.datasource.default.threadpool.queue.size:32}")
+    private Integer defaultThreadpoolQueueSize;
+
     @Autowired
     private ActorFactory actorFactory;
+
+    private ThreadPoolTaskExecutor dataSourceServiceExecutor;
 
     private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
@@ -64,6 +76,9 @@ public class MatchActorSystem {
     @PostConstruct
     public void postConstruct() {
         system = ActorSystemFactory.create("datacloud", 16);
+
+        initDefaultDataSourceThreadPool();
+
         initActors();
     }
 
@@ -71,6 +86,9 @@ public class MatchActorSystem {
     public void preDestroy() {
         log.info("Shutting down match actor system");
         system.shutdown();
+
+        dataSourceServiceExecutor.shutdown();
+
         log.info("Completed shutdown of match actor system");
     }
 
@@ -127,6 +145,10 @@ public class MatchActorSystem {
         return maxAllowedRecordCount.get();
     }
 
+    public ThreadPoolTaskExecutor getDataSourceServiceExecutor() {
+        return dataSourceServiceExecutor;
+    }
+
     private void initActors() {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
@@ -166,4 +188,12 @@ public class MatchActorSystem {
         return actorRef;
     }
 
+    private void initDefaultDataSourceThreadPool() {
+        log.info("Initialize default data source thread pool.");
+        dataSourceServiceExecutor = new ThreadPoolTaskExecutor();
+        dataSourceServiceExecutor.setCorePoolSize(defaultThreadpoolCountMin);
+        dataSourceServiceExecutor.setMaxPoolSize(defaultThreadpoolCountMax);
+        dataSourceServiceExecutor.setQueueCapacity(defaultThreadpoolQueueSize);
+        dataSourceServiceExecutor.initialize();
+    }
 }

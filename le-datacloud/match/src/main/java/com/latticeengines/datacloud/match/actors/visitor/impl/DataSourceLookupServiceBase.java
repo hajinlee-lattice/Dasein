@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
@@ -22,8 +23,9 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     @Override
     public void asyncLookup(String lookupRequestId, Object request, String returnAddress) {
-        Thread th = new Thread(createLookupRunnable(lookupRequestId, request, returnAddress));
-        th.start();
+        ThreadPoolTaskExecutor executor = actorSystem.getDataSourceServiceExecutor();
+        Runnable task = createLookupRunnable(lookupRequestId, request, returnAddress);
+        executor.execute(task);
     }
 
     private Runnable createLookupRunnable(final String lookupRequestId, final Object request,

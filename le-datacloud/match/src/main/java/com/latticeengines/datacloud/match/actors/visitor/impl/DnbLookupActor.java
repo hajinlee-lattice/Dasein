@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.TimerMessage;
@@ -77,8 +78,10 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
         if (log.isDebugEnabled()) {
             log.debug("Got timer call: " + msg.getContext().toString());
         }
-        Thread th = new Thread(createLookupRunnable((BulkLookupStrategy) msg.getContext()));
-        th.start();
+
+        ThreadPoolTaskExecutor executor = matchActorSystem.getDataSourceServiceExecutor();
+        Runnable task = createLookupRunnable((BulkLookupStrategy) msg.getContext());
+        executor.execute(task);
     }
 
     private Runnable createLookupRunnable(final BulkLookupStrategy strategy) {
