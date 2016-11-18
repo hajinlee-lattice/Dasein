@@ -29,4 +29,9 @@ public interface HdfsSourceEntityMgr {
 
     List<String> getVersions(Source source);
 
+    void initiateSource(Source source);
+
+    void deleteSource(Source source);
+
+    boolean checkSourceExist(Source source);
 }

@@ -19,6 +19,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
@@ -67,6 +68,19 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
         TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
         return executor.kickOffNewProgress(transformationProgressEntityMgr, request.getBaseVersions(),
                 request.getTargetVersion());
+    }
+
+    @Override
+    public TransformationProgress pipelineTransform(PipelineTransformationRequest request, String hdfsPod) {
+        if (StringUtils.isNotEmpty(hdfsPod)) {
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+
+        TransformationService<?> transformationService = (TransformationService<?>) applicationContext
+                .getBean("pipelineTransformationService");
+
+        TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
+        return executor.kickOffNewPipelineProgress(transformationProgressEntityMgr, request);
     }
 
     private List<TransformationProgress> scanForNewWorkFlow(String hdfsPod) {

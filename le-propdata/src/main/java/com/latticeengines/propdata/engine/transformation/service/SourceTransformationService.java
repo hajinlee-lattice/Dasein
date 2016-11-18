@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 
 public interface SourceTransformationService {
 
@@ -11,4 +12,5 @@ public interface SourceTransformationService {
 
     TransformationProgress transform(TransformationRequest request, String hdfsPod, boolean fromScan);
 
+    TransformationProgress pipelineTransform(PipelineTransformationRequest request, String hdfsPod); 
 }

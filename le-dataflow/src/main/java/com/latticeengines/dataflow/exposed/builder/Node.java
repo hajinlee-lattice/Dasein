@@ -24,6 +24,7 @@ import com.latticeengines.dataflow.exposed.builder.operations.Operation;
 import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenameOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.RenamePipeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.SampleOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.TransformFunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
@@ -311,6 +312,10 @@ public class Node {
 
     public Node limit(int count) {
         return new Node(builder.register(new LimitOperation(opInput(identifier), count)), builder);
+    }
+
+    public Node sample(float fraction) {
+        return new Node(builder.register(new SampleOperation(opInput(identifier), fraction)), builder);
     }
 
     public Node addTimestamp(String timestampField, int mode) {

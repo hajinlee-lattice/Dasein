@@ -12,8 +12,6 @@ public class TransformationRequest {
     @JsonProperty("Submitter")
     private String submitter;
 
-    // you can use the list specify versions for different bases, or multiple
-    // versions of a single base source. it all depends on your source's nature.
     @JsonProperty("BaseVersions")
     private List<String> baseVersions;
 

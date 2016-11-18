@@ -9,10 +9,12 @@ import org.springframework.util.CollectionUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
@@ -52,6 +54,33 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                 }
                 TransformationConfiguration transformationConfiguration = transformationService
                         .createTransformationConfiguration(baseVersions, targetVersion);
+                if (transformationConfiguration != null) {
+                    TransformationProgress progress = transformationService
+                            .startNewProgress(transformationConfiguration, jobSubmitter);
+                    scheduleTransformationWorkflow(transformationConfiguration, progress,
+                            transformationProgressEntityMgr);
+                    return progress;
+                }
+            } catch (Exception e) {
+                log.error(e);
+                throw e;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_25015,
+                new String[] { transformationService.getSource().getSourceName(), retries.toString() });
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public TransformationProgress kickOffNewPipelineProgress(TransformationProgressEntityMgr transformationProgressEntityMgr,
+           PipelineTransformationRequest request) {
+        Integer retries = 0;
+        while (retries++ < MAX_RETRY) {
+            try {
+                PipelineTransformationService service = (PipelineTransformationService)transformationService;
+                TransformationConfiguration transformationConfiguration = service.createTransformationConfiguration(request);
+
                 if (transformationConfiguration != null) {
                     TransformationProgress progress = transformationService
                             .startNewProgress(transformationConfiguration, jobSubmitter);

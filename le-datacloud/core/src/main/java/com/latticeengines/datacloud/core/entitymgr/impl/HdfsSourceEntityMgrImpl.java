@@ -252,6 +252,48 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
     }
 
+    @Override
+    public boolean checkSourceExist(Source source) {
+        boolean sourceExists = false;
+        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        try {
+            if (HdfsUtils.isDirectory(yarnConfiguration, sourceDir))  {
+                sourceExists = true;
+            }
+        } catch (Exception e) {
+            log.info("Failed to check " + source.getSourceName() + " in HDFS");
+        } finally {
+            return sourceExists;
+        }
+    }
+
+    @Override
+    public void initiateSource(Source source) {
+        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, sourceDir)) {
+                return;
+            }  else {
+                HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+            }
+        } catch (Exception e) {
+            log.error("Failed to initiate source " + source.getSourceName() + " in HDFS");
+        }
+
+    }
+
+    @Override
+    public void deleteSource(Source source) {
+        String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, sourceDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, sourceDir);
+            }
+        } catch (Exception e) {
+            log.error("Failed to delete source" + source.getSourceName() + " in HDFS");
+        }
+    }
+
     private void sleep(long sleepDuration) {
         try {
             Thread.sleep(sleepDuration);

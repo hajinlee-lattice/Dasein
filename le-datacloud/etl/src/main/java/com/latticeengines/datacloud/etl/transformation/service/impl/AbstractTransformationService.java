@@ -207,7 +207,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return versionDirs;
     }
 
-    private void deleteFSEntry(TransformationProgress progress, String entryPath) {
+    protected void deleteFSEntry(TransformationProgress progress, String entryPath) {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, entryPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, entryPath);
@@ -235,59 +235,69 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected boolean doPostProcessing(TransformationProgress progress, String workflowDir) {
+        return doPostProcessing(progress, workflowDir, true);
+    }
+
+    protected boolean doPostProcessing(TransformationProgress progress, String workflowDir, boolean saveResult) {
+        boolean status = true;
         String avroWorkflowDir = finalWorkflowOuputDir(progress);
+        if (saveResult) {
+            Source source = getSource();
+            String version = progress.getVersion();
+            status = saveSourceVersion(progress, source, version, avroWorkflowDir);
+        }
+        // delete intermediate data
+        deleteFSEntry(progress, avroWorkflowDir);
+        deleteFSEntry(progress, workflowDir);
+        return status;
+    }
+
+    protected boolean saveSourceVersion(TransformationProgress progress, Source source, String version, String workflowDir) {
+        String avroWorkflowDir = finalWorkflowOuputDir(progress);
+        // extract schema
         try {
-
-            // extract schema
-            try {
-                extractSchema(progress, avroWorkflowDir);
-            } catch (Exception e) {
-                updateStatusToFailed(progress, "Failed to extract schema of " + getSource().getSourceName() + " avsc.",
+            extractSchema(progress, source, version, workflowDir);
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.",
                         e);
-                return false;
-            }
-
-            // copy result to source version dir
-            try {
-                String sourceDir = sourceVersionDirInHdfs(progress);
-                deleteFSEntry(progress, sourceDir);
-                String currentMaxVersion = null;
-
-                for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
-                        avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
-                    if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
-                        HdfsUtils.mkdir(yarnConfiguration, sourceDir);
-                    }
-                    String avroFileName = new Path(avroFilePath).getName();
-                    LOG.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
-                    HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
-                }
-
-                try {
-                    currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource());
-                } catch (Exception e) {
-                    // We can log this exception and ignore this error as
-                    // probably file does not even exists
-                    LOG.debug("Could not read version file", e);
-                }
-                // overwrite max version if progress's version is higher
-                if (currentMaxVersion == null || progress.getVersion().compareTo(currentMaxVersion) > 0) {
-                    hdfsSourceEntityMgr.setCurrentVersion(getSource(), progress.getVersion());
-                }
-
-                HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
-            } catch (Exception e) {
-                updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
-                return false;
-            }
-
-        } finally {
-            // delete intermediate data
-            deleteFSEntry(progress, avroWorkflowDir);
-            deleteFSEntry(progress, workflowDir);
+            return false;
         }
 
-        return false;
+        // copy result to source version dir
+        try {
+            String sourceDir = sourceVersionDirInHdfs(source, version);
+            deleteFSEntry(progress, sourceDir);
+            String currentMaxVersion = null;
+
+            for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration,
+                avroWorkflowDir + HDFS_PATH_SEPARATOR + AVRO_REGEX)) {
+                if (!HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
+                    HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+                }
+                String avroFileName = new Path(avroFilePath).getName();
+                LOG.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
+                HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
+            }
+
+            try {
+                currentMaxVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+            } catch (Exception e) {
+                // We can log this exception and ignore this error as
+                // probably file does not even exists
+                LOG.debug("Could not read version file", e);
+                currentMaxVersion = null;
+            }
+            // overwrite max version if progress's version is higher
+            if (currentMaxVersion == null || version.compareTo(currentMaxVersion) > 0) {
+                hdfsSourceEntityMgr.setCurrentVersion(source, version);
+            }
+
+            HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
+            return false;
+        }
+        return true;
     }
 
     public TransformationProgress findRunningJob() {
@@ -326,9 +336,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
-    protected void extractSchema(TransformationProgress progress, String avroDir) throws Exception {
-        String version = getVersion(progress);
-        String avscPath = hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
+    protected void extractSchema(TransformationProgress progress, Source source,String version, String avroDir) throws Exception {
+        String avscPath = hdfsPathBuilder.constructSchemaFile(source, version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
@@ -357,6 +366,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     protected String sourceDirInHdfs(Source source) {
         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source).toString();
         getLogger().info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        return sourceDirInHdfs;
+    }
+
+    protected String sourceVersionDirInHdfs(Source source, String version) {
+        String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
+        getLogger().info("sourceVersionDirInHdfs for " + source.getSourceName() + " = " + sourceDirInHdfs);
         return sourceDirInHdfs;
     }
 

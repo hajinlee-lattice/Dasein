@@ -11,4 +11,9 @@ public interface SourceService {
 
     List<Source> getSources();
 
+    Source createSource(String sourceName);
+
+    Source findOrCreateSource(String sourceName);
+
+    boolean deleteSource(Source source);
 }

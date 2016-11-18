@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -103,6 +104,32 @@ public class TransformationResource extends InternalResourceBase implements Tran
             if (CollectionUtils.isEmpty(transformationRequest.getBaseVersions())) {
                 throw new IllegalArgumentException("Please provide BaseVersion for BomboraDepivoted");
             }
+        }
+    }
+
+    @RequestMapping(value = "pipeline", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiIgnore
+    @ApiOperation(value = "Trigger a new transformation for a pipelined transformations. ")
+    public TransformationProgress transform(@RequestBody PipelineTransformationRequest transformationRequest,
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
+            HttpServletRequest request) {
+        checkHeader(request);
+        try {
+            if (StringUtils.isEmpty(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+                HdfsPodContext.changeHdfsPodId(hdfsPod);
+            }
+            TransformationProgress progress = sourceTransformationService.pipelineTransform(transformationRequest, hdfsPod);
+            if (progress == null) {
+                throw new IllegalStateException("Cannot start a new progress for your request");
+            }
+            return progress;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getTargetSource() });
+        } finally {
+            hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
     }
 }
