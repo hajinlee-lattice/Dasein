@@ -1,0 +1,7 @@
+<ul>
+  <li class="checkbox" ng-repeat="opt in options">
+    <label>
+      <input type="checkbox" ng-model="selected[opt[key]]" ng-checked="selected[opt[key]]"/>{{::opt.name}}
+    </label>
+  </li>
+</ul>

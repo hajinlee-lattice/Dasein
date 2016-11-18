@@ -13,6 +13,11 @@
   -webkit-transition: all 0.2s ease;
 }
 
+.pipeline-list-container {
+  border-right: 1px solid #ccc;
+  overflow-x: auto;
+}
+
 .pipeline-list,
 .pipeline-step-list {
   font-size: 13px;
@@ -21,12 +26,12 @@
 
 .pipeline-list {
   padding: 0;
-  overflow-y: auto;
-  border-right: 1px solid #ccc;
+  display: inline-block;
+  min-width: 100%;
   height: ~"calc(100vh - 200px)";
 
   li {
-    display: table-row;
+    min-width: 100%;
     cursor: pointer;
 
     div {
@@ -68,6 +73,13 @@
   i {
     cursor: pointer;
     color: #3d7fcd;
+  }
+}
+
+.pipeline-description {
+  textarea {
+    resize: vertical;
+    max-width: 100%;
   }
 }
 
@@ -165,4 +177,12 @@
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.modelrun-status.json-panel {
+  pre {
+    height: 200px;
+    resize: vertical;
+    overflow-y: auto;
+  }
 }

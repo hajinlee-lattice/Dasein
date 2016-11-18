@@ -1,13 +1,11 @@
 <section class="row create-pipeline-main">
-  <div ng-class="vm_pipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'">
+  <div ng-class="vm_pipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'" class="pipeline-list-container no-gutter">
     <h4>{{::vm_pipeline.labels.PIPELINES}}</h4>
     <ul class="pipeline-list">
       <li ng-repeat="pipeline in vm_pipeline.analyticPipelines"
         ng-class="{selected: vm_pipeline.selectedPipeline === pipeline}"
         ng-click="vm_pipeline.selectPipeline(pipeline)">
-        <div>
-          {{::pipeline.name}}
-        </div>
+        <div>{{::pipeline.name}}</div>
       </li>
     </ul>
   </div>
@@ -17,11 +15,9 @@
         <h2 class="text-center">{{::vm_pipeline.spinnerMsg}}</h2>
     </div>
     <div ng-if="vm_pipeline.message" class="row">
-      <p class="alert" ng-class="vm_pipeline.error ? 'alert-danger' : 'alert-success'">
-        {{vm_pipeline.message}}
-      </p>
+      <p class="alert" ng-class="vm_pipeline.error ? 'alert-danger' : 'alert-success'">{{vm_pipeline.message}}</p>
     </div>
-    <div ng-if="!vm_pipeline.loading && vm_pipeline.selectedPipeline">
+    <div ng-if="!vm_pipeline.loading && vm_pipeline.selectedPipeline" class="container-fluid">
       <div class="row">
         <h4>{{::vm_pipeline.labels.STEPS}}</h4>
         <form class="form-group">
@@ -78,7 +74,7 @@
           </select>
         </form>
       </div>
-      <div class="row">
+      <div class="row pipeline-description">
         <form class="form-group">
           <label>{{::vm_pipeline.labels.PIPELINE_DESCRIPTION}}:</label>
           <textarea class="form-control" placeholder="{{::vm_pipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_pipeline.pipelineDescription"/>

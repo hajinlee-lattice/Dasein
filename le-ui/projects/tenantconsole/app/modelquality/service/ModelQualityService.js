@@ -57,7 +57,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 } catch (e) {
                     if (status === 200) {
                         return {
-                            pipelineName: data
+                            analyticPipelineName: data
                         };
                     } else {
                         return data;
@@ -131,7 +131,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 } catch (e) {
                     if (status === 200) {
                         return {
-                            analyticTestName: data
+                            dataSetName: data
                         };
                     } else {
                         return data;
@@ -452,6 +452,66 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
     this.GetAllDatasets = function () {
         return this.GetDatasets();
+    };
+
+    this.GetDatasetByName = function (datasetName) {
+        return this.GetDatasets(datasetName);
+    };
+
+    this.CreateDatasetFromTenant = function (tenantType, tenantId, modelId, playExternalId) {
+
+        var defer = $q.defer();
+
+        var result = {
+            success: false,
+            resultObj: [],
+            errMsg: null
+        };
+
+        var params = {
+            tenantType: tenantType,
+            tenantId: tenantId,
+            modelID: modelId,
+            playExternalID: playExternalId
+        };
+
+        $http({
+            method: 'POST',
+            url: '/modelquality/datasets/createFromTenant',
+            params: params,
+            transformResponse: [function (data, headers, status) {
+                // why is this api returning a string!
+                try {
+                    return JSON.parse(data);
+                } catch (e) {
+                    if (status === 200) {
+                        return {
+                            analyticTestName: data
+                        };
+                    } else {
+                        return data;
+                    }
+                }
+            }]
+        }).success(function(data) {
+            result.success = true;
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
+    this.CreateDatasetFromTenantByModelId = function (tenantType, tenantId, modelId) {
+        return this.CreateDatasetFromTenant(tenantType, tenantId, modelId, undefined);
+    };
+
+    this.CreateDatasetFromTenantByPlayExternalId = function (tenantType, tenantId, playExternalId) {
+        return this.CreateDatasetFromTenant(tenantType, tenantId, undefined, playExternalId);
     };
 
     // /modelquality/propdataconfigs/

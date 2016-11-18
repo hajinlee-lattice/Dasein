@@ -185,6 +185,7 @@ module.exports = function(grunt) {
                         '<%= app.dir %>/app/modelquality/controller/ModelQualityRootCtrl.js',
                         '<%= app.dir %>/app/modelquality/directive/ModelQualityLineChart.js',
                         '<%= app.dir %>/app/modelquality/directive/ModelQualityGroupBarChart.js',
+                        '<%= app.dir %>/app/modelquality/directive/MultiSelectCheckbox.js',
                         '<%= app.dir %>/app/modelquality/service/InfluxDbService.js',
                         '<%= app.dir %>/app/modelquality/service/ModelQualityService.js',
                         '<%= app.dir %>/app/modelquality/dashboard/controller/ModelQualityDashboardCtrl.js',
