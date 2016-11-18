@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,8 +41,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
 
     private final AtomicBoolean fetchersInitiated = new AtomicBoolean(false);
 
-    private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, DataSourceLookupRequest> reqs = new ConcurrentHashMap<>();
     private final Queue<String> pendingReqIds = new ConcurrentLinkedQueue<>();
 
     private void initExecutors() {
@@ -126,8 +122,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             initExecutors();
         }
 
-        reqReturnAddrs.put(lookupRequestId, returnAddress);
-        reqs.put(lookupRequestId, request);
+        saveReq(lookupRequestId, returnAddress, request);
         pendingReqIds.offer(lookupRequestId);
         synchronized (pendingReqIds) {
             if (pendingReqIds.size() > 0 && pendingReqIds.size() <= chunkSize) {
@@ -149,12 +144,13 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                         try {
                             pendingReqIds.wait();
                         } catch (InterruptedException e) {
-                            log.error(e);
+                            log.error(String.format("Encounter InterruptedException in Dynamo fetcher: %s",
+                                    e.getMessage()));
                         }
                     }
                     for (int i = 0; i < Math.min(pendingReqIds.size(), chunkSize); i++) {
                         String lookupRequestId = pendingReqIds.poll();
-                        DataSourceLookupRequest req = reqs.get(lookupRequestId);
+                        DataSourceLookupRequest req = getReq(lookupRequestId);
                         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) req.getInputData();
                         String dataCloudVersion = req.getMatchTravelerContext().getDataCloudVersion();
                         if (!lookupReqWithVersion.containsKey(dataCloudVersion)) {
@@ -169,34 +165,49 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                     }
                 }
                 for (String dataCloudVersion : lookupReqWithVersion.keySet()) {
-                    Long startTime = System.currentTimeMillis();
-                    List<String> results = accountLookupService
-                            .batchLookupIds(lookupReqWithVersion.get(dataCloudVersion));
-                    List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
-                    log.info(String.format(
-                            "Fetched results from Dynamo for %d async requests (DataCloudVersion=%s) Duration=%d",
-                            reqIds.size(), dataCloudVersion, System.currentTimeMillis() - startTime));
-                    if (results.size() != reqIds.size()) {
-                        log.error("Dynamo lookup failed to return complete matching results");
-                    }
-                    for (int i = 0; i < Math.min(results.size(), reqIdsWithVersion.get(dataCloudVersion).size()); i++) {
-                        String result = results.get(i);
-                        if (StringUtils.isNotEmpty(result)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Got result from lookup for Lookup key=" + reqIds.get(i)
-                                        + " Lattice Account Id=" + result);
-                            }
-                        } else {
-                            // may not be able to handle empty string
-                            result = null;
-                            if (log.isDebugEnabled()) {
-                                log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
-                            }
+                    try {
+                        Long startTime = System.currentTimeMillis();
+                        List<String> results = accountLookupService
+                                .batchLookupIds(lookupReqWithVersion.get(dataCloudVersion));
+                        List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
+                        log.info(String.format(
+                                "Fetched results from Dynamo for %d async requests (DataCloudVersion=%s) Duration=%d",
+                                reqIds.size(), dataCloudVersion, System.currentTimeMillis() - startTime));
+                        if (results == null) {
+                            throw new RuntimeException(String.format(
+                                    "Dynamo lookup got null matching results: submitted %d requests", reqIds.size()));
                         }
-                        sendResponse(reqIds.get(i), result, reqReturnAddrs.get(reqIds.get(i)));
-                        reqReturnAddrs.remove(reqIds.get(i));
-                        reqs.remove(reqIds.get(i));
+                        if (results.size() != reqIds.size()) {
+                            throw new RuntimeException(String.format(
+                                    "Dynamo lookup failed to return complete matching results: submitted %d requests but only got %d results back",
+                                    reqIds.size(), results.size()));
+                        }
+                        for (int i = 0; i < results.size(); i++) {
+                            String result = results.get(i);
+                            if (StringUtils.isNotEmpty(result)) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Got result from lookup for Lookup key=" + reqIds.get(i)
+                                            + " Lattice Account Id=" + result);
+                                }
+                            } else {
+                                // may not be able to handle empty string
+                                result = null;
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
+                                }
+                            }
+                            sendResponse(reqIds.get(i), result, getReqReturnAdd(reqIds.get(i)));
+                            removeReq(reqIds.get(i));
+                        }
+                    } catch (Exception ex) {
+                        List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
+                        for (String reqId : reqIds) {
+                            DataSourceLookupRequest req = getReq(reqId);
+                            sendFailureResponse(req, ex);
+                            removeReq(reqId);
+                        }
                     }
+
                 }
             }
         }

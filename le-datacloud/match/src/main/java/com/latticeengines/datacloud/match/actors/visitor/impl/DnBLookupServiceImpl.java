@@ -3,9 +3,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +39,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private DnBCacheService dnbCacheService;
 
-    private final ConcurrentMap<String, String> reqReturnAddrs = new ConcurrentHashMap<String, String>();
     private final Queue<DnBMatchContext> unsubmittedReqs = new ConcurrentLinkedQueue<DnBMatchContext>();
     private final Queue<DnBBatchMatchContext> submittedReqs = new ConcurrentLinkedQueue<DnBBatchMatchContext>();
 
@@ -98,8 +95,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             return;
         }
 
-        reqReturnAddrs.put(lookupRequestId, returnAddress);
-
+        saveReq(lookupRequestId, returnAddress, request);
         unsubmittedReqs.offer(context);
 
         if (log.isDebugEnabled()) {
@@ -195,8 +191,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             } else {
                 dnbCacheService.addCache(context);
             }
-            sendResponse(lookupRequestId, context, reqReturnAddrs.get(lookupRequestId));
-            reqReturnAddrs.remove(lookupRequestId);
+            sendResponse(lookupRequestId, context, getReqReturnAdd(lookupRequestId));
+            removeReq(lookupRequestId);
         }
     }
 
