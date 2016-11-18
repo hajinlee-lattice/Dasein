@@ -182,11 +182,10 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     }
 
     @Override
-    public String createDataSetFromTenant(String tenantName, DataSetTenantType tenantType, String modelID,
-            String playExternalID) {
+    public String createDataSetFromTenant(DataSetTenantType tenantType, String tenantId, String sourceId) {
         String url = constructUrl(
-                "/datasets/createFromTenant?tenantId={tenantId}&tenantType={tenantType}&modelID={modelID}&playExternalID={playExternalID}",
-                tenantName, tenantType, modelID, playExternalID);
+                "/datasets/create?tenantType={tenantType}&tenantId={tenantId}&sourceId={sourceId}",
+                tenantType, tenantId, sourceId);
         return post("createDataSet", url, null, String.class);
     }
 

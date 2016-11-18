@@ -23,36 +23,36 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
     DataSetEntityMgr dataSetEntityMgr;
     
     @Override
-    public String createDataSetFromLP2Tenant(String tenantId, String modelID){
-        return createDataSetFromLPTenant(tenantId, modelID, "2.0");
+    public String createDataSetFromLP2Tenant(String tenantId, String modelId){
+        return createDataSetFromLPTenant(tenantId, modelId, "2.0");
     }
     
     @Override
-    public String createDataSetFromLPITenant(String tenantId, String modelID){
-        return createDataSetFromLPTenant(tenantId, modelID, "3.0");
+    public String createDataSetFromLPITenant(String tenantId, String modelId){
+        return createDataSetFromLPTenant(tenantId, modelId, "3.0");
     }
     
     @Override
-    public String createDataSetFromPlaymakerTenant(String tenantName, String playExternalID){
+    public String createDataSetFromPlaymakerTenant(String tenantName, String playExternalId){
         throw new NotImplementedException("Playmaker tenants are not yet supported");
     }
 
-    private String createDataSetFromLPTenant(String tenantId, String modelID, String version) {
+    private String createDataSetFromLPTenant(String tenantId, String modelId, String version) {
 
-        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelID,
+        ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId,
                 CustomerSpace.parse(tenantId));
         if(modelSummary == null){
-            throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelID});
+            throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelId});
         }
         String trainingFilePath = modelSummary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
         
         if(trainingFilePath == null || trainingFilePath.isEmpty()){
-            throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelID});
+            throw new LedpException(LedpCode.LEDP_35005, new String[] {tenantId, modelId});
         }
         
         if(modelSummary.getSourceSchemaInterpretation() == null || modelSummary.getSourceSchemaInterpretation().isEmpty()){
-            throw new LedpException(LedpCode.LEDP_35006, new String[] {tenantId, modelID});
+            throw new LedpException(LedpCode.LEDP_35006, new String[] {tenantId, modelId});
         }
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(modelSummary.getSourceSchemaInterpretation());
         
@@ -62,7 +62,7 @@ public class DataSetServiceImpl extends BaseServiceImpl implements DataSetServic
         }
         
         dataset = new DataSet();
-        dataset.setName(tenantId+"_"+modelID);
+        dataset.setName(tenantId+"_"+modelId);
         dataset.setDataSetType(DataSetType.FILE);
         dataset.setSchemaInterpretation(schemaInterpretation);
         dataset.setTrainingSetHdfsPath(trainingFilePath);

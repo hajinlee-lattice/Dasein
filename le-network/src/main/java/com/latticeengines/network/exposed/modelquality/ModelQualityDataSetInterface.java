@@ -13,6 +13,5 @@ public interface ModelQualityDataSetInterface {
 
     DataSet getDataSetByName(String dataSetName);
 
-    String createDataSetFromTenant(String tenantName, DataSetTenantType tenantType, String modelID,
-            String playExternalID);
+    String createDataSetFromTenant(DataSetTenantType tenantType, String tenantId, String sourceId);
 }

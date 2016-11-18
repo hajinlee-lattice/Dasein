@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.DataSetTenantType;
 import com.latticeengines.modelquality.entitymgr.DataSetEntityMgr;
@@ -34,7 +32,7 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
 
     @Autowired
     private DataSetEntityMgr dataSetEntityMgr;
-    
+
     @Autowired
     private DataSetService dataSetService;
 
@@ -55,34 +53,23 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
     }
 
     @Override
-    @RequestMapping(value = "/createFromTenant", method = RequestMethod.POST)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert new DataSet for given tenant")
-    public String createDataSetFromTenant(@RequestParam("tenantId") String tenantName,
-            @RequestParam("tenantType") DataSetTenantType tenantType,
-            @RequestParam(value = "modelID", required = false) String modelID,
-            @RequestParam(value = "playExternalID", required = false) String playExternalID) {
-        switch(tenantType){
+    public String createDataSetFromTenant(@RequestParam("tenantType") DataSetTenantType tenantType,
+            @RequestParam("tenantId") String tenantId, @RequestParam("sourceId") String sourceId) {
+        String toReturn = null;
+        switch (tenantType) {
         case LP2:
-            if(modelID == null || modelID.isEmpty()){
-                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LP2"});
-            }
-            dataSetService.createDataSetFromLP2Tenant(tenantName, modelID);
+            toReturn = dataSetService.createDataSetFromLP2Tenant(tenantId, sourceId);
             break;
         case LPI:
-            if(modelID == null || modelID.isEmpty()){
-                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Model ID", "LPI"});
-            }
-            dataSetService.createDataSetFromLPITenant(tenantName, modelID);
+            toReturn = dataSetService.createDataSetFromLPITenant(tenantId, sourceId);
             break;
         case PLAYMAKER:
-            if(playExternalID == null || playExternalID.isEmpty()){
-                throw new LedpException(LedpCode.LEDP_35004, new String[]{ "Play ExternalID", "PLAYMAKER"});
-            }
-            dataSetService.createDataSetFromPlaymakerTenant(tenantName, playExternalID);
+            toReturn = dataSetService.createDataSetFromPlaymakerTenant(tenantId, sourceId);
         }
-        return null;
-        
+        return toReturn;
     }
 
     @Override
