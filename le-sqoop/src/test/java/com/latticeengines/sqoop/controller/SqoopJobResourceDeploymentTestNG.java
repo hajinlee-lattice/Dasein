@@ -185,6 +185,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setQuery(sqlQuery) //
                 .setSplitColumn("SeedID") //
                 .setMode(SqoopImporter.Mode.QUERY) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .setNumMappers(1) //
                 .build();
         List<String> otherOptions = new ArrayList<>(
