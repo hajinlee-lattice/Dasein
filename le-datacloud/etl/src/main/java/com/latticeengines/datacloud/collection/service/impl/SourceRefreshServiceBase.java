@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,13 +26,13 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Progress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -52,7 +53,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     abstract Source getSource();
 
     @Autowired
-    protected SqoopService sqoopService;
+    protected SqoopProxy sqoopProxy;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
@@ -182,7 +183,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             P progress) {
         try {
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, splitColumn, whereClause);
-            ApplicationId appId = sqoopService.importTable(importer);
+            ApplicationId appId = ConverterUtils
+                    .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
@@ -230,7 +232,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         return new SqoopExporter.Builder().setCustomer(SQOOP_CUSTOMER_PROPDATA + sqlTable).setNumMappers(numMappers)
                 .setTable(sqlTable).setSourceDir(avroDir).setDbCreds(new DbCreds(credsBuilder))
                 .addHadoopArg(JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT)
-                .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION).addExtraOption(SQOOP_OPTION_BATCH).setSync(false).build();
+                .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION).addExtraOption(SQOOP_OPTION_BATCH)
+                .setSync(false).build();
     }
 
     protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String splitColumn,

@@ -55,10 +55,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     private DbMetadataService dbMetadataService;
 
     public ApplicationId exportData(SqoopExporter exporter) {
-        Configuration yarnConfiguration = exporter.getYarnConfiguration();
-        if (yarnConfiguration == null) {
-            yarnConfiguration = new Configuration(this.yarnConfiguration);
-        }
+        Configuration yarnConfiguration = new Configuration(this.yarnConfiguration);
         int numMappers = exporter.getNumMappers();
         if (numMappers < 1) {
             numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
@@ -114,11 +111,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     }
 
     public ApplicationId importData(SqoopImporter importer) {
-
-        Configuration yarnConfiguration = importer.getYarnConfiguration();
-        if (yarnConfiguration == null) {
-            yarnConfiguration = new Configuration(this.yarnConfiguration);
-        }
+        Configuration yarnConfiguration = new Configuration(this.yarnConfiguration);
 
         boolean targeDirExists = false;
         try {
@@ -296,6 +289,9 @@ public class SqoopJobServiceImpl implements SqoopJobService {
     }
 
     protected String overwriteQueue(String queue) {
+        if (StringUtils.isEmpty(queue)) {
+            queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        }
         return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
     }
 

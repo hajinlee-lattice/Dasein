@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -33,7 +32,6 @@ public class SqoopExporter {
     private int numMappers;
     private String javaColumnTypeMappings;
     private List<String> exportColumns;
-    private Configuration yarnConfiguration;
     private boolean sync;
     private List<String> hadoopArgs;
     private List<String> otherOptions;
@@ -129,14 +127,6 @@ public class SqoopExporter {
         this.exportColumns = exportColumns;
     }
 
-    public Configuration getYarnConfiguration() {
-        return yarnConfiguration;
-    }
-
-    public void setYarnConfiguration(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
-
     @JsonProperty("sync")
     public boolean isSync() {
         return sync;
@@ -186,7 +176,6 @@ public class SqoopExporter {
         private int numMappers = 0;
         private String javaColumnTypeMappings;
         private List<String> exportColumns = new ArrayList<>();
-        private Configuration yarnConfiguration;
         private boolean sync = false;
         private List<String> hadoopArgs = new ArrayList<>();
         private List<String> otherOptions = new ArrayList<>();
@@ -201,7 +190,6 @@ public class SqoopExporter {
             exporter.setNumMappers(this.numMappers);
             exporter.setJavaColumnTypeMappings(this.javaColumnTypeMappings);
             exporter.setExportColumns(new ArrayList<>(this.exportColumns));
-            exporter.setYarnConfiguration(this.yarnConfiguration);
             exporter.setSync(this.sync);
 
             Set<String> hadoopArgKeys = new HashSet<>();
@@ -271,11 +259,6 @@ public class SqoopExporter {
 
         public Builder setExportColumns(List<String> exportColumns) {
             this.exportColumns = exportColumns;
-            return this;
-        }
-
-        public Builder setYarnConfiguration(Configuration yarnConfiguration) {
-            this.yarnConfiguration = yarnConfiguration;
             return this;
         }
 

@@ -28,7 +28,6 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.etl.service.SqoopService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-datacloud-etl-context.xml" })
@@ -65,9 +64,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private SqoopService sqoopService;
 
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -117,7 +118,9 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
 
         if (PurgeStrategy.NUM_VERSIONS.equals(purgeStrategy)) {
             int numToKeep = getSource().getNumberOfVersionsToKeep();
-            if (versions.size() <= numToKeep) { return; }
+            if (versions.size() <= numToKeep) {
+                return;
+            }
 
             Collections.sort(versions);
             Collections.reverse(versions);
@@ -207,9 +210,9 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             createStageTable();
 
             SqoopExporter exporter = getCollectionDbExporter(stageTableName, avroDir);
-            ApplicationId appId = sqoopService.exportTable(exporter);
-            FinalApplicationStatus status =
-                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            ApplicationId appId = ConverterUtils
+                    .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

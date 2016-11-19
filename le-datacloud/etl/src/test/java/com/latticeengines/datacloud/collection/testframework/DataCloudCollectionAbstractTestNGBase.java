@@ -71,7 +71,7 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
         DbCreds creds = new DbCreds(builder);
-        // sqoopService.exportDataSync(destTable, avroDir, creds, assignedQueue, customer + "-upload-" + destTable, numMappers, null);
+        // sqoopProxy.exportDataSync(destTable, avroDir, creds, assignedQueue, customer + "-upload-" + destTable, numMappers, null);
     }
 
     @SuppressWarnings("unused")

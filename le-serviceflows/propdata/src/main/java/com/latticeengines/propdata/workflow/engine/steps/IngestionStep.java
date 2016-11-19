@@ -24,7 +24,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
-import com.latticeengines.datacloud.etl.service.SqoopService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
@@ -37,6 +36,8 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("ingestionStep")
@@ -53,7 +54,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private EaiProxy eaiProxy;
 
     @Autowired
-    private SqoopService sqoopService;
+    private SqoopProxy sqoopProxy;
 
     private YarnClient yarnClient;
 
@@ -142,11 +143,17 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir.toString())) {
             HdfsUtils.rmdir(yarnConfiguration, hdfsDir.toString());
         }
-        SqoopImporter importer = new SqoopImporter.Builder().setCustomer(progress.getTriggeredBy())
-                .setTable(sqlToTextConfig.getDbTable()).setTargetDir(hdfsDir.toString())
-                .setDbCreds(new DbCreds(credsBuilder)).setMode(sqlToTextConfig.getSqoopMode())
-                .setQuery(sqlToTextConfig.getDbQuery()).setNumMappers(sqlToTextConfig.getMappers())
-                .setSplitColumn(sqlToTextConfig.getSplitColumn()).build();
+        SqoopImporter importer = new SqoopImporter.Builder() //
+                .setCustomer(progress.getTriggeredBy()) //
+                .setTable(sqlToTextConfig.getDbTable()) //
+                .setTargetDir(hdfsDir.toString()) //
+                .setDbCreds(new DbCreds(credsBuilder)) //
+                .setMode(sqlToTextConfig.getSqoopMode()) //
+                .setQuery(sqlToTextConfig.getDbQuery()) //
+                .setNumMappers(sqlToTextConfig.getMappers()) //
+                .setSplitColumn(sqlToTextConfig.getSplitColumn()) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
+                .build();
         List<String> otherOptions = new ArrayList<>(Arrays.asList("--relaxed-isolation", "--as-textfile"));
         if (!StringUtil.isEmpty(sqlToTextConfig.getNullString())) {
             otherOptions.add("--null-string");
@@ -171,7 +178,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             otherOptions.add(sqlToTextConfig.getFieldTerminatedBy());
         }
         importer.setOtherOptions(otherOptions);
-        ApplicationId appId = sqoopService.importTable(importer);
+        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration,
                 appId, WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus != FinalApplicationStatus.SUCCEEDED) {
