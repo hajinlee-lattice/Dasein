@@ -18,7 +18,6 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -254,8 +253,7 @@ public abstract class BaseRestApiProxy {
         this.hostport = hostport;
     }
 
-    @VisibleForTesting
-    void setMaxAttempts(int maxAttempts) {
+    protected void setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
 

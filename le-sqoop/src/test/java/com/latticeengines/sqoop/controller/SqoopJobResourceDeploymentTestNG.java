@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-sqoop-context.xml" })
@@ -107,6 +108,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setNumMappers(4) //
                 .setTable(sqlTable) //
                 .setSourceDir(AVRO_DIR) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .setDbCreds(new DbCreds(credsBuilder)).build();
         AppSubmission submission = sqoopProxy.exportData(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
@@ -129,6 +131,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setNumMappers(4) //
                 .setTable(sqlTable) //
                 .setTargetDir(AVRO_DIR) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .setSplitColumn("LE_Last_Upload_Date") //
                 .setDbCreds(new DbCreds(credsBuilder)) //
                 .build();
@@ -155,6 +158,7 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
                 .setDbCreds(new DbCreds(credsBuilder)) //
                 .addExtraOption("--input-optionally-enclosed-by") //
                 .addExtraOption("\"") //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .build();
         AppSubmission submission = sqoopProxy.exportData(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));

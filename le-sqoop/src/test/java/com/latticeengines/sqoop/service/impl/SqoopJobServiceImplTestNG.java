@@ -1,4 +1,4 @@
-package com.lattcom.latticeengines.sqoop.service.impl;
+package com.latticeengines.sqoop.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqooop.functionalframework.SqoopFunctionalTestNGBase;
+import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {

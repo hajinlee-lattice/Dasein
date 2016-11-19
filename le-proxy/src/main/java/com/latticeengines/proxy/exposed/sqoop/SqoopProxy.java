@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.sqoop;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
@@ -13,6 +15,11 @@ public class SqoopProxy extends BaseRestApiProxy {
 
     public SqoopProxy() {
         super(PropertyUtils.getProperty("common.sqoop.url"), "/sqoop/jobs");
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        setMaxAttempts(1);
     }
 
     public AppSubmission importData(SqoopImporter importer) {

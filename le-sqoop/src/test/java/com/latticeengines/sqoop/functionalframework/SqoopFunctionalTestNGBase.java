@@ -1,4 +1,4 @@
-package com.latticeengines.sqooop.functionalframework;
+package com.latticeengines.sqoop.functionalframework;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;

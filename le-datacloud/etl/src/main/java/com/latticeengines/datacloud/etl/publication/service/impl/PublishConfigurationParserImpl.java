@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,6 +131,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                 .setDbCreds(getDbCreds(sqlConfiguration)) //
                 .addHadoopArg(JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT) //
                 .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .setSync(false) //
                 .build();
     }
@@ -147,6 +149,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                 .setDbCreds(getDbCreds(textToSqlConfiguration)) //
                 .addHadoopArg(JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT) //
                 .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION) //
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()) //
                 .setSync(false) //
                 .build();
         List<String> otherOptions = new ArrayList<String>();

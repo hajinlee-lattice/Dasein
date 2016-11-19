@@ -18,7 +18,7 @@ import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
-import com.latticeengines.sqooop.functionalframework.SqoopFunctionalTestNGBase;
+import com.latticeengines.sqoop.functionalframework.SqoopFunctionalTestNGBase;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 
 public class MetadataServiceImplTestNG extends SqoopFunctionalTestNGBase {
