@@ -124,7 +124,7 @@
                         <div class="box-inner">
                             <div class="header">
                                 <div ng-if="::enrichment.Subcategory" class="ico">
-                                    <img ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" />
+                                    <img fallback-src="{{vm.categoryIcon(enrichment.Category)}}" ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" onerror="this.parentNode.className='ico broken-image'"/>
                                 </div>
                                 <div ng-if="::!enrichment.Subcategory" class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
                                 <ul class="categories">

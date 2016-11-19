@@ -416,12 +416,12 @@ angular.module('lp.enrichment.leadenrichment', [
         }
     }
 
-    var subcategoryRenamer = function(string){
+    var subcategoryRenamer = function(string, replacement){
         if(string) {
-            return string.toLowerCase().replace(/\W+/g, '');
+            var replacement = replacement || '';
+            return string.toLowerCase().replace(/\W+/g, replacement);
         }
         return '';
-
     }
 
     vm.subcategoryIcon = function(category, subcategory){
@@ -429,6 +429,14 @@ angular.module('lp.enrichment.leadenrichment', [
             category = subcategoryRenamer(category),
             subcategory = subcategoryRenamer(subcategory),
             icon = category + (subcategory ? '-'+subcategory : '') + '.png';
+
+        return path + icon;
+    }
+
+    vm.categoryIcon = function(category){
+        var path = '/assets/images/enrichments/',
+            category = subcategoryRenamer(category, '-'),
+            icon = 'ico-attr-' + category + '.png';
 
         return path + icon;
     }
@@ -493,4 +501,15 @@ angular.module('lp.enrichment.leadenrichment', [
     }
 
     vm.init();
+})
+.directive('fallbackSrc', function () {
+    var fallbackSrc = {
+        link: function postLink(scope, iElement, iAttrs) {
+            iElement.bind('error', function() {
+                angular.element(this).attr("src", iAttrs.fallbackSrc);
+            });
+        }
+    }
+    console.log(fallbackSrc);
+    return fallbackSrc;
 });

@@ -499,6 +499,11 @@
                         height: 100%;
                         width: 100%;
                     }
+                    &.broken-image {
+                        img {
+                            opacity: .5;
+                        }
+                    }
                 }
                 .categories {
                     display: inline;
