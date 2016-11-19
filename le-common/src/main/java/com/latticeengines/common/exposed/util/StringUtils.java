@@ -20,7 +20,7 @@ public class StringUtils {
             return null;
         }
         Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '(', ')', '+', '=', '{', '}', '[', ']', '\'', '"',
-                '<', '>', '.' };
+                '<', '>', '.', '’' };
         Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',' };
         Set<Character> removedSet = new HashSet<Character>(Arrays.asList(removed));
         Set<Character> replacedBySpaceSet = new HashSet<Character>(Arrays.asList(replacedBySpace));
