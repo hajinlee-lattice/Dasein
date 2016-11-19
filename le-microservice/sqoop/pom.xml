@@ -34,6 +34,10 @@
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.sqoop</groupId>
+                    <artifactId>sqoop</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
