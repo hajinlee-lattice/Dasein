@@ -192,7 +192,6 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     eventVector = data[schema["target"]]
     configMetadata = schema["config_metadata"]
 
-
     attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[],
                       "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
 
@@ -429,7 +428,10 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         index: id of next column in output file
     '''
 
+    (displayname, approvedusage, category, fundamentaltype) = otherMetadata
+
     if len(columnVector.unique()) > 200:
+        approvedusage = 'None'
         columnVector = columnVector.apply(lambda x: 'LATTICE_GT200_DiscreteValue' if not isnull(x) else None)
 
     mi, componentMi = calculateMutualInfo(columnVector, eventVector)
@@ -445,10 +447,10 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         (numPosEvents, lift) = getLift(avgProbability, valueCount, valueVector, eventVector)
         datum["id"] = index
         datum["barecolumnname"] = colName
-        datum["displayname"] = otherMetadata[0]
-        datum["approvedusage"] = otherMetadata[1]
-        datum["category"] = otherMetadata[2]
-        datum["fundamentaltype"] = otherMetadata[3]
+        datum["displayname"] = displayname
+        datum["approvedusage"] = approvedusage
+        datum["category"] = category
+        datum["fundamentaltype"] = fundamentaltype
         datum["columnvalue"] = value
         datum["Dtype"] = "STR"
         datum["minV"] = None
