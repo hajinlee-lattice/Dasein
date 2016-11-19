@@ -18,7 +18,7 @@ angular.module('lp.campaigns.list', [
 
     });
 
-    vm.createCampaignClick = function ($event) {
+    vm.showCreateCampaignModal = function ($event) {
         
         console.log("create campaign");
         if ($event != null) {

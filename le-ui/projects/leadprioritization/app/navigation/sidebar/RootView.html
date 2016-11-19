@@ -5,8 +5,11 @@
         </a>
     </div>
     <ul class="menu">
-        <li role="presentation" ng-class="{active: $state.includes('home.campaigns') || $state.includes('home.models') || $state.includes('home.models.history')}">
-            <a ui-sref="home.campaigns" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_WORKSHOP')}}" ui-sref-opts="{reload: true}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_WORKSHOP')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_WORKSHOP')}}</span></a>
+        <li role="presentation" ng-class="{active: $state.includes('home.models') || $state.includes('home.models.history')}">
+            <a ui-sref="home.models" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}" ui-sref-opts="{reload: true}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}</span></a>
+        </li>
+        <li ng-if="showCampaignsPage" role="presentation" ng-class="{active: $state.includes('home.campaigns')}">
+            <a ui-sref="home.campaigns" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_CAMPAIGNS')}}" ui-sref-opts="{reload: true}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_CAMPAIGNS')}}"><span class="ico ico-model ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_CAMPAIGNS')}}</span></a>
         </li>
         <li ng-if="showUserManagement" role="presentation" ui-sref-active="active">
             <a ui-sref="home.users" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}"><span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}"><span class="ico ico-user ico-light-gray"></span></span><span class="label">{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_USERS')}}</span></a>

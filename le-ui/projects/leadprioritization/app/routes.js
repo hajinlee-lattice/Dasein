@@ -3,7 +3,7 @@ angular
 .run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
     $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
-        if (fromState.name == 'home.campaigns' && toState.name == 'home') {
+        if (fromState.name == 'home.models' && toState.name == 'home') {
             evt.preventDefault();
             window.open("/login", "_self");
         }
@@ -86,7 +86,7 @@ angular
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
                             
-                            $state.go('home.campaigns', { 
+                            $state.go('home.models', { 
                                 tenantName: Tenant.DisplayName
                             });
                         }
@@ -94,42 +94,11 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 }
             }
-        }) 
-        .state('home.campaigns', {
-            url: '/campaigns',
-            params: {
-                pageTitle: 'Workshop',
-                pageIcon: 'ico-model'
-            },
-            resolve: {
-                CampaignList: function($q, CampaignStore) {
-                    var deferred = $q.defer();
-
-                    CampaignStore.getCampaigns(true).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                "navigation@": {
-                    templateUrl: 'app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/ModelListView.html'
-                },
-                "main@": {
-                    controller: 'CampaignListController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/campaigns/views/CampaignListView.html'
-                }
-            }
         })
         .state('home.models', {
             url: '/models',
             params: {
-                pageTitle: 'Workshop',
+                pageTitle: 'Models',
                 pageIcon: 'ico-model'
             },
             resolve: {
@@ -161,7 +130,7 @@ angular
             url: '/history',
             params: {
                 pageIcon: 'ico-model',
-                pageTitle: 'Workshop'
+                pageTitle: 'Models > Creation History'
             },
             views: {
                 "navigation@": {
@@ -396,6 +365,34 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/RefineModelColumnsView.html'
                 }   
+            }
+        })
+        .state('home.campaigns', {
+            url: '/campaigns',
+            params: {
+                pageTitle: 'Campaigns',
+                pageIcon: 'ico-model'
+            },
+            resolve: {
+                CampaignList: function($q, CampaignStore) {
+                    var deferred = $q.defer();
+
+                    CampaignStore.getCampaigns(true).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "main@": {
+                    controller: 'CampaignListController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/campaigns/views/CampaignListView.html'
+                }
             }
         })
         .state('home.marketosettings', {
@@ -785,7 +782,7 @@ angular
                                 .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                         }
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
                 }
             }
         })

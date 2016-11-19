@@ -2,18 +2,40 @@
     <section id="main-content" class="container lp-campaign-list">
 
         <div class="row">
-            <ul class="twelve columns campaign-list">
-                <li 
+            <ul class="twelve columns tile-list">
+                <!-- <li 
                     data-campaign-list-tile-widget
                     class="campaign"
                     ng-repeat="campaign in campaigns"
                     data="campaign">
+                </li> -->
+                <li class="list-item">
+                    <div 
+                        class="campaign-tile" 
+                        ng-click="tileClick($event)" 
+                        ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
+                        ui-sref="home.campaign.models({ campaignName: '{{ data.name | escape }}' })">
+                        <div class="campaign-header">
+                            Campaign Type
+                            Dropdown
+                        </div>
+                        <div class="campaign-details">
+                            Name
+                            Description
+                            Meta Data
+                        </div>
+                        <div class="campaign-rename">
+                            Name
+                            Description
+                            Actions
+                        </div>
+                    </div>
                 </li>
                 <li>
                     <button 
                         type="button" 
                         class="button new-tile-button"
-                        ng-click="vm.createCampaignClick($event)">
+                        ng-click="vm.showCreateCampaignModal($event)">
                         <span>&#43;</span>
                         Create Campaign
                     </button>

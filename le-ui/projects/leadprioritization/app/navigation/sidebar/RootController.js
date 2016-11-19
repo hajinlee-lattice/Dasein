@@ -35,6 +35,7 @@ angular
             $scope.showEloquaSettings = FeatureFlagService.FlagIsEnabled(flags.USE_ELOQUA_SETTINGS);
             $scope.showSalesforceSettings = FeatureFlagService.FlagIsEnabled(flags.USE_SALESFORCE_SETTINGS);
             $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
+            $scope.showCampaignsPage = FeatureFlagService.FlagIsEnabled(flags.CAMPAIGNS_PAGE);
             $scope.showLeadEnrichmentPage = 1; 
         });
 
