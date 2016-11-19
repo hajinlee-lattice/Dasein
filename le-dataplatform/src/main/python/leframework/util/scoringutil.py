@@ -1,19 +1,20 @@
 import random
+import numpy as np
 
 class ScoringUtil():
 
     @staticmethod
     def score(mediator, data, logger):
-        
+
         if mediator.clf is None:
             return []
-        scored = mediator.clf.predict_proba(data[mediator.schema["features"]])
+        scored = mediator.clf.predict_proba(data[mediator.schema["features"]].apply(lambda x : x.round(8) if x.dtype == np.float64 else x))
         index = 1
         if len(scored) > 0 and len(scored[0]) < 2:
             logger.warn("All events have the same label.")
             index = 0
         return [sample[index] for sample in scored]
-    
+
     @staticmethod
     def sortWithRandom(df, axis=0, seed=-1, scale=.0001):
         random.seed(seed)

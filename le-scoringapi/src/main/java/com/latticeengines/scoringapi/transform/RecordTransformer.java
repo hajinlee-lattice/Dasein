@@ -1,5 +1,7 @@
 package com.latticeengines.scoringapi.transform;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,7 @@ public class RecordTransformer {
 
     @Autowired
     private TransformRetriever transformRetriever;
-    
+
     @Autowired
     private JythonEngineRetriever jythonEngineRetriever;
 
@@ -54,7 +56,8 @@ public class RecordTransformer {
                         } else if (value.toString().toLowerCase().equals("false")) {
                             value = entry.type.type().cast(Double.valueOf("0.0"));
                         } else if (!value.toString().equals("null") && !value.toString().equals("None")) {
-                            value = entry.type.type().cast(Double.valueOf(value.toString()));
+                            value = entry.type.type().cast(BigDecimal.valueOf(Double.valueOf(value.toString()))
+                                    .setScale(8, RoundingMode.HALF_UP).doubleValue());
                         } else {
                             value = null;
                         }

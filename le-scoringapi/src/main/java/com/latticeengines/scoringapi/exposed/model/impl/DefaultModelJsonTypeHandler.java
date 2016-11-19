@@ -1,6 +1,8 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -350,7 +352,8 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
-        double probability = (double) evaluation.get(ScoreType.PROBABILITY);
+        double probability = BigDecimal.valueOf((double) evaluation.get(ScoreType.PROBABILITY))
+                .setScale(8, RoundingMode.HALF_UP).doubleValue();
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 
         int percentile = (int) percentileObject;

@@ -2,6 +2,7 @@ import logging
 import sys
 
 import pandas as pd
+import numpy as np
 
 def get_logger(name):
     logger = logging.getLogger(name)
@@ -28,7 +29,7 @@ class Pipeline(object):
         return self.pipelineSteps
 
     def predict(self, dataFrame, configMetadata, test):
-        transformed = dataFrame
+        transformed = dataFrame.apply(lambda x: x.round(8) if type(x) is float else x)
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             try:
