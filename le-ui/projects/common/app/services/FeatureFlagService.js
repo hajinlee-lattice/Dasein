@@ -51,6 +51,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
         LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
 
+        CAMPAIGNS_PAGE: 'EnableCampaignUI',
         JOBS_PAGE: 'JobsPage',
         MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
         API_CONSOLE_PAGE: 'APIConsolePage',
