@@ -349,7 +349,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         for (String requiredField : requiredFields) {
             boolean foundRequiredField = false;
             for (FieldMapping fieldMapping : fieldMappings) {
-                if (fieldMapping.getUserField() != null && fieldMapping.getMappedField().equals(requiredField)) {
+                if (fieldMapping.getMappedField() != null && fieldMapping.getMappedField().equals(requiredField)) {
                     foundRequiredField = true;
                     assertNotNull(fieldMapping.getUserField());
                     assertTrue(fieldMapping.isMappedToLatticeField());
