@@ -518,11 +518,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
 
     function defaultFeatureFlagValue(featureFlag) {
-        if (featureFlag.DisplayName === "Dante"
-            || featureFlag.DisplayName === "UseSalesforceSettings"
-            || featureFlag.DisplayName === "UseMarketoSettings"
-            || featureFlag.DisplayName === "UseEloquaSettings"
-            || featureFlag.DisplayName === "EnablePocTransform" ) {
+        if (featureFlag.DisplayName === "Dante" || featureFlag.DisplayName === "UseSalesforceSettings" || featureFlag.DisplayName === "UseMarketoSettings" || featureFlag.DisplayName === "UseEloquaSettings" | featureFlag.DisplayName === "EnablePocTransform") {
             return true;
         }
         if (!featureFlag.Configurable) {
