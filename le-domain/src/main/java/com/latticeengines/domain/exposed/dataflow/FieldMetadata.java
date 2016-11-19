@@ -23,26 +23,37 @@ public class FieldMetadata {
     private boolean nullable = true;
     private List<FieldMetadata> ancestors = new ArrayList<>();
     private String tableName;
+    private Schema listElementSchema;
 
     public FieldMetadata(FieldMetadata fm) {
-        this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties());
+        this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties(), null);
     }
 
     public FieldMetadata(String fieldName, Class<?> javaType) {
-        this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
+        this(AvroUtils.getAvroType(javaType), javaType, fieldName, null, null);
     }
 
     public FieldMetadata(String fieldName, Class<?> javaType, Map<String, String> properties) {
-        this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
+        this(AvroUtils.getAvroType(javaType), javaType, fieldName, null, null);
         properties.putAll(properties);
     }
 
-    @SuppressWarnings("deprecation")
+    public FieldMetadata(String fieldName, Class<?> javaType, Schema avroSchema) {
+        this(AvroUtils.getAvroType(javaType), javaType, fieldName, null, avroSchema);
+        properties.putAll(properties);
+    }
+    
     public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField) {
+        this(avroType, javaType, fieldName, avroField, null);
+    }
+
+    @SuppressWarnings("deprecation")
+    public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField, Schema listElementSchema) {
         this.avroType = avroType;
         this.javaType = javaType;
         this.fieldName = fieldName;
         this.avroField = avroField;
+        this.listElementSchema = listElementSchema;
 
         if (avroField != null) {
             properties.putAll(avroField.props());
@@ -50,8 +61,8 @@ public class FieldMetadata {
     }
 
     public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Schema.Field avroField,
-            Map<String, String> properties) {
-        this(avroType, javaType, fieldName, avroField);
+            Map<String, String> properties, Schema avroSchema) {
+        this(avroType, javaType, fieldName, avroField, avroSchema);
         if (avroField == null && properties != null) {
             this.properties.putAll(properties);
         }
@@ -145,5 +156,13 @@ public class FieldMetadata {
                 }
             }
         }
+    }
+
+    public Schema getListElementSchema() {
+        return listElementSchema;
+    }
+
+    public void setListElementSchema(Schema listElementSchema) {
+        this.listElementSchema = listElementSchema;
     }
 }
