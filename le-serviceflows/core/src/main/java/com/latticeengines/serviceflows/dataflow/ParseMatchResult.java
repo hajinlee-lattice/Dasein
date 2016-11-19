@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -16,6 +19,8 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
 
+    private static final Log log = LogFactory.getLog(ParseMatchResult.class);
+
     private static final String SOURCE_PREFIX = "Source_";
     private List<String> sourceCols;
 
@@ -25,7 +30,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         Node source = addSource(parameters.sourceTableName);
 
         List<String> conflictingFields = findConflictingFields(source);
-
+        log.info("Found conflicting fields: " + StringUtils.join(conflictingFields, ", "));
         if (!conflictingFields.isEmpty()) {
             FieldList retainFields = retainFields(source, conflictingFields);
             source = source.retain(retainFields);
