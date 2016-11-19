@@ -545,6 +545,10 @@ public class AvroUtils {
             return Type.LONG;
         case "Timestamp":
             return Type.LONG;
+        case "List":
+            return Type.ARRAY;
+        case "Map":
+            return Type.RECORD;
         default:
             throw new RuntimeException("Unknown avro type for java type " + javaClassName);
         }
