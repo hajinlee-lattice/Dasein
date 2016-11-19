@@ -3,6 +3,7 @@ Description:
 If the choice is made to assign a categorical variable to numeric values, the choice should be the conversion rate for that specitic categorical value.
 For example, category A has 0% conversion, B has 1% conversion, and C has 8% conversion in the training set.  Reassign A,B, and C to 0,.01 and .08, respectively
 '''
+import json
 import os
 from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
@@ -83,12 +84,12 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         return categoryValue
 
     def __writeRTSArtifacts(self):
-        with open("conversionratemapping.txt", "w") as fp:
-            fp.write(str(self.categoricalColumnMapping))
+        with open("conversionratemapping.json", "wb") as fp:
+            json.dump(self.categoricalColumnMapping, fp)
             self.categoricalColumnMappingFilePath = os.path.abspath(fp.name)
 
     def getRTSArtifacts(self):
-        return [("conversionratemapping.txt", self.categoricalColumnMappingFilePath)]
+        return [("conversionratemapping.json", self.categoricalColumnMappingFilePath)]
 
     def doColumnCheck(self):
         return False

@@ -1,4 +1,5 @@
-categoricalColumnMapping = eval(open('conversionratemapping.txt', 'r').read())
+import json
+categoricalColumnMapping = json.load(open('conversionratemapping.json', 'rb'))
 
 def transform(args, record):
     column = args["column"]
