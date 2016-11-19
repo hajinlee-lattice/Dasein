@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.match.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
         if (forEnrichment) {
-            selectedLeadEnrichmentAttributes = //
-                    enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
+            selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space, enrichInternalAttributes);
 
             shouldCallEnrichmentExplicitly = shouldCallEnrichmentExplicitly(modelSummary, //
                     forEnrichment, selectedLeadEnrichmentAttributes);
@@ -165,5 +165,18 @@ public class SingleRecordMatcher extends AbstractMatcher {
         logInDebugMode("matchOutput:", matchOutput);
 
         return matchOutput;
+    }
+
+    private List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space, boolean enrichInternalAttributes) {
+        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = new ArrayList<>();
+        List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache
+                .getEnrichmentAttributesMetadata(space);
+        for (LeadEnrichmentAttribute attr : tempSelectedLeadEnrichmentAttributes) {
+            if (enrichInternalAttributes || !attr.getIsInternal()) {
+                selectedLeadEnrichmentAttributes.add(attr);
+            }
+        }
+
+        return selectedLeadEnrichmentAttributes;
     }
 }
