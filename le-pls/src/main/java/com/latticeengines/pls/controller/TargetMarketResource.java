@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.network.exposed.pls.TargetMarketInterface;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 
@@ -25,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/targetmarkets")
 @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
-public class TargetMarketResource implements TargetMarketInterface {
+public class TargetMarketResource {
 
     private static final String FIT_MODEL_WORKFLOW = "fitModelWorkflow";
     private static final String TEST_FIT_MODEL_WORKFLOW = "mockFitModelWorkflow";
