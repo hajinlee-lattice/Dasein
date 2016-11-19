@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.exposed.operation;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -832,7 +833,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         FileUtils.deleteQuietly(new File(fileName));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testDenormalize() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
@@ -850,46 +851,32 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node node = addSource("Feature");
-                List<FieldMetadata> fms = Arrays.asList(new FieldMetadata("ListFeature", List.class), //
+                URL url = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/operation/ListType.avsc");
+                String schemaStr;
+                try {
+                    schemaStr = FileUtils.readFileToString(new File(url.getFile()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Schema schema = new Schema.Parser().parse(schemaStr);
+                List<FieldMetadata> fms = Arrays.asList(new FieldMetadata("ListFeature", List.class, schema), //
                         new FieldMetadata("Timestamp", Long.class));
                 return node.groupByAndBuffer(new FieldList("Timestamp"), //
-                        new DenormalizeIntoListBuffer(new Fields("Timestamp", "ListFeature")), fms);
+                        new DenormalizeIntoListBuffer(new Fields("Timestamp", "ListFeature"), "ListFeature"), fms);
             }
         });
+        
+        
+        List<GenericRecord> output = readOutput();
 
-        for (GenericRecord record : readOutput()) {
-            String domain = record.get("Domain").toString();
-            switch (domain) {
-            case "dom1.com":
-                Assert.assertEquals(record.get("f1").toString(), "No");
-                Assert.assertEquals(record.get("f2").toString(), "Yes");
-                Assert.assertEquals(record.get("f3").toString(), "No");
-                Assert.assertEquals(record.get("f4").toString(), "Yes");
-                Assert.assertEquals(record.get("g1").toString(), "Yes");
-                Assert.assertEquals(record.get("g2").toString(), "No");
-                Assert.assertEquals(record.get("g3").toString(), "Yes");
-                Assert.assertEquals(record.get("g4").toString(), "No");
-                break;
-            case "dom2.com":
-                Assert.assertEquals(record.get("f1").toString(), "Yes");
-                Assert.assertEquals(record.get("f2").toString(), "No");
-                Assert.assertEquals(record.get("f3").toString(), "Yes");
-                Assert.assertEquals(record.get("f4").toString(), "No");
-                Assert.assertEquals(record.get("g1").toString(), "No");
-                Assert.assertEquals(record.get("g2").toString(), "Yes");
-                Assert.assertEquals(record.get("g3").toString(), "No");
-                Assert.assertEquals(record.get("g4").toString(), "Yes");
-                break;
-            case "dom3.com":
-                Assert.assertNull(record.get("f1"));
-                Assert.assertNull(record.get("f2"));
-                Assert.assertNull(record.get("f3"));
-                Assert.assertNull(record.get("f4"));
-                Assert.assertNull(record.get("g1"));
-                Assert.assertNull(record.get("g2"));
-                Assert.assertNull(record.get("g3"));
-                Assert.assertNull(record.get("g4"));
-                break;
+        for (GenericRecord record : output) {
+            List<?> list = (List<?>) record.get("ListFeature");
+            Long timestamp = (long) record.get("Timestamp");
+            
+            if (timestamp == 124L) {
+                Assert.assertEquals(list.size(), 2);
+            } else if (timestamp == 123L) {
+                Assert.assertEquals(list.size(), 3);
             }
         }
 

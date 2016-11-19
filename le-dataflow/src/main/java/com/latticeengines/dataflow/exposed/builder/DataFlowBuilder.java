@@ -150,6 +150,8 @@ public abstract class DataFlowBuilder {
             case BOOLEAN:
                 fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
                 break;
+            case ARRAY:
+                fieldAssembler = fieldBuilder.type().array().items(fm.getListElementSchema()).noDefault();
             default:
                 break;
             }

@@ -576,7 +576,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             seenFields.add(fieldName);
             FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
             FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
-                    origfm.getField(), origfm.getProperties());
+                    origfm.getField(), origfm.getProperties(), null);
             declaredFields.add(fm);
         }
         return declaredFields;
@@ -609,9 +609,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     public Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
-        String taregetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
-        if (taregetSchemaPath != null) {
-            return getSchemaFromFilePath(taregetSchemaPath);
+        String targetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
+        if (targetSchemaPath != null) {
+            return getSchemaFromFilePath(targetSchemaPath);
         }
         return null;
     }
@@ -896,7 +896,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (sourceTables != null) {
             lastOperator = constructFlowDefinition(parameters).getIdentifier();
         } else {
-            lastOperator = constructFlowDefinition(dataFlowCtx, (Map<String, String>) sourcePaths);
+            lastOperator = constructFlowDefinition(dataFlowCtx, sourcePaths);
         }
         engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
 

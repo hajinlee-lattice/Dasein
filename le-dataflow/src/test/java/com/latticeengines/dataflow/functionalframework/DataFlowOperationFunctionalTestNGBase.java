@@ -117,13 +117,13 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         return execute(builder, TARGET_PATH);
     }
 
-    protected Table execute(DataFlowBuilder builder, String tagetPath) {
+    protected Table execute(DataFlowBuilder builder, String targetPath) {
         builder.setLocal(LOCAL);
 
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.SOURCETABLES, getSources());
         ctx.setProperty(DataFlowProperty.CUSTOMER, "Customer");
-        ctx.setProperty(DataFlowProperty.TARGETPATH, tagetPath);
+        ctx.setProperty(DataFlowProperty.TARGETPATH, targetPath);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "Output");
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.FLOWNAME, "Flow");

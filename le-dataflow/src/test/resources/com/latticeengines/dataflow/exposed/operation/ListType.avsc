@@ -1,0 +1,18 @@
+{
+  "name": "normalizedType",
+  "type": "record",
+  "fields": [
+    {
+      "name": "Domain",
+      "type": "string"
+    },
+    {
+      "name": "Feature",
+      "type": "string"
+    },
+    {
+      "name": "Value",
+      "type": "int"
+    }
+  ]
+}
