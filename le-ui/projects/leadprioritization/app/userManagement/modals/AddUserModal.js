@@ -41,7 +41,7 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
         var email = email || '';
         $scope.levelsToSelect = [];
         if(isLatticeEmail(email)) {
-            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+            //$scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
         }
         if(!isLatticeEmail(email)) {
             $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);

@@ -48,7 +48,7 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     	//$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
     	$scope.levelsToSelect = [];
         if(hasLatticeEmail) {
-            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+            //$scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
         }
         if(!hasLatticeEmail) {
             $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
@@ -56,7 +56,7 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     } else if (currentLevel.ordinal == 3) {
         $scope.levelsToSelect = [];
         if(hasLatticeEmail) {
-            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name); 
+            //$scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name); 
             $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
         }
         if(!hasLatticeEmail) {
@@ -66,7 +66,7 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     } else if (currentLevel.ordinal == 4) {
     	$scope.levelsToSelect = [];
         if(hasLatticeEmail) {
-            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+            //$scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
             $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
             $scope.levelsToSelect.push(RightsUtility.accessLevel.SUPER_ADMIN.name);
         }
