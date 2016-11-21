@@ -131,7 +131,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 } catch (e) {
                     if (status === 200) {
                         return {
-                            dataSetName: data
+                            analyticTestName: data
                         };
                     } else {
                         return data;
@@ -485,7 +485,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 } catch (e) {
                     if (status === 200) {
                         return {
-                            analyticTestName: data
+                            datasetName: data
                         };
                     } else {
                         return data;

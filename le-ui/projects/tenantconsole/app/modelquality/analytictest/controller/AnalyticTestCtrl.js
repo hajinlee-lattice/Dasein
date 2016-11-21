@@ -47,7 +47,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
         ModelQualityService.CreateDatasetFromTenant(tenantType, tenantId, modelId).then(function (result) {
             $scope.clear();
 
-            return ModelQualityService.GetDatasetByName(result.datasetName);
+            return ModelQualityService.GetDatasetByName(result.resultObj.datasetName);
         }).then(function (results) {
             var dataset = results.resultObj;
 
@@ -57,6 +57,8 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
             } else {
                 $scope.message = dataset.name + ' already exists';
             }
+
+            $scope.selected[dataset.name] = true;
         }).catch(function (error) {
             $scope.error = true;
             if (error && error.errMsg) {
