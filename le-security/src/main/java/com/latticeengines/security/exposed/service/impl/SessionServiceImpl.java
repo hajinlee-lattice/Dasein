@@ -18,15 +18,14 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
-import com.latticeengines.security.exposed.globalauth.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.util.GASessionCache;
+import com.latticeengines.security.util.GASessionCacheHolder;
 
 @Component("sessionService")
 public class SessionServiceImpl implements SessionService {
 
     private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
-    private static final int CACHE_TIMEOUT_IN_SEC = (int) ((GlobalSessionManagementServiceImpl.TicketInactivityTimeoutInMinute * 60) * 0.01);
     private static final Integer MAX_RETRY = 3;
     private static final Long RETRY_INTERVAL_MSEC = 200L;
     private static Random random = new Random(System.currentTimeMillis());
@@ -41,7 +40,7 @@ public class SessionServiceImpl implements SessionService {
 
     @PostConstruct
     private void initializeSessionCache() {
-        sessionCache = new GASessionCache(globalSessionManagementService, CACHE_TIMEOUT_IN_SEC);
+        sessionCache = GASessionCacheHolder.getCache(globalSessionManagementService);
     }
 
     @Override

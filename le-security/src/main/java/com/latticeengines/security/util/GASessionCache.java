@@ -49,8 +49,8 @@ public class GASessionCache {
                                             + " out of " + MAX_RETRY + " times", e);
                                 }
                                 try {
-                                    retryInterval = new Double(retryInterval
-                                            * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+                                    retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000))
+                                            .longValue();
                                     Thread.sleep(retryInterval);
                                 } catch (Exception e) {
                                     // ignore
@@ -80,8 +80,8 @@ public class GASessionCache {
     }
 
     public void put(String token, Session session) {
-        log.info(String.format("Putting a session for tenant %s into cache for token %s",
-                session.getTenant().getId(), token));
+        log.info(String.format("Putting a session for tenant %s into cache for token %s", session.getTenant().getId(),
+                token));
         tokenExpirationCache.put(token, session);
     }
 
