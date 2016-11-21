@@ -1,4 +1,3 @@
-import pandas as pd
 import math
 from numpy import floor, log10, ceil
 from numpy.random import choice
@@ -90,8 +89,10 @@ def createBinsByStepSize(xList, xListLen, stepSize, numPtsInBin):
             break
         # if the value at current position is the same as the starting value 
         # of the current bucket, or there are still not sufficient points to make
-        # a new bucket, keep expanding current bucket
-        elif xList[posCurr] == xList[binIdx[-1]] or posCurr - binIdx[-1] < numPtsInBin:
+        # a new bucket, or if the remaining buckets are not sufficient to make a 
+        # new bucket, keep expanding current bucket
+        elif xList[posCurr] == xList[binIdx[-1]] or posCurr - binIdx[-1] < numPtsInBin  \
+        or xListLen - posCurr < numPtsInBin:
             continue
         # when a new bucket is possible, check the new boundary point
         # if values at each side of the boundary point are different
@@ -167,6 +168,7 @@ def createRegularBuckets(xListToBucket, eventListToBucket, totalCnt, minPtsToBuc
                          rawBinNumber, minRegBucketSize, minNumBuckets, maxNumBuckets, 
                          forUI, kurtThreshold, tailSize, numTailBuckets, sizeThreshold, 
                          liftThreshold, evevtDiffThreshold):
+    minPtsToBucket = max(minPtsToBucket, minRegBucketSize * 2)
     #all values are the same, or list empty
     if len(set(xListToBucket)) == 0:
         bktStats, bucketMins, bucketMaxes = [], [], []
