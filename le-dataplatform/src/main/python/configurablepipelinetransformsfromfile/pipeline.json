@@ -78,7 +78,8 @@
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
         "maxNumberUniqueValues": 200,
-        "categoricalColumns": "categoricalColumns"
+        "categoricalColumns": "categoricalColumns",
+        "params": "params"
       },
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
