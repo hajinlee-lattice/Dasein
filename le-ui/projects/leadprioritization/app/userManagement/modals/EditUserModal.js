@@ -40,29 +40,40 @@ app.controller('EditUserController', function ($scope, $rootScope, $state, _, Re
     
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
     var userLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel);
-    
+
+    var hasLatticeEmail = $scope.user.Email.toLowerCase().includes('@lattice-engines.com');
+
     if (userLevel.ordinal <= 1) {
         // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     	//$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
-    	$scope.levelsToSelect = [
-            RightsUtility.accessLevel.EXTERNAL_USER.name
-        ];
+    	$scope.levelsToSelect = [];
+        if(hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+        }
+        if(!hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
+        }
     } else if (currentLevel.ordinal == 3) {
-        $scope.levelsToSelect = [
-            RightsUtility.accessLevel.EXTERNAL_USER.name,
-            RightsUtility.accessLevel.INTERNAL_USER.name, 
-            RightsUtility.accessLevel.INTERNAL_USER.name, 
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name
-        ];
+        $scope.levelsToSelect = [];
+        if(hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name); 
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
+        }
+        if(!hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+        } 
     } else if (currentLevel.ordinal == 4) {
-        console.log(RightsUtility.accessLevel);
-    	$scope.levelsToSelect = [
-            RightsUtility.accessLevel.EXTERNAL_USER.name,
-            RightsUtility.accessLevel.INTERNAL_USER.name, 
-            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name, 
-            RightsUtility.accessLevel.SUPER_ADMIN.name
-        ];
+    	$scope.levelsToSelect = [];
+        if(hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.SUPER_ADMIN.name);
+        }
+        if(!hasLatticeEmail) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+        }
     }
 
     $scope.saveInProgress = false;

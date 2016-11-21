@@ -37,23 +37,50 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
     $scope.ResourceUtility = ResourceUtility;
     // get rid of external admin per Tejas. will add it back when PLS 2.1 is released
     //$scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
-    $scope.levelsToSelect = [
-        RightsUtility.accessLevel.EXTERNAL_USER.name,
-        RightsUtility.accessLevel.INTERNAL_USER.name
-    ];
+    var makeLevels = function(email){
+        var email = email || '';
+        $scope.levelsToSelect = [];
+        if(isLatticeEmail(email)) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_USER.name);
+        }
+        if(!isLatticeEmail(email)) {
+            $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_USER.name);
+        }
 
-    var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
-    if (currentLevel && currentLevel.ordinal == 4) {
-        $scope.levelsToSelect = _.union($scope.levelsToSelect, [
-            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.SUPER_ADMIN.name
-        ]);
-    } else if (currentLevel && currentLevel.ordinal == 3) {
-        $scope.levelsToSelect = _.union($scope.levelsToSelect, [
-            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name
-        ]);
+        var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
+        if (currentLevel && currentLevel.ordinal == 4) {
+            if(isLatticeEmail(email)) {
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.SUPER_ADMIN.name);
+            }
+            if(!isLatticeEmail(email)) {
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+            }
+        } else if (currentLevel && currentLevel.ordinal == 3) {
+            if(!isLatticeEmail(email)) {
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
+            }
+            if(isLatticeEmail(email)) {
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+            }
+        }
+        if($scope.user && $scope.user.AccessLevel) {
+            $scope.user.AccessLevel = $scope.levelsToSelect[0];
+        }
+    }
+    makeLevels();
+
+    $scope.emailChange = function(){
+        var email = ($scope.user && $scope.user.Email && $scope.user.Email.length ? $scope.user.Email : '' );
+        if(email) {
+            makeLevels(email);
+        }
+
+    }
+    $scope.allowAccessSelect = function(){
+        if($scope.user && $scope.user.Email && $scope.user.Email.length) {
+            return true;
+        }
     }
 
     $scope.saveInProgress = false;
