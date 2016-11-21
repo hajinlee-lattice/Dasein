@@ -11,7 +11,7 @@
       "properties": {
         "InterfaceName": "Id",
         "ApprovedUsage": [
-          "ModelAndAllInsights"
+          "None"
         ],
         "PhysicalName": "Id"
       },
@@ -54,7 +54,7 @@
       "properties": {
         "InterfaceName": "Event",
         "ApprovedUsage": [
-          "ModelAndAllInsights"
+          "None"
         ],
         "PhysicalName": "Event"
       },
