@@ -126,7 +126,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
                 .targetTableName(input.getTableName() + "_match_target") //
                 .targetPath(targetPath) //
                 .partitions(cascadingPartitions) //
-                .jobProperties(getJobProperties()) //
+                .jobProperties(getJobProperties(input)) //
                 .engine("MR") //
                 .queue(queueName) //
                 .setBeanName("cascadingBulkMatchDataflow");
@@ -142,14 +142,20 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
         return matchCommandService.start(input, appId, rootOperationUid);
     }
 
-    private Properties getJobProperties() {
+    private Properties getJobProperties(MatchInput input) {
+        int mapReduceSize = Integer.parseInt(cascadingContainerSize);
+        if (input.getNumRows() > 600_000) {
+            mapReduceSize = mapReduceSize * 3;
+        } else if (input.getNumRows() > 200_000) {
+            mapReduceSize = mapReduceSize * 2;
+        }
+
         Properties jobProperties = new Properties();
         jobProperties.put("mapred.reduce.tasks", "1");
         jobProperties.put("cascading.spill.map.threshold", "100000");
         jobProperties.put("mapreduce.job.running.map.limit", "100");
-        jobProperties.put("yarn.scheduler.minimum-allocation-mb", cascadingContainerSize);
-        jobProperties.put("mapreduce.map.memory.mb", cascadingContainerSize);
-        jobProperties.put("mapreduce.reduce.memory.mb", cascadingContainerSize);
+        jobProperties.put("mapreduce.map.memory.mb", mapReduceSize + "");
+        jobProperties.put("mapreduce.reduce.memory.mb", mapReduceSize + "");
         return jobProperties;
     }
 
