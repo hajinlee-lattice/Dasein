@@ -52,23 +52,22 @@ angular
             // 'exportData':                       'score_training_set',
         },
         'modelAndEmailWorkflow': {
-            'dedupEventTable': 'create_global_target_market',
-            'matchDataCloud': 'create_global_target_market',
-            'processMatchResult': 'create_global_target_market',
-            'addStandardAttributes': 'create_global_target_market',
+            'dedupEventTable': 'load_data',
+            'matchDataCloud': 'load_data',
+            'processMatchResult': 'generate_insights',
+            'addStandardAttributes': 'generate_insights',
             'resolveMetadataFromUserRefinedAttributes': 'create_global_target_market',
             'sample': 'create_global_target_market',
             'exportData': 'create_global_target_market',
             'setMatchSelection': 'create_global_target_market',
             'writeMetadataFiles': 'create_global_target_market',
             'profile': 'create_global_target_market',
-            'reviewModel': 'create_global_target_market',
-            'remediateDataRules': 'create_global_target_market',
-            'writeMetadataFiles': 'create_global_target_market',
             'createModel': 'create_global_target_market',
-            'downloadAndProcessModelSummaries': 'create_global_target_market',
-            'persistDataRules': 'create_global_target_market'
-        },
+            'downloadAndProcessModelSummaries': 'create_global_target_market', 
+            'combineInputTableWithScoreDataFlow': 'create_global_target_market',
+            'exportData': 'create_global_target_market',
+            'pivotScoreAndEvent': 'create_global_target_market',
+        }, 
         'pmmlModelWorkflow': {
             'createPMMLModel': 'create_global_target_market'
         }
