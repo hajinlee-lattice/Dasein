@@ -1,7 +1,5 @@
 <section class="mq-dashboard">
   <p ng-if="message" class="alert alert-info">{{message}}</p>
-  <div ng-repeat="query in chartDataPromiseQueries">
-    <model-quality-group-bar-chart ng-if="query.type==='Selected'"  promise="query.promise" title="query.title" class="chart-container"></model-quality-group-bar-chart>
-    <model-quality-line-chart ng-if="query.type==='Production'" promise="query.promise" title="query.title" class="chart-container"></model-quality-line-chart>
-  </div>
+  <model-quality-line-chart ng-repeat="chart in lineCharts" data="chart" class="chart-container"></model-quality-line-chart>
+  <model-quality-group-bar-chart ng-repeat="chart in barCharts" data="chart" class="chart-container"></model-quality-group-bar-chart>
 </section>

@@ -58,7 +58,7 @@
               ng-if="col.type==='select'"
               placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
               ng-model="vm_analyticTest.analyticTest[col.key]"
-              ng-options="opt.value as opt.name for opt in vm_analyticTest.entityOptions[col.key]">
+              ng-options="opt.name as opt.name for opt in vm_analyticTest.entityOptions[col.key]">
             </select>
             <button
               class="form-control"
@@ -90,7 +90,7 @@
     </div>
   </div>
 </div>
-
+ 
 <script type="text/ng-template" id="MultiSelectModal.html">
   <div class="modal-header">
     <h3 class="modal-title" id="modal-title">{{::title}}</h3>
