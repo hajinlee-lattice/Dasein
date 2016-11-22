@@ -1,6 +1,6 @@
 angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 ])
-.controller('ModelQualityDashboardCtrl', function ($scope, $state, $window, SelectedPipelineMetrics, ProductionPipelineMetrics) {
+.controller('ModelQualityDashboardCtrl', function ($scope, $state, $window, $q, AnalyticTests, InfluxDbService) {
 
     var _window = angular.element($window);
 
@@ -15,66 +15,159 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
         _window.unbind('resize', bindResize);
     });
 
-    // tag type selected pipelines bar charts
-    var data = [],
-        columns = [],
-        rows = [];
-    if (SelectedPipelineMetrics.resultObj.results && SelectedPipelineMetrics.resultObj.results[0].series) {
-        data = SelectedPipelineMetrics.resultObj.results[0].series[0];
-        columns = data.columns;
-        rows = data.values;
+    var analyticTests = AnalyticTests.resultObj;
+
+    var queries = [];
+    for (var i = 0; i < analyticTests.length; i++) {
+        var at = analyticTests[i];
+        var type = at.analytic_test_type;
+
+        var q;
+        switch (type) {
+            case 'Production':
+                q = getProductionQuery(at);
+                break;
+            case 'SelectedPipelines':
+                q = getSelectedPipelinesQuery(at);
+                break;
+        }
+
+        queries.push({
+            query: q,
+            analyticTest: at,
+            type: type
+        });
     }
 
-    var columnToIndexMap = {};
-    columns.forEach(function(column, index) {
-        columnToIndexMap[column] = index;
-    });
+    $scope.chartDataPromiseQueries = queries.map(function (query) {
+        var promise = InfluxDbService.Query({
+            q: query.query,
+            db: 'ModelQuality'
+        }).then(function (result) {
+            var defer = $q.defer();
+            switch (query.type) {
+                case 'Production':
+                    defer.resolve(processLineChart(result));
+                    break;
+                case 'SelectedPipelines':
+                    defer.resolve(processBarChart(result));
+                    break;
+                default:
+                    defer.reject({query: query});
+            }
 
-    var timeColumnIndex = columnToIndexMap.time,
-        analyticPipelineNameIndex = columnToIndexMap.AnalyticPipelineName,
-        analyticTestNameIndex = columnToIndexMap.AnalyticTestName,
-        dataSetNameIndex = columnToIndexMap.DataSetName,
-        pipelineNameIndex = columnToIndexMap.PipelineName;
+            return defer.promise;
+        });
 
-    var metricsColIndex = {};
-    metricsColIndex.RocScore = columnToIndexMap.RocScore;
-    metricsColIndex.Top10PercentLift = columnToIndexMap.Top10PercentLift;
-    metricsColIndex.Top20PercentLift = columnToIndexMap.Top20PercentLift;
-    metricsColIndex.Top30PercentLift = columnToIndexMap.Top30PercentLift;
+        return {
+            type: query.type,
+            title: query.analyticTest.name,
+            promise: promise
+        };
+    })
 
-    var barChartBuckets = {};
-    rows.forEach(function (row) {
+    if (!$scope.chartDataPromiseQueries.length) {
+        $scope.message = 'No Charts to be Displayed';
+    }
 
-        var at = row[analyticTestNameIndex];
-        var ap = row[analyticPipelineNameIndex];
-        var p = row[pipelineNameIndex];
-        var ds = row[dataSetNameIndex];
-        var date = row[timeColumnIndex];
+    function getProductionQuery (analyticTest) {
+        var series = [
+            'MEAN(RocScore) AS RocScore',
+            'MEAN(Top10PercentLift) AS Top10PercentLift',
+            'MEAN(Top20PercentLift) AS Top20PercentLift',
+            'MEAN(Top30PercentLift) AS Top30PercentLift'
+        ];
 
-        // bar charts
-        if (!barChartBuckets[at]) {
-            barChartBuckets[at] = {};
+        var whereClause = "", sep = "";
+        var pipelines = analyticTest.analytic_pipeline_names;
+        for (var i = 0; i < pipelines.length; i++) {
+            whereClause += sep + "AnalyticPipelineName = '" + pipelines[i] + "'";
+            sep = " OR ";
         }
 
-        var atBucket = barChartBuckets[at];
-        if (!atBucket[ds]) {
-            var newDsBucket = {};
-            newDsBucket.dataset = ds;
-            newDsBucket.description = {};
-            newDsBucket.description.analyticTest = at;
-            newDsBucket.description.dataset = ds;
-            newDsBucket.pipelines = {};
-            atBucket[ds] = newDsBucket;
+        var queries = [];
+        for (var j = 0; j < series.length; j++) {
+             var q = "SELECT " + series[j] + " FROM ModelingMeasurement WHERE AnalyticTestName = '" + analyticTest.name + "' AND (" + whereClause + ")" + " GROUP BY AnalyticPipelineName";
+             queries.push(q);
+        }
+        return queries.join(";");
+    }
+
+    function getSelectedPipelinesQuery (analyticTest) {
+        var series = [
+            'RocScore',
+            'Top10PercentLift',
+            'Top20PercentLift',
+            'Top30PercentLift'
+        ].join(',');
+
+        var columns = [
+            'AnalyticPipelineName',
+            'AnalyticTestName',
+            'DataSetName',
+        ].join(',');
+
+        var whereClause = "", sep = "";
+        var pipelines = analyticTest.analytic_pipeline_names;
+        for (var i = 0; i < pipelines.length; i++) {
+            whereClause += sep + "AnalyticPipelineName = '" + pipelines[i] + "'";
+            sep = " OR ";
         }
 
-        var dsBucket = atBucket[ds];
-        var pBucketPipelines = dsBucket.pipelines;
-        if (!pBucketPipelines[ap]) {
-            pBucketPipelines[ap] = {};
+        var query = "SELECT " + series + "," + columns + " FROM ModelingMeasurement WHERE AnalyticTestName = '" + analyticTest.name + "' AND (" + whereClause + ")";
+        return query;
+    }
+
+    function processBarChart (queryResult) {
+        var data = [],
+            columns = [],
+            rows = [];
+        if (queryResult.resultObj.results && queryResult.resultObj.results[0].series) {
+            data = queryResult.resultObj.results[0].series[0];
+            columns = data.columns;
+            rows = data.values;
         }
 
-        var pBucket = pBucketPipelines[ap];
-        if (!pBucket.date || pBucket.date < date) {
+        var columnToIndexMap = {};
+        columns.forEach(function(column, index) {
+            columnToIndexMap[column] = index;
+        });
+
+        var analyticPipelineNameIndex = columnToIndexMap.AnalyticPipelineName,
+            analyticTestNameIndex = columnToIndexMap.AnalyticTestName,
+            dataSetNameIndex = columnToIndexMap.DataSetName,
+            pipelineNameIndex = columnToIndexMap.PipelineName;
+
+        var metricsColIndex = {};
+        metricsColIndex.RocScore = columnToIndexMap.RocScore;
+        metricsColIndex.Top10PercentLift = columnToIndexMap.Top10PercentLift;
+        metricsColIndex.Top20PercentLift = columnToIndexMap.Top20PercentLift;
+        metricsColIndex.Top30PercentLift = columnToIndexMap.Top30PercentLift;
+
+        var barChart = {};
+        rows.forEach(function (row) {
+
+            var at = row[analyticTestNameIndex];
+            var ap = row[analyticPipelineNameIndex];
+            var ds = row[dataSetNameIndex];
+
+            if (!barChart[ds]) {
+                var newDsBucket = {};
+                newDsBucket.dataset = ds;
+                newDsBucket.description = {};
+                newDsBucket.description.analyticTest = at;
+                newDsBucket.description.dataset = ds;
+                newDsBucket.pipelines = {};
+                barChart[ds] = newDsBucket;
+            }
+
+            var dsBucket = barChart[ds];
+            var pBucketPipelines = dsBucket.pipelines;
+            if (!pBucketPipelines[ap]) {
+                pBucketPipelines[ap] = {};
+            }
+
+            var pBucket = pBucketPipelines[ap];
             var value = {};
             for (var m in metricsColIndex) {
                 value[m] = row[metricsColIndex[m]];
@@ -84,17 +177,11 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
             pBucket.description.analyticTest = at;
             pBucket.description.dataset = ds;
             pBucket.description.analyticPipeline = ap;
-            pBucket.description.pipeline = p;
-            pBucket.date = date;
             pBucket.value = value;
-        }
 
-    });
+        });
 
-    $scope.barCharts = _.map(barChartBuckets, function (atData, atKey) {
-        var chartData = {};
-        chartData.title = atKey;
-        chartData.data = _.map(atData, function (dsData, dsKey) {
+        return _.map(barChart, function (dsData, dsKey) {
             var groupData = {};
             groupData.dataset = dsKey;
             groupData.categories = _.map(dsData.pipelines, function (pipelineData, pipelineKey) {
@@ -108,72 +195,35 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
 
             return groupData;
         });
-
-        return chartData;
-    });
-
-
-    // tag type production line charts
-    var series = [];
-    if (ProductionPipelineMetrics.resultObj.results && ProductionPipelineMetrics.resultObj.results[0].series) {
-        series = ProductionPipelineMetrics.resultObj.results[0].series;
     }
 
-    var tagBuckets = {};
-    series.forEach(function (entry) {
-        var tagName = entry.tags.AnalyticTestTag;
+    function processLineChart (queryResult) {
 
-        if (!tagBuckets[tagName]) {
-            tagBuckets[tagName] = [];
+        var series = [];
+        if (queryResult.resultObj.results) {
+            series = queryResult.resultObj.results;
         }
 
-        var tagBucket = tagBuckets[tagName];
-        tagBucket.push(entry);
-    });
+        var lines = series.map(function (series) {
+            series = series.series;
+            var key = series[0].columns[1];
 
-    var lineCharts = _.map(tagBuckets, function (tagBucket, tagName) {
-        var bucketSeries = {
-            RocScore: [],
-            Top10PercentLift: [],
-            Top20PercentLift: [],
-            Top30PercentLift: []
-        };
-
-        tagBucket.forEach(function (bucket) {
-            var ap = bucket.tags.AnalyticPipelineName;
-
-            var columnToIndexMap = {};
-            bucket.columns.forEach(function(column, index) {
-                columnToIndexMap[column] = index;
+            var points = series.map(function (data) {
+                return {
+                    x: data.tags.AnalyticPipelineName,
+                    y: data.values[0][1],
+                    key: key
+                };
             });
 
-            _.each(bucketSeries, function (bucketSerie, key) {
-                var colIdx = columnToIndexMap[key];
-
-                bucketSerie.push({
-                    key: key,
-                    y: bucket.values[0][colIdx],
-                    x: ap
-                });
-            });
+            return {
+                key: key,
+                values: points
+            };
         });
 
-        var chart = {};
-        chart.title = tagName;
-        chart.data = _.map(bucketSeries, function (values, key) {
-            var chartData = {};
-            chartData.key = key;
-            chartData.values = values.sort(function(a,b) { return (a.x > b.x) ? 1 : ((a.x < b.x) ? -1 : 0); });
-
-            return chartData;
-        });
-
-        return chart;
-    });
-
-    $scope.lineCharts = lineCharts;
-
-    if ($scope.lineCharts.length === 0 && $scope.barCharts.length === 0) {
-        $scope.message = 'No Charts to be Displayed';
+        return lines;
     }
+
 });
+

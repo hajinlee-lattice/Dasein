@@ -4,7 +4,8 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
     return {
         restrict: 'AE',
         scope: {
-            data: '='
+            promise: '=',
+            title: '='
         },
         link: function (scope, element, attr, ModelQualityLineChartVm) {
 
@@ -22,7 +23,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
 
             var title = d3container.append("div")
                 .attr("class", "chart-title")
-                .text(scope.data.title);
+                .text(scope.title);
 
             var margin = {top: 20, right: 20, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
@@ -53,7 +54,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             var chart = svg.append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
             var hoverVerticalLine = chart.append("line")
                 .attr("class", "chart-hover-line")
                 .attr("x1", 0)
@@ -66,8 +66,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 .attr("width", width)
                 .attr("height", height)
                 .style("fill", "transparent");
-
-            var bisectDate = d3.bisector(function(d) { return d; }).left;
 
             var tooltipXPosWrap = function (width) {
                 return function (mouseX) {
@@ -90,7 +88,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             };
 
             var render = function () {
-                var seriesData = scope.data.data;
+                var seriesData = scope.data;
                 var extents = getExtents(seriesData);
 
                 y.domain(extents.yExtent);
@@ -163,13 +161,11 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 focus.on("mouseenter", function() {
                     hoverVerticalLine.style("display", null);
                     showTooltip();
-                })
-                .on("mouseleave", function() {
+                }).on("mouseleave", function() {
                     hideTooltip();
                     hoverVerticalLine.style("display", "none");
                     dots.style("r", "0px");
-                })
-                .on("mousemove", function () {
+                }).on("mousemove", function () {
                     var mouse = d3.mouse(this);
                     var xPos = mouse[0];
                     var tippedPos = -1;
@@ -213,8 +209,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     tooltip.html(template)
                         .style("left", function () {
                             return tooltipXPos(xPos);
-                        })
-                        .style("top", mouse[1] + "px");
+                        }).style("top", mouse[1] + "px");
                 });
 
             };
@@ -262,7 +257,10 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 };
             };
 
-            render();
+            scope.promise.then(function(result) {
+                scope.data = result;
+                render();
+            })
 
             scope.$on('resize', function () {
                 resize();

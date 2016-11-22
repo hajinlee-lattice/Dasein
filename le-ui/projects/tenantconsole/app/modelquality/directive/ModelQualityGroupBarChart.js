@@ -4,7 +4,8 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
     return {
         restrict: 'AE',
         scope: {
-            data: '='
+            promise: '=',
+            title: '='
         },
         link: function (scope, element, attr, ModelQualityGroupBarChartVm) {
 
@@ -20,7 +21,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
             var title = d3container.append("div")
                 .attr("class", "chart-title")
-                .text(scope.data.title);
+                .text(scope.title);
 
             var options = ['RocScore', 'Top10PercentLift', 'Top20PercentLift','Top30PercentLift'];
 
@@ -72,8 +73,8 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
             var data, groups, bars;
             var render = function () {
-                data = scope.data.data;
-                var categories = scope.data.data[0].categories.map(function(set) {
+                data = scope.data;
+                var categories = data[0].categories.map(function(set) {
                     return set.category;
                 });
 
@@ -111,7 +112,9 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     .attr("dy", ".35em")
                     .attr("text-anchor", "start")
                     .attr("dominant-baseline", "middle")
-                    .text(function(d) { return d.toUpperCase(); });
+                    .text(function(d) {
+                        return d.toUpperCase();
+                    });
 
                 legend.each(function(d, i) {
                     var self = d3.select(this);
@@ -213,7 +216,10 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                 render();
             };
 
-            render();
+            scope.promise.then(function (result) {
+                scope.data = result;
+                render();
+            });
 
             scope.$on('resize', function () {
                 resize();

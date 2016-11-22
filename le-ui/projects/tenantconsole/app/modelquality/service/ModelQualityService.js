@@ -625,8 +625,8 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
 
     this.GetAnalyticTestTypes = function () {
         var types = [];
-        types.push({name: 'Production'});
-        types.push({name: 'Default'});
+        types.push({name: 'Production', value: 'Production'});
+        types.push({name: 'Selected Pipelines', value: 'SelectedPipelines'});
 
         return {
             success: true,

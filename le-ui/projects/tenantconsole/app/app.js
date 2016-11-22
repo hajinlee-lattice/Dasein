@@ -89,49 +89,9 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 }
             },
             resolve: {
-                SelectedPipelineMetrics: function (InfluxDbService) {
-                    var cols = [
-                        'AnalyticPipelineName',
-                        'AnalyticTestName',
-                        'DataSetName',
-                        'PipelineName',
-                        'RocScore',
-                        'Top10PercentLift',
-                        'Top20PercentLift',
-                        'Top30PercentLift'
-                    ].join(',');
-
-                    var clause = [
-                        'WHERE ',
-                        'AnalyticTestTag !~ /^PRODUCTION/'
-                    ].join('');
-
-                    return InfluxDbService.Query({
-                        q: 'SELECT ' + cols + ' FROM ModelingMeasurement ' + clause,
-                        db: 'ModelQuality'
-                    });
-                },
-                ProductionPipelineMetrics: function (InfluxDbService) {
-                    var aggregrates = [
-                        'MEAN(RocScore) AS RocScore',
-                        'MEAN(Top10PercentLift) AS Top10PercentLift',
-                        'MEAN(Top20PercentLift) AS Top20PercentLift',
-                        'MEAN(Top30PercentLift) AS Top30PercentLift'
-                    ].join(',');
-
-                    var clause = [
-                        'WHERE ',
-                        'AnalyticTestTag =~ /^PRODUCTION/', ' ',
-                        'GROUP BY ',
-                        'AnalyticTestTag', ',',
-                        'AnalyticPipelineName'
-                    ].join('');
-
-                    return InfluxDbService.Query({
-                        q: 'SELECT ' + aggregrates + ' FROM ModelingMeasurement ' + clause,
-                        db: 'ModelQuality'
-                    });
-                },
+                AnalyticTests: function (ModelQualityService) {
+                    return ModelQualityService.GetAllAnalyticTests();
+                }
             }
         })
         .state('MODELQUALITY.PIPELINE', {
@@ -252,5 +212,15 @@ app.run(function($rootScope, $state) {
         }
 
         $state.go('NOWHERE', {error: true, pageMessage: pageMessage});
+    });
+});
+
+app.config(function($provide) {
+    $provide.decorator('$httpBackend', function($delegate) {
+        return function(method, url, post, callback, headers, timeout, withCredentials, responseType) {
+            // multi select to influxdb require semicolon to be encoded
+            url = url.replace(/;/g, '%3B');
+            $delegate(method, url, post, callback, headers, timeout, withCredentials, responseType);
+        };
     });
 });
