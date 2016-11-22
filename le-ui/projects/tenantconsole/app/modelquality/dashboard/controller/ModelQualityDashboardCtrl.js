@@ -64,7 +64,7 @@ angular.module("app.modelquality.controller.ModelQualityDashboardCtrl", [
             title: query.analyticTest.name,
             promise: promise
         };
-    })
+    });
 
     if (!$scope.chartDataPromiseQueries.length) {
         $scope.message = 'No Charts to be Displayed';

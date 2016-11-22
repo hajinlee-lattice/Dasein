@@ -260,7 +260,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             scope.promise.then(function(result) {
                 scope.data = result;
                 render();
-            })
+            });
 
             scope.$on('resize', function () {
                 resize();
