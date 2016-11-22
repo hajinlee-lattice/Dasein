@@ -1,19 +1,26 @@
 angular.module("app.datacloud.controller.Metadata2Ctrl", [
-    'kendo.directives',
     'ngAnimate',
     'ngSanitize',
     'ngPrettyJson',
     'ui.bootstrap'
 ])
-.controller('Metadata2Ctrl', function ($scope, $state, $timeout, $uibModal, MetadataService) {
+.controller('Metadata2Ctrl', function ($scope, $state, $stateParams, $timeout, $interval, $uibModal, MetadataService) {
 
         var vm = {};
 
-        vm.pagesize = 10;
+        angular.element('body').addClass('Metadata2Ctrl');
+        $scope.$on('$destroy', function() {
+            if(angular.element('body').hasClass('Metadata2Ctrl')) {
+                angular.element('body').removeClass('Metadata2Ctrl');
+            }
+        });
+
+        vm.pagesize = 50;
         vm.order = 'ColumnName';
 
-        vm.version = '2.0.0';
-        vm.metadta = {};
+        vm.versions = {};
+        vm.version = $stateParams.version || '2.0.0';
+        vm.metadata = [];
 
         vm.columns = {
                 ColumnName: {label:'Column Name'},
@@ -23,8 +30,8 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
                 ApprovedUsage: {label:'Approved Usage'},
                 FundamentalType: {label:'Fund Type'},
                 StatisticalType: {label:'Stat Type'},
-                CanEnrich: {label:'Can Enrich', editable: true},
                 Description: {label:'Description', editable: true},
+                CanEnrich: {label:'Can Enrich', editable: true},
                 IsPremium: {label:'Is Premium', editable: true}
             };
 
@@ -38,6 +45,16 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
                 vm.loading_error = result.errMsg;
             }
         });
+
+        MetadataService.GetDataCloudVersions().then(function(result){
+            if (result.success) {
+                vm.versions = result.resultObj;
+            }
+        });
+
+        vm.versionChange = function() {
+            $state.go('DATACLOUD.METADATA2', {version: vm.select_version});
+        };
 
         vm.SortOrder = function(val) {
             return val[vm.order];
@@ -68,6 +85,21 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
             }
             return data;
         };
+        vm.select_version = [];
+        /**
+         * because stupid, and angular has issues with ng-select
+         */
+        var setOptionsSelectedState = $interval(function(){
+            var selected = document.querySelectorAll('option[selected="selected"]'); 
+            for(var i in selected) { 
+                var select = selected[i]; 
+                if(typeof select === 'object') {
+                    select.selected = true;}
+                }
+                if(selected.length) {
+                    $interval.cancel(setOptionsSelectedState);
+                }
+            }, 1000);
 
         vm.init = function(){
         };

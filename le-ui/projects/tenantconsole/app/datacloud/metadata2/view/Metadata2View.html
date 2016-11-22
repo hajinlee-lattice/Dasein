@@ -1,5 +1,5 @@
 <div class="metadata-component">
-    <ul class="filters">
+    <ul class="filters" ng-show="!vm.loading">
         <li>
             <button ng-click="vm.editAll()" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i> edit all</button>
         </li>
@@ -21,12 +21,20 @@
             </div>
         </li>
     </ul>
-    <div ng-if="vm.loading">loading</div>
-    <form ng-model="vm.metadata_form">
-        <table class="metadata">
+    <ul class="filters" ng-show="!vm.loading">
+        <li>
+            <label for="versions">version</label>
+            <select name="versions" id="versions" ng-model="vm.select_version"  ng-change="vm.versionChange()" >
+                <option ng-repeat="version in vm.versions" value="{{version.Version}}" ng-selected="version.Version == vm.version" ng-disabled="version.Version == vm.version">{{version.Version}}</option>
+            </select>
+        </li>
+    </ul>
+    <form ng-model="vm.metadata_form" ng-class="{loading: vm.loading}">
+        <div class="loading-icon" ng-if="vm.loading"><i class="fa fa-spinner fa-spin fa-3x fa-fw"></i></div>
+        <table class="metadata" ng-show="!vm.loading">
             <tr>
-                <th>&nbsp;</th>
-                <th ng-repeat="(key, column) in vm.columns" ng-click="vm.order = (vm.order == key ? '-'+key : key); vm.current = 1;" ng-class="{'sorted':vm.order == key || vm.order == '-'+key}">
+                <th class="edit-button">&nbsp;</th>
+                <th ng-repeat="(key, column) in vm.columns" ng-click="vm.order = (vm.order == key ? '-'+key : key); vm.current = 1;" ng-class="{'sorted':vm.order == key || vm.order == '-'+key}" class="{{key}}">
                     {{column.label}}
                     <span ng-if="vm.order != key && vm.order != '-'+key" class="fa fa-sort"></span>
                     <span ng-if="vm.order == key || vm.order == '-'+key" class="fa fa-sort-{{ vm.order == key ? 'up' : 'down' }}"></span>
@@ -35,14 +43,14 @@
             <tr ng-repeat="(row, data) in (filteredList = (vm.metadata 
                     | filter: {
                         CanEnrich: (!vm.show.enrichment ? '' : true),
-                        IsPremium: (!vm.show.premium ? '' : true),
+                        IsPremium: (!vm.show.premium ? '' : true)
                     })) 
                     | orderBy: vm.order
                     | filter: (vm.query.length ? vm.query : '') : false
                     | startFrom: (vm.current - 1) * vm.pagesize 
                     | limitTo: vm.pagesize">
-                <td><button ng-click="vm.edit_all = false; vm.edit[data.ColumnId] = !vm.edit[data.ColumnId]" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
-                <td ng-repeat="(key, column) in vm.columns" class="type-{{vm.type(key)}}" title="{{vm.get(data[key])}}">
+                <td class="edit-button"><button ng-click="vm.edit_all = false; vm.edit[data.ColumnId] = !vm.edit[data.ColumnId]" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+                <td ng-repeat="(key, column) in vm.columns" class="type-{{vm.type(key)}} {{key}}" title="{{vm.get(data[key])}}">
                     <span ng-if="column.editable">
                         <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="text" value="{{vm.get(data[key])}}" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" placeholder="{{key}}" />
                         <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'checkbox'" type="checkbox" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-checked="{{data[key]}}" />

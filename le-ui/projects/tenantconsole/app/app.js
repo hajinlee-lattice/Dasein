@@ -8,7 +8,8 @@ var app = angular.module('TenantConsoleApp', [
     'app.tenants.controller.TenantListCtrl',
     'app.tenants.controller.TenantConfigCtrl',
     'app.modelquality',
-    'app.datacloud'
+    'app.datacloud',
+    'pd.navigation.pagination'
 ]);
 
 app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
@@ -170,7 +171,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             }
         })
         .state('DATACLOUD.METADATA2', {
-            url: '/metadata2',
+            url: '/metadata2/{version}',
             views: {
                 'main@DATACLOUD': {
                     templateUrl: 'app/datacloud/metadata2/view/Metadata2View.html',
