@@ -6,24 +6,24 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Component
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
@@ -53,11 +53,15 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Value("${datacloud.dnb.application.id}")
     private String applicationId;
 
-    @Value("${datacloud.dnb.token.cache.expiration.time}")
+    @Value("${datacloud.dnb.token.cache.expiration.duration.minute}")
     private int tokenCacheExpirationTime;
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    @Value("${datacloud.dnb.authentication.token.jsonpath}")
+    private String tokenJsonPath;
+
     private LoadingCache<DnBKeyType, String> tokenCache;
+
+    private RestApiClient dnbClient = new RestApiClient();
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -79,21 +83,19 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     }
 
     private String obtainAuthorizationReponseBody(DnBKeyType type) throws IOException {
-        String apikey;
-        if (type == DnBKeyType.REALTIME) {
-            apikey = realtimeKey;
-        } else {
-            apikey = bulkKey;
+        switch (type) {
+        case REALTIME:
+            return dnbClient.post(authorityRequestEntity(realtimeKey, passwd), authorityUrl);
+        case BATCH:
+            return dnbClient.post(authorityRequestEntity(bulkKey, passwd), authorityUrl);
+        default:
+            throw new UnsupportedOperationException(
+                    String.format("DnBKeyType %s is not supported in DnBAuthenticationService.", type.name()));
         }
-        ResponseEntity<String> res = restTemplate.postForEntity(authorityUrl, authorityRequestEntity(apikey, passwd),
-                String.class);
-        return res.getBody().toString();
     }
 
     private String retrieveTokenFromResponseBody(String body) throws ParseException {
-        JSONParser parser = new JSONParser();
-        JSONObject obj = (JSONObject) parser.parse(body);
-        String token = (String) ((JSONObject) obj.get("AuthenticationDetail")).get("Token");
+        String token = JsonPath.parse(body).read(tokenJsonPath);
         if (token == null) {
             throw new RuntimeException(String.format("Failed to parse token from response %s!", body));
         }
@@ -102,19 +104,23 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Override
     public String requestToken(DnBKeyType type) {
+        String token;
         try {
-            return tokenCache.get(type);
+            token = tokenCache.get(type);
         } catch (ExecutionException e) {
             log.error(e);
-            throw new RuntimeException("Failed to get the token from tokenCache!");
+            throw new LedpException(LedpCode.LEDP_25027);
         }
+        if (StringUtils.isEmpty(token)) {
+            throw new LedpException(LedpCode.LEDP_25027);
+        }
+        return token;
     }
 
     @Override
-    public String refreshAndGetToken(DnBKeyType type) {
+    public void refreshToken(DnBKeyType type) {
         tokenCache.refresh(type);
         log.info("DnB token is expired, retry it.");
-        return requestToken(type);
     }
 
     private String requestTokenFromDnB(DnBKeyType type) {

@@ -57,7 +57,7 @@ public class LocationUtils {
                         new String[] { "CÔTE D IVOIRE", "IVORY COAST COTE DIVOIRE", "COTE DIVOIRE", "COTE D IVOIRE",
                                 "IVORY COAST", "COTE DIVOIRE IVORY COAST", "CÔTE DIVOIRE", "COTE D", "C TE DIVOIRE" } }, //
                 { "CZECH REPUBLIC", new String[] { "CZECH REPUBLIC", "CZECHIA", "CZECH", "ČESKÁ REPUBLIKA" } }, //
-                { "CURAÇAO", new String[] { "CURAÇAO", "CURAÃ§AO" } }, //
+                { "CURAÇAO", new String[] { "CURAÇAO", "CURAÃ§AO", "CURACAO" } }, //
                 { "CAPE VERDE", new String[] { "CAPE VERDE", "CAPEVERDE" } }, //
                 { "CAMEROON", new String[] { "CAMEROON", "CAMEROUN" } }, //
                 { "DOMINICAN REPUBLIC",
@@ -105,16 +105,19 @@ public class LocationUtils {
                 { "MOROCCO", new String[] { "MOROCCO", "MAROC" } }, //
                 { "MALI", new String[] { "MALI", "MALI REPUBLIQUE" } }, //
                 { "MACAO", new String[] { "MACAO", "MACAU CHINA", "MACAU", "MACAO SAR" } }, //
+                { "MEXICO", new String[] { "MEXICO", "MÉXICO" } }, //
                 { "NORWAY", new String[] { "NORWAY", "NORGE" } }, //
                 { "NETHERLANDS",
                         new String[] { "NETHERLANDS", "NETHERLANDS NE", "NETHERLANDS ANTILLES", "NETHERLANDS HOLLAND",
                                 "KINGDOM NETHERLANDS", "HOLLAND", "HOLANDSKO" } }, //
+                { "NEW CALEDONIA", new String[] { "NEW CALEDONIA", "NEW CALÉDONIA" } }, //
                 { "OMAN", new String[] { "OMAN", "SULTANATE OMAN" } }, //
                 { "PANAMA", new String[] { "PANAMA", "REPUBLICA DE PANAMA" } }, //
                 { "POLAND", new String[] { "POLAND", "POLSKA" } }, //
                 { "PALESTINE STATE",
                         new String[] { "PALESTINE STATE", "PALESTINIAN TERRITORY OCCUPIED", "PALESTINIAN TERRITORY",
                                 "PALESTINIAN TERRITORIES", "PALESTINIAN AUTHORITY", "PALESTINE" } }, //
+                { "PERU", new String[] { "PERU", "PERÚ" } }, //
                 { "RUSSIAN FEDERATION",
                         new String[] { "RUSSIAN FEDERATION", "RUSSIA FEDERATION", "RUSSIA", "RUSSIAN FED",
                                 "RUSSIAN" } }, //

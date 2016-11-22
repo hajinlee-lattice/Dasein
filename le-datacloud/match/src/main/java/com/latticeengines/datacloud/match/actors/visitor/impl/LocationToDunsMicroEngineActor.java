@@ -34,6 +34,10 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     protected boolean accept(Traveler traveler) {
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
 
+        if (matchKeyTuple.getDuns() != null) {
+            return false;
+        }
+
         if (matchKeyTuple.getCountryCode() != null && matchKeyTuple.getName() != null) {
             return true;
         }

@@ -27,7 +27,11 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private String lookupRequestId;
 
+    private String serviceBatchId;
+
     private DnBMatchStrategy matchStrategy;
+
+    private Long duration;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -163,8 +167,24 @@ public class DnBMatchContext implements Fact, Dimension {
         this.matchStrategy = matchStrategy;
     }
 
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public String getServiceBatchId() {
+        return serviceBatchId;
+    }
+
+    public void setServiceBatchId(String serviceBatchId) {
+        this.serviceBatchId = serviceBatchId;
+    }
+
     public enum DnBMatchStrategy {
-        EMAIL, ENTITY
+        EMAIL, ENTITY, BATCH
     }
 
 }

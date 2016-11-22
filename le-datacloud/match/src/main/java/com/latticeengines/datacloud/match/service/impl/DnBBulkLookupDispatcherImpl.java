@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component
@@ -59,9 +60,6 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Value("${datacloud.dnb.bulk.servicebatchid.xpath}")
     private String serviceIdXpath;
 
-    @Value("${datacloud.dnb.bulk.timestamp.xpath}")
-    private String timestampXpath;
-
     @Value("${datacloud.dnb.bulk.input.record.format}")
     private String recordFormat;
 
@@ -81,13 +79,13 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     public DnBBatchMatchContext sendRequest(DnBBatchMatchContext batchContext) {
         for (int i = 0; i < retries; i++) {
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_DISPATCH);
-            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
                 log.info("Sent batched request to dnb bulk match api, status=" + batchContext.getDnbCode() + " size="
                         + batchContext.getContexts().size() + " timestamp=" + batchContext.getTimestamp()
                         + " serviceId=" + batchContext.getServiceBatchId());
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BATCH);
+            dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
         }
         return batchContext;
     }
@@ -105,9 +103,13 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
             if (log.isDebugEnabled()) {
                 log.debug("LedpException in DnB batch match dispatching request: " + ledpEx.getCode().getMessage());
             }
-            batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+                batchContext.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+            } else {
+                batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            }
         } else {
-            log.error("Unhandled exception in DnB batch match dispatching request: " + ex.getMessage());
+            log.warn("Unhandled exception in DnB batch match dispatching request: " + ex.getMessage());
             ex.printStackTrace();
             batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
         }
@@ -117,8 +119,15 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
 
     @Override
     protected void parseResponse(String response, DnBBatchMatchContext batchContext, DnBAPIType apiType) {
-        batchContext.setServiceBatchId((String) retrieveXmlValueFromResponse(serviceIdXpath, response));
-        batchContext.setDnbCode(DnBReturnCode.OK);
+        String serviceBatchId = (String) retrieveXmlValueFromResponse(serviceIdXpath, response);
+        if (!StringUtils.isEmpty(serviceBatchId)) {
+            batchContext.setServiceBatchId(serviceBatchId);
+            batchContext.setDnbCode(DnBReturnCode.OK);
+        } else {
+            log.warn(String.format("Fail to extract serviceBatchId from response of DnB bulk match request: %s",
+                    response));
+            batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
+        }
     }
 
     @Override

@@ -29,7 +29,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
 
     private List<DnBBlackCache> blackCaches = new ArrayList<DnBBlackCache>();
 
-    @AfterClass(groups = "functional", enabled = false)
+    @AfterClass(groups = "functional", enabled = true)
     public void afterClass() {
         deleteEntities();
     }
@@ -49,7 +49,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
      * White Cache
      *********************************/
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testCreateWhiteCache() {
         Object[][] data = getEntityInputData();
         DnBMatchContext entityContext = new DnBMatchContext();
@@ -76,7 +76,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         whiteCaches.add(dnbCacheService.addWhiteCache(emailContext));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateWhiteCache", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testCreateWhiteCache", enabled = true)
     public void testBatchCreateWhiteCache() {
         Object[][] data = getEntityInputData();
         List<DnBMatchContext> entityContexts = new ArrayList<DnBMatchContext>();
@@ -93,7 +93,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.setDuns((String) data[i][7]);
             entityContext.setConfidenceCode((Integer) data[i][8]);
             entityContext.setMatchGrade((String) data[i][9]);
-            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.add(entityContext);
         }
         whiteCaches.addAll(dnbCacheService.batchAddWhiteCache(entityContexts));
@@ -112,7 +112,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateWhiteCache",
-            "testBatchCreateWhiteCache" }, enabled = false)
+            "testBatchCreateWhiteCache" }, enabled = true)
     public void testLookupWhiteCache() {
         Object[][] data = getEntityInputData();
         // cache hit
@@ -155,7 +155,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateWhiteCache",
-            "testBatchCreateWhiteCache" }, enabled = false)
+            "testBatchCreateWhiteCache" }, enabled = true)
     public void testBatchLookupWhiteCache() {
         Object[][] data = getEntityInputData();
         Map<String, DnBMatchContext> entityContexts = new HashMap<String, DnBMatchContext>();
@@ -167,7 +167,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.getInputNameLocation().setCity((String) data[i][3]);
             entityContext.getInputNameLocation().setPhoneNumber((String) data[i][4]);
             entityContext.getInputNameLocation().setZipcode((String) data[i][5]);
-            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.put(String.valueOf(i), entityContext);
         }
         Map<String, DnBWhiteCache> whiteCaches = dnbCacheService.batchLookupWhiteCache(entityContexts);
@@ -204,7 +204,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
      * Black Cache
      *********************************/
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testCreateBlackCache() {
         Object[][] data = getEntityInputData();
         DnBMatchContext entityContext = new DnBMatchContext();
@@ -225,7 +225,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         blackCaches.add(dnbCacheService.addBlackCache(emailContext));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreateBlackCache", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testCreateBlackCache", enabled = true)
     public void testBatchCreateBlackCache() {
         Object[][] data = getEntityInputData();
         List<DnBMatchContext> entityContexts = new ArrayList<DnBMatchContext>();
@@ -239,7 +239,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             nameLocation.setPhoneNumber((String) data[i][4]);
             nameLocation.setZipcode((String) data[i][5]);
             entityContext.setInputNameLocation(nameLocation);
-            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.add(entityContext);
         }
         blackCaches.addAll(dnbCacheService.batchAddBlackCache(entityContexts));
@@ -255,7 +255,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateBlackCache",
-            "testBatchCreateBlackCache" }, enabled = false)
+            "testBatchCreateBlackCache" }, enabled = true)
     public void testLookupBlackCache() {
         Object[][] data = getEntityInputData();
         // cache hit
@@ -294,7 +294,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateBlackCache",
-            "testBatchCreateBlackCache" }, enabled = false)
+            "testBatchCreateBlackCache" }, enabled = true)
     public void testBatchLookupBlackCache() {
         Object[][] data = getEntityInputData();
         Map<String, DnBMatchContext> entityContexts = new HashMap<String, DnBMatchContext>();
@@ -306,7 +306,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.getInputNameLocation().setCity((String) data[i][3]);
             entityContext.getInputNameLocation().setPhoneNumber((String) data[i][4]);
             entityContext.getInputNameLocation().setZipcode((String) data[i][5]);
-            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+            entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.put(String.valueOf(i), entityContext);
         }
         Map<String, DnBBlackCache> blackCaches = dnbCacheService.batchLookupBlackCache(entityContexts);

@@ -59,13 +59,13 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         for (int i = 0; i < retries; i++) {
             Long startTime = System.currentTimeMillis();
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
-            if (context.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+            context.setDuration(System.currentTimeMillis() - startTime);
+            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
                 log.info(String.format("DnB realtime entity matching request %s: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                        System.currentTimeMillis() - startTime));
+                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
+            dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
         }
         return context;
     }
@@ -75,13 +75,13 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         for (int i = 0; i < retries; i++) {
             Long startTime = System.currentTimeMillis();
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_EMAIL);
-            if (context.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+            context.setDuration(System.currentTimeMillis() - startTime);
+            if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
                 log.info(String.format("DnB realtime email matching request %s: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(),
-                        System.currentTimeMillis() - startTime));
+                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
+            dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
         }
         return context;
     }
@@ -100,7 +100,14 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         default:
             throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
         }
-        context.setDnbCode(DnBReturnCode.OK);
+        if (!StringUtils.isEmpty(context.getDuns())) {
+            context.setDnbCode(DnBReturnCode.OK);
+        } else {
+            log.warn(String.format("Fail to extract duns from response of request %: %", context.getLookupRequestId(),
+                    response));
+            context.setDnbCode(DnBReturnCode.BAD_RESPONSE);
+        }
+
         dnbMatchResultValidator.validate(context);
     }
     
@@ -119,9 +126,13 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 log.debug("LedpException in DnB realtime request " + context.getLookupRequestId() + ": "
                         + ledpEx.getCode().getMessage());
             }
-            context.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+                context.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+            } else {
+                context.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            }
         } else {
-            log.error("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
+            log.warn("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
                     + ex.getMessage());
             ex.printStackTrace();
             context.setDnbCode(DnBReturnCode.UNKNOWN);

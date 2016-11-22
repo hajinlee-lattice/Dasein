@@ -148,6 +148,13 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBWhiteCache(context.getInputEmail(), context.getDuns(), context.getConfidenceCode(),
                         context.getMatchGrade());
             }
+        case BATCH:
+            if (lookup) {
+                return new DnBWhiteCache(context.getInputNameLocation());
+            } else {
+                return new DnBWhiteCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
+                        context.getMatchGrade());
+            }
         default:
             throw new UnsupportedOperationException("DnBWhiteCache.CacheType " + context.getMatchStrategy().name()
                     + " is supported in DnB white cache lookup");
@@ -234,6 +241,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             return new DnBBlackCache(context.getInputNameLocation());
         case EMAIL:
             return new DnBBlackCache(context.getInputEmail());
+        case BATCH:
+            return new DnBBlackCache(context.getInputNameLocation());
         default:
             throw new UnsupportedOperationException("DnBBlackCache.CacheType " + context.getMatchStrategy().name()
                     + " is supported in DnB black cache lookup");

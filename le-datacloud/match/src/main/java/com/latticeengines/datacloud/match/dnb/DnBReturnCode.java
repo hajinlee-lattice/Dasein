@@ -8,10 +8,11 @@ public enum DnBReturnCode {
     UNAUTHORIZED("Unauthorized to call API"),
     RATE_LIMITING("Rate Limiting"),
     TIMEOUT("Timeout"),
-    EXPIRED("Token is expired but failed to refresh"),
+    EXPIRED_TOKEN("Token is expired but failed to refresh"),
     EXCEED_REQUEST_NUM("Exceed Hourly Maximum Limit"),
     EXCEED_CONCURRENT_NUM("Exceed Concurrent Limit"),
     BAD_REQUEST("Bad Request"),
+    BAD_RESPONSE("Bad Response"),
     UNKNOWN("Unkown error");
 
     String message;

@@ -18,8 +18,6 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
@@ -72,7 +70,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         List<FuzzyMatchHistory> fuzzyMatchHistories = new ArrayList<>();
-        List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
             if (future != null) {
@@ -84,36 +81,18 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchRecord.setLatticeAccountId(result);
                 traveler.setBatchMode(actorSystem.isBatchMode());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
-                if (traveler.getDnBMatchContexts() != null) {
-                    for (DnBMatchContext dnBMatchContext : traveler.getDnBMatchContexts()) {
-                        dnBMatchHistories.add(new DnBMatchHistory(dnBMatchContext));
-                    }
-                }
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
             }
         }
 
         writeFuzzyMatchHistory(fuzzyMatchHistories);
-        writeDnBMatchHistory(dnBMatchHistories);
     }
 
     @MatchStep
     private void writeFuzzyMatchHistory(List<FuzzyMatchHistory> metrics) {
         try {
             MeasurementMessage<FuzzyMatchHistory> message = new MeasurementMessage<>();
-            message.setMeasurements(metrics);
-            message.setMetricDB(MetricDB.LDC_Match);
-            actorSystem.getMetricActor().tell(message, null);
-        } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
-        }
-    }
-
-    @MatchStep
-    private void writeDnBMatchHistory(List<DnBMatchHistory> metrics) {
-        try {
-            MeasurementMessage<DnBMatchHistory> message = new MeasurementMessage<>();
             message.setMeasurements(metrics);
             message.setMetricDB(MetricDB.LDC_Match);
             actorSystem.getMetricActor().tell(message, null);

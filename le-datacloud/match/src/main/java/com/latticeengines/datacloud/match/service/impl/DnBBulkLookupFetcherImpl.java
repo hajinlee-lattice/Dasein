@@ -24,6 +24,7 @@ import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component
@@ -60,6 +61,12 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Value("${datacloud.dnb.bulk.result.id.xpath}")
     private String batchResultIdXpath;
 
+    @Value("${datacloud.dnb.bulk.receive.timestamp.xpath}")
+    private String receiveTimestampXpath;
+
+    @Value("${datacloud.dnb.bulk.complete.timestamp.xpath}")
+    private String completeTimestampXpath;
+
     @Value("${datacloud.dnb.bulk.query.interval}")
     private int queryInterval;
 
@@ -93,7 +100,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
         for (int i = 0; i < retries; i++) {
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
-            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED || i == retries - 1) {
+            if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
                 if (log.isDebugEnabled()) {
                     log.debug("Fetched result from DnB bulk match api. Status=" + batchContext.getDnbCode());
                 }
@@ -104,7 +111,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                 }
                 break;
             }
-            dnBAuthenticationService.refreshAndGetToken(DnBKeyType.BATCH);
+            dnBAuthenticationService.refreshToken(DnBKeyType.BATCH);
         }
         return batchContext;
     }
@@ -122,9 +129,13 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             if (log.isDebugEnabled()) {
                 log.debug("LedpException in DnB batch match fetching request: " + ledpEx.getCode().getMessage());
             }
-            batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            if (ledpEx.getCode() == LedpCode.LEDP_25027) {
+                batchContext.setDnbCode(DnBReturnCode.EXPIRED_TOKEN);
+            } else {
+                batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
+            }
         } else {
-            log.error("Unhandled exception in DnB batch match fetching request: " + ex.getMessage());
+            log.warn("Unhandled exception in DnB batch match fetching request: " + ex.getMessage());
             ex.printStackTrace();
             batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
         }
@@ -132,26 +143,39 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
     @Override
     protected void parseResponse(String response, DnBBatchMatchContext batchContext, DnBAPIType apiType) {
-        DnBReturnCode returnCode = parseBatchProcessStatus(response);
-        batchContext.setDnbCode(returnCode);
+        try {
+            DnBReturnCode returnCode = parseBatchProcessStatus(response);
+            batchContext.setDnbCode(returnCode);
 
-        if (batchContext.getDnbCode() != DnBReturnCode.OK) {
-            return;
-        }
-
-        String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
-        byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
-        List<String> resultsList = Arrays.asList((new String(decodeResults)).split("\n"));
-        for (String result : resultsList) {
-            DnBMatchContext normalizedResult = normalizeOneRecord(result);
-            DnBMatchContext context = batchContext.getContexts().get(normalizedResult.getLookupRequestId());
-            context.copyMatchResult(normalizedResult);
-        }
-        for (String lookupRequestId : batchContext.getContexts().keySet()) {
-            if (batchContext.getContexts().get(lookupRequestId).getDnbCode() == null) {
-                batchContext.getContexts().get(lookupRequestId).setDnbCode(DnBReturnCode.UNMATCH);
+            if (batchContext.getDnbCode() != DnBReturnCode.OK) {
+                return;
             }
+
+            parseTimestamp(response, batchContext);
+
+            String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
+
+            byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
+            List<String> resultsList = Arrays.asList((new String(decodeResults)).split("\n"));
+            for (String result : resultsList) {
+                DnBMatchContext normalizedResult = normalizeOneRecord(result, batchContext.getServiceBatchId());
+                DnBMatchContext context = batchContext.getContexts().get(normalizedResult.getLookupRequestId());
+                context.copyMatchResult(normalizedResult);
+            }
+            for (String lookupRequestId : batchContext.getContexts().keySet()) {
+                DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
+                context.setDuration(batchContext.getDuration());
+                context.setServiceBatchId(batchContext.getServiceBatchId());
+                if (context.getDnbCode() == null) {
+                    context.setDnbCode(DnBReturnCode.UNMATCH);
+                }
+            }
+        } catch (Exception ex) {
+            log.warn(String.format("Fail to extract match result from response of DnB bulk match request %s: %s",
+                    batchContext.getServiceBatchId(), response));
+            batchContext.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
+
     }
 
     private DnBReturnCode parseBatchProcessStatus(String body) {
@@ -167,27 +191,47 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
         }
     }
 
-    private DnBMatchContext normalizeOneRecord(String record) {
+    private DnBMatchContext normalizeOneRecord(String record, String serviceBatchId) {
         DnBMatchContext output = new DnBMatchContext();
-        record = record.substring(1, record.length() - 1);
-        String[] values = record.split("\",\"");
+        try {
+            record = record.substring(1, record.length() - 1);
+            String[] values = record.split("\",\"");
 
-        String lookupRequestId = values[1];
-        output.setLookupRequestId(lookupRequestId);
-        String duns = values[25];
-        if (!StringUtils.isNumeric(values[48])) {
-            output.setDnbCode(DnBReturnCode.DISCARD);
-            return output;
+            String lookupRequestId = values[1];
+            output.setLookupRequestId(lookupRequestId);
+            String duns = values[25];
+            if (!StringUtils.isNumeric(values[48])) {
+                output.setDnbCode(DnBReturnCode.DISCARD);
+                return output;
+            }
+            int confidenceCode = Integer.parseInt(values[48]);
+            String matchGrade = values[49];
+
+            output.setDuns(duns);
+            output.setConfidenceCode(confidenceCode);
+            output.setMatchGrade(matchGrade);
+            output.setDnbCode(DnBReturnCode.OK);
+            dnbMatchResultValidator.validate(output);
+        } catch (Exception e) {
+            log.warn(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
+                    serviceBatchId, record));
+            output.setDnbCode(DnBReturnCode.BAD_RESPONSE);
         }
-        int confidenceCode = Integer.parseInt(values[48]);
-        String matchGrade = values[49];
-
-        output.setDuns(duns);
-        output.setConfidenceCode(confidenceCode);
-        output.setMatchGrade(matchGrade);
-        output.setDnbCode(DnBReturnCode.OK);
-        dnbMatchResultValidator.validate(output);
         return output;
+    }
+
+    private void parseTimestamp(String response, DnBBatchMatchContext batchContext) {
+        String receivedTimeStr = (String) retrieveXmlValueFromResponse(receiveTimestampXpath, response);
+        String completeTimeStr = (String) retrieveXmlValueFromResponse(completeTimestampXpath, response);
+        Date receivedTime = DateTimeUtils.parseT(receivedTimeStr);
+        Date completeTime = DateTimeUtils.parseT(completeTimeStr);
+        if (completeTime == null || receivedTime == null || completeTime.getTime() <= receivedTime.getTime()) {
+            log.warn(String.format("Fail to parse timestamp field in the response of DnB bulk match request  %s",
+                    batchContext.getServiceBatchId()));
+            batchContext.setDuration(null);
+        } else {
+            batchContext.setDuration(completeTime.getTime() - receivedTime.getTime());
+        }
     }
 
     @Override

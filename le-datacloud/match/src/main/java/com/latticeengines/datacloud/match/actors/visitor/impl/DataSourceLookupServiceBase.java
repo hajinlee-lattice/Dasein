@@ -1,9 +1,8 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
-import java.util.concurrent.ExecutorService;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -104,5 +103,9 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
 
     protected DataSourceLookupRequest getReq(String lookupRequestId) {
         return reqs.get(lookupRequestId);
+    }
+
+    protected MatchActorSystem getActorSystem() {
+        return actorSystem;
     }
 }

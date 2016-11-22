@@ -60,8 +60,8 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     }
 
     protected String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
-        if (apiType == DnBAPIType.AUTHENTICATION || apiType == DnBAPIType.REALTIME_ENTITY
-                || apiType == DnBAPIType.REALTIME_EMAIL || apiType == DnBAPIType.BATCH_FETCH) {
+        if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL
+                || apiType == DnBAPIType.BATCH_FETCH) {
             return dnbClient.get(entity, url);
         } else {
             return dnbClient.post(entity, url);
@@ -92,9 +92,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             case "SC002":
                 return DnBReturnCode.UNAUTHORIZED;
             case "SC003":
-                return DnBReturnCode.EXPIRED;
+                return DnBReturnCode.EXPIRED_TOKEN;
             case "SC004":
-                return DnBReturnCode.EXPIRED;
+                return DnBReturnCode.EXPIRED_TOKEN;
             case "SC005":
                 return DnBReturnCode.EXCEED_REQUEST_NUM;
             case "SC006":

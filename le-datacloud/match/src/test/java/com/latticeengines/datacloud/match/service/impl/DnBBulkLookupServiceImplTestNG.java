@@ -47,7 +47,8 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(output.size(), getEntityInputData().length);
         for (String lookupRequestId : output.keySet()) {
             DnBMatchContext result = output.get(lookupRequestId);
-            log.info("Request " + result.getLookupRequestId() + ": " + result.getDuns());
+            log.info("Request " + result.getLookupRequestId() + ": " + result.getDuns() + " duration = "
+                    + result.getDuration());
         }
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
         dnBBulkLookupFetcher.getResult(batchContext);

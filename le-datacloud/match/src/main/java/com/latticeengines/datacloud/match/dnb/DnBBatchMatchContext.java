@@ -14,6 +14,8 @@ public class DnBBatchMatchContext {
 
     private Map<String, DnBMatchContext> contexts;
 
+    private Long duration;
+
     public DnBBatchMatchContext() {
         contexts = new HashMap<String, DnBMatchContext>();
     }
@@ -50,4 +52,11 @@ public class DnBBatchMatchContext {
         this.contexts = contexts;
     }
 
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
 }

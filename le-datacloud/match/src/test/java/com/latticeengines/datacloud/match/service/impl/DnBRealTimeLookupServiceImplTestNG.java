@@ -52,6 +52,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertEquals(res.getDuns(), duns);
         Assert.assertEquals(res.getConfidenceCode(), ConfidenceCode);
         Assert.assertEquals(res.getMatchGrade(), matchGrade);
+        Assert.assertNotNull(res.getDuration());
+        log.info(String.format("Match duration: %d", res.getDuration()));
     }
 
     @Test(groups = "functional", enabled = false)
@@ -104,6 +106,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEmailLookup(context);
         Assert.assertEquals(res.getDnbCode(), dnbCode);
         Assert.assertEquals(res.getDuns(), duns);
+        Assert.assertNotNull(res.getDuration());
+        log.info(String.format("Match duration: %d", res.getDuration()));
     }
 
     @DataProvider(name = "entityInputData")

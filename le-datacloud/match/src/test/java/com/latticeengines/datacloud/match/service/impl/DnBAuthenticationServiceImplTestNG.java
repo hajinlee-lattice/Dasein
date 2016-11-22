@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static java.lang.Thread.sleep;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +21,20 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
     public void testAuthentication() {
         String token1 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
         String token2 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
+        Assert.assertNotNull(token1);
+        Assert.assertNotNull(token2);
 
         // token1 should be equal to token2 since token2 came from loading cache
         Assert.assertEquals(token1, token2);
 
-        // Test cache expiration
-        try {
-            sleep(70000);
-        } catch (InterruptedException e) {
-        }
+        log.info("Token1: " + token1);
+
+        dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
+
         String token3 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME);
+        Assert.assertNotNull(token3);
         Assert.assertNotEquals(token1, token3);
 
-        String token4 = dnBAuthenticationService.refreshAndGetToken(DnBKeyType.REALTIME);
-        Assert.assertNotEquals(token3, token4);
+        log.info("Token3: " + token3);
     }
 }
