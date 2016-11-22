@@ -66,7 +66,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         this.name = name;
     }
 
-    @Column(name = "PATH", unique = false, nullable = false)
+    @Column(name = "PATH", unique = false, nullable = false, length = 2048)
     @JsonProperty("path")
     public String getPath() {
         return path;

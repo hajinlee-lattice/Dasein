@@ -68,7 +68,7 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     private Long pid;
 
     @JsonProperty("path")
-    @Column(name = "PATH", nullable = false)
+    @Column(name = "PATH", nullable = false, length = 2048)
     private String path;
 
     @JsonProperty("created")

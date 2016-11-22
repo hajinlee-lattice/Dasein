@@ -494,7 +494,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @JsonProperty("PivotArtifactPath")
-    @Column(name = "PIVOT_ARTIFACT_PATH", nullable = true)
+    @Column(name = "PIVOT_ARTIFACT_PATH", nullable = true, length = 2048)
     public String getPivotArtifactPath() {
         return pivotArtifactPath;
     }

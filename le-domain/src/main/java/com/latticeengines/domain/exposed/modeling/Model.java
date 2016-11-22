@@ -157,7 +157,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonProperty("metadata")
-    @Column(name = "METADATA_HDFS_PATH")
+    @Column(name = "METADATA_HDFS_PATH", length = 2048)
     public String getMetadataHdfsPath() {
         return metadataHdfsPath;
     }
@@ -168,7 +168,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonProperty("data")
-    @Column(name = "DATA_HDFS_PATH")
+    @Column(name = "DATA_HDFS_PATH", length = 2048)
     public String getDataHdfsPath() {
         return dataHdfsPath;
     }
@@ -190,7 +190,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonProperty("model_dir_data")
-    @Column(name = "MODEL_HDFS_DIR")
+    @Column(name = "MODEL_HDFS_DIR", length = 2048)
     public String getModelHdfsDir() {
         return modelHdfsDir;
     }

@@ -40,7 +40,7 @@ public class Artifact implements HasName, HasPid, HasTenantId {
     private String name;
     
     @JsonProperty("path")
-    @Column(name = "PATH", nullable = false)
+    @Column(name = "PATH", nullable = false, length = 766)
     private String path;
     
     @JsonProperty("type")

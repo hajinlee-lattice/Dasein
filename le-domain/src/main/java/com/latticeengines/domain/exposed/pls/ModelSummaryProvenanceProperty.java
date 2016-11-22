@@ -65,7 +65,7 @@ public class ModelSummaryProvenanceProperty implements HasOptionAndValue, HasPid
         this.option = option;
     }
 
-    @Column(name = "VALUE", nullable = true)
+    @Column(name = "VALUE", nullable = true, length = 2048)
     @JsonProperty("value")
     public String getValue() {
         return value;

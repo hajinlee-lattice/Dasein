@@ -62,7 +62,7 @@ public class DataSet implements HasName, HasTenant, HasPid, Fact, Dimension {
     private SchemaInterpretation schemaInterpretation;
 
     @JsonProperty("training_hdfs_path")
-    @Column(name = "TRAINING_HDFS_PATH")
+    @Column(name = "TRAINING_HDFS_PATH", length = 2048)
     private String trainingSetHdfsPath;
 
     @JsonProperty("test_hdfs_path")
