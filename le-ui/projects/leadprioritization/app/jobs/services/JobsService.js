@@ -229,6 +229,9 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
 
+                if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                    stepRunning = "score_training_set";
+                }
                 result = {
                     success: true,
                     resultObj:
@@ -284,6 +287,9 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
 
+                if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                    stepRunning = "score_training_set";
+                }
                 result = {
                     success: true,
                     resultObj: {
@@ -306,13 +312,6 @@ angular
             function onError(response) {
                 result = {
                     success: false,
-                    resultObj: {
-                        id: job.id,
-                        user: job.user,
-                        errorCode: job.errorCode,
-                        errorMsg: job.errorMsg,
-                        jobType: job.jobType,
-                    }
                 };
                 deferred.resolve(result);
             }
@@ -441,6 +440,10 @@ angular
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
                 var stepCompleted = getDictionaryValue(job, i);
+
+                if ((stepCompleted == "generate_insights" || stepCompleted == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                    continue;
+                }
 
                 if (stepCompleted) {
                     numStepsInGroup[stepCompleted] += 1;
