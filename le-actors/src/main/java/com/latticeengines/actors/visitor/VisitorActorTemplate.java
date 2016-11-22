@@ -71,13 +71,12 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     }
 
     protected void travel(Traveler traveler, ActorRef currentActorRef, boolean rejected) {
+        getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         String nextLocation = getNextLocation(traveler);
         if (nextLocation == null) {
             nextLocation = traveler.getAnchorActorLocation();
         }
         ActorRef nextActorRef = getContext().actorFor(nextLocation);
-
-        getGuideBook().logVisit(currentActorRef.path().toSerializationFormat(), traveler);
         if (logCheckInNOut()) {
             VisitingHistory visitingHistory = traveler.checkOut(getClass().getSimpleName(), getActorName(nextActorRef));
             visitingHistory.setRejected(rejected);

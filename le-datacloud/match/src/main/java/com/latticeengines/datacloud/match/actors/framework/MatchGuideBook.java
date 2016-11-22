@@ -157,10 +157,13 @@ public class MatchGuideBook extends GuideBook {
         String currentContext = traveler.getMatchKeyTuple().toString();
         if (StringUtils.isNotEmpty(candidateDestination) && history.containsKey(candidateDestination)) {
             Set<String> previousData = history.get(candidateDestination);
-            return previousData.contains(currentContext);
-        } else {
-            return false;
+            if (previousData.contains(currentContext)) {
+                traveler.debug("Skipping " + actorSystem.getActorName(candidateDestination)
+                        + " because this is the second visit with the same context.");
+                return true;
+            }
         }
+        return false;
     }
 
     private DecisionGraph getDecisionGraph(MatchTraveler traveler) throws ExecutionException {
