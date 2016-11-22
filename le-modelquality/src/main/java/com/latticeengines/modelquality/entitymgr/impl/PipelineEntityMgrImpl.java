@@ -40,7 +40,7 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
         pipeline.setName(pipeline.getName().replace('/', '_'));
         for (PipelineStep step : pipeline.getPipelineSteps()) {
             String stepName = step.getName().replace('/', '_');
-            if (findByName(stepName) == null) {
+            if (pipelineStepDao.findByField("NAME", stepName) == null) {
                 step.setName(stepName);
                 pipelineStepDao.create(step);
             }

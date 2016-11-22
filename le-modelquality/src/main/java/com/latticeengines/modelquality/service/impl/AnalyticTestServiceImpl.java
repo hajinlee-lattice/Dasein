@@ -60,7 +60,7 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         }
 
         analyticTest.setName(analyticTestEntityNames.getName());
-
+        analyticTest.setAnalyticTestType(analyticTestEntityNames.getAnalyticTestType());
         analyticTest.setAnalyticTestTag(analyticTestEntityNames.getAnalyticTestTag());
 
         if (analyticTestEntityNames.getAnalyticPipelineNames() == null
@@ -111,29 +111,34 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
             return modelRunEntityMgr.findModelRunsByAnalyticTest(analyticTestName);
         }
 
-        Environment env = new Environment();
-        env.apiHostPort = this.apiHostPort;
-        env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
-        env.username = "bnguyen@lattice-engines.com";
-        env.password = "tahoe";
-
         for (AnalyticPipeline ap : analyticTest.getAnalyticPipelines()) {
             for (DataSet ds : analyticTest.getDataSets()) {
-                ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
-                modelRunEntityNames.setAnalyticPipelineName(ap.getName());
-                modelRunEntityNames.setDataSetName(ds.getName());
-                modelRunEntityNames
-                        .setName(analyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
-                modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
-                modelRunEntityNames.setAnalyticTestName(analyticTestName);
-                modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag());
-                ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames, env);
+                ModelRun modelRun = createModelRun(analyticTest, ap, ds);
                 resultSet.add(modelRun);
             }
         }
         analyticTest.setExecuted(true);
         analyticTestEntityMgr.update(analyticTest);
         return resultSet;
+    }
+
+    private ModelRun createModelRun(AnalyticTest analyticTest, AnalyticPipeline ap, DataSet ds) {
+        Environment env = new Environment();
+        env.apiHostPort = this.apiHostPort;
+        env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
+        env.username = "bnguyen@lattice-engines.com";
+        env.password = "tahoe";
+
+        ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
+        modelRunEntityNames.setAnalyticPipelineName(ap.getName());
+        modelRunEntityNames.setDataSetName(ds.getName());
+        modelRunEntityNames
+                .setName(analyticTest.getName() + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
+        modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
+        modelRunEntityNames.setAnalyticTestName(analyticTest.getName());
+        modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag());
+        ModelRun modelRun = modelRunService.createModelRun(modelRunEntityNames, env);
+        return modelRun;
     }
 
     @Transactional

@@ -44,7 +44,7 @@ public class AnalyticTest implements HasName, HasPid {
 
     @JsonProperty("analytic_test_type")
     @Column(name = "ANALYTIC_TEST_TYPE", nullable = false)
-    private AnalyticTestType analyticTestType = AnalyticTestType.Default;
+    private AnalyticTestType analyticTestType = AnalyticTestType.SelectedPipelines;
 
     @JsonProperty("analytic_test_tag")
     @Column(name = "ANALYTIC_TEST_TAG")

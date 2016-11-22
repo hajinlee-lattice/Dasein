@@ -76,6 +76,12 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     @Override
     public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names,
             PipelineStepType type) {
+        
+        if(pipelineStepEntityMgr.findByName(stepName) != null)
+        {
+            throw new LedpException(LedpCode.LEDP_35002, new String[] {"Pipeline Step", stepName});
+        }
+        
         try {
             switch (type) {
             case METADATA:
