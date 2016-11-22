@@ -763,7 +763,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 /* checked mark aspect */
 .custom[type="checkbox"]:not(:checked) + label:after,
 .custom[type="checkbox"]:checked + label:after {
-  content: '✔';
+  content: '\f00c';
   position: absolute;
   top: 3px; 
   left: 4px;

@@ -14,9 +14,13 @@ pd-pagination-controls .pd-pagination {
     button.white-button {
         padding: .4em .8em;
         color: #467dba;
+        -webkit-transition: all 0s linear;
+        -moz-transition: all 0s linear;
+        -ms-transition: all 0s linear;
+        transition: all 0s linear;
     }
     
-    button.disabled,
+    button[disabled],
     button.active {
         color: #467dba;
         pointer-events: none;
@@ -24,7 +28,7 @@ pd-pagination-controls .pd-pagination {
         outline: 0;
     }
     
-    button.disabled {
+    button[disabled] {
         border-color: #eee;
         color: #ccc;
     }

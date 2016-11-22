@@ -15,7 +15,7 @@ angular
     .directive('pdPaginationControls', function() {
         return {
             restrict: 'EA',
-            templateUrl: 'app/navigation/pagination/PaginationView.html',
+            templateUrl: '/app/modules/Pagination/Pagination.html',
             scope: {
                 max: '=',
                 current: '='
