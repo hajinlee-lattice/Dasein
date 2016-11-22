@@ -25,6 +25,7 @@ import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
+import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -48,6 +49,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private DnBCacheService dnbCacheService;
 
+    @Autowired
+    private DnBMatchResultValidator dnbMatchResultValidator;
+
     private final Queue<DnBMatchContext> unsubmittedReqs = new ConcurrentLinkedQueue<DnBMatchContext>();
     private final Queue<DnBBatchMatchContext> submittedReqs = new ConcurrentLinkedQueue<DnBBatchMatchContext>();
     private static AtomicInteger unsubmittedNum = new AtomicInteger(0);
@@ -62,6 +66,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
         if (whiteCache != null) {
             context.copyResultFromWhiteCache(whiteCache);
+            dnbMatchResultValidator.validate(context);
             return context;
         }
         DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
@@ -98,6 +103,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
         if (whiteCache != null) {
             context.copyResultFromWhiteCache(whiteCache);
+            dnbMatchResultValidator.validate(context);
             sendResponse(lookupRequestId, context, returnAddress);
             return;
         }
