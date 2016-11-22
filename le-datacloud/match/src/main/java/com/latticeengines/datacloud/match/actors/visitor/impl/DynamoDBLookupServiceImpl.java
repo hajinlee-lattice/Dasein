@@ -74,8 +74,10 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             accountLookupRequest.addLookupPair(matchKeyTuple.getDomain(), matchKeyTuple.getDuns());
             Long startTime = System.currentTimeMillis();
             result = accountLookupService.batchLookupIds(accountLookupRequest).get(0);
-            log.info(String.format("Fetched results from Dynamo for 1 sync requests (DataCloudVersion=%s) Duration=%d",
-                    request.getMatchTravelerContext().getDataCloudVersion(), System.currentTimeMillis() - startTime));
+            log.info(String.format(
+                    "Fetched result from Dynamo for 1 sync requests (DataCloudVersion=%s) Duration=%d Result is %sempty",
+                    request.getMatchTravelerContext().getDataCloudVersion(), System.currentTimeMillis() - startTime,
+                    result == null ? "" : "not "));
             if (StringUtils.isNotEmpty(result)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Got result from lookup for Lookup key=" + accountLookupRequest.getIds().get(0)
@@ -196,15 +198,19 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
                                 }
                             }
-                            sendResponse(reqIds.get(i), result, getReqReturnAdd(reqIds.get(i)));
+                            String returnAddr = getReqReturnAdd(reqIds.get(i));
                             removeReq(reqIds.get(i));
+                            sendResponse(reqIds.get(i), result, returnAddr);
                         }
                     } catch (Exception ex) {
+                        ex.printStackTrace();
                         List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
                         for (String reqId : reqIds) {
                             DataSourceLookupRequest req = getReq(reqId);
-                            sendFailureResponse(req, ex);
-                            removeReq(reqId);
+                            if (req != null) {
+                                removeReq(reqId);
+                                sendFailureResponse(req, ex);
+                            }
                         }
                     }
 
