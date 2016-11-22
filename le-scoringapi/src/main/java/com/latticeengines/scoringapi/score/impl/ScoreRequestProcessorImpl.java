@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
+import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
@@ -798,9 +799,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {
         ModelSummaryProvenance provenance = scoringArtifacts.getModelSummary().getModelSummaryConfiguration();
         boolean shouldSkipMatching = false;
-        if (scoringArtifacts.getModelSummary().getModelSummaryProvenanceProperties()
-                .contains(ProvenancePropertyName.ExcludePropdataColumns)) {
-            shouldSkipMatching = provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns);
+        for (ModelSummaryProvenanceProperty property : scoringArtifacts.getModelSummary()
+                .getModelSummaryProvenanceProperties()) {
+            if (property.getOption().equals(ProvenancePropertyName.ExcludePropdataColumns.name())) {
+                shouldSkipMatching = provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns);
+                break;
+            }
         }
         boolean isPmmlModel = ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType());
 
