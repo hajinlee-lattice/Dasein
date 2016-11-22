@@ -31,6 +31,14 @@
     </ul>
     <form ng-model="vm.metadata_form" ng-class="{loading: vm.loading}">
         <div class="loading-icon" ng-if="vm.loading"><i class="fa fa-spinner fa-spin fa-3x fa-fw"></i></div>
+        <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
+            <div class="twelve columns">
+                <pd-pagination-controls 
+                    current="vm.current" 
+                    max="vm.max = filteredList.length / vm.pagesize">
+                </pd-pagination-controls>
+            </div>
+        </div>
         <table class="metadata" ng-show="!vm.loading">
             <tr>
                 <th class="edit-button">&nbsp;</th>
@@ -63,10 +71,10 @@
         <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
             <div class="twelve columns">
                 <pd-pagination-controls 
-                        current="vm.current" 
-                        max="vm.max = filteredList.length / vm.pagesize">
-            </pd-pagination-controls>
+                    current="vm.current" 
+                    max="vm.max = filteredList.length / vm.pagesize">
+                </pd-pagination-controls>
+            </div>
         </div>
-    </div>
     </form>
 </div>
