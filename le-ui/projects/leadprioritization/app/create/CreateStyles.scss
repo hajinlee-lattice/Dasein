@@ -365,6 +365,11 @@ section.container.custom-fields {
         font-size: 1.2em;
         padding: 0.5em;
     }
+    form[name="fieldMappingForm"] {
+        .columns {
+            min-width: 672px;
+        }
+    }
 }
 
 

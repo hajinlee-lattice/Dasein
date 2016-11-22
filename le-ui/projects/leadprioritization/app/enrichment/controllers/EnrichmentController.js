@@ -115,6 +115,7 @@ angular.module('lp.enrichment.leadenrichment', [
                     EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                     stopNumbersInterval();
                     vm.enrichments_completed = true;
+                    vm.hasSaved = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': true}).length;
                 }
             }
         });
@@ -330,7 +331,9 @@ angular.module('lp.enrichment.leadenrichment', [
             selectedAttributes: selected,
             deselectedAttributes: deselected
         }
+
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
+
         EnrichmentService.setEnrichments(data).then(function(result){
             vm.saveDisabled = true;
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
@@ -510,6 +513,5 @@ angular.module('lp.enrichment.leadenrichment', [
             });
         }
     }
-    console.log(fallbackSrc);
     return fallbackSrc;
 });

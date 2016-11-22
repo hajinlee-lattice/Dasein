@@ -27,7 +27,7 @@
                 <li class="categories">
                     <div class="dropdown-categories" ng-class="{active: vm.show_categories, ready: vm.enable_category_dropdown}">
                         <h4 ng-click="vm.categoriesDropdown($event)">Search and browse by category</h4>
-                        <ul ng-class="{active: vm.show_categories}">
+                        <ul ng-class="{active: vm.show_categories}" class="category-dropdown">
                             <li ng-repeat="(key, value) in vm.categories">
                                 <div class="category" ng-class="{active: vm.inCategory({Category: value})}">
                                     <span class="subcategory-arrow" ng-class="{'subcategory-toggle': vm.subcategories[value]}"></span>
@@ -74,7 +74,7 @@
                     </ul>
                     <ul class="actions">
                         <li class="save">
-                            <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
+                            <button class="save button orange-button" ng-disabled="vm.saveDisabled && !vm.hasSaved" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                         </li>
                         </ul>
                     </ul>
