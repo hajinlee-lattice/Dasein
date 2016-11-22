@@ -57,7 +57,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             matchKeyTuple.setDuns(res.getDuns());
             if (res.getDnbCode() != DnBReturnCode.OK) {
                 traveler.debug(getClass().getSimpleName() + " encountered issue with DnB for traveler " + traveler //
-                        + ": " + res.getDnbCode().getMessage() //
+                        + ": " + (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage()) //
                         + " (ConfidenceCode = " //
                         + (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()) //
                         + ", MatchGrade = " //
