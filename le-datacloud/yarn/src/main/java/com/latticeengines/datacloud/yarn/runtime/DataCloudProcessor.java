@@ -222,7 +222,6 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             }
             log.info("Use decision graph " + decisionGraph);
 
-
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
             Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(10));
@@ -389,10 +388,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         List<OutputRecord> recordsWithErrors = new ArrayList<>();
         for (OutputRecord record : groupOutput.getResult()) {
             if (record.getErrorMessages() != null && !record.getErrorMessages().isEmpty()) {
-                // TODO: per record error might cause out of memory. change to stream to output file on the fly
+                // TODO: per record error might cause out of memory. change to
+                // stream to output file on the fly
                 // record.setOutput(null);
                 // recordsWithErrors.add(record);
-                for (String msg: record.getErrorMessages()) {
+                for (String msg : record.getErrorMessages()) {
                     log.warn(msg);
                 }
             }
@@ -456,20 +456,25 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             return value;
         }
         String javaClass = metadataColumn.getJavaClass();
-        if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
-            return String.valueOf(value);
-        }
-        if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
-            return Integer.valueOf(String.valueOf(value));
-        }
-        if (LONG.equalsIgnoreCase(javaClass) && !(value instanceof Long)) {
-            return Long.valueOf(String.valueOf(value));
-        }
-        if (FLOAT.equalsIgnoreCase(javaClass) && !(value instanceof Float)) {
-            return Float.valueOf(String.valueOf(value));
-        }
-        if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
-            return Double.valueOf(String.valueOf(value));
+        try {
+            if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
+                return String.valueOf(value);
+            }
+            if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
+                return Integer.valueOf(String.valueOf(value));
+            }
+            if (LONG.equalsIgnoreCase(javaClass) && !(value instanceof Long)) {
+                return Long.valueOf(String.valueOf(value));
+            }
+            if (FLOAT.equalsIgnoreCase(javaClass) && !(value instanceof Float)) {
+                return Float.valueOf(String.valueOf(value));
+            }
+            if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
+                return Double.valueOf(String.valueOf(value));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to parse value " + value + " of attribute " + columnId + " to " + javaClass, e);
         }
         return value;
     }
@@ -487,7 +492,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         Schema outputSchema;
         if (predefinedSelection == null) {
             List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(customizedSelection, dataCloudVersion);
-            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName, dataCloudVersion);
+            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                    dataCloudVersion);
         } else {
             outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
         }
