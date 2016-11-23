@@ -12,11 +12,11 @@ angular.module('lp.create.import.job', [
     $scope.applicationId = $stateParams.applicationId;
     var REFRESH_JOB_INTERVAL_ID;
     var REFRESH_PERFORM_CALC_ID; 
-    var TIME_BETWEEN_JOB_REFRESH = 1000;
+    var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;
 
-    getJobStatusFromAppId();
+    getJobStatusFromAppIdAndPerformCalc();
 
-    REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppId, TIME_BETWEEN_JOB_REFRESH);
+    REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppIdAndPerformCalc, TIME_BETWEEN_JOB_REFRESH);
 
     $scope.jobStepsRunningStates = {
         load_data: false, 
@@ -49,65 +49,38 @@ angular.module('lp.create.import.job', [
         $interval.cancel(REFRESH_PERFORM_CALC_ID);
     });
 
-    function performCalc() {
-        JobsStore.getJobs(true).then(function(jobs) {
-            if (jobs.length > 0) {
-                var pendings = [];
+    function performCalc(job) {
+        ServiceErrorUtility.process({ data: job });
 
-                for (var i=0; i<jobs.length; i++) {
-                    if (jobs[i].applicationId == $scope.applicationId) {
-                        var job = jobs[i];
-                    } 
+        if (job.jobStatus == 'Pending') {
+            ceiling = 10;
+        } else if (job.stepRunning == 'load_data'){
+            ceiling = 35;
+        } else if (job.stepRunning == 'generate_insights'){
+            ceiling = 60;
+        } else if (job.stepRunning == 'create_global_target_market'){
+            ceiling = 80;
+        } else if (job.stepRunning == 'score_training_set') {
+            ceiling = 90;
+        } else if (job.jobStatus == 'Completed') {
+            ceiling = 100;
+        }
 
-                    if (jobs[i].jobStatus == 'Pending' && !jobs[i].applicationId) {
-                        pendings.push(jobs[i]);
-                    }
-                }
+        $scope.isPMMLCompleted = ($scope.isPMMLJob && ($scope.jobStepsCompletedStates && $scope.jobStepsCompletedStates.create_global_target_market));
 
-                if (!job && pendings.length > 0) {
-                    job = pendings.pop();
-                }
+        if (initialized) {
+            value = ceiling;
+        } else if (up == true && value <= ceiling){
+            value += increment
+        }
 
-                if (!job) {
-                    return;
-                }
-                ServiceErrorUtility.process({ data: job });
+        if (value == ceiling){
+            up = false;
+        }
 
-                if (job.jobStatus == 'Pending') {
-                    ceiling = 10;
-                } else if (job.stepRunning == 'load_data'){
-                    ceiling = 35;
-                } else if (job.stepRunning == 'generate_insights'){
-                    ceiling = 60;
-                } else if (job.stepRunning == 'create_global_target_market'){
-                    ceiling = 80;
-                } else if (job.stepRunning == 'score_training_set') {
-                    ceiling = 90;
-                } else if (job.jobStatus == 'Completed') {
-                    ceiling = 100;
-                }
-
-                $scope.isPMMLCompleted = ($scope.isPMMLJob && ($scope.jobStepsCompletedStates && $scope.jobStepsCompletedStates.create_global_target_market));
-
-                if (initialized) {
-                    value = ceiling;
-                } else if (up == true && value <= ceiling){
-                    value += increment
-                }
-
-                if (value == ceiling){
-                    up = false;
-                }
-                
-                $scope.compress_percent = value;
-                $scope.jobStatus = job.jobStatus;
-                initialized = true;
-                updateStatesBasedOnJobStatus(job);
-            };
-        });
+        $scope.compress_percent = value;
+        initialized = true;
     };
-
-    REFRESH_PERFORM_CALC_ID = $interval(performCalc, TIME_BETWEEN_JOB_REFRESH);
 
     function updateStatesBasedOnJobStatus(job) {
         $scope.startTimestamp = job.startTimestamp;
@@ -152,26 +125,14 @@ angular.module('lp.create.import.job', [
         REFRESH_JOB_INTERVAL_ID = null;
     }
 
-    function getJobStatusFromAppId() {
-        JobsStore.getJobs(true).then(function(jobs) {
-            if (jobs.length > 0) {
-                for (var i=0; i<jobs.length; i++) {
-                    if (jobs[i].applicationId == $scope.applicationId) {
-                        var resultObj = jobs[i];
-                    }
-                }
-
-                if (!resultObj) {
-                    return;
-                }
-
-                if ($scope.jobStatus == resultObj.jobStatus) {
-                    return;
-                }
+    function getJobStatusFromAppIdAndPerformCalc() {
+        JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
+            if (response.success) {
+                var resultObj = response.resultObj;
 
                 $scope.jobStatus = resultObj.jobStatus;
                 $scope.jobId = resultObj.id;
-                
+
                 if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
                     ServiceErrorUtility.process({ data: resultObj });
                     cancelPeriodJobStatusQuery();
@@ -179,13 +140,10 @@ angular.module('lp.create.import.job', [
 
                 updateStatesBasedOnJobStatus(resultObj);
                 performCalc(resultObj);
-
-                JobsStore.getJobs();
-            } else {
-
             }
         });
     }
+
     $scope.cancelJob = function($event, jobId) {
         if ($event != null) {
             $event.stopPropagation();

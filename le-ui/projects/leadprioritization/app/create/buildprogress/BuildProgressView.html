@@ -17,14 +17,14 @@
                     <dt>Job Started</dt>
                     <dd>
                         <div class="progress-icon"  data-ng-if="jobStatus != null">
-                            <span data-ng-if="!startTimestamp">
+                            <span data-ng-if="jobStatus == 'Pending'">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="startTimestamp">
+                            <span data-ng-if="startTimestamp && jobStatus != 'Pending'">
                                 <i class="fa fa-check"></i>
                             </span>
                         </div>
-                        <div data-ng-if="startTimestamp">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
+                        <div data-ng-if="startTimestamp && jobStatus != 'Pending'">{{startTimestamp | date: 'MM/dd/yyyy h:mma'}}</div>
                     </dd>
                 </dl>
 
