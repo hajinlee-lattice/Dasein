@@ -153,6 +153,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         String createdDateUTC = DateTimeUtils.formatTZ(now);
         String tupleStr = convertTuplesToString(batchContext);
         String inputObjectBase64 = Base64Utils.encodeBase64(tupleStr, false, Integer.MAX_VALUE);
+        log.info(String.format("Submitted encoded match input: %s", inputObjectBase64));
         return String.format(dnBBulkApiBody, createdDateUTC.toString(), inputObjectBase64,
                 String.valueOf(batchContext.getContexts().size()));
     }

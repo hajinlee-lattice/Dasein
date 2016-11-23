@@ -256,6 +256,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     originalName = (String) inputRecord.get(namePos);
                 }
                 if (StringUtils.isNotEmpty(originalName)) {
+                    String cleanName = com.latticeengines.common.exposed.util.StringUtils
+                            .getStandardString(originalName);
                     String originalCountry = null;
                     for (Integer countryPos : countryPosList) {
                         originalCountry = (String) inputRecord.get(countryPos);
@@ -273,7 +275,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
 
                     NameLocation nameLocation = new NameLocation();
-                    nameLocation.setName(originalName);
+                    nameLocation.setName(cleanName);
                     nameLocation.setState(cleanState);
                     nameLocation.setCountry(cleanCountry);
                     nameLocation.setCountryCode(countryCode);
