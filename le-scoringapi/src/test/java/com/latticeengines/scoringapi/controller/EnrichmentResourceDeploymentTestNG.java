@@ -25,7 +25,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "As 1010daT";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "lication Development Tech";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -327,7 +327,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        Assert.assertEquals(count.intValue(), 2);
+        Assert.assertEquals(count.intValue(), 3);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {
