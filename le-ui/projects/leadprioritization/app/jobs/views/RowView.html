@@ -100,7 +100,11 @@
                                 <p class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span class="loading-small" data-ng-if="jobStepsRunningStates.load_data"></span>
+                                <span 
+                                    class="loading-small" 
+data-ng-if="
+jobStepsRunningStates.load_data || 
+jobStepsRunningStates.undefined && !jobStepsCompletedStates.load_data"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.load_data"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'load_data'"></i>
                             </span>
@@ -115,7 +119,11 @@
                                 <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span class="loading-small" data-ng-if="jobStepsRunningStates.generate_insights"></span>
+                                <span 
+                                    class="loading-small" 
+data-ng-if="
+jobStepsRunningStates.generate_insights || 
+jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
                             </span>
@@ -130,7 +138,11 @@
                                 <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span class="loading-small" data-ng-if="jobStepsRunningStates.create_global_target_market"></span>
+                                <span 
+                                    class="loading-small" 
+data-ng-if="
+jobStepsRunningStates.create_global_target_market || 
+jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
                             </span>
@@ -145,7 +157,14 @@
                                 <p class="completion-times">{{ stepsCompletedTimes.score_training_set | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
-                                <span class="loading-small" data-ng-if="jobStepsRunningStates.score_training_set || jobStepsRunningStates.generate_insights && jobStepsCompletedStates.generate_insights || jobStepsCompletedStates.create_global_target_market && jobStepsRunningStates.create_global_target_market"></span>
+                                <span 
+                                    class="loading-small" 
+data-ng-if="
+
+jobStepsRunningStates.score_training_set || 
+jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market
+
+"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.score_training_set"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'score_training_set'"></i>
                             </span>
