@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,38 +27,38 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Autowired
     private DnBBulkLookupFetcher dnBBulkLookupFetcher;
     
-
-    @Test(groups = "functional", enabled = false)
-    public void testBulkLookupService() {
+    @Test(groups = "dnb", enabled = true)
+    public void testDnBBulkLookup() {
         DnBBatchMatchContext batchContext = dnBBulkLookupDispatcher.sendRequest(generateInput());
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
-    }
 
-
-    @Test(groups = "functional", enabled = true)
-    public void testBulkLookupFetcher() {
-        DnBBatchMatchContext batchContext = generateInput();
-
-        batchContext.setTimestamp(new Date());
-        batchContext.setServiceBatchId("2239595E1");
-
-        Map<String, DnBMatchContext> output = dnBBulkLookupFetcher.getResult(batchContext).getContexts();
+        batchContext = dnBBulkLookupFetcher.getResult(batchContext);
+        while (batchContext.getDnbCode() == DnBReturnCode.IN_PROGRESS
+                || batchContext.getDnbCode() == DnBReturnCode.RATE_LIMITING) {
+            if (batchContext.getTimestamp() == null
+                    || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) / 1000 / 60 > 60) {
+                break;
+            }
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                break;
+            }
+            batchContext = dnBBulkLookupFetcher.getResult(batchContext);
+        }
+        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
+        Map<String, DnBMatchContext> output = batchContext.getContexts();
         Assert.assertEquals(output.size(), getEntityInputData().length);
         for (String lookupRequestId : output.keySet()) {
             DnBMatchContext result = output.get(lookupRequestId);
-            log.info("Request " + result.getLookupRequestId() + ": " + result.getDuns() + " duration = "
-                    + result.getDuration());
+            log.info(String.format("Request %s: duns = %s, duration = %d, confidence code = %d, match grade = %s",
+                    result.getLookupRequestId(), result.getDuns(), result.getDuration(), result.getConfidenceCode(),
+                    result.getMatchGrade().getRawCode()));
+            Assert.assertEquals(result.getDuns(), "013919572");
+            Assert.assertNotNull(result.getDuration());
+            Assert.assertEquals((int) result.getConfidenceCode(), 7);
+            Assert.assertEquals(result.getMatchGrade().getRawCode(), "AZZAAZZZFFZ");
         }
-        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
-        dnBBulkLookupFetcher.getResult(batchContext);
-        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.RATE_LIMITING);
-        try {
-            Thread.sleep(70000);
-        } catch (InterruptedException e) {
-        }
-        dnBBulkLookupFetcher.getResult(batchContext);
-        Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
-
     }
 
     public static Object[][] getEntityInputData() {
@@ -68,7 +67,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                 //{ "Désirée Daude", null, null, "DE", DnBReturnCode.BAD_REQUEST, null, null, null },
                 //{ "ABCDEFG", "New York", "Washinton", "US", DnBReturnCode.UNMATCH, null, null, null },
                 //{ "Gorman Manufacturing", null, null, "US", DnBReturnCode.DISCARD, null, 6, new DnBMatchGrade("AZZZZZZZFZZ") },
-            {"Amazon Inc", "Chicago", "Illinois", "US"}
+                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US" }
                 };
     }
 
