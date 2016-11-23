@@ -30,15 +30,18 @@ def update_profile(profile, environment, stack, consul):
                 if len(line.strip()) > 0 and ('#' != line.strip()[0]):
                     key = line.strip().replace('\n', '').split('=')[0]
                     value = line.strip().replace('\n', '')[len(key) + 1:]
-                    if key in KEYS_TO_BE_UPDATED:
-                        value = "http://%s" % ip
-                        if key == "AWS_PLAYMAKER_ADDRESS":
-                            value += "/api"
-                        if key == "AWS_OAUTH_ADDRESS":
-                            value += "/oauth2"
-                    fout.write("%s=%s\n" % (key, value))
+                    if key not in ["LE_ENVIRONMENT", "LE_STACK"]:
+                        if key in KEYS_TO_BE_UPDATED:
+                            value = "http://%s" % ip
+                            if key == "AWS_PLAYMAKER_ADDRESS":
+                                value += "/api"
+                            if key == "AWS_OAUTH_ADDRESS":
+                                value += "/oauth2"
+                        fout.write("%s=%s\n" % (key, value))
                 else:
                     fout.write(line)
+            fout.write("LE_ENVIRONMENT=%s\n" % environment)
+            fout.write("LE_STACK=%s\n" % stack)
     os.rename(profile + NEW_SUFFIX, profile)
 
 
