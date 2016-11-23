@@ -154,8 +154,6 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             parseTimestamp(response, batchContext);
 
             String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
-            log.info(String.format("Encoded match result for request %s: %s", batchContext.getServiceBatchId(),
-                    encodedStr));
             byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
             String decodedStr = new String(decodeResults);
             List<String> resultsList = Arrays.asList(decodedStr.split("\n"));
