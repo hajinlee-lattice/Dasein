@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.Id;
 
@@ -22,7 +23,7 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
     private static final String CACHE_CONTEXT = "CacheContext";
     private static final String UNKNOWN = "NULL";
 
-    private Map<String, String> keyTokenValues = new HashMap<String, String>();
+    private Map<String, String> keyTokenValues = new TreeMap<String, String>();
 
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
