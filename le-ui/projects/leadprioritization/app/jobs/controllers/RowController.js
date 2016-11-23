@@ -26,6 +26,7 @@ angular
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
+            $scope.isPMML = (['pmmlModelWorkflow'].indexOf(job.jobType) > -1);
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
@@ -238,7 +239,6 @@ angular
                 $scope.job.source = jobStatus.source;
                 $scope.job.applicationId = jobStatus.applicationId;
                 $scope.job.applicationLogUrl = jobStatus.applicationLogUrl;
-                $scope.isPMML = (['PmmlModel'].indexOf(jobStatus.modelType) > -1);
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                     $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
