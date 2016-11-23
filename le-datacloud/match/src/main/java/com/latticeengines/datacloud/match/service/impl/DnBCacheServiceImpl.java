@@ -49,7 +49,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
             addWhiteCache(context);
         }
-        if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
+        if ((context.getMatchStrategy() == DnBMatchContext.DnBMatchStrategy.ENTITY
+                || context.getMatchStrategy() == DnBMatchContext.DnBMatchStrategy.EMAIL)
+                && context.getDnbCode() == DnBReturnCode.UNMATCH) {
             addBlackCache(context);
         }
     }
