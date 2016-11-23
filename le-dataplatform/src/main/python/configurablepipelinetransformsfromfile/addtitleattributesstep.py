@@ -10,6 +10,23 @@ import random
 
 logger = get_logger("pipeline")
 
+
+class TitleTrfFunction(object):
+
+    def execute(self, x):
+        pass
+
+class GetStrLength(TitleTrfFunction):
+
+    def __init__(self, maxTitleLen):
+        self.maxTitleLen = maxTitleLen
+
+    def execute(self, inputStr):
+        try:
+            return float(min(len(inputStr), self.maxTitleLen))
+        except TypeError:
+            return 0.0
+
 class AddTitleAttributesStep(PipelineStep):
 
     def __init__(self, dsTitleImputation, targetCol, titleColName, maxTitleLen, missingValues):
@@ -19,10 +36,12 @@ class AddTitleAttributesStep(PipelineStep):
         self.dsTitleImputationFilePath = None
         self.maxTitleLen = maxTitleLen
         self.missingValues = missingValues
-        self.functionsToCall = {'DS_TitleLength': self.__getStrLength}
+        self.functionsToCall = {'DS_TitleLength': GetStrLength(maxTitleLen)}
         self.columnsToRemove = set(['Title_Length'])
         logger.info('AddTitleAttributesStep: maxTitleLen={0}; missingValues={1}'.format(maxTitleLen, str(missingValues)))
 
+    def getRTSMainModule(self):
+        return 'add_title_attributes'
 
     def getRTSArtifacts(self):
         return [("dstitleimputations.json", self.dsTitleImputationFilePath)]
@@ -31,21 +50,33 @@ class AddTitleAttributesStep(PipelineStep):
         return [{"dstitlefeaturesstep-dstitleimputationvalues.json": self.dsTitleImputation}]
 
     def getOutputColumns(self):
-        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.titleColumn]) for featureName, _ in self.functionsToCall.iteritems()]  
+        return [(create_column(featureName, self.__getOutputColTypes(featureName)), [self.titleColumn, featureName]) for featureName, _ in self.functionsToCall.iteritems()]
+
+    def doColumnCheck(self):
+        return False
 
     def transform(self, dataFrame, configMetadata, test):
+
+        if self.titleColumn not in dataFrame.columns.values:
+            return dataFrame
+
         calculateImputationValues = True
         if len(self.dsTitleImputation) != 0:
+            logger.info('Title imputations already exist: {}'.format(str(self.dsTitleImputation)))
             calculateImputationValues = False
+
+        ## These parameters are needed to configure the RTS transformation
+        self.dsTitleImputation['maxTitleLen'] = self.maxTitleLen
+        self.dsTitleImputation['missingValues'] = self.missingValues
 
         titleList = dataFrame[self.titleColumn].tolist()
         eventList = dataFrame[self.targetColumn].tolist()
 
-        titleFeatDict = {}
+        titleFeatureDict = {}
 
-        for featureName, funcToCall in self.functionsToCall.iteritems():
+        for featureName, function in self.functionsToCall.iteritems():
 
-            dsColVal = [funcToCall(x) for x in titleList]
+            dsColVal = [function.execute(x) for x in titleList]
 
             if featureName in ['DS_Title_HasUnusualChar','DS_Title_IsAcademic','DS_Title_IsTechRelated', \
                                  'DS_Title_IsDirector', 'DS_Title_IsSenior', 'DS_Title_IsVPAbove']:
@@ -67,14 +98,16 @@ class AddTitleAttributesStep(PipelineStep):
                 except KeyError:
                     print('Keyerror')
                     pass
-            titleFeatDict.update({featureName : dsColVal})
+            titleFeatureDict.update({featureName : dsColVal})
 
         if calculateImputationValues:
             self.__appendMetadataEntryInBatches(configMetadata)
             self.__writeRTSArtifacts()
-        
-        dataFrame = pd.concat([dataFrame, pd.DataFrame(titleFeatDict, index = dataFrame.index.values)], axis = 1)
 
+        logger.info('Columns that are being added to the event table: {}'.format(str(titleFeatureDict.keys())))
+        dataFrame = pd.concat([dataFrame, pd.DataFrame(titleFeatureDict, index = dataFrame.index.values)], axis = 1)
+
+        logger.info('Columns that have been replaced by new Title Attributes: {}'.format(str(list(self.columnsToRemove))))
         self.removeColumns(dataFrame, self.columnsToRemove)
 
         return dataFrame
@@ -83,17 +116,19 @@ class AddTitleAttributesStep(PipelineStep):
         with open("dstitleimputations.json", "wb") as fp:
             json.dump(self.dsTitleImputation, fp)
             self.dsTitleImputationFilePath = os.path.abspath(fp.name)
-    
+
     def __appendMetadataEntryInBatches(self, configMetadata):
         for featureName, _ in self.functionsToCall.iteritems():
-            self.__appendMetadataEntry(configMetadata, featureName, *self.__getMetadataTypes(featureName))
+            statisticalType, fundamentalType, dataType = self.__getMetadataTypes(featureName)
+            logger.info('Setting metadata for column {0}: StatisticalType={1}, FundamentalType={2}, DataType={3}'.format(featureName, statisticalType, fundamentalType, dataType))
+            self.__appendMetadataEntry(configMetadata, featureName, statisticalType, fundamentalType, dataType)
 
     def __appendMetadataEntry(self, configMetadata, columnName, StatisticalType, FundamentalType, DataType):
         if configMetadata is None:
             return
         entry = {}
         entry["ColumnName"] = columnName
-        entry["StatisticalType"] = StatisticalType 
+        entry["StatisticalType"] = StatisticalType
         entry["FundamentalType"] = FundamentalType
         entry["DataType"] = DataType
         super(AddTitleAttributesStep, self).appendMetadataEntry(configMetadata, entry)
@@ -101,12 +136,6 @@ class AddTitleAttributesStep(PipelineStep):
     def __ismissing(self, x):
         return pd.isnull(x) or x in self.missingValues
 
-    def __getStrLength(self, inputStr):
-        try:
-            return float(min(len(inputStr), self.maxTitleLen))
-        except TypeError:
-            return 0.0
-    
     def __getOutputColTypes(self, featName):
         if featName in ['DS_TitleLength', 'DS_Title_Level']:
             return 'FLOAT'
@@ -114,7 +143,7 @@ class AddTitleAttributesStep(PipelineStep):
             return 'STRING'
         else:
             return 'BOOLEAN'
-    
+
     def __getMetadataTypes(self, featName):
         if featName in ['DS_TitleLength', 'DS_Title_Level']:
             return "ratio", "numeric", "Float"
@@ -174,7 +203,7 @@ class AddTitleAttributesStep(PipelineStep):
         bRates=[abs(bucketRate(i)-convRate) for i in range(numBuckets)]
         bucket=[i for i in range(numBuckets) if bRates[i]==min(bRates)][0]
         return self.__meanVal([nonNullValues[i] for i in bucketRange(bucket)])
-        
+
     def __valueMapValue(self, nonNullEvents,nonNullValues,convRate,contValue=False,numBuckets=20):
         if contValue:
             return self.__contValueMapValue(nonNullEvents,nonNullValues,convRate,numBuckets)
@@ -189,7 +218,7 @@ class AddTitleAttributesStep(PipelineStep):
             return self.__valueMapValue(events,values,sampleConvRate,contValue,numBuckets), values
         nullConvRate = self.__meanVal([events[i] for i in ixNull])
         ixNonNull=[i for i in range(len(events)) if i not in  set(ixNull)]
-        
+
         nonNullConvRate=self.__meanVal([events[i] for i in ixNonNull])
 
         nonNullEvents=[events[i] for i in ixNonNull]
@@ -208,10 +237,3 @@ class AddTitleAttributesStep(PipelineStep):
             else:
                 return nonNullUseValues[iDictNonNull[i]]
         return mappedNullValue, [getVal(i) for i in xrange(len(values))]
-
-
-    
-            
-
-
-    
