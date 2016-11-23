@@ -66,6 +66,17 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         try {
             String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
             pipeline.addStepsFromPipelineJson(pipelineContents);
+            
+            for(PipelineStep ps : pipeline.getPipelineSteps()) {
+                PipelineStep pStep = pipelineStepEntityMgr.findByName(ps.getName());
+                if(pStep == null){
+                    pipelineStepEntityMgr.create(ps);
+                }
+                else{
+                    ps.setPid(pStep.getPid());
+                    pipelineStepEntityMgr.update(ps);
+                }
+            }
             pipelineEntityMgr.create(pipeline);
         } catch (IOException e) {
             throw new RuntimeException(e);
