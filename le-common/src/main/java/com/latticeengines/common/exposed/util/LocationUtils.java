@@ -338,15 +338,23 @@ public class LocationUtils {
         };
 
         Object[][] usRegionData = new Object[][] { //
-                { "New England", new String[]{ "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont" } },
-                { "Mid-Atlantic", new String[]{ "New Jersey", "New York", "Pennsylvania" } },
-                { "East North Central", new String[]{ "Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin" } },
-                { "West North Central", new String[]{ "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota" } },
-                { "South Atlantic", new String[]{ "Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "Washington D.C.", "West Virginia" } },
-                { "East South Central", new String[]{ "Alabama", "Kentucky", "Mississippi", "Tennessee" } },
-                { "West South Central", new String[]{ "Arkansas", "Louisiana", "Oklahoma", "Texas" } },
-                { "Mountain", new String[]{ "Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming" } },
-                { "Pacific", new String[]{ "Alaska", "California", "Hawaii", "Oregon", "Washington" } }
+                { "New England",
+                        new String[] { "Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island",
+                                "Vermont" } }, //
+                { "Mid-Atlantic", new String[] { "New Jersey", "New York", "Pennsylvania" } }, //
+                { "East North Central", new String[] { "Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin" } }, //
+                { "West North Central",
+                        new String[] { "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota",
+                                "South Dakota" } }, //
+                { "South Atlantic",
+                        new String[] { "Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina",
+                                "Virginia", "Washington DC", "West Virginia" } }, //
+                { "East South Central", new String[] { "Alabama", "Kentucky", "Mississippi", "Tennessee" } }, //
+                { "West South Central", new String[] { "Arkansas", "Louisiana", "Oklahoma", "Texas" } }, //
+                { "Mountain",
+                        new String[] { "Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah",
+                                "Wyoming" } }, //
+                { "Pacific", new String[] { "Alaska", "California", "Hawaii", "Oregon", "Washington" } } //
         };
 
         countrySynonMap = dataToMap(countrySynonData);
@@ -397,7 +405,7 @@ public class LocationUtils {
             Map<String, String> stateLookUp = usStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (usStateAbbrMap.containsKey(guess)) {
-                return usStateAbbrMap.get(guess);
+                return com.latticeengines.common.exposed.util.StringUtils.getStandardString(usStateAbbrMap.get(guess));
             } else {
                 return null;
             }
@@ -405,21 +413,22 @@ public class LocationUtils {
             Map<String, String> stateLookUp = caStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (caStateAbbrMap.containsKey(guess)) {
-                return caStateAbbrMap.get(guess);
+                return com.latticeengines.common.exposed.util.StringUtils.getStandardString(caStateAbbrMap.get(guess));
             } else {
                 return null;
             }
         } else {
-            return state;
+            return com.latticeengines.common.exposed.util.StringUtils.getStandardString(state);
         }
     }
 
     public static String getStandardRegion(String standardCountry, String standardState) {
         if (USA.equalsIgnoreCase(standardCountry)) {
             if (StringUtils.isNotEmpty(standardState) && usRegionMap.containsKey(standardState.toUpperCase())) {
-                return usRegionMap.get(standardState.toUpperCase());
+                return com.latticeengines.common.exposed.util.StringUtils
+                        .getStandardString(usRegionMap.get(standardState.toUpperCase()));
             } else {
-                return "Other";
+                return "OTHER";
             }
         } else {
             return standardCountry;

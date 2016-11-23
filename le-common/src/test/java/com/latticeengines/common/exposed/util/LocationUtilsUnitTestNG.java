@@ -1,10 +1,14 @@
 package com.latticeengines.common.exposed.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class LocationUtilsUnitTestNG {
+
+    private static Log log = LogFactory.getLog(LocationUtilsUnitTestNG.class);
 
     @Test(groups = "unit", dataProvider = "usaDataProvider")
     public void testParseUSA(String country) {
@@ -43,30 +47,30 @@ public class LocationUtilsUnitTestNG {
     @DataProvider(name = "stateDataProvider")
     Object[][] stateDataProvider() {
         return new Object[][] { //
-                { "USA", "District Of Columbia  ", "Washington D.C.", "South Atlantic" }, //
-                { "United States", "  Dist. of Columbia", "Washington D.C.", "South Atlantic" }, //
-                { "U.S.", "D.C.", "Washington D.C.", "South Atlantic" }, //
-                { "U.S.A.", "D. C.", "Washington D.C.", "South Atlantic" }, //
-                { "U. S. A.", "DC-District Of Typo", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "DC - Dist. of Columbia", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "D.C. - Dist. of Columbia-", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "D. C. - Dist. of Columbia", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "Washington D.C.", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "Washington D. C.", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "Wash. D. C.", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "Wash. D.C.", "Washington D.C.", "South Atlantic" }, //
-                { "USA", "Washington", "Washington", "Pacific" }, //
-                { "USA", "New York", "New York", "Mid-Atlantic" }, //
-                { "USA", "New Mexico", "New Mexico", "Mountain" }, //
-                { "USA", "FL - Flori", "Florida", "South Atlantic" }, //
-                { "USA", "Rhode Island", "Rhode Island", "New England" }, //
-                { "USA", "Virgin Islands", "Virgin Islands", "Other" }, //
-                { "USA", "NB", "Nebraska", "West North Central" }, //
-                { "Canada", "NB", "New Brunswick", "CANADA" }, //
-                { "Canada", "Québec", "Quebec", "CANADA" }, //
-                { "China", "Beijing", "Beijing", "CHINA" }, //
-                { "Japan", "Nowhere", "Nowhere", "JAPAN" }, //
-                { "USA", "Beijing", null, "Other" }, //
+                { "USA", "District Of Columbia  ", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "United States", "  Dist. of Columbia", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "U.S.", "D.C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "U.S.A.", "D. C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "U. S. A.", "DC-District Of Typo", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "DC - Dist. of Columbia", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "D.C. - Dist. of Columbia-", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "D. C. - Dist. of Columbia", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "Washington D.C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "Washington D. C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "Wash. D. C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "Wash. D.C.", "WASHINGTON DC", "SOUTH ATLANTIC" }, //
+                { "USA", "Washington", "WASHINGTON", "PACIFIC" }, //
+                { "USA", "New York", "NEW YORK", "MID ATLANTIC" }, //
+                { "USA", "New Mexico", "NEW MEXICO", "MOUNTAIN" }, //
+                { "USA", "FL - Flori", "FLORIDA", "SOUTH ATLANTIC" }, //
+                { "USA", "Rhode Island", "RHODE ISLAND", "NEW ENGLAND" }, //
+                { "USA", "Virgin Islands", "VIRGIN ISLANDS", "OTHER" }, //
+                { "USA", "NB", "NEBRASKA", "WEST NORTH CENTRAL" }, //
+                { "Canada", "NB", "NEW BRUNSWICK", "CANADA" }, //
+                { "Canada", "Québec", "QUEBEC", "CANADA" }, //
+                { "China", "Beijing", "BEIJING", "CHINA" }, //
+                { "Japan", "Nowhere", "NOWHERE", "JAPAN" }, //
+                { "USA", "Beijing", null, "OTHER" }, //
                 { "Canada", "Nowhere", null, "CANADA" }, //
         };
     }

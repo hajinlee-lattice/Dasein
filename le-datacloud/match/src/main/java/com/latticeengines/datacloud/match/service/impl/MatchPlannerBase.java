@@ -285,7 +285,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                         for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
                             originalCity = (String) inputRecord.get(cityPos);
                         }
-                        nameLocation.setCity(originalCity);
+                        String cleanCity = com.latticeengines.common.exposed.util.StringUtils
+                                .getStandardString(originalCity);
+                        nameLocation.setCity(cleanCity);
                     }
 
                     record.setParsedNameLocation(nameLocation);

@@ -20,9 +20,10 @@ public class StringUtils {
             if (str == null) {
                 return null;
             }
-            Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '(', ')', '+', '=', '{', '}', '[', ']', '\'',
+            Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '+', '=', '\'',
                     '"', '<', '>', '.', '’' };
-            Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',' };
+            Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',', '(', ')', '{', '}',
+                    '[', ']' };
             Set<Character> removedSet = new HashSet<Character>(Arrays.asList(removed));
             Set<Character> replacedBySpaceSet = new HashSet<Character>(Arrays.asList(replacedBySpace));
             StringBuilder sb = new StringBuilder(str.toUpperCase());
