@@ -138,14 +138,17 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Value("${datacloud.match.bulk.group.size}")
     private Integer sqlGroupSize;
 
-    @Value("${datacloud.yarn.num.travelers}")
-    private int numTravelers;
-
     @Value("${datacloud.match.fuzzymatch.decision.graph}")
     private String fuzzyMatchGraph;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
+
+    @Value("${datacloud.yarn.actors.num.threads}")
+    private int fuzzyThreadPool;
+
+    @Value("${datacloud.yarn.actors.group.size}")
+    private int fuzzyGroupSize;
 
     @Autowired
     private MatchProxy matchProxy;
@@ -224,7 +227,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
-            Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(10));
+            Long timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
             log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
 
             useProxy = Boolean.TRUE.equals(jobConfiguration.getUseRealTimeProxy());
@@ -237,19 +240,14 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             }
 
             Integer groupSize = jobConfiguration.getGroupSize();
+            Integer numThreads = jobConfiguration.getThreadPoolSize();
             if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
-                // for actor system bulk match, match records one by one
-                groupSize = 1;
+                groupSize = fuzzyGroupSize;
+                numThreads = fuzzyThreadPool;
             } else {
                 if (groupSize == null || groupSize < 1) {
                     groupSize = sqlGroupSize;
                 }
-            }
-
-            Integer numThreads = jobConfiguration.getThreadPoolSize();
-            if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion) && !useProxy) {
-                numThreads = numTravelers;
-            } else {
                 if (numThreads == null || numThreads < 1) {
                     numThreads = sqlThreadPool;
                 }
@@ -423,11 +421,12 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
-                if (fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD) && !(value instanceof String)) {
-                    value = String.valueOf(value);
-                }
                 if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
                     value = matchDeclaredType(value, fields.get(i).name());
+                } else if (fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD) && value != null
+                        && !(value instanceof String)) {
+                    // for id only match using RTS cache
+                    value = String.valueOf(value);
                 }
                 builder.set(fields.get(i), value);
             }

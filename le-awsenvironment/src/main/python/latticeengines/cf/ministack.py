@@ -203,9 +203,9 @@ def provision(environment, stackname, tag):
     write_to_stack(consul, environment, stackname, HAPROXY_KEY, ip)
 
 def bootstrap_cli(args):
-    bootstrap(args.environment, args.stackname, args.apps, args.profile)
+    bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances)
 
-def bootstrap(environment, stackname, apps, profile, region="us-east-1"):
+def bootstrap(environment, stackname, apps, profile, instances, region="us-east-1"):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -219,8 +219,9 @@ def bootstrap(environment, stackname, apps, profile, region="us-east-1"):
     threads = []
     for app in apps.split(","):
         alloc = ALLOCATION[app]
-        instances = alloc['capacity'] if 'capacity' in alloc else 1
-        thread = CreateServiceThread(environment, stackname, app, instances, ecr_url, ip, profile, region)
+        num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
+        num_tasks = instances if instances < num_tasks else num_tasks
+        thread = CreateServiceThread(environment, stackname, app, num_tasks, ecr_url, ip, profile, region)
         thread.start()
         threads.append(thread)
 
@@ -347,7 +348,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-a', dest='apps', type=str, default=DEFAULT_APPS, help='comma separated list of apps to bootstrap.')
-    parser1.add_argument('-i', dest='ip', type=str, help='IP of HAProxy. need either ip or a consul address')
+    parser1.add_argument('-n', dest='instances', type=int, default="2", help='number of instances.')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=bootstrap_cli)
