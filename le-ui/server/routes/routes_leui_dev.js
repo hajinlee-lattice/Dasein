@@ -11,6 +11,16 @@ module.exports = [{
         '/images': '/assets/images'
     }
 },{
+    path: '/projects/ng2/dist',
+    html5mode: true,
+    pages: {
+        '/ng2': 'index.html'
+    },
+    folders: {
+        '/': '/',
+        '/ng2/lib': '/src/assets/lib'
+    }
+},{
     path: '/projects/login',
     pages: {
         '/': 'index.html',

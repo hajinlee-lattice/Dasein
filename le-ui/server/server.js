@@ -38,18 +38,24 @@ class Server {
 
         if (options.config.protocols.https) {
             try {
+                const tls = require('tls');
+                const constants = require('constants');
                 const https = require('https');
                 const httpsKey = fs.readFileSync(options.config.HTTPS_KEY, 'utf8');
                 const httpsCert = fs.readFileSync(options.config.HTTPS_CRT, 'utf8');
-                const credentials = {
-                    cert: httpsCert
+
+                const tlsOptions = {
+                    cert: httpsCert,
+                    secureOptions: constants.SSL_OP_NO_SSLv2 | constants.SSL_OP_NO_SSLv3
                 };
 
-                options.config.HTTPS_KEY  ? credentials.key = httpsKey : null;
-                options.config.HTTPS_PASS ? credentials.passphrase = options.config.HTTPS_PASS : null;
+                options.config.HTTPS_KEY  ? tlsOptions.key = httpsKey : null;
+                options.config.HTTPS_PASS ? tlsOptions.passphrase = options.config.HTTPS_PASS : null;
 
+                tls.CLIENT_RENEG_LIMIT = 0;
                 https.globalAgent.maxSockets = Infinity;
-                this.httpsServer = https.createServer(credentials, this.app);
+                
+                this.httpsServer = https.createServer(tlsOptions, this.app);
             } catch(err) {
                 console.log(chalk.red(DateUtil.getTimeStamp() + ':httpserror>'), err);
             }
