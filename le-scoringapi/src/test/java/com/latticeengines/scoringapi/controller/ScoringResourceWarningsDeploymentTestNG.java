@@ -119,7 +119,7 @@ public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControlle
         for (String warningCode : expectedWarningCodeAndMessageValues.keySet()) {
             String observedDescription = observedWarningCodes.get(warningCode);
             for (String warningValue : expectedWarningCodeAndMessageValues.get(warningCode)) {
-                Assert.assertTrue(observedDescription.contains(warningValue));
+                Assert.assertTrue(observedDescription.toUpperCase().contains(warningValue.toUpperCase()));
             }
         }
     }
