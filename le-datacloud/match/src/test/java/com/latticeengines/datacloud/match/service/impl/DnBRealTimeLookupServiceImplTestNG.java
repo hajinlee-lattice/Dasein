@@ -113,12 +113,13 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     @DataProvider(name = "entityInputData")
     public static Object[][] getEntityInputData() {
         return new Object[][] {
-                { "Benchmark Blinds", "Gilbert", "Arizona", "US", DnBReturnCode.OK, "038796548", 8,
+                { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "US", DnBReturnCode.OK, "038796548", 8,
                         new DnBMatchGrade("AZZAAZZZFAB") },
-                { "Désirée Daude", null, null, "DE", DnBReturnCode.BAD_REQUEST, null, null, null },
-                { "ABCDEFG", "New York", "Washinton", "US", DnBReturnCode.UNMATCH, null, null, null },
-                { "Gorman Manufacturing", null, null, "US", DnBReturnCode.DISCARD, null, 6,
-                        new DnBMatchGrade("AZZZZZZZFZZ") } };
+                { "DÉSIRÉE DAUDE", null, null, "DE", DnBReturnCode.BAD_REQUEST, null, null, null },
+                { "ABCDEFG", "NEW YORK", "WASHINTON", "US", DnBReturnCode.UNMATCH, null, null, null },
+                { "GORMAN MANUFACTURING", null, null, "US", DnBReturnCode.DISCARD, null, 6,
+                        new DnBMatchGrade("AZZZZZZZFZZ") },
+                { "GOOGLE", null, "CA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZAZZZFFZ") }, };
     }
 
     @DataProvider(name = "emailInputData")

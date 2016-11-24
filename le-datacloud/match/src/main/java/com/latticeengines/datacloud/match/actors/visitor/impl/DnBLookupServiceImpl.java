@@ -155,6 +155,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             case DISPATCHER:
                 List<DnBBatchMatchContext> batchContexts = new ArrayList<DnBBatchMatchContext>();
                 synchronized (unsubmittedReqs) {
+                    if (unsubmittedReqs.size() > 0) {
+                        log.info(String.format("Current queue size of unsubmitted requests: %d",
+                                unsubmittedReqs.size()));
+                    }
                     if (unsubmittedReqs.size() >= 10000
                             || (!unsubmittedReqs.isEmpty() && unsubmittedReqs.size() == unsubmittedNum.get())) {
                         int num = (int) Math.ceil(unsubmittedReqs.size() / 10000.0);
