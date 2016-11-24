@@ -48,6 +48,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
     
     public static final String NAME = "name";
     public static final String INSIGHTS = "insights";
+    public static final String CAMPAIGN_TYPE = "campaign_type";
     public static final String CAMPAIGN_ID = "campaign_id";
     
     private static String[] schemas;
@@ -80,7 +81,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @JsonProperty("campaign_type")
+    @JsonProperty(CAMPAIGN_TYPE)
     @Column(name = "CAMPAIGN_TYPE", nullable = false)
     private CampaignType campaignType;
 
@@ -191,6 +192,9 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
 
     @Override
     public String getId() {
+        if (campaignType == CampaignType.PROFILE) {
+            return tenant.getId() + "|PROFILE";
+        }
         return campaignId;
     }
 
@@ -204,6 +208,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
         Schema schema = getSchema(recordType);
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         builder.set(NAME, getName());
+        builder.set(CAMPAIGN_TYPE, getCampaignType().name());
         try {
             List<GenericRecord> data = new ArrayList<>();
             for (Insight insight : getInsights()) {
@@ -227,6 +232,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
     @Override
     public Campaign fromFabricAvroRecord(GenericRecord record) {
         setName((record.get(NAME).toString()));
+        setCampaignType(CampaignType.valueOf(record.get(CAMPAIGN_TYPE).toString()));
         GenericData.Array<GenericRecord> insightRecords = (Array<GenericRecord>) record.get(INSIGHTS);
         List<Insight> insights = new ArrayList<>();
         Insight dummy = new Insight();
@@ -251,7 +257,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, FabricEntity<Camp
         schemas[1] = AvroUtils.buildSchema("com/latticeengines/domain/exposed/ulysses/InsightListType.avsc", //
                 Insight.NAME, Insight.INSIGHT_SECTIONS, schemas[0]);
         schemas[2] = AvroUtils.buildSchema("com/latticeengines/domain/exposed/ulysses/CampaignType.avsc", //
-                Campaign.NAME, Campaign.INSIGHTS, schemas[1]);
+                Campaign.NAME, Campaign.CAMPAIGN_TYPE, Campaign.INSIGHTS, schemas[1]);
         return schemas;
     }
 }

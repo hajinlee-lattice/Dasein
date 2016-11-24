@@ -74,7 +74,4 @@ public class CampaignResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertEquals(campaign.getSegments().get(0), summary.getId());
     }
 
-    @Test(groups = "functional")
-    public void createFromTable() {
-    }
 }

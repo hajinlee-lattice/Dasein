@@ -13,6 +13,7 @@
     <import resource="classpath:common-threadpool-context.xml"/>
     <import resource="classpath:aws-context.xml"/>
     <import resource="classpath:datafabric-context.xml"/>
+    <import resource="classpath:proxy-context.xml"/>
     <!-- 
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/> -->

@@ -48,7 +48,6 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         teardown();
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
-        client = dynamoService.getClient();
         ListTablesResult result = client.listTables();
         System.out.println("Tables: " + result.getTableNames());
     }
@@ -65,7 +64,7 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
                         + "{\"name\":\"ID\",\"type\":[\"string\",\"null\"]},"
                         + "{\"name\":\"Value\",\"type\":[\"string\",\"null\"]}" + "]}", RECORD_TYPE));
 
-        DynamoDataStoreImpl dataStore = new DynamoDataStoreImpl(client, repo, RECORD_TYPE, schema);
+        DynamoDataStoreImpl dataStore = new DynamoDataStoreImpl(dynamoService, repo, RECORD_TYPE, schema);
 
         Object[][] data = new Object[][] { { "1", "value1" }, { "2", "value2" } };
 

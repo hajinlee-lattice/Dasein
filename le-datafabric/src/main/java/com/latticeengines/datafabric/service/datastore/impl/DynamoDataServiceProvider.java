@@ -37,11 +37,13 @@ public class DynamoDataServiceProvider implements FabricDataServiceProvider {
         this.endPoint = endPoint;
     }
 
+    @Override
     public FabricDataStore constructDataStore(String repository, String recordType, Schema schema) {
         log.info("Initialize dynamo data store " + " repo " + repository + " record " + recordType);
-        return new DynamoDataStoreImpl(dynamoService.getClient(), repository, recordType, schema);
+        return new DynamoDataStoreImpl(dynamoService, repository, recordType, schema);
     }
 
+    @Override
     public String getName() {
         return name;
     }

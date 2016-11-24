@@ -18,6 +18,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.aws.dynamo.impl.DynamoServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
@@ -171,7 +172,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
             fabricSchema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
 
-        dataStore = new DynamoDataStoreImpl(client, repo, recordType, fabricSchema);
+        dataStore = new DynamoDataStoreImpl(new DynamoServiceImpl(client), repo, recordType, fabricSchema);
     }
 
 }

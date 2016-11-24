@@ -116,6 +116,7 @@ public class InsightSection implements FabricEntity<InsightSection> {
         setDescription(record.get(DESCRIPTION).toString());
         setHeadline(record.get(HEADLINE).toString());
         setTip(record.get(TIP).toString());
+        setInsightSourceType(InsightSourceType.valueOf(record.get(INSIGHT_SOURCE_TYPE).toString()));
 
         if (record.get(ATTRIBUTES) != null) {
             String serializedAttributes = record.get(ATTRIBUTES).toString();
@@ -128,8 +129,7 @@ public class InsightSection implements FabricEntity<InsightSection> {
 
     @Override
     public InsightSection fromHdfsAvroRecord(GenericRecord record) {
-        // TODO Auto-generated method stub
-        return null;
+        return fromFabricAvroRecord(record);
     }
 
     public static void setAvroSchema(Schema avroSchema) {

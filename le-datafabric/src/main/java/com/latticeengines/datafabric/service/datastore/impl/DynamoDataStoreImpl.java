@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xerial.snappy.Snappy;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.AttributeUpdate;
 import com.amazonaws.services.dynamodbv2.document.BatchGetItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
@@ -46,6 +45,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.KeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
+import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttributes;
@@ -70,14 +70,14 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private String repository;
     private String recordType;
     private Schema schema;
-    private AmazonDynamoDBClient client;
+    private DynamoService dynamoService;
 
     private DynamoIndex tableIndex;
     private DynamoAttributes tableAttributes;
     private String tableName = null;
 
-    public DynamoDataStoreImpl(AmazonDynamoDBClient client, String repository, String recordType, Schema schema) {
-        this.client = client;
+    public DynamoDataStoreImpl(DynamoService dynamoService, String repository, String recordType, Schema schema) {
+        this.dynamoService = dynamoService;
         this.repository = repository;
         this.recordType = recordType;
         this.tableName = buildTableName();
@@ -95,7 +95,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public void createRecord(String id, GenericRecord record) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         Item item = buildItem(id, record);
         try {
@@ -109,7 +109,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public void deleteRecord(String id, GenericRecord record) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
 
         try {
@@ -123,7 +123,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public void updateRecord(String id, GenericRecord record) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
 
         UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, record);
@@ -138,7 +138,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public GenericRecord findRecord(String id) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         GenericRecord record = null;
         Item item = null;
@@ -160,7 +160,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public void createRecords(Map<String, GenericRecord> records) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         TableWriteItems writeItems = new TableWriteItems(tableName);
 
         for (Map.Entry<String, GenericRecord> entry : records.entrySet()) {
@@ -250,7 +250,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private void batchFindRecord(List<String> idList, Map<String, GenericRecord> records) {
 
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         TableKeysAndAttributes keys = new TableKeysAndAttributes(tableName);
 
         for (String id : idList) {
@@ -297,7 +297,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public List<GenericRecord> findRecords(Map<String, String> properties) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         QuerySpec querySpec = buildQuerySpec(properties);
 
@@ -436,7 +436,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public Map<String, Object> findAttributes(String id) {
-        DynamoDB dynamoDB = new DynamoDB(client);
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         Map<String, Object> map = new HashMap<>();
 
