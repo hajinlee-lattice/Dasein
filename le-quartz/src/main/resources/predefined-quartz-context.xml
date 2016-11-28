@@ -105,6 +105,17 @@
         <property name="jobTimeout" value="${quartz.scoring.scoringmanager.job.timeout:3600}" />
     </bean>
 
+    <bean name="matchCommandClean" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="matchCommandClean" />
+        <property name="cronTrigger" value="${quartz.matchapi.matchcommandclean.refresh.job.cron:0 0 0 1/1 * ? *}" />
+        <property name="destUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.primary.url}" />
+        <property name="secondaryDestUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.secondary.url}" />
+        <property name="queryApi" value="${quartz.matchapi.matchcommandclean.predefined.job.query.api}" />
+        <property name="checkJobBeanUrl" value="${quartz.matchapi.matchcommandclean.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;matchCommandCleanerBean&quot;}" />
+        <property name="jobTimeout" value="${quartz.matchapi.matchcommandclean.refresh.job.timeout:3600}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
         <ref bean="plsModelSummaryDownload"/>
         <ref bean="dataplatformDLOrchestration"/>
@@ -114,6 +125,7 @@
         <ref bean="dellebiDailyJob3"/>
         <ref bean="dataCloudRefresh"/>
         <ref bean="scoringManagerJob"/>
+        <ref bean="matchCommandClean"/>
     </util:list>
 
 </beans>

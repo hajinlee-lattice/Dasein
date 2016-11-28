@@ -4,6 +4,7 @@
 
     <import resource="classpath:matchapi-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
     <bean class="com.latticeengines.matchapi.swagger.SwaggerConfig" />
 
     <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">

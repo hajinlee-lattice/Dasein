@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,5 +35,18 @@ public class MatchCommandEntityMgrImpl implements MatchCommandEntityMgr {
     @Transactional(value = "propDataManage", readOnly = true)
     public MatchCommand findByRootOperationUid(String rootUid) {
         return matchCommandDao.findByField("RootOperationUID", rootUid);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public List<MatchCommand> findOutDatedCommands(int retentionDays) {
+        return matchCommandDao.findOutDatedCommands(retentionDays);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
+    public void deleteCommand(MatchCommand command) {
+        matchCommandDao.deleteCommand(command);
+
     }
 }
