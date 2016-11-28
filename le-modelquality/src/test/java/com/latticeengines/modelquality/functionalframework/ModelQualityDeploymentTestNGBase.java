@@ -260,10 +260,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     public void tearDown() throws Exception {
         System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTest.getName()));
         analyticTestEntityMgr.delete(analyticTest);
-        for (AnalyticPipeline ap : analyticPipelines) {
-            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"", ap.getName()));
-            analyticPipelineEntityMgr.delete(ap);
-        }
         System.out.println(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
         dataSetEntityMgr.delete(dataset);
         System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));

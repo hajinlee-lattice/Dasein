@@ -15,6 +15,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -49,11 +52,13 @@ public class ModelRun implements HasName, HasPid, Fact, Dimension, HasAuditingFi
     @ManyToOne
     @JoinColumn(name = "FK_ANALYTIC_PIPELINE_ID", nullable = false)
     @JsonIgnore
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private AnalyticPipeline analyticPipeline;
 
     @ManyToOne
     @JoinColumn(name = "FK_DATASET_ID", nullable = false)
     @JsonIgnore
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private DataSet dataSet;
 
     @Column(name = "ANALYTIC_TEST_NAME", nullable = true)

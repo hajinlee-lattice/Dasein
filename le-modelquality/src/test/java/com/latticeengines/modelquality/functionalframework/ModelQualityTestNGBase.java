@@ -70,13 +70,4 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/steps");
         HdfsUtils.rmdir(yarnConfiguration, hdfsDir + "/pipelines");
     }
-    /*
-     * protected void cleanupDb() { modelRunEntityMgr.deleteAll();
-     * modelConfigEntityMgr.deleteAll(); analyticTestEntityMgr.deleteAll();
-     * analyticPipelineEntityMgr.deleteAll(); algorithmEntityMgr.deleteAll();
-     * dataFlowEntityMgr.deleteAll(); dataSetEntityMgr.deleteAll();
-     * pipelineToPipelineStepsEntityMgr.deleteAll();
-     * pipelineStepEntityMgr.deleteAll(); pipelineEntityMgr.deleteAll();
-     * propDataEntityMgr.deleteAll(); samplingEntityMgr.deleteAll(); }
-     */
 }

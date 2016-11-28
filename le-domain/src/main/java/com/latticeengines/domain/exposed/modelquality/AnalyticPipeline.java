@@ -17,6 +17,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,26 +46,31 @@ public class AnalyticPipeline implements HasName, HasPid {
     @JsonProperty("pipeline")
     @JoinColumn(name = "FK_PIPELINE_ID", nullable = false)
     @ManyToOne
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Pipeline pipeline;
 
     @JsonProperty("algorithm")
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
     @ManyToOne
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Algorithm algorithm;
 
     @JsonProperty("prop_data")
     @JoinColumn(name = "FK_PROPDATA_ID", nullable = false)
     @ManyToOne
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private PropData propData;
 
     @JsonProperty("data_flow")
     @JoinColumn(name = "FK_DATAFLOW_ID", nullable = false)
     @ManyToOne
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private DataFlow dataFlow;
 
     @JsonProperty("sampling")
     @JoinColumn(name = "FK_SAMPLING_ID", nullable = false)
     @ManyToOne
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Sampling sampling;
     
     @ManyToMany(fetch=FetchType.LAZY, mappedBy = "analyticPipelines", cascade = { CascadeType.MERGE })
