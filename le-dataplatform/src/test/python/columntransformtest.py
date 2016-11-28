@@ -34,7 +34,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 8, "Pipeline should have 8 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(lenOfPipeline, 9, "Pipeline should have 9 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
@@ -74,7 +74,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
             self.assertTrue(hasattr(step, "transform"), "Each transform in pipeline should have a transform method")
 
     def checkThatTransformsDontThrowExceptions(self):
-        keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
+        keys = ["addtitleattributesstep","exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
                 , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn", "remediatedatarulesstep", "assignconversionratetoallcategoricalvalues",
                 "featureselectionstep", "highnumberuniquevaluesremovalstep"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
@@ -143,20 +143,22 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
             print i, step
 
             if i == 0:
-                self.assertEquals(step.__class__.__name__ , "RemediateDataRulesStep")
+                self.assertEquals(step.__class__.__name__ , "AddTitleAttributesStep")
             if i == 1:
-                self.assertEquals(step.__class__.__name__ , "PivotStep")
+                self.assertEquals(step.__class__.__name__ , "RemediateDataRulesStep")
             if i == 2:
-                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
+                self.assertEquals(step.__class__.__name__ , "PivotStep")
             if i == 3:
-                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
+                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
             if i == 4:
-                self.assertEquals(step.__class__.__name__ , "ImputationStep")
+                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
             if i == 5:
-                self.assertEquals(step.__class__.__name__ , "HighNumberUniqueValuesRemovalStep")
+                self.assertEquals(step.__class__.__name__ , "ImputationStep")
             if i == 6:
-                self.assertEquals(step.__class__.__name__ , "FeatureSelectionStep")
+                self.assertEquals(step.__class__.__name__ , "HighNumberUniqueValuesRemovalStep")
             if i == 7:
+                self.assertEquals(step.__class__.__name__ , "FeatureSelectionStep")
+            if i == 8:
                 self.assertEquals(step.__class__.__name__ , "ExportDataFrameStep")
 
     def assertSortingOfEVTransform(self, pipeline):

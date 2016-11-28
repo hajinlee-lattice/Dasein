@@ -22,6 +22,8 @@ class GetStrLength(TitleTrfFunction):
         self.maxTitleLen = maxTitleLen
 
     def execute(self, inputStr):
+        if inputStr is None:
+            return None        
         try:
             return float(min(len(inputStr), self.maxTitleLen))
         except TypeError:
@@ -70,14 +72,13 @@ class AddTitleAttributesStep(PipelineStep):
         self.dsTitleImputation['missingValues'] = self.missingValues
 
         titleList = dataFrame[self.titleColumn].tolist()
-        eventList = dataFrame[self.targetColumn].tolist()
 
         titleFeatureDict = {}
 
         for featureName, function in self.functionsToCall.iteritems():
 
             dsColVal = [function.execute(x) for x in titleList]
-
+            
             if featureName in ['DS_Title_HasUnusualChar','DS_Title_IsAcademic','DS_Title_IsTechRelated', \
                                  'DS_Title_IsDirector', 'DS_Title_IsSenior', 'DS_Title_IsVPAbove']:
                 continue
@@ -85,18 +86,20 @@ class AddTitleAttributesStep(PipelineStep):
             nullBooleanInd = [self.__ismissing(x) for x in dsColVal]
 
             if calculateImputationValues:
+                self.dsTitleImputation[featureName] = 0.0
+                eventList = dataFrame[self.targetColumn].tolist()
                 if sum(nullBooleanInd) > 1 and  sum(nullBooleanInd) < len(nullBooleanInd):
                     if featureName == 'DS_TitleLength':
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd, True)
                     else:
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd)
-                    self.dsTitleImputation.update({featureName: imputedValue})
+                    self.dsTitleImputation[featureName] = imputedValue
                     logger.info('Title column "{0}" has imputation value {1}'.format(featureName, imputedValue))
             else:
                 try:
                     dsColVal = [x[0] if not x[1] else self.dsTitleImputation[featureName] for x in izip(dsColVal, nullBooleanInd)]
                 except KeyError:
-                    print('Keyerror')
+                    logger.error('KeyError')
                     pass
             titleFeatureDict.update({featureName : dsColVal})
 
@@ -114,6 +117,7 @@ class AddTitleAttributesStep(PipelineStep):
 
     def __writeRTSArtifacts(self):
         with open("dstitleimputations.json", "wb") as fp:
+            logger.info('Writing RTS artifacts: {}'.format(json.dumps(self.dsTitleImputation)))
             json.dump(self.dsTitleImputation, fp)
             self.dsTitleImputationFilePath = os.path.abspath(fp.name)
 
@@ -134,7 +138,7 @@ class AddTitleAttributesStep(PipelineStep):
         super(AddTitleAttributesStep, self).appendMetadataEntry(configMetadata, entry)
 
     def __ismissing(self, x):
-        return pd.isnull(x) or x in self.missingValues
+        return pd.isnull(x) or (x in self.missingValues)
 
     def __getOutputColTypes(self, featName):
         if featName in ['DS_TitleLength', 'DS_Title_Level']:
