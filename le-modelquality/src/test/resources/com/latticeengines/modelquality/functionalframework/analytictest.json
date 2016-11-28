@@ -1,6 +1,6 @@
 {
     "name": "ModelQualityDeploymentTest",
-    "analytic_test_type": "Default",
+    "analytic_test_type": "SelectedPipelines",
     "analytic_pipeline_names": [
         "ModelQualityDeploymentTest",
         "ModelQualityDeploymentTest-2"
