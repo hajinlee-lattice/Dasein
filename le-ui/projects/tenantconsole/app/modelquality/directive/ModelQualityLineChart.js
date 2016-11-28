@@ -172,7 +172,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 .on("mousemove", function () {
                     var mouse = d3.mouse(this);
                     var xPos = mouse[0];
-                    var tippedPos = -1;
+                    var tippedPos = 0;
                     var domain = x.domain();
 
                     for (var i = 1; i < domain.length; i++) {
