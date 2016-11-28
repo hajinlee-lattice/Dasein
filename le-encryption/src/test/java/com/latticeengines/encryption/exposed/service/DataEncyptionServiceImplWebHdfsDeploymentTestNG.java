@@ -85,7 +85,7 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         updatedHdfsDir = directory + "/testfolder_updated";
         testDirectoryCreation();
         testFileCreation();
-        testFileReading(enableEncryptionTenant);
+        testFileReading();
         testUpdateDirectoryName();
         testDeleteDirectory();
     }
@@ -105,8 +105,8 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
         log.info("Start creating a file in Hdfs: " + hdfsDir);
         String fileContents;
         try {
-            fileContents = FileUtils.readFileToString(
-                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+            fileContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
+                    RESOURCE_BASE + "/" + FILE_NAME).getPath()));
             WebHdfsUtils.writeToFile(webHdfsUrl, yarnConfiguration, String.format("%s/%s", hdfsDir, FILE_NAME),
                     fileContents);
         } catch (IOException e) {
@@ -116,19 +116,21 @@ public class DataEncyptionServiceImplWebHdfsDeploymentTestNG extends EncryptionT
 
     }
 
-    protected void testFileReading(boolean enableEncryptionTenant) {
+    protected void testFileReading() {
         log.info("Start reading the file created in Hdfs: " + hdfsDir);
         try {
             FileStatus fileStatus = WebHdfsUtils.getFileStatus(webHdfsUrl, yarnConfiguration,
                     String.format("%s/%s", hdfsDir, FILE_NAME));
             Assert.assertTrue(fileStatus.isFile());
-            Assert.assertEquals(Boolean.valueOf(enableEncryptionTenant), Boolean.valueOf(fileStatus.isEncrypted()));
-            String expectedFileContents = FileUtils.readFileToString(
-                    new File(ClassLoader.getSystemResource(RESOURCE_BASE + "/" + FILE_NAME).getPath()));
-            log.info("file contents are: " + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
-                    String.format("%s/%s", hdfsDir, FILE_NAME)));
-            Assert.assertEquals(expectedFileContents, WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
-                    String.format("%s/%s", hdfsDir, FILE_NAME)));
+            String expectedFileContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
+                    RESOURCE_BASE + "/" + FILE_NAME).getPath()));
+            log.info("file contents are: "
+                    + WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                            String.format("%s/%s", hdfsDir, FILE_NAME)));
+            Assert.assertEquals(
+                    expectedFileContents,
+                    WebHdfsUtils.getWebHdfsFileContents(webHdfsUrl, yarnConfiguration,
+                            String.format("%s/%s", hdfsDir, FILE_NAME)));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading the file contents.");
