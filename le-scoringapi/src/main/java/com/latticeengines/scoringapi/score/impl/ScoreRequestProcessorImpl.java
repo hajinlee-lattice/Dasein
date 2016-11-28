@@ -100,10 +100,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts.getModelJsonType());
 
-        ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts, fieldSchemas,
-                request.getRecord(), modelJsonTypeHandler);
-        if (missingEssentialFieldsException != null) {
-            throw missingEssentialFieldsException;
+        if (!shouldSkipMatching) {
+            ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts, fieldSchemas,
+                    request.getRecord(), modelJsonTypeHandler);
+            if (missingEssentialFieldsException != null) {
+                throw missingEssentialFieldsException;
+            }
         }
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
@@ -569,10 +571,14 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
                 if (modelArtifactTuple.getKey() == null) {
                     ScoringArtifacts scoringArtifact = modelArtifactTuple.getValue();
+
                     ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(
                             scoringArtifact.getModelJsonType());
-                    missingEssentialFieldsOrBadModelException = checkForMissingFields(record.getRecordId(),
-                            scoringArtifact, fieldSchemas, attrValMap, modelJsonTypeHandler, modelId);
+
+                    if (!shouldSkipMatching(scoringArtifact)) {
+                        missingEssentialFieldsOrBadModelException = checkForMissingFields(record.getRecordId(),
+                                scoringArtifact, fieldSchemas, attrValMap, modelJsonTypeHandler, modelId);
+                    }
 
                     if (!Record.LATTICE_ID.equals(record.getIdType())) {
                         latticeId = LatticeIdGenerator.generateLatticeId(attrValMap);
