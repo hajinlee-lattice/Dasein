@@ -13,6 +13,7 @@ module.exports = function (grunt) {
             lp: './projects/leadprioritization',
             pd: './projects/prospectdiscovery',
             login: './projects/login',
+            ng2: './projects/ng2',
             assets: 'assets',
             app: 'app'
         },
@@ -209,28 +210,6 @@ module.exports = function (grunt) {
             }
         },
 
-        run: {
-            node: {
-                args: [ './app.js' ]
-            },
-            nodemon: {
-                cmd: 'nodemon',
-                args: [ './app.js' ]
-            },
-            pm2: {
-                cmd: 'pm2.cmd',
-                args: [ 'start', './app.js' ]
-            },
-            killnode: {
-                cmd: 'taskkill.exe',
-                args: [
-                    '/F',
-                    '/IM',
-                    'node.exe'
-                ]
-            }
-        },
-
         sass: {
             options: {
                 sourcemap: 'auto',
@@ -297,7 +276,7 @@ module.exports = function (grunt) {
                 tasks: [ 'sass:common', 'sass:login', 'sass:lp' ]
             },
             watch: {
-                tasks: [ 'watch:common', 'watch:login', 'watch:lp' ],
+                tasks: [ 'watch:common', 'watch:login', 'watch:lp', 'run:ng2' ],
                 options: {
                     logConcurrentOutput: true
                 }
@@ -342,12 +321,81 @@ module.exports = function (grunt) {
                     logConcurrentOutput: true
                 }
             }
+        },
+
+        run: {
+            node: {
+                args: [ './app.js' ]
+            },
+            nodemon: {
+                cmd: 'nodemon',
+                args: [ './app.js' ]
+            },
+            pm2: {
+                cmd: 'pm2.cmd',
+                args: [ 'start', './app.js' ]
+            },
+            ng2: {
+                exec: 'cd ./projects/ng2/ && ng build --watch'
+            },
+            killnode: {
+                cmd: 'taskkill.exe',
+                args: [
+                    '/F',
+                    '/IM',
+                    'node.exe'
+                ]
+            }
+        },
+
+        webpack: {
+            ng2: {
+                entry: "<%= dir.ng2 %>/src/index.html",
+                output: {
+                    path: "<%= dir.ng2 %>/dist/",
+                    filename: "inline2.js",
+                },
+
+                stats: {
+                    // Configure the console output (stats: false disables)
+                    colors: true,
+                    modules: true,
+                    reasons: true
+                },
+
+                storeStatsTo: "webpackOutput", // writes the status to a variable named xyz
+                // you may use it later in grunt i.e. <%= xyz.hash %>
+
+                progress: true, // Don't show progress
+
+                failOnError: false, // don't report error to grunt if webpack find errors
+                // Use this if webpack errors are tolerable and grunt should continue
+
+                watch: true, // use webpacks watcher
+                // You need to keep the grunt process alive
+                /*
+                watchOptions: {
+                    aggregateTimeout: 500,
+                    poll: true
+                },
+                */
+                // Use this when you need to fallback to poll based watching (webpack 1.9.1+ only)
+
+                keepalive: true, // don't finish the grunt task
+                // Use this in combination with the watch option
+
+                inline: false,  // embed the webpack-dev-server runtime into the bundle
+                hot: false, // adds the HotModuleReplacementPlugin and switch the server to hot mode
+                // Use this in combination with the inline option
+
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    //grunt.loadNpmTasks('grunt-webpack');
     grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-env');
 
