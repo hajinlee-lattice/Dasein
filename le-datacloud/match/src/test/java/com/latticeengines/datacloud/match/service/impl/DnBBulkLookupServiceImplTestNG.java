@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
+import com.latticeengines.datacloud.match.dnb.DnBMatchGrade;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
@@ -54,10 +55,11 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
             log.info(String.format("Request %s: duns = %s, duration = %d, confidence code = %d, match grade = %s",
                     result.getLookupRequestId(), result.getDuns(), result.getDuration(), result.getConfidenceCode(),
                     result.getMatchGrade().getRawCode()));
-            Assert.assertEquals(result.getDuns(), "013919572");
+            Assert.assertEquals(result.getDuns(), getEntityInputData()[Integer.valueOf(lookupRequestId)][4]);
             Assert.assertNotNull(result.getDuration());
-            Assert.assertEquals((int) result.getConfidenceCode(), 7);
-            Assert.assertEquals(result.getMatchGrade().getRawCode(), "AZZAAZZZFFZ");
+            Assert.assertEquals((int) result.getConfidenceCode(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][5]);
+            Assert.assertEquals(result.getMatchGrade(), getEntityInputData()[Integer.valueOf(lookupRequestId)][6]);
         }
     }
 
@@ -67,7 +69,8 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                 //{ "Désirée Daude", null, null, "DE", DnBReturnCode.BAD_REQUEST, null, null, null },
                 //{ "ABCDEFG", "New York", "Washinton", "US", DnBReturnCode.UNMATCH, null, null, null },
                 //{ "Gorman Manufacturing", null, null, "US", DnBReturnCode.DISCARD, null, 6, new DnBMatchGrade("AZZZZZZZFZZ") },
-                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US" }
+                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ") },
+                { "GOOGLE GERMANY", "HAMBURG", null, "DE", "330465266", 7, new DnBMatchGrade("AZZAZZZZZFZ") }
                 };
     }
 

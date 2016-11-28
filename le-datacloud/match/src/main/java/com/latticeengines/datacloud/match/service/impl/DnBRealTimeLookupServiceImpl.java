@@ -54,6 +54,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.realtime.retry.maxattempts}")
     private int retries;
 
+    @Value("${datacloud.dnb.realtime.reasoncode.de}")
+    private String reasonCodeDe;
+
     @Override
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
@@ -164,6 +167,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 url.append("CountryISOAlpha2Code=");
                 url.append(context.getInputNameLocation().getCountryCode());
                 url.append("&");
+                if (context.getInputNameLocation().getCountryCode().equals("DE")) {
+                    url.append("OrderReasonCode=");
+                    url.append(reasonCodeDe);
+                    url.append("&");
+                }
             } else {
                 throw new LedpException(LedpCode.LEDP_25023);
             }

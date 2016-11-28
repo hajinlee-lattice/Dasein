@@ -54,6 +54,10 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertEquals(res.getMatchGrade(), matchGrade);
         Assert.assertNotNull(res.getDuration());
         log.info(String.format("Match duration: %d", res.getDuration()));
+        if (res.getMatchGrade() != null) {
+            log.info(res.getMatchGrade().getRawCode());
+        }
+
     }
 
     @Test(groups = "functional", enabled = false)
@@ -115,11 +119,13 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         return new Object[][] {
                 { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "US", DnBReturnCode.OK, "038796548", 8,
                         new DnBMatchGrade("AZZAAZZZFAB") },
-                { "DÉSIRÉE DAUDE", null, null, "DE", DnBReturnCode.BAD_REQUEST, null, null, null },
+                { "DÉSIRÉE DAUDE", null, null, "DE", DnBReturnCode.DISCARD, null, 4, new DnBMatchGrade("BZZZZZZZZZZ") },
                 { "ABCDEFG", "NEW YORK", "WASHINTON", "US", DnBReturnCode.UNMATCH, null, null, null },
                 { "GORMAN MANUFACTURING", null, null, "US", DnBReturnCode.DISCARD, null, 6,
                         new DnBMatchGrade("AZZZZZZZFZZ") },
-                { "GOOGLE", null, "CA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZAZZZFFZ") }, };
+                { "GOOGLE", null, "CA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZAZZZFFZ") },
+                { "GOOGLE GERMANY", "HAMBURG", null, "DE", DnBReturnCode.OK, "330465266", 7,
+                        new DnBMatchGrade("AZZAZZZZZFZ") } };
     }
 
     @DataProvider(name = "emailInputData")
