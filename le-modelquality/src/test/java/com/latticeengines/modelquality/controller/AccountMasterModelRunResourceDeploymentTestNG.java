@@ -82,7 +82,8 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
 
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
-            thisPropData.setDataCloudVersion("2.0.0");
+            thisPropData.setDataCloudVersion("2.0.1");
+            thisPropData.setExcludePublicDomains(true);
             PropData propDataAlreadyExists = propDataEntityMgr.findByName(thisPropData.getName());
             if (propDataAlreadyExists != null)
                 propDataEntityMgr.delete(propDataAlreadyExists);
@@ -172,16 +173,16 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
     @DataProvider(name = "getDerivedColumnCsvFile")
     public Object[][] getAccountDerivedColumnCsvFile() {
         return new Object[][] {
-                // { "Mulesoft_NA_doman_derived", "Mulesoft_NA_domain.csv" }, //
-                // { "Mulesoft_Emea_doman_derived", "Mulesoft_Emea_domain.csv"
-                // }, //
-                // { "Mulesoft_Apac_doman_derived", "Mulesoft_Apac_domain.csv"
-                // }, //
-                // { "Qlik_doman_derived", "Qlik_domaiin.csv" }, //
-                { "HootSuite_domain_derived", "HootSuite_domain.csv" }, //
-                // { "CornerStone_domain_derived", "CornerStone_domain.csv" },
-                // { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
-                // { "Tenable_domain_derived", "Tenable_domain.csv" }, //
+        // { "Mulesoft_NA_doman_derived", "Mulesoft_NA_domain.csv" }, //
+        // { "Mulesoft_Emea_doman_derived", "Mulesoft_Emea_domain.csv"
+        // }, //
+        // { "Mulesoft_Apac_doman_derived", "Mulesoft_Apac_domain.csv"
+        // }, //
+        // { "Qlik_doman_derived", "Qlik_domaiin.csv" }, //
+        { "HootSuite_domain_derived", "HootSuite_domain.csv" }, //
+        // { "CornerStone_domain_derived", "CornerStone_domain.csv" },
+        // { "PolyCom_domain_derived", "PolyCom_domain.csv" }, //
+        // { "Tenable_domain_derived", "Tenable_domain.csv" }, //
         };
     }
 
