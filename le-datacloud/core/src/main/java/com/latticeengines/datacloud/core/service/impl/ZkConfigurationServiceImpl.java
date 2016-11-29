@@ -5,10 +5,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -22,11 +18,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.datacloud.core.datasource.DataSourceConnection;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 
 @Component("zkConfigurationService")
@@ -86,17 +86,16 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         }
     }
 
-
     public boolean fuzzyMatchEnabled(CustomerSpace customerSpace) {
         try {
             FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
-            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.name()) && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.name())));
+            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())));
         } catch (Exception e) {
-            log.error("Error when retrieving feature flags for " +  customerSpace, e);
+            log.error("Error when retrieving feature flags for " + customerSpace, e);
             return false;
         }
     }
-
 
     private Path dbPoolPath(DataSourcePool pool) {
         Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);

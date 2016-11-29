@@ -98,6 +98,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Value("${pls.ff.enableDnBFeatureFlag}")
     private boolean enableDnBFeatureFlag;
 
+    @Value("${pls.test.e2e.use.fuzzy.match}")
+    private boolean useFuzzyMatch;
+
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
@@ -118,6 +121,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 && !BooleanUtils.toBoolean(System.getenv("DNB_RTS_AND_MODELING_DISABLED"))) {
             featureFlagMap.put(LatticeFeatureFlag.USE_DNB_RTS_AND_MODELING.getName(), true);
         }
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName(), useFuzzyMatch);
+
         log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);
         tenantToAttach = testBed.getMainTestTenant();

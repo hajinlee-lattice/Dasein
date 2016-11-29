@@ -222,6 +222,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 } else {
                     decisionGraph = defaultGraph;
                 }
+                log.info("Overwrite decision graph be default value " + decisionGraph);
             }
             log.info("Use decision graph " + decisionGraph);
 

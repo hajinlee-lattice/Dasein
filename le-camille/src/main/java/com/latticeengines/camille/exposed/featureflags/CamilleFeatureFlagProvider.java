@@ -232,6 +232,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
             toReturn = null;
         }
         if (toReturn == null) {
+            log.info("Flag-value map in cache is empty, returning empty map.");
             toReturn = new FeatureFlagValueMap();
         }
         return toReturn;
