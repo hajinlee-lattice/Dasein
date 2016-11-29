@@ -4,6 +4,7 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
@@ -90,6 +91,7 @@ public class DnBMatchContext implements Fact, Dimension {
         this.inputEmail = inputEmail;
     }
 
+    @MetricField(name = "DUNS")
     public String getDuns() {
         return duns;
     }
@@ -151,6 +153,7 @@ public class DnBMatchContext implements Fact, Dimension {
         this.hitBlackCache = hitBlackCache;
     }
 
+    @MetricField(name = "LookupRequestId", fieldType = MetricField.FieldType.STRING)
     public String getLookupRequestId() {
         return lookupRequestId;
     }
@@ -167,12 +170,22 @@ public class DnBMatchContext implements Fact, Dimension {
         this.matchStrategy = matchStrategy;
     }
 
+    @MetricTag(tag = "MatchStrategy")
+    public String getMatchStrategyName() {
+        return getMatchStrategy().name();
+    }
+
     public Long getDuration() {
         return duration;
     }
 
     public void setDuration(Long duration) {
         this.duration = duration;
+    }
+
+    @MetricField(name = "Duration", fieldType = MetricField.FieldType.DOUBLE)
+    public Double getDurationAsDouble() {
+        return duration.doubleValue();
     }
 
     public String getServiceBatchId() {
