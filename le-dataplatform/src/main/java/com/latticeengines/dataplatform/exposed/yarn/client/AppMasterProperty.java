@@ -9,6 +9,7 @@ public enum AppMasterProperty {
     CUSTOMER, //
     CONTAINER_COUNT, //
     APP_NAME, //
-    APP_NAME_SUFFIX;
+    APP_NAME_SUFFIX, //
+    MAX_APP_ATTEMPTS;
 
 }

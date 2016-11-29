@@ -70,8 +70,8 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @Override
     public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
         Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>();
-        String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE
-                .name());
+        String containerLaunchContextFile = containerProperties
+                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
         copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:" + containerLaunchContextFile,
                 getJobDir(containerProperties), false));
 
@@ -92,12 +92,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 false));
 
         if (!excludeDataplatformLib) {
-            hdfsEntries
-                    .add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                            LocalResourceVisibility.PUBLIC, //
-                            String.format("/app/%s/dataplatform/lib/*.jar",
-                                    versionManager.getCurrentVersionInStack(stackName)), //
-                            false));
+            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                    LocalResourceVisibility.PUBLIC, //
+                    String.format("/app/%s/dataplatform/lib/*.jar", versionManager.getCurrentVersionInStack(stackName)), //
+                    false));
         }
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -167,21 +165,22 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     @Override
     public List<String> getCommands(Properties containerProperties) {
-        String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE
-                .name());
+        String containerLaunchContextFile = containerProperties
+                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
         if (containerLaunchContextFile == null) {
-            throw new IllegalStateException("Property " + ContainerProperty.APPMASTER_CONTEXT_FILE + " does not exist.");
+            throw new IllegalStateException(
+                    "Property " + ContainerProperty.APPMASTER_CONTEXT_FILE + " does not exist.");
         }
         File contextFile = new File(containerLaunchContextFile);
         if (!contextFile.exists()) {
-            throw new IllegalStateException("Container launcher context file " + containerLaunchContextFile
-                    + " does not exist.");
+            throw new IllegalStateException(
+                    "Container launcher context file " + containerLaunchContextFile + " does not exist.");
         }
         String parameter = setupParameters(containerProperties);
 
-        return Arrays.<String> asList(new String[] {
-                "$JAVA_HOME/bin/java", //
-                // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+        return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
+                // "-Xdebug -Xnoagent -Djava.compiler=NONE
+                // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 getXmxSetting(containerProperties),
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
@@ -242,6 +241,15 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     public Configuration getConfiguration() {
         return yarnConfiguration;
+    }
+
+    @Override
+    public int getMaxAppAttempts(Properties appMasterProperties) {
+        String maxAppAttempts = appMasterProperties.getProperty(AppMasterProperty.MAX_APP_ATTEMPTS.name(), "-1");
+        if (maxAppAttempts.equals("-1")) {
+            return yarnConfiguration.getInt("yarn.resourcemanager.am.max-attempts", 2);
+        }
+        return Integer.valueOf(maxAppAttempts);
     }
 
 }

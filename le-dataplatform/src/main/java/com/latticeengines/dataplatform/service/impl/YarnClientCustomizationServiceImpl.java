@@ -84,6 +84,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         int memory = customization.getMemory(appMasterProperties);
         int virtualCores = customization.getVirtualcores(appMasterProperties);
         int priority = customization.getPriority(appMasterProperties);
+        int maxAppAttempts = customization.getMaxAppAttempts(appMasterProperties);
         String queue = customization.getQueue(appMasterProperties);
 
         customization.afterCreateLocalLauncherContextFile(containerProperties);
@@ -116,6 +117,10 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
         if (environment != null) {
             client.setEnvironment(environment);
+        }
+        
+        if (maxAppAttempts != 0) {
+            client.setMaxAppAttempts(maxAppAttempts);
         }
 
         // copy the metadata.json file to HDFS data directory

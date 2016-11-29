@@ -51,4 +51,6 @@ public abstract class YarnClientCustomization {
     public abstract Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties);
 
     public abstract void afterCreateLocalLauncherContextFile(Properties containerProperties);
+
+    public abstract int getMaxAppAttempts(Properties appMasterProperties);
 }
