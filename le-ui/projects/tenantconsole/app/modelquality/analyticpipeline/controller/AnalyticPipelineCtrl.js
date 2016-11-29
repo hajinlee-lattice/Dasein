@@ -1,7 +1,7 @@
-angular.module('app.modelquality.controller.PipelineCtrl', [
+angular.module('app.modelquality.controller.AnalyticPipelineCtrl', [
     'app.modelquality.controller.PipelineStepCtrl'
 ])
-.controller('PipelineCtrl', function ($scope, $state, $q, AnalyticPipelines, PropDataConfigs, ModelQualityService) {
+.controller('AnalyticPipelineCtrl', function ($scope, $state, $q, AnalyticPipelines, PropDataConfigs, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {

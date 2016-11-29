@@ -135,15 +135,15 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
                 },
             }
         })
-        .state('MODELQUALITY.PIPELINE', {
-            url: '/pipeline',
+        .state('MODELQUALITY.ANALYTICPIPELINE', {
+            url: '/analyticpipeline',
             views: {
                 'main@MODELQUALITY': {
-                    templateUrl: 'app/modelquality/pipeline/view/PipelineView.html',
-                    controller: 'PipelineCtrl',
-                    controllerAs: 'vm_pipeline'
+                    templateUrl: 'app/modelquality/analyticpipeline/view/AnalyticPipelineView.html',
+                    controller: 'AnalyticPipelineCtrl',
+                    controllerAs: 'vm_analyticPipeline'
                 },
-                'createPipelineStep@MODELQUALITY.PIPELINE': {
+                'createPipelineStep@MODELQUALITY.ANALYTICPIPELINE': {
                     templateUrl: 'app/modelquality/pipeline/view/PipelineStepView.html',
                     controller: 'PipelineStepCtrl',
                     controllerAs: 'vm_pipelineStep'

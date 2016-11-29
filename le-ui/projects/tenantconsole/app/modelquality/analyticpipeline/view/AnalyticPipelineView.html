@@ -1,0 +1,99 @@
+<section class="row create-pipeline-main">
+  <div ng-class="vm_analyticPipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'" class="pipeline-list-container no-gutter">
+    <h4>{{::vm_analyticPipeline.labels.PIPELINES}}</h4>
+    <ul class="pipeline-list">
+      <li ng-repeat="pipeline in vm_analyticPipeline.analyticPipelines"
+        ng-class="{selected: vm_analyticPipeline.selectedPipeline === pipeline}"
+        ng-click="vm_analyticPipeline.selectPipeline(pipeline)">
+        <div>{{::pipeline.name}}</div>
+      </li>
+    </ul>
+  </div>
+  <div ng-class="vm_analyticPipeline.stepMetadata ? 'col-xs-5' : 'col-xs-8'">
+    <div ng-if="vm_analyticPipeline.loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{::vm_analyticPipeline.spinnerMsg}}</h2>
+    </div>
+    <div ng-if="vm_analyticPipeline.message" class="row">
+      <p class="alert" ng-class="vm_analyticPipeline.error ? 'alert-danger' : 'alert-success'">{{vm_analyticPipeline.message}}</p>
+    </div>
+    <div ng-if="!vm_analyticPipeline.loading && vm_analyticPipeline.selectedPipeline" class="container-fluid">
+      <div class="row">
+        <h4>{{::vm_analyticPipeline.labels.STEPS}}</h4>
+        <form class="form-group">
+          <label> {{::vm_analyticPipeline.labels.PIPELINE_NAME}}:
+            <input type="text" class="form-control" placeholder="Pipeline Name" ng-model="vm_analyticPipeline.pipelineName"/>
+          </label>
+        </form>
+        <ul class="pipeline-step-list">
+          <li ng-if="!vm_analyticPipeline.pipelineSteps.length">
+            {{::vm_analyticPipeline.labels.EMPTY_STEPS}}
+          </li>
+          <li ng-repeat="step in vm_analyticPipeline.pipelineSteps track by $index">
+            <span class="list-bullet">{{$index + 1}}:</span>{{step.Name}}
+            <span class="align-right">
+              <table class="align-right pipeline-editor">
+                <td>
+                  <i class="fa fa-trash"
+                    ng-click="vm_analyticPipeline.deleteStep($index)"></i>
+                </td>
+                <td>
+                  <i class="fa fa-eye"
+                    ng-click="vm_analyticPipeline.inspectMetadata($index)"></i>
+                </td>
+                <td>
+                  <i class="fa fa-arrow-up"
+                    ng-if="!$first"
+                    ng-click="vm_analyticPipeline.swapSteps($index, $index-1)"></i>
+                </td>
+                <td>
+                  <i class="fa fa-arrow-down"
+                    ng-if="!$last"
+                    ng-click="vm_analyticPipeline.swapSteps($index, $index+1)"></i>
+                </td>
+              </table>
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <button class="btn btn-default"
+          ng-if="!vm_analyticPipeline.isCreatingStep"
+          ng-click="vm_analyticPipeline.createStep()">{{::vm_analyticPipeline.labels.ADD_STEP}}</button>
+        <div ng-if="vm_analyticPipeline.isCreatingStep" ui-view="createPipelineStep"></div>
+      </div>
+      <div class="row">
+        <hr>
+      </div>
+      <div class="row">
+        <form class="form-group">
+          <label>{{::vm_analyticPipeline.labels.PROP_DATA_CONFIG}}: <label>
+          <select class="form-control"
+            ng-model="vm_analyticPipeline.analyticPipeline.prop_data_name"
+            ng-options="config.name as config.name for config in vm_analyticPipeline.propDataConfigs">
+          </select>
+        </form>
+      </div>
+      <div class="row pipeline-description">
+        <form class="form-group">
+          <label>{{::vm_analyticPipeline.labels.PIPELINE_DESCRIPTION}}:</label>
+          <textarea class="form-control" placeholder="{{::vm_analyticPipeline.labels.PIPELINE_DESCRIPTION}}" ng-model="vm_analyticPipeline.pipelineDescription"/>
+        </form>
+      </div>
+      <div class="row">
+        <hr>
+      </div>
+      <div class="row" ng-if="!vm_analyticPipeline.loading">
+        <div class="pull-right">
+          <button class="btn btn-default"
+            ng-click="vm_analyticPipeline.save()">{{::vm_analyticPipeline.labels.SAVE}}</button>
+          <button class="btn" ng-click="vm_analyticPipeline.cancelPipeline()">{{::vm_analyticPipeline.labels.CANCEL}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-if="vm_analyticPipeline.stepMetadata" class="json-panel col-xs-4">
+    <i class="fa fa-times" ng-click="vm_analyticPipeline.clearStepMetadata()"></i>
+    <pre>{{vm_analyticPipeline.stepMetadata | json:2 }}</pre>
+  </div>
+</section>
