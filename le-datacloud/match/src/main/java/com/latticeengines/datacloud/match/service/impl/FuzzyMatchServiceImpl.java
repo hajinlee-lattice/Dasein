@@ -43,7 +43,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel) throws Exception {
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception {
         checkRecordType(matchRecords);
 
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
@@ -65,6 +65,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 if (StringUtils.isNotEmpty(decisionGraph)) {
                     travelContext.setDecisionGraph(decisionGraph);
                 }
+                travelContext.setUseDnBCache(useDnBCache);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
             }
         }

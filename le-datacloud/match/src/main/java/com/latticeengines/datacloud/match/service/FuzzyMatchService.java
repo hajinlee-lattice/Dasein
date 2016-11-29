@@ -9,6 +9,6 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 public interface FuzzyMatchService {
 
     <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid, String dataCloudVersion,
-                                            String decisionGraph, Level logLevel) throws Exception;
+            String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception;
 
 }

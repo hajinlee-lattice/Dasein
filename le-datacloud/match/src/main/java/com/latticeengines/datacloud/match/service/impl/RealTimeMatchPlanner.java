@@ -43,6 +43,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
+        context.setUseDnBCache(input.getUseDnBCache());
         return context;
     }
 

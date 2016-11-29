@@ -68,6 +68,9 @@ public class MatchInput implements Fact, Dimension {
     private String realTimeProxyUrl;
     private Integer realTimeThreadPoolSize;
 
+    // if not provided, first check DnB cache before going to DnB api
+    private boolean useDnBCache = true;
+
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
         return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
@@ -367,6 +370,16 @@ public class MatchInput implements Fact, Dimension {
 
     public static String getDefaultDatacloudVersion() {
         return DEFAULT_DATACLOUD_VERSION;
+    }
+
+    @JsonProperty("UseDnBCache")
+    public boolean getUseDnBCache() {
+        return useDnBCache;
+    }
+
+    @JsonProperty("UseDnBCache")
+    public void setUseDnBCache(boolean useDnBCache) {
+        this.useDnBCache = useDnBCache;
     }
 
     @Override

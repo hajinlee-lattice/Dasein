@@ -38,6 +38,8 @@ public class MatchContext implements Fact, Dimension {
     private List<LatticeAccount> matchedAccounts;
     private Map<String, String> latticeIdToLookupIdMap;
 
+    private boolean useDnBCache;
+
     @JsonIgnore
     private String contextId;
 
@@ -179,6 +181,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setContextId(String contextId) {
         this.contextId = contextId;
+    }
+
+    public boolean isUseDnBCache() {
+        return useDnBCache;
+    }
+
+    public void setUseDnBCache(boolean useDnBCache) {
+        this.useDnBCache = useDnBCache;
     }
 
     @JsonIgnore

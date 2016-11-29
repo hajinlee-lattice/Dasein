@@ -63,29 +63,31 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        Long startTime = System.currentTimeMillis();
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
-        if (whiteCache != null) {
-            context.copyResultFromWhiteCache(whiteCache);
-            dnbMatchResultValidator.validate(context);
-            context.setDuration(System.currentTimeMillis() - startTime);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+        if (request.getMatchTravelerContext().isUseDnBCache()) {
+            Long startTime = System.currentTimeMillis();
+            DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+            if (whiteCache != null) {
+                context.copyResultFromWhiteCache(whiteCache);
+                dnbMatchResultValidator.validate(context);
+                context.setDuration(System.currentTimeMillis() - startTime);
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format(
+                            "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                }
+                return context;
             }
-            return context;
-        }
-        DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
-        if (blackCache != null) {
-            context.copyResultFromBlackCache(blackCache);
-            context.setDuration(System.currentTimeMillis() - startTime);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+            DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
+            if (blackCache != null) {
+                context.copyResultFromBlackCache(blackCache);
+                context.setDuration(System.currentTimeMillis() - startTime);
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format(
+                            "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
+                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                }
+                return context;
             }
-            return context;
         }
         context = dnbRealTimeLookupService.realtimeEntityLookup(context);
         dnbCacheService.addCache(context);
@@ -113,31 +115,33 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
-        Long startTime = System.currentTimeMillis();
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
-        if (whiteCache != null) {
-            context.copyResultFromWhiteCache(whiteCache);
-            dnbMatchResultValidator.validate(context);
-            context.setDuration(System.currentTimeMillis() - startTime);
-            sendResponse(lookupRequestId, context, returnAddress);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+        if (request.getMatchTravelerContext().isUseDnBCache()) {
+            Long startTime = System.currentTimeMillis();
+            DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+            if (whiteCache != null) {
+                context.copyResultFromWhiteCache(whiteCache);
+                dnbMatchResultValidator.validate(context);
+                context.setDuration(System.currentTimeMillis() - startTime);
+                sendResponse(lookupRequestId, context, returnAddress);
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format(
+                            "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                }
+                return;
             }
-            return;
-        }
-        DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
-        if (blackCache != null) {
-            context.copyResultFromBlackCache(blackCache);
-            context.setDuration(System.currentTimeMillis() - startTime);
-            sendResponse(lookupRequestId, context, returnAddress);
-            if (log.isDebugEnabled()) {
-                log.debug(String.format(
-                        "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+            DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
+            if (blackCache != null) {
+                context.copyResultFromBlackCache(blackCache);
+                context.setDuration(System.currentTimeMillis() - startTime);
+                sendResponse(lookupRequestId, context, returnAddress);
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format(
+                            "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
+                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                }
+                return;
             }
-            return;
         }
 
         saveReq(lookupRequestId, returnAddress, request);
