@@ -67,8 +67,8 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
-        implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
+public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration> implements
+        ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ScoringProcessor.class);
 
@@ -183,8 +183,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         log.info(String.format("The output score path is %s", scorePath));
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, scorePath);
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.IMPORT_ERROR_FILE_NAME,
-                targetDir + "/error.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, ScoringDaemonService.IMPORT_ERROR_FILE_NAME, targetDir
+                + "/error.csv");
     }
 
     @VisibleForTesting
@@ -198,8 +198,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private List<RecordScoreResponse> bulkScore(BulkRecordScoreRequest scoreRequest, String customerSpace,
             Boolean enrichmentEnabledForInternalAttributes) {
         long startTime = System.currentTimeMillis();
-        log.info(String.format("Sending internal bulk score request with %d records for tenant %s",
-                scoreRequest.getRecords().size(), customerSpace));
+        log.info(String.format("Sending internal bulk score request with %d records for tenant %s", scoreRequest
+                .getRecords().size(), customerSpace));
         List<RecordScoreResponse> recordScoreResponse = null;
         if (isEnableDebug) {
             log.info("Score in the debug mode");
@@ -308,7 +308,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 String fieldName = field.name();
                 Object fieldValue = avroRecord.get(fieldName) == null ? null : avroRecord.get(fieldName).toString();
                 String resolvedFieldName = fieldNameMapping.containsKey(fieldName) //
-                        ? fieldNameMapping.get(fieldName) : fieldName;
+                ? fieldNameMapping.get(fieldName)
+                        : fieldName;
                 attributeValues.put(resolvedFieldName, fieldValue);
             }
 
@@ -462,13 +463,14 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     while (it.hasNext()) {
                         Entry<String, Schema.Type> entry = it.next();
                         Object value = null;
-                        if (enrichmentAttributeValues == null
-                                || !enrichmentAttributeValues.containsKey(entry.getKey())) {
-                            log.warn(String.format(
-                                    "The enrichment attribute values in the score response is null or does match this entry. Will set enrichment attribute %s to NULL value",
-                                    entry.getKey()));
+                        if (enrichmentAttributeValues == null || !enrichmentAttributeValues.containsKey(entry.getKey())) {
+                            log.warn(String
+                                    .format("The enrichment attribute values in the score response is null or does match this entry. Will set enrichment attribute %s to NULL value",
+                                            entry.getKey()));
                         } else {
                             value = enrichmentAttributeValues.get(entry.getKey());
+                            Schema.Type avroType = entry.getValue();
+                            value = AvroUtils.checkTypeAndConvert(entry.getKey(), value, avroType);
                         }
                         builder.set(entry.getKey(), value);
                     }
@@ -545,8 +547,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         BulkScoreApiCallable(RTSBulkScoringConfiguration rtsBulkScoringConfig, FileReader<GenericRecord> reader,
                 DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
                 Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, AtomicLong counter,
-                long recordCount, Map<String, String> fieldNameMapping,
-                boolean enrichmentEnabledForInternalAttributes) {
+                long recordCount, Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes) {
 
             super();
             this.rtsBulkScoringConfig = rtsBulkScoringConfig;

@@ -562,7 +562,8 @@ public class AvroUtils {
                 " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
                 " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
                 " LOCATION '%s'" + " TBLPROPERTIES ('avro.schema.url'='%s')";
-        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, schemaHdfsPath);
+        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir,
+                schemaHdfsPath);
     }
 
     public static Schema extractTypeInformation(Schema schema) {
@@ -759,5 +760,44 @@ public class AvroUtils {
         return schema;
     }
 
-
+    public static Object checkTypeAndConvert(String column, Object value, Type avroType) {
+        if (value == null || avroType == null) {
+            return value;
+        }
+        try {
+            switch (avroType) {
+            case DOUBLE:
+                if (!(value instanceof Double)) {
+                    return Double.valueOf(value.toString());
+                }
+                break;
+            case FLOAT:
+                if (!(value instanceof Float)) {
+                    return Float.valueOf(value.toString());
+                }
+                break;
+            case INT:
+                if (!(value instanceof Integer)) {
+                    return Integer.valueOf(value.toString());
+                }
+                break;
+            case LONG:
+                if (!(value instanceof Long)) {
+                    return Long.valueOf(value.toString());
+                }
+                break;
+            case BOOLEAN:
+                if (!(value instanceof Boolean)) {
+                    return Boolean.valueOf(value.toString());
+                }
+                break;
+            default:
+                break;
+            }
+        } catch (Exception ex) {
+            log.warn("Type mismatch for column=" + column + " avro type=" + avroType, ex);
+            value = null;
+        }
+        return value;
+    }
 }
