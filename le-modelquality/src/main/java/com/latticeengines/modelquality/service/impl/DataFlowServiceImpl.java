@@ -29,7 +29,7 @@ public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowServ
         dataFlow.setName(dataFlowName);
         dataFlow.setMatch(true);
         dataFlow.setTransformationGroup(TransformationGroup.STANDARD);
-        dataFlow.setDedupType(DedupType.MULTIPLELEADSPERDOMAIN);
+        dataFlow.setDedupType(DedupType.ONELEADPERDOMAIN);
         dataFlowEntityMgr.create(dataFlow);
         return dataFlow;
     }

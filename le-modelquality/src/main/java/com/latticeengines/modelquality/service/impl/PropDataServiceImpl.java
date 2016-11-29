@@ -25,7 +25,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
     @Autowired
     @VisibleForTesting
     private ColumnMetadataProxy columnMetadataProxy;
-    
+
     private static final Log log = LogFactory.getLog(PropDataServiceImpl.class);
 
     @Override
@@ -39,7 +39,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
         }
         propData = new PropData();
         propData.setName(propDataName);
-        propData.setDataCloudVersion("1.0.0");
+        propData.setDataCloudVersion("2.0.1");
         propDataEntityMgr.create(propData);
         return propData;
     }
@@ -127,7 +127,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
     }
 
     protected String getLatestDNBVersion() {
-        String toReturn = "2.0.0";
+        String toReturn = "2.0.1";
         try {
             DataCloudVersion latestDNBVersion = columnMetadataProxy.latestVersion(null);
             if (latestDNBVersion != null && !latestDNBVersion.getVersion().isEmpty()) {
