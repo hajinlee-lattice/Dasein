@@ -4,6 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -84,6 +86,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
+        Collection<String> reservedWords = Arrays.asList(new String[]{"Score"});
+        ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
     }
 

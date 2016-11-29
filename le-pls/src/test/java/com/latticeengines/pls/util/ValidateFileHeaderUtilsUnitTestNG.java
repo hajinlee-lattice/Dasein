@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -128,5 +130,18 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         assertFalse(AvroUtils.isAvroFriendlyFieldName(malformedName));
         String correctformedName = "avro_2name_23";
         assertTrue(AvroUtils.isAvroFriendlyFieldName(correctformedName));
+    }
+
+    @Test(groups = "unit")
+    public void validateReserverdWordsInHeaders() throws IOException {
+        LedpException thrown = null;
+        try {
+            ValidateFileHeaderUtils.checkForReservedHeaders("file",
+                    Sets.newHashSet(new String[] { "a", "b", "Score", "c" }), Arrays.asList(new String[] { "Score" }));
+        } catch (LedpException e) {
+            thrown = e;
+        }
+        assertNotNull(thrown);
+        assertEquals(thrown.getCode(), LedpCode.LEDP_18122);
     }
 }

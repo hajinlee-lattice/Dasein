@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,8 +45,9 @@ public class ValidateFileHeaderUtils {
     public static Set<String> getCSVHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool) {
         try {
             Set<String> headerFields = null;
-            InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
-                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+            InputStreamReader reader = new InputStreamReader(
+                    new BOMInputStream(stream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
@@ -59,7 +61,7 @@ public class ValidateFileHeaderUtils {
             return headerFields;
 
         } catch (IllegalArgumentException e) {
-            throw new LedpException(LedpCode.LEDP_18109, new String[]{e.getMessage()});
+            throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -67,11 +69,12 @@ public class ValidateFileHeaderUtils {
     }
 
     public static List<String> getCSVColumnValues(String columnHeaderName, InputStream stream,
-                                                  CloseableResourcePool closeableResourcePool) {
+            CloseableResourcePool closeableResourcePool) {
         try {
             List<String> columnFields = new ArrayList<>();
-            InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
-                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+            InputStreamReader reader = new InputStreamReader(
+                    new BOMInputStream(stream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
             CSVFormat format = LECSVFormat.format;
             CSVParser parser = new CSVParser(reader, format);
@@ -96,7 +99,9 @@ public class ValidateFileHeaderUtils {
                 }
             }
             if (oneColumnMalformedCSV) {
-                log.warn(String.format("One row for column: %s in the csv caused a csv parsing error, this might be due to a malformed csv", columnHeaderName));
+                log.warn(String.format(
+                        "One row for column: %s in the csv caused a csv parsing error, this might be due to a malformed csv",
+                        columnHeaderName));
             }
 
             return columnFields;
@@ -108,7 +113,7 @@ public class ValidateFileHeaderUtils {
 
     @SuppressWarnings("unchecked")
     public static void checkForDuplicateHeaders(List<Attribute> attributes, String fileDisplayName,
-                                                Set<String> headerFields) {
+            Set<String> headerFields) {
         Map<String, List<String>> duplicates = new HashMap<>();
         for (final Attribute attribute : attributes) {
             final List<String> allowedDisplayNames = attribute.getAllowedDisplayNames();
@@ -130,30 +135,29 @@ public class ValidateFileHeaderUtils {
         if (duplicates.size() > 0) {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, List<String>> entry : duplicates.entrySet()) {
-                sb.append(String
-                        .format("In file %s, cannot have columns %s as CSV headers because they correspond to the same information (%s)\n",
-                                fileDisplayName, StringUtils.join(entry.getValue()), entry.getKey()));
+                sb.append(String.format(
+                        "In file %s, cannot have columns %s as CSV headers because they correspond to the same information (%s)\n",
+                        fileDisplayName, StringUtils.join(entry.getValue()), entry.getKey()));
             }
-            throw new LedpException(LedpCode.LEDP_18107, new String[]{sb.toString()});
+            throw new LedpException(LedpCode.LEDP_18107, new String[] { sb.toString() });
         }
     }
 
     public static void checkForEmptyHeaders(String fileDisplayName, Set<String> headerFields) {
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
-                throw new LedpException(LedpCode.LEDP_18096, new String[]{fileDisplayName});
+                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
             }
         }
     }
 
     public static void checkForMissingRequiredFields(List<Attribute> attributes, String fileDisplayName,
-                                                     Set<String> headerFields, boolean respectNullability) {
+            Set<String> headerFields, boolean respectNullability) {
 
         Set<String> missingRequiredFields = new HashSet<>();
         Iterator<Attribute> attrIterator = attributes.iterator();
 
-        iterateAttr:
-        while (attrIterator.hasNext()) {
+        iterateAttr: while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
             Iterator<String> headerIterator = headerFields.iterator();
 
@@ -175,7 +179,7 @@ public class ValidateFileHeaderUtils {
         }
         if (!missingRequiredFields.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[]{StringUtils.join(missingRequiredFields, ","), fileDisplayName});
+                    new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
         }
 
         checkForEmptyHeaders(fileDisplayName, headerFields);
@@ -198,5 +202,19 @@ public class ValidateFileHeaderUtils {
             sb.append(AVRO_FIELD_NAME_PREFIX);
         }
         return sb.append(fieldName).toString().replaceAll("[^A-Za-z0-9_]", "_");
+    }
+
+    public static void checkForReservedHeaders(String displayName, Set<String> headerFields,
+            Collection<String> reservedWords) {
+        List<String> overlappedWords = new ArrayList<>();
+        for (String reservedWord : reservedWords) {
+            if (headerFields.contains(reservedWord)) {
+                overlappedWords.add(reservedWord);
+            }
+        }
+        if (overlappedWords.size() > 0) {
+            throw new LedpException(LedpCode.LEDP_18122, new String[] { overlappedWords.toString(), displayName });
+        }
+
     }
 }

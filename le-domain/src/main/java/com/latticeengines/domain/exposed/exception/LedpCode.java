@@ -223,7 +223,7 @@ public enum LedpCode {
     LEDP_18119("Cannot create marketo credential with duplicate name: {0}"), //
     LEDP_18120("Invalid file uploaded. There must be minimum of 2 columns."), //
     LEDP_18121("Model summary with id {0} must exist for campaign creation."), //
-
+    LEDP_18122("Found reserved column name {0} in csv headers in csv file {1}."), //
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
 
