@@ -7,6 +7,3 @@
 <div class="form-group" ng-repeat="item in ::vm_publishLatest.urls">
   <button class="btn btn-default" ng-click="vm_publishLatest.publishLatest($event, item.url)">{{::vm_publishLatest.labels[item.labelKey]}}</button>
 </div>
-<div class="form-group">
-  <button class="btn btn-default" ng-click="vm_publishLatest.publishAll()">{{::vm_publishLatest.labels.ALL}}</button>
-</div>
