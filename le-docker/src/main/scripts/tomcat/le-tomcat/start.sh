@@ -29,6 +29,7 @@ if [ -f "/etc/efsip.txt" ]; then
 fi
 
 export JAVA_OPTS="-Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099"
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
