@@ -17,6 +17,7 @@ angular
         var flags = FeatureFlagService.Flags();
         vm.showPivotMapping = FeatureFlagService.FlagIsEnabled(flags.ALLOW_PIVOT_FILE);
     });
+
     ImportStore.ResetAdvancedSettings();
 
     angular.extend(vm, {
@@ -169,7 +170,9 @@ angular
         vm.pivotUploaded = true;
     }
 
-    vm.pivotCancel = function() { }
+    vm.pivotCancel = function() {
+        vm.pivotUploaded = false;
+    }
 
     vm.stripExt = function(fileName) {
         var fnSplit = (fileName || '').split('.');

@@ -363,6 +363,7 @@ angular
                 }
 
                 vm.uploading = false;
+
                 if (result.Success && result.Result) {
                     var fileName = vm.choosenFileName = result.Result.name,
                         metaData = vm.metadata = result.Result;
@@ -371,7 +372,7 @@ angular
                     vm.uploaded = true;
                     vm.message = 'Done in ' + (vm.getElapsedTime(vm.startTime) || '0 seconds');
                 } else {
-                    vm.cancel(true);
+                    vm.cancel(true, result);
                     vm.message = 'Transfer aborted';
 
                     setTimeout(function() {
@@ -429,7 +430,7 @@ angular
                 return timestamp;
             }
 
-            vm.cancel = function(IGNORE_FILENAME) {
+            vm.cancel = function(IGNORE_FILENAME, data) {
                 vm.compressing = false;
                 vm.uploading = false;
                 vm.uploaded = false;
@@ -445,7 +446,7 @@ angular
                 }
 
                 if (typeof vm.fileCancel == 'function') {
-                    vm.fileCancel();
+                    vm.fileCancel({ data: data });
                 }
             }
 
@@ -478,6 +479,7 @@ angular
             }
 
             angular.extend(vm, $scope, options);
+
             vm.init();
         }
     };
