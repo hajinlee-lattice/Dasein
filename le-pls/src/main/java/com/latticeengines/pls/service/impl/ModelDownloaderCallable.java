@@ -2,12 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +33,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
     private FeatureImportanceParser featureImportanceParser;
+    private Set<String> modelSummaryIds;
 
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
@@ -46,6 +42,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         this.yarnConfiguration = builder.getYarnConfiguration();
         this.parser = builder.getModelSummaryParser();
         this.featureImportanceParser = builder.getFeatureImportanceParser();
+        this.modelSummaryIds = builder.getModelSummaryIds();
     }
 
     @Override
@@ -88,46 +85,41 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return false;
         }
 
-        Set<String> set = new HashSet<>();
         MultiTenantContext.setTenant(tenant);
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-        for (ModelSummary summary : summaries) {
-            try {
-                set.add(UuidUtils.extractUuid(summary.getId()));
-            } catch (Exception e) {
-                // Skip any model summaries that have unexpected ID syntax
-                log.warn(e);
-            }
-        }
+
         boolean foundFilesToDownload = false;
 
         for (String file : files) {
             try {
                 String modelSummaryId = UuidUtils.parseUuid(file);
-                if (!set.contains(modelSummaryId)) {
-                    String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
-                    ModelSummary summary = parser.parse(file, contents);
-                    String[] tokens = file.split("/");
-                    summary.setTenant(tenant);
-
-                    try {
-                        setFeatureImportance(summary, file);
-                    } catch (IOException e) {
-                        log.warn("Errors fetching RF feature importance file. Skipping...", e);
+                synchronized (modelSummaryIds) {
+                    if (modelSummaryIds.contains(modelSummaryId)) {
+                        continue;
+                    } else {
+                        modelSummaryIds.add(modelSummaryId);
                     }
-
-                    try {
-                        summary.setApplicationId("application_" + tokens[tokens.length - 3]);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        log.error(String.format("Cannot set application id of model summary with id %s.",
-                                modelSummaryId));
-                    }
-                    log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
-                            summary.getId(), summary.getApplicationId(), file));
-                    modelSummaryEntityMgr.create(summary);
-
-                    foundFilesToDownload = true;
                 }
+                String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
+                ModelSummary summary = parser.parse(file, contents);
+                String[] tokens = file.split("/");
+                summary.setTenant(tenant);
+
+                try {
+                    setFeatureImportance(summary, file);
+                } catch (IOException e) {
+                    log.warn("Errors fetching RF feature importance file. Skipping...", e);
+                }
+
+                try {
+                    summary.setApplicationId("application_" + tokens[tokens.length - 3]);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    log.error(String.format("Cannot set application id of model summary with id %s.",
+                            modelSummaryId));
+                }
+                log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
+                        summary.getId(), summary.getApplicationId(), file));
+                modelSummaryEntityMgr.create(summary);
+                foundFilesToDownload = true;
             } catch (BlockMissingException e) {
                 log.error(e);
                 // delete the bad model summary file
@@ -177,6 +169,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         private Configuration yarnConfiguration;
         private ModelSummaryParser modelSummaryParser;
         private FeatureImportanceParser featureImportanceParser;
+        private Set<String> modelSummaryIds;
 
         public Builder() {
 
@@ -212,6 +205,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return this;
         }
 
+        public Builder modelSummaryIds(Set<String> modelSummaryIds) {
+            this.modelSummaryIds = modelSummaryIds;
+            return this;
+        }
+
         public Tenant getTenant() {
             return tenant;
         }
@@ -234,6 +232,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         public FeatureImportanceParser getFeatureImportanceParser() {
             return featureImportanceParser;
+        }
+
+        public Set<String> getModelSummaryIds() {
+            return modelSummaryIds;
         }
 
     }

@@ -1,13 +1,12 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -54,7 +53,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         this.maxPartialDownloadCount = builder.getMaxPartialDownloadCount();
     }
 
-    private Future<Boolean> downloadModel(Tenant tenant) {
+    private Future<Boolean> downloadModel(Tenant tenant, Set<String> modelSummaryIds) {
         log.debug("Downloading model for tenant " + tenant.getId());
         ModelDownloaderCallable.Builder builder = new ModelDownloaderCallable.Builder();
         builder.modelServiceHdfsBaseDir(modelServiceHdfsBaseDir) //
@@ -62,7 +61,8 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                 .modelSummaryEntityMgr(modelSummaryEntityMgr) //
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(parser) //
-                .featureImportanceParser(featureImportanceParser);
+                .featureImportanceParser(featureImportanceParser)
+                .modelSummaryIds(modelSummaryIds);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
         return modelSummaryDownloadExecutor.submit(callable);
     }
@@ -94,6 +94,20 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         }
     }
 
+    private Set<String> getModelSummaryIds() {
+        Set<String> modelSummaryIds = Collections.synchronizedSet(new HashSet<String>());
+        List<ModelSummary> summaries = modelSummaryEntityMgr.getAll();
+        for (ModelSummary summary : summaries) {
+            try {
+                modelSummaryIds.add(UuidUtils.extractUuid(summary.getId()));
+            } catch (Exception e) {
+                // Skip any model summaries that have unexpected ID syntax
+                log.warn(e);
+            }
+        }
+        return modelSummaryIds;
+    }
+
     private Boolean needFullDownload() {
         Date now = new Date(System.currentTimeMillis());
         if (now.getTime() - lastFullDownloadTime.getTime() > fullDownloadInterval * 1000) {
@@ -113,11 +127,12 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             for (ModelSummaryDownloadFlag flag : waitingFlags) {
                 tenantIds.add(flag.getTenantId());
             }
+            Set<String> modelSummaryIds = getModelSummaryIds();
             List<Future<Boolean>> futures = new ArrayList<>();
             for (String tenantId : tenantIds) {
                 Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
                 if (tenant != null) {
-                    futures.add(downloadModel(tenant));
+                    futures.add(downloadModel(tenant, modelSummaryIds));
                 }
             }
             for (Future<Boolean> future : futures) {
@@ -136,9 +151,10 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         log.debug("Perform full download!");
         List<Tenant> tenants = tenantEntityMgr.findAll();
 
+        Set<String> modelSummaryIds = getModelSummaryIds();
         List<Future<Boolean>> futures = new ArrayList<>();
         for (Tenant tenant : tenants) {
-            futures.add(downloadModel(tenant));
+            futures.add(downloadModel(tenant, modelSummaryIds));
         }
 
         for (Future<Boolean> future : futures) {
