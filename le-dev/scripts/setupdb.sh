@@ -28,11 +28,13 @@ do
 done
 wait
 
-bash $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
-bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
-bash $WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
-bash $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
-bash $WSHOME/le-dev/scripts/setupdb_oauth2.sh
-bash $WSHOME/le-dev/scripts/setupdb_globalauth.sh
-bash $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
-bash $WSHOME/le-dev/scripts/setupzk.sh
+source $WSHOME/le-dev/scripts/setupdb_parameters.sh
+
+. $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
+. $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+. $WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
+. $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
+. $WSHOME/le-dev/scripts/setupdb_oauth2.sh
+. $WSHOME/le-dev/scripts/setupdb_globalauth.sh
+. $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
+. $WSHOME/le-dev/scripts/setupzk.sh

@@ -19,11 +19,11 @@ fi
 mysql_version=$(echo `mysqld --version` | sed 's/[[:alpha:]|(|[:space:]]//g' | cut -d \- -f 1 | cut -d \) -f 1) || 5.5
 if version_gt ${mysql_version} ${threshold_version}; then
     echo "MySQL version $mysql_version is greater than $threshold_version, replacing DATA by DATA LOCAL"
-    sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_globalauth.sql | sed "s|LOAD DATA INFILE|LOAD DATA LOCAL INFILE|g" | mysql -u root -pwelcome
+    sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_globalauth.sql | sed "s|LOAD DATA INFILE|LOAD DATA LOCAL INFILE|g" | eval $MYSQL_COMMAND
 
 else
     echo "MySQL version $mysql_version"
-    sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_globalauth.sql | mysql -u root -pwelcome
+    sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb_globalauth.sql | eval $MYSQL_COMMAND
 fi
 
 
