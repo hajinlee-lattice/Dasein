@@ -379,8 +379,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
-            logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
-            return (index, diagnostics)
+            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DiscreteValue' if not isnull(x) else None)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])
@@ -455,6 +454,9 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
     Returns:
         index: id of next column in output file
     '''
+
+    (displayname, approvedusage, category, fundamentaltype) = otherMetadata
+    
     groupingResults = groupingDict['groupingResults']
     mi = groupingDict['mi']
     entropyValue = groupingDict['entropyValue']
@@ -464,10 +466,10 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colName
-        datum["displayname"] = otherMetadata[0]
-        datum["approvedusage"] = otherMetadata[1]
-        datum["category"] = otherMetadata[2]
-        datum["fundamentaltype"] = otherMetadata[3]
+        datum["displayname"] = displayname
+        datum["approvedusage"] = approvedusage
+        datum["category"] = category
+        datum["fundamentaltype"] = fundamentaltype
         datum["columnvalue"] = key
         datum["Dtype"] = "STR"
         datum["minV"] = None

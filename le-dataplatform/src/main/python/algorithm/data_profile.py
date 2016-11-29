@@ -375,6 +375,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
             if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
+            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DiscreteValue' if not isnull(x) else None)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
         # Band column
@@ -429,10 +430,6 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
     '''
 
     (displayname, approvedusage, category, fundamentaltype) = otherMetadata
-
-    if len(columnVector.unique()) > 200:
-        approvedusage = 'None'
-        columnVector = columnVector.apply(lambda x: 'LATTICE_GT200_DiscreteValue' if not isnull(x) else None)
 
     mi, componentMi = calculateMutualInfo(columnVector, eventVector)
     entropyValue = entropy(eventVector)
