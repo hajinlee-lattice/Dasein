@@ -6,14 +6,17 @@ import glob
 import re
 import argparse
 
-DROP_PRIMARY_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[PK.+\]"
-DROP_DEFAULT_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[DF.+\]"
-DROP_UNIQUE_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[UQ.+\]"
-ADD_PRIMARY_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[PK.+\]"
-ADD_DEFAULT_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[DF.+\]"
-ADD_UNIQUE_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[UQ.+\]"
+DROP_PRIMARY_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[(PK.+)\]"
+DROP_DEFAULT_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[(DF.+)\]"
+DROP_UNIQUE_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[(UQ.+)\]"
+DROP_FOREIGN_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] DROP CONSTRAINT \[(FK.+)\]"
+ADD_PRIMARY_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[(PK.+)\]"
+ADD_DEFAULT_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[(DF.+)\]"
+ADD_UNIQUE_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[(UQ.+)\]"
+ADD_FOREIGN_KEY_PATTERN = "ALTER TABLE \[dbo\].\[(.+)\] ADD CONSTRAINT \[(FK.+)\]"
 NUMBER = 'number'
 CONTENT = "contents"
+DB_OWNER = "db_owner"
 DELIMITER = "GO\r\n"
 
 
@@ -21,7 +24,8 @@ def main(argv):
     parsedResult = parseArguments()
     inputFileName = parsedResult.inputFile
 
-    keyPatterns = [DROP_PRIMARY_KEY_PATTERN, DROP_DEFAULT_KEY_PATTERN, DROP_UNIQUE_KEY_PATTERN, ADD_PRIMARY_KEY_PATTERN, ADD_DEFAULT_KEY_PATTERN, ADD_UNIQUE_KEY_PATTERN]
+    keyPatterns = [DROP_PRIMARY_KEY_PATTERN, DROP_DEFAULT_KEY_PATTERN, DROP_UNIQUE_KEY_PATTERN, DROP_FOREIGN_KEY_PATTERN, ADD_PRIMARY_KEY_PATTERN, ADD_DEFAULT_KEY_PATTERN, ADD_UNIQUE_KEY_PATTERN, ADD_FOREIGN_KEY_PATTERN]
+    foreignKeyPatterns = [DROP_FOREIGN_KEY_PATTERN, ADD_FOREIGN_KEY_PATTERN]
     keyChanges = {}
 
     outputFileName = 'schemaChangeResult.sql'
@@ -36,10 +40,17 @@ def main(argv):
 
     for eachSplit in splitWithGos:
         firstLine = eachSplit.strip().split("\n")[0]
+        # get rid of the [db_owner] part of the script
+        if DB_OWNER in firstLine:
+            continue
         findMatch = False
         for pattern in keyPatterns:
             matchObj = re.match(pattern, firstLine, flags=0)
             if matchObj:
+                # For foreign keys, the pattern should be exactly the foreign key
+                if pattern in foreignKeyPatterns:
+                    print "foreign key found: ", matchObj.group(2)
+                    pattern = matchObj.group(2)
                 processKeyPattern(matchObj.group(1), pattern, eachSplit, keyChanges)
                 findMatch = True
                 break;
@@ -75,6 +86,11 @@ def processKeyChanges(keyChanges):
             if keyChanges[table][DROP_UNIQUE_KEY_PATTERN][NUMBER] == keyChanges[table][ADD_UNIQUE_KEY_PATTERN][NUMBER]:
                 del keyChanges[table][DROP_UNIQUE_KEY_PATTERN]
                 del keyChanges[table][ADD_UNIQUE_KEY_PATTERN]
+        # Process foreign key for the table. If the number for a foreign key pattern is 2, it means that this foreign key is dropped 
+        # and then added back.
+        for key in keyChanges[table].keys():
+            if keyChanges[table][key][NUMBER] == 2:
+                del keyChanges[table][key]
         if not keyChanges[table]:
             del keyChanges[table]
 
