@@ -64,9 +64,6 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
-    @Value("${microservice.quiet.period.minute}")
-    private int quietPeriodInMinute;
-
     private RestTemplate restTemplate = getRestTemplate();
 
     private static Set<String> monitoredApps = new ConcurrentSkipListSet<>();
