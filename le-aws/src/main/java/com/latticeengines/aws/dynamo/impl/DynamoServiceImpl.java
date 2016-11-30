@@ -42,7 +42,7 @@ public class DynamoServiceImpl implements DynamoService {
         remoteDynamoDb = new DynamoDB(remoteClient);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            localClient = new AmazonDynamoDBClient().withEndpoint(endpoint);
+            localClient = new AmazonDynamoDBClient(awsCredentials).withEndpoint(endpoint);
             localDynamoDb = new DynamoDB(localClient);
         }
         switchToRemote();
