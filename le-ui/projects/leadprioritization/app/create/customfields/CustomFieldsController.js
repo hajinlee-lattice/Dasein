@@ -49,6 +49,7 @@ angular
         switch (selectedOption.id) {
             case 0: // custom user mapping
                 mapping.mappedField = mapping.mappedField || mapping.userField;
+                mapping.mappedToLatticeField = false;
                 break;
             case 1: // map to lattice cloud
                 mapping.mappedField = vm.UnmappedFieldsMap[mapping.mappedField] 
