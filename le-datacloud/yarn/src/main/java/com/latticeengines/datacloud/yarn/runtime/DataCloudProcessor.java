@@ -473,8 +473,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                 return Double.valueOf(String.valueOf(value));
             }
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to parse value " + value + " of attribute " + columnId + " to " + javaClass, e);
+            log.warn("Failed to parse value " + value + " of attribute " + columnId + " to " + javaClass + ". Using null instead", e);
+            return null;
         }
         return value;
     }
