@@ -115,7 +115,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         try (InputStreamReader reader = new InputStreamReader(new FileInputStream(csvFileName))) {
-            CSVFormat format = LECSVFormat.format;
+            CSVFormat format = LECSVFormat.format.withQuote(null);
             try (CSVParser parser = new CSVParser(reader, format)) {
                 Set<String> headers = parser.getHeaderMap().keySet();
                 DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
