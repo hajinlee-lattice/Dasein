@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,7 @@ import com.latticeengines.ulysses.entitymgr.impl.CampaignEntityMgrImpl;
 import com.latticeengines.ulysses.service.CompanyProfileService;
 
 @Component("companyProfileService")
-public class CompanyProfileServiceImpl implements CompanyProfileService, InitializingBean {
+public class CompanyProfileServiceImpl implements CompanyProfileService {
     
     @Autowired
     private FabricMessageService messageService;
@@ -47,7 +48,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService, Initial
         return campaignEntityMgr;
     }
     
-    @Override
+    @PostConstruct
     public void afterPropertiesSet() throws Exception {
         campaignEntityMgr = new CampaignEntityMgrImpl(messageService, dataService);
         campaignEntityMgr.init();

@@ -1,6 +1,7 @@
 package com.latticeengines.ulysses.service.impl;
 
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import com.latticeengines.ulysses.entitymgr.impl.ScoreAndEnrichmentEntityMgrImpl
 import com.latticeengines.ulysses.service.ScoreAndEnrichmentService;
 
 @Component("scoreAndEnrichmentService")
-public class ScoreAndEnrichmentServiceImpl implements ScoreAndEnrichmentService, InitializingBean {
+public class ScoreAndEnrichmentServiceImpl implements ScoreAndEnrichmentService {
 
     @Autowired
     private FabricMessageService messageService;
@@ -24,8 +25,8 @@ public class ScoreAndEnrichmentServiceImpl implements ScoreAndEnrichmentService,
     public ScoreAndEnrichmentServiceImpl() {
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void postConstruct() throws Exception {
         scoreAndEnrichmentEntityMgr = new ScoreAndEnrichmentEntityMgrImpl(messageService, dataService);
         scoreAndEnrichmentEntityMgr.init();
     }
