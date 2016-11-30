@@ -16,6 +16,7 @@ import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -123,6 +124,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
     private SelectedAttrService selectedAttrService;
@@ -325,6 +329,17 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         modelSummaryService.createModelSummary(modelSummary, tenantId);
+    }
+
+    @RequestMapping(value = "/modelsummarydownloadflag/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Insert a model summary download flag")
+    public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}/"
