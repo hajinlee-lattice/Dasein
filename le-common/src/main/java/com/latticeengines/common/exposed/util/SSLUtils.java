@@ -18,7 +18,7 @@ public class SSLUtils {
     private static final Log log = LogFactory.getLog(SSLUtils.class);
     private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
 
-    static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();
+    public static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();
 
     public static void turnOffSSL() {
         if (sslOff.get() == null || !sslOff.get()) {

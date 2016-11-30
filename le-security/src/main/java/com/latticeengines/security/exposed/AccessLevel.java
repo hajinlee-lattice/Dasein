@@ -3,7 +3,9 @@ package com.latticeengines.security.exposed;
 import java.util.Arrays;
 import java.util.List;
 
-public enum AccessLevel {
+import org.springframework.security.core.GrantedAuthority;
+
+public enum AccessLevel implements GrantedAuthority {
     THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
             GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
             GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
@@ -148,6 +150,11 @@ public enum AccessLevel {
 
     public List<GrantedRight> getGrantedRights() {
         return this.grantedRights;
+    }
+
+    @Override
+    public String getAuthority() {
+        return name();
     }
 
     public static AccessLevel maxAccessLevel(List<GrantedRight> hadRights) {

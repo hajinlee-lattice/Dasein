@@ -12,13 +12,20 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.microservice.service.StatusService;
 
@@ -57,7 +64,10 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    @Value("${microservice.quiet.period.minute}")
+    private int quietPeriodInMinute;
+
+    private RestTemplate restTemplate = getRestTemplate();
 
     private static Set<String> monitoredApps = new ConcurrentSkipListSet<>();
 
@@ -98,27 +108,32 @@ public class StatusServiceImpl implements StatusService {
         }
 
         status.put("Overall", overall ? "OK" : "ERROR");
-
         return status;
     }
 
     @Override
     public Map<String, String> appStatus() {
+        Map<String, String> statusMap = new HashMap<>();
         LogManager.getLogger(RestTemplate.class).setLevel(Level.FATAL);
 
-        Map<String, String> statusMap = new HashMap<>();
         for (String app : monitoredApps) {
             String url = healthUrls.get(app);
-            statusMap.put(app, isUp(url) ? "OK" : "ERROR");
+            boolean thisAppIsUp = isUp(url);
+            statusMap.put(app, thisAppIsUp ? "OK" : "ERROR");
+            if (!thisAppIsUp) {
+                break;
+            }
         }
 
-        for (String app : healthUrls.keySet()) {
-            if (!monitoredApps.contains(app)) {
-                String url = healthUrls.get(app);
-                if (isUp(url)) {
-                    log.info("Discovered a new app to monitor: " + app);
-                    statusMap.put(app, "OK");
-                    monitoredApps.add(app);
+        if (!statusMap.containsValue("ERROR")) {
+            for (String app : healthUrls.keySet()) {
+                if (!monitoredApps.contains(app)) {
+                    String url = healthUrls.get(app);
+                    if (isUp(url)) {
+                        log.info("Discovered a new app to monitor: " + app);
+                        statusMap.put(app, "OK");
+                        monitoredApps.add(app);
+                    }
                 }
             }
         }
@@ -142,6 +157,23 @@ public class StatusServiceImpl implements StatusService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private static RestTemplate getRestTemplate() {
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory()) //
+                .register("https", SSLUtils.SSL_BLIND_SOCKET_FACTORY) //
+                .build();
+        PoolingHttpClientConnectionManager pool = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        pool.setDefaultMaxPerRoute(2);
+        pool.setMaxTotal(32);
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory( //
+                HttpClientBuilder.create() //
+                        .setConnectionManager(pool) //
+                        .build());
+        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout(10000);
+        return new RestTemplate(requestFactory);
     }
 
 }
