@@ -1,7 +1,7 @@
 # Test for required env variables
 printf "%s\n" "${HADOOP_HOME:?You must set HADOOP_HOME}"
 printf "%s\n" "${ZOOKEEPER_HOME:?You must set ZOOKEEPER_HOME}"
-
+printf "%s\n" "${DYNAMO_HOME:?You must set DYNAMO_HOME}"
 
 rm -f /tmp/*.out
 rm -Rf $HADOOP_HOME/logs/*.log*
@@ -24,4 +24,5 @@ $HADOOP_HOME/sbin/kms.sh start
 CATALINA_HOME=$OLD_CATALINA_HOME
 
 ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
-
+echo "Starting Dynamo"
+nohup java -Djava.library.path=${DYNAMO_HOME}/DynamoDBLocal_lib -jar ${DYNAMO_HOME}/DynamoDBLocal.jar > ${DYNAMO_HOME}/dynamo.log 2>&1 &

@@ -5,6 +5,7 @@ printf "%s\n" "${WSHOME:?You must set WSHOME}"
 printf "%s\n" "${LE_STACK:?You must set LE_STACK to a unique value among developers}"
 printf "%s\n" "${HADOOP_NAMENODE_DATA_DIR:?You must set HADOOP_NAMENODE_DATA_DIR}"
 printf "%s\n" "${HADOOP_DATANODE_DATA_DIR:?You must set HADOOP_DATANODE_DATA_DIR}"
+printf "%s\n" "${DYNAMO_HOME:?You must set DYNAMO_HOME}"
 
 bash $WSHOME/le-dev/start-cluster.sh || true
 
@@ -52,3 +53,23 @@ chmod 600 $WSHOME/le-dev/sftpdevkey
 scp -i $WSHOME/le-dev/sftpdevkey sftpdev@10.41.1.31:/artifactory/tez-0.8.2.tar.gz $TEZ_TARBALL
 hdfs dfs -put -f $TEZ_TARBALL /apps/tez || true
 rm -rf $TEZ_TARBALL || true
+
+DYNAMO_ARTIFACT_DIR=$WSHOME/le-dev/dynamo/artifacts
+if [ -f $DYNAMO_ARTIFACT_DIR/dynamodb_local_latest.tar.gz ]; then
+    echo "Skipping download of Dynamo"
+else
+    echo "Downloading Dynamo"
+    pushd $DYNAMO_ARTIFACT_DIR
+    wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz
+    popd
+fi
+
+if [ -d $DYNAMO_HOME ]; then
+    echo "Removing old installation directory"
+    rm -rf $DYNAMO_HOME
+fi
+
+mkdir -p $DYNAMO_HOME
+pushd $DYNAMO_HOME
+echo "Installing DynamoDB to $DYNAMO_HOME"
+tar xzf $DYNAMO_ARTIFACT_DIR/dynamodb_local_latest.tar.gz 
