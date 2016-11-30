@@ -55,6 +55,12 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     public Pipeline findByName(String name) {
         return pipelineDao.findByField("NAME", name);
     }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Pipeline getLatestProductionVersion() {
+        return pipelineDao.findByMaxVersion();
+    }
 
     private void setPipelineStepOrder(Pipeline pipeline) {
         List<PipelineToPipelineSteps> steps = pipeline.getPipelineToPipelineSteps();

@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Table(name = "MODELQUALITY_ANALYTIC_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class AnalyticPipeline implements HasName, HasPid {
+public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,6 +73,10 @@ public class AnalyticPipeline implements HasName, HasPid {
     @OnDelete(action=OnDeleteAction.CASCADE)
     private Sampling sampling;
     
+    @JsonProperty("version")
+    @Column(name = "VERSION", nullable = true)
+    private int version;
+    
     @ManyToMany(fetch=FetchType.LAZY, mappedBy = "analyticPipelines", cascade = { CascadeType.MERGE })
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
@@ -113,11 +117,6 @@ public class AnalyticPipeline implements HasName, HasPid {
         return algorithm;
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
     public PropData getPropData() {
         return propData;
     }
@@ -141,5 +140,21 @@ public class AnalyticPipeline implements HasName, HasPid {
     public void setSampling(Sampling sampling) {
         this.sampling = sampling;
     }
+    
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
 
 }

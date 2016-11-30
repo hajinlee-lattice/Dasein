@@ -46,4 +46,9 @@ public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implement
         return dataFlowDao.findByField("NAME", dataFlowName);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFlow getLatestProductionVersion() {
+        return dataFlowDao.findByMaxVersion();
+    }
 }

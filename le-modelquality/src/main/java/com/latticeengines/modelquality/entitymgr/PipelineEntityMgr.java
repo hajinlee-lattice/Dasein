@@ -6,5 +6,6 @@ import com.latticeengines.domain.exposed.modelquality.Pipeline;
 public interface PipelineEntityMgr extends BaseEntityMgr<Pipeline> {
 
     Pipeline findByName(String name);
-
+    
+    Pipeline getLatestProductionVersion();
 }

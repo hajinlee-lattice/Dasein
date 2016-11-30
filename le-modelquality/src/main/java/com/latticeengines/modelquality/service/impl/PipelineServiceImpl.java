@@ -77,6 +77,14 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                     pipelineStepEntityMgr.update(ps);
                 }
             }
+            
+            Pipeline previousLatest = pipelineEntityMgr.getLatestProductionVersion();
+            int versionNo = 1;
+            if(previousLatest != null) {
+                versionNo = previousLatest.getVersion() + 1;
+            }
+            pipeline.setVersion(versionNo);
+            
             pipelineEntityMgr.create(pipeline);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -30,6 +30,8 @@ public class AnalyticPipelineEntityNames {
     @ApiModelProperty(required = true)
     private String sampling;
 
+    private int version;
+    
     public AnalyticPipelineEntityNames() {
     }
 
@@ -40,6 +42,7 @@ public class AnalyticPipelineEntityNames {
         this.propData = ap.getPropData().getName();
         this.dataFlow = ap.getDataFlow().getName();
         this.sampling = ap.getSampling().getName();
+        this.version = ap.getVersion();
     }
 
     public void setName(String name) {
@@ -88,5 +91,13 @@ public class AnalyticPipelineEntityNames {
 
     public String getSampling() {
         return sampling;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

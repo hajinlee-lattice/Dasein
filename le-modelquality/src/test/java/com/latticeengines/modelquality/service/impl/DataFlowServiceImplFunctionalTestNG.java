@@ -19,17 +19,35 @@ public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalT
     @Test(groups = "functional")
     public void createLatestWithValidVersion() {
         try {
-            DataFlowServiceImpl spiedDataFlowService = spy((DataFlowServiceImpl) dataFlowService);
-            doReturn("z/9.9.9-SNAPSHOT").when(spiedDataFlowService).getVersion();
+            DataFlow df = dataFlowEntityMgr.getLatestProductionVersion();
+            int initialVersion = 0;
+            if (df != null) {
+                initialVersion = df.getVersion();
+            }
 
-            DataFlow df = spiedDataFlowService.createLatestProductionDataFlow();
+            DataFlowServiceImpl spiedDataFlowService = spy((DataFlowServiceImpl) dataFlowService);
+            doReturn("z/9.9.8-SNAPSHOT").when(spiedDataFlowService).getVersion();
+
+            df = spiedDataFlowService.createLatestProductionDataFlow();
             Assert.assertNotNull(df);
+            Assert.assertEquals(initialVersion + 1, df.getVersion());
+            Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", df.getName());
+            Assert.assertNotNull(dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
+
+            doReturn("z/9.9.9-SNAPSHOT").when(spiedDataFlowService).getVersion();
+            df = spiedDataFlowService.createLatestProductionDataFlow();
+            Assert.assertNotNull(df);
+            Assert.assertEquals(initialVersion + 2, df.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", df.getName());
             Assert.assertNotNull(dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {
             throw e;
         } finally {
-            DataFlow df = dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
+            DataFlow df = dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT");
+            if (df != null) {
+                dataFlowEntityMgr.delete(df);
+            }
+            df = dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
             if (df != null) {
                 dataFlowEntityMgr.delete(df);
             }

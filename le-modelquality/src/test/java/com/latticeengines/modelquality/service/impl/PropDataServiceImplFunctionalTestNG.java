@@ -21,19 +21,37 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
     @Test(groups = "functional")
     public void createLatestWithValidVersion() {
         try {
-            PropDataServiceImpl spiedPropDataService = spy((PropDataServiceImpl) propDataService);
-            doReturn("z/9.9.9-SNAPSHOT").when(spiedPropDataService).getVersion();
+            PropData pd = propDataEntityMgr.getLatestProductionVersion();
+            int initialVersion = 0;
+            if (pd != null) {
+                initialVersion = pd.getVersion();
+            }
 
-            PropData propdata = spiedPropDataService.createLatestProductionPropData();
-            Assert.assertNotNull(propdata);
-            Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", propdata.getName());
+            PropDataServiceImpl spiedPropDataService = spy((PropDataServiceImpl) propDataService);
+            doReturn("z/9.9.8-SNAPSHOT").when(spiedPropDataService).getVersion();
+
+            pd = spiedPropDataService.createLatestProductionPropData();
+            Assert.assertNotNull(pd);
+            Assert.assertEquals(initialVersion + 1, pd.getVersion());
+            Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", pd.getName());
+            Assert.assertNotNull(propDataEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
+
+            doReturn("z/9.9.9-SNAPSHOT").when(spiedPropDataService).getVersion();
+            pd = spiedPropDataService.createLatestProductionPropData();
+            Assert.assertNotNull(pd);
+            Assert.assertEquals(initialVersion + 2, pd.getVersion());
+            Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", pd.getName());
             Assert.assertNotNull(propDataEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {
             throw e;
         } finally {
-            PropData df = propDataEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
-            if (df != null) {
-                propDataEntityMgr.delete(df);
+            PropData pd = propDataEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT");
+            if (pd != null) {
+                propDataEntityMgr.delete(pd);
+            }
+            pd = propDataEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
+            if (pd != null) {
+                propDataEntityMgr.delete(pd);
             }
         }
     }
@@ -47,7 +65,7 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
         {
             if(pd.getName().contains("DNB"))
             {
-                Assert.assertTrue(pd.getName().contains("2.0.0"));
+                Assert.assertTrue(pd.getName().contains("2.0.1"));
             }
         }
     }

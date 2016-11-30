@@ -47,6 +47,13 @@ public class SamplingServiceImpl extends BaseServiceImpl implements SamplingServ
         def.addSamplingPropertyValue(value);
         sampling.addSamplingPropertyDef(def);
         
+        Sampling previousLatest = samplingEntityMgr.getLatestProductionVersion();
+        int versionNo = 1;
+        if(previousLatest != null) {
+            versionNo = previousLatest.getVersion() + 1;
+        }
+        sampling.setVersion(versionNo);
+        
         samplingEntityMgr.create(sampling);
 
         return sampling;

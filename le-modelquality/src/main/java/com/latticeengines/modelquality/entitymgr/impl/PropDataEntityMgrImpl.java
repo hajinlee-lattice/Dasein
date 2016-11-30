@@ -46,4 +46,9 @@ public class PropDataEntityMgrImpl extends BaseEntityMgrImpl<PropData> implement
         return propDataDao.findByField("NAME", propDataConfigName);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PropData getLatestProductionVersion() {
+        return propDataDao.findByMaxVersion();
+    }
 }

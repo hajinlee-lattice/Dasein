@@ -51,5 +51,10 @@ public class AlgorithmEntityMgrImpl extends BaseEntityMgrImpl<Algorithm> impleme
     public Algorithm findByName(String algorithmName) {
         return algorithmDao.findByField("NAME", algorithmName);
     }
-
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Algorithm getLatestProductionVersion() {
+        return algorithmDao.findByMaxVersion();
+    }
 }

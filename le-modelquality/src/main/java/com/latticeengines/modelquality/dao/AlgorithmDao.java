@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.modelquality.Algorithm;
 
 public interface AlgorithmDao extends BaseDao<Algorithm> {
 
+    Algorithm findByMaxVersion();
 }

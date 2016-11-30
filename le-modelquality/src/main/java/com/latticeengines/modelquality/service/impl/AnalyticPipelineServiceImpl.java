@@ -85,9 +85,10 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
             throw new LedpException(LedpCode.LEDP_35000, new String[] { "Sampling", analyticPipelineEntityNames.getSampling() });
         }
         analyticPipeline.setSampling(sampling);
+        
+        analyticPipeline.setVersion(analyticPipelineEntityNames.getVersion());
 
         analyticPipelineEntityMgr.create(analyticPipeline);
-
         return analyticPipeline;
     }
 
@@ -109,6 +110,13 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
         analyticPipelineEntityNames.setPipeline(modelQualityProxy.createPipelineFromProduction().getName());
         analyticPipelineEntityNames.setPropData(modelQualityProxy.createPropDataConfigFromProduction().getName());
         analyticPipelineEntityNames.setSampling(modelQualityProxy.createSamplingFromProduction().getName());
+
+        AnalyticPipeline previousLatest = analyticPipelineEntityMgr.getLatestProductionVersion();
+        int versionNo = 1;
+        if(previousLatest != null) {
+            versionNo = previousLatest.getVersion() + 1;
+        }
+        analyticPipelineEntityNames.setVersion(versionNo);
 
         analyticPipeline = createAnalyticPipeline(analyticPipelineEntityNames);
 

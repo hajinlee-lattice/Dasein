@@ -77,6 +77,13 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
         def.addAlgorithmPropertyValue(value);
         algorithm.addAlgorithmPropertyDef(def);
 
+        Algorithm previousLatest = algorithmEntityMgr.getLatestProductionVersion();
+        int versionNo = 1;
+        if(previousLatest != null) {
+            versionNo = previousLatest.getVersion() + 1;
+        }
+        algorithm.setVersion(versionNo);
+        
         algorithmEntityMgr.create(algorithm);
         return algorithm;
     }

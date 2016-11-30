@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 @Entity
 @Table(name = "MODELQUALITY_DATAFLOW", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class DataFlow implements HasName, HasPid, Fact, Dimension {
+public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,6 +45,10 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @JsonProperty("transform_dedup_type")
     @Column(name = "TRANSFORM_DEDUP_TYPE", nullable = true)
     private DedupType dedupType;
+    
+    @JsonProperty("version")
+    @Column(name = "VERSION", nullable = true)
+    private int version;
 
     public Boolean getMatch() {
         return match;
@@ -101,5 +105,15 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+    
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

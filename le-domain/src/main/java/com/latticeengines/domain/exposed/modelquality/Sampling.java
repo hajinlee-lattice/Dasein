@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Table(name = "MODELQUALITY_SAMPLING", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Sampling implements HasName, HasPid, Fact, Dimension {
+public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +47,10 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
 
     @Column(name = "PARALLEL_ENABLED", nullable = false)
     private boolean parallelEnabled = false;
+    
+    @JsonProperty("version")
+    @Column(name = "VERSION", nullable = true)
+    private int version;
 
     @JsonProperty("sampling_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sampling")
@@ -94,6 +98,16 @@ public class Sampling implements HasName, HasPid, Fact, Dimension {
     @JsonIgnore
     public String getParallelEnabled() {
         return String.valueOf(parallelEnabled);
+    }
+    
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     @MetricTagGroup

@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Table(name = "MODELQUALITY_ALGORITHM", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Algorithm implements HasName, HasPid, Fact, Dimension {
+public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLatest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +51,9 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension {
 
     @Column(name = "SCRIPT", nullable = false)
     private String script;
+    
+    @Column(name = "VERSION", nullable = true)
+    private int version;
 
     @JsonProperty("algorithm_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "algorithm")
@@ -86,6 +89,16 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+    
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     public List<AlgorithmPropertyDef> getAlgorithmPropertyDefs() {

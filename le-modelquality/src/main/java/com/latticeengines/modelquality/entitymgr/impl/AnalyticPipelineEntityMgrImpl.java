@@ -35,5 +35,10 @@ public class AnalyticPipelineEntityMgrImpl extends BaseEntityMgrImpl<AnalyticPip
     public AnalyticPipeline findByName(String analyticPipelineName) {
         return analyticPipelineDao.findByField("NAME", analyticPipelineName);
     }
-
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public AnalyticPipeline getLatestProductionVersion() {
+        return analyticPipelineDao.findByMaxVersion();
+    }
 }

@@ -14,26 +14,45 @@ import com.latticeengines.modelquality.service.SamplingService;
 public class SamplingServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
 
     @Autowired
-    private SamplingService SamplingService;
+    private SamplingService samplingService;
 
     @Test(groups = "functional")
     public void createLatestWithValidVersion() {
         try {
-            SamplingServiceImpl spiedSamplingService = spy((SamplingServiceImpl) SamplingService);
-            doReturn("z/9.9.9-SNAPSHOT").when(spiedSamplingService).getVersion();
+            Sampling s = samplingEntityMgr.getLatestProductionVersion();
+            int initialVersion = 0;
+            if (s != null) {
+                initialVersion = s.getVersion();
+            }
 
-            Sampling df = spiedSamplingService.createLatestProductionSamplingConfig();
-            Assert.assertNotNull(df);
-            Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", df.getName());
+            SamplingServiceImpl spiedSamplingService = spy((SamplingServiceImpl) samplingService);
+            doReturn("z/9.9.8-SNAPSHOT").when(spiedSamplingService).getVersion();
+
+            s = spiedSamplingService.createLatestProductionSamplingConfig();
+            Assert.assertNotNull(s);
+            Assert.assertEquals(initialVersion + 1, s.getVersion());
+            Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", s.getName());
+            Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
+
+            doReturn("z/9.9.9-SNAPSHOT").when(spiedSamplingService).getVersion();
+            s = spiedSamplingService.createLatestProductionSamplingConfig();
+            Assert.assertNotNull(s);
+            Assert.assertEquals(initialVersion + 2, s.getVersion());
+            Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", s.getName());
             Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {
             throw e;
         } finally {
-            Sampling df = samplingEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
-            if (df != null) {
-                samplingEntityMgr.delete(df);
+            Sampling s = samplingEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT");
+            if (s != null) {
+                samplingEntityMgr.delete(s);
+            }
+            s = samplingEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT");
+            if (s != null) {
+                samplingEntityMgr.delete(s);
             }
         }
     }
+
 
 }

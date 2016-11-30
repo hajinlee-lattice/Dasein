@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Table(name = "MODELQUALITY_PIPELINE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME" }) })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable {
+public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable, SupportsLatest {
 
     private static final long serialVersionUID = 1391478020765752403L;
 
@@ -62,6 +62,10 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
     @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
+    
+    @JsonProperty("version")
+    @Column(name = "VERSION", nullable = true)
+    private int version;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pk.pipeline")
@@ -119,6 +123,16 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable 
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    @Override
+    public int getVersion() {
+        return version;
+    }
+
+    @Override
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     @JsonProperty("pipeline_steps")

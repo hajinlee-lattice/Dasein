@@ -52,5 +52,10 @@ public class SamplingEntityMgrImpl extends BaseEntityMgrImpl<Sampling> implement
     public Sampling findByName(String samplingConfigName) {
         return samplingDao.findByField("NAME", samplingConfigName);
     }
-
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Sampling getLatestProductionVersion() {
+        return samplingDao.findByMaxVersion();
+    }
 }

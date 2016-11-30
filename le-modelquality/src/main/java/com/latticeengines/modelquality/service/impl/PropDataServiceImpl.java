@@ -40,6 +40,12 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
         propData = new PropData();
         propData.setName(propDataName);
         propData.setDataCloudVersion("2.0.1");
+        PropData previousLatest = propDataEntityMgr.getLatestProductionVersion();
+        int versionNo = 1;
+        if(previousLatest != null) {
+            versionNo = previousLatest.getVersion() + 1;
+        }
+        propData.setVersion(versionNo);
         propDataEntityMgr.create(propData);
         return propData;
     }
