@@ -3,6 +3,7 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
@@ -41,6 +42,9 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,
             TransformationGroup transformationGroup) {
@@ -96,7 +100,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         }
         String dataCloudVersion = null;
         if (summary != null) {
-            dataCloudVersion = summary.getDataCloudVersion();
+            dataCloudVersion = columnMetadataProxy.latestVersion(summary.getDataCloudVersion()).getVersion();
         }
 
         return new ScoreWorkflowConfiguration.Builder() //

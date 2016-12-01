@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -43,10 +44,13 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
-    
+
     @Autowired
     private MatchCommandProxy matchCommandProxy;
-    
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
+
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
@@ -54,7 +58,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
         }
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName()) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                sourceFile.getTableName()) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
@@ -69,10 +74,10 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
                 enableLeadEnrichment, enableDebug);
 
-        log.info(String
-                .format("Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
-                        modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
-                        sourceFile.getDisplayName()));
+        log.info(String.format(
+                "Submitting testing data rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
+                modelId, sourceFile.getTableName(), MultiTenantContext.getCustomerSpace(),
+                sourceFile.getDisplayName()));
         ApplicationId applicationId = workflowJobService.submit(configuration);
         sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
@@ -81,7 +86,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     public ImportAndRTSBulkScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
             String sourceDisplayName, boolean enableLeadEnrichment, boolean enableDebug) {
-        
+
         ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
@@ -94,6 +99,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         boolean skipIdMatch = true;
         if (modelSummary != null) {
             dataCloudVersion = modelSummary.getDataCloudVersion();
+            dataCloudVersion = columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
             skipIdMatch = !modelSummary.isMatch();
         }
         skipIdMatch = skipIdMatch || ModelType.PMML.equals(modelSummary.getModelType());
@@ -110,10 +116,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(
-                        "/"
-                                + StringUtils.substringBeforeLast(
-                                        sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv") + "_scored_"
-                                + DateTime.now().getMillis()) //
+                        "/" + StringUtils.substringBeforeLast(sourceFileDisplayName.replaceAll("[^A-Za-z0-9_]", "_"),
+                                ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
                 .enableDebug(enableDebug) //
@@ -122,8 +126,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("AccountMasterColumn") //
                 .columnSelection(Predefined.ID, "1.0.0") //
-                .dataCloudVersion(dataCloudVersion)
-                .skipMatchingStep(skipIdMatch)
+                .dataCloudVersion(dataCloudVersion) //
+                .skipMatchingStep(skipIdMatch) //
                 .matchClientDocument(matchClientDocument) //
                 .build();
     }

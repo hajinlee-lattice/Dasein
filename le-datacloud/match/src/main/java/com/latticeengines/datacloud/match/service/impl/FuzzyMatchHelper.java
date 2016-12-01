@@ -13,13 +13,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -42,6 +45,15 @@ public class FuzzyMatchHelper implements DbHelper {
     @Autowired
     private FuzzyMatchService fuzzyMatchService;
 
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
+
+    @Value("${datacloud.match.fuzzymatch.decision.graph}")
+    private String fuzzyMatchGraph;
+
+    @Value("${datacloud.match.default.decision.graph}")
+    private String defaultGraph;
+
     @Override
     public boolean accept(String version) {
         return MatchUtils.isValidForAccountMasterBasedMatch(version);
@@ -63,8 +75,17 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             try {
+                String decisionGraph = context.getInput().getDecisionGraph();
+                if (StringUtils.isEmpty(decisionGraph)) {
+                    CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
+                    if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
+                        decisionGraph = fuzzyMatchGraph;
+                    } else {
+                        decisionGraph = defaultGraph;
+                    }
+                }
                 fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                        dataCloudVersion, context.getInput().getDecisionGraph(), context.getInput().getLogLevel(),
+                        dataCloudVersion, decisionGraph, context.getInput().getLogLevel(),
                         context.isUseDnBCache());
             } catch (Exception e) {
                 log.error("Failed to run fuzzy match.", e);

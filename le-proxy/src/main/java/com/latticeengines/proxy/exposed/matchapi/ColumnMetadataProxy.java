@@ -55,7 +55,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                         }
                         DataCloudVersion latestVersion = requestLatestVersion(compatibleVersion);
                         log.info("Loaded latest version for compatibleVersion '" + compatibleVersion
-                                + "' into LoadingCache: " + latestVersion == null ? null : latestVersion.getVersion());
+                                + "' into LoadingCache: " + (latestVersion == null ? null : latestVersion.getVersion()));
                         return latestVersion;
                     }
                 });
