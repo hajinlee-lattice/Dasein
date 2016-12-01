@@ -76,7 +76,8 @@ public class FuzzyMatchHelper implements DbHelper {
         if (!fetchOnly) {
             try {
                 String decisionGraph = context.getInput().getDecisionGraph();
-                if (StringUtils.isEmpty(decisionGraph)) {
+                if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null
+                        && context.getInput().getTenant() != null) {
                     CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
                     if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
                         decisionGraph = fuzzyMatchGraph;
@@ -85,8 +86,7 @@ public class FuzzyMatchHelper implements DbHelper {
                     }
                 }
                 fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                        dataCloudVersion, decisionGraph, context.getInput().getLogLevel(),
-                        context.isUseDnBCache());
+                        dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache());
             } catch (Exception e) {
                 log.error("Failed to run fuzzy match.", e);
             }
@@ -160,6 +160,7 @@ public class FuzzyMatchHelper implements DbHelper {
         MatchContext mergedContext = new MatchContext();
         MatchInput dummyInput = new MatchInput();
         dummyInput.setDataCloudVersion(dataCloudVersion);
+        dummyInput.setTenant(matchContextList.get(0).getInput().getTenant());
         mergedContext.setInput(dummyInput);
 
         List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
