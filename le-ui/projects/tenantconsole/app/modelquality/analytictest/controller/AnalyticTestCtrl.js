@@ -47,7 +47,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
         ModelQualityService.CreateDatasetFromTenant(tenantType, tenantId, modelId).then(function (result) {
             $scope.clear();
 
-            return ModelQualityService.GetDatasetByName(result.resultObj.datasetName);
+            return ModelQualityService.GetDatasetByName(result.resultObj.name);
         }).then(function (results) {
             var dataset = results.resultObj;
 
@@ -152,7 +152,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
 
         ModelQualityService.CreateAnalyticTest(testToSave).then(function (result) {
             vm.error = false;
-            vm.message = 'Analytic test ' + testToSave.name + ' created';
+            vm.message = 'Analytic test ' + result.resultObj.name + ' created';
             vm.analyticTests.push(testToSave);
             vm.reset();
         }).catch(function (error) {

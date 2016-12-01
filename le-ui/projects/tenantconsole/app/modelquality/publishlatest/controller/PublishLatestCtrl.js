@@ -1,33 +1,25 @@
 angular.module('app.modelquality.controller.PublishLatestCtrl', [
 ])
-.controller('PublishLatestCtrl', function ($scope, $http, $q) {
+.controller('PublishLatestCtrl', function ($scope, $http, ModelQualityService) {
 
     var vm = this;
     angular.extend(vm, {
         labels: {
-            ANALYTICPIPELINES: 'Publish latest analytic pipeline'
+            NOTE: 'This will publish the latest analytic pipeline and all associated components.<br>All analytic test of type "Selected pipeline" will have production pipelines replaced.<br>All analytic test of type "Production" will have latest analytic pipeline appended.',
+            PUBLISH: 'Publish'
         },
         error: false,
         message: null,
         loading: false
     });
 
-    vm.urls = [];
-    vm.urls.push({
-        url: '/modelquality/analyticpipelines/latest',
-        labelKey: 'ANALYTICPIPELINES'
-    });
-
-    vm.publishLatest = function (event,  url) {
-        event.preventDefault();
-
+    vm.publishLatest = function () {
         vm.loading = true;
         vm.message = null;
 
-        $http.post(url).then(function (result) {
-            vm.error = false;
-            vm.message = 'POST ' + url + ' success';
-        }).catch(function (error) {
+        ModelQualityService.LatestAnalyticPipeline()
+        .then(ModelQualityService.UpdateAnalyticTestProduction())
+        .catch(function (error) {
             vm.error = true;
             vm.message = error.data.errorCode + ': ' + error.data.errorMsg;
         }).finally(function () {

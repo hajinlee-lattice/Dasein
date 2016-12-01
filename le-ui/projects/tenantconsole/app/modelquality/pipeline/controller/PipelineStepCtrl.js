@@ -37,7 +37,7 @@ angular.module("app.modelquality.controller.PipelineStepCtrl", [
     });
 
     vm.createStep = function () {
-        vm.clearMessage();
+        vm.error = false;
 
         vm.message = '';
         vm.message += !vm.stepName ? 'Step name required. ' : '';
@@ -51,29 +51,20 @@ angular.module("app.modelquality.controller.PipelineStepCtrl", [
 
         vm.loading = true;
 
-        var promises = {};
-        if (vm.pythonFile) {
-            promises.python = ModelQualityService.UploadPythonFile(vm.stepName, vm.pythonFile.name, vm.pythonFile);
-        }
-
-        if (vm.metadataFile) {
-            promises.metadata = ModelQualityService.UploadMetadataFile(vm.stepName, vm.metadataFile.name, vm.metadataFile);
-        }
+        var promises = {
+            python: ModelQualityService.UploadPythonFile(vm.stepName, vm.pythonFile.name, vm.pythonFile),
+            metadata: ModelQualityService.UploadMetadataFile(vm.stepName, vm.metadataFile.name, vm.metadataFile)
+        };
 
         $q.all(promises).then(function (results) {
-            // because $q.all only catches first error, we want to catch all errors
-            // ModelQualityService.UploadStepFile will resolve errors
-            if (results.python) {
-                vm.message += results.python.errMsg ? results.python.errMsg.errMsg : '';
-            }
-
-            if (results.metadata) {
-                vm.message += results.metadata.errMsg ? results.metadata.errMsg.errMsg : '';
-            }
-
-            var errorMsg = _.reduce(results, function (result, value, key) {
-                return result += value.errMsg ? value.errMsg.errorCode + ': ' + value.errMsg.errorMsg + ' ' : '';
-            }, '');
+            // because $q.all only catches first error, we want to catch all errors, ModelQualityService.UploadStepFile will resolve errors
+            var errorMsg = _.chain(results)
+                .map(function (value, key) {
+                    return value.errMsg ? value.errMsg.errorCode + ': ' + value.errMsg.errorMsg + ' ' : '';
+                }).uniq()
+                .filter(function (value) {
+                    return !!value;
+                }).value().join(',');
 
             if (errorMsg) {
                 vm.error = true;
@@ -98,16 +89,8 @@ angular.module("app.modelquality.controller.PipelineStepCtrl", [
                 }
             }
 
-        }).catch(function (error) {
-            vm.error = true;
-            if (error && error.errMsg) {
-                vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
-            } else {
-                vm.message = 'Unexpected error has occured. Please try again.';
-            }
         }).finally(function () {
             vm.loading = false;
-            vm.clearMessage();
         });
     };
 
@@ -128,8 +111,4 @@ angular.module("app.modelquality.controller.PipelineStepCtrl", [
         vm.metadataFile = null;
     };
 
-    vm.clearMessage = function () {
-        vm.error = false;
-        vm.message = null;
-    };
 });

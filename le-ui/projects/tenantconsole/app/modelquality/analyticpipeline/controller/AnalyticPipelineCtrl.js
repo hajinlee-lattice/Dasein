@@ -183,7 +183,7 @@ angular.module('app.modelquality.controller.AnalyticPipelineCtrl', [
                 vm.analyticPipelines.push(angular.copy(vm.analyticPipeline));
 
                 vm.reset();
-                vm.message = 'Analytic pipeline ' + result.resultObj.pipelineName + ' has been created.';
+                vm.message = 'Analytic pipeline ' + result.resultObj.name + ' has been created.';
             });
     }
 

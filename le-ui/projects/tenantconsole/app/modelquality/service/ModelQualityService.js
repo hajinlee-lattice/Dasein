@@ -1,32 +1,11 @@
-var app = angular.module("app.modelquality.service.ModelQualityService", [
-]);
-
-app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility){
+angular.module("app.modelquality.service.ModelQualityService", [
+])
+.service('ModelQualityService', function($q, $http, $timeout, SessionUtility){
 
     // /modelquality/analyticpipelines
     this.GetAnalyticPipelines = function(analyticPipelineName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/analyticpipelines/' + (analyticPipelineName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+        var url = '/analyticpipelines/' + (analyticPipelineName || '');
+        return this.Get(url);
     };
 
     this.GetAnalyticPipelineByName = function (analyticPipelineName) {
@@ -38,69 +17,18 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
     };
 
     this.CreateAnalyticPipeline = function (analyticPipeline) {
-        var defer = $q.defer();
+        var url = '/analyticpipelines/';
+        return this.Post(url, analyticPipeline, null);
+    };
 
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/analyticpipelines/',
-            data: analyticPipeline,
-            transformResponse: [function (data, headers, status) {
-                // why is this api returning a string!
-                try {
-                    return JSON.parse(data);
-                } catch (e) {
-                    if (status === 200) {
-                        return {
-                            analyticPipelineName: data
-                        };
-                    } else {
-                        return data;
-                    }
-                }
-            }]
-        }).success(function(data) {
-            result.success = true;
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+    this.LatestAnalyticPipeline = function () {
+        return this.Post('/analyticpipelines/latest', null, null);
     };
 
     // /modelquality/analytictests
     this.GetAnalyticTests = function(analyticTestName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/analytictests/' + (analyticTestName || ''),
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+        var url = '/analytictests/' + (analyticTestName || '');
+        return this.Get(url);
     };
 
     this.GetAllAnalyticTests = function () {
@@ -112,93 +40,24 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
     };
 
     this.CreateAnalyticTest = function (analyticTest) {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/analytictests/',
-            data: analyticTest,
-            transformResponse: [function (data, headers, status) {
-                // why is this api returning a string!
-                try {
-                    return JSON.parse(data);
-                } catch (e) {
-                    if (status === 200) {
-                        return {
-                            analyticTestName: data
-                        };
-                    } else {
-                        return data;
-                    }
-                }
-            }]
-        }).success(function(data) {
-            result.success = true;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+        var url = '/analytictests/';
+        return this.Post(url, analyticTest, null);
     };
 
     this.ExecuteAnalyticTest = function (analyticTestName) {
-        var defer = $q.defer();
+        var url = '/analytictests/execute/' + analyticTestName;
+        return this.Put(url, null, null);
+    };
 
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'PUT',
-            url: '/modelquality/analytictests/execute/' + (analyticTestName || ''),
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+    this.UpdateAnalyticTestProduction = function () {
+        var url = '/analytictests/updateproduction';
+        return this.Put(url, null, null);
     };
 
     // /modelquality/pipelines
     this.GetPipelines = function (pipelineName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/pipelines/' + (pipelineName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+        var url = '/pipelines/' + (pipelineName || '');
+        return this.Get(url);
     };
 
     this.GetAllPipelines = function () {
@@ -210,54 +69,14 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
     };
 
     this.CreatePipeline = function (pipelineName, pipelineDescription, pipelineSteps) {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
+        var url = '/pipelines/';
+        var data = pipelineSteps;
+        var params = {
+            pipelineName: pipelineName,
+            pipelineDescription: pipelineDescription
         };
 
-        var params = {};
-        params.pipelineName = pipelineName;
-        if (pipelineDescription) {
-            params.pipelineDescription = pipelineDescription;
-        }
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/pipelines/',
-            data: pipelineSteps,
-            params: params,
-            transformResponse: [function (data, headers, status) {
-                // why is this api returning a string!
-                try {
-                    return JSON.parse(data);
-                } catch (e) {
-                    if (status === 200) {
-                        return {
-                            pipelineName: data
-                        };
-                    } else {
-                        return data;
-                    }
-                }
-            }]
-        }).success(function(data) {
-
-            result.success = true;
-            result.resultObj = data;
-            defer.resolve(result);
-
-        }).error(function(err, status){
-
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-
-        });
-
-        return defer.promise;
+        return this.Post(url, data, params);
     };
 
     // /modelquality/pipelines/pipelinestepfiles/
@@ -302,152 +121,18 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return defer.promise;
     };
 
-    this.UploadMetadataFile = this.UploadStepFile.bind(this, 'metadata');
-
-    this.UploadPythonFile = this.UploadStepFile.bind(this, 'python');
-
-    // /modelquality/algorithms
-    this.GetAlgorithms = function(algorithmName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/algorithms/' + (algorithmName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+    this.UploadMetadataFile = function (stepName, fileName, file) {
+        return this.UploadStepFile('metadata', stepName, fileName, file);
     };
 
-    this.GetAllAlgorithms = function () {
-        return this.GetAlgorithms();
-    };
-
-    this.GetAlgorithmByName = function (algorithmName) {
-        return this.GetAlgorithms(algorithmName);
-    };
-
-    this.LatestAlgorithm = function () {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/algorithms/latest'
-        }).success(function(data) {
-            result.success = true;
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
-    // /modelquality/dataflows
-    this.GetDataflows = function(dataflowName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/dataflows/' + (dataflowName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
-    this.GetAllDataflows = function () {
-        return this.GetDataflows();
-    };
-
-    this.GetDataflowByName = function (dataflowName) {
-        return this.GetDataflows(dataflowName);
-    };
-
-    this.LatestDataflow = function () {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/dataflows/latest'
-        }).success(function(data) {
-            result.success = true;
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+    this.UploadPythonFile = function (stepName, fileName, file) {
+        return this.UploadStepFile('python', stepName, fileName, file);
     };
 
     // /modelquality/datasets/
     this.GetDatasets = function (datasetName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/datasets/' + (datasetName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
+        var url = '/datasets/' + (datasetName || '');
+        return this.Get(url);
     };
 
     this.GetAllDatasets = function () {
@@ -459,7 +144,60 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
     };
 
     this.CreateDatasetFromTenant = function (tenantType, tenantId, sourceId) {
+        var url = '/datasets/create';
+        var params = {
+            tenantType: tenantType,
+            tenantId: tenantId,
+            sourceId: sourceId
+        };
+        return this.Post(url, null, params);
+    };
 
+    // /modelquality/propdataconfigs/
+    this.GetPropdataConfigs = function (propdataConfigName) {
+        var url = '/propdataconfigs/' + (propdataConfigName || '');
+        return this.Get(url);
+    };
+
+    this.GetAllPropdataConfigs = function () {
+        return this.GetPropdataConfigs();
+    };
+
+    this.GetPropdataConfigByName = function (propdataConfigName) {
+        return this.GetPropdataConfigs(propdataConfigName);
+    };
+
+    this.PropDataLatestForUI = function () {
+        var url = '/propdataconfigs/latestForUI';
+        return this.Post(url, null, null);
+    };
+
+    this.Get = function (url) {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/modelquality'+ url
+        }).success(function(data){
+            result.resultObj = data;
+            defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+            result.success = false;
+            result.errMsg = err;
+            defer.reject(result);
+        });
+
+        return defer.promise;
+    };
+
+    this.Post = function (url, data, params) {
         var defer = $q.defer();
 
         var result = {
@@ -468,15 +206,10 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
             errMsg: null
         };
 
-        var params = {
-            tenantType: tenantType,
-            tenantId: tenantId,
-            sourceId: sourceId
-        };
-
         $http({
             method: 'POST',
-            url: '/modelquality/datasets/create',
+            url: '/modelquality' + url,
+            data: data,
             params: params,
             transformResponse: [function (data, headers, status) {
                 // why is this api returning a string!
@@ -485,7 +218,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
                 } catch (e) {
                     if (status === 200) {
                         return {
-                            datasetName: data
+                            name: data
                         };
                     } else {
                         return data;
@@ -505,8 +238,7 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         return defer.promise;
     };
 
-    // /modelquality/propdataconfigs/
-    this.GetPropdataConfigs = function (propdataConfigName) {
+    this.Put = function (url, data, params) {
         var defer = $q.defer();
 
         var result = {
@@ -516,106 +248,16 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         };
 
         $http({
-            method: 'GET',
-            url: '/modelquality/propdataconfigs/' + (propdataConfigName || '')
+            method: 'PUT',
+            url: '/modelquality' + url,
+            data: data,
+            params: params
         }).success(function(data){
             result.resultObj = data;
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
             result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
-    this.GetAllPropdataConfigs = function () {
-        return this.GetPropdataConfigs();
-    };
-
-    this.GetPropdataConfigByName = function (propdataConfigName) {
-        return this.GetPropdataConfigs(propdataConfigName);
-    };
-
-    this.PropDataLatestForUI = function () {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/propdataconfigs/latestForUI'
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
-    // /modelquality/samplingconfigs/
-    this.GetSamplingConfigs = function(samplingConfigName) {
-        var defer = $q.defer();
-
-        var result = {
-            success: true,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'GET',
-            url: '/modelquality/samplingconfigs/' + (samplingConfigName || '')
-        }).success(function(data){
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
-            result.success = false;
-            result.errMsg = err;
-            defer.reject(result);
-        });
-
-        return defer.promise;
-    };
-
-    this.GetAllSamplingConfigs = function () {
-        return this.GetSamplingConfigs();
-    };
-
-    this.GetSamplingConfigByName = function (samplingConfigName) {
-        return this.GetSamplingConfigs(samplingConfigName);
-    };
-
-    this.LatestSamplingConfig = function () {
-        var defer = $q.defer();
-
-        var result = {
-            success: false,
-            resultObj: [],
-            errMsg: null
-        };
-
-        $http({
-            method: 'POST',
-            url: '/modelquality/samplingconfigs/latest'
-        }).success(function(data) {
-            result.success = true;
-            result.resultObj = data;
-            defer.resolve(result);
-        }).error(function(err, status){
-            SessionUtility.handleAJAXError(err, status);
             result.errMsg = err;
             defer.reject(result);
         });
@@ -628,11 +270,13 @@ app.service('ModelQualityService', function($q, $http, $timeout, SessionUtility)
         types.push({name: 'Production', value: 'Production'});
         types.push({name: 'Selected Pipelines', value: 'SelectedPipelines'});
 
-        return {
+        var result = {
             success: true,
             resultObj: types,
             errMsg: null
         };
+
+        return result;
     };
 
 });
