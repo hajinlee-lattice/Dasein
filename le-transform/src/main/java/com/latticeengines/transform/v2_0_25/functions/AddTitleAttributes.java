@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
@@ -16,6 +18,8 @@ import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 public class AddTitleAttributes implements RealTimeTransform {
 
     private static final long serialVersionUID = 507637584133936112L;
+
+    private static final Log log = LogFactory.getLog(AddTitleAttributes.class);
 
     protected int maxTitleLen;
     protected List<String> missingValues = new ArrayList<>();
@@ -57,12 +61,18 @@ public class AddTitleAttributes implements RealTimeTransform {
             String contents = FileUtils.readFileToString(new File(filename));
             Map<String, Object> titleAttributeData = JsonUtils.deserialize(contents, Map.class, true);
             for (Map.Entry<String, Object> entry : titleAttributeData.entrySet()) {
-                if (entry.getKey().equals("maxTitleLen"))
+                if (entry.getKey().equals("maxTitleLen")) {
                     maxTitleLen = (int) entry.getValue();
-                else if (entry.getKey().equals("missingValues"))
+                    log.info(String.format("Loaded maxTitleLen = %d", maxTitleLen));
+                } else if (entry.getKey().equals("missingValues")) {
                     missingValues = (List) entry.getValue();
-                else
+                    for (String value : missingValues) {
+                        log.info(String.format("Loaded Missing Value: %s", value));
+                    }
+                } else {
                     imputationMap.put(entry.getKey(), (Double) entry.getValue());
+                    log.info(String.format("Loaded Imputation Value %f for %s", entry.getValue(), entry.getKey()));
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(

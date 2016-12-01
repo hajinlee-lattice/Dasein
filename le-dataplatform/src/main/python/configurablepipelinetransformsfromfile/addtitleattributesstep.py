@@ -23,9 +23,9 @@ class GetStrLength(TitleTrfFunction):
 
     def execute(self, inputStr):
         if inputStr is None:
-            return None        
+            return None
         try:
-            return float(min(len(inputStr), self.maxTitleLen))
+            return float(min(len(inputStr.decode('utf-8')), self.maxTitleLen))
         except TypeError:
             return 0.0
 
@@ -93,8 +93,8 @@ class AddTitleAttributesStep(PipelineStep):
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd, True)
                     else:
                         imputedValue, dsColVal = self.__fullValueMap(eventList, dsColVal, nullBooleanInd)
-                    self.dsTitleImputation[featureName] = imputedValue
-                    logger.info('Title column "{0}" has imputation value {1}'.format(featureName, imputedValue))
+                    self.dsTitleImputation[featureName] = round(imputedValue, 2)
+                    logger.info('Title column "{0}" has imputation value {1} (rounded to {2})'.format(featureName, imputedValue, self.dsTitleImputation[featureName]))
             else:
                 try:
                     dsColVal = [x[0] if not x[1] else self.dsTitleImputation[featureName] for x in izip(dsColVal, nullBooleanInd)]
@@ -140,10 +140,10 @@ class AddTitleAttributesStep(PipelineStep):
     def __ismissing(self, x):
         return pd.isnull(x) or (x in self.missingValues)
 
-    def __getOutputColTypes(self, featName):
-        if featName in ['DS_TitleLength', 'DS_Title_Level']:
+    def __getOutputColTypes(self, featureName):
+        if featureName in ['DS_TitleLength', 'DS_Title_Level']:
             return 'FLOAT'
-        elif featName in ['DS_Title_Channel', 'DS_Title_Function', 'DS_Title_Level_Categorical', 'DS_Title_Role', 'DS_TItle_Scope']:
+        elif featureName in ['DS_Title_Channel', 'DS_Title_Function', 'DS_Title_Level_Categorical', 'DS_Title_Role', 'DS_TItle_Scope']:
             return 'STRING'
         else:
             return 'BOOLEAN'
