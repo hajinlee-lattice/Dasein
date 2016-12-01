@@ -17,7 +17,7 @@ public class StringUtils {
 
     public static String getStandardString(String str) {
         try {
-            if (str == null) {
+            if (org.apache.commons.lang.StringUtils.isEmpty(str)) {
                 return null;
             }
             Character[] removed = { '~', '@', '#', '$', '%', '^', '*', '+', '=', '\'',

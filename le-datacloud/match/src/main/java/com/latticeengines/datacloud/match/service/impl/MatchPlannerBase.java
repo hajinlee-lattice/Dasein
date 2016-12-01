@@ -244,11 +244,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private void parseRecordForNameLocation(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
             Set<NameLocation> nameLocationSet, InternalOutputRecord record) {
-        if (keyPositionMap.containsKey(MatchKey.Name) && keyPositionMap.containsKey(MatchKey.State)
-                && keyPositionMap.containsKey(MatchKey.Country)) {
+        if (keyPositionMap.containsKey(MatchKey.Name)) {
             List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
-            List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
-            List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
 
             try {
                 String originalName = null;
@@ -258,9 +255,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 if (StringUtils.isNotEmpty(originalName)) {
                     String cleanName = com.latticeengines.common.exposed.util.StringUtils
                             .getStandardString(originalName);
+
                     String originalCountry = null;
-                    for (Integer countryPos : countryPosList) {
-                        originalCountry = (String) inputRecord.get(countryPos);
+                    if (keyPositionMap.containsKey(MatchKey.Country)) {
+                        List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
+                        for (Integer countryPos : countryPosList) {
+                            originalCountry = (String) inputRecord.get(countryPos);
+                        }
                     }
                     if (StringUtils.isEmpty(originalCountry)) {
                         originalCountry = LocationUtils.USA;
@@ -269,26 +270,29 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     String countryCode = countryCodeService.getCountryCode(cleanCountry);
 
                     String originalState = null;
-                    for (Integer statePos : statePosList) {
-                        originalState = (String) inputRecord.get(statePos);
+                    if (keyPositionMap.containsKey(MatchKey.State)) {
+                        List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
+                        for (Integer statePos : statePosList) {
+                            originalState = (String) inputRecord.get(statePos);
+                        }
                     }
                     String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
+
+                    String originalCity = null;
+                    if (keyPositionMap.containsKey(MatchKey.City)) {
+                        for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
+                            originalCity = (String) inputRecord.get(cityPos);
+                        }
+                    }
+                    String cleanCity = com.latticeengines.common.exposed.util.StringUtils
+                            .getStandardString(originalCity);
 
                     NameLocation nameLocation = new NameLocation();
                     nameLocation.setName(cleanName);
                     nameLocation.setState(cleanState);
                     nameLocation.setCountry(cleanCountry);
                     nameLocation.setCountryCode(countryCode);
-
-                    if (keyPositionMap.containsKey(MatchKey.City)) {
-                        String originalCity = null;
-                        for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
-                            originalCity = (String) inputRecord.get(cityPos);
-                        }
-                        String cleanCity = com.latticeengines.common.exposed.util.StringUtils
-                                .getStandardString(originalCity);
-                        nameLocation.setCity(cleanCity);
-                    }
+                    nameLocation.setCity(cleanCity);
 
                     record.setParsedNameLocation(nameLocation);
                     nameLocationSet.add(nameLocation);

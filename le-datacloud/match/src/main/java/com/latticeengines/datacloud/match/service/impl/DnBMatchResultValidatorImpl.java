@@ -36,6 +36,10 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
                 && matchGrade.getRawCode().charAt(4) == 'A') {
             return false;
         }
+        if (matchGrade.getRawCode().charAt(0) == 'A' && matchGrade.getRawCode().charAt(3) == 'A'
+                && matchGrade.getRawCode().charAt(4) == 'Z') {
+            return false;
+        }
         return true;
     }
 }
