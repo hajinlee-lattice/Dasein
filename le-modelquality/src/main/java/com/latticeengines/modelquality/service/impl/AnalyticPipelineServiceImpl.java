@@ -18,8 +18,12 @@ import com.latticeengines.modelquality.entitymgr.DataFlowEntityMgr;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.entitymgr.PropDataEntityMgr;
 import com.latticeengines.modelquality.entitymgr.SamplingEntityMgr;
+import com.latticeengines.modelquality.service.AlgorithmService;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
-import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
+import com.latticeengines.modelquality.service.DataFlowService;
+import com.latticeengines.modelquality.service.PipelineService;
+import com.latticeengines.modelquality.service.PropDataService;
+import com.latticeengines.modelquality.service.SamplingService;
 
 @Component("analyticPipelineService")
 public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements AnalyticPipelineService {
@@ -31,21 +35,33 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
     private PipelineEntityMgr pipelineEntityMgr;
 
     @Autowired
+    private PipelineService pipelineService;
+    
+    @Autowired
     private AlgorithmEntityMgr algorithmEntityMgr;
+    
+    @Autowired
+    private AlgorithmService algorithmService;
 
     @Autowired
     private PropDataEntityMgr propdataEntityMgr;
 
     @Autowired
+    private PropDataService propdataService;
+
+    @Autowired
     private DataFlowEntityMgr dataflowEntityMgr;
+
+    @Autowired
+    private DataFlowService dataflowService;
 
     @Autowired
     private SamplingEntityMgr samplingEntityMgr;
 
     @Autowired
-    private ModelQualityProxy modelQualityProxy;
+    private SamplingService samplingService;
 
-    private final String production = "Production";
+    private final String production = "PRODUCTION";
 
     @Override
     public AnalyticPipeline createAnalyticPipeline(AnalyticPipelineEntityNames analyticPipelineEntityNames) {
@@ -105,11 +121,11 @@ public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements Anal
         
         AnalyticPipelineEntityNames analyticPipelineEntityNames = new AnalyticPipelineEntityNames();
         analyticPipelineEntityNames.setName(analyticPipelineName);
-        analyticPipelineEntityNames.setAlgorithm(modelQualityProxy.createAlgorithmFromProduction().getName());
-        analyticPipelineEntityNames.setDataFlow(modelQualityProxy.createDataFlowFromProduction().getName());
-        analyticPipelineEntityNames.setPipeline(modelQualityProxy.createPipelineFromProduction().getName());
-        analyticPipelineEntityNames.setPropData(modelQualityProxy.createPropDataConfigFromProduction().getName());
-        analyticPipelineEntityNames.setSampling(modelQualityProxy.createSamplingFromProduction().getName());
+        analyticPipelineEntityNames.setAlgorithm(algorithmService.createLatestProductionAlgorithm().getName());
+        analyticPipelineEntityNames.setDataFlow(dataflowService.createLatestProductionDataFlow().getName());
+        analyticPipelineEntityNames.setPipeline(pipelineService.createLatestProductionPipeline().getName());
+        analyticPipelineEntityNames.setPropData(propdataService.createLatestProductionPropData().getName());
+        analyticPipelineEntityNames.setSampling(samplingService.createLatestProductionSamplingConfig().getName());
 
         AnalyticPipeline previousLatest = analyticPipelineEntityMgr.getLatestProductionVersion();
         int versionNo = 1;

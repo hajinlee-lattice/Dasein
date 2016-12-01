@@ -63,9 +63,9 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
     
-    @JsonProperty("version")
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
+    private Integer version;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "pk.pipeline")
@@ -126,12 +126,12 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     }
     
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

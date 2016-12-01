@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.modelquality;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -30,7 +31,8 @@ public class AnalyticPipelineEntityNames {
     @ApiModelProperty(required = true)
     private String sampling;
 
-    private int version;
+    @JsonIgnore
+    private Integer version;
     
     public AnalyticPipelineEntityNames() {
     }
@@ -93,11 +95,11 @@ public class AnalyticPipelineEntityNames {
         return sampling;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 }

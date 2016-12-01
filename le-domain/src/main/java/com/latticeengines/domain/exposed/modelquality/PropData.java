@@ -49,9 +49,9 @@ public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLates
     @Column(name = "EXCLUDE_PUBLIC_DOMAINS", nullable = true)
     private boolean excludePublicDomains;
 
-    @JsonProperty("version")
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
+    private Integer version;
     
     @Override
     @MetricTag(tag = "PropDataConfigName")
@@ -123,12 +123,12 @@ public class PropData implements HasName, HasPid, Fact, Dimension, SupportsLates
     }
     
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

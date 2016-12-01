@@ -46,38 +46,38 @@ public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
     @JsonProperty("pipeline")
     @JoinColumn(name = "FK_PIPELINE_ID", nullable = false)
     @ManyToOne
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Pipeline pipeline;
 
     @JsonProperty("algorithm")
     @JoinColumn(name = "FK_ALGORITHM_ID", nullable = false)
     @ManyToOne
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Algorithm algorithm;
 
     @JsonProperty("prop_data")
     @JoinColumn(name = "FK_PROPDATA_ID", nullable = false)
     @ManyToOne
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private PropData propData;
 
     @JsonProperty("data_flow")
     @JoinColumn(name = "FK_DATAFLOW_ID", nullable = false)
     @ManyToOne
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private DataFlow dataFlow;
 
     @JsonProperty("sampling")
     @JoinColumn(name = "FK_SAMPLING_ID", nullable = false)
     @ManyToOne
-    @OnDelete(action=OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Sampling sampling;
-    
-    @JsonProperty("version")
+
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
-    
-    @ManyToMany(fetch=FetchType.LAZY, mappedBy = "analyticPipelines", cascade = { CascadeType.MERGE })
+    private Integer version;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "analyticPipelines", cascade = { CascadeType.MERGE })
     @JsonIgnore
     private List<AnalyticTest> analyticTests = new ArrayList<>();
 
@@ -140,14 +140,14 @@ public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
     public void setSampling(Sampling sampling) {
         this.sampling = sampling;
     }
-    
+
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 
@@ -155,6 +155,4 @@ public class AnalyticPipeline implements HasName, HasPid, SupportsLatest {
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
-
 }

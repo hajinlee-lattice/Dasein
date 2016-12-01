@@ -15,4 +15,6 @@ public interface AnalyticTestService {
     List<AnalyticTestEntityNames> getAll();
 
     List<ModelRun> executeByName(String name);
+
+    List<AnalyticTest> updateProductionAnalyticPipeline();
 }

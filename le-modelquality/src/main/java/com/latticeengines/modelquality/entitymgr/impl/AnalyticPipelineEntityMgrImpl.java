@@ -41,4 +41,10 @@ public class AnalyticPipelineEntityMgrImpl extends BaseEntityMgrImpl<AnalyticPip
     public AnalyticPipeline getLatestProductionVersion() {
         return analyticPipelineDao.findByMaxVersion();
     }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public AnalyticPipeline findByVersion(Integer version) {
+        return analyticPipelineDao.findByField("VERSION", version);
+    }
 }

@@ -46,9 +46,9 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLates
     @Column(name = "TRANSFORM_DEDUP_TYPE", nullable = true)
     private DedupType dedupType;
     
-    @JsonProperty("version")
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
+    private Integer version;
 
     public Boolean getMatch() {
         return match;
@@ -108,12 +108,12 @@ public class DataFlow implements HasName, HasPid, Fact, Dimension, SupportsLates
     }
     
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 }

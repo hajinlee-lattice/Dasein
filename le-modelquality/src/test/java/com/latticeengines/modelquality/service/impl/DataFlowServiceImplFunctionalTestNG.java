@@ -20,7 +20,7 @@ public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalT
     public void createLatestWithValidVersion() {
         try {
             DataFlow df = dataFlowEntityMgr.getLatestProductionVersion();
-            int initialVersion = 0;
+            Integer initialVersion = 0;
             if (df != null) {
                 initialVersion = df.getVersion();
             }
@@ -30,14 +30,14 @@ public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalT
 
             df = spiedDataFlowService.createLatestProductionDataFlow();
             Assert.assertNotNull(df);
-            Assert.assertEquals(initialVersion + 1, df.getVersion());
+            Assert.assertEquals(new Integer(initialVersion + 1), df.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", df.getName());
             Assert.assertNotNull(dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
             doReturn("z/9.9.9-SNAPSHOT").when(spiedDataFlowService).getVersion();
             df = spiedDataFlowService.createLatestProductionDataFlow();
             Assert.assertNotNull(df);
-            Assert.assertEquals(initialVersion + 2, df.getVersion());
+            Assert.assertEquals(new Integer(initialVersion + 2), df.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", df.getName());
             Assert.assertNotNull(dataFlowEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {

@@ -48,9 +48,9 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
     @Column(name = "PARALLEL_ENABLED", nullable = false)
     private boolean parallelEnabled = false;
     
-    @JsonProperty("version")
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
+    private Integer version;
 
     @JsonProperty("sampling_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "sampling")
@@ -101,12 +101,12 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
     }
     
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

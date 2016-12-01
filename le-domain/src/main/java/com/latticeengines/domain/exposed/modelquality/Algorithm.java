@@ -52,8 +52,9 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
     @Column(name = "SCRIPT", nullable = false)
     private String script;
     
+    @JsonIgnore
     @Column(name = "VERSION", nullable = true)
-    private int version;
+    private Integer version;
 
     @JsonProperty("algorithm_property_defs")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "algorithm")
@@ -92,12 +93,12 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
     }
     
     @Override
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 

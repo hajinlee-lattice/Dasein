@@ -60,6 +60,14 @@ public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, 
     }
 
     @Override
+    @RequestMapping(value = "/updateproduction", method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Update the production analytic pipeline in existing analytic tests")
+    public List<AnalyticTest> updateProductionAnalyticPipeline() {
+        return analyticTestService.updateProductionAnalyticPipeline();
+    }
+
+    @Override
     public AnalyticTestEntityNames getByName(String name) {
         return analyticTestService.getByName(name);
     }

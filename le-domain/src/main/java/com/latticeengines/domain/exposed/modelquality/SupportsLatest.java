@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.modelquality;
 
 public interface SupportsLatest {
 
-    int getVersion();
+    Integer getVersion();
 
-    void setVersion(int version);
+    void setVersion(Integer version);
 }

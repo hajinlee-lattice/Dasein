@@ -22,7 +22,7 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
     public void createLatestWithValidVersion() {
         try {
             PropData pd = propDataEntityMgr.getLatestProductionVersion();
-            int initialVersion = 0;
+            Integer initialVersion = 0;
             if (pd != null) {
                 initialVersion = pd.getVersion();
             }
@@ -32,14 +32,14 @@ public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalT
 
             pd = spiedPropDataService.createLatestProductionPropData();
             Assert.assertNotNull(pd);
-            Assert.assertEquals(initialVersion + 1, pd.getVersion());
+            Assert.assertEquals(new Integer(initialVersion + 1), pd.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", pd.getName());
             Assert.assertNotNull(propDataEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
             doReturn("z/9.9.9-SNAPSHOT").when(spiedPropDataService).getVersion();
             pd = spiedPropDataService.createLatestProductionPropData();
             Assert.assertNotNull(pd);
-            Assert.assertEquals(initialVersion + 2, pd.getVersion());
+            Assert.assertEquals(new Integer(initialVersion + 2), pd.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", pd.getName());
             Assert.assertNotNull(propDataEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {

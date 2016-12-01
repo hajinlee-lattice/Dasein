@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipelineEntityNames;
+import com.latticeengines.domain.exposed.modelquality.AnalyticTest;
 import com.latticeengines.domain.exposed.modelquality.AnalyticTestEntityNames;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.domain.exposed.modelquality.DataSet;
@@ -313,5 +314,12 @@ public class ModelQualityProxy extends MicroserviceRestApiProxy
     public List<ModelRun> executeAnalyticTestByName(String analyticTestName) {
         String url = constructUrl("/analytictests/execute/{analyticTestName}");
         return post("executeAnalyticTestByName", url, analyticTestName, List.class);
+    }
+
+    @Override
+    public List<AnalyticTest> updateProductionAnalyticPipeline() {
+        String url = constructUrl("/analytictests/updateproduction");
+        AnalyticTest at = null;
+        return post("updateProductionAnalyticPipeline", url, at, List.class);
     }
 }

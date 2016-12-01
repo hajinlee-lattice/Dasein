@@ -20,7 +20,7 @@ public class SamplingServiceImplFunctionalTestNG extends ModelQualityFunctionalT
     public void createLatestWithValidVersion() {
         try {
             Sampling s = samplingEntityMgr.getLatestProductionVersion();
-            int initialVersion = 0;
+            Integer initialVersion = 0;
             if (s != null) {
                 initialVersion = s.getVersion();
             }
@@ -30,14 +30,14 @@ public class SamplingServiceImplFunctionalTestNG extends ModelQualityFunctionalT
 
             s = spiedSamplingService.createLatestProductionSamplingConfig();
             Assert.assertNotNull(s);
-            Assert.assertEquals(initialVersion + 1, s.getVersion());
+            Assert.assertEquals(new Integer(initialVersion.intValue() + 1), s.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", s.getName());
             Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
             doReturn("z/9.9.9-SNAPSHOT").when(spiedSamplingService).getVersion();
             s = spiedSamplingService.createLatestProductionSamplingConfig();
             Assert.assertNotNull(s);
-            Assert.assertEquals(initialVersion + 2, s.getVersion());
+            Assert.assertEquals(new Integer(initialVersion + 2), s.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", s.getName());
             Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
         } catch (Exception e) {
