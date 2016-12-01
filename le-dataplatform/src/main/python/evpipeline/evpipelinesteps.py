@@ -283,17 +283,6 @@ class RevenueColumnTransformStep(PipelineStep):
         dataFrame[column] = dataFrame[column].apply(lambda x : x)
         dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
     
-    def logRevenueColumnWithBooleanPositive(self, dataFrame, column):
-        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x <= 0 or x == None else x)
-        dataFrame['Trx_Boolean_Positive_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
-        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x :  x)
-    
-    def logRevenueColumnWithBooleanNegative(self, dataFrame, column):
-        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x == 0 or x == None else x)
-        dataFrame['Trx_Boolean_Negative_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
-        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
-        dataFrame[column] = dataFrame[column].apply(lambda x : x)
         
 class EVModelStep(PipelineStep):
     model = None
