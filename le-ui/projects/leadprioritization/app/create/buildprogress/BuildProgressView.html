@@ -89,7 +89,7 @@
                     <dt data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</dt>
                     <dd>
                         <div class="progress-icon">
-                            <span data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.create_global_target_market && jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.generate_insights && jobStepsRunningStates.generate_insights">
+                            <span data-ng-if="jobStepsRunningStates.score_training_set">
                                 <span class="loading-small"></span>
                             </span>
                             <span data-ng-if="jobStepsCompletedStates.score_training_set">
