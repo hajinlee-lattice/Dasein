@@ -17,17 +17,19 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
 
         vm.pagesize = 50;
         vm.order = 'ColumnName';
+        vm.select_version = [];
 
         vm.versions = {};
         vm.version = $stateParams.version || '2.0.0';
         vm.metadata = [];
+        vm.save_ready = false;
 
         vm.columns = {
                 ColumnName: {label:'Column Name'},
                 DisplayName: {label:'Display Name', editable: true},
                 Category: {label:'Category', editable: true},
                 Subcategory: {label:'Subcategory', editable: true},
-                ApprovedUsage: {label:'Approved Usage'},
+                ApprovedUsage: {label:'Approved Usage', editable: true},
                 FundamentalType: {label:'Fund Type'},
                 StatisticalType: {label:'Stat Type'},
                 Description: {label:'Description', editable: true},
@@ -40,7 +42,6 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
             if (result.success) {
                 vm.metadata = result.resultObj;
                 vm.loading = false;
-                //console.log(vm.metadata);
             } else {
                 vm.loading_error = result.errMsg;
             }
@@ -85,7 +86,42 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
             }
             return data;
         };
-        vm.select_version = [];
+
+        vm.save = function(){
+            if(1) {
+                return false; // exit because not ready but checking in code and pass linter
+            }
+            var json = [],
+                arrays = [];
+            for(var j in vm.metadata[0]) {
+                if(typeof vm.metadata[0][j] === 'object') {
+                    arrays.push(j);
+                }
+            }
+            for(var i in vm.model) {
+                var model = vm.model[i],
+                    keys = Object.keys(model),
+                    metadata = vm.metadata[i],
+                    intersection = _.intersection(keys, arrays);
+console.log(model);
+                if(intersection.length) {
+                    for(var k in intersection) {
+                        var key = intersection[k];
+                        if(model[key]) {
+                            model[key] = model[key].split(',');
+                        }
+                    }
+                }
+
+                var merged = Object.assign({}, metadata, model);
+                json.push(merged);
+            }
+            if(json.length) {
+            vm.saved_json = json;
+            }
+            console.log(vm.saved_json);
+        };
+
         /**
          * because stupid, and angular has issues with ng-select
          */
