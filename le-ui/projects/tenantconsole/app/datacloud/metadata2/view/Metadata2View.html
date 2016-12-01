@@ -62,8 +62,8 @@
                     | limitTo: vm.pagesize">
                 <td class="edit-button"><button ng-click="vm.edit_all = false; vm.edit[data.ColumnId] = !vm.edit[data.ColumnId]" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
                 <td ng-repeat="(key, column) in vm.columns" class="type-{{vm.type(key)}} {{key}}" title="{{vm.get(data[key])}}">
-                    <span ng-if="column.editable">
-                        <input type="hidden" ng-model="vm.model[row]['mykey']" ng-value="data.ColumnId" />
+                    <span ng-if="column.editable" ng-init="vm.model[row]['ColumnId'] = data.ColumnId">
+                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="hidden" ng-model="vm.model[row]['mykey']" ng-value="data.ColumnId" />
                         <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="text" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" placeholder="{{key}}" ng-model="vm.model[row][key]" value="{{vm.get(data[key])}}" />
                         <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'checkbox'" type="checkbox" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-checked="{{data[key]}}" ng-model="vm.model[row][key]" />
                         <textarea ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'textarea'" type="textarea" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-model="vm.model[row][key]">{{vm.get(data[key])}}</textarea>

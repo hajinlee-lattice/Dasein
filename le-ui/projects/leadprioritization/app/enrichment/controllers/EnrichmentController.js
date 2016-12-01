@@ -115,7 +115,7 @@ angular.module('lp.enrichment.leadenrichment', [
                     EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                     stopNumbersInterval();
                     vm.enrichments_completed = true;
-                    vm.hasSaved = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': true}).length;
+                    vm.hasSaved = $filter('filter')(vm.enrichments, {'IsDirty': true}).length;
                 }
             }
         });
@@ -331,12 +331,14 @@ angular.module('lp.enrichment.leadenrichment', [
             selectedAttributes: selected,
             deselectedAttributes: deselected
         }
+        vm.saveDisabled = 1;
+        vm.hasSaved = 0;
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
         EnrichmentService.setEnrichments(data).then(function(result){
-            vm.saveDisabled = true;
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
+            vm.saveDisabled = 1;
             if(selectedObj.length > 0 || deselectedObj.length > 0) {
                 var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
                 for(i in dirtyObj){

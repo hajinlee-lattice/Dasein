@@ -4,7 +4,7 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
     'ngPrettyJson',
     'ui.bootstrap'
 ])
-.controller('Metadata2Ctrl', function ($scope, $state, $stateParams, $timeout, $interval, $uibModal, MetadataService) {
+.controller('Metadata2Ctrl', function ($scope, $state, $stateParams, $timeout, $interval, $uibModal, $filter, MetadataService) {
 
         var vm = {};
 
@@ -88,9 +88,6 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
         };
 
         vm.save = function(){
-            if(1) {
-                return false; // exit because not ready but checking in code and pass linter
-            }
             var json = [],
                 arrays = [];
             for(var j in vm.metadata[0]) {
@@ -101,9 +98,11 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
             for(var i in vm.model) {
                 var model = vm.model[i],
                     keys = Object.keys(model),
-                    metadata = vm.metadata[i],
+                    metadata = $filter('filter')(vm.metadata, {'ColumnId': model.ColumnId})[0], //vm.metadata[i],
                     intersection = _.intersection(keys, arrays);
-console.log(model);
+                    if(keys.length < 2) {
+                        break;
+                    }
                 if(intersection.length) {
                     for(var k in intersection) {
                         var key = intersection[k];
@@ -112,14 +111,13 @@ console.log(model);
                         }
                     }
                 }
-
                 var merged = Object.assign({}, metadata, model);
                 json.push(merged);
             }
             if(json.length) {
-            vm.saved_json = json;
+                vm.saved_json = json;
             }
-            console.log(vm.saved_json);
+            console.log('saving ->', vm.saved_json);
         };
 
         /**
@@ -141,7 +139,6 @@ console.log(model);
         };
 
         vm.init();
-
         $scope.vm = vm;
 
 });
