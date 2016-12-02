@@ -18,7 +18,9 @@ public class PhoneNumberUtils {
             return String.valueOf(standardPhoneNumber.getCountryCode())
                     + String.valueOf(standardPhoneNumber.getNationalNumber());
         } catch (NumberParseException e) {
-            log.info("Fail to standardize phone number: " + phoneNumber);
+            if (phoneNumber != null) {
+                log.info("Fail to standardize phone number: " + phoneNumber);
+            }
             return phoneNumber;
         }
     }
