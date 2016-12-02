@@ -80,15 +80,20 @@ public class AccountMasterLookupRebuildServiceImplTestNG
             log.info(latticeId + " " + key);
             Assert.assertTrue((latticeId.equals(1L) && key.equals("_DOMAIN_a.com_DUNS_01"))
                     || (latticeId.equals(2L) && key.equals("_DOMAIN_a.com_DUNS_02"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_b.com_DUNS_01"))
-                    || (latticeId.equals(1L) && key.equals("_DOMAIN_a.com_DUNS_NULL"))
-                    || (latticeId.equals(3L) && key.equals("_DOMAIN_b.com_DUNS_NULL"))
-                    || (latticeId.equals(4L) && key.equals("_DOMAIN_c.com_DUNS_NULL"))
+                    || (latticeId.equals(3L) && key.equals("_DOMAIN_a.com_DUNS_03"))
+                    || (latticeId.equals(4L) && key.equals("_DOMAIN_b.com_DUNS_01"))
+                    || (latticeId.equals(5L) && key.equals("_DOMAIN_b.com_DUNS_02"))
+                    || (latticeId.equals(6L) && key.equals("_DOMAIN_b.com_DUNS_03"))
+                    || (latticeId.equals(7L) && key.equals("_DOMAIN_b.com_DUNS_04"))
                     || (latticeId.equals(1L) && key.equals("_DOMAIN_NULL_DUNS_01"))
                     || (latticeId.equals(2L) && key.equals("_DOMAIN_NULL_DUNS_02"))
-                    || (latticeId.equals(5L) && key.equals("_DOMAIN_NULL_DUNS_03")));
+                    || (latticeId.equals(3L) && key.equals("_DOMAIN_NULL_DUNS_03"))
+                    || (latticeId.equals(7L) && key.equals("_DOMAIN_NULL_DUNS_04"))
+                    || (latticeId.equals(1L) && key.equals("_DOMAIN_a.com_DUNS_NULL"))
+                    || (latticeId.equals(5L) && key.equals("_DOMAIN_b.com_DUNS_NULL"))
+                    || (latticeId.equals(8L) && key.equals("_DOMAIN_c.com_DUNS_NULL")));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 9);
+        Assert.assertEquals(rowNum, 14);
     }
 }

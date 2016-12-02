@@ -4,11 +4,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
 
 @Component("accountMasterLookupRebuildFlow")
 public class AccountMasterLookupRebuildFlow
@@ -20,6 +23,7 @@ public class AccountMasterLookupRebuildFlow
     private final static String DUNS_FIELD = "DUNS";
     private final static String PRIMARY_DOMAIN_FIELD = "LE_IS_PRIMARY_DOMAIN";
     private final static String PRIMARY_LOCATION_FIELD = "LE_IS_PRIMARY_LOCATION";
+    private final static String GLOBAL_DUNS_FIELD = "GLOBAL_ULTIMATE_DUNS_NUMBER";
 
     @Override
     protected Class<? extends TransformationConfiguration> getTransConfClass() {
@@ -35,16 +39,19 @@ public class AccountMasterLookupRebuildFlow
         return searchByDuns.merge(searchByDomain).merge(searchByBoth);
     }
 
-    // Accounts from LatticeCacheSeed with domains, no DUNS.
     private Node addSearchByDomainNode(Node node) {
         node = node.filter(DOMAIN_FIELD + " != null", new FieldList(DOMAIN_FIELD));
-        node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
+        //node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
+        node = node.groupByAndBuffer(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD, DUNS_FIELD),
+                new AccountMasterLookupBuffer(
+                        new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])),
+                        LATTICEID_FIELD, DOMAIN_FIELD, DUNS_FIELD, GLOBAL_DUNS_FIELD, PRIMARY_LOCATION_FIELD),
+                true);
         node = node.apply(new AccountMasterLookupKeyFunction(KEY_FIELD, DOMAIN_FIELD, null),
                 new FieldList(node.getFieldNames()), new FieldMetadata(KEY_FIELD, String.class));
         return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
     }
 
-    // Accounts from DnBCacheSeed with DUNS but no Domains
     private Node addSearchByDuns(Node node) {
         node = node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
         node = node.groupByAndLimit(new FieldList(DUNS_FIELD), new FieldList(PRIMARY_DOMAIN_FIELD), 1, true, true);
@@ -53,7 +60,6 @@ public class AccountMasterLookupRebuildFlow
         return node.retain(new FieldList(LATTICEID_FIELD, KEY_FIELD));
     }
 
-    // Accounts from DnBCacheSeed with both DUNS and Domains
     private Node addSearchByBothNode(Node node) {
         node = node.filter(DOMAIN_FIELD + " != null && " + DUNS_FIELD + " != null",
                 new FieldList(DOMAIN_FIELD, DUNS_FIELD));
