@@ -5,7 +5,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
         restrict: 'AE',
         scope: {
             promise: '=',
-            title: '='
+            chartTitle: '='
         },
         link: function (scope, element, attr, ModelQualityGroupBarChartVm) {
 
@@ -43,7 +43,7 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
                 title = d3container.append("div")
                     .attr("class", "chart-title")
-                    .text(scope.title);
+                    .text(scope.chartTitle);
 
                 dropdown = d3container.append("select")
                     .attr("class", "chart-metric-menu")
