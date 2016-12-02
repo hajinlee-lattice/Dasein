@@ -210,12 +210,14 @@ public class AnalyticTestServiceImpl extends BaseServiceImpl implements Analytic
         env.tenant = "ModelQuality_Test.ModelQuality_Test.Production";
         env.username = "bnguyen@lattice-engines.com";
         env.password = "tahoe";
+        
+        String validatedAnalyticTestName = (analyticTest.getName() != null) ? analyticTest.getName().replaceAll("[^A-Za-z0-9_]", "") : "";
 
         ModelRunEntityNames modelRunEntityNames = new ModelRunEntityNames();
         modelRunEntityNames.setAnalyticPipelineName(ap.getName());
         modelRunEntityNames.setDataSetName(ds.getName());
         modelRunEntityNames
-                .setName(analyticTest.getName() + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
+                .setName(validatedAnalyticTestName + "_" + ap.getPid() + "_" + ds.getPid() + "_" + UUID.randomUUID());
         modelRunEntityNames.setDescription("ModelRun created by the Execute Analytic Test API");
         modelRunEntityNames.setAnalyticTestName(analyticTest.getName());
         modelRunEntityNames.setAnalyticTestTag(analyticTest.getAnalyticTestTag());

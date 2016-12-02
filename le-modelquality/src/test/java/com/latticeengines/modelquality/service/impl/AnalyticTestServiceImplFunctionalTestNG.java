@@ -29,10 +29,27 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
     private String prodfunctionalTestName = "deploymentTest_AT_Production";
     private String functionalTestDatasetName = "deploymentTestDataSet_AT";
 
+
+    @Test(groups = "manual")
+    public void testmodelRunNameValidation(){
+        String testStr = "Test12345";
+        String pattern = "[^A-Za-z0-9_]";
+        
+        Assert.assertEquals(testStr.replaceAll(pattern, ""), "Test12345");
+        
+        testStr = "Test 12345";
+        Assert.assertEquals(testStr.replaceAll(pattern, ""), "Test12345");
+
+        testStr = "Test_12345";
+        Assert.assertEquals(testStr.replaceAll(pattern, ""), "Test_12345");
+
+        testStr = "T.e,s/t&1(2*3-4:5;?()[]{}\"\\'\t";
+        Assert.assertEquals(testStr.replaceAll(pattern, ""), "Test12345");
+    }
+    
     @Test(groups = "functional")
     public void updateProductionAnalyticPipeline() {
         createDeploymentTestDataSet();
-
         // create a t-1 prod pipeline
         AnalyticPipelineServiceImpl spiedAnalyticPipelineService = spy(
                 (AnalyticPipelineServiceImpl) analyticPipelineService);
