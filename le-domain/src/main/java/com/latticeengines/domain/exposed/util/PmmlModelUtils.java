@@ -44,6 +44,11 @@ public class PmmlModelUtils {
         return pmmlFields;
     }
 
+    public static final List<PmmlField> getPmmlFields(InputStream pmmlStream) throws Exception {
+        PMML pmml = getPMML(pmmlStream);
+        return getPmmlFields(pmml);
+    }
+
     public static PMML getPMMLWithOriginalVersion(InputStream pmmlStream) throws Exception {
         InputSource source = new InputSource(pmmlStream);
         XMLReader reader = XMLReaderFactory.createXMLReader();
