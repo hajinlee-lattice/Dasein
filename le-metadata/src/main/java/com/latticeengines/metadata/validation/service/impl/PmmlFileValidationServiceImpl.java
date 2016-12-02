@@ -27,7 +27,15 @@ import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 @Component("pmmlFileValidationService")
 public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
-    private Set<String> supportedVersions;
+    public static final Set<String> SUPPORTED_VERSIONS = new TreeSet<>();
+
+    static {
+        for (Version version : Version.values()) {
+            if (!version.getVersion().equals("3.0")) {
+                SUPPORTED_VERSIONS.add(version.getVersion());
+            }
+        }
+    }
 
     protected PmmlFileValidationServiceImpl() {
         super(ArtifactType.PMML);
@@ -35,16 +43,6 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @PostConstruct
-    public void setSupportedVersions() {
-        supportedVersions = new TreeSet<>();
-        for (Version version : Version.values()) {
-            if (!version.getVersion().equals("3.0")) {
-                supportedVersions.add(version.getVersion());
-            }
-        }
-    }
 
     @Override
     public void validate(String filePath) {
@@ -83,8 +81,8 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
     private void validatePmmlVersion(PMML pmml) {
         String version = pmml.getVersion();
-        if (!supportedVersions.contains(version)) {
-            throw new LedpException(LedpCode.LEDP_28028, new String[] { version, supportedVersions.toString() });
+        if (!SUPPORTED_VERSIONS.contains(version)) {
+            throw new LedpException(LedpCode.LEDP_28028, new String[] { version, SUPPORTED_VERSIONS.toString() });
         }
     }
 }
