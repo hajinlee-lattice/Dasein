@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.match.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,16 @@ public abstract class AbstractMatcher implements Matcher {
             MatchInput matchInput, //
             MatchOutput matchOutput, //
             List<String> matchLogs, List<String> matchErrorLogs) {
+        // to safegaurd against null list
+        if (matchLogs == null) {
+            matchLogs = new ArrayList<String>();
+        }
+
+        // to safegaurd against null list
+        if (matchErrorLogs == null) {
+            matchErrorLogs = new ArrayList<String>();
+        }
+
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH,
                     new String[] { JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));

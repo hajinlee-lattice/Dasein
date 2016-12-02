@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.enrich.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +61,8 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
         Map<String, Map<String, Object>> matchedRecordEnrichmentMap = //
                 getMatcher(false).matchAndJoin(space, interpreted, //
-                        fieldSchemas, record, null, true, false, false, requestId, false, null, null);
+                        fieldSchemas, record, null, true, false, false, requestId, false, new ArrayList<String>(),
+                        new ArrayList<String>());
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {
             enrichmentAttributes = new HashMap<>();
