@@ -1,12 +1,16 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -15,6 +19,8 @@ import org.dmg.pmml.DataField;
 import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
+import org.dmg.pmml.PMML;
+import org.jpmml.model.JAXBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +38,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.pmml.PmmlField;
+import com.latticeengines.domain.exposed.pmml.RegressionTargetCorrector;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -115,9 +122,25 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         return bldr;
     }
 
-    private Map<ArtifactType, String> getMetadataArtifacts() {
+    private String fixPMMLFile(String pmmlPath) throws Exception {
+        PMML pmml = PmmlModelUtils.getPMML(HdfsUtils.getInputStream(yarnConfiguration, pmmlPath));
+        new RegressionTargetCorrector().applyTo(pmml);
+        StringWriter stringWriter = new StringWriter();
+        Result result = new StreamResult(stringWriter);
+        JAXBUtil.marshalPMML(pmml, result);
+        return stringWriter.getBuffer().toString();
+    }
+
+    Map<ArtifactType, String> getMetadataArtifacts() {
         Map<ArtifactType, String> metadataArtifacts = new HashMap<>();
-        metadataArtifacts.put(ArtifactType.PMML, configuration.getPmmlArtifactPath());
+        try {
+            String fixedPmmlContents = fixPMMLFile(configuration.getPmmlArtifactPath());
+            String fixedPmmlPath = configuration.getPmmlArtifactPath() + ".fixed.xml";
+            HdfsUtils.writeToFile(yarnConfiguration, fixedPmmlPath, fixedPmmlContents);
+            metadataArtifacts.put(ArtifactType.PMML, fixedPmmlPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return metadataArtifacts;
     }
 
@@ -177,7 +200,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         for (PmmlField pmmlField : pmmlFields) {
             MiningField field = pmmlField.miningField;
             String name = field.getName().getValue();
-            if (field.getUsageType() == FieldUsageType.ACTIVE && !pivotValuesByTargetColumn.containsKey(name)) {
+            if (field.getUsageType() == FieldUsageType.ACTIVE
+                    && !pivotValuesByTargetColumn.containsKey(name)) {
                 features.add(name);
             } else if (field.getUsageType() == FieldUsageType.PREDICTED) {
                 event = name;
@@ -209,8 +233,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             }
             AttributeMetadata attrMetadatum = new AttributeMetadata();
             attrMetadatum.setColumnName(columnName);
-            attrMetadatum.setApprovedUsage(Arrays
-                    .asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+            attrMetadatum.setApprovedUsage(
+                    Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
 
             if (field.getOpType() == OpType.CATEGORICAL || field.getOpType() == OpType.ORDINAL) {
                 attrMetadatum.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);
@@ -228,8 +252,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             UserDefinedType userType = sourceColumnTypes.get(name);
             AttributeMetadata attrMetadatum = new AttributeMetadata();
             attrMetadatum.setColumnName(name);
-            attrMetadatum.setApprovedUsage(Arrays
-                    .asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
+            attrMetadatum.setApprovedUsage(
+                    Arrays.asList(new String[] { ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE }));
             // pivot columns are always categorical
             attrMetadatum.setStatisticalType(ModelingMetadata.NOMINAL_STAT_TYPE);
             attrMetadatum.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
