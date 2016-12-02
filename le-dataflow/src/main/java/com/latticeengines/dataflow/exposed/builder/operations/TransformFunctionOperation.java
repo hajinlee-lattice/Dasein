@@ -30,7 +30,8 @@ public class TransformFunctionOperation extends Operation {
 
         RealTimeTransform transform;
         try {
-            Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class.forName(packageName + "." + definition.name);
+            Class<RealTimeTransform> c = (Class<RealTimeTransform>) Class
+                    .forName(getRTSClassFromPythonName(packageName, definition.name));
             Constructor<RealTimeTransform> ctor = c.getConstructor();
             transform = ctor.newInstance();
         } catch (Exception e1) {
@@ -39,11 +40,11 @@ public class TransformFunctionOperation extends Operation {
         }
 
         TransformMetadata metadata = transform.getMetadata();
-        
+
         TransformationMetadata overrideMetadata = definition.transformationMetadata;
-        
+
         Map<String, String> properties = metadata.getProperties();
-        
+
         if (overrideMetadata != null) {
             for (Map.Entry<String, String> entry : overrideMetadata.getProperties().entrySet()) {
                 properties.put(entry.getKey(), entry.getValue());
@@ -55,8 +56,7 @@ public class TransformFunctionOperation extends Operation {
         }
         // For now, assume that all Java functions are to be used within RTS
         setRTSProperties(targetField, definition.name, definition.arguments);
-        Operation base = new FunctionOperation(
-                prior, //
+        Operation base = new FunctionOperation(prior, //
                 new TransformFunction(definition, transform, DataFlowUtils.convertToFields(targetField.getFieldName())), //
                 fieldsToApply, //
                 targetField, null);
@@ -75,5 +75,15 @@ public class TransformFunctionOperation extends Operation {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getRTSClassFromPythonName(String packageName, String pythonModuleName) {
+        String[] tokens = pythonModuleName.split("_");
+        StringBuilder sb = new StringBuilder(packageName + ".");
+
+        for (String token : tokens) {
+            sb.append(StringUtils.capitalize(token));
+        }
+        return sb.toString();
     }
 }
