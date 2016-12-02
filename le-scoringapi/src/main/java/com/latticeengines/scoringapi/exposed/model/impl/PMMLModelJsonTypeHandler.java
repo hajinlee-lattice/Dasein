@@ -1,20 +1,28 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
+
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 @Component
 public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
+    
+    private static final Log log = LogFactory.getLog(DefaultModelJsonTypeHandler.class);
+    
     @Override
     public boolean accept(String modelJsonType) {
         return PMML_MODEL.equals(modelJsonType);
@@ -55,4 +63,15 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
         // just put field and original value for PMML model case
         record.put(fieldName, fieldValue);
     }
+    
+    @Override
+    public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
+            Map<String, Object> transformedRecord) {
+        ScoreResponse scoreResponse = new ScoreResponse();
+        double probabilityOrValue = score(scoringArtifacts, transformedRecord).getProbabilityOrValue();
+        scoreResponse.setScore(probabilityOrValue);
+        return scoreResponse;
+    }
+
+    
 }

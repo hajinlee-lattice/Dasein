@@ -280,7 +280,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                     evaluationFast = pmmlEvaluator.evaluate(transformedFast, derivation);
 
                     Double expectedScore = expectedScores.get(record.getKey());
-                    Double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
+                    Double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY_OR_VALUE);
 
                     if (Math.abs(expectedScore - scoreFast) > 0.000001) {
                         System.out.println(String.format("Record id %f has value %f, expected is %f", //

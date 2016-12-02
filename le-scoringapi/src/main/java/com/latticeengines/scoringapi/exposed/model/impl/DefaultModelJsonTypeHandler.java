@@ -181,7 +181,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             List<String> matchLogs, List<String> matchErrorLogs) {
         DebugScoreResponse debugScoreResponse = new DebugScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
-        debugScoreResponse.setProbability(scoreEvaluation.getProbability());
+        debugScoreResponse.setProbability(scoreEvaluation.getProbabilityOrValue());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
         debugScoreResponse.setTransformedRecord(transformedRecord);
         debugScoreResponse.setMatchedRecord(matchedRecord);
@@ -348,11 +348,11 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         return new DefaultModelEvaluator(is);
     }
 
-    private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, //
+    protected ScoreEvaluation score(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation());
-        double probability = BigDecimal.valueOf((double) evaluation.get(ScoreType.PROBABILITY))
+        double probability = BigDecimal.valueOf((double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE))
                 .setScale(8, RoundingMode.HALF_UP).doubleValue();
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
 
@@ -360,7 +360,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         if (percentile > 99 || percentile < 5) {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Score out of range; percentile: %d probability: %,.7f", percentile,
-                        (double) evaluation.get(ScoreType.PROBABILITY)));
+                        (double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE)));
             }
             percentile = Math.min(percentile, 99);
             percentile = Math.max(percentile, 5);

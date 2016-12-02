@@ -5,14 +5,10 @@ package com.latticeengines.scoringapi.exposed;
  */
 public enum ScoreType {
 
-    PROBABILITY(Double.class),
-
-    LIFT(Double.class),
-
-    PERCENTILE(Integer.class),
-
-    BUCKET(String.class),
-
+    PROBABILITY_OR_VALUE(Double.class), //
+    LIFT(Double.class), //
+    PERCENTILE(Integer.class), //
+    BUCKET(String.class), //
     MODEL_NAME(String.class);
 
     private ScoreType(Class<?> type) {

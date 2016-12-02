@@ -38,7 +38,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 public class DefaultModelEvaluator implements ModelEvaluator {
     private static final Log log = LogFactory.getLog(ModelEvaluator.class);
 
-    private final PMMLManager manager;
+    protected final PMMLManager manager;
 
     protected static final double DEFAULT_DOUBLE_VALUE = 0.0d;
 
@@ -164,7 +164,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         ProbabilityDistribution classification = getClassification(results, target);
         double predicted = classification.getProbability("1");
 
-        result.put(ScoreType.PROBABILITY, predicted);
+        result.put(ScoreType.PROBABILITY_OR_VALUE, predicted);
 
         if (derivation.averageProbability != 0) {
             result.put(ScoreType.LIFT, predicted / derivation.averageProbability);

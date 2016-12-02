@@ -187,7 +187,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 Map<ScoreType, Object> evaluationFast = pmmlEvaluator.evaluate(transformedFast, derivation);
                 totalEvaluationTime += (System.currentTimeMillis() - time10);
                 double expectedScore = expectedScores.get(recIdAsDouble);
-                double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
+                double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY_OR_VALUE);
 
                 if (Math.abs(expectedScore - scoreFast) > 0.000001) {
                     errors++;
