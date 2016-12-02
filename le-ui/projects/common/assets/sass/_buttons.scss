@@ -164,11 +164,12 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		width: 100%;
 	}
   &.new-tile-button {
-    padding: 60px 80px;
+    padding: 75px 0;
     background-color: transparent;
     border: #ddd dashed 2px;
     text-align: center;
     color: #333;
+    width: 100%;
     &:hover {
       background-color: transparent;
       color: #222;

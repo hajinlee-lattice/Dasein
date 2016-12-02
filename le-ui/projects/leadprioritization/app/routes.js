@@ -395,6 +395,21 @@ angular
                 }
             }
         })
+        .state('home.campaigns.models', {
+            url: '/models',
+            params: {
+                pageTitle: 'Campaigns',
+                pageIcon: 'ico-model'
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "main@": {
+                    templateUrl: 'app/campaigns/views/CampaignModelsView.html'
+                }
+            }
+        })
         .state('home.marketosettings', {
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',
@@ -648,7 +663,7 @@ angular
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
                 }   
             }
         })

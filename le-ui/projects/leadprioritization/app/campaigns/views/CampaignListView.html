@@ -1,47 +1,96 @@
-<div class="container">
-    <section id="main-content" class="container lp-campaign-list">
+<section id="main-content" class="container lp-campaign-list">
 
-        <div class="row">
-            <ul class="twelve columns tile-list">
+    <div class="row">
+        <div class="twelve columns">
+            <ul class="tiles">
                 <!-- <li 
                     data-campaign-list-tile-widget
                     class="campaign"
                     ng-repeat="campaign in campaigns"
                     data="campaign">
                 </li> -->
-                <li class="list-item">
-                    <div 
-                        class="campaign-tile" 
-                        ng-click="tileClick($event)" 
-                        ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
-                        ui-sref="home.campaign.models({ campaignName: '{{ data.name | escape }}' })">
-                        <div class="campaign-header">
-                            Campaign Type
-                            Dropdown
-                        </div>
-                        <div class="campaign-details">
-                            Name
-                            Description
-                            Meta Data
-                        </div>
-                        <div class="campaign-rename">
-                            Name
-                            Description
-                            Actions
+                
+                <li 
+                    ng-click="tileClick($event)" 
+                    ui-sref="home.campaigns.models"
+                    ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
+                >
+                    <div class="tile-header">
+                        <h2>NA Tech Segment Campaign 2016</h2>
+                        <div class="edit">
+                            <button 
+                                    type="button"
+                                    ng-click="customMenuClick($event)" 
+                                    ng-class="{ 'open': showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
+                            </button>
+                            <ul class="model-menu" ng-if="showCustomMenu">
+                                <li></li>
+                            </ul>
                         </div>
                     </div>
+                    <div class="tile-body">
+                        <p>Targets the tech industry during the critical buying period during the main trade of the year.</p>
+                    </div>
+                    <div class="meta-data">
+                        <dl class="stats">
+                            <dt>Models</dt>
+                            <dd class="small">0</dd>
+                        </dl>
+                        <dl class="stats">
+                            <dt>Last Model</dt>
+                            <dd class="small">N/A</dd>
+                        </dl>
+                        <dl class="stats">
+                            <dt>Talking Points</dt>
+                            <dd class="small">0</dd>
+                        </dl>
+                    </div>
                 </li>
-                <li>
+
+                <li class="create-tile" ng-if="vm.createClicked">
+                    <div class="form-group">
+                        <label>Name
+                        <input 
+                            autofocus
+                            type="text" 
+                            name="" 
+                            data-ng-model="vm.campaignName"
+                            class="form-control" />
+                            </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea 
+                            class="form-control"
+                            data-ng-model="vm.campaignDescription"
+                        ></textarea>
+                    </div>  
+                    <div class="actions">
+                        <button 
+                            type="button" 
+                            class="button white-button pull-left" 
+                            ng-click="vm.createCampaignCancelClick($event)">
+                            Cancel</button>
+                        <button 
+                            type="button" 
+                            class="button orange-button pull-right" 
+                            ng-click="vm.createCampaignClick($event)">
+                            Create</button>
+                    </div>
+                </li>
+
+                <li class="no-style">
                     <button 
                         type="button" 
                         class="button new-tile-button"
-                        ng-click="vm.showCreateCampaignModal($event)">
+                        ng-click="vm.createCampaignClick($event)">
                         <span>&#43;</span>
                         Create Campaign
                     </button>
                 </li>
             </ul>
         </div>
+    </div><!-- End .row -->
 
-    </section>
-</div>
+</section>

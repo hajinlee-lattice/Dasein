@@ -8,6 +8,8 @@ angular.module('lp.campaigns.list', [
 ) {
     var vm = this;
 
+    vm.createClicked = false;
+
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
         campaigns: CampaignList || []
@@ -18,14 +20,55 @@ angular.module('lp.campaigns.list', [
 
     });
 
-    vm.showCreateCampaignModal = function ($event) {
-        
-        console.log("create campaign");
+    vm.createCampaignClick = function ($event) {
         if ($event != null) {
             $event.stopPropagation();
         }
-        CreateCampaignModal.show();
+        vm.createClicked = true;
+
+
+
     };
+    vm.createCampaignCancelClick = function ($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        vm.createClicked = false;
+    };
+
+
+
+    // This needs to be moved over to CampaignTileListWidget.js When ready
+    vm.showCustomMenu = false;
+    vm.customMenuClick = function ($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+        
+        $scope.showCustomMenu = !$scope.showCustomMenu;
+
+        if ($scope.showCustomMenu) {
+            $(document).bind('click', function(event){
+                var isClickedElementChildOfPopup = $element
+                    .find(event.target)
+                    .length > 0;
+
+                if (isClickedElementChildOfPopup)
+                    return;
+
+                $scope.$apply(function(){
+                    $scope.showCustomMenu = false;
+                    $(document).unbind(event);
+                });
+            });
+        }
+    };
+    vm.tileClick = function ($event) {
+        $event.preventDefault();
+    };
+
+
+
 
     vm.init();
 });

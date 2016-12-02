@@ -1,3 +1,12 @@
+
+
+/*
+===========================================================
+This is the tile system used in PD
+===========================================================
+*/
+
+
 .tile-list {
 	display: -webkit-flex;
 	display: flex;
@@ -93,4 +102,321 @@
 			color: $onyx;
 		}
 	}
+}
+
+
+
+
+
+
+
+/*
+===================================================================================
+This is the standardized version of a tile system (select attribute list). 
+Should be incorporated across PD and LP (models list, campaigns list).
+===================================================================================
+*/
+.no-tiles {
+    padding: 10em 0 6em;
+    margin-bottom: 10em;
+    background: url(/lp/assets/images/bg_no_models.png) no-repeat center center;
+}
+.tiles {
+    margin: 0 0 3px;
+    padding: 0;
+    & > li {
+        position: relative;
+        min-height: 300px;
+        padding: 13px;
+        margin-bottom: 26px;
+        vertical-align: top;
+        background-color: #fff;
+        border: #d0d0d0 solid 1px;
+        border-radius: 6px; 
+        &:hover {
+            transition: all 0ms ease 0s;
+            border-color: #87AAD2;
+            cursor: pointer;
+        }
+        &.no-style {
+        	background: none;
+        	border: none;
+            padding: 0;
+        }
+        &.create-tile {
+            &:hover {
+                border-color: #d0d0d0;
+                cursor: default;
+            }
+            .form-group {
+                margin-bottom: 10px;
+            }
+            .actions {
+                position: absolute;
+                bottom: 13px;
+                width: 90%;
+            }
+        }
+    }
+}
+
+
+.tile-header {
+    word-wrap: break-word;
+    margin-bottom: 10px;
+    h2 {
+        margin: 0;
+        color: #333333;
+        font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
+        padding-right: 1.75em;
+        font-size: 18px;
+        text-align: left;
+        &:after {
+            color: #bfbfbf;
+            font-style: normal;
+            font-weight: normal;
+            top: 1em;
+            right: 1em;
+            position: absolute;
+        }
+    }
+    .edit {
+        top: 0;
+        right: 0;
+        position: absolute;
+        button {
+            padding: 0.5em 0.75em 0.35em 0.8em;
+            margin-right: 0;
+            font-size: larger;
+            transition: all 0s linear;
+            background-color: transparent;
+            border: 0;
+            border-bottom-width: 1px;
+            &:hover {
+                * {
+                    color: #f16a22;
+                }
+            }
+            &.open {
+                background: #222;
+                color: #fff;
+                border-radius: 4px;
+                border-bottom-right-radius: 0;
+                border-bottom-left-radius: 0;
+                border-top-left-radius: 0;
+
+                &:hover * {
+                  color: #fff;
+                }
+            }
+            span, span:after, span:before {
+                transition: background 0s linear, color 0s linear;
+            }
+        }
+    }
+}
+
+
+.tile-body {
+    
+}
+
+
+.meta-data {
+    position: absolute;
+    bottom: 0;
+    padding: 13px;
+    width: 94%;
+    .stats, .status {
+        display: inline-block;
+    }
+    .status {
+        padding-left: 16px;
+        vertical-align: text-bottom;
+        margin-left: 16px;
+        border-left: #ddd solid 1px;
+        font-size: 1.45em;
+    }
+}
+.delete-tile {
+    position: absolute;
+    bottom: 0px;
+    right: 8px;
+    z-index: 1;
+    padding: 2px 6px;
+    background: transparent;
+    border: none;
+    color: #bfbfbf;
+    font-size: 2em;
+}
+.delete-tile:hover {
+    color: #477cba;
+}
+
+.tile-title h2 {
+  background: transparent;
+}
+
+.tile-title h2:hover {
+    background: transparent;
+}
+
+.tile-title h2.tile-name-editable {
+  background: url(../images/ico-pencil.png) no-repeat top right;
+}
+
+.tile-title h2.tile-name-editable:hover {
+    background: url(../images/ico-pencil-hover.png) no-repeat top right;
+}
+
+.tile-title h2.edit {
+  right: 0px;
+  top: 0px;
+  padding-right: 0;
+}
+
+
+
+
+/* Model Tile Actions Menu */
+.tile-menu {
+  position: absolute;
+  right: 0;
+  background: #222;
+  padding: 10px 0;
+  font-size: 16px;
+  -webkit-border-bottom-left-radius: 6px; 
+  -moz-border-bottom-left-radius: 6px; 
+  border-bottom-left-radius: 6px; 
+  -webkit-border-top-left-radius: 6px; 
+  -moz-border-top-left-radius: 6px; 
+  border-top-left-radius: 6px; 
+  font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+  li {
+    display: block;
+    list-style: none;
+    padding: 0.3em 1em;
+    text-align: right;
+    color: #eee;
+    white-space: nowrap;
+    &:hover {
+      background: #444;
+      transition: none;
+      color: #f16a22;
+    }
+    i {
+      color: #999;
+      margin-left: .5em;
+      width: 1em;
+      text-align: center;
+      vertical-align: middle;
+    }
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+  a:link, a:visited {
+    color: #fff;
+  }
+}
+
+.tile-title .edit button {
+    padding: 0.5em 0.75em 0.35em 0.8em;
+    margin-right: 0;
+    font-size: larger;
+    transition: all 0s linear;
+    background-color: transparent;
+    border: 0;
+    border-bottom-width: 1px;
+
+  &:hover {
+    * {
+      color: #f16a22;
+    }
+  }
+
+  span, span:after, span:before {
+    transition: background 0s linear, color 0s linear;
+  }
+}
+
+.tile-title .edit button.open {
+    background: #222;
+    color: #fff;
+    border-radius: 4px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+
+    &:hover * {
+      color: #fff;
+    }
+}
+
+.tile-title .editableform {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+.tile-title .editableform .control-group {
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+  border: #486d99 solid 2px;
+}
+
+.tile-title .popover-title {
+  margin: -10px -16px 8px -16px;
+}
+
+
+.tile-error {
+  border-radius: 4px 4px 4px 4px;
+  margin-top: 0.5em;
+}
+
+
+
+@media (min-width: 640px) and (max-width: 799px) {
+    .tiles > li {
+        display: inline-block;
+        width: 48%;
+        margin: 0 1% 6px;
+		&:nth-child(2n+1) {
+			margin-left: 0;
+		}
+		&:nth-child(2n) {
+			margin-right: 0;
+		}
+    }
+}
+@media (min-width: 800px) and (max-width: 1023px) {
+    .tiles > li {
+        display: inline-block;
+        width: 31%;
+        margin: 0 1% 16px;
+        .meta-data {
+            position: absolute;
+        }
+		&:nth-child(3n+1) {
+			margin-left: 0;
+		}
+		&:nth-child(3n) {
+			margin-right: 0;
+		}
+    }
+}
+@media (min-width: 1024px) {
+    .tiles > li {
+        display: inline-block;
+        width: 23.2%;
+        margin: 0 1% 26px;
+		&:nth-child(4n+1) {
+			margin-left: 0;
+		}
+		&:nth-child(4n) {
+			margin-right: 0;
+		}
+    }
 }
