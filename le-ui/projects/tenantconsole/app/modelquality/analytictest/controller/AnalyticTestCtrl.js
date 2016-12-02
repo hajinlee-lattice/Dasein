@@ -6,6 +6,7 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
     $scope.title = options.title;
     $scope.options = options.options;
     $scope.selected = options.selected;
+    $scope.readonly = options.readonly;
 
     options.context[options.key].forEach(function (item) {
         $scope.selected[item] = true;
@@ -202,7 +203,8 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
                         key: key,
                         title: vm.labels[key.toUpperCase()],
                         options: options,
-                        selected: selected
+                        selected: selected,
+                        readonly: analyticTest.analytic_test_type === 'Production'
                     };
                 }
             }
@@ -282,6 +284,15 @@ angular.module('app.modelquality.controller.AnalyticTestCtrl', [
                     vm.message = 'Error executing analytic test: ' + analyticTestName;
                 }
             });
+    };
+
+    vm.selectChange = function (key, value) {
+        if (key === 'analytic_test_type' && value === 'Production') {
+            ModelQualityService.LatestAnalyticPipeline()
+                .then(function (result) {
+                    vm.analyticTest.analytic_pipeline_names = [result.resultObj.name];
+                });
+        }
     };
 
     function isValidateAnalyticTest (analyticTest) {

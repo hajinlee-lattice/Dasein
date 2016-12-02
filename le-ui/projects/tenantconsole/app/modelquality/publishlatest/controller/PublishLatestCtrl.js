@@ -16,12 +16,19 @@ angular.module('app.modelquality.controller.PublishLatestCtrl', [
     vm.publishLatest = function () {
         vm.loading = true;
         vm.message = null;
+        vm.error = false;
 
-        ModelQualityService.LatestAnalyticPipeline()
-        .then(ModelQualityService.UpdateAnalyticTestProduction())
-        .catch(function (error) {
+        ModelQualityService.LatestAnalyticPipeline().then(function (result) {
+            vm.message = 'Analytic pipeline' + result.resultObj.name + ' created';
+            return ModelQualityService.UpdateAnalyticTestProduction();
+        }).catch(function (error) {
             vm.error = true;
-            vm.message = error.data.errorCode + ': ' + error.data.errorMsg;
+
+            if (error) {
+                vm.message = error.errMsg.errorCode + ': ' + error.errMsg.errorMsg;
+            } else {
+                vm.message = 'Unexpected error has occured';
+            }
         }).finally(function () {
             vm.loading = false;
         });

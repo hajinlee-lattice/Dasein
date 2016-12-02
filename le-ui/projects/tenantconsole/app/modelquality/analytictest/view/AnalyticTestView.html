@@ -58,7 +58,8 @@
               ng-if="col.type==='select'"
               placeholder="{{::vm_analyticTest.labels[col.key.toUpperCase()]}}"
               ng-model="vm_analyticTest.analyticTest[col.key]"
-              ng-options="opt.value as opt.name for opt in vm_analyticTest.entityOptions[col.key]">
+              ng-options="opt.value as opt.name for opt in vm_analyticTest.entityOptions[col.key]"
+              ng-change="vm_analyticTest.selectChange(col.key, vm_analyticTest.analyticTest[col.key])">
             </select>
             <button
               class="form-control"
@@ -96,7 +97,7 @@
     <h3 class="modal-title" id="modal-title">{{::title}}</h3>
   </div>
   <div class="modal-body modal-max-height" id="modal-body">
-    <multi-select-checkbox options="options" selected="selected" key="name"></multi-select-checkbox>
+    <multi-select-checkbox options="options" selected="selected" key="name" readonly="readonly"></multi-select-checkbox>
   </div>
 </script>
 
