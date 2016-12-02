@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ulysses.ScoreAndEnrichmentRecord;
 import com.latticeengines.ulysses.entitymgr.ScoreAndEnrichmentEntityMgr;
-import com.latticeengines.ulysses.functionalframework.UlyssesTestNGBase;
+import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 
 public class ScoreAndEnrichmentEntityMgrImplTestNG extends UlyssesTestNGBase {
     
@@ -57,6 +57,6 @@ public class ScoreAndEnrichmentEntityMgrImplTestNG extends UlyssesTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "create" })
     public void findAttributesByKey() {
         Map<String, Object> map = scoreAndEnrichmentEntityMgr.findAttributesByKey("12345");
-        assertEquals(((List) map.get(ScoreAndEnrichmentRecord.CAMPAIGN_IDS)).size(), 2);
+        assertEquals(((List) map.get("campaignIds")).size(), 2);
     }
 }

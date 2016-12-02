@@ -25,6 +25,7 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -379,6 +380,10 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             }
 
             return map;
+        } else if (avroInstance instanceof Utf8) {
+            return avroInstance.toString();
+        } else if (avroInstance instanceof GenericData.EnumSymbol) {
+            return avroInstance.toString();
         }
 
         return avroInstance;

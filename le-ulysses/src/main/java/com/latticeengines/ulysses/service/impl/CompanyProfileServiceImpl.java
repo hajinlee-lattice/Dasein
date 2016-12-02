@@ -69,8 +69,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         insightSection.setTip("Insight section tip for company profile");
         insightSection.setHeadline("Insight section headline for company profile");
         insightSection.setInsightSourceType(InsightSourceType.EXTERNAL);
-        insightSection.setAttributes(Arrays.asList(new String[] { "" }));
-        
+
         profile.setInsights(Arrays.asList(new Insight[] { insight }));
         insight.setInsightSections(Arrays.asList(new InsightSection[] { insightSection }));
         

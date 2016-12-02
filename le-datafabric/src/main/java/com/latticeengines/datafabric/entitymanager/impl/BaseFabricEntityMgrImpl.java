@@ -2,8 +2,6 @@ package com.latticeengines.datafabric.entitymanager.impl;
 
 import static com.latticeengines.datafabric.util.RedisUtil.INDEX;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -16,19 +14,14 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.Decoder;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.Encoder;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
@@ -285,35 +278,15 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private GenericRecord entityToRecord(T entity) {
 
-        if (entity instanceof FabricEntity) {
-            return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
-        }
-
-        GenericRecord record = null;
-        ReflectDatumWriter<T> writer = new ReflectDatumWriter<T>(schema);
-        GenericDatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
         try {
-            Encoder encoder = EncoderFactory.get().directBinaryEncoder(output, null);
-            writer.write(entity, encoder);
-            encoder.flush();
-
-            ByteArrayInputStream input = new ByteArrayInputStream(output.toByteArray());
-            Decoder decoder = DecoderFactory.get().directBinaryDecoder(input, null);
-            record = reader.read(null, decoder);
-        } catch (Exception e) {
-            log.error("Failed to convert entity to generic record");
-            log.error(e);
-            return null;
-        } finally {
-            try {
-                output.close();
-            } catch (Exception e) {
+            if (entity instanceof FabricEntity) {
+                return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
             }
+            return AvroReflectionUtils.toGenericRecord(entity, schema);
+        } catch (Exception e) {
+            log.error("Failed to convert entity to generic record", e);
+            return null;
         }
-
-        return record;
     }
 
     private T recordToEntity(GenericRecord record) {

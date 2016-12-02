@@ -25,4 +25,4 @@ CATALINA_HOME=$OLD_CATALINA_HOME
 
 ZOO_LOG_DIR=$ZOOKEEPER_HOME/logs $ZOOKEEPER_HOME/bin/zkServer.sh start
 echo "Starting Dynamo"
-nohup java -Djava.library.path=${DYNAMO_HOME}/DynamoDBLocal_lib -jar ${DYNAMO_HOME}/DynamoDBLocal.jar > ${DYNAMO_HOME}/dynamo.log 2>&1 &
+nohup java -Djava.library.path=${DYNAMO_HOME}/DynamoDBLocal_lib -jar ${DYNAMO_HOME}/DynamoDBLocal.jar -dbPath ${DYNAMO_HOME} -sharedDb > ${DYNAMO_HOME}/dynamo.log 2>&1 &

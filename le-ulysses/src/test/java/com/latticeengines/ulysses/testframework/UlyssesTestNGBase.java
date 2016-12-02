@@ -1,6 +1,7 @@
-package com.latticeengines.ulysses.functionalframework;
+package com.latticeengines.ulysses.testframework;
 
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,17 +20,17 @@ import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListe
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-ulysses-context.xml" })
-public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests implements InitializingBean {
+public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     protected FabricMessageService messageService;
 
     @Autowired
     protected FabricDataService dataService;
-    
+
     @Autowired
     protected DynamoService dynamoService;
-    
+
     @Value("${common.le.environment}")
     private String leEnv;
 
@@ -41,12 +42,12 @@ public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests implemen
         dynamoService.deleteTable(tableName);
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
     }
-    
+
     protected void tearDown() {
         dynamoService.switchToRemote();
     }
-    
-    @Override
+
+    @PostConstruct
     public void afterPropertiesSet() throws Exception {
         dynamoService.switchToLocal();
     }

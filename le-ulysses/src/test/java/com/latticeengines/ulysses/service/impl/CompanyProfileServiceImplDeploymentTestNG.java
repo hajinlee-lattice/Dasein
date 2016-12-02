@@ -17,42 +17,43 @@ import com.latticeengines.domain.exposed.ulysses.Campaign;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.InsightSection;
 import com.latticeengines.ulysses.entitymgr.CampaignEntityMgr;
-import com.latticeengines.ulysses.functionalframework.UlyssesFunctionalTestNGBase;
+import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 import com.latticeengines.ulysses.service.CompanyProfileService;
 
-public class CompanyProfileServiceImplTestNG extends UlyssesFunctionalTestNGBase {
-    
+public class CompanyProfileServiceImplDeploymentTestNG extends UlyssesTestNGBase {
+
     private static final CustomerSpace TESTCUSTOMER = CustomerSpace.parse("UlyssesTest.UlyssesTest.Production");
-    
+
     @Autowired
     private CompanyProfileService companyProfileService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        CampaignEntityMgr campaignEntityMgr = ((CompanyProfileServiceImpl) companyProfileService).getCampaignEntityMgr();
+        CampaignEntityMgr campaignEntityMgr = ((CompanyProfileServiceImpl) companyProfileService)
+                .getCampaignEntityMgr();
         super.createTable(campaignEntityMgr.getRepository(), campaignEntityMgr.getRecordType());
-        
+
         companyProfileService.setupCampaignForCompanyProfile(TESTCUSTOMER);
 
         Campaign profile = campaignEntityMgr.findByKey(TESTCUSTOMER + "|PROFILE");
         profile.setTenant(new Tenant(TESTCUSTOMER.toString()));
         InsightSection section = profile.getInsights().get(0).getInsightSections().get(0);
-        
+
         section.setAttributes(Arrays.asList("LE_INDUSTRY", "LE_REVENUE_RANGE", "AdvertisingTechnologiesTopAttributes"));
         section.setHeadline("Some headline");
         section.setTip("Some tip");
-        
+
         profile.getInsights().get(0).setInsightSections(Arrays.asList(new InsightSection[] { section }));
-        
+
         campaignEntityMgr.update(profile);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void getProfile() throws Exception {
         Map<MatchKey, String> matchRequest = new HashMap<>();
         matchRequest.put(MatchKey.Email, "bnguyen@lattice-engines.com");
         CompanyProfile profile = companyProfileService.getProfile(TESTCUSTOMER, matchRequest);
-        
+
         assertEquals(profile.attributes.size(), 3);
     }
 }

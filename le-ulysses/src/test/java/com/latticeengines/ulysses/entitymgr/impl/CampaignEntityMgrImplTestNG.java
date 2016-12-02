@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.ulysses.Insight;
 import com.latticeengines.domain.exposed.ulysses.InsightSection;
 import com.latticeengines.domain.exposed.ulysses.InsightSourceType;
 import com.latticeengines.ulysses.entitymgr.CampaignEntityMgr;
-import com.latticeengines.ulysses.functionalframework.UlyssesTestNGBase;
+import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 
 public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
     
@@ -41,6 +41,7 @@ public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
         s1.setInsightSourceType(InsightSourceType.BOTH);
         
         Insight i1 = new Insight();
+        i1.setId("Insight1");
         i1.setName("Insight1");
         i1.setInsightSections(Arrays.asList(new InsightSection[] { s1 }));
         
