@@ -4,61 +4,81 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
     return {
         restrict: 'AE',
         scope: {
-            data: '='
+            promise: '=',
+            title: '='
         },
         link: function (scope, element, attr, ModelQualityGroupBarChartVm) {
 
             var container = element[0];
-            $(container).empty();
+            var $container = $(container);
             var d3container = d3.select(container);
-
-            var tooltipTimer = null;
-            var tooltip = d3container
-                .append("div")
-                .attr("class", "chart-tooltip")
-                .style("opacity", 0);
-
-            var title = d3container.append("div")
-                .attr("class", "chart-title")
-                .text(scope.data.title);
-
-            var options = ['RocScore', 'Top10PercentLift', 'Top20PercentLift','Top30PercentLift'];
-
-            var dropdown = d3container.append("select")
-                .attr("class", "chart-metric-menu")
-                .attr("name", "metric")
-                .on("change", function (_, i, el) {
-                    key = options[el[i].selectedIndex];
-                    changeKey();
-                });
-
-            dropdown.selectAll("option")
-                .data(options)
-                .enter()
-                .append("option")
-                .attr("value", function (d) { return d; })
-                .text(function (d) { return d; });
-
-            var key = options[0];
 
             var margin = {top: 20, right: 20, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
                 height = container.clientHeight - margin.top - margin.bottom;
 
-            var svg = d3container.append("svg")
-                .attr("width", container.clientWidth)
-                .attr("height", container.clientHeight);
+            var options = ['RocScore', 'Top10PercentLift', 'Top20PercentLift','Top30PercentLift'];
+            var key = options[0];
 
-            var chart = svg.append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var svg,
+                chart,
+                x0,
+                x1,
+                y,
+                color,
+                xAxis,
+                yAxis,
+                title,
+                dropdown,
+                tooltipTimer,
+                tooltip;
 
-            var x0 = d3.scaleBand().rangeRound([0, width]).padding(1/3).align(0.5),
-                x1 = d3.scaleBand(),
+            var init = function () {
+                $container.empty();
+
+                tooltip = d3container
+                    .append("div")
+                    .attr("class", "chart-tooltip")
+                    .style("opacity", 0);
+
+                title = d3container.append("div")
+                    .attr("class", "chart-title")
+                    .text(scope.title);
+
+                dropdown = d3container.append("select")
+                    .attr("class", "chart-metric-menu")
+                    .attr("name", "metric")
+                    .on("change", function (_, i, el) {
+                        key = options[el[i].selectedIndex];
+                        changeKey();
+                    });
+
+                dropdown.selectAll("option")
+                    .data(options)
+                    .enter()
+                    .append("option")
+                    .attr("value", function (d) { return d; })
+                    .text(function (d) { return d; });
+
+                svg = d3container.append("svg")
+                    .attr("width", container.clientWidth)
+                    .attr("height", container.clientHeight);
+
+                chart = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                x0 = d3.scaleBand().rangeRound([0, width]).padding(1/3).align(0.5);
+                x1 = d3.scaleBand();
                 y = d3.scaleLinear().range([height, 0]);
 
-            var color = d3.scaleOrdinal(d3.schemeCategory20);
-            var xAxis = d3.axisBottom(x0).tickValues([]);
+                color = d3.scaleOrdinal(d3.schemeCategory20);
+                xAxis = d3.axisBottom(x0).tickValues([]);
                 yAxis = d3.axisLeft(y);
+
+                scope.$on('resize', function () {
+                    resize();
+                });
+            };
 
             var hideTooltip = function () {
                 tooltip.style("opacity", 0);
@@ -72,8 +92,8 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
 
             var data, groups, bars;
             var render = function () {
-                data = scope.data.data;
-                var categories = scope.data.data[0].categories.map(function(set) {
+                data = scope.data;
+                var categories = data[0].categories.map(function(set) {
                     return set.category;
                 });
 
@@ -111,7 +131,9 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                     .attr("dy", ".35em")
                     .attr("text-anchor", "start")
                     .attr("dominant-baseline", "middle")
-                    .text(function(d) { return d.toUpperCase(); });
+                    .text(function(d) {
+                        return d.toUpperCase();
+                    });
 
                 legend.each(function(d, i) {
                     var self = d3.select(this);
@@ -213,15 +235,28 @@ angular.module('app.modelquality.directive.ModelQualityGroupBarChart', [
                 render();
             };
 
-            render();
+            scope.promise.then(function(result) {
+                scope.data = result;
+                init();
+                render();
+            }).catch(function (error) {
+                $container.addClass('chart-error');
 
-            scope.$on('resize', function () {
-                resize();
+                var message = '';
+                if (error && error.reason) {
+                    message = error.reason + ' for analytic test: ' + error.analyticTest.name;
+                } else {
+                    message = 'Unknown error generating charts';
+                }
+
+                $container.empty();
+                $container.append('<p class="alert alert-danger">' + message +'</p>');
             });
 
         },
         controller: 'ModelQualityGroupBarChartCtrl',
-        controllerAs: 'ModelQualityGroupBarChartVm'
+        controllerAs: 'ModelQualityGroupBarChartVm',
+        template: '<div class="loader"></div><h4 class="text-center">Loading chart for {{::title}}...</h4>'
     };
 })
 .controller('ModelQualityGroupBarChartCtrl', function ($scope) {

@@ -4,70 +4,92 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
     return {
         restrict: 'AE',
         scope: {
-            data: '='
+            promise: '=',
+            title: '='
         },
         link: function (scope, element, attr, ModelQualityLineChartVm) {
 
             var chartId = new Date().getTime();
 
             var container = element[0];
-            $(container).empty();
+            var $container = $(container);
             var d3container = d3.select(container);
-
-            var tooltipTimer = null;
-            var tooltip = d3container
-                .append("div")
-                .attr("class", "chart-tooltip")
-                .style("opacity", 0);
-
-            var title = d3container.append("div")
-                .attr("class", "chart-title")
-                .text(scope.data.title);
 
             var margin = {top: 20, right: 20, bottom: 40, left: 40},
                 width = container.clientWidth - margin.left - margin.right,
                 height = container.clientHeight - margin.top - margin.bottom;
 
-            var svg = d3container.append("svg")
-                .attr("width", container.clientWidth)
-                .attr("height", container.clientHeight);
+            var svg,
+                chart,
+                line,
+                x,
+                y,
+                xAxis,
+                yAxis,
+                color,
+                title,
+                tooltipTimer,
+                tooltip,
+                hoverVerticalLine,
+                focus,
+                tooltipXPos;
 
-            svg.append("defs").append("clipPath")
-                .attr("id", "clip-" + chartId)
-                .append("rect")
-                .attr("width", width)
-                .attr("height", height);
+            var init = function () {
+                $(container).empty();
 
-            var x = d3.scalePoint().range([0, width]),
-                y = d3.scaleLinear().range([height, 0]),
+                tooltip = d3container
+                    .append("div")
+                    .attr("class", "chart-tooltip")
+                    .style("opacity", 0);
+
+                title = d3container.append("div")
+                    .attr("class", "chart-title")
+                    .text(scope.title);
+
+                svg = d3container.append("svg")
+                    .attr("width", container.clientWidth)
+                    .attr("height", container.clientHeight);
+
+                svg.append("defs").append("clipPath")
+                    .attr("id", "clip-" + chartId)
+                    .append("rect")
+                    .attr("width", width)
+                    .attr("height", height);
+
+                x = d3.scalePoint().range([0, width]);
+                y = d3.scaleLinear().range([height, 0]);
                 color = d3.scaleOrdinal(d3.schemeCategory20);
 
-            var xAxis = d3.axisBottom(x).tickValues([]),
+                xAxis = d3.axisBottom(x).tickValues([]);
                 yAxis = d3.axisLeft(y);
 
-            var line = d3.line()
-                .curve(d3.curveLinear)
-                .x(function(d) { return x(d.x); })
-                .y(function(d) { return y(d.y); });
+                line = d3.line()
+                    .curve(d3.curveLinear)
+                    .x(function(d) { return x(d.x); })
+                    .y(function(d) { return y(d.y); });
 
-            var chart = svg.append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                chart = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+                hoverVerticalLine = chart.append("line")
+                    .attr("class", "chart-hover-line")
+                    .attr("x1", 0)
+                    .attr("y1", 0)
+                    .attr("x2", 0)
+                    .attr("y2", height);
 
-            var hoverVerticalLine = chart.append("line")
-                .attr("class", "chart-hover-line")
-                .attr("x1", 0)
-                .attr("y1", 0)
-                .attr("x2", 0)
-                .attr("y2", height);
+                focus = chart.append("rect")
+                    .attr("class", "chart-focus")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .style("fill", "transparent");
 
-            var focus = chart.append("rect")
-                .attr("class", "chart-focus")
-                .attr("width", width)
-                .attr("height", height)
-                .style("fill", "transparent");
+                tooltipXPos = tooltipXPosWrap(width);
 
-            var bisectDate = d3.bisector(function(d) { return d; }).left;
+                scope.$on('resize', function () {
+                    resize();
+                });
+            };
 
             var tooltipXPosWrap = function (width) {
                 return function (mouseX) {
@@ -78,7 +100,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     }
                 };
             };
-            var tooltipXPos = tooltipXPosWrap(width);
+
             var hideTooltip = function () {
                 tooltip.style("opacity", 0);
             };
@@ -90,7 +112,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
             };
 
             var render = function () {
-                var seriesData = scope.data.data;
+                var seriesData = scope.data;
                 var extents = getExtents(seriesData);
 
                 y.domain(extents.yExtent);
@@ -163,13 +185,11 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 focus.on("mouseenter", function() {
                     hoverVerticalLine.style("display", null);
                     showTooltip();
-                })
-                .on("mouseleave", function() {
+                }).on("mouseleave", function() {
                     hideTooltip();
                     hoverVerticalLine.style("display", "none");
                     dots.style("r", "0px");
-                })
-                .on("mousemove", function () {
+                }).on("mousemove", function () {
                     var mouse = d3.mouse(this);
                     var xPos = mouse[0];
                     var tippedPos = 0;
@@ -213,14 +233,11 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     tooltip.html(template)
                         .style("left", function () {
                             return tooltipXPos(xPos);
-                        })
-                        .style("top", mouse[1] + "px");
+                        }).style("top", mouse[1] + "px");
                 });
-
             };
 
             var resize = function () {
-
                 width = container.clientWidth - margin.left - margin.right;
                 height = container.clientHeight - margin.top - margin.bottom;
 
@@ -262,14 +279,29 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 };
             };
 
-            render();
+            scope.promise.then(function(result) {
+                scope.data = result;
+                init();
+                render();
+            }).catch(function (error) {
+                $container.addClass('chart-error');
 
-            scope.$on('resize', function () {
-                resize();
+                var message = '';
+                if (error && error.reason) {
+                    message = error.reason + ' for analytic test: ' + error.analyticTest.name;
+                } else {
+                    message = 'Unknown error generating charts';
+                }
+
+                $container.empty();
+                $container.append('<p class="alert alert-danger">' + message +'</p>');
             });
+
         },
         controller: 'ModelQualityLineChartCtrl',
-        controllerAs: 'ModelQualityLineChartVm'
+        controllerAs: 'ModelQualityLineChartVm',
+        template: '<div class="loader"></div><h2 class="text-center">Loading chart for {{::title}}...</h2>'
+
     };
 })
 .controller('ModelQualityLineChartCtrl', function ($scope) {

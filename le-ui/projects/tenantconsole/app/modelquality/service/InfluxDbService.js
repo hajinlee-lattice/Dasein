@@ -1,7 +1,6 @@
-var app = angular.module("app.modelquality.service.InfluxDbService", [
-]);
-
-app.service('InfluxDbService', function($q, $http, SessionUtility){
+angular.module("app.modelquality.service.InfluxDbService", [
+])
+.service('InfluxDbService', function($q, $http, SessionUtility){
 
     this.Query = function (query) {
         var defer = $q.defer();
