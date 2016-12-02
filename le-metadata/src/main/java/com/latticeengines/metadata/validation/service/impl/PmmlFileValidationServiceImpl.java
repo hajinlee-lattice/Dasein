@@ -2,12 +2,17 @@ package com.latticeengines.metadata.validation.service.impl;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.dmg.pmml.PMML;
+import org.jpmml.schema.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +27,7 @@ import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 @Component("pmmlFileValidationService")
 public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
-    public static final String SUPPORTED_VERSION = "3.1";
+    private Set<String> supportedVersions;
 
     protected PmmlFileValidationServiceImpl() {
         super(ArtifactType.PMML);
@@ -30,6 +35,16 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @PostConstruct
+    public void setSupportedVersions() {
+        supportedVersions = new TreeSet<>();
+        for (Version version : Version.values()) {
+            if (!version.getVersion().equals("3.0")) {
+                supportedVersions.add(version.getVersion());
+            }
+        }
+    }
 
     @Override
     public void validate(String filePath) {
@@ -68,8 +83,8 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
     private void validatePmmlVersion(PMML pmml) {
         String version = pmml.getVersion();
-        if (!version.equals(SUPPORTED_VERSION)) {
-            throw new LedpException(LedpCode.LEDP_28028, new String[] { version, SUPPORTED_VERSION });
+        if (!supportedVersions.contains(version)) {
+            throw new LedpException(LedpCode.LEDP_28028, new String[] { version, supportedVersions.toString() });
         }
     }
 }
