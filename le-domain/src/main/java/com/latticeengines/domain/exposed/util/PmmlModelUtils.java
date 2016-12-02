@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.transform.sax.SAXSource;
 
 import org.dmg.pmml.DataDictionary;
@@ -20,7 +21,7 @@ import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.latticeengines.domain.exposed.jpmml.filter.LEImportFilter;
+import com.latticeengines.domain.exposed.pmml.LEImportFilter;
 import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.pmml.SkipFilter;
 
