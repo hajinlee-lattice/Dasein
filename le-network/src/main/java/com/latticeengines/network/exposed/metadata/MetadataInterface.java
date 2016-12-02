@@ -32,7 +32,7 @@ public interface MetadataInterface {
 
     Table copyTable(String sourceTenantId, String targetCustomerSpace, String tableName);
 
-    String validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
+    void validateArtifact(String customerSpace, ArtifactType artifactType, String filePath);
 
     MetadataSegment createMetadataSegment(String customerSpace, String segmentName, String tableName);
 }
