@@ -9,7 +9,7 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ulysses.EnrichedAccountRecord;
+import com.latticeengines.domain.exposed.ulysses.EnrichedAccount;
 import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 
@@ -30,7 +30,7 @@ public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
     
     @Test(groups = "functional", dependsOnMethods = { "init" })
     public void create() {
-        EnrichedAccountRecord record = new EnrichedAccountRecord();
+        EnrichedAccount record = new EnrichedAccount();
         record.setId("12345");
         record.setTenantId("A.A.Production");
         record.setExternalId("asdfghj");
@@ -43,7 +43,7 @@ public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "create" })
     public void findByKey() {
-        EnrichedAccountRecord record = scoreAndEnrichmentEntityMgr.findByKey("12345");
+        EnrichedAccount record = scoreAndEnrichmentEntityMgr.findByKey("12345");
         assertEquals(record.getId(), "12345");
         assertEquals(record.getTenantId(), "A.A.Production");
         assertEquals(record.getExternalId(), "asdfghj");
