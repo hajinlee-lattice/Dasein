@@ -9,17 +9,17 @@ import java.util.Map;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ulysses.ScoreAndEnrichmentRecord;
-import com.latticeengines.ulysses.entitymgr.ScoreAndEnrichmentEntityMgr;
+import com.latticeengines.domain.exposed.ulysses.EnrichedAccountRecord;
+import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 
-public class ScoreAndEnrichmentEntityMgrImplTestNG extends UlyssesTestNGBase {
+public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
     
-    private ScoreAndEnrichmentEntityMgr scoreAndEnrichmentEntityMgr;
+    private EnrichedAccountEntityMgr scoreAndEnrichmentEntityMgr;
     
     @BeforeClass(groups = "functional")
     public void setup() {
-        scoreAndEnrichmentEntityMgr = new ScoreAndEnrichmentEntityMgrImpl(messageService, dataService);
+        scoreAndEnrichmentEntityMgr = new EnrichedAccountEntityMgrImpl(messageService, dataService);
         super.createTable(scoreAndEnrichmentEntityMgr.getRepository(), scoreAndEnrichmentEntityMgr.getRecordType());
     }
     
@@ -30,7 +30,7 @@ public class ScoreAndEnrichmentEntityMgrImplTestNG extends UlyssesTestNGBase {
     
     @Test(groups = "functional", dependsOnMethods = { "init" })
     public void create() {
-        ScoreAndEnrichmentRecord record = new ScoreAndEnrichmentRecord();
+        EnrichedAccountRecord record = new EnrichedAccountRecord();
         record.setId("12345");
         record.setTenantId("A.A.Production");
         record.setExternalId("asdfghj");
@@ -43,7 +43,7 @@ public class ScoreAndEnrichmentEntityMgrImplTestNG extends UlyssesTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "create" })
     public void findByKey() {
-        ScoreAndEnrichmentRecord record = scoreAndEnrichmentEntityMgr.findByKey("12345");
+        EnrichedAccountRecord record = scoreAndEnrichmentEntityMgr.findByKey("12345");
         assertEquals(record.getId(), "12345");
         assertEquals(record.getTenantId(), "A.A.Production");
         assertEquals(record.getExternalId(), "asdfghj");

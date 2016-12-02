@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-public class ScoreAndEnrichmentRecord implements HasId<String> {
+public class EnrichedAccount implements HasId<String> {
 
     @Id
     @JsonProperty("latticeRequestId")

@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.ulysses.entitymgr.ScoreAndEnrichmentEntityMgr;
-import com.latticeengines.ulysses.entitymgr.impl.ScoreAndEnrichmentEntityMgrImpl;
-import com.latticeengines.ulysses.service.ScoreAndEnrichmentService;
+import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
+import com.latticeengines.ulysses.entitymgr.impl.EnrichedAccountEntityMgrImpl;
+import com.latticeengines.ulysses.service.EnrichedAccountService;
 
 @Component("scoreAndEnrichmentService")
-public class ScoreAndEnrichmentServiceImpl implements ScoreAndEnrichmentService {
+public class EnrichedAccountServiceImpl implements EnrichedAccountService {
 
     @Autowired
     private FabricMessageService messageService;
@@ -20,14 +20,14 @@ public class ScoreAndEnrichmentServiceImpl implements ScoreAndEnrichmentService 
     @Autowired
     private FabricDataService dataService;
     
-    private ScoreAndEnrichmentEntityMgr scoreAndEnrichmentEntityMgr;
+    private EnrichedAccountEntityMgr scoreAndEnrichmentEntityMgr;
     
-    public ScoreAndEnrichmentServiceImpl() {
+    public EnrichedAccountServiceImpl() {
     }
 
     @PostConstruct
     public void postConstruct() throws Exception {
-        scoreAndEnrichmentEntityMgr = new ScoreAndEnrichmentEntityMgrImpl(messageService, dataService);
+        scoreAndEnrichmentEntityMgr = new EnrichedAccountEntityMgrImpl(messageService, dataService);
         scoreAndEnrichmentEntityMgr.init();
     }
 
