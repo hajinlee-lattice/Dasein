@@ -39,11 +39,10 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
     }
 
     @Override
-    public String validate(String filePath) {
+    public void validate(String filePath) {
         try {
             if (StringUtils.isEmpty(filePath) || !HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                return new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() })
-                        .getMessage();
+                throw new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() });
             }
             try (Reader reader = new InputStreamReader(new BOMInputStream(HdfsUtils.getInputStream(yarnConfiguration, //
                     filePath)), "UTF-8")) {
@@ -52,13 +51,12 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
                     validateSourceColumn(parser.iterator());
                 }
             }
-        } catch (LedpException leException) {
-            return leException.getMessage();
+        } catch (LedpException le) {
+            throw new RuntimeException(le);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
-            return LedpCode.LEDP_10008.getMessage();
+            throw new LedpException(LedpCode.LEDP_10008);
         }
-        return "";
     }
 
     private void validateHeader(Set<String> headers) {

@@ -426,6 +426,7 @@ public enum LedpCode {
     LEDP_28025("PMML file {0} not found for module {1}."), //
     LEDP_28026("Pivot file {0} not found for module {1}."), //
     LEDP_28027("Problem reading data rules from {0}."), //
+    LEDP_28028("Unsupported PMML version {0} detected. We only support {1}."), //
 
     // le-dellebi
     LEDP_29000(

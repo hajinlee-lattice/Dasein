@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<PMML version="3.0" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<PMML version="3.1" xmlns="http://www.dmg.org/PMML-3_0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <Header copyright="Copyright (c) Integral Solutions Ltd., 1994 - 2005. All rights reserved.">
 <Application name="Clementine" version="10.0"/>
 <Annotation>Exported with PMML extensions for use with SPSS SmartScore</Annotation>

@@ -7,6 +7,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.dmg.pmml.PMML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,8 @@ import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 @Component("pmmlFileValidationService")
 public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
+    public static final String SUPPORTED_VERSION = "3.1";
+
     protected PmmlFileValidationServiceImpl() {
         super(ArtifactType.PMML);
     }
@@ -29,25 +32,26 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
     private Configuration yarnConfiguration;
 
     @Override
-    public String validate(String filePath) {
-        String messg = "";
+    public void validate(String filePath) {
         try {
             if (StringUtils.isEmpty(filePath) || !HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                return new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() })
-                        .getMessage();
+                throw new LedpException(LedpCode.LEDP_10011, new String[] { new Path(filePath).getName() });
             }
             try (InputStream pmmlStream = HdfsUtils.getInputStream(yarnConfiguration, filePath)) {
-                List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(pmmlStream);
-                messg = validatePmmlField(pmmlFields);
+                PMML pmml = PmmlModelUtils.getPMMLWithOriginalVersion(pmmlStream);
+                validatePmmlVersion(pmml);
+                List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(pmml);
+                validatePmmlField(pmmlFields);
             }
+        } catch (LedpException le) {
+            throw new RuntimeException(le);
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
-            return LedpCode.LEDP_10008.getMessage();
+            throw new LedpException(LedpCode.LEDP_10008);
         }
-        return messg;
     }
 
-    private String validatePmmlField(List<PmmlField> pmmlFields) {
+    private void validatePmmlField(List<PmmlField> pmmlFields) {
         StringBuilder sb = new StringBuilder();
         for (PmmlField pmmlField : pmmlFields) {
             if (!AvroUtils.isAvroFriendlyFieldName(pmmlField.miningField.getName().getValue())) {
@@ -57,6 +61,15 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
                 sb.append("DataField: ").append(pmmlField.miningField.getName()).append(" has invalid value.\n");
             }
         }
-        return sb.toString();
+        if (sb.length() > 0) {
+            throw new LedpException(LedpCode.LEDP_18115, new String[] { sb.toString() });
+        }
+    }
+
+    private void validatePmmlVersion(PMML pmml) {
+        String version = pmml.getVersion();
+        if (!version.equals(SUPPORTED_VERSION)) {
+            throw new LedpException(LedpCode.LEDP_28028, new String[] { version, SUPPORTED_VERSION });
+        }
     }
 }

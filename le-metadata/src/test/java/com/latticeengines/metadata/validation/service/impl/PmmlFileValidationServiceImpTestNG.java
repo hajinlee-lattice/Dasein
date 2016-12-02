@@ -23,11 +23,17 @@ public class PmmlFileValidationServiceImpTestNG extends MetadataFunctionalTestNG
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration,
                 ClassLoader.getSystemResource(RESOURCE_BASE + "/IRIS_MLP_Neural_Network.xml").getPath(), hdfsPath);
 
-        String error = ArtifactValidation.getArtifactValidationService(ArtifactType.PMML).validate(
-                hdfsPath + "/IRIS_MLP_Neural_Network.xml");
-        System.out.println(error);
-        assertTrue(error.contains("MiningField: petal length has invalid value."));
-        assertTrue(error.contains("DataField: petal width has invalid value."));
+        try {
+            ArtifactValidation.getArtifactValidationService(ArtifactType.PMML)
+                    .validate(hdfsPath + "/IRIS_MLP_Neural_Network.xml");
+            assertTrue(false);
+        } catch (Exception e) {
+            String error = e.getMessage();
+            System.out.println(error);
+            assertTrue(error.contains("MiningField: petal length has invalid value."));
+            assertTrue(error.contains("DataField: petal width has invalid value."));
+
+        }
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 
