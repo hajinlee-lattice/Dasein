@@ -18,7 +18,7 @@ public class ScalarTypeHandler extends PMMLResultHandlerBase {
         double predicted = Double.valueOf(originalResult.toString());
 
         result.put(ScoreType.PROBABILITY_OR_VALUE, predicted);
-        result.put(ScoreType.PERCENTILE, -1);
+        result.put(ScoreType.PERCENTILE, null);
     }
 
 }

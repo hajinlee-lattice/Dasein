@@ -4,6 +4,7 @@ public class ScoreEvaluation {
 
     private double probabilityOrValue;
     private int percentile;
+    private ScoreType scoreType = null;;
 
     public ScoreEvaluation(double probabilityOrValue, int percentile) {
         super();
@@ -25,6 +26,14 @@ public class ScoreEvaluation {
     
     public void setPercentile(int percentile) {
         this.percentile = percentile;
+    }
+
+    public ScoreType getScoreType() {
+        return scoreType;
+    }
+
+    public void setScoreType(ScoreType scoreType) {
+        this.scoreType = scoreType;
     }
 
 }

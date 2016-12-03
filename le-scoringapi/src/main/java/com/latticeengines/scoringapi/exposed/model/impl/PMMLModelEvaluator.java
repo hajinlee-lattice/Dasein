@@ -5,6 +5,8 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dmg.pmml.DataField;
+import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
@@ -53,6 +55,10 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         }
     }
     
+    private Object getDefaultValue(DataType dataType) {
+        return DataTypeDefault.getByDataType(dataType).getDefaultValue();
+    }
+    
     @Override
     public Map<ScoreType, Object> evaluate(Map<String, Object> record, //
             ScoreDerivation derivation) {
@@ -63,7 +69,16 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         boolean debugRow = false;
 
         for (FieldName name : evaluator.getActiveFields()) {
-            prepare(evaluator, arguments, debugRow, name, record.get(name.getValue()));
+            Object value = record.get(name.getValue());
+            
+            if (value == null) {
+                DataField dataField = evaluator.getDataField(name);
+                
+                if (dataField != null) {
+                    value = getDefaultValue(dataField.getDataType());
+                }
+            }
+            prepare(evaluator, arguments, debugRow, name, value);
         }
 
         Map<FieldName, ?> results = null;
@@ -82,5 +97,55 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         calculatePercentile(derivation, results, result);
 
         return result;
+    }
+    
+    private enum DataTypeDefault {
+        
+        STRING(DataType.STRING, ""), //
+        INTEGER(DataType.INTEGER, 0), //
+        FLOAT(DataType.FLOAT, 0.0), //
+        DOUBLE(DataType.DOUBLE, 0.0), //
+        BOOLEAN(DataType.BOOLEAN, false), //
+        DATE(DataType.DATE, null), //
+        TIME(DataType.TIME, null), //
+        DATE_TIME(DataType.DATE_TIME, null), //
+        DATE_DAYS_SINCE_0(DataType.DATE_DAYS_SINCE_0, null), //
+        DATE_DAYS_SINCE_1960(DataType.DATE_DAYS_SINCE_1960, null), //
+        DATE_DAYS_SINCE_1970(DataType.DATE_DAYS_SINCE_1970, null), //
+        DATE_DAYS_SINCE_1980(DataType.DATE_DAYS_SINCE_1980, null),
+        TIME_SECONDS(DataType.TIME_SECONDS, null),
+        DATE_TIME_SECONDS_SINCE_0(DataType.DATE_TIME_SECONDS_SINCE_0, null),
+        DATE_TIME_SECONDS_SINCE_1960(DataType.DATE_TIME_SECONDS_SINCE_1960, null),
+        DATE_TIME_SECONDS_SINCE_1970(DataType.DATE_TIME_SECONDS_SINCE_1970, null),
+        DATE_TIME_SECONDS_SINCE_1980(DataType.DATE_TIME_SECONDS_SINCE_1980, null);
+
+        private final DataType dataType;
+        private final Object defaultValue;
+        
+        private static Map<DataType, DataTypeDefault> map = new HashMap<>();
+            
+        static {
+            for (DataTypeDefault d : DataTypeDefault.values()) {
+                map.put(d.getDataType(), d);
+            }
+        }
+        
+        DataTypeDefault(DataType dataType, Object defaultValue) {
+            this.dataType = dataType;
+            this.defaultValue = defaultValue;
+        }
+
+        public Object getDefaultValue() {
+            return defaultValue;
+        }
+
+        public DataType getDataType() {
+            return dataType;
+        }
+        
+        public static DataTypeDefault getByDataType(DataType dataType) {
+            return map.get(dataType);
+        }
+
     }
 }
