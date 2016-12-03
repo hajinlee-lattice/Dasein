@@ -32,12 +32,9 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             return true;
         }
         // Name: 0, City: 3, State: 4
-        if (matchGrade.getRawCode().charAt(0) == 'A' && matchGrade.getRawCode().charAt(3) == 'Z'
-                && matchGrade.getRawCode().charAt(4) == 'A') {
-            return false;
-        }
-        if (matchGrade.getRawCode().charAt(0) == 'A' && matchGrade.getRawCode().charAt(3) == 'A'
-                && matchGrade.getRawCode().charAt(4) == 'Z') {
+        if (matchGrade.getRawCode().charAt(0) == 'A'
+                && (matchGrade.getRawCode().charAt(3) == 'A' || matchGrade.getRawCode().charAt(3) == 'Z')
+                && (matchGrade.getRawCode().charAt(4) == 'A' || matchGrade.getRawCode().charAt(4) == 'Z')) {
             return false;
         }
         return true;

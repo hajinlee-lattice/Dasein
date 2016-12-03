@@ -121,7 +121,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                         new DnBMatchGrade("AZZAAZZZFAB") },
                 { "DÉSIRÉE DAUDE", null, null, "DE", DnBReturnCode.DISCARD, null, 4, new DnBMatchGrade("BZZZZZZZZZZ") },
                 { "ABCDEFG", "NEW YORK", "WASHINTON", "US", DnBReturnCode.UNMATCH, null, null, null },
-                { "GORMAN MANUFACTURING", null, null, "US", DnBReturnCode.DISCARD, null, 6,
+                { "GORMAN MANUFACTURING", null, null, "US", DnBReturnCode.OK, "804735132", 6,
                         new DnBMatchGrade("AZZZZZZZFZZ") },
                 { "GOOGLE", null, "CA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZAZZZFFZ") },
                 { "GOOGLE GERMANY", "HAMBURG", null, "DE", DnBReturnCode.OK, "330465266", 7,
