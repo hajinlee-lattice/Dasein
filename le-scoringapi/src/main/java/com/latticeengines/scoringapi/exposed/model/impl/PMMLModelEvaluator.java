@@ -37,7 +37,12 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         Object o = results.get(new FieldName(target));
         PMMLResultHandler handler = PMMLResultHandlerBase.getHandler(o.getClass());
-        handler.processResult(result, o);
+        
+        if (handler == null) {
+            result.put(ScoreType.PERCENTILE, -1);
+        } else {
+            handler.processResult(result, o);
+        }
     }
 
     @Override
