@@ -111,7 +111,11 @@ public class LoginResource {
         UserDocument doc = new UserDocument();
 
         try {
-            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
+            String ticketData = request.getHeader(Constants.AUTHORIZATION);
+            if (!StringUtils.isNotEmpty(ticketData)) {
+                throw new LedpException(LedpCode.LEDP_18123);
+            }
+            Ticket ticket = new Ticket(ticketData);
             ticket.setTenants(Collections.singletonList(tenant));
             doc.setTicket(ticket);
 
@@ -131,7 +135,7 @@ public class LoginResource {
 
             doc.setResult(result);
         } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
+            if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18123) {
                 throw new LoginException(e);
             }
             throw e;
