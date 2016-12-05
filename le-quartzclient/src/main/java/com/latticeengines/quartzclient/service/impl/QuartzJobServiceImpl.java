@@ -133,8 +133,12 @@ public class QuartzJobServiceImpl implements QuartzJobService {
 
     @Override
     public Boolean hasActiveJob(QuartzJobArguments jobArgs) {
-        if (jobActives.containsKey(jobArgs.getPredefinedJobType())) {
-            return jobActives.get(jobArgs.getPredefinedJobType());
+        String tenantId = jobArgs.getTenantId();
+        String jobName = jobArgs.getJobName();
+        String jobType = jobArgs.getPredefinedJobType();
+        String jobKey = tenantId + jobName + jobType;
+        if (jobActives.containsKey(jobKey)) {
+            return jobActives.get(jobKey);
         } else {
             return false;
         }
