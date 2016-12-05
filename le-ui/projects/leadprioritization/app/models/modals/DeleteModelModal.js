@@ -29,7 +29,7 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
         });
     };
 })
-.controller('DeleteModelController', function ($scope, $rootScope, $state, ResourceUtility, NavUtility, ModelService) {
+.controller('DeleteModelController', function ($scope, $rootScope, $state, ResourceUtility, NavUtility, ModelStore, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deleteModelClick = function ($event) {
@@ -37,6 +37,7 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
             $event.preventDefault();
         }
 
+        ModelStore.removeModel($scope.modelId);
         updateAsDeletedModel($scope.modelId);
     };
 

@@ -349,9 +349,13 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsDeleted");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
-        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
-                ModelSummary.class);
-        assertNull(summary);
+        try {
+            ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
+                    ModelSummary.class);
+            assertTrue(false, String.format("Model: %s should have been deleted", summary.getId()));
+        } catch (Exception e) {
+            assertTrue(true);
+        }
 
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -379,12 +383,12 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
         restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"));
-        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/modelsummaries/ms-8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a", ModelSummary.class);
-        assertNull(summary);
+        response = restTemplate.getForObject(getRestAPIHostPort()
+                + "/pls/modelsummaries/", List.class);
+        assertEquals(response.size(), 0);
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "functional" }, dependsOnMethods = "deleteModelSummaryHasEditPlsModelsRight")
     public void testPostModelSummariesNoCreatePlsModelsRight() throws IOException {
         switchToSuperAdmin();
         assertCreateModelSummariesSuccess();
@@ -520,21 +524,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary modelSummary = getDetails(eloquaTenant, "eloqua");
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         int originalNumModels = response.size();
-
-        int version = 0;
-        String possibleID = modelSummary.getId();
-        String name = modelSummaryParser.parseOriginalName(modelSummary.getName());
-        ModelSummary existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/"
-                + possibleID, ModelSummary.class);
-        while (existingSummary != null) {
-            possibleID = modelSummary.getId().replace(name, name + "-" + String.format("%03d", ++version));
-            existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + possibleID,
-                    ModelSummary.class);
-        }
-        modelSummary.setId(possibleID);
-        if (version > 0) {
-            modelSummary.setName(modelSummary.getName().replace(name, name + "-" + String.format("%03d", version)));
-        }
 
         ModelSummary newSummary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/",
                 modelSummary, ModelSummary.class);

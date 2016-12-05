@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -72,8 +74,17 @@ public class ModelSummaryResource {
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
-    public ModelSummary getModelSummary(@PathVariable String modelId) {
-        return modelSummaryService.getModelSummary(modelId);
+    public ModelSummary getModelSummary(@PathVariable String modelId, HttpServletRequest request,
+            HttpServletResponse response) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        ModelSummary modelSummary = modelSummaryService.getModelSummary(modelId);
+
+        if (modelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18123,
+                    new String[] { modelId, tenant.getId() });
+        }
+
+        return modelSummary;
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

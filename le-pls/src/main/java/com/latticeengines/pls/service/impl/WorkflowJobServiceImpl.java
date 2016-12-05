@@ -87,10 +87,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
                 + tenantWithPid.getPid());
-        long time1 = System.currentTimeMillis();
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
-        log.info(String.format("Job load time. getting all jobs from workflow api took: %.2f",
-                (System.currentTimeMillis() - time1) / 1000.0));
         if (jobs == null) {
             jobs = Collections.emptyList();
         }

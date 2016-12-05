@@ -369,7 +369,8 @@ angular.module('mainApp.models.services.ModelService', [
             method: 'GET',
             url: '/pls/modelsummaries/'+ modelId,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                'ErrorDisplayMethod': 'modal',
             }
         })
         .success(function(data, status, headers, config) {
