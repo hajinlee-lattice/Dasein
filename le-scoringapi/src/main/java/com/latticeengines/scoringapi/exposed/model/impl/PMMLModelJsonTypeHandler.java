@@ -101,8 +101,13 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             scoreEvaluation = new ScoreEvaluation(-1.0, i);
             scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
         }
+        Object c = evaluation.get(ScoreType.CLASSIFICATION);
+        String classification = String.valueOf(c);
+        if (c == null) {
+            classification = null;
+        }
         
-        scoreEvaluation.setClassification((String) evaluation.get(ScoreType.CLASSIFICATION));
+        scoreEvaluation.setClassification(classification);
 
         return scoreEvaluation;
     }

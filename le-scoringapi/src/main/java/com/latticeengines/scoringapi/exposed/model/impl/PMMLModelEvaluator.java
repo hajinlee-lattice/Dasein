@@ -5,6 +5,8 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
@@ -21,6 +23,8 @@ import com.latticeengines.scoringapi.exposed.model.impl.pmmlresult.PMMLResultHan
 import com.latticeengines.scoringapi.exposed.model.impl.pmmlresult.PMMLResultHandlerBase;
 
 public class PMMLModelEvaluator extends DefaultModelEvaluator {
+    
+    private static final Log log = LogFactory.getLog(PMMLModelEvaluator.class);
 
     public PMMLModelEvaluator(InputStream is) {
         super(is);
@@ -39,6 +43,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         PMMLResultHandler handler = PMMLResultHandlerBase.getHandler(o.getClass());
         
         if (handler == null) {
+            log.error(String.format("No handler for %s class type.", o.getClass().toString()));
             result.put(ScoreType.PERCENTILE, -1);
         } else {
             handler.processResult(result, o);
