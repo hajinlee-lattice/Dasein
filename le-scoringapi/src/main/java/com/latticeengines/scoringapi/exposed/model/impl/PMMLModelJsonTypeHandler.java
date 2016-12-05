@@ -74,6 +74,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
         ScoreResponse scoreResponse = new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         
+        scoreResponse.setClassification(scoreEvaluation.getClassification());
         if (scoreEvaluation.getScoreType() == ScoreType.PERCENTILE) {
             scoreResponse.setScore(scoreEvaluation.getPercentile());
         } else if (scoreEvaluation.getScoreType() == ScoreType.PROBABILITY_OR_VALUE) {
@@ -100,6 +101,8 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
             scoreEvaluation = new ScoreEvaluation(-1.0, i);
             scoreEvaluation.setScoreType(ScoreType.PERCENTILE);
         }
+        
+        scoreEvaluation.setClassification((String) evaluation.get(ScoreType.CLASSIFICATION));
 
         return scoreEvaluation;
     }

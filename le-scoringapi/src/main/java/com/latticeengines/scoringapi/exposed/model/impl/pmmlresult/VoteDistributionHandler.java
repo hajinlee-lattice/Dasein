@@ -3,21 +3,21 @@ package com.latticeengines.scoringapi.exposed.model.impl.pmmlresult;
 import java.util.Map;
 
 import org.jpmml.evaluator.EvaluationException;
-import org.jpmml.evaluator.ProbabilityDistribution;
+import org.jpmml.evaluator.VoteDistribution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoringapi.exposed.ScoreType;
 
 @Component
-public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
+public class VoteDistributionHandler extends PMMLResultHandlerBase {
 
-    public ProbabilityDistributionHandler() {
-        super(new Class<?>[] { ProbabilityDistribution.class });
+    public VoteDistributionHandler() {
+        super(new Class<?>[] { VoteDistribution.class });
     }
 
     @Override
     public void processResult(Map<ScoreType, Object> result, Object originalResult) {
-        ProbabilityDistribution distribution = (ProbabilityDistribution) originalResult;
+        VoteDistribution distribution = (VoteDistribution) originalResult;
         Object r = null;
         
         try {
@@ -27,15 +27,8 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
             // this means it's Lattice RF model
         }
         
-        double predicted = 0.0;
+        double predicted = distribution.getProbability((String) r);
         
-        if (r != null) {
-            predicted = distribution.getProbability(r.toString());
-        } else {
-            predicted = distribution.getProbability("1");
-            result.put(ScoreType.CLASSIFICATION, "1");
-        }
-
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
         result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
     }

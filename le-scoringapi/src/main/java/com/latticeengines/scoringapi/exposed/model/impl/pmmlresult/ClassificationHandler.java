@@ -22,6 +22,7 @@ public class ClassificationHandler extends PMMLResultHandlerBase {
         
         try {
             r = distribution.getResult();
+            result.put(ScoreType.CLASSIFICATION, r);
         } catch (EvaluationException e) {
             // this means it's Lattice RF model
         }

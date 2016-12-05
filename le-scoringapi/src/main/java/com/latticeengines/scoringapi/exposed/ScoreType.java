@@ -9,6 +9,7 @@ public enum ScoreType {
     LIFT(Double.class), //
     PERCENTILE(Integer.class), //
     BUCKET(String.class), //
+    CLASSIFICATION(String.class), //
     MODEL_NAME(String.class);
 
     private ScoreType(Class<?> type) {

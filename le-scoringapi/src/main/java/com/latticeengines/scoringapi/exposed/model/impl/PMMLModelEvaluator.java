@@ -56,7 +56,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
         try {
             super.prepare(evaluator, arguments, debugRow, name, value);
         } catch (Exception e) {
-            super.prepare(evaluator, arguments, debugRow, name, DEFAULT_DOUBLE_VALUE);
+            throw new RuntimeException(e);
         }
     }
     
