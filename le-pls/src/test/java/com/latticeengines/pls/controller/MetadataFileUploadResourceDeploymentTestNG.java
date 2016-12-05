@@ -77,12 +77,11 @@ public class MetadataFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
         String path = String.format("/pls/metadatauploads/modules/module1/%s?artifactName=abcd",
                 ArtifactType.PivotMapping.getUrlToken());
         try {
-            restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST, requestEntity, ResponseDocument.class);
-            throw new RuntimeException();
+            restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST, requestEntity, String.class);
+            assertTrue(false);
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains("LEDP_18115"));
             assertTrue(e.getMessage().contains(
-                            "File Validation Failed due to: [Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType] from the file]"));
+                            "Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));
         }
     }
 }
