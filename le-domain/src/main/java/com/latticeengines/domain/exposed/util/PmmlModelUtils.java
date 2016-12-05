@@ -66,17 +66,23 @@ public class PmmlModelUtils {
     }
 
     public static PMML getPMML(InputStream pmmlStream) throws Exception {
-        InputSource source = new InputSource(pmmlStream);
-        XMLReader reader = XMLReaderFactory.createXMLReader();
-        ImportFilter importFilter = new ImportFilter(reader);
-        XMLFilter skipSegmentationFilter = new SkipFilter(reader, "Segmentation");
-        skipSegmentationFilter.setParent(importFilter);
-        XMLFilter skipExtensionFilter = new SkipFilter(reader, "Extension");
-        skipExtensionFilter.setParent(skipSegmentationFilter);
-        SAXSource transformedSource = new SAXSource(skipExtensionFilter, source);
+        return getPMML(pmmlStream, true);
+    }
 
-        PMML pmml = JAXBUtil.unmarshalPMML(transformedSource);
-        return pmml;
+    public static PMML getPMML(InputStream pmmlStream, boolean skipSections) throws Exception {
+        if (skipSections) {
+            XMLReader reader = XMLReaderFactory.createXMLReader();
+            ImportFilter importFilter = new ImportFilter(reader);
+            XMLFilter skipSegmentationFilter = new SkipFilter(reader, "Segmentation");
+            skipSegmentationFilter.setParent(importFilter);
+            XMLFilter skipExtensionFilter = new SkipFilter(reader, "Extension");
+            skipExtensionFilter.setParent(skipSegmentationFilter);
+            SAXSource transformedSource = new SAXSource(skipExtensionFilter, new InputSource(pmmlStream));
+
+            return JAXBUtil.unmarshalPMML(transformedSource);
+        } else {
+            return JAXBUtil.unmarshalPMML(ImportFilter.apply(new InputSource(pmmlStream)));
+        }
     }
 
     private static Map<String, DataField> getDataFields(PMML pmml) {

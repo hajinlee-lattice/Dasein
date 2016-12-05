@@ -18,6 +18,10 @@ public class ScoreResponse extends BaseResponse {
     @JsonProperty("score")
     @ApiModelProperty(value = "Score")
     private double score;
+    
+    @JsonProperty("classification")
+    @ApiModelProperty(value = "Classification")
+    private String classification;
 
     @JsonProperty("enrichmentAttributeValues")
     @ApiModelProperty(value = "Enrichment attribute values")
@@ -53,6 +57,14 @@ public class ScoreResponse extends BaseResponse {
 
     public void setEnrichmentAttributeValues(Map<String, Object> enrichmentAttributeValues) {
         this.enrichmentAttributeValues = enrichmentAttributeValues;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
     }
 
 }
