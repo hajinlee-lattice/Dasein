@@ -123,7 +123,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
     }
 
     private String fixPMMLFile(String pmmlPath) throws Exception {
-        PMML pmml = PmmlModelUtils.getPMML(HdfsUtils.getInputStream(yarnConfiguration, pmmlPath));
+        PMML pmml = PmmlModelUtils.getPMML(HdfsUtils.getInputStream(yarnConfiguration, pmmlPath), false);
         new RegressionTargetCorrector().applyTo(pmml);
         StringWriter stringWriter = new StringWriter();
         Result result = new StreamResult(stringWriter);

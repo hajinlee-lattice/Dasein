@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -146,6 +147,11 @@ public class CreatePMMLModelUnitTestNG {
         List<PmmlField> pmmlFields = PmmlModelUtils.getPmmlFields(inputStream);
         Map.Entry<String[], String> featuresAndTarget = createPMMLModel.getFeaturesAndTarget(pmmlFields, pivotValues);
         assertNotNull(featuresAndTarget.getValue());
-
+    }
+    
+    @Test(groups = "unit")
+    public void getMetadataArtifacts() throws Exception {
+        Map<ArtifactType, String> result = createPMMLModel.getMetadataArtifacts();
+        assertNotNull(result.get(ArtifactType.PMML));
     }
 }
