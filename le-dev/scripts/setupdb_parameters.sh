@@ -15,5 +15,12 @@ if ! [ -z "$3" ]; then
 fi
 
 echo "Using hostname:$db_hostname user:$db_user password:$db_password"
-MYSQL_COMMAND='mysql -h $db_hostname -u $db_user -p$db_password'
+if [[ "${UNAME}" == 'Darwin' ]]; then
+    echo "You are on Mac"
+    MYSQL_COMMAND='mysql -h $db_hostname -u $db_user -p$db_password --local-infile=1'
+else
+    echo "You are on ${UNAME}"
+    MYSQL_COMMAND='mysql -h $db_hostname -u $db_user -p$db_password'
+fi
 
+echo "MYSQL_COMMAND=$MYSQL_COMMAND"

@@ -13,6 +13,8 @@ function processErrors
 # Test for required env variables
 printf "%s\n" "${WSHOME:?You must set WSHOME}"
 
+UNAME=`uname`
+
 # Compile le-domain
 cd $WSHOME/le-domain
 mvn -DskipTests clean install 2> /tmp/errors.txt
