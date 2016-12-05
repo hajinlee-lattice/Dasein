@@ -1,7 +1,7 @@
 <ul>
-  <li class="checkbox" ng-repeat="opt in options">
+  <li class="checkbox" ng-repeat="opt in options | filter:{'name':search}">
     <label>
-      <input type="checkbox" ng-model="selected[opt[key]]" ng-checked="selected[opt[key]]" ng-disabled="readonly"/>{{::opt.name}}
+      <input type="checkbox" ng-model="selected[opt.name]" ng-checked="selected[opt.name]" ng-disabled="readonly"/>{{::opt.name}}
     </label>
   </li>
 </ul>

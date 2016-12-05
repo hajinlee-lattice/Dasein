@@ -6,8 +6,8 @@ angular.module('app.modelquality.directive.MultiSelectCheckbox', [
         scope: {
             options: '=',
             selected: '=',
-            key: '@',
-            readonly: '='
+            readonly: '=',
+            search: '='
         },
         templateUrl: 'app/modelquality/view/MultiSelectCheckboxView.html',
         controller: 'MultiSelectCheckboxCtrl',

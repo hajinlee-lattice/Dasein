@@ -11,6 +11,13 @@
     </div>
   </div>
   <div class="row">
+    <form class="form-inline">
+      <div class="form-group">
+      <label for="search">Search:
+        <input class="form-control" name="search" type="text" ng-model="search"/>
+      </label>
+      </div>
+    </form>
     <table class="table table-striped table-bordered table-hover">
       <thead>
         <tr>
@@ -20,6 +27,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="analyticTest in vm_analyticTest.analyticTests |
+          filter:{'name': search} |
           startFrom: ((vm_analyticTest.cur - 1) * vm_analyticTest.max) |
           limitTo:vm_analyticTest.max">
           <td ng-repeat="col in ::vm_analyticTest.columns">
@@ -97,7 +105,14 @@
     <h3 class="modal-title" id="modal-title">{{::title}}</h3>
   </div>
   <div class="modal-body modal-max-height" id="modal-body">
-    <multi-select-checkbox options="options" selected="selected" key="name" readonly="readonly"></multi-select-checkbox>
+    <form class="form-inline">
+      <div class="form-group">
+      <label for="search">Search:
+        <input class="form-control" name="search" type="text" ng-model="search"/>
+      </label>
+      </div>
+    </form>
+    <multi-select-checkbox options="options" selected="selected" readonly="readonly" search="search"></multi-select-checkbox>
   </div>
 </script>
 
@@ -110,7 +125,14 @@
       <div class="loader loader-xs"> </div>
     </div>
     <p ng-if="message" class="alert" ng-class="error ? 'alert-danger' : 'alert-success'">{{message}}</p>
-    <multi-select-checkbox options="options" selected="selected" key="name"></multi-select-checkbox>
+    <form class="form-inline">
+      <div class="form-group">
+      <label for="search">Search:
+        <input class="form-control" name="search" type="text" ng-model="search"/>
+      </label>
+      </div>
+    </form>
+    <multi-select-checkbox options="options" selected="selected" search="search"></multi-select-checkbox>
     <div class="container-fluid">
       <hr>
       <div class="row">

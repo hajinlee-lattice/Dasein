@@ -1,8 +1,16 @@
 <section class="row create-pipeline-main">
   <div ng-class="vm_analyticPipeline.stepMetadata ? 'col-xs-3' : 'col-xs-4'" class="pipeline-list-container no-gutter">
     <h4>{{::vm_analyticPipeline.labels.PIPELINES}}</h4>
+    <form class="form-inline">
+      <div class="form-group">
+      <label for="search">Search:
+        <input class="form-control" name="search" type="text" ng-model="search"/>
+      </label>
+      </div>
+    </form>
     <ul class="pipeline-list">
-      <li ng-repeat="pipeline in vm_analyticPipeline.analyticPipelines"
+      <li ng-repeat="pipeline in vm_analyticPipeline.analyticPipelines |
+        filter:{'name':search}"
         ng-class="{selected: vm_analyticPipeline.selectedPipeline === pipeline}"
         ng-click="vm_analyticPipeline.selectPipeline(pipeline)">
         <div>{{::pipeline.name}}</div>

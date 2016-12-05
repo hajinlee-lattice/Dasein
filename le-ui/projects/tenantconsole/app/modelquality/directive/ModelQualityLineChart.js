@@ -171,6 +171,7 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     .append("circle")
                     .attr("cx", function(d,i) { return x(d.x); })
                     .attr("cy", function(d,i) { return y(d.y); })
+                    .attr("r", "3px")
                     .attr("fill", function (d,i) { return color(d.key); });
 
                 chart.append("g")
@@ -188,7 +189,6 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 }).on("mouseleave", function() {
                     hideTooltip();
                     hoverVerticalLine.style("display", "none");
-                    dots.style("r", "0px");
                 }).on("mousemove", function () {
                     var mouse = d3.mouse(this);
                     var xPos = mouse[0];
@@ -215,12 +215,9 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                     var tooltipData = {};
                     tooltipData.AnalyticPipeline = tippedKey;
 
-                    dots.style("r", function (d, i) {
+                    dots.each(function (d, i) {
                         if (d.x === tippedKey) {
                             tooltipData[d.key] = d.y;
-                            return '3px';
-                        } else {
-                            return '0px';
                         }
                     });
 
