@@ -26,7 +26,7 @@ class TransformTest(TestCase):
         shutil.copy(os.path.join('data',artifacts), '.')
         import addtitleattributestrf as trf
 
-        valuesToCheck = {'CEO': 3.0, '': 15.06, None: 15.06, 'AStringThatIsLongerThanThirtyCharacters': 30.0}
+        valuesToCheck = {'CEO': 3.0, '': 16.74705882352941, None: 16.74705882352941, 'AStringThatIsLongerThanThirtyCharacters': 30.0}
         args = {'column1': 'Title', 'column2': 'DS_TitleLength'}
 
         for k, v in valuesToCheck.iteritems():

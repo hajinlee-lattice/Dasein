@@ -19,7 +19,7 @@ class TrainingTest(TrainingTestBase):
             del sys.modules['launcher']
         from launcher import Launcher
 
-        traininglauncher = Launcher("metadata-modeling-lead-1.json")
+        traininglauncher = Launcher("SlimEventTable_Mulesoft_Metadata_Modeling_20160624_155355.json")
         fieldList = traininglauncher.getParser().fields
         traininglauncher.execute(False)
  
@@ -54,7 +54,7 @@ class TrainingTest(TrainingTestBase):
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
 
         # Test the scoring engine using the generated pipeline that was deserialized
-        inputColumns = json.loads(open(glob.glob("metadata-modeling-lead-1.json")[0]).read())["features"]
+        inputColumns = json.loads(open(glob.glob("SlimEventTable_Mulesoft_Metadata_Modeling_20160624_155355.json")[0]).read())["features"]
 
         value = [random() for _ in range(len(inputColumns))]
 
