@@ -57,7 +57,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private static final Log log = LogFactory.getLog(DynamoDataStoreImpl.class);
 
     private static final String ERRORMESSAGE = //
-            "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
+    "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
 
     private static final String REPO = "_REPO_";
     private static final String RECORD = "_RECORD_";
@@ -384,6 +384,13 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             return avroInstance.toString();
         } else if (avroInstance instanceof GenericData.EnumSymbol) {
             return avroInstance.toString();
+        } else if (avroInstance instanceof Map) {
+            Map map = (Map) avroInstance;
+            Map<String, String> result = new HashMap<>();
+            for (Object key : map.keySet()) {
+                result.put(key.toString(), map.get(key).toString());
+            }
+            return result;
         }
 
         return avroInstance;

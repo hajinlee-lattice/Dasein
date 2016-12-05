@@ -1,9 +1,8 @@
 package com.latticeengines.domain.exposed.ulysses;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.Id;
 
@@ -13,40 +12,31 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class EnrichedAccount implements HasId<String> {
 
+    public EnrichedAccount() {
+        id = UUID.randomUUID().toString();
+    }
+
     @Id
-    @JsonProperty("latticeRequestId")
+    @JsonProperty
+    @DynamoAttribute
     private String id;
 
-    @JsonProperty("score")
-    @DynamoAttribute("score")
-    private double score;
+    @Id
+    @JsonProperty
+    @DynamoAttribute
+    private String latticeAccountId;
 
-    @JsonProperty("attributes")
-    private Map<String, String> attributes = new HashMap<>();
-
-    @JsonProperty("campaignIds")
-    @DynamoAttribute("campaignIds")
-    private List<String> campaignIds = new ArrayList<>();
-
-    @JsonProperty("tenantId")
-    @DynamoAttribute("tenantId")
+    @JsonProperty
+    @DynamoAttribute
     private String tenantId;
 
-    @JsonProperty("externalId")
-    @DynamoAttribute("externalId")
-    private String externalId;
+    @JsonProperty
+    @DynamoAttribute
+    private String sourceAccountId;
 
-    @JsonProperty("requestTimestamp")
-    @DynamoAttribute("requestTimestamp")
-    private long requestTimestamp;
-
-    public void setCampaignIds(List<String> campaignIds) {
-        this.campaignIds = campaignIds;
-    }
-
-    public List<String> getCampaignIds() {
-        return campaignIds;
-    }
+    @JsonProperty
+    @DynamoAttribute
+    private Map<String, String> attributes = new HashMap<>();
 
     @Override
     public String getId() {
@@ -58,24 +48,12 @@ public class EnrichedAccount implements HasId<String> {
         this.id = id;
     }
 
-    public void setValue(String key, String value) {
-        attributes.put(key, value);
+    public String getLatticeAccountId() {
+        return latticeAccountId;
     }
 
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
+    public void setLatticeAccountId(String latticeAccountId) {
+        this.latticeAccountId = latticeAccountId;
     }
 
     public String getTenantId() {
@@ -86,19 +64,23 @@ public class EnrichedAccount implements HasId<String> {
         this.tenantId = tenantId;
     }
 
-    public String getExternalId() {
-        return externalId;
+    public String getSourceAccountId() {
+        return sourceAccountId;
     }
 
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
+    public void setSourceAccountId(String sourceAccountId) {
+        this.sourceAccountId = sourceAccountId;
     }
 
-    public long getRequestTimestamp() {
-        return requestTimestamp;
+    public void setAttribute(String key, String value) {
+        attributes.put(key, value);
     }
 
-    public void setRequestTimestamp(long requestTimestamp) {
-        this.requestTimestamp = requestTimestamp;
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 }
