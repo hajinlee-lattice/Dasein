@@ -25,6 +25,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 @Component
 public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
     
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultModelJsonTypeHandler.class);
     
     @Override
