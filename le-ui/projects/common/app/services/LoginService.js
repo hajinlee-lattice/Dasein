@@ -126,7 +126,9 @@ angular.module('mainApp.login.services.LoginService', [
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
                 
-                setTimeout(function() { $window.location.href = "/login"; }, 300);
+                setTimeout(function() { 
+                    window.open("/login/", "_self"); 
+                }, 300);
             } else {
                 SessionService.HandleResponseErrors(data, status);
             }
