@@ -58,6 +58,7 @@
                     .setting {
                         &.col {
                             @include flex-item(0 1 50%);
+                            min-width: 50%;
                         }
                         padding: 0 50px;
                         padding-top: 16px;
