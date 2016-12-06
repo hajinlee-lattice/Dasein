@@ -287,7 +287,7 @@ section.container.custom-fields {
             }
         }
         td {
-            padding: 0.3em 0em .3em 1em;
+            padding: 0.3em 0.5em .3em 0.5em;
             margin: 0;
             vertical-align: middle;
                 
@@ -621,14 +621,14 @@ Media Queries
             border-bottom: 1px solid #e9e9e9;
 
             select {
-                max-width: 90%;
+                /*max-width: 90%;*/
             }
 
             td {
                 border-right: 1px solid #e9e9e9;
                 
                 &.field-mapping-inputs {
-                    padding: 0.5em 1em 0.5em;
+                    padding: 0.5em;
                 }
 
                 &:last-child {
