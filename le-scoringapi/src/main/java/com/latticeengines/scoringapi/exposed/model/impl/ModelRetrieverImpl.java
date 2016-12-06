@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -80,15 +81,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
 
-    private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
-                                                                                            // modelId
-    private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
+    static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
+                                                                                    // modelId
+    static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
     private int scoreArtifactCacheMaxSize;
+
+    @Value("${scoringapi.scoreartifact.cache.expiration.time}")
+    private int scoreArtifactCacheExpirationTime;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -267,8 +271,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
-        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType).getScoreDerivation(
-                hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
+        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType)
+                .getScoreDerivation(hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
@@ -331,8 +335,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
-                throw new LedpException(LedpCode.LEDP_31007, new String[] { modelSummary.getId(),
-                        JsonUtils.serialize(folders) });
+                throw new LedpException(LedpCode.LEDP_31007,
+                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
@@ -471,6 +475,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String localModelJsonCacheDir = String.format(LOCAL_MODELJSON_CACHE_DIR, customerSpace.toString(), modelId);
         File modelArtifactsDir = new File(localModelJsonCacheDir + LOCAL_MODEL_ARTIFACT_CACHE_DIR);
 
+        // the model artifacts already exists in the local file system
+        if (modelArtifactsDir.exists()) {
+            return modelArtifactsDir;
+        }
+
         if (!modelArtifactsDir.exists() && !modelArtifactsDir.mkdirs()) {
             throw new LedpException(LedpCode.LEDP_31006, new String[] { modelArtifactsDir.getAbsolutePath() });
         }
@@ -479,12 +488,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
                 if (!StringUtils.isBlank(localPathToPersist)) {
-                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
-                            + MODEL_JSON);
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0),
+                            localPathToPersist + MODEL_JSON);
                 }
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
-                        localModelJsonCacheDir });
+                throw new LedpException(LedpCode.LEDP_31002,
+                        new String[] { modelJsonHdfsPath.get(0), localModelJsonCacheDir });
             }
         } else if (modelJsonHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31003, new String[] { hdfsScoreArtifactBaseDir });
@@ -504,13 +513,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, //
             String modelId) {
-        return scoreArtifactCache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace,
-                modelId));
+        return scoreArtifactCache
+                .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
 
     private void instantiateCache() {
         log.info("Instantiating score artifact cache with max size " + scoreArtifactCacheMaxSize);
         scoreArtifactCache = CacheBuilder.newBuilder().maximumSize(scoreArtifactCacheMaxSize)
+                .expireAfterWrite(scoreArtifactCacheExpirationTime, TimeUnit.DAYS)
                 .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts>() {
                     @Override
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -90,6 +91,10 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
         requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
         requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
+        if (scoringArtifacts.getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
+            throw new ScoringApiException(LedpCode.LEDP_31114,
+                    new String[] { scoringArtifacts.getModelSummary().getId() });
+        }
         requestInfo.put("ModelType",
                 (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
 

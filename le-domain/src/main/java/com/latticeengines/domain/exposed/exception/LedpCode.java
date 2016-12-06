@@ -486,12 +486,14 @@ public enum LedpCode {
     LEDP_31111("api_error", "Could not process record. Cause: {0}"), //
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
+    LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
     LEDP_31199("missing_domain",
             "Required field(s) are missing: {0}. In case of lead type model, " //
                     + "make sure to specify 'Email' field and for non-lead type model " //
                     + "specify either 'Website' or 'Domain' fields. If these fields " //
                     + "are not specified then specify both 'CompanyName' " //
                     + "and 'State' fields."), //
+
 
     // le-serviceflows
     LEDP_32000("Validations failed: {0}"), //

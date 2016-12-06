@@ -5,7 +5,7 @@ import java.io.File;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -23,8 +23,20 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     @Test(groups = "deployment", enabled = true)
     public void testRetrieveModelArtifacts() throws Exception {
         tenant = setupTenantAndModelSummary(false);
+
         ScoringArtifacts artifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
-        Assert.notNull(artifacts);
+        testArtifacts(artifacts);
+        // Fetch the artifacts second time directly from the cache
+        ScoringArtifacts cachedArtifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
+        testArtifacts(cachedArtifacts);
+    }
+
+    private void testArtifacts(ScoringArtifacts artifacts) {
+        Assert.assertNotNull(artifacts);
+        String localModelJsonCacheDir = String.format(ModelRetrieverImpl.LOCAL_MODELJSON_CACHE_DIR,
+                customerSpace.toString(), MODEL_ID);
+        File modelArtifactsDir = new File(localModelJsonCacheDir + ModelRetrieverImpl.LOCAL_MODEL_ARTIFACT_CACHE_DIR);
+        Assert.assertEquals(artifacts.getModelArtifactsDir(), modelArtifactsDir);
     }
 
     /**
