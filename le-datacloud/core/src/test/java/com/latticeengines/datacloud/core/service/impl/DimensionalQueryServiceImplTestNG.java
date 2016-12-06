@@ -84,23 +84,18 @@ public class DimensionalQueryServiceImplTestNG extends DataCloudCoreFunctionalTe
         attrId = dimensionalQueryService.findAttrId(query);
         verifyAttribute(attrId, "Level3", "3.1");
 
-        error = false;
-        try {
-            qualifiers = new HashMap<>();
-            qualifiers.put("Level1", "1.1");
-            qualifiers.put("Level2", "2.3");
-            qualifiers.put("Level3", "3.1");
-            query.setQualifiers(qualifiers);
-            dimensionalQueryService.findAttrId(query);
-        } catch (LedpException e) {
-            error = true;
-        }
-        Assert.assertTrue(error, "Should throw a LedpException.");
+        qualifiers = new HashMap<>();
+        qualifiers.put("Level1", "1.1");
+        qualifiers.put("Level2", "2.3");
+        qualifiers.put("Level3", "3.1");
+        query.setQualifiers(qualifiers);
+        attrId = dimensionalQueryService.findAttrId(query);
+        Assert.assertNull(attrId);
 
         categoricalAttributeEntityMgrImplTestNG.teardownHierarchy();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testIllegalQuery() {
         DimensionalQuery query = new DimensionalQuery();
         query.setDimension(TEST_DIMENSION);

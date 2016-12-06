@@ -57,11 +57,7 @@ public class DimensionalQueryServiceImpl implements DimensionalQueryService {
         }
 
         CategoricalAttribute attribute = findAttrRecursively(rootAttribute, qualifiers);
-        if (attribute == null) {
-            throw new LedpException(LedpCode.LEDP_25029,
-                    new String[] { queryStr, "Cannot find any qualified attribute." });
-        }
-        return attribute.getPid();
+        return attribute == null ? null : attribute.getPid();
     }
 
     private boolean isDimensionRoot(CategoricalAttribute rootAttribute, Map<String, String> qualifier) {
