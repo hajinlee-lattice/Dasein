@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.jpmml.evaluator.Classification;
 import org.jpmml.evaluator.EvaluationException;
+import org.jpmml.evaluator.NodeScoreDistribution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -12,7 +13,7 @@ import com.latticeengines.scoringapi.exposed.ScoreType;
 public class ClassificationHandler extends PMMLResultHandlerBase {
 
     public ClassificationHandler() {
-        super(new Class<?>[] { Classification.class });
+        super(new Class<?>[] { Classification.class, NodeScoreDistribution.class });
     }
 
     @Override
