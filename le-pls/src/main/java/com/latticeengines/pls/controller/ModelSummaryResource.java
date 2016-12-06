@@ -76,11 +76,11 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Get summary for specific model")
     public ModelSummary getModelSummary(@PathVariable String modelId, HttpServletRequest request,
             HttpServletResponse response) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         ModelSummary modelSummary = modelSummaryService.getModelSummary(modelId);
 
         if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18123,
+            throw new LedpException(LedpCode.LEDP_18124,
                     new String[] { modelId, tenant.getId() });
         }
 
