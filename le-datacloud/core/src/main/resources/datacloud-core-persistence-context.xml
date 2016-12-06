@@ -41,4 +41,12 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="categoricalAttributeDao" class="com.latticeengines.datacloud.core.dao.impl.CategoricalAttributeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="categoricalDimensionDao" class="com.latticeengines.datacloud.core.dao.impl.CategoricalDimensionDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

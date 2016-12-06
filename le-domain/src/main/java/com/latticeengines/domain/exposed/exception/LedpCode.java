@@ -372,6 +372,8 @@ public enum LedpCode {
     LEDP_25025("DnBAPIType {0} is not supported in DnB realtime matching"), //
     LEDP_25026("Updated metadata: {0} for version: {1} is not valid due to approved usage conflict"), //
     LEDP_25027("Fail to get token from DnB authentication service"), //
+    LEDP_25028("Cannot find the root attribute for dimension {0}:{1}"), //
+    LEDP_25029("Cannot find the attribute id for query [ {0} ]: {1}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
