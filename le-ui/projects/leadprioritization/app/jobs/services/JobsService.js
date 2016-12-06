@@ -451,6 +451,7 @@ angular
                 var stepCompleted = getDictionaryValue(job, i);
 
                 if ((stepCompleted == "generate_insights" || stepCompleted == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                    numStepsInGroup.score_training_set += 1;
                     continue;
                 }
 
