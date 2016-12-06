@@ -2,6 +2,9 @@ package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
+
+import java.util.List;
 
 public class VdbMetadataField implements Cloneable {
 
@@ -16,6 +19,10 @@ public class VdbMetadataField implements Cloneable {
     private String description;
     private String displayDiscretization;
     private String statisticalType;
+    private boolean isConflictWithMandatoryRule;
+    private boolean isCoveredByMandatoryRule;
+    private boolean isConflictWithOptionalRule;
+    private List<String> associatedRules;
 
     @JsonProperty("ColumnName")
     public String getColumnName() {
@@ -130,6 +137,42 @@ public class VdbMetadataField implements Cloneable {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @JsonProperty("IsConflictWithMandatoryRule")
+    public boolean isConflictWithMandatoryRule() {
+        return isConflictWithMandatoryRule;
+    }
+
+    public void setIsConflictWithMandatoryRule(boolean isConflictWithMandatoryRule) {
+        this.isConflictWithMandatoryRule = isConflictWithMandatoryRule;
+    }
+
+    @JsonProperty("IsCoveredByMandatoryRule")
+    public boolean isCoveredByMandatoryRule() {
+        return isCoveredByMandatoryRule;
+    }
+
+    public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
+        this.isCoveredByMandatoryRule = isCoveredByMandatoryRule;
+    }
+
+    @JsonProperty("IsConflictWithOptionalRule")
+    public boolean isConflictWithOptionalRule() {
+        return isConflictWithOptionalRule;
+    }
+
+    public void setIsConflictWithOptionalRule(boolean isConflictWithOptionalRule) {
+        this.isConflictWithOptionalRule = isConflictWithOptionalRule;
+    }
+
+    @JsonProperty("AssociatedRules")
+    public List<String> getAssociatedRules() {
+        return this.associatedRules;
+    }
+
+    public void setAssociatedRules(List<String> associatedRules) {
+        this.associatedRules = associatedRules;
     }
 
     @Override
