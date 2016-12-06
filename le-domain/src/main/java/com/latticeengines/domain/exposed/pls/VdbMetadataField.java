@@ -144,6 +144,7 @@ public class VdbMetadataField implements Cloneable {
         return isConflictWithMandatoryRule;
     }
 
+    @JsonProperty("IsConflictWithMandatoryRule")
     public void setIsConflictWithMandatoryRule(boolean isConflictWithMandatoryRule) {
         this.isConflictWithMandatoryRule = isConflictWithMandatoryRule;
     }
@@ -153,6 +154,7 @@ public class VdbMetadataField implements Cloneable {
         return isCoveredByMandatoryRule;
     }
 
+    @JsonProperty("IsCoveredByMandatoryRule")
     public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
         this.isCoveredByMandatoryRule = isCoveredByMandatoryRule;
     }
@@ -162,6 +164,7 @@ public class VdbMetadataField implements Cloneable {
         return isConflictWithOptionalRule;
     }
 
+    @JsonProperty("IsConflictWithOptionalRule")
     public void setIsConflictWithOptionalRule(boolean isConflictWithOptionalRule) {
         this.isConflictWithOptionalRule = isConflictWithOptionalRule;
     }
@@ -171,6 +174,7 @@ public class VdbMetadataField implements Cloneable {
         return this.associatedRules;
     }
 
+    @JsonProperty("AssociatedRules")
     public void setAssociatedRules(List<String> associatedRules) {
         this.associatedRules = associatedRules;
     }
