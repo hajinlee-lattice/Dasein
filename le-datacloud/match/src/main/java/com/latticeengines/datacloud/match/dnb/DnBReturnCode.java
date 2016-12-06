@@ -6,6 +6,7 @@ public enum DnBReturnCode {
     DISCARD("Matched result is discarded"),
     IN_PROGRESS("Batch match is in progress"),
     UNAUTHORIZED("Unauthorized to call API"),
+    UNSUBMITTED("Batch request is not submitted because too many requests are waiting for result"),
     RATE_LIMITING("Rate Limiting"),
     TIMEOUT("Timeout"),
     EXPIRED_TOKEN("Token is expired but failed to refresh"),

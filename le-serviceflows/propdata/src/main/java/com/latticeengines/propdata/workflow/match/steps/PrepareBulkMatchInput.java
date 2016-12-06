@@ -155,6 +155,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             jobConfiguration.setRealTimeProxyUrl(getConfiguration().getRealTimeProxyUrl());
             jobConfiguration.setThreadPoolSize(getConfiguration().getRealTimeThreadPoolSize());
         }
+        jobConfiguration.setUseDnBCache(getConfiguration().getUseDnBCache());
         return jobConfiguration;
     }
 

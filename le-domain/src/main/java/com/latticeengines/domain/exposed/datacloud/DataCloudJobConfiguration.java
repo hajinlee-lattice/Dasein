@@ -58,6 +58,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private Boolean publicDomainAsNormalDomain = Boolean.FALSE;
     @JsonProperty("use_realtime_proxy")
     private Boolean useRealTimeProxy = Boolean.FALSE;
+    @JsonProperty("use_dnb_cache")
+    private boolean useDnBCache = true;
 
 
     public String getHdfsPodId() {
@@ -235,6 +237,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
     public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
         this.useRealTimeProxy = useRealTimeProxy;
+    }
+
+    public boolean getUseDnBCache() {
+        return useDnBCache;
+    }
+
+    public void setUseDnBCache(boolean useDnBCache) {
+        this.useDnBCache = useDnBCache;
     }
 
     @Override

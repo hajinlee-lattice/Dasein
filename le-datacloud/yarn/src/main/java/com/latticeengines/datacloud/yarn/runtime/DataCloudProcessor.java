@@ -175,6 +175,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
     private boolean useProxy = false;
     private String decisionGraph;
+    private boolean useDnBCache = true;
 
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
@@ -262,6 +263,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             inputSchema = jobConfiguration.getInputAvroSchema();
             outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                     jobConfiguration.getDataCloudVersion());
+
+            useDnBCache = jobConfiguration.getUseDnBCache();
 
             setProgress(0.07f);
             Long startTime = System.currentTimeMillis();
@@ -372,6 +375,8 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
         if (useProxy) {
             matchInput.setSkipKeyResolution(true);
         }
+
+        matchInput.setUseDnBCache(useDnBCache);
 
         return matchInput;
     }

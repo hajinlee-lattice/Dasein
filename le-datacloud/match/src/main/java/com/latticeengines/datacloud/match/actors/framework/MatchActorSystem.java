@@ -1,10 +1,10 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -194,7 +194,7 @@ public class MatchActorSystem {
 
     private void initDefaultDataSourceThreadPool() {
         log.info("Initialize default data source thread pool.");
-        BlockingQueue<Runnable> runnableQueue = new ArrayBlockingQueue<Runnable>(defaultThreadpoolQueueSize);
+        BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
         dataSourceServiceExecutor = new ThreadPoolExecutor(defaultThreadpoolCountMin, defaultThreadpoolCountMax, 1,
                 TimeUnit.MINUTES, runnableQueue);
     }

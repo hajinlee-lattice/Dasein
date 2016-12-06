@@ -29,16 +29,16 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
 
     public static TimerRegistrationHelper timerRegistrationHelper = new TimerRegistrationHelper(DnbLookupActor.class);
 
-    @Value("${datacloud.match.dnbLookupActor.dispatcher.timer.frequency:5}")
+    @Value("${datacloud.dnb.dispatcher.timer.frequency:30}")
     private int dispatcherTimerFrequency;
 
-    @Value("${datacloud.match.dnbLookupActor.dispatcher.timer.frequency.unit:MINUTES}")
+    @Value("${datacloud.dnb.dispatcher.timer.frequency.unit:SECONDS}")
     private TimeUnit dispatcherTimerFrequencyUnit;
 
-    @Value("${datacloud.match.dnbLookupActor.fetcher.timer.frequency:30}")
+    @Value("${datacloud.dnb.fetcher.timer.frequency:10}")
     private int fetcherTimerFrequency;
 
-    @Value("${datacloud.match.dnbLookupActor.fetcher.timer.frequency.unit:SECONDS}")
+    @Value("${datacloud.dnb.fetcher.timer.frequency.unit:SECONDS}")
     private TimeUnit fetcherTimerFrequencyUnit;
 
     @PostConstruct

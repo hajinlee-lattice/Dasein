@@ -81,6 +81,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String SCENARIO_WITHOUT_CITY = "WithoutCity";
     private static final String SCENARIO_WITHOUT_STATE_CITY = "WithoutStateCity";
     private static final String SCENARIO_INCOMPLETELOCATION = "IncompleteLocation";
+    private static final String SCENARIO_BULKMATCH_LOADTEST = "BulkMatchLoadTest";
 
     private static final String VALIDLOCATION_FILENAME = "BulkFuzzyMatchInput_ValidLocation.avro";
     private static final String VALIDLOCATION_INVALIDDOMAIN_FILENAME = "BulkFuzzyMatchInput_ValidLocation_InvalidDomain.avro";
@@ -90,6 +91,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String WITHOUT_CITY_FILENAME = "BulkFuzzyMatchInput_WithoutCity.avro";
     private static final String WITHOUT_STATECITY_FILENAME = "BulkFuzzyMatchInput_WithoutStateCity.avro";
     private static final String INCOMPLETELOCATION_FILENAME = "BulkFuzzyMatchInput_IncompleteLocation.avro";
+    private static final String BULKMATCH_LOADTEST_FILENAME = "BulkFuzzyMatchInput_LoadTest.avro";
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -137,7 +139,29 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
             validateBulkMatchResult(scenario, finalStatus.getResultLocation());
         }
+    }
 
+    @Test(groups = "deployment", enabled = false)
+    public void loadTestBulkMatch() {
+        String[] scenarios = { SCENARIO_BULKMATCH_LOADTEST };
+        for (String scenario : scenarios) {
+            MatchInput input = prepareBulkMatchInput(scenario, false);
+            MatchCommand command = matchProxy.matchBulk(input, podId);
+            ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+            Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
+            MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+            Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+            Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+            Assert.assertEquals(finalStatus.getProgress(), 1f);
+            Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+            Assert.assertEquals(finalStatus.getResultLocation(),
+                    hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        }
     }
 
     private MatchInput prepareRealtimeMatchInput(String scenario, boolean useDnBCache) {
@@ -167,7 +191,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private List<String> prepareFields(String scenario) {
         List<String> fields = null;
-        if (scenario != null && scenario.equals(SCENARIO_VALIDLOCATION)) {
+        if (scenario != null && (scenario.equals(SCENARIO_VALIDLOCATION) || scenario.equals(SCENARIO_INCOMPLETELOCATION)
+                || scenario.equals(SCENARIO_BULKMATCH_LOADTEST))) {
             fields = Arrays.asList("Name", "City", "State", "Country");
         } else if (scenario != null && scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN)) {
             fields = Arrays.asList("Name", "City", "State", "Country", "Domain");
@@ -181,8 +206,6 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             fields = Arrays.asList("Name", "State", "Country");
         } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_STATE_CITY)) {
             fields = Arrays.asList("Name", "Country");
-        } else if (scenario != null && scenario.equals(SCENARIO_INCOMPLETELOCATION)) {
-            fields = Arrays.asList("Name", "City", "State", "Country");
         } else {
             throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
         }
@@ -339,6 +362,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             uploadTestAVro(fullAvroDir, WITHOUT_STATECITY_FILENAME);
         } else if (scenario != null && scenario.equals(SCENARIO_INCOMPLETELOCATION)) {
             uploadTestAVro(fullAvroDir, INCOMPLETELOCATION_FILENAME);
+        } else if (scenario != null && scenario.equals(SCENARIO_BULKMATCH_LOADTEST)) {
+            uploadTestAVro(fullAvroDir, BULKMATCH_LOADTEST_FILENAME);
         } else {
             throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
         }

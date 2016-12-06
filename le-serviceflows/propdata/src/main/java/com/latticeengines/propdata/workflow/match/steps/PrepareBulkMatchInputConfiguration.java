@@ -67,6 +67,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     private String realTimeProxyUrl;
     private Integer realTimeThreadPoolSize;
 
+    private boolean useDnBCache = true;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -279,5 +281,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     public void setRealTimeThreadPoolSize(Integer realTimeThreadPoolSize) {
         this.realTimeThreadPoolSize = realTimeThreadPoolSize;
     }
+
+    @JsonProperty("use_dnb_cache")
+    public boolean getUseDnBCache() {
+        return useDnBCache;
+    }
+
+    @JsonProperty("use_dnb_cache")
+    public void setUseDnBCache(boolean useDnBCache) {
+        this.useDnBCache = useDnBCache;
+    }
+
 }
 
