@@ -75,10 +75,6 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private boolean enabled;
 
     @JsonProperty
-    @Column(name = "IS_MANDATORY", nullable = false)
-    private boolean isMandatory;
-
-    @JsonProperty
     @Transient
     private boolean frozenEnablement;
 
@@ -148,14 +144,6 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public boolean isMandatory() {
-        return isMandatory;
-    }
-
-    public void setIsMandatory(boolean isMandatory) {
-        this.isMandatory = isMandatory;
     }
 
     public boolean isFrozenEnablement() {
