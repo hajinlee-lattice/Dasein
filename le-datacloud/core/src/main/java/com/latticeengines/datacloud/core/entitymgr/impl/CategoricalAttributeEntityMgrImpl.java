@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -38,9 +39,21 @@ public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEn
         return rootAttr;
     }
 
+    @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public CategoricalAttribute getAttribute(Long pid) {
         return attributeDao.findByKey(CategoricalAttribute.class, pid);
+    }
+
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public CategoricalAttribute getAttribute(String attrName, String attrValue) {
+        if (StringUtils.isNotEmpty(attrValue)) {
+            return attributeDao.findByNameValue(attrName, attrValue);
+        } else {
+            return null;
+        }
     }
 
 }

@@ -3,7 +3,7 @@ USE `LDC_ManageDB`;
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 
 DELIMITER //
-CREATE PROCEDURE `UpdateSchema` ()
+CREATE PROCEDURE `UpdateSchema`()
   BEGIN
     IF NOT EXISTS(SELECT table_name
                   FROM INFORMATION_SCHEMA.TABLES
@@ -11,12 +11,32 @@ CREATE PROCEDURE `UpdateSchema` ()
                         AND table_name = 'CategoricalAttribute')
     THEN
       CREATE TABLE `CategoricalAttribute` (
-        `PID`       BIGINT        NOT NULL AUTO_INCREMENT UNIQUE,
-        `AttrName`  VARCHAR(100)  NOT NULL,
+        `PID`       BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
+        `AttrName`  VARCHAR(100) NOT NULL,
         `AttrValue` VARCHAR(500) NOT NULL,
         `ParentID`  BIGINT,
         PRIMARY KEY (`PID`),
         UNIQUE (`AttrName`, `AttrValue`, `ParentID`)
+      )
+        ENGINE = InnoDB;
+    END IF;
+
+    IF NOT EXISTS(SELECT table_name
+                  FROM INFORMATION_SCHEMA.TABLES
+                  WHERE table_schema = 'LDC_ManageDB'
+                        AND table_name = 'AccountMasterFact')
+    THEN
+      CREATE TABLE `AccountMasterFact` (
+        `PID`         BIGINT   NOT NULL AUTO_INCREMENT UNIQUE,
+        `Category`    BIGINT   NOT NULL,
+        `EncodedCube` LONGTEXT NOT NULL,
+        `Industry`    BIGINT   NOT NULL,
+        `Location`    BIGINT   NOT NULL,
+        `NumEmpRange` BIGINT   NOT NULL,
+        `NumLocRange` BIGINT   NOT NULL,
+        `RevRange`    BIGINT   NOT NULL,
+        PRIMARY KEY (`PID`),
+        UNIQUE (`Location`, `Industry`, `NumEmpRange`, `RevRange`, `NumLocRange`, `Category`)
       )
         ENGINE = InnoDB;
     END IF;
@@ -53,6 +73,19 @@ CREATE PROCEDURE `UpdateSchema` ()
     IF EXISTS(SELECT TABLE_NAME
               FROM INFORMATION_SCHEMA.STATISTICS
               WHERE table_schema = 'LDC_ManageDB'
+                    AND TABLE_NAME = 'AccountMasterFact'
+                    AND index_name = 'IX_DIMENSIONS')
+    THEN
+      DROP INDEX IX_DIMENSIONS
+      ON `AccountMasterFact`;
+    END IF;
+
+    CREATE INDEX IX_DIMENSIONS
+      ON `AccountMasterFact` (`Category`, `Industry`, `Location`, `NumEmpRange`, `NumLocRange`, `RevRange`);
+
+    IF EXISTS(SELECT TABLE_NAME
+              FROM INFORMATION_SCHEMA.STATISTICS
+              WHERE table_schema = 'LDC_ManageDB'
                     AND TABLE_NAME = 'CategoricalDimension'
                     AND index_name = 'IX_SOURCE_DIMENSION')
     THEN
@@ -66,7 +99,7 @@ CREATE PROCEDURE `UpdateSchema` ()
   END //
 DELIMITER ;
 
-CALL `UpdateSchema`() ;
+CALL `UpdateSchema`();
 
 
 

@@ -12,4 +12,6 @@ public interface CategoricalAttributeEntityMgr {
 
     CategoricalAttribute getAttribute(Long pid);
 
+    CategoricalAttribute getAttribute(String attrName, String attrValue);
+
 }

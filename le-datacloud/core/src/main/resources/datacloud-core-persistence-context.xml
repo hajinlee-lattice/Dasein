@@ -49,4 +49,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="accountMasterFactDao" class="com.latticeengines.datacloud.core.dao.impl.AccountMasterFactDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>
