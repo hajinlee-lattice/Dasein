@@ -269,44 +269,4 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         return defaultRules;
     }
 
-    @SuppressWarnings("unused")
-    private List<DataRule> getMasterList() {
-        List<String> columnRuleNames = new ArrayList<>();
-        List<String> rowRuleNames = new ArrayList<>();
-
-        columnRuleNames.add("UniqueValueCountDS");
-        columnRuleNames.add("PopulatedRowCountDS");
-        columnRuleNames.add("OverlyPredictiveDS");
-        columnRuleNames.add("LowCoverageDS");
-        columnRuleNames.add("NullIssueDS");
-
-        rowRuleNames.add("HighlyPredictiveSmallPopulationDS");
-
-        List<DataRule> masterRuleList = new ArrayList<>();
-        for (String name : columnRuleNames) {
-            DataRule rule = generateDataRule(name);
-            masterRuleList.add(rule);
-        }
-
-        for (String name : rowRuleNames) {
-            DataRule rule = generateDataRule(name);
-            masterRuleList.add(rule);
-        }
-
-        DataRuleUtils.populateDataRuleDisplayNameAndDescriptions(masterRuleList);
-
-        return masterRuleList;
-    }
-
-    private DataRule generateDataRule(String name) {
-        DataRule rule = new DataRule();
-        rule.setName(name);
-        rule.setFrozenEnablement(false);
-        rule.setColumnsToRemediate(new ArrayList<String>());
-        rule.setEnabled(false);
-        rule.setProperties(new HashMap<String, String>());
-
-        return rule;
-    }
-
 }

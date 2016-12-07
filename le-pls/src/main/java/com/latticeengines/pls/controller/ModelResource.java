@@ -22,8 +22,8 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
-import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
+import com.latticeengines.domain.exposed.modelreview.ModelReviewDataRule;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -199,8 +199,8 @@ public class ModelResource {
     @RequestMapping(value = "/modelreview/mocked/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the data rules for model")
-    public ResponseDocument<List<DataRule>> getModelDataRules(@PathVariable String modelId)
-            throws IOException {
+    public ResponseDocument<List<ModelReviewDataRule>> getModelDataRules(
+            @PathVariable String modelId) throws IOException {
         return ResponseDocument.successResponse(generateMockedDataRules());
     }
 
@@ -249,14 +249,14 @@ public class ModelResource {
         VdbMetadataField METADATA_1 = new VdbMetadataField();
         METADATA_1.setColumnName("AnnualRevenue");
         METADATA_1.setDisplayName("AnnualRevenue");
-        METADATA_1.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS.toString());
+        METADATA_1.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_1.setTags("Internal");
         METADATA_1.setAssociatedRules(new ArrayList<String>());
 
         VdbMetadataField METADATA_2 = new VdbMetadataField();
         METADATA_2.setColumnName("BusinessTechnologiesSeoTitle");
         METADATA_2.setDisplayName("BusinessTechnologiesSeoTitle");
-        METADATA_2.setApprovedUsage(ApprovedUsage.MODEL_MODELINSIGHTS.toString());
+        METADATA_2.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_2.setTags("InternalTransform");
         METADATA_2.setAssociatedRules(new ArrayList<String>());
 
@@ -272,7 +272,7 @@ public class ModelResource {
         METADATA_4.setDisplayName("CompanyType");
         METADATA_4.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_4.setTags("Internal");
-        METADATA_4.setIsConflictWithOptionalRule(true);
+        METADATA_4.setIsCoveredByOptionalRule(true);
         METADATA_4.setAssociatedRules(Arrays.asList(new String[] { "ModelBias" }));
 
         VdbMetadataField METADATA_5 = new VdbMetadataField();
@@ -285,7 +285,7 @@ public class ModelResource {
         VdbMetadataField METADATA_6 = new VdbMetadataField();
         METADATA_6.setColumnName("City");
         METADATA_6.setDisplayName("City");
-        METADATA_6.setApprovedUsage(ApprovedUsage.MODEL.toString());
+        METADATA_6.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_6.setTags("Internal");
         METADATA_6.setAssociatedRules(new ArrayList<String>());
 
@@ -294,7 +294,7 @@ public class ModelResource {
         METADATA_7.setDisplayName("NumberOfEmployees");
         METADATA_7.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_7.setTags("Internal");
-        METADATA_7.setIsConflictWithMandatoryRule(true);
+        METADATA_7.setIsCoveredByOptionalRule(true);
         METADATA_7.setIsCoveredByMandatoryRule(true);
         METADATA_7.setAssociatedRules(Arrays.asList(new String[] { "TooManyValues" }));
 
@@ -303,49 +303,47 @@ public class ModelResource {
         METADATA_8.setDisplayName("CompanyType");
         METADATA_8.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_8.setTags("Internal");
-        METADATA_8.setIsConflictWithOptionalRule(true);
-        METADATA_8.setAssociatedRules(Arrays.asList(new String[] { "LowCoverage", "MissingPredictiveValues" }));
+        METADATA_8.setIsCoveredByOptionalRule(true);
+        METADATA_8.setAssociatedRules(
+                Arrays.asList(new String[] { "LowCoverage", "MissingPredictiveValues" }));
 
         return Arrays.asList(new VdbMetadataField[] { METADATA_1, METADATA_2, METADATA_3,
                 METADATA_4, METADATA_5, METADATA_6, METADATA_7, METADATA_8 });
     }
 
     @SuppressWarnings("unchecked")
-    private List<DataRule> generateMockedDataRules() {
-        DataRule DATA_RULE_1 = new DataRule();
+    private List<ModelReviewDataRule> generateMockedDataRules() {
+        ModelReviewDataRule DATA_RULE_1 = new ModelReviewDataRule();
         DATA_RULE_1.setName("LowCoverage");
         DATA_RULE_1.setDisplayName("Low Coverage");
         DATA_RULE_1.setDescription(
                 "This attribute is missing value for more than 98% of records, which causes scores to be less accurate");
         DATA_RULE_1.setColumnsToRemediate(Arrays.asList(new String[] { "NumnberOfOffices" }));
-        DATA_RULE_1.setEnabled(true);
 
-        DataRule DATA_RULE_2 = new DataRule();
+        ModelReviewDataRule DATA_RULE_2 = new ModelReviewDataRule();
         DATA_RULE_2.setName("MissingPredictiveValues");
         DATA_RULE_2.setDisplayName("Missing Values are predictive");
         DATA_RULE_2.setDescription(
                 "When this attribute is missing a value, it is more likely to convert. This often caues...");
         DATA_RULE_2.setColumnsToRemediate(Arrays.asList(new String[] { "NumberOfOffices" }));
-        DATA_RULE_2.setEnabled(true);
 
-        DataRule DATA_RULE_3 = new DataRule();
+        ModelReviewDataRule DATA_RULE_3 = new ModelReviewDataRule();
         DATA_RULE_3.setName("ModelBias");
         DATA_RULE_3.setDisplayName("Model Bias");
         DATA_RULE_3.setDescription(
                 "This attribute is introducing bias into the model. This mean it will more than look like it's improving the model during training");
         DATA_RULE_3.setColumnsToRemediate(Arrays.asList(new String[] { "CompanyType" }));
-        DATA_RULE_3.setEnabled(true);
 
-        DataRule DATA_RULE_4 = new DataRule();
+        ModelReviewDataRule DATA_RULE_4 = new ModelReviewDataRule();
         DATA_RULE_4.setName("TooManyValues");
         DATA_RULE_4.setDisplayName("Too many values");
         DATA_RULE_4.setDescription(
                 "This text attribute cannot be included in models because it has too many values, which causes scores to be less accurate. For text attributes, ...");
         DATA_RULE_4.setColumnsToRemediate(Arrays.asList(new String[] { "NumberOfEmployees" }));
-        DATA_RULE_4.setEnabled(true);
         DATA_RULE_4.setIsMandatory(true);
 
-        return Arrays.asList(new DataRule[] { DATA_RULE_1, DATA_RULE_2, DATA_RULE_3, DATA_RULE_4 });
+        return Arrays.asList(
+                new ModelReviewDataRule[] { DATA_RULE_1, DATA_RULE_2, DATA_RULE_3, DATA_RULE_4 });
     }
 
 }

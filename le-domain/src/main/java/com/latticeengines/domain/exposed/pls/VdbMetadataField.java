@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modelreview.DataRule;
 
 import java.util.List;
 
@@ -19,9 +18,8 @@ public class VdbMetadataField implements Cloneable {
     private String description;
     private String displayDiscretization;
     private String statisticalType;
-    private boolean isConflictWithMandatoryRule;
+    private boolean isCoveredByOptionalRule;
     private boolean isCoveredByMandatoryRule;
-    private boolean isConflictWithOptionalRule;
     private List<String> associatedRules;
 
     @JsonProperty("ColumnName")
@@ -139,14 +137,14 @@ public class VdbMetadataField implements Cloneable {
         return JsonUtils.serialize(this);
     }
 
-    @JsonProperty("IsConflictWithMandatoryRule")
-    public boolean isConflictWithMandatoryRule() {
-        return isConflictWithMandatoryRule;
+    @JsonProperty("IsCoveredByOptionalRule")
+    public boolean isCoveredByOptionalRule() {
+        return isCoveredByOptionalRule;
     }
 
-    @JsonProperty("IsConflictWithMandatoryRule")
-    public void setIsConflictWithMandatoryRule(boolean isConflictWithMandatoryRule) {
-        this.isConflictWithMandatoryRule = isConflictWithMandatoryRule;
+    @JsonProperty("IsCoveredByOptionalRule")
+    public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
+        this.isCoveredByOptionalRule = isCoveredByOptionalRule;
     }
 
     @JsonProperty("IsCoveredByMandatoryRule")
@@ -157,16 +155,6 @@ public class VdbMetadataField implements Cloneable {
     @JsonProperty("IsCoveredByMandatoryRule")
     public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
         this.isCoveredByMandatoryRule = isCoveredByMandatoryRule;
-    }
-
-    @JsonProperty("IsConflictWithOptionalRule")
-    public boolean isConflictWithOptionalRule() {
-        return isConflictWithOptionalRule;
-    }
-
-    @JsonProperty("IsConflictWithOptionalRule")
-    public void setIsConflictWithOptionalRule(boolean isConflictWithOptionalRule) {
-        this.isConflictWithOptionalRule = isConflictWithOptionalRule;
     }
 
     @JsonProperty("AssociatedRules")
