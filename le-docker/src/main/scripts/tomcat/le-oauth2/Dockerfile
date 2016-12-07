@@ -1,4 +1,4 @@
-FROM latticeengines/tomcat
+FROM latticeengines/tomcatbase
 
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null

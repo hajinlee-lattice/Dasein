@@ -4,7 +4,7 @@ docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev
 
 source ../functions.sh
 
-for img in 'haproxy' 'config' 'swagger' 'tomcat'; do
+for img in 'haproxy' 'config' 'swagger' 'tomcatbase'; do
 
     pushd le-${img} &&
     build_docker latticeengines/${img} &&

@@ -1,4 +1,4 @@
-FROM latticeengines/centos
+FROM latticeengines/centos7
 
 # install sass
 RUN yum install -y install rubygems \
