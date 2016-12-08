@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>
-            <version>${le.propdata.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
