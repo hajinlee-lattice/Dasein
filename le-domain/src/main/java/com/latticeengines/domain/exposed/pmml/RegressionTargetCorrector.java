@@ -1,17 +1,14 @@
 package com.latticeengines.domain.exposed.pmml;
 
 import java.util.Deque;
-import java.util.List;
 import java.util.Objects;
 
 import org.dmg.pmml.DataDictionary;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.FieldUsageType;
 import org.dmg.pmml.MiningField;
 import org.dmg.pmml.MiningFunctionType;
-import org.dmg.pmml.MiningSchema;
 import org.dmg.pmml.Model;
 import org.dmg.pmml.PMML;
 import org.dmg.pmml.PMMLObject;
@@ -21,6 +18,8 @@ import org.dmg.pmml.VisitorAction;
 import org.jpmml.evaluator.IndexableUtil;
 import org.jpmml.evaluator.UnsupportedFeatureException;
 import org.jpmml.model.visitors.AbstractModelVisitor;
+
+import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 
 public class RegressionTargetCorrector extends AbstractModelVisitor {
 
@@ -37,7 +36,7 @@ public class RegressionTargetCorrector extends AbstractModelVisitor {
     @Override
     public VisitorAction visit(Model model) {
         MiningFunctionType miningFunction = model.getFunctionName();
-
+        PmmlModelUtils.setDefaultValueForMiningField(model, getPMML().getDataDictionary());
         switch (miningFunction) {
         case REGRESSION:
             processRegressionModel(model);
@@ -52,7 +51,7 @@ public class RegressionTargetCorrector extends AbstractModelVisitor {
     private void processRegressionModel(Model model) {
         PMML pmml = getPMML();
 
-        MiningField miningField = getTargetField(model);
+        MiningField miningField = PmmlModelUtils.getTargetField(model);
         if (miningField == null) {
             return;
         }
@@ -123,30 +122,5 @@ public class RegressionTargetCorrector extends AbstractModelVisitor {
 
     private void setCastInteger(Target.CastInteger castInteger) {
         this.castInteger = castInteger;
-    }
-
-    static private MiningField getTargetField(Model model) {
-        MiningSchema miningSchema = model.getMiningSchema();
-
-        MiningField result = null;
-
-        List<MiningField> miningFields = miningSchema.getMiningFields();
-        for (MiningField miningField : miningFields) {
-            FieldUsageType fieldUsage = miningField.getUsageType();
-
-            switch (fieldUsage) {
-            case TARGET:
-            case PREDICTED:
-                if (result != null) {
-                    throw new UnsupportedFeatureException(miningSchema);
-                }
-                result = miningField;
-                break;
-            default:
-                break;
-            }
-        }
-
-        return result;
     }
 }

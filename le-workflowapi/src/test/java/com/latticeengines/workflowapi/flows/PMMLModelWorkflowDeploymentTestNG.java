@@ -4,11 +4,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -18,7 +20,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CreatePMMLModelConfiguration;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBase {
 
@@ -27,6 +31,9 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     @Autowired
     private PMMLModelWorkflow pmmlModelWorkflow;
+
+    @Autowired
+    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -38,14 +45,16 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
 
     private String modelDisplayName;
 
+    private int modelCount = 1;
+
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupForPMMLModel();
     }
 
-    @Test(groups = "deployment", enabled = false)
-    public void testWorkflow() throws Exception {
-
+    @Test(groups = "deployment", dataProvider = "pmmlFileNameProvider", enabled = true)
+    public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
+        setupFiles(PMML_CUSTOMERSPACE, pmmlFileName, pivotValueFileName);
         PMMLModelWorkflowConfiguration workflowConfig = generatePMMLModelWorkflowConfiguration();
         for (String key : workflowConfig.getConfigRegistry().keySet()) {
             if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
@@ -57,17 +66,13 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
                 System.out.println("Model name = " + modelName);
             }
         }
-
+        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         WorkflowExecutionId workflowId = workflowService.start(pmmlModelWorkflow.name(), workflowConfig);
 
-        // Line below is example of how to restart a workflow from the last
-        // failed step; also need to disable the setup
-        // WorkflowExecutionId workflowId = workflowService.restart(new
-        // WorkflowExecutionId(18L));
         waitForCompletion(workflowId);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
-        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.size(), modelCount++);
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(modelName)) {
                 assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
@@ -75,10 +80,9 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
                 modelDisplayName = summary.getDisplayName();
             }
         }
-
+        scoreRecords();
     }
 
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "testWorkflow" })
     public void scoreRecords() throws IOException, InterruptedException {
 
         Model model = testPMMLScoring.getModel(modelDisplayName, PMML_CUSTOMERSPACE, pmmlTenant);
@@ -87,4 +91,17 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         testPMMLScoring.scoreRecords(model.getModelId(), PMML_CUSTOMERSPACE, pmmlTenant);
     }
 
+    @DataProvider(name = "pmmlFileNameProvider")
+    public Object[][] getDataProvider() {
+        return new Object[][] { { "rfpmml.xml", "pivotvalues.txt" }, //
+                { "dectree.xml", "" }, //
+                { "glm_lead_pmml.xml", "GLM_test_mapping_table.csv" }, //
+                { "lr.xml", "" }, //
+                { "svm.xml", "" }, //
+                { "svm_iris.xml", "" }, //
+                { "naivebayes.xml", "" }, //
+                { "IRIS_MLP_Neural_Network.xml", "" }, //
+                { "nn.xml", "" } //
+        };
+    }
 }

@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -31,24 +33,27 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
         setupUsers(PMML_CUSTOMERSPACE);
         setupCamille(PMML_CUSTOMERSPACE);
         setupHdfs(PMML_CUSTOMERSPACE);
-        setupFiles(PMML_CUSTOMERSPACE);
     }
 
-    private void setupFiles(CustomerSpace customerSpace) throws Exception {
+    protected void setupFiles(CustomerSpace customerSpace, String pmmlFileName, String pivotFileName) throws Exception {
         URL pmmlFile = ClassLoader
-                .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pmmlfiles/rfpmml.xml");
-        URL pivotFile = ClassLoader
-                .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pivotfiles/pivotvalues.txt");
-
+                .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pmmlfiles/" + pmmlFileName);
         Path pmmlFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
                 customerSpace, "module1", ArtifactType.PMML);
-        Path pivotValuesFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
-                customerSpace, "module1", ArtifactType.PivotMapping);
-
+        pmmlHdfsPath = null;
         pmmlHdfsPath = pmmlFolderHdfsPath.toString() + "/" + new File(pmmlFile.getFile()).getName();
-        pivotValuesHdfsPath = pivotValuesFolderHdfsPath.toString() + "/" + new File(pivotFile.getFile()).getName();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pmmlFile.getPath(), pmmlHdfsPath);
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pivotFile.getPath(), pivotValuesHdfsPath);
+        pivotValuesHdfsPath = null;
+        if (StringUtils.isNotEmpty(pivotFileName)) {
+            URL pivotFile = ClassLoader.getSystemResource(
+                    "com/latticeengines/workflowapi/flows/leadprioritization/pivotfiles/" + pivotFileName);
+
+            Path pivotValuesFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
+                    customerSpace, "module1", ArtifactType.PivotMapping);
+
+            pivotValuesHdfsPath = pivotValuesFolderHdfsPath.toString() + "/" + new File(pivotFile.getFile()).getName();
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pivotFile.getPath(), pivotValuesHdfsPath);
+        }
     }
 
     protected PMMLModelWorkflowConfiguration generatePMMLModelWorkflowConfiguration() {
@@ -67,7 +72,7 @@ public class PMMLModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase
                 .inputProperties(inputProperties) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name()) //
-                .displayName("PMML MODEL - " + System.currentTimeMillis()) //
+                .displayName("PMML MODEL - " + new Path(pmmlHdfsPath).getSuffix()) //
                 .build();
 
         return workflowConfig;

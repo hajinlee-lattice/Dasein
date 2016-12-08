@@ -11,15 +11,11 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 @Component("downloadAndProcessModelSummaries")
 public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStepConfiguration> {
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
@@ -53,9 +49,13 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);
 
         for (ModelSummary modelSummary : eventToModelSummary.values()) {
-            double avgProbability = (double) modelSummary.getTotalConversionCount()
-                    / (double) modelSummary.getTotalRowCount();
-            putDoubleValueInContext(MODEL_AVG_PROBABILITY, avgProbability);
+            if (modelSummary.getTotalRowCount() != 0) {
+                double avgProbability = (double) modelSummary.getTotalConversionCount()
+                        / (double) modelSummary.getTotalRowCount();
+                putDoubleValueInContext(MODEL_AVG_PROBABILITY, avgProbability);
+            } else {
+                log.info("TotalRowCount is 0!");
+            }
         }
     }
 }

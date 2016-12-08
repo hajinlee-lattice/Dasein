@@ -1,0 +1,473 @@
+<?xml version="1.0"?>
+<PMML version="4.2" xmlns="http://www.dmg.org/PMML-4_2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_2 http://www.dmg.org/v4-2/pmml-4-2.xsd">
+ <Header copyright="Copyright (c) 2016 maxu" description="Generalized Linear Regression Model">
+  <Extension name="user" value="maxu" extender="Rattle/PMML"/>
+  <Application name="Rattle/PMML" version="1.4"/>
+  <Timestamp>2016-12-02 12:34:11</Timestamp>
+ </Header>
+ <DataDictionary numberOfFields="77">
+  <DataField name="predictedScore" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Analyst" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Architect" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Consultant" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_CXOEVP" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Developer" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Director" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Educator" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_IndividualContributor" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_Manager" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_ProfessionalStaff" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_SupportStaff" optype="continuous" dataType="double"/>
+  <DataField name="contact_job_SVPVP" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_Creative" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_CustomerExperience" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_eCommerce" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_EngineeringDevelopment" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_ExecutiveGeneralAdministration" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_Finance" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_HumanResources" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_IT" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_Marketing" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_Operations" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_ProfessionalServices" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_PublicAffairsCommunications" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_ResearchSciences" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_Sales" optype="continuous" dataType="double"/>
+  <DataField name="contact_department_TrainingLearning" optype="continuous" dataType="double"/>
+  <DataField name="contact_lead_order" optype="continuous" dataType="double"/>
+  <DataField name="account_lead_order" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_ACROBAT" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_AEM" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_AEMMOBILE" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_ANALYTICS" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_AUDIENCEMANAGER" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_CAMPAIGN" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_CREATIVE" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_DPS" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_ECHOSIGN" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_LIVECYCLE" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_MEDIAOPTIMIZER" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_PPBU" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_SOCIAL" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_TARGET" optype="continuous" dataType="double"/>
+  <DataField name="lead_product_outlook_group_WEM" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_Advertising" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_Database" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_Email" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_Events" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_Offer" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_SalesCalldown" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_type_WebsiteDirect" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_A" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_AdobeEventsegSummit" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_ContentSyndication" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_DataBaseBuilding" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_DataBaseBuildingDataAppends" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_Dinners" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_EMail" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_ESeminarEvent" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_ListUploadInternalList" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_ListUploadPurchasedfrom3rdParty" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_LiveDemo" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_ProductOverview" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_RFIRequestforInformation" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_SuccessStoryCaseStudy" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_Survey" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_TradeshowConference" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_Trial" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_VideoOther" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_VideoFeaturedDemo" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_VideoProductTour" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_WebinarLive" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_WebinarOnDemand" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_WhitepaperExternalLicensed" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_WhitepaperInternalProduced" optype="continuous" dataType="double"/>
+  <DataField name="lead_activity_subtype_WhitepaperProductOverview" optype="continuous" dataType="double"/>
+ </DataDictionary>
+ <GeneralRegressionModel modelName="Elasticnet_Model" modelType="generalLinear" algorithmName="glmnet" functionName="regression">
+  <Extension name="lambda" value="6.72276887250961e-05"/>
+  <MiningSchema>
+   <MiningField name="predictedScore" usageType="predicted"/>
+   <MiningField name="contact_job_Analyst" usageType="active"/>
+   <MiningField name="contact_job_Architect" usageType="active"/>
+   <MiningField name="contact_job_Consultant" usageType="active"/>
+   <MiningField name="contact_job_CXOEVP" usageType="active"/>
+   <MiningField name="contact_job_Developer" usageType="active"/>
+   <MiningField name="contact_job_Director" usageType="active"/>
+   <MiningField name="contact_job_Educator" usageType="active"/>
+   <MiningField name="contact_job_IndividualContributor" usageType="active"/>
+   <MiningField name="contact_job_Manager" usageType="active"/>
+   <MiningField name="contact_job_ProfessionalStaff" usageType="active"/>
+   <MiningField name="contact_job_SupportStaff" usageType="active"/>
+   <MiningField name="contact_job_SVPVP" usageType="active"/>
+   <MiningField name="contact_department_Creative" usageType="active"/>
+   <MiningField name="contact_department_CustomerExperience" usageType="active"/>
+   <MiningField name="contact_department_eCommerce" usageType="active"/>
+   <MiningField name="contact_department_EngineeringDevelopment" usageType="active"/>
+   <MiningField name="contact_department_ExecutiveGeneralAdministration" usageType="active"/>
+   <MiningField name="contact_department_Finance" usageType="active"/>
+   <MiningField name="contact_department_HumanResources" usageType="active"/>
+   <MiningField name="contact_department_IT" usageType="active"/>
+   <MiningField name="contact_department_Marketing" usageType="active"/>
+   <MiningField name="contact_department_Operations" usageType="active"/>
+   <MiningField name="contact_department_ProfessionalServices" usageType="active"/>
+   <MiningField name="contact_department_PublicAffairsCommunications" usageType="active"/>
+   <MiningField name="contact_department_ResearchSciences" usageType="active"/>
+   <MiningField name="contact_department_Sales" usageType="active"/>
+   <MiningField name="contact_department_TrainingLearning" usageType="active"/>
+   <MiningField name="contact_lead_order" usageType="active"/>
+   <MiningField name="account_lead_order" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_ACROBAT" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_AEM" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_AEMMOBILE" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_ANALYTICS" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_AUDIENCEMANAGER" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_CAMPAIGN" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_CREATIVE" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_DPS" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_ECHOSIGN" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_LIVECYCLE" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_MEDIAOPTIMIZER" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_PPBU" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_SOCIAL" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_TARGET" usageType="active"/>
+   <MiningField name="lead_product_outlook_group_WEM" usageType="active"/>
+   <MiningField name="lead_activity_type_Advertising" usageType="active"/>
+   <MiningField name="lead_activity_type_Database" usageType="active"/>
+   <MiningField name="lead_activity_type_Email" usageType="active"/>
+   <MiningField name="lead_activity_type_Events" usageType="active"/>
+   <MiningField name="lead_activity_type_Offer" usageType="active"/>
+   <MiningField name="lead_activity_type_SalesCalldown" usageType="active"/>
+   <MiningField name="lead_activity_type_WebsiteDirect" usageType="active"/>
+   <MiningField name="lead_activity_subtype_A" usageType="active"/>
+   <MiningField name="lead_activity_subtype_AdobeEventsegSummit" usageType="active"/>
+   <MiningField name="lead_activity_subtype_ContentSyndication" usageType="active"/>
+   <MiningField name="lead_activity_subtype_DataBaseBuilding" usageType="active"/>
+   <MiningField name="lead_activity_subtype_DataBaseBuildingDataAppends" usageType="active"/>
+   <MiningField name="lead_activity_subtype_Dinners" usageType="active"/>
+   <MiningField name="lead_activity_subtype_EMail" usageType="active"/>
+   <MiningField name="lead_activity_subtype_ESeminarEvent" usageType="active"/>
+   <MiningField name="lead_activity_subtype_ListUploadInternalList" usageType="active"/>
+   <MiningField name="lead_activity_subtype_ListUploadPurchasedfrom3rdParty" usageType="active"/>
+   <MiningField name="lead_activity_subtype_LiveDemo" usageType="active"/>
+   <MiningField name="lead_activity_subtype_ProductOverview" usageType="active"/>
+   <MiningField name="lead_activity_subtype_RFIRequestforInformation" usageType="active"/>
+   <MiningField name="lead_activity_subtype_SuccessStoryCaseStudy" usageType="active"/>
+   <MiningField name="lead_activity_subtype_Survey" usageType="active"/>
+   <MiningField name="lead_activity_subtype_TradeshowConference" usageType="active"/>
+   <MiningField name="lead_activity_subtype_Trial" usageType="active"/>
+   <MiningField name="lead_activity_subtype_VideoOther" usageType="active"/>
+   <MiningField name="lead_activity_subtype_VideoFeaturedDemo" usageType="active"/>
+   <MiningField name="lead_activity_subtype_VideoProductTour" usageType="active"/>
+   <MiningField name="lead_activity_subtype_WebinarLive" usageType="active"/>
+   <MiningField name="lead_activity_subtype_WebinarOnDemand" usageType="active"/>
+   <MiningField name="lead_activity_subtype_WhitepaperExternalLicensed" usageType="active"/>
+   <MiningField name="lead_activity_subtype_WhitepaperInternalProduced" usageType="active"/>
+   <MiningField name="lead_activity_subtype_WhitepaperProductOverview" usageType="active"/>
+  </MiningSchema>
+  <Output>
+   <OutputField name="predictedValue" feature="predictedValue"/>
+   <OutputField name="predictedMean" feature="transformedValue">
+    <Apply function="exp">
+     <FieldRef field="predictedValue"/>
+    </Apply>
+   </OutputField>
+  </Output>
+  <ParameterList>
+   <Parameter name="p0" label="Intercept"/>
+   <Parameter name="p1" label="contact_job_Analyst"/>
+   <Parameter name="p2" label="contact_job_Architect"/>
+   <Parameter name="p3" label="contact_job_Consultant"/>
+   <Parameter name="p4" label="contact_job_CXOEVP"/>
+   <Parameter name="p5" label="contact_job_Developer"/>
+   <Parameter name="p6" label="contact_job_Director"/>
+   <Parameter name="p7" label="contact_job_Educator"/>
+   <Parameter name="p8" label="contact_job_IndividualContributor"/>
+   <Parameter name="p9" label="contact_job_Manager"/>
+   <Parameter name="p10" label="contact_job_ProfessionalStaff"/>
+   <Parameter name="p11" label="contact_job_SupportStaff"/>
+   <Parameter name="p12" label="contact_job_SVPVP"/>
+   <Parameter name="p13" label="contact_department_Creative"/>
+   <Parameter name="p14" label="contact_department_CustomerExperience"/>
+   <Parameter name="p15" label="contact_department_eCommerce"/>
+   <Parameter name="p16" label="contact_department_EngineeringDevelopment"/>
+   <Parameter name="p17" label="contact_department_ExecutiveGeneralAdministration"/>
+   <Parameter name="p18" label="contact_department_Finance"/>
+   <Parameter name="p19" label="contact_department_HumanResources"/>
+   <Parameter name="p20" label="contact_department_IT"/>
+   <Parameter name="p21" label="contact_department_Marketing"/>
+   <Parameter name="p22" label="contact_department_Operations"/>
+   <Parameter name="p23" label="contact_department_ProfessionalServices"/>
+   <Parameter name="p24" label="contact_department_PublicAffairsCommunications"/>
+   <Parameter name="p25" label="contact_department_ResearchSciences"/>
+   <Parameter name="p26" label="contact_department_Sales"/>
+   <Parameter name="p27" label="contact_department_TrainingLearning"/>
+   <Parameter name="p28" label="contact_lead_order"/>
+   <Parameter name="p29" label="account_lead_order"/>
+   <Parameter name="p30" label="lead_product_outlook_group_ACROBAT"/>
+   <Parameter name="p31" label="lead_product_outlook_group_AEM"/>
+   <Parameter name="p32" label="lead_product_outlook_group_AEMMOBILE"/>
+   <Parameter name="p33" label="lead_product_outlook_group_ANALYTICS"/>
+   <Parameter name="p34" label="lead_product_outlook_group_AUDIENCEMANAGER"/>
+   <Parameter name="p35" label="lead_product_outlook_group_CAMPAIGN"/>
+   <Parameter name="p36" label="lead_product_outlook_group_CREATIVE"/>
+   <Parameter name="p37" label="lead_product_outlook_group_DPS"/>
+   <Parameter name="p38" label="lead_product_outlook_group_ECHOSIGN"/>
+   <Parameter name="p39" label="lead_product_outlook_group_LIVECYCLE"/>
+   <Parameter name="p40" label="lead_product_outlook_group_MEDIAOPTIMIZER"/>
+   <Parameter name="p41" label="lead_product_outlook_group_PPBU"/>
+   <Parameter name="p42" label="lead_product_outlook_group_SOCIAL"/>
+   <Parameter name="p43" label="lead_product_outlook_group_TARGET"/>
+   <Parameter name="p44" label="lead_product_outlook_group_WEM"/>
+   <Parameter name="p45" label="lead_activity_type_Advertising"/>
+   <Parameter name="p46" label="lead_activity_type_Database"/>
+   <Parameter name="p47" label="lead_activity_type_Email"/>
+   <Parameter name="p48" label="lead_activity_type_Events"/>
+   <Parameter name="p49" label="lead_activity_type_Offer"/>
+   <Parameter name="p50" label="lead_activity_type_SalesCalldown"/>
+   <Parameter name="p51" label="lead_activity_type_WebsiteDirect"/>
+   <Parameter name="p52" label="lead_activity_subtype_A"/>
+   <Parameter name="p53" label="lead_activity_subtype_AdobeEventsegSummit"/>
+   <Parameter name="p54" label="lead_activity_subtype_ContentSyndication"/>
+   <Parameter name="p55" label="lead_activity_subtype_DataBaseBuilding"/>
+   <Parameter name="p56" label="lead_activity_subtype_DataBaseBuildingDataAppends"/>
+   <Parameter name="p57" label="lead_activity_subtype_Dinners"/>
+   <Parameter name="p58" label="lead_activity_subtype_EMail"/>
+   <Parameter name="p59" label="lead_activity_subtype_ESeminarEvent"/>
+   <Parameter name="p60" label="lead_activity_subtype_ListUploadInternalList"/>
+   <Parameter name="p61" label="lead_activity_subtype_ListUploadPurchasedfrom3rdParty"/>
+   <Parameter name="p62" label="lead_activity_subtype_LiveDemo"/>
+   <Parameter name="p63" label="lead_activity_subtype_ProductOverview"/>
+   <Parameter name="p64" label="lead_activity_subtype_RFIRequestforInformation"/>
+   <Parameter name="p65" label="lead_activity_subtype_SuccessStoryCaseStudy"/>
+   <Parameter name="p66" label="lead_activity_subtype_Survey"/>
+   <Parameter name="p67" label="lead_activity_subtype_TradeshowConference"/>
+   <Parameter name="p68" label="lead_activity_subtype_Trial"/>
+   <Parameter name="p69" label="lead_activity_subtype_VideoOther"/>
+   <Parameter name="p70" label="lead_activity_subtype_VideoFeaturedDemo"/>
+   <Parameter name="p71" label="lead_activity_subtype_VideoProductTour"/>
+   <Parameter name="p72" label="lead_activity_subtype_WebinarLive"/>
+   <Parameter name="p73" label="lead_activity_subtype_WebinarOnDemand"/>
+   <Parameter name="p74" label="lead_activity_subtype_WhitepaperExternalLicensed"/>
+   <Parameter name="p75" label="lead_activity_subtype_WhitepaperInternalProduced"/>
+   <Parameter name="p76" label="lead_activity_subtype_WhitepaperProductOverview"/>
+  </ParameterList>
+  <CovariateList>
+   <Predictor name="contact_job_Analyst"/>
+   <Predictor name="contact_job_Architect"/>
+   <Predictor name="contact_job_Consultant"/>
+   <Predictor name="contact_job_CXOEVP"/>
+   <Predictor name="contact_job_Developer"/>
+   <Predictor name="contact_job_Director"/>
+   <Predictor name="contact_job_Educator"/>
+   <Predictor name="contact_job_IndividualContributor"/>
+   <Predictor name="contact_job_Manager"/>
+   <Predictor name="contact_job_ProfessionalStaff"/>
+   <Predictor name="contact_job_SupportStaff"/>
+   <Predictor name="contact_job_SVPVP"/>
+   <Predictor name="contact_department_Creative"/>
+   <Predictor name="contact_department_CustomerExperience"/>
+   <Predictor name="contact_department_eCommerce"/>
+   <Predictor name="contact_department_EngineeringDevelopment"/>
+   <Predictor name="contact_department_ExecutiveGeneralAdministration"/>
+   <Predictor name="contact_department_Finance"/>
+   <Predictor name="contact_department_HumanResources"/>
+   <Predictor name="contact_department_IT"/>
+   <Predictor name="contact_department_Marketing"/>
+   <Predictor name="contact_department_Operations"/>
+   <Predictor name="contact_department_ProfessionalServices"/>
+   <Predictor name="contact_department_PublicAffairsCommunications"/>
+   <Predictor name="contact_department_ResearchSciences"/>
+   <Predictor name="contact_department_Sales"/>
+   <Predictor name="contact_department_TrainingLearning"/>
+   <Predictor name="contact_lead_order"/>
+   <Predictor name="account_lead_order"/>
+   <Predictor name="lead_product_outlook_group_ACROBAT"/>
+   <Predictor name="lead_product_outlook_group_AEM"/>
+   <Predictor name="lead_product_outlook_group_AEMMOBILE"/>
+   <Predictor name="lead_product_outlook_group_ANALYTICS"/>
+   <Predictor name="lead_product_outlook_group_AUDIENCEMANAGER"/>
+   <Predictor name="lead_product_outlook_group_CAMPAIGN"/>
+   <Predictor name="lead_product_outlook_group_CREATIVE"/>
+   <Predictor name="lead_product_outlook_group_DPS"/>
+   <Predictor name="lead_product_outlook_group_ECHOSIGN"/>
+   <Predictor name="lead_product_outlook_group_LIVECYCLE"/>
+   <Predictor name="lead_product_outlook_group_MEDIAOPTIMIZER"/>
+   <Predictor name="lead_product_outlook_group_PPBU"/>
+   <Predictor name="lead_product_outlook_group_SOCIAL"/>
+   <Predictor name="lead_product_outlook_group_TARGET"/>
+   <Predictor name="lead_product_outlook_group_WEM"/>
+   <Predictor name="lead_activity_type_Advertising"/>
+   <Predictor name="lead_activity_type_Database"/>
+   <Predictor name="lead_activity_type_Email"/>
+   <Predictor name="lead_activity_type_Events"/>
+   <Predictor name="lead_activity_type_Offer"/>
+   <Predictor name="lead_activity_type_SalesCalldown"/>
+   <Predictor name="lead_activity_type_WebsiteDirect"/>
+   <Predictor name="lead_activity_subtype_A"/>
+   <Predictor name="lead_activity_subtype_AdobeEventsegSummit"/>
+   <Predictor name="lead_activity_subtype_ContentSyndication"/>
+   <Predictor name="lead_activity_subtype_DataBaseBuilding"/>
+   <Predictor name="lead_activity_subtype_DataBaseBuildingDataAppends"/>
+   <Predictor name="lead_activity_subtype_Dinners"/>
+   <Predictor name="lead_activity_subtype_EMail"/>
+   <Predictor name="lead_activity_subtype_ESeminarEvent"/>
+   <Predictor name="lead_activity_subtype_ListUploadInternalList"/>
+   <Predictor name="lead_activity_subtype_ListUploadPurchasedfrom3rdParty"/>
+   <Predictor name="lead_activity_subtype_LiveDemo"/>
+   <Predictor name="lead_activity_subtype_ProductOverview"/>
+   <Predictor name="lead_activity_subtype_RFIRequestforInformation"/>
+   <Predictor name="lead_activity_subtype_SuccessStoryCaseStudy"/>
+   <Predictor name="lead_activity_subtype_Survey"/>
+   <Predictor name="lead_activity_subtype_TradeshowConference"/>
+   <Predictor name="lead_activity_subtype_Trial"/>
+   <Predictor name="lead_activity_subtype_VideoOther"/>
+   <Predictor name="lead_activity_subtype_VideoFeaturedDemo"/>
+   <Predictor name="lead_activity_subtype_VideoProductTour"/>
+   <Predictor name="lead_activity_subtype_WebinarLive"/>
+   <Predictor name="lead_activity_subtype_WebinarOnDemand"/>
+   <Predictor name="lead_activity_subtype_WhitepaperExternalLicensed"/>
+   <Predictor name="lead_activity_subtype_WhitepaperInternalProduced"/>
+   <Predictor name="lead_activity_subtype_WhitepaperProductOverview"/>
+  </CovariateList>
+  <PPMatrix>
+   <PPCell value="1" predictorName="contact_job_Analyst" parameterName="p1"/>
+   <PPCell value="1" predictorName="contact_job_Architect" parameterName="p2"/>
+   <PPCell value="1" predictorName="contact_job_Consultant" parameterName="p3"/>
+   <PPCell value="1" predictorName="contact_job_CXOEVP" parameterName="p4"/>
+   <PPCell value="1" predictorName="contact_job_Developer" parameterName="p5"/>
+   <PPCell value="1" predictorName="contact_job_Director" parameterName="p6"/>
+   <PPCell value="1" predictorName="contact_job_Educator" parameterName="p7"/>
+   <PPCell value="1" predictorName="contact_job_IndividualContributor" parameterName="p8"/>
+   <PPCell value="1" predictorName="contact_job_Manager" parameterName="p9"/>
+   <PPCell value="1" predictorName="contact_job_ProfessionalStaff" parameterName="p10"/>
+   <PPCell value="1" predictorName="contact_job_SupportStaff" parameterName="p11"/>
+   <PPCell value="1" predictorName="contact_job_SVPVP" parameterName="p12"/>
+   <PPCell value="1" predictorName="contact_department_Creative" parameterName="p13"/>
+   <PPCell value="1" predictorName="contact_department_CustomerExperience" parameterName="p14"/>
+   <PPCell value="1" predictorName="contact_department_eCommerce" parameterName="p15"/>
+   <PPCell value="1" predictorName="contact_department_EngineeringDevelopment" parameterName="p16"/>
+   <PPCell value="1" predictorName="contact_department_ExecutiveGeneralAdministration" parameterName="p17"/>
+   <PPCell value="1" predictorName="contact_department_Finance" parameterName="p18"/>
+   <PPCell value="1" predictorName="contact_department_HumanResources" parameterName="p19"/>
+   <PPCell value="1" predictorName="contact_department_IT" parameterName="p20"/>
+   <PPCell value="1" predictorName="contact_department_Marketing" parameterName="p21"/>
+   <PPCell value="1" predictorName="contact_department_Operations" parameterName="p22"/>
+   <PPCell value="1" predictorName="contact_department_ProfessionalServices" parameterName="p23"/>
+   <PPCell value="1" predictorName="contact_department_PublicAffairsCommunications" parameterName="p24"/>
+   <PPCell value="1" predictorName="contact_department_ResearchSciences" parameterName="p25"/>
+   <PPCell value="1" predictorName="contact_department_Sales" parameterName="p26"/>
+   <PPCell value="1" predictorName="contact_department_TrainingLearning" parameterName="p27"/>
+   <PPCell value="1" predictorName="contact_lead_order" parameterName="p28"/>
+   <PPCell value="1" predictorName="account_lead_order" parameterName="p29"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_ACROBAT" parameterName="p30"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_AEM" parameterName="p31"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_AEMMOBILE" parameterName="p32"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_ANALYTICS" parameterName="p33"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_AUDIENCEMANAGER" parameterName="p34"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_CAMPAIGN" parameterName="p35"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_CREATIVE" parameterName="p36"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_DPS" parameterName="p37"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_ECHOSIGN" parameterName="p38"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_LIVECYCLE" parameterName="p39"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_MEDIAOPTIMIZER" parameterName="p40"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_PPBU" parameterName="p41"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_SOCIAL" parameterName="p42"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_TARGET" parameterName="p43"/>
+   <PPCell value="1" predictorName="lead_product_outlook_group_WEM" parameterName="p44"/>
+   <PPCell value="1" predictorName="lead_activity_type_Advertising" parameterName="p45"/>
+   <PPCell value="1" predictorName="lead_activity_type_Database" parameterName="p46"/>
+   <PPCell value="1" predictorName="lead_activity_type_Email" parameterName="p47"/>
+   <PPCell value="1" predictorName="lead_activity_type_Events" parameterName="p48"/>
+   <PPCell value="1" predictorName="lead_activity_type_Offer" parameterName="p49"/>
+   <PPCell value="1" predictorName="lead_activity_type_SalesCalldown" parameterName="p50"/>
+   <PPCell value="1" predictorName="lead_activity_type_WebsiteDirect" parameterName="p51"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_A" parameterName="p52"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_AdobeEventsegSummit" parameterName="p53"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_ContentSyndication" parameterName="p54"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_DataBaseBuilding" parameterName="p55"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_DataBaseBuildingDataAppends" parameterName="p56"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_Dinners" parameterName="p57"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_EMail" parameterName="p58"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_ESeminarEvent" parameterName="p59"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_ListUploadInternalList" parameterName="p60"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_ListUploadPurchasedfrom3rdParty" parameterName="p61"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_LiveDemo" parameterName="p62"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_ProductOverview" parameterName="p63"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_RFIRequestforInformation" parameterName="p64"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_SuccessStoryCaseStudy" parameterName="p65"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_Survey" parameterName="p66"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_TradeshowConference" parameterName="p67"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_Trial" parameterName="p68"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_VideoOther" parameterName="p69"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_VideoFeaturedDemo" parameterName="p70"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_VideoProductTour" parameterName="p71"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_WebinarLive" parameterName="p72"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_WebinarOnDemand" parameterName="p73"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_WhitepaperExternalLicensed" parameterName="p74"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_WhitepaperInternalProduced" parameterName="p75"/>
+   <PPCell value="1" predictorName="lead_activity_subtype_WhitepaperProductOverview" parameterName="p76"/>
+  </PPMatrix>
+  <ParamMatrix>
+   <PCell parameterName="p0" df="1" beta="-2.35997782926855"/>
+   <PCell parameterName="p1" df="1" beta="0.639555873002708"/>
+   <PCell parameterName="p2" df="1" beta="0.394869348668367"/>
+   <PCell parameterName="p3" df="1" beta="-0.217755866726727"/>
+   <PCell parameterName="p4" df="1" beta="-0.285967550992787"/>
+   <PCell parameterName="p5" df="1" beta="-0.0147538093804966"/>
+   <PCell parameterName="p6" df="1" beta="0.527854265136526"/>
+   <PCell parameterName="p7" df="1" beta="-0.148111186306979"/>
+   <PCell parameterName="p8" df="1" beta="0.524096043298586"/>
+   <PCell parameterName="p9" df="1" beta="0.633425208965104"/>
+   <PCell parameterName="p10" df="1" beta="0.184420629606839"/>
+   <PCell parameterName="p11" df="1" beta="0.204121628935087"/>
+   <PCell parameterName="p12" df="1" beta="0.299516135023078"/>
+   <PCell parameterName="p13" df="1" beta="-0.308276944877559"/>
+   <PCell parameterName="p15" df="1" beta="0.510412580950955"/>
+   <PCell parameterName="p16" df="1" beta="0.0924121772409134"/>
+   <PCell parameterName="p17" df="1" beta="-0.062483194650951"/>
+   <PCell parameterName="p18" df="1" beta="-0.312131520103542"/>
+   <PCell parameterName="p19" df="1" beta="0.0575363239453197"/>
+   <PCell parameterName="p20" df="1" beta="-0.0114750552771568"/>
+   <PCell parameterName="p21" df="1" beta="0.152062588586476"/>
+   <PCell parameterName="p22" df="1" beta="-0.109774904224398"/>
+   <PCell parameterName="p23" df="1" beta="-0.523071751001795"/>
+   <PCell parameterName="p24" df="1" beta="-0.0740903450403443"/>
+   <PCell parameterName="p25" df="1" beta="0.551655580486506"/>
+   <PCell parameterName="p26" df="1" beta="-0.426249884056679"/>
+   <PCell parameterName="p27" df="1" beta="0.106964957877686"/>
+   <PCell parameterName="p28" df="1" beta="-0.00420941844203252"/>
+   <PCell parameterName="p29" df="1" beta="0.00633755777251003"/>
+   <PCell parameterName="p31" df="1" beta="-0.134547852334151"/>
+   <PCell parameterName="p33" df="1" beta="0.122006332907991"/>
+   <PCell parameterName="p35" df="1" beta="0.192197744362465"/>
+   <PCell parameterName="p42" df="1" beta="-0.223813266164914"/>
+   <PCell parameterName="p43" df="1" beta="-0.00258147776425039"/>
+   <PCell parameterName="p45" df="1" beta="-0.493554074268665"/>
+   <PCell parameterName="p46" df="1" beta="0.00308898166465914"/>
+   <PCell parameterName="p47" df="1" beta="-0.469726907461817"/>
+   <PCell parameterName="p48" df="1" beta="0.166927613536658"/>
+   <PCell parameterName="p49" df="1" beta="-0.628488359220091"/>
+   <PCell parameterName="p50" df="1" beta="0.464575058796187"/>
+   <PCell parameterName="p51" df="1" beta="-2.28863304286207"/>
+   <PCell parameterName="p52" df="1" beta="-2.45084494137911e-11"/>
+   <PCell parameterName="p57" df="1" beta="-0.0110787099264274"/>
+   <PCell parameterName="p59" df="1" beta="-0.869019705938541"/>
+   <PCell parameterName="p60" df="1" beta="1.43394121503042"/>
+   <PCell parameterName="p62" df="1" beta="0.0661199402078202"/>
+   <PCell parameterName="p63" df="1" beta="0.288640419090593"/>
+   <PCell parameterName="p64" df="1" beta="-1.18913097605142"/>
+   <PCell parameterName="p65" df="1" beta="-0.255149869062199"/>
+   <PCell parameterName="p66" df="1" beta="0.0769629011663734"/>
+   <PCell parameterName="p67" df="1" beta="-1.02351584126052"/>
+   <PCell parameterName="p69" df="1" beta="-0.553144486525734"/>
+   <PCell parameterName="p70" df="1" beta="-0.431488505224001"/>
+   <PCell parameterName="p71" df="1" beta="-0.181339844301319"/>
+   <PCell parameterName="p72" df="1" beta="0.207902950589717"/>
+   <PCell parameterName="p73" df="1" beta="-0.141627412512589"/>
+   <PCell parameterName="p74" df="1" beta="-0.477758558958833"/>
+   <PCell parameterName="p75" df="1" beta="-0.448971646391436"/>
+   <PCell parameterName="p76" df="1" beta="-0.0728944378973679"/>
+  </ParamMatrix>
+ </GeneralRegressionModel>
+</PMML>
