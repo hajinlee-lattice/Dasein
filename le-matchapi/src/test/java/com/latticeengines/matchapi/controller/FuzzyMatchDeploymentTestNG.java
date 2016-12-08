@@ -100,7 +100,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private MatchCommandService matchCommandService;
 
     @Test(groups = "deployment", enabled = true)
-    public void testRealtimeMatch() {
+    public void testRealtimeMatchWithCache() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
                 SCENARIO_INCOMPLETELOCATION };
@@ -108,15 +108,23 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             MatchInput input = prepareRealtimeMatchInput(scenario, false);
             MatchOutput output = matchProxy.matchRealTime(input);
             validateRealtimeMatchResult(scenario, output);
+        }
+    }
 
-            input.setUseDnBCache(true);
-            output = matchProxy.matchRealTime(input);
+    @Test(groups = "dnb", enabled = true)
+    public void testRealtimeMatchWithoutCache() {
+        String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
+                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
+                SCENARIO_INCOMPLETELOCATION };
+        for (String scenario : scenarios) {
+            MatchInput input = prepareRealtimeMatchInput(scenario, true);
+            MatchOutput output = matchProxy.matchRealTime(input);
             validateRealtimeMatchResult(scenario, output);
         }
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testBulkMatch() {
+    public void testBulkMatchWithCache() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_INCOMPLETELOCATION };
         for (String scenario : scenarios) {
@@ -142,7 +150,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment", enabled = false)
-    public void loadTestBulkMatch() {
+    public void loadTestBulkMatchWithoutCache() {
         String[] scenarios = { SCENARIO_BULKMATCH_LOADTEST };
         for (String scenario : scenarios) {
             MatchInput input = prepareBulkMatchInput(scenario, false);
