@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,14 +30,25 @@ public class CampaignResource {
     @Autowired
     private CampaignService campaignService;
 
+    @RequestMapping(value = "/{campaignName}/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a campaign from a list of models")
+    @PreAuthorize("hasRole('Edit_PLS_Campaigns')")
+    public SimpleBooleanResponse createCampaign(@PathVariable String campaignName, //
+            @RequestParam(value="description", required=false) String description, HttpServletRequest request) {
+        campaignService.createCampaign(campaignName, description, request);
+        return SimpleBooleanResponse.successResponse();
+    }
+
     @RequestMapping(value = "/{campaignName}/models/", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a campaign from a list of models")
     @PreAuthorize("hasRole('Edit_PLS_Campaigns')")
     public SimpleBooleanResponse createFromModel(@PathVariable String campaignName, //
+            @RequestParam(value="description", required=false) String description, //
             @RequestBody List<String> modelIds, //
             HttpServletRequest request) {
-        campaignService.createCampaignFromModels(campaignName, null, modelIds, request);
+        campaignService.createCampaignFromModels(campaignName, description, null, modelIds, request);
         return SimpleBooleanResponse.successResponse();
     }
 
@@ -46,6 +58,7 @@ public class CampaignResource {
     @PreAuthorize("hasRole('Edit_PLS_Campaigns')")
     public SimpleBooleanResponse createFromTable(@PathVariable String campaignName, //
             @PathVariable String tableName, //
+            @RequestParam(value="description", required=false) String description, //
             HttpServletRequest request) {
         return SimpleBooleanResponse.successResponse();
     }

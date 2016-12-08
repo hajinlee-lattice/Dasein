@@ -9,11 +9,13 @@ import com.latticeengines.domain.exposed.ulysses.Campaign;
 public interface CampaignService {
 
     List<Campaign> findAll();
-
-    Campaign createCampaignFromModels(String campaignName, String segmentName, List<String> modelIds,
+    
+    Campaign createCampaign(String campaignName, String description, HttpServletRequest request);
+    
+    Campaign createCampaignFromModels(String campaignName, String description, String segmentName, List<String> modelIds,
             HttpServletRequest request);
 
-    Campaign createCampaignFromTable(String campaignName, String segmentName, String tableName,
+    Campaign createCampaignFromTable(String campaignName, String description, String segmentName, String tableName,
             HttpServletRequest request);
 
     Campaign findCampaignByName(String campaignName);

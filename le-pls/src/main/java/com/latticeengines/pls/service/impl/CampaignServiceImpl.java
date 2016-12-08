@@ -51,7 +51,15 @@ public class CampaignServiceImpl implements CampaignService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
-    public Campaign createCampaignFromModels(String campaignName, String segmentName, List<String> modelIds, HttpServletRequest request) {
+    public Campaign createCampaign(String campaignName, String description, HttpServletRequest request) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        return createCampaign(campaignName, description, tenant, new ArrayList<MetadataSegment>(), true);
+    }
+
+    @Override
+    public Campaign createCampaignFromModels(String campaignName, String description, String segmentName, //
+            List<String> modelIds, HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         
@@ -66,24 +74,26 @@ public class CampaignServiceImpl implements CampaignService {
             segments.add(segment);
         }
 
-        return createCampaign(campaignName, tenant, segments, true);
+        return createCampaign(campaignName, description, tenant, segments, true);
     }
 
     @Override
-    public Campaign createCampaignFromTable(String campaignName, String segmentName, String tableName, HttpServletRequest request) {
+    public Campaign createCampaignFromTable(String campaignName, String description, String segmentName, //
+            String tableName, HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Table table = metadataProxy.getTable(tenant.getId(), tableName);
         MetadataSegment segment = listSegmentBuilder.createSegment(tenant.getId(), segmentName, table);
-        return createCampaign(campaignName, tenant, segment);
+        return createCampaign(campaignName, description, tenant, segment);
     }
     
-    private Campaign createCampaign(String name, Tenant tenant, MetadataSegment segment) {
-        return createCampaign(name, tenant, Arrays.asList(new MetadataSegment[] { segment }), true);
+    private Campaign createCampaign(String name, String description, Tenant tenant, MetadataSegment segment) {
+        return createCampaign(name, description, tenant, Arrays.asList(new MetadataSegment[] { segment }), true);
     }
     
-    private Campaign createCampaign(String name, Tenant tenant, List<MetadataSegment> segments, boolean inbound) {
+    private Campaign createCampaign(String name, String description, Tenant tenant, List<MetadataSegment> segments, boolean inbound) {
         Campaign campaign = new Campaign();
         campaign.setName(name);
+        campaign.setDescription(description);
         campaign.setTenant(tenant);
         
         

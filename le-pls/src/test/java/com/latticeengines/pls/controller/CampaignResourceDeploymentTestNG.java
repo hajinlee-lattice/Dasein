@@ -61,7 +61,7 @@ public class CampaignResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         summary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries", summary, ModelSummary.class);
         List<String> modelIds = Arrays.asList(summary.getId());
         SimpleBooleanResponse response = restTemplate.postForObject( //
-                getRestAPIHostPort() + "/pls/campaigns/CAMPAIGN1/models/", modelIds, SimpleBooleanResponse.class);
+                getRestAPIHostPort() + "/pls/campaigns/CAMPAIGN1/models/?description=abc", modelIds, SimpleBooleanResponse.class);
         assertNull(response.getErrors());
     }
 
@@ -71,6 +71,7 @@ public class CampaignResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 Campaign.class, new HashMap<>());
         assertNotNull(campaign);
         assertEquals(campaign.getSegments().size(), 1);
+        assertEquals(campaign.getDescription(), "abc");
         assertEquals(campaign.getSegments().get(0), summary.getId());
     }
 
