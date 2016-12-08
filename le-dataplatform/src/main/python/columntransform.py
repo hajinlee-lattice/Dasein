@@ -127,12 +127,14 @@ class ColumnTransform(object):
                 if "LoadFromHdfs" in value and value["LoadFromHdfs"] == True:
                     f = value["ColumnTransformFilePath"]
                     f = self.stripPath(f)
-                    hdfs.copyToLocal(value["ColumnTransformFilePath"], "./%s" % f)
+                    logger.info('Loading PipelineStep from HDFS: {0} --> {1}'.format(value["ColumnTransformFilePath"], '{0}/{1}'.format(pipelinePath, f)))
+                    hdfs.copyToLocal(value["ColumnTransformFilePath"], '{0}/{1}'.format(pipelinePath, f))
                     rtsFile = value["RTSFilePath"] if "RTSFilePath" in value else None
-                    
+
                     if rtsFile is not None:
                         rtsFile = self.stripPath(rtsFile)
-                        hdfs.copyToLocal(value["RTSFilePath"], "./%s" % rtsFile)
+                        logger.info('Loading Python Transform from HDFS: {0} --> {1}'.format(value["RTSFilePath"], '{0}/{1}'.format(pipelinePath, rtsFile)))
+                        hdfs.copyToLocal(value["RTSFilePath"], '{0}/{1}'.format(pipelinePath, rtsFile))
 
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
