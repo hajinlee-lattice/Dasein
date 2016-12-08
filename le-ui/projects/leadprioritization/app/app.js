@@ -20,6 +20,7 @@ var mainApp = angular.module('mainApp', [
     'lp.models.review',
     'lp.create.import',
     'lp.enrichment.leadenrichment',
+    'lp.enrichmentwizard.leadenrichment',
     'lp.sfdc.credentials',
     'lp.managefields',
     'lp.marketo.enrichment'
