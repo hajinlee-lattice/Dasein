@@ -19,7 +19,6 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.reflect.AvroIgnore;
-import org.apache.avro.reflect.AvroSchema;
 import org.apache.avro.reflect.Nullable;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -53,6 +52,10 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @JsonProperty("description")
+    @Column(name = "DESCRIPTION", nullable = true)
+    private String description;
 
     @JsonProperty("campaign_type")
     @Column(name = "CAMPAIGN_TYPE", nullable = false)
@@ -180,6 +183,14 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
     @Override
     public void setId(String id) {
         this.campaignId = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }
