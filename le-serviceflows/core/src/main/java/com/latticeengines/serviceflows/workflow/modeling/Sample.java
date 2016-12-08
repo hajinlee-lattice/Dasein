@@ -2,23 +2,18 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("sample")
 public class Sample extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(Sample.class);
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
