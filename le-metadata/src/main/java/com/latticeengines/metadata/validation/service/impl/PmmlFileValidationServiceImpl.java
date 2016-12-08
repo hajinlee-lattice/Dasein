@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
