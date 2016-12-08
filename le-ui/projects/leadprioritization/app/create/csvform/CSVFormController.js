@@ -38,6 +38,8 @@ angular
         params: {
             infoTemplate: "<div class='row divider'><div class='twelve columns'><h4>What is a Training File?</h4><p>A training set is a CSV file with records of your historical successes. It is used to build your ideal customer profile by leveraging the Lattice Predictive Insights platform. Ideal training set should have at least 7,000 accounts, 150 success events and a conversion rate of less than 10%.</p></div></div><div class='row'><div class='six columns'><h4>Account Model:</h4><p>Upload a CSV file with accounts</p><p>Required: Id (any unique value for each record), Website (domain of company website), Event (1 for success, 0 otherwise)</p><p>Optional fields: Additional internal attributes about the accounts you would like to use as predictive attributes.</p></div><div class='six columns'><h4>Lead Model:</h4><p>Upload a CSV file with leads</p><p>Required: Id (any unique value for each record), Email, Event (1 for success, 0 otherwise)</p><p>Optional: Lead engagement data can be used as predictive attributes. Below are supported attributes:<ul><li>Marketo (4 week counts): Email Bounces (Soft), Email Clicks, Email Opens, Email Unsubscribes, Form Fills, Web-Link Clicks, Webpage Visits, Interesting Moments</li><li>Eloqua (4 week counts): Email Open, Email Send, Email Click Though, Email Subscribe, Email Unsubscribe, Form Submit, Web Visit, Campaign Membership, External Activity</li></ul></p></div></div>",
             compressed: true,
+            importError: false,
+            importErrorMsg: '',
         },
         pivotParams: {
             infoTemplate: "<h4>Pivot Mapping File</h4><p>Choose a Pivot Mapping File</p>",
@@ -59,9 +61,26 @@ angular
 
     vm.fileLoad = function(headers) {
         var columns = headers.split(','),
+            nonDuplicatedColumns = [],
+            duplicatedColumns = [],
             schemaSuggestion;
+        vm.params.importError = false;
+        vm.showImportError = false;
 
         if (columns.length > 0) {
+            for (var i = 0; i < columns.length; i++) {
+                if (nonDuplicatedColumns.indexOf(columns[i]) < 0) {
+                    nonDuplicatedColumns.push(columns[i]);
+                } else {
+                    duplicatedColumns.push(columns[i]);
+                }
+            }
+            if (duplicatedColumns.length != 0) {
+                vm.showImportError = true;
+                vm.importErrorMsg = "Duplicate column(s) detected: '[" + duplicatedColumns + "]'";
+                vm.params.importError = true;
+            }
+
             var hasWebsite = columns.indexOf('Website') != -1,
                 hasEmail = columns.indexOf('Email') != -1;
 

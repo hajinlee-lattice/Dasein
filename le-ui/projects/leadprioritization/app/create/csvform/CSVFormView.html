@@ -1,6 +1,9 @@
 <section class="container setup-import">
 <form name="uploadForm" ng-controller="csvImportController as vm" novalidate>
   <div class="row">
+      <div class="global-error local-error" data-ng-show="vm.showImportError">
+          {{vm.importErrorMsg}}
+      </div>
     <div class="columns eight offset-two box-outline">
       <div class="section-header">
         <h4>CSV Import</h4>

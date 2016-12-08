@@ -80,6 +80,11 @@ angular
                     if (typeof vm.fileLoad == 'function') {
                         vm.params = vm.fileLoad({headers:headers}) || vm.params;
                     }
+                    if (vm.params.importError) {
+                        var result = { Success: false };
+                        vm.uploadResponse(result);
+                        return;
+                    }
 
                     var fnFallBack = function() {
                         vm.compress_percent = 100;
@@ -343,7 +348,7 @@ angular
                         },
                         progress: vm.uploadProgress
                     };
-                
+
                 vm.cancelDeferred = cancelDeferred = $q.defer();
 
                 ImportService.Upload(options).then(vm.uploadResponse);
