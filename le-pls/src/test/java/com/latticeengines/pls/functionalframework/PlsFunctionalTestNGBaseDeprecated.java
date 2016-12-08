@@ -311,7 +311,6 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
         setupSecurityContext(segment.getTenant());
     }
 
-
     protected void cleanupTargetMarketDB() {
         setupSecurityContext(mainTestTenant);
         List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.findAllTargetMarkets();

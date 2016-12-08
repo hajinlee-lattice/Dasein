@@ -1,7 +1,7 @@
 package com.latticeengines.scoring.util;
 
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,15 +32,15 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtilTestNG {
 
-    private static final String MODEL_ID = "60fd2fa4-9868-464e-a534-3205f52c41f0";
+    private static final String MODEL_ID = ScoringUnitTestUtils.generateRandomModelId();
 
     @Test(groups = "unit")
     public void testProcessScoreFiles() throws IOException, DecoderException {
         // copy over the score.txt file to the current directory
-        URL scoreUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/results/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
-        File dest = new File(System.getProperty("user.dir")
-                + "/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
+        URL scoreUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/scoring/results/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
+        File dest = new File(
+                System.getProperty("user.dir") + "/60fd2fa4-9868-464e-a534-3205f52c41f0scoringoutputfile-0.txt");
         try {
             FileUtils.copyURLToFile(scoreUrl, dest);
         } catch (IOException e) {
@@ -85,8 +85,8 @@ public class ScoringMapperPredictUtilTestNG {
                 81, 0.018806509945750453, 0.0175358841357, 2);
         ScoreOutput result8 = new ScoreOutput("baf39fe9-a184-4a83-9399-45208560dbe4", "High", 1.48679773768, MODEL_ID,
                 75, 0.017721518987341773, 0.0148266449465, 2);
-        ScoreOutput result9 = new ScoreOutput("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium", 1.15302681698,
-                MODEL_ID, 65, 0.013743218806509945, 0.01244724204371, 1);
+        ScoreOutput result9 = new ScoreOutput("cd7de65c-b2af-42a5-85af-491cf8503747", "Medium", 1.15302681698, MODEL_ID,
+                65, 0.013743218806509945, 0.01244724204371, 1);
         ScoreOutput result10 = new ScoreOutput("fd6be1aa-95aa-45b2-adbb-3125a01acf84", "Medium", 1.06199838406,
                 MODEL_ID, 62, 0.012658227848101266, 0.01185827291902, 1);
         expectedResultList.add(result1);
@@ -295,8 +295,9 @@ public class ScoringMapperPredictUtilTestNG {
     @Test(groups = "unit", dataProvider = "dataProvider")
     public void testCalculateResult(String id, Double score, String bucketDisplayName, int percentile)
             throws IOException {
-        String str = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(
-                "com/latticeengines/scoring/models/sampleModel/enhancements/scorederivation.json").getFile()));
+        String str = FileUtils.readFileToString(new File(ClassLoader
+                .getSystemResource("com/latticeengines/scoring/models/sampleModel/enhancements/scorederivation.json")
+                .getFile()));
         ScoreDerivation scoreDerivation = JsonUtils.deserialize(str, ScoreDerivation.class);
         ScoreOutput scoreOutput = ScoringMapperPredictUtil.calculateResult(scoreDerivation, "modelid", id, score);
         assertEquals(scoreOutput.getBucketDisplayName(), bucketDisplayName);

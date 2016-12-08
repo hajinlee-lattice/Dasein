@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringJobService;
+import com.latticeengines.scoring.util.ScoringUnitTestUtils;
 
 public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
@@ -34,7 +35,7 @@ public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
     private String scorePath;
 
-    private String uuid = "ac52c4b7-b856-456d-b3a6-6dc758139eaf";
+    private String modelId = ScoringUnitTestUtils.generateRandomModelId();
 
     @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
@@ -51,7 +52,7 @@ public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
         scoringConfig.setCustomer(tenant);
         scoringConfig.setSourceDataDir(dataPath);
         scoringConfig.setTargetResultDir(scorePath);
-        scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
+        scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { modelId }));
         scoringConfig.setUniqueKeyColumn("LeadID");
         ApplicationId appId = scoringJobService.score(scoringConfig);
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

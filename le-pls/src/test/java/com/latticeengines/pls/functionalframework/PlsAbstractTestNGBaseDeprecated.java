@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -252,5 +253,9 @@ public abstract class PlsAbstractTestNGBaseDeprecated extends SecurityFunctional
     }
 
     protected abstract String getRestAPIHostPort();
+
+    protected String generateRandomModelId() {
+        return String.format("ms__%s-PLSModel", UUID.randomUUID());
+    }
 
 }

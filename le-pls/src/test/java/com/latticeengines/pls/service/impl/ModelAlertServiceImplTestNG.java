@@ -26,7 +26,7 @@ import com.latticeengines.pls.service.ModelAlertService;
 
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    private static final String MODEL_ID = "ms__8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a-PLSModel";
+    private String modelId;
     private String tenantId;
     private String dir;
 
@@ -39,7 +39,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
     private URL modelSummaryUrl;
     private URL metadataDiagnosticsUrl;
     private URL dataDiagnosticsUrl;
-    private URL rfMoelUrl;
+    private URL rfModelUrl;
     private URL topPredictorUrl;
 
     @Autowired
@@ -56,7 +56,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
         setupUsers();
 
         tenantId = testingTenants.get(0).getId();
-        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(MODEL_ID)
+        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(modelId)
                 + "/container_01/";
         modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
@@ -64,7 +64,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
                 .getSystemResource("com/latticeengines/pls/functionalframework/metadata-diagnostics.json");
         dataDiagnosticsUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/diagnostics.json");
-        rfMoelUrl = ClassLoader.getSystemResource("com/latticeengines/pls/functionalframework/rf_model.txt");
+        rfModelUrl = ClassLoader.getSystemResource("com/latticeengines/pls/functionalframework/rf_model.txt");
         topPredictorUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/topPredictor_model.csv");
 
@@ -79,7 +79,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), modelSummaryFileHdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, metadataDiagnosticsUrl.getFile(), metadataDiagnosticsFileHdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataDiagnosticsUrl.getFile(), dataDiagnosticsFileHdfsPath);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfMoelUrl.getFile(), rfModelFileHdfsPath);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfModelUrl.getFile(), rfModelFileHdfsPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, topPredictorUrl.getFile(), topPredictorFileHdfsPath);
 
     }
@@ -97,7 +97,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
         ModelAlerts.MissingMetaDataWarnings metadataWarning = null;
         try {
-            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, MODEL_ID);
+            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, modelId);
         } catch (Exception e) {
             Assert.fail("Should NOT have thrown an exception");
         }
@@ -119,7 +119,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
         ModelAlerts.MissingMetaDataWarnings metadataWarning = null;
         try {
-            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, MODEL_ID);
+            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, modelId);
         } catch (Exception e) {
             Assert.fail("Should NOT have thrown an exception");
         }
@@ -137,13 +137,13 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
             HdfsUtils.rmdir(yarnConfiguration, metadataDiagnosticsFileHdfsPath);
         }
 
-        URL metadataUrl = ClassLoader
-                .getSystemResource("com/latticeengines/pls/functionalframework/metadata-diagnostics-missing-approvedUsageAnnotation.json");
+        URL metadataUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/functionalframework/metadata-diagnostics-missing-approvedUsageAnnotation.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, metadataUrl.getFile(), metadataDiagnosticsFileHdfsPath);
 
         ModelAlerts.MissingMetaDataWarnings metadataWarning = null;
         try {
-            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, MODEL_ID);
+            metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, modelId);
         } catch (Exception e) {
             System.out.println(ExceptionUtils.getFullStackTrace(e));
             Assert.fail("Should NOT have thrown an exception");
@@ -160,7 +160,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
         ModelAlerts.ModelQualityWarnings modelingWarning = null;
         try {
-            modelingWarning = modelAlertService.generateModelQualityWarnings(tenantId, MODEL_ID);
+            modelingWarning = modelAlertService.generateModelQualityWarnings(tenantId, modelId);
         } catch (Exception e) {
             Assert.fail("Should NOT have thrown an exception");
         }
@@ -189,7 +189,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
         ModelAlerts.ModelQualityWarnings modelingWarning = null;
         try {
-            modelingWarning = modelAlertService.generateModelQualityWarnings(tenantId, MODEL_ID);
+            modelingWarning = modelAlertService.generateModelQualityWarnings(tenantId, modelId);
             Assert.fail("Should have thrown an exception");
         } catch (Exception e) {
             assertNull(modelingWarning);

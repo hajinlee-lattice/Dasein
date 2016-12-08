@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,6 +33,10 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
     @Mock
     private ModelRetriever modelRetriever;
 
+    @Autowired
+    @Mock
+    protected HttpStopWatch httpStopWatch;
+
     @Mock
     private ScoreRequest request;
 
@@ -50,6 +55,7 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
         when(request.getModelId()).thenReturn("modelId");
         when(request.getRule()).thenReturn("");
         when(request.getSource()).thenReturn("");
+        when(httpStopWatch.split("requestPreparation")).thenReturn(1L);
         Mockito.doNothing().when(requestInfo).put(any(String.class), any(String.class));
         ModelSummary modelSummary = new ModelSummary();
         modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
@@ -57,7 +63,8 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
         modelSummary.setId("modelId");
         ScoringArtifacts scoringArtifacts = new ScoringArtifacts(modelSummary, null, null, null, null, null, null, null,
                 null);
-        when(modelRetriever.getModelArtifacts(space, "")).thenReturn(scoringArtifacts);
+        when(modelRetriever.getModelArtifacts(any(CustomerSpace.class), any(String.class)))
+                .thenReturn(scoringArtifacts);
     }
 
     @Test(groups = "functional")
