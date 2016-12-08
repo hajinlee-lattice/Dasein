@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -76,6 +77,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -118,6 +120,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
+
+    @Autowired
+    private ModelMetadataService modelMetadataService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -440,6 +445,20 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
+    }
+
+    @RequestMapping(value = "/metadata/required/modelId/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get required column names for the event table used for the specified model")
+    public List<String> getRequiredColumns(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        List<String> columnNames = new ArrayList<>();
+        for (Attribute attr : modelMetadataService.getRequiredColumns(modelId)) {
+            columnNames.add(attr.getName());
+        }
+        return columnNames;
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")

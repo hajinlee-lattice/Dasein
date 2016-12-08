@@ -66,6 +66,12 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return modelSummary;
     }
 
+    public List<String> getRequiredColumnNames(String modelId, CustomerSpace customerSpace) {
+        String url = constructUrl("pls/internal/metadata/required/modelId/", modelId, customerSpace.toString());
+        List<?> requiredColumnObjList = restTemplate.getForObject(url, List.class);
+        return JsonUtils.convertList(requiredColumnObjList, String.class);
+    }
+
     public void createModelSummary(ModelSummary modelSummary, CustomerSpace customerSpace) {
         try {
             String url = constructUrl("pls/internal/modelsummaries", customerSpace.toString());
