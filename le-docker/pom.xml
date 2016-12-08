@@ -10,7 +10,7 @@
     <properties>
         <component-name>docker</component-name>
         <kafka.connect.docker.context>src/main/scripts/kafka/le-kafka-connect</kafka.connect.docker.context>
-        <tomcat.docker.context>src/main/scripts/tomcat/le-tomcat</tomcat.docker.context>
+        <tomcat.docker.context>src/main/scripts/tomcat/le-tomcatbase</tomcat.docker.context>
         <config.docker.context>src/main/scripts/tomcat/le-config</config.docker.context>
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
         <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
