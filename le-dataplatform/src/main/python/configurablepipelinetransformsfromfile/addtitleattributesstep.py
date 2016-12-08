@@ -25,7 +25,12 @@ class GetStrLength(TitleTrfFunction):
         if inputStr is None:
             return None
         try:
-            return float(min(len(inputStr.decode('utf-8')), self.maxTitleLen))
+            ## It is possible that inputStr is actually a byte array, which in Python 2.7 is stored
+            ## in a string type.  If this is the case, then we need to decode the byte array
+            ## to a unicode object.
+            if type(inputStr) == str:
+                inputStr = inputStr.decode('utf-8')
+            return float(min(len(inputStr), self.maxTitleLen))
         except TypeError:
             return 0.0
 

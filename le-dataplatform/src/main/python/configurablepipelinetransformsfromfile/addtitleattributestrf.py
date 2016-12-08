@@ -17,4 +17,7 @@ def transform(args, record):
         else:
             return 0.0
 
-    return float(min(len(title.decode('utf-8')), maxTitleLen))
+    if type(title) == str:
+        title = title.decode('utf-8')
+
+    return float(min(len(title), maxTitleLen))

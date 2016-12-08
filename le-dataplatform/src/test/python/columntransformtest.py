@@ -12,7 +12,6 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()[1]
 
-        self.assertLengthOfPipeline(pipeline)
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
         self.checkThatTransformsDontThrowExceptions()
         self.assertNamedParameterListStatic()
@@ -22,19 +21,10 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()[1]
 
-        self.assertLengthOfEVPipeline(pipeline)
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
         self.checkThatEVTransformsDontThrowExceptions()
         self.assertNamedParameterListStatic()
         self.assertSortingOfEVTransform(pipeline)
-
-    def assertLengthOfEVPipeline(self, pipeline):
-        lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
-
-    def assertLengthOfPipeline(self, pipeline):
-        lenOfPipeline = len(pipeline)
-        self.assertEqual(lenOfPipeline, 8, "Pipeline should have 8 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
