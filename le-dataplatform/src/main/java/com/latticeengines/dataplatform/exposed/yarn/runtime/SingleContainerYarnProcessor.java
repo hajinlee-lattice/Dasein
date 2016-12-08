@@ -8,8 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -119,9 +117,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
         @Override
         public T mapLine(String line, int lineNumber) throws Exception {
             log.info("Parsing line " + line);
-            JSONParser parser = new JSONParser();
-            JSONObject jsonObj = (JSONObject) parser.parse(line);
-            return JsonUtils.deserialize(jsonObj.toString(), type);
+            return JsonUtils.deserialize(line, type);
         }
 
     }

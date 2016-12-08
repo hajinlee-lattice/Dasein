@@ -384,8 +384,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .setCustomer("Dell")//
                 .setSplitColumn("ID")//
                 .build();
-        
-        
+
         ApplicationId appId = sqoopJobService.importData(importer);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
