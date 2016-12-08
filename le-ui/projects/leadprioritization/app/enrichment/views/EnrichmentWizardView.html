@@ -1,0 +1,161 @@
+<div class="enrichment-wizard-container">
+    <section id="main-content" class="container">
+        <div class="loading-enrichments" ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i> Loading enrichments... {{vm.enrichments.length|number}}</div>
+        <div class="filters-container">
+            <ul class="filters" >
+                <li class="query">
+                    <div class="ng-search">
+                        <a class="button icon-button white-button" ng-click="vm.query.length ? vm.query = null : ''">
+                            <span class="fa fa-search" ng-show="!vm.query.length"></span>
+                            <span class="fa fa-times" ng-show="vm.query.length"></span>
+                        </a>
+                        <input type="text" class="form-control" placeholder="Search" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
+                    </div>
+                </li>
+                <li class="filter dropdown-container">
+                    <h2 ng-click="openFilters = !openFilters" class="button icon-button white-button" ng-class="{active:openFilters}">
+                        <i class="fa fa-filter"></i>
+                    </h2>
+                    <ul class="dropdown" ng-class="{open:openFilters}">
+                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
+                        <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
+                        <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
+                        <li ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
+                    </ul>
+                </li>
+                <li class="sort">
+                    <a class="button icon-button white-button" ng-click="vm.SortOrder = (vm.SortOrder == 'DisplayName' ? '-DisplayName' : 'DisplayName'); vm.metadata.current = 1;" ng-init="vm.SortOrder = 'DisplayName';">
+                        <span class="fa fa-sort-amount-{{vm.SortOrder == 'DisplayName' ? 'asc' : 'desc'}}"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <ul class="categories" ng-class="{'has-category': vm.category}">
+            <li ng-repeat="category in vm.categories" class="category {{vm.categoryClass(category)}} border-top color round-box active-glow" 
+                ng-class="{active: vm.category == category}" 
+                ng-click="(vm.category == category ? vm.category = '' : vm.category = category); vm.subcategory = ''; vm.metadata.current = 1;">
+                <span>
+                    <h2>
+                        <img ng-src="{{vm.categoryIcon(category)}}" />
+                        {{category}}
+                    </h2>
+                    <span class="count">
+                        <strong ng-if="vm.enrichments_completed">{{(vm.enrichments|filter:{'Category':category}|filter:vm.searchFields).length}}</strong>
+                        <strong ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i></strong></li>
+                    </span>
+                </span>
+        </ul>
+        
+        <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
+            <div class="row required-fields-pagination" ng-show="vm.max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls 
+                            ng-click="vm.clickPaginate()"
+                            current="vm.metadata.current" 
+                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+            <ul class="subcategories">
+                <li ng-repeat="subcategory in (subcategoriesList = (vm.subcategories[vm.category])) 
+                        | startFrom: (vm.metadata.current - 1) * vm.pagesize 
+                        | limitTo: vm.pagesize"  
+                    class="subcategory {{vm.categoryClass(vm.category)}} border-top round-box" 
+                    ng-class="{active: vm.subcategory == subcategory}" 
+                    ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
+                    <h2>
+                        <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
+                        {{subcategory}}
+                    </h2>
+                    <span class="count">
+                        <strong ng-if="vm.enrichments_completed">{{(vm.enrichments|filter:{'Category':category, 'Subcategory':subcategory}|filter:vm.searchFields).length}}</strong>
+                        <strong ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i></strong></li>
+                        </span>
+                </li>
+            </ul>
+            <div class="row required-fields-pagination" ng-show="vm.max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls 
+                            ng-click="vm.clickPaginate()"
+                            current="vm.metadata.current" 
+                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+
+        <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
+            <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
+                <span ng-click="vm.subcategory = ''">Back</span> | {{vm.subcategory}}
+            </div>
+            <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls 
+                            ng-click="vm.clickPaginate()"
+                            current="vm.metadata.current" 
+                            max="vm.max = filteredList.length / vm.pagesize">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+            <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
+                <li class="box {{vm.categoryClass(enrichment.Category)}} border-top round-box ngAnimate" 
+                ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                | filter: vm.searchFields
+                | orderBy: vm.SortOrder
+                | filter: { 
+                            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
+                            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
+                            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
+                            'Category': vm.category,
+                            'Subcategory': vm.subcategory
+                            })) 
+                | startFrom: (vm.metadata.current - 1) * vm.pagesize 
+                | limitTo: vm.pagesize" 
+                ng-class="{'active': enrichment.IsSelected}">
+                    <div class="box-inner">
+                        <div class="header">
+                            <div ng-if="::enrichment.Subcategory" class="ico">
+                                <img fallback-src="{{vm.categoryIcon(enrichment.Category)}}" ng-src="{{vm.subcategoryIcon(enrichment.Category, enrichment.Subcategory)}}" onerror="this.parentNode.className='ico broken-image'"/>
+                            </div>
+                            <div ng-if="::!enrichment.Subcategory" class="ico ico-light-gray ico-light-gray-from-black ico-attr-{{::vm.categoryClass(enrichment.Category)}}"></div>
+                            <ul class="tags">
+                                <li data-corner-ribbon="premium" ng-if="::enrichment.IsPremium" class="premium"><strong>premium</strong></li>
+                                <li data-corner-ribbon="internal" ng-if="::enrichment.IsInternal" class="internal"><strong>internal</strong></li>
+                            </ul>
+                            <h2>
+                                <strong>{{::enrichment.DisplayName}}</strong>
+                            </h2>
+                        </div>
+                        <p class="description">{{::enrichment.Description}}</p>
+                        <div class="controls">
+                            <div class="toggle">
+                                <button class="button" 
+                                        ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 
+                                        ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
+                                    <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li ng-show="!filteredList.length">
+                    <div ng-show="!vm.enrichments_loaded">
+                        <div class="loader"> </div>
+                    </div>       
+                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
+                </li>
+            </ul>
+            <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+                <div class="twelve columns">
+                    <pd-pagination-controls 
+                            ng-click="vm.clickPaginate()"
+                            current="vm.metadata.current" 
+                            max="vm.max = filteredList.length / vm.pagesize">
+                    </pd-pagination-controls>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
