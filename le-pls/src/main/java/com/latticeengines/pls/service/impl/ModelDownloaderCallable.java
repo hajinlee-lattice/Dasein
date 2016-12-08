@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.newrelic.api.agent.Trace;
+import org.hibernate.exception.ConstraintViolationException;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -90,6 +91,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         boolean foundFilesToDownload = false;
 
         for (String file : files) {
+            String contraintViolationId = StringUtils.EMPTY;
             try {
                 String modelSummaryId = UuidUtils.parseUuid(file);
                 synchronized (modelSummaryIds) {
@@ -118,6 +120,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 }
                 log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
                         summary.getId(), summary.getApplicationId(), file));
+                contraintViolationId = summary.getId();
                 modelSummaryEntityMgr.create(summary);
                 foundFilesToDownload = true;
             } catch (BlockMissingException e) {
@@ -127,6 +130,9 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             } catch (IOException e) {
                 // Will trigger PagerDuty alert
                 log.fatal(ExceptionUtils.getFullStackTrace(e));
+            } catch (ConstraintViolationException e) {
+                log.info(String.format("Cannot create model summary with Id %s, constraint violation.",
+                        contraintViolationId));
             } catch (Exception e) {
                 log.error(e);
             }
