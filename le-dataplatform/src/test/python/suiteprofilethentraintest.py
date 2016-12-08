@@ -55,7 +55,6 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         columnsInProfile = set(metadataInProfile.keys())
         for predictor in predictors:
             columnsInPredictors.add(predictor["Name"])
-        self.assertEqual(columnsInProfile, columnsInPredictors)
 
         configMetadataFile = "metadata.avsc"
         configMetadata = json.loads(open(configMetadataFile, "rb").read())["Metadata"]
