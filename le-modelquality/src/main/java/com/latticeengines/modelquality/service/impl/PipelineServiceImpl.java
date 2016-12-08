@@ -66,25 +66,24 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         try {
             String pipelineContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, pipelineJson);
             pipeline.addStepsFromPipelineJson(pipelineContents);
-            
-            for(PipelineStep ps : pipeline.getPipelineSteps()) {
+
+            for (PipelineStep ps : pipeline.getPipelineSteps()) {
                 PipelineStep pStep = pipelineStepEntityMgr.findByName(ps.getName());
-                if(pStep == null){
+                if (pStep == null) {
                     pipelineStepEntityMgr.create(ps);
-                }
-                else{
+                } else {
                     ps.setPid(pStep.getPid());
                     pipelineStepEntityMgr.update(ps);
                 }
             }
-            
+
             Pipeline previousLatest = pipelineEntityMgr.getLatestProductionVersion();
             int versionNo = 1;
-            if(previousLatest != null) {
+            if (previousLatest != null) {
                 versionNo = previousLatest.getVersion() + 1;
             }
             pipeline.setVersion(versionNo);
-            
+
             pipelineEntityMgr.create(pipeline);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -95,12 +94,11 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     @Override
     public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names,
             PipelineStepType type) {
-        
-        if(pipelineStepEntityMgr.findByName(stepName) != null)
-        {
-            throw new LedpException(LedpCode.LEDP_35002, new String[] {"Pipeline Step", stepName});
+
+        if (pipelineStepEntityMgr.findByName(stepName) != null) {
+            throw new LedpException(LedpCode.LEDP_35002, new String[] { "Pipeline Step", stepName });
         }
-        
+
         try {
             switch (type) {
             case METADATA:
@@ -153,14 +151,15 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                     step.setLoadFromHdfs(true);
                     pipelineStepEntityMgr.create(step);
                 } catch (IOException e) {
-                    throw new LedpException(LedpCode.LEDP_35001, new String[] {""});
+                    throw new LedpException(LedpCode.LEDP_35001, new String[] { "" });
                 }
             }
             ptoPStep.setPipelineStep(step);
             pToPSteps.add(ptoPStep);
         }
 
-        // Now that steps have been validated and created, create the pipeline and the associations
+        // Now that steps have been validated and created, create the pipeline
+        // and the associations
         pipelineEntityMgr.create(pipeline);
         for (PipelineToPipelineSteps ptoPStep : pToPSteps) {
             pipelineToPipelineStepsEntityMgr.create(ptoPStep);
@@ -193,7 +192,6 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         Map<String, PipelineStep> stepsMap = new HashMap<>();
         for (int i = 1; i <= steps.size(); i++) {
             PipelineStep s = steps.get(i - 1);
-            s.setSortKey(i);
             stepsMap.put(s.getMainClassName(), s);
         }
         PipelineJson pipelineJson = new PipelineJson(stepsMap);

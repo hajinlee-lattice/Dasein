@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.modelquality;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +64,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
-    
+
     @JsonIgnore
     @Column(name = "VERSION", nullable = true)
     private Integer version;
@@ -116,7 +118,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     public void setPipelineDriver(String pipelineDriver) {
         this.pipelineDriver = pipelineDriver;
     }
-    
+
     public String getDescription() {
         return description;
     }
@@ -124,7 +126,7 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     @Override
     public Integer getVersion() {
         return version;
@@ -138,12 +140,23 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     @JsonProperty("pipeline_steps")
     public List<PipelineStep> getPipelineSteps() {
         List<PipelineStep> steps = new ArrayList<>();
+
+        class CompareSortOrder implements Comparator<PipelineStep> {
+            @Override
+            public int compare(PipelineStep step1, PipelineStep step2) {
+                int a = step1.getSortKey();
+                int b = step2.getSortKey();
+                return a > b ? +1 : a < b ? -1 : 0;
+            }
+        }
+
         for (PipelineToPipelineSteps p : pipelineSteps) {
             PipelineStep step = p.getPipelineStep();
             step.setSortKey(p.getOrder());
             steps.add(step);
 
         }
+        Collections.sort(steps, new CompareSortOrder());
         return steps;
     }
 
