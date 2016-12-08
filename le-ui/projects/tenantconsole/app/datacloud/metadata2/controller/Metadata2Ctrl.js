@@ -78,7 +78,10 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
             return 'default';
         };
 
-        vm.get = function(data) {
+        vm.get = function(data, model) {
+            if(model) {
+                return model;
+            }
             if(data) {
                 if(typeof data === 'object') {
                     return data.join(', ');
@@ -100,25 +103,50 @@ angular.module("app.datacloud.controller.Metadata2Ctrl", [
                     keys = Object.keys(model),
                     metadata = $filter('filter')(vm.metadata, {'ColumnId': model.ColumnId})[0], //vm.metadata[i],
                     intersection = _.intersection(keys, arrays);
-                    if(keys.length < 2) {
-                        break;
-                    }
-                if(intersection.length) {
-                    for(var k in intersection) {
-                        var key = intersection[k];
-                        if(model[key]) {
-                            model[key] = model[key].split(',');
+                if(keys.length > 1) {
+                    if(intersection.length) {
+                        for(var k in intersection) {
+                            var key = intersection[k];
+                            if(model[key]) {
+                                if(typeof model[key] === 'object') {
+                                    model[key] = model[key].join().split(',');
+                                } else {
+                                    model[key] = model[key].split(',');
+                                }
+                            }
                         }
                     }
+                    var merged = Object.assign({}, metadata, model);
+                    json.push(merged);
                 }
-                var merged = Object.assign({}, metadata, model);
-                json.push(merged);
             }
             if(json.length) {
-                vm.saved_json = json;
+                vm.edit_all = false;
+                vm.edit = [];
+                MetadataService.EditMetadata(vm.version, json).then(function(result){
+                });
             }
-            console.log('saving ->', vm.saved_json);
+            console.log('saved ->', json);
         };
+
+        vm.edit = [];
+        vm.editing = function(ColumnId) {
+            if(vm.edit.includes(ColumnId)) {
+                vm.edit.splice(vm.edit.indexOf(ColumnId), 1);
+            } else {
+                vm.edit.push(ColumnId);
+            }
+        };
+
+        $scope.$watch('vm.query', function(newv, oldv){
+            lazySearch();
+        });
+
+        var applyQuery = function(){
+            vm.search_query = vm.query;
+        };
+
+        var lazySearch = _.throttle(applyQuery, 60);
 
         /**
          * because stupid, and angular has issues with ng-select

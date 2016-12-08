@@ -23,11 +23,11 @@
     </ul>
     <ul class="filters" ng-show="!vm.loading">
         <li>
-            <button ng-click="vm.save()">save</button>
+            <button ng-click="vm.save()" ng-disabled="vm.model.length">save</button>
         </li>
         <li>
             <label for="versions">version</label>
-            <select name="versions" id="versions" ng-model="vm.select_version"  ng-change="vm.versionChange()" >
+            <select name="versions" id="versions" ng-model="vm.select_version"  ng-init="vm.select_version = vm.version" ng-change="vm.versionChange()" >
                 <option ng-repeat="version in vm.versions" value="{{version.Version}}" ng-selected="version.Version == vm.version" ng-disabled="version.Version == vm.version">{{version.Version}}</option>
             </select>
         </li>
@@ -38,7 +38,8 @@
             <div class="twelve columns">
                 <pd-pagination-controls 
                     current="vm.current" 
-                    max="vm.max = filteredList.length / vm.pagesize">
+                    max="vm.max = filteredList.length / vm.pagesize" 
+                    ng-disabled="vm.edit_all || vm.edit.length">
                 </pd-pagination-controls>
             </div>
         </div>
@@ -57,22 +58,21 @@
                         IsPremium: (!vm.show.premium ? '' : true)
                     })) 
                     | orderBy: vm.order
-                    | filter: (vm.query.length ? vm.query : '') : false
+                    | filter: (vm.search_query.length ? vm.search_query : '') : false
                     | startFrom: (vm.current - 1) * vm.pagesize 
                     | limitTo: vm.pagesize">
-                <td class="edit-button"><button ng-click="vm.edit_all = false; vm.edit[data.ColumnId] = !vm.edit[data.ColumnId]" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+                <td class="edit-button"><button ng-click="vm.edit_all = false; vm.editing(data.ColumnId)" ng-class="{'active': vm.edit}"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
                 <td ng-repeat="(key, column) in vm.columns" class="type-{{vm.type(key)}} {{key}}" title="{{vm.get(data[key])}}">
                     <span ng-if="column.editable" ng-init="vm.model[row]['ColumnId'] = data.ColumnId">
-                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="hidden" ng-model="vm.model[row]['mykey']" ng-value="data.ColumnId" />
-                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'default'" type="text" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" placeholder="{{key}}" ng-model="vm.model[row][key]" value="{{vm.get(data[key])}}" />
-                        <input ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'checkbox'" type="checkbox" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-checked="{{data[key]}}" ng-model="vm.model[row][key]" />
-                        <textarea ng-if="(vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) == 'textarea'" type="textarea" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-model="vm.model[row][key]">{{vm.get(data[key])}}</textarea>
+                        <input ng-if="(vm.edit_all || vm.edit.includes(data.ColumnId)) && vm.type(key) == 'default'" type="text" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" placeholder="{{key}}" ng-model="vm.model[row][key]" ng-init="vm.model[row][key] = vm.get(data[key], vm.model[row][key])" value="{{vm.get(data[key], vm.model[row][key])}}" />
+                        <input ng-if="(vm.edit_all || vm.edit.includes(data.ColumnId)) && vm.type(key) == 'checkbox'" type="checkbox" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-checked="{{data[key]}}" ng-model="vm.model[row][key]" />
+                        <textarea ng-if="(vm.edit_all || vm.edit.includes(data.ColumnId)) && vm.type(key) == 'textarea'" type="textarea" id="input-{{row}}-{{key}}" name="input-{{row}}-{{key}}" ng-model="vm.model[row][key]">{{vm.get(data[key], vm.model[row][key])}}</textarea>
                     </span>
-                    <label ng-class="{hide: column.editable && (vm.edit_all || vm.edit[data.ColumnId]) && vm.type(key) != 'checkbox'}" for="input-{{row}}-{{key}}">{{vm.get(data[key])}}</label>
+                    <label ng-class="{hide: column.editable && (vm.edit_all || vm.edit.includes(data.ColumnId)) && vm.type(key) != 'checkbox'}" for="input-{{row}}-{{key}}">{{vm.get(data[key], vm.model[row][key])}}</label>
                 </td>
             </tr>
         </table>
-        <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1">
+        <div class="row required-fields-pagination" ng-init="vm.current = 1" ng-show="vm.max > 1" ng-disabled="vm.edit_all || vm.edit.length">
             <div class="twelve columns">
                 <pd-pagination-controls 
                     current="vm.current" 

@@ -53,5 +53,35 @@ app.service('MetadataService', function($q, $http, $timeout, SessionUtility){
         return defer.promise;
     };
 
+    this.EditMetadata = function (dataCloudVersion, json) {
+        var deferred = $q.defer();
+        if(1) { // because linter
+            return false;
+        }
+        $http({
+            method: 'PUT',
+            url: '/match/metadata/' + dataCloudVersion,
+            headers: {
+                'Content-Type': "application/json"
+            },
+            data: json
+        })
+        .success(function (data, status, headers, config) {
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                //result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+
 });
 
