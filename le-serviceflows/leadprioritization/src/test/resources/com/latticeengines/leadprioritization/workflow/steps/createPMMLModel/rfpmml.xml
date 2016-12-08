@@ -96,6 +96,7 @@
     <DataField dataType="double" optype="continuous" name="CloudTechnologies_ProjectMgnt_Two"/>
     <DataField dataType="double" optype="continuous" name="CloudTechnologies_SoftwareBasic_One"/>
     <DataField dataType="double" optype="continuous" name="CloudTechnologies_SoftwareBasic_Two"/>
+    <DataField dataType="double" optype="continuous" name="abc"/>
     <DataField dataType="double" optype="continuous" name="PD_DA_LastSocialActivity_Units_days"/>
     <DataField dataType="double" optype="continuous" name="x2Sales"/>
     <DataField dataType="double" optype="continuous" name="x2NoTitle"/>
@@ -338,7 +339,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -716,7 +717,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -745,7 +746,7 @@
             <Node recordCount="3414">
               <SimplePredicate operator="lessOrEqual" field="BW_Server" value="5.5"/>
               <Node recordCount="1998">
-                <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                 <Node recordCount="864">
                   <SimplePredicate operator="lessOrEqual" field="CloudTechnologies_MarketingPerfMgmt_One" value="0.5"/>
                   <Node recordCount="20">
@@ -934,7 +935,7 @@
                 </Node>
               </Node>
               <Node recordCount="1416">
-                <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                 <Node recordCount="1166">
                   <SimplePredicate operator="lessOrEqual" field="BW_shop" value="0.0817843899131"/>
                   <Node recordCount="107">
@@ -1310,7 +1311,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -1688,7 +1689,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -2029,7 +2030,7 @@
                   <Node recordCount="760">
                     <SimplePredicate operator="lessOrEqual" field="BW_Web_Server" value="16.0"/>
                     <Node recordCount="422">
-                      <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                      <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                       <Node recordCount="407">
                         <SimplePredicate operator="lessOrEqual" field="BusinessRetirementParticipants" value="17895.0"/>
                         <Node recordCount="391">
@@ -2058,7 +2059,7 @@
                       </Node>
                     </Node>
                     <Node recordCount="338">
-                      <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                      <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                       <Node recordCount="303">
                         <SimplePredicate operator="lessOrEqual" field="CloudTechnologies_SoftwareBasic_One" value="1.9040697813"/>
                         <Node recordCount="81">
@@ -2218,7 +2219,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -2684,7 +2685,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -3294,7 +3295,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -3664,7 +3665,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -4194,7 +4195,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -4684,7 +4685,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -5014,7 +5015,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -5496,7 +5497,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -6010,7 +6011,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -6564,7 +6565,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -6942,7 +6943,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -7416,7 +7417,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -7826,7 +7827,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -8220,7 +8221,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -8622,7 +8623,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -9112,7 +9113,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -9185,7 +9186,7 @@
                       <Node recordCount="83">
                         <SimplePredicate operator="greaterThan" field="Activity_InterestingMoment_cnt" value="3.01242232323"/>
                         <Node recordCount="66">
-                          <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                          <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                           <Node recordCount="11">
                             <SimplePredicate operator="lessOrEqual" field="BW_javascript" value="4.5"/>
                             <ScoreDistribution value="1" recordCount="2.0"/>
@@ -9198,7 +9199,7 @@
                           </Node>
                         </Node>
                         <Node recordCount="17">
-                          <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                          <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                           <ScoreDistribution value="1" recordCount="6.0"/>
                           <ScoreDistribution value="0" recordCount="21.0"/>
                         </Node>
@@ -9490,7 +9491,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -9876,7 +9877,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -10350,7 +10351,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -10872,7 +10873,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -11274,7 +11275,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -11636,7 +11637,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -11982,7 +11983,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -12320,7 +12321,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -12690,7 +12691,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -13100,7 +13101,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -13534,7 +13535,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -13976,7 +13977,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -14474,7 +14475,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -14836,7 +14837,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -14996,7 +14997,7 @@
                   <Node recordCount="752">
                     <SimplePredicate operator="lessOrEqual" field="PD_DA_PrimarySIC1" value="731736448.0"/>
                     <Node recordCount="617">
-                      <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                      <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                       <Node recordCount="201">
                         <SimplePredicate operator="lessOrEqual" field="BW_hosting" value="0.5"/>
                         <ScoreDistribution value="1" recordCount="0.0"/>
@@ -15033,7 +15034,7 @@
                       </Node>
                     </Node>
                     <Node recordCount="135">
-                      <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                      <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                       <Node recordCount="91">
                         <SimplePredicate operator="lessOrEqual" field="BW_hosting" value="5.0"/>
                         <Node recordCount="10">
@@ -15278,7 +15279,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -15744,7 +15745,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -16154,7 +16155,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -16668,7 +16669,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -16904,12 +16905,12 @@
                     <Node recordCount="78">
                       <SimplePredicate operator="greaterThan" field="BW_Web_Master" value="2.5"/>
                       <Node recordCount="24">
-                        <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                        <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                         <ScoreDistribution value="1" recordCount="0.0"/>
                         <ScoreDistribution value="0" recordCount="36.0"/>
                       </Node>
                       <Node recordCount="54">
-                        <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                        <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                         <Node recordCount="18">
                           <SimplePredicate operator="lessOrEqual" field="BusinessRetirementParticipants" value="3589.68505859"/>
                           <ScoreDistribution value="1" recordCount="1.0"/>
@@ -17134,7 +17135,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -17536,7 +17537,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -18162,7 +18163,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -18708,7 +18709,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -19126,7 +19127,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -19672,7 +19673,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -20082,7 +20083,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -20700,7 +20701,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -20974,7 +20975,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -21138,12 +21139,12 @@
                       <Node recordCount="27">
                         <SimplePredicate operator="lessOrEqual" field="BW_seo_headers" value="1.5"/>
                         <Node recordCount="17">
-                          <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                          <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                           <ScoreDistribution value="1" recordCount="0.0"/>
                           <ScoreDistribution value="0" recordCount="29.0"/>
                         </Node>
                         <Node recordCount="10">
-                          <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                          <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                           <ScoreDistribution value="1" recordCount="1.0"/>
                           <ScoreDistribution value="0" recordCount="12.0"/>
                         </Node>
@@ -21416,7 +21417,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -21890,7 +21891,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -22292,7 +22293,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -22790,7 +22791,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -23504,7 +23505,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -23922,7 +23923,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -24332,7 +24333,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -24407,12 +24408,12 @@
                       <Node recordCount="25">
                         <SimplePredicate operator="greaterThan" field="BW_Web_Server" value="1.5"/>
                         <Node recordCount="12">
-                          <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                          <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                           <ScoreDistribution value="1" recordCount="1.0"/>
                           <ScoreDistribution value="0" recordCount="17.0"/>
                         </Node>
                         <Node recordCount="13">
-                          <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                          <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                           <ScoreDistribution value="1" recordCount="0.0"/>
                           <ScoreDistribution value="0" recordCount="25.0"/>
                         </Node>
@@ -24854,7 +24855,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -25256,7 +25257,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -25650,7 +25651,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -26268,7 +26269,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -26814,7 +26815,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -27232,7 +27233,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -27738,7 +27739,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -28148,7 +28149,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -28646,7 +28647,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -29192,7 +29193,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -29674,7 +29675,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -30036,7 +30037,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -30366,7 +30367,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -30808,7 +30809,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -31154,7 +31155,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -31732,7 +31733,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -32206,7 +32207,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -32528,7 +32529,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -33018,7 +33019,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -33094,12 +33095,12 @@
               <Node recordCount="122">
                 <SimplePredicate operator="greaterThan" field="CloudTechnologies_SoftwareBasic_One" value="1.4040697813"/>
                 <Node recordCount="78">
-                  <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                  <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                   <ScoreDistribution value="1" recordCount="0.0"/>
                   <ScoreDistribution value="0" recordCount="119.0"/>
                 </Node>
                 <Node recordCount="44">
-                  <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                  <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                   <Node recordCount="25">
                     <SimplePredicate operator="lessOrEqual" field="Activity_FillOutForm_cnt" value="0.791702747345"/>
                     <Node recordCount="15">
@@ -33460,7 +33461,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -33958,7 +33959,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -34312,7 +34313,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -34802,7 +34803,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -35276,7 +35277,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -35742,7 +35743,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -36144,7 +36145,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -36666,7 +36667,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -37164,7 +37165,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -37558,7 +37559,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -38032,7 +38033,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -38490,7 +38491,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -38980,7 +38981,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -39526,7 +39527,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -40096,7 +40097,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -40458,7 +40459,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -40884,7 +40885,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -41246,7 +41247,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -41752,7 +41753,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -42202,7 +42203,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -42612,7 +42613,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -43006,7 +43007,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -43496,7 +43497,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -43986,7 +43987,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -44356,7 +44357,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -44385,7 +44386,7 @@
             <Node recordCount="3695">
               <SimplePredicate operator="lessOrEqual" field="BW_mx" value="2.5"/>
               <Node recordCount="2098">
-                <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                 <Node recordCount="78">
                   <SimplePredicate operator="lessOrEqual" field="Alexa_Rank" value="627.5"/>
                   <Node recordCount="45">
@@ -44566,7 +44567,7 @@
                 </Node>
               </Node>
               <Node recordCount="1597">
-                <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                 <Node recordCount="1572">
                   <SimplePredicate operator="lessOrEqual" field="Alexa_ViewsPerUser" value="7.24499988556"/>
                   <Node recordCount="1488">
@@ -44830,7 +44831,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -45320,7 +45321,7 @@
             <MiningField usageType="active" name="CloudTechnologies_ProjectMgnt_Two"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_One"/>
             <MiningField usageType="active" name="CloudTechnologies_SoftwareBasic_Two"/>
-            <MiningField usageType="active" name=""/>
+            <MiningField usageType="active" name="abc"/>
             <MiningField usageType="active" name="PD_DA_LastSocialActivity_Units_days"/>
             <MiningField usageType="active" name="x2Sales"/>
             <MiningField usageType="active" name="x2NoTitle"/>
@@ -45484,7 +45485,7 @@
                     <Node recordCount="387">
                       <SimplePredicate operator="greaterThan" field="Alexa_ViewsPerMillion" value="0.00499999988824"/>
                       <Node recordCount="294">
-                        <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                        <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                         <Node recordCount="35">
                           <SimplePredicate operator="lessOrEqual" field="BW_Web_Server" value="1.5"/>
                           <Node recordCount="21">
@@ -45505,7 +45506,7 @@
                         </Node>
                       </Node>
                       <Node recordCount="93">
-                        <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                        <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                         <Node recordCount="44">
                           <SimplePredicate operator="lessOrEqual" field="BW_javascript" value="5.5"/>
                           <ScoreDistribution value="1" recordCount="0.0"/>
@@ -45644,12 +45645,12 @@
                     <Node recordCount="159">
                       <SimplePredicate operator="greaterThan" field="Alexa_ViewsPerMillion" value="0.555000007153"/>
                       <Node recordCount="117">
-                        <SimplePredicate operator="lessOrEqual" field="" value="0.5"/>
+                        <SimplePredicate operator="lessOrEqual" field="abc" value="0.5"/>
                         <ScoreDistribution value="1" recordCount="0.0"/>
                         <ScoreDistribution value="0" recordCount="185.0"/>
                       </Node>
                       <Node recordCount="42">
-                        <SimplePredicate operator="greaterThan" field="" value="0.5"/>
+                        <SimplePredicate operator="greaterThan" field="abc" value="0.5"/>
                         <Node recordCount="27">
                           <SimplePredicate operator="lessOrEqual" field="BusinessEstimatedEmployees" value="3381.95019531"/>
                           <ScoreDistribution value="1" recordCount="0.0"/>
