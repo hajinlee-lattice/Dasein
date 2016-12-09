@@ -371,7 +371,7 @@ angular
             url: '/campaigns',
             params: {
                 pageTitle: 'Campaigns',
-                pageIcon: 'ico-model'
+                pageIcon: 'ico-campaign'
             },
             resolve: {
                 CampaignList: function($q, CampaignStore) {
@@ -505,8 +505,9 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $state) {
-                        $scope.state = 'home.marketosettings.edit';
+                    controller: function($scope, ResourceUtility) {
+                        $scope.isCreateForm = true;
+                        $scope.ResourceUtility = ResourceUtility;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -530,9 +531,10 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $stateParams, $state) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = 'home.marketosettings.edit';
                         $scope.id = $stateParams.id;
+                        $scope.ResourceUtility = ResourceUtility;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -568,9 +570,10 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, $stateParams, $state) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.id;
+                        $scope.ResourceUtility = ResourceUtility;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -624,9 +627,10 @@ angular
                             return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
-                    controller: function($scope, $stateParams, $state) {
+                    controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.id;
+                        $scope.ResourceUtility = ResourceUtility;
                     },
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
@@ -636,7 +640,7 @@ angular
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '&credentialId=' + $scope.id + '"></iframe>');
                     },
-                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
             }
         })
@@ -663,7 +667,7 @@ angular
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
-                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
             }
         })
@@ -690,7 +694,7 @@ angular
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                     },
-                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
             }
         })
@@ -766,7 +770,7 @@ angular
                                 .html('<iframe src="' + urls.creds_url + '"></iframe>');
                         }
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
             }
         })
@@ -797,7 +801,7 @@ angular
                                 .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                         }
                     },
-                    template: '<section class="container"><div class="row"><div class="eight columns"><div id="sureshot_iframe_container"></div></div></div></section>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
             }
         })
@@ -828,7 +832,7 @@ angular
                                 .html('<iframe src="' + urls.enrichment_settings_url + '"></iframe>');
                         }
                     },
-                    template: '<div id="sureshot_iframe_container"></div>'
+                    templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
             }
         })

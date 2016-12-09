@@ -131,31 +131,40 @@ Should be incorporated across PD and LP (models list, campaigns list).
         margin-bottom: 26px;
         vertical-align: top;
         background-color: #fff;
-        border: #d0d0d0 solid 1px;
-        border-radius: 6px; 
+        border-style: solid;
+        border-color: #d0d0d0;
+        border-top-color: #2493eb;
+        border-width: 8px 1px 1px;
+        border-top-right-radius: 4px;
+        border-top-left-radius: 4px;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
         &:hover {
             transition: all 0ms ease 0s;
-            border-color: #87AAD2;
+            border-color: #32a3fd;
+            border-top-color: #2493eb;
             cursor: pointer;
         }
         &.no-style {
         	background: none;
         	border: none;
-            padding: 0;
+          padding: 0;
         }
         &.create-tile {
-            &:hover {
-                border-color: #d0d0d0;
-                cursor: default;
-            }
-            .form-group {
-                margin-bottom: 10px;
-            }
-            .actions {
-                position: absolute;
-                bottom: 13px;
-                width: 90%;
-            }
+          border-top-color: #4cae4f;
+          &:hover {
+              border-color: #d0d0d0;
+              border-top-color: #4cae4f;
+              cursor: default;
+          }
+          .form-group {
+              margin-bottom: 10px;
+          }
+          .actions {
+              position: absolute;
+              bottom: 13px;
+              width: 90%;
+          }
         }
     }
 }

@@ -173,7 +173,7 @@ a.button, .button a:link, .button a:focus, .button a:visited {
     &:hover {
       background-color: transparent;
       color: #222;
-      border: #a1daf2 solid 2px;
+      border: #5BB7FD solid 2px;
       -webkit-box-shadow: 0px 0px 26px 1px rgba(161,218,242,0.57);
       -moz-box-shadow:    0px 0px 26px 1px rgba(161,218,242,0.57);
       box-shadow:         0px 0px 26px 1px rgba(161,218,242,0.57);
@@ -345,13 +345,16 @@ Use this structure for angled buttons:
             transition: none;
         }
     }
-    a {
+    a, .angled-link {
         display: inline-block;
         padding: 14px 24px 10px 0;
         position: relative;
         transition: none;
         transform: skewX(-20deg);
         display: inline-block;
+    }
+    .angled-link span {
+      color: rgba(255, 255, 255, 0.4);
     }
     span {
         color: #fff;

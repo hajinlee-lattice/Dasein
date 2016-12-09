@@ -69,6 +69,15 @@ Icons
 		background-color: $pearl-white;
 		-webkit-mask-image: url("/assets/images/ico-model.svg");
 		mask: url("/assets/images/ico-model.svg");
+	}	
+	&.ico-campaign {
+		background-color: transparent;
+		background-image: url("/assets/images/ico-campaign-white.png");
+		background-size: 16px;
+		&.ico-black {
+			background-color: transparent;
+			background-image: url("/assets/images/ico-campaign-dark.png");
+		}
 	}
 	&.ico-marketo-apikey {
 		-webkit-mask-image: url("/assets/images/ico-marketo-apikey.svg");
@@ -307,6 +316,12 @@ Icons
 			background-image: url("/assets/images/ico-model.png");
 			&.ico-black {
 				background-image: url("/assets/images/ico-model-black.png");
+			}
+		}
+		&.ico-campaign {
+			background-image: url("/assets/images/ico-campaign-white.png");
+			&.ico-black {
+				background-image: url("/assets/images/ico-campaign-black.png");
 			}
 		}
 		&.ico-cog {

@@ -11,19 +11,25 @@
         <a ui-sref="home.models" class="button icon-button">
             <span class="fa fa-angle-left"></span>
         </a>
-        <h3>Marketo Settings</h3>
+        <h3>Marketo Profiles</h3>
     </div>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="home.marketosettings.apikey">
+            <a class="pd-sidebar-header" ui-sref="home.marketosettings.apikey" analytics-on="click" analytics-event="API Key">
                 <span class="ico-container"><span class="ico ico-marketo-apikey ico-light-gray"></span></span>
-                <span class="pd-sidebar-header-label label">API Key</span>
+                <span class="pd-sidebar-header-label label">Credentials</span>
             </a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a class="pd-sidebar-header" ui-sref="home.marketosettings.models">
+            <a class="pd-sidebar-header" ui-sref="home.marketosettings.enrichment" analytics-on="click" analytics-event="Models">
                 <span class="ico-container"><span class="ico ico-marketo-models ico-light-gray"></span></span>
-                <span class="pd-sidebar-header-label label">Models</span>
+                <span class="pd-sidebar-header-label label">Enrichment</span>
+            </a>
+        </li>
+        <li>
+            <a class="pd-sidebar-header" ui-sref="home.marketosettings.scoring" analytics-on="click" analytics-event="Scoring">
+                <span class="ico-container"><span class="ico ico-marketo-models ico-light-gray"></span></span>
+                <span class="pd-sidebar-header-label label">Scoring</span>
             </a>
         </li>
     </ul>

@@ -138,10 +138,11 @@ angular.module('lp.marketo', [
 	};
 
 }])
-.controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', function(MarketoCredentials, MarketoService, DeleteCredentialModal) {
+.controller('MarketoCredentialsController', ['MarketoCredentials', 'MarketoService', 'DeleteCredentialModal', 'ResourceUtility', function(MarketoCredentials, MarketoService, DeleteCredentialModal, ResourceUtility) {
     var vm = this;
 
     angular.extend(vm, {
+    	ResourceUtility: ResourceUtility,
 		credentials: MarketoCredentials
     });
 

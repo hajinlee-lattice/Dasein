@@ -79,6 +79,9 @@ span.ico-container {
             height: 40px;
             width: 45px;
         }
+        &.ico-campaign {
+            background-size: 21px;
+        }    
     }
 }
 
@@ -227,6 +230,9 @@ nav.primary-nav {
                 transition: all 250ms ease 1ms;
                 span {
                     background-color: white;
+                    &.ico-campaign {
+                        background-color: transparent;
+                    }
                 }
             }
         }

@@ -561,13 +561,15 @@ Create Model: Setup & Import Page
 
 
 #sureshot_iframe_container iframe {
-  width: 100%;
   position: absolute;
   bottom: 0;
   height: calc(100% - 185px);
+  width: 650px;
+  left: 50%;
+  margin-left: -300px;
 }
 .open-nav #sureshot_iframe_container iframe {
-  width: calc(100% - 399px);
+    margin-left: -220px;
 }
 
 

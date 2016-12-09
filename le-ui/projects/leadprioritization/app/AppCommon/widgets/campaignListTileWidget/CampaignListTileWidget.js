@@ -18,16 +18,16 @@ angular.module('mainApp.appCommon.widgets.CampaignListTileWidget', [
             };
 
             var data = $scope.data;
-            var flags = FeatureFlagService.Flags();
+            // var flags = FeatureFlagService.Flags();
 
-            $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
-            $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
-            $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
-            $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
-            $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
+            // $scope.mayChangeModelNames = FeatureFlagService.FlagIsEnabled(flags.CHANGE_MODEL_NAME);
+            // $scope.mayDeleteModels = FeatureFlagService.FlagIsEnabled(flags.DELETE_MODEL);
+            // $scope.showRefineAndClone = FeatureFlagService.FlagIsEnabled(flags.VIEW_REFINE_CLONE);
+            // $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
+            // $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
 
             //TODO:pierce Field names subject to change
-            $scope.isActive = data.Status === "Active";
+            // $scope.isActive = data.Status === "Active";
             $scope.showCustomMenu = false;
 
             $scope.customMenuClick = function ($event) {
