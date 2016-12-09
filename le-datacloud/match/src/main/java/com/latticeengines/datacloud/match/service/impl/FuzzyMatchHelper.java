@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Future;
+
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -70,40 +72,77 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Override
     public MatchContext fetch(MatchContext context) {
+        fetchInternal(context, true);
+
+        fetchMatchResult(context);
+        return context;
+    }
+
+    private void fetchInternal(MatchContext context, boolean isSync) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();
 
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             try {
-                String decisionGraph = context.getInput().getDecisionGraph();
-                if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null
-                        && context.getInput().getTenant() != null) {
-                    CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
-                    if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
-                        decisionGraph = fuzzyMatchGraph;
-                    } else {
-                        decisionGraph = defaultGraph;
-                    }
+                String decisionGraph = setDecisionGraph(context);
+                if (isSync) {
+                    fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
+                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache());
+                } else {
+                    List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
+                            context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph, context
+                                    .getInput().getLogLevel(), context.isUseDnBCache());
+                    context.setFuturesResult(futures);
                 }
-                fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                        dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache());
             } catch (Exception e) {
                 log.error("Failed to run fuzzy match.", e);
             }
         }
+    }
 
-        List<String> ids = new ArrayList<>();
-        int notNullIds = 0;
-        for (InternalOutputRecord record : context.getInternalResults()) {
-            String latticeAccountId = record.getLatticeAccountId();
-            ids.add(latticeAccountId);
-            if (StringUtils.isNotEmpty(latticeAccountId)) {
-                notNullIds++;
+    private String setDecisionGraph(MatchContext context) {
+        String decisionGraph = context.getInput().getDecisionGraph();
+        if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null && context.getInput().getTenant() != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
+            if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
+                decisionGraph = fuzzyMatchGraph;
+            } else {
+                decisionGraph = defaultGraph;
             }
         }
+        return decisionGraph;
+    }
 
+    @Override
+    public MatchContext fetchAsync(MatchContext context) {
+        fetchInternal(context, false);
+        return context;
+    }
+
+    @Override
+    public void fetchIdResult(MatchContext context) {
+        try {
+            fuzzyMatchService.fetchIdResult(context.getInternalResults(), context.getInput().getLogLevel(),
+                    context.getFuturesResult());
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to process match result!", ex);
+        }
+    }
+
+    @Override
+    public void fetchMatchResult(MatchContext context) {
+        String dataCloudVersion = context.getInput().getDataCloudVersion();
         boolean idOnly = context.isSeekingIdOnly();
         if (!idOnly) {
+            List<String> ids = new ArrayList<>();
+            int notNullIds = 0;
+            for (InternalOutputRecord record : context.getInternalResults()) {
+                String latticeAccountId = record.getLatticeAccountId();
+                ids.add(latticeAccountId);
+                if (StringUtils.isNotEmpty(latticeAccountId)) {
+                    notNullIds++;
+                }
+            }
             Long startTime = System.currentTimeMillis();
             List<LatticeAccount> accounts = accountLookupService.batchFetchAccounts(ids, dataCloudVersion);
 
@@ -118,7 +157,6 @@ public class FuzzyMatchHelper implements DbHelper {
                         System.currentTimeMillis() - startTime, accounts.size()));
             }
         }
-        return context;
     }
 
     @Override
@@ -148,8 +186,8 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean latticeAccountIdOnly = context.isSeekingIdOnly();
         if (!latticeAccountIdOnly) {
             for (InternalOutputRecord record : context.getInternalResults()) {
-                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
-                        context.getInput().getDataCloudVersion());
+                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(), context.getInput()
+                        .getDataCloudVersion());
             }
         }
         return context;
@@ -200,8 +238,8 @@ public class FuzzyMatchHelper implements DbHelper {
     @Trace
     private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
             String dataCloudVersion) {
-        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
-                .getDecodeParameters(columnSelection, dataCloudVersion);
+        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService.getDecodeParameters(
+                columnSelection, dataCloudVersion);
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());

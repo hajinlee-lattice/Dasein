@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import scala.concurrent.Future;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -42,6 +44,10 @@ public class MatchContext implements Fact, Dimension {
 
     @JsonIgnore
     private String contextId;
+
+    @JsonIgnore
+    private List<Future<Object>> futuresResult;
+    private boolean fuzzyMatchEnabled;
 
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
@@ -191,6 +197,14 @@ public class MatchContext implements Fact, Dimension {
         this.useDnBCache = useDnBCache;
     }
 
+    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
+        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    }
+    
+    public boolean isFuzzyMatchEnabled() {
+        return fuzzyMatchEnabled;
+    }
+
     @JsonIgnore
     @MetricTag(tag = "MatchEngine")
     public String getMatchEngineAsString() {
@@ -210,4 +224,13 @@ public class MatchContext implements Fact, Dimension {
         }
 
     }
+
+    public List<Future<Object>> getFuturesResult() {
+        return futuresResult;
+    }
+
+    public void setFuturesResult(List<Future<Object>> futuresResult) {
+        this.futuresResult = futuresResult;
+    }
+
 }

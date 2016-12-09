@@ -71,6 +71,8 @@ public class MatchInput implements Fact, Dimension {
     // if not provided, first check DnB cache before going to DnB api
     private boolean useDnBCache = true;
 
+    private boolean fuzzyMatchEnabled;
+
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
         return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
@@ -223,7 +225,6 @@ public class MatchInput implements Fact, Dimension {
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
-
 
     @MetricTagGroup
     @JsonProperty("PredefinedSelection")
@@ -380,6 +381,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("UseDnBCache")
     public void setUseDnBCache(boolean useDnBCache) {
         this.useDnBCache = useDnBCache;
+    }
+
+    @JsonProperty("FuzzyMatchEnabled")
+    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
+        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    }
+
+    @JsonProperty("FuzzyMatchEnabled")
+    public boolean isFuzzyMatchEnabled() {
+        return fuzzyMatchEnabled;
     }
 
     @Override

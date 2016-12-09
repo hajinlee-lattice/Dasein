@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
-class InternalOutputRecord extends OutputRecord {
+public class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;
     private Boolean isPublicDomain = false;

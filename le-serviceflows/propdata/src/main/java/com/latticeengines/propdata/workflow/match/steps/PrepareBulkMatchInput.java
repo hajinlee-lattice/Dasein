@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -110,30 +111,51 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             if (blocks.length == 1) {
                 jobConfiguration.setAvroPath(avroGlobs);
             } else {
-                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
-                        jobConfiguration.getBlockOperationUid()).toString();
+                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(
+                        jobConfiguration.getRootOperationUid(), jobConfiguration.getBlockOperationUid()).toString();
                 jobConfiguration.setAvroPath(targetFile);
-                List<GenericRecord> data = new ArrayList<>();
-                while (data.size() < blockSize && iterator.hasNext()) {
-                    data.add(iterator.next());
-                }
-                try {
-                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, data);
-                    log.info("Write a block of " + AvroUtils.count(yarnConfiguration, targetFile) + " rows to "
-                            + targetFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                writeBlock(iterator, blockSize, targetFile);
             }
             jobConfiguration.setInputAvroSchema(getConfiguration().getInputAvroSchema());
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
                     .getApplicationId();
-            jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]",
-                    getConfiguration().getCustomerSpace().toString(), appId, blockIdx, blocks.length));
+            jobConfiguration.setAppName(String.format("%s~PropDataMatch[%s]~Block[%d/%d]", getConfiguration()
+                    .getCustomerSpace().toString(), appId, blockIdx, blocks.length));
             configurations.add(jobConfiguration);
         }
 
         return configurations;
+    }
+
+    private void writeBlock(Iterator<GenericRecord> iterator, Integer blockSize, String targetFile) {
+        int bufferSize = 2000;
+        List<GenericRecord> data = new ArrayList<>();
+        int count = 0;
+        while (count < blockSize && iterator.hasNext()) {
+            data.add(iterator.next());
+            count++;
+            if (data.size() >= bufferSize) {
+                writeBuffer(targetFile, data);
+                data.clear();
+            }
+        }
+        if (data.size() > 0) {
+            writeBuffer(targetFile, data);
+        }
+        log.info("Write a block of " + count + " rows to " + targetFile);
+    }
+
+    private void writeBuffer(String targetFile, List<GenericRecord> data) {
+        try {
+            if (!HdfsUtils.fileExists(yarnConfiguration, targetFile)) {
+                AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetFile, data);
+            } else {
+                AvroUtils.appendToHdfsFile(yarnConfiguration, targetFile, data);
+            }
+            log.info("Write a buffer of " + data.size() + " rows to " + targetFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private DataCloudJobConfiguration generateJobConfiguration() {
@@ -156,6 +178,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             jobConfiguration.setThreadPoolSize(getConfiguration().getRealTimeThreadPoolSize());
         }
         jobConfiguration.setUseDnBCache(getConfiguration().getUseDnBCache());
+        jobConfiguration.setFuzzyMatchEnabled(getConfiguration().isFuzzyMatchEnabled());
         return jobConfiguration;
     }
 

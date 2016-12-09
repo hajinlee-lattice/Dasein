@@ -40,7 +40,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     protected MetricService metricService;
 
     @MatchStep
-    MatchContext complete(MatchContext matchContext) {
+    protected MatchContext complete(MatchContext matchContext) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
         matchContext = dbHelper.updateInternalResults(matchContext);
         matchContext = mergeResults(matchContext);
@@ -49,6 +49,17 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - receiveTime);
         return matchContext;
     }
+    
+    @Override
+    public MatchContext executeAsync(MatchContext matchContext) {
+        return matchContext;
+    }
+
+    @Override
+    public MatchContext executeMatchResult(MatchContext matchContext) {
+        return matchContext;
+    }
+
 
     @SuppressWarnings("unchecked")
     @VisibleForTesting
@@ -56,7 +67,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Trace
     MatchContext mergeResults(MatchContext matchContext) {
         ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(matchContext);
-        MetadataColumnService metadataColumnService = beanDispatcher.getMetadataColumnService(matchContext);
+        MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher.getMetadataColumnService(matchContext);
 
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());

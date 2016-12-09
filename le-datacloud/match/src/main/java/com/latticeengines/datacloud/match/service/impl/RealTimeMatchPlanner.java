@@ -44,6 +44,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
         context.setUseDnBCache(input.getUseDnBCache());
+        context.setFuzzyMatchEnabled(input.isFuzzyMatchEnabled());
         return context;
     }
 

@@ -35,6 +35,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);
         context.setUseDnBCache(input.getUseDnBCache());
+        context.setFuzzyMatchEnabled(input.isFuzzyMatchEnabled());
         return context;
     }
 }

@@ -23,4 +23,10 @@ public interface DbHelper extends HasDataCloudVersion {
 
     void initExecutors();
 
+    void fetchMatchResult(MatchContext context);
+
+    MatchContext fetchAsync(MatchContext context);
+
+    void fetchIdResult(MatchContext context);
+
 }

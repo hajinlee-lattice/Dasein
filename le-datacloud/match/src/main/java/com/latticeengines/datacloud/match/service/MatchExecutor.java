@@ -12,4 +12,9 @@ public interface MatchExecutor {
 
     List<MatchContext> executeBulk(List<MatchContext> matchContexts);
 
+    MatchContext executeAsync(MatchContext matchContext);
+
+    MatchContext executeMatchResult(MatchContext matchContext);
+
+
 }

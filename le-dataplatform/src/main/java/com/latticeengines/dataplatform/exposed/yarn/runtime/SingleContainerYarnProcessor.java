@@ -134,8 +134,8 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     public ExitStatus afterStep(StepExecution stepExecution) {
         return null;
     }
-
-    protected void setProgress(float progress) {
+    
+    public void setProgress(float progress) {
         ledpProgressReporter.setProgress(progress);
     }
 

@@ -13,6 +13,12 @@ import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
@@ -25,18 +31,12 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     private static final Log log = LogFactory.getLog(FuzzyMatchServiceImpl.class);
 
     private static final Timeout REALTIME_TIMEOUT = new Timeout(new FiniteDuration(10, TimeUnit.MINUTES));
-    private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(1, TimeUnit.HOURS));
+    private static final Timeout BATCH_TIMEOUT = new Timeout(new FiniteDuration(3, TimeUnit.HOURS));
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -45,31 +45,25 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception {
         checkRecordType(matchRecords);
+        logLevel = setLogLevel(logLevel);
+        List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
+                decisionGraph, logLevel, useDnBCache);
 
+        fetchIdResult(matchRecords, logLevel, matchFutures);
+    }
+
+    @Override
+    public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception {
+        logLevel = setLogLevel(logLevel);
+        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache);
+    }
+
+    @Override
+    public <T extends OutputRecord> void fetchIdResult(List<T> matchRecords, Level logLevel,
+            List<Future<Object>> matchFutures) throws Exception {
+        logLevel = setLogLevel(logLevel);
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
-        List<Future<Object>> matchFutures = new ArrayList<>();
-        if (logLevel == null) {
-            logLevel = Level.INFO;
-        }
-
-        for (T record : matchRecords) {
-            InternalOutputRecord matchRecord = (InternalOutputRecord) record;
-            if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId()) || matchRecord.isFailed()) {
-                matchFutures.add(null);
-            } else {
-                MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
-                MatchTraveler travelContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
-                travelContext.setLogLevel(logLevel);
-                matchRecord.setTravelerId(travelContext.getTravelerId());
-                travelContext.setDataCloudVersion(dataCloudVersion);
-                if (StringUtils.isNotEmpty(decisionGraph)) {
-                    travelContext.setDecisionGraph(decisionGraph);
-                }
-                travelContext.setUseDnBCache(useDnBCache);
-                matchFutures.add(askFuzzyMatchAnchor(travelContext, timeout));
-            }
-        }
-
         List<FuzzyMatchHistory> fuzzyMatchHistories = new ArrayList<>();
         for (int idx = 0; idx < matchFutures.size(); idx++) {
             Future<Object> future = matchFutures.get(idx);
@@ -90,6 +84,37 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         writeFuzzyMatchHistory(fuzzyMatchHistories);
     }
 
+    private Level setLogLevel(Level logLevel) {
+        if (logLevel == null) {
+            logLevel = Level.INFO;
+        }
+        return logLevel;
+    }
+
+    private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
+            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) {
+
+        List<Future<Object>> matchFutures = new ArrayList<>();
+        for (T record : matchRecords) {
+            InternalOutputRecord matchRecord = (InternalOutputRecord) record;
+            if (StringUtils.isNotEmpty(matchRecord.getLatticeAccountId()) || matchRecord.isFailed()) {
+                matchFutures.add(null);
+            } else {
+                MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
+                MatchTraveler travelContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
+                travelContext.setLogLevel(logLevel);
+                matchRecord.setTravelerId(travelContext.getTravelerId());
+                travelContext.setDataCloudVersion(dataCloudVersion);
+                if (StringUtils.isNotEmpty(decisionGraph)) {
+                    travelContext.setDecisionGraph(decisionGraph);
+                }
+                travelContext.setUseDnBCache(useDnBCache);
+                matchFutures.add(askFuzzyMatchAnchor(travelContext));
+            }
+        }
+        return matchFutures;
+    }
+
     @MatchStep
     private void writeFuzzyMatchHistory(List<FuzzyMatchHistory> metrics) {
         try {
@@ -102,7 +127,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
     }
 
-    private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler, Timeout timeout) {
+    private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler) {
+        Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
         return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
     }
 
@@ -124,8 +150,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 if (logEntry.getThrowable() == null) {
                     record.log(logEntry.getMessage());
                 } else {
-                    record.log(logEntry.getMessage() + "\n" + StringEscapeUtils
-                            .escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
+                    record.log(logEntry.getMessage() + "\n"
+                            + StringEscapeUtils.escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
                 }
             }
         }

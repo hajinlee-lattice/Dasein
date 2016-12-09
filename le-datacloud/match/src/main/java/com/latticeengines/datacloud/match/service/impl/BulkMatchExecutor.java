@@ -9,7 +9,6 @@ import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 
-
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
@@ -20,6 +19,21 @@ class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
     public MatchContext execute(MatchContext matchContext) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
         matchContext = dbHelper.fetchSync(matchContext);
+        matchContext = complete(matchContext);
+        return matchContext;
+    }
+
+    @Override
+    public MatchContext executeAsync(MatchContext matchContext) {
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        return dbHelper.fetchAsync(matchContext);
+    }
+
+    @Override
+    public MatchContext executeMatchResult(MatchContext matchContext) {
+        DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
+        dbHelper.fetchIdResult(matchContext);
+        dbHelper.fetchMatchResult(matchContext);
         matchContext = complete(matchContext);
         return matchContext;
     }
