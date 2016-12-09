@@ -1039,6 +1039,64 @@ angular
                 }   
             }
         })
+        .state('home.enrichment-new', {
+            url: '/enrichment-new',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'LEAD_ENRICHMENT_SETUP_TITLE';
+                        }
+                    },
+                    controller: function($scope, EnrichmentStore) {
+                        $scope.metadata = EnrichmentStore.metadata;
+                        $scope.$watch('metadata.current', function(newVal, oldVal){
+                            if(newVal !== oldVal) {
+                                angular.element(window).scrollTop(0,0);
+                            }
+                        });
+                        $scope.selectToggle = function(bool) {
+                            EnrichmentStore.setMetadata('toggle.show.selected', bool);
+                            EnrichmentStore.setMetadata('current', 1);
+                        }
+                    },
+                    //templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
+                },
+                "main@": {
+                    resolve: {
+                        EnrichmentCategories: function($q, EnrichmentStore) {
+                            return false;
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getCategories().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentPremiumSelectMaximum: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getPremiumSelectMaximum().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'EnrichmentWizardController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/enrichment/views/EnrichmentWizardView.html'
+                }   
+            }
+        })
         .state('home.enrichment', {
             url: '/enrichment',
             params: {

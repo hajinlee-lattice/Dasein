@@ -34,6 +34,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
+        enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
         enrichments: [],
@@ -57,7 +58,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enable_grid: true,
         view: 'list'
     });
-    
+
     var stopGetEnrichments = false;
     $scope.$on('$destroy', function () {
         stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
@@ -229,6 +230,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         if(vm.userSelectedCount < 1) {
             vm.selectDisabled = 1;
         }
+        if(!vm.enabledManualSave) {
+            vm.saveSelected();
+        }
     }
 
     var status_timer;
@@ -386,12 +390,46 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return path + icon;
     }
 
+    var subcategoryCountList = [];
+    vm.subcategoryCount = function(category, subcategory) {
+        var filtered = vm.enrichments;
+        filtered =  $filter('filter')(filtered, {
+            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
+            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
+            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
+            'Category': category, 
+            'Subcategory': subcategory
+        });
+        filtered = $filter('filter')(filtered, vm.searchFields);
+        return filtered.length;
+    }
+
+    vm.subcategoryFilter = function(subcategory) {
+        if(!vm.enrichments_completed) {
+            return true;
+        }
+        var category = vm.category;
+        return (vm.subcategoryCount(category, subcategory) ? true : false);
+    }
+
     vm.categoryIcon = function(category){
         var path = '/assets/images/enrichments/',
             category = subcategoryRenamer(category, '-'),
             icon = 'ico-attr-' + category + '.png';
 
         return path + icon;
+    }
+
+    vm.categoryCount = function(category) {
+        var filtered = vm.enrichments;
+        filtered =  $filter('filter')(filtered, {
+            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
+            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
+            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
+            'Category': category
+        });
+        filtered = $filter('filter')(filtered, vm.searchFields);
+        return filtered.length;
     }
 
     var _scrolled = function() {
@@ -448,10 +486,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.category = vm.categories[0];
         }
     });
-
-    var categoryCount = function(category) {
-        return $filter('filter')(vm.enrichments, {'Cateogry': category}).length;
-    }
 
     vm.init = function() {
         _resized();

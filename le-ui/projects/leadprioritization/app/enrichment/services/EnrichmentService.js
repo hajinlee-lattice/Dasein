@@ -4,6 +4,7 @@ angular.module('lp.enrichment.leadenrichment')
     this.enrichments = null;
     this.categories = null;
     this.subcategories = {};
+    this.count = null;
     this.selectedCount = null;
     this.premiumSelectMaximum = null;
     this.metadata = {
@@ -121,6 +122,18 @@ angular.module('lp.enrichment.leadenrichment')
         this.enrichments = item;
     }
 
+    this.getCount = function(){
+        var deferred = $q.defer();
+        if (this.count) {
+            deferred.resolve(this.count);
+        } else {
+            EnrichmentService.getCount().then(function(response){
+                deferred.resolve(response);
+            });
+        }
+        return deferred.promise;
+    }
+
     this.getSelectedCount = function(){
         var deferred = $q.defer();
         if (this.selectedCount) {
@@ -141,6 +154,17 @@ angular.module('lp.enrichment.leadenrichment')
             //ENVs: Default, QA, Production
             //url: '/Pods/<ENV>/Default/PLS/EnrichAttributeMaxNumber'
             url: '/pls/enrichment/lead/premiumattributeslimitation'
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
+    this.getCount = function(){
+        var deferred = $q.defer();
+        $http({
+            method: 'get',
+            url: '/pls/enrichment/lead/count'
         }).then(function(response){
             deferred.resolve(response);
         });

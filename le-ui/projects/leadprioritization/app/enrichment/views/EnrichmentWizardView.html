@@ -1,6 +1,12 @@
-7<div class="enrichment-wizard-container">
+<div class="enrichment-wizard-container">
     <section id="main-content" class="container">
-        <div class="loading-enrichments" ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i> Loading enrichments... {{vm.enrichments.length|number}}</div>
+        <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
+            <div class="icon"></div>
+            <div class="message" ng-bind-html="vm.status_alert.message">
+            </div>
+            <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
+        </div>
+        <div class="loading-enrichments"><span ng-if="!vm.enrichments_completed"><i lass="fa fa-spinner fa-spin fa-fw"></i> Loading </span>Enrichments: {{vm.enrichments.length|number}}</div>
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -28,7 +34,7 @@
                         <span class="fa fa-sort-amount-{{vm.SortOrder == 'DisplayName' ? 'asc' : 'desc'}}"></span>
                     </a>
                 </li>
-                <li class="save">
+                <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
             </ul>
@@ -45,8 +51,8 @@
                             {{category}}
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{(vm.enrichments|filter:{'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),'Category': category}|filter:vm.searchFields).length}}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+                            <strong ng-if="vm.enrichments_completed">{{vm.categoryCount(category)}}</strong>
+                            <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                     </span>
                 </div>
@@ -57,7 +63,6 @@
             <div class="row required-fields-pagination" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
-                            ng-click="vm.clickPaginate()"
                             current="vm.metadata.current" 
                             max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
@@ -66,7 +71,7 @@
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = (vm.subcategories[vm.category])) 
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-                        | limitTo: vm.pagesize"  
+                        | limitTo: vm.pagesize" 
                     class="subcategory" 
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
@@ -77,8 +82,8 @@
                             {{subcategory}}
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{(vm.enrichments|filter:{'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),'Category':category, 'Subcategory':subcategory}|filter:vm.searchFields).length}}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+                            <strong ng-if="vm.enrichments_completed">{{vm.subcategoryCount(vm.category, subcategory)}}</strong>
+                            <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                             </span>
                     </div>
                 </li>
@@ -86,7 +91,6 @@
             <div class="row required-fields-pagination" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
-                            ng-click="vm.clickPaginate()"
                             current="vm.metadata.current" 
                             max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
@@ -95,13 +99,12 @@
         </div>
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
-            <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
+            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
                 <span ng-click="vm.subcategory = ''">Back</span> | {{vm.subcategory}}
             </div>
             <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
-                            ng-click="vm.clickPaginate()"
                             current="vm.metadata.current" 
                             max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
@@ -130,11 +133,11 @@
                                 <li data-corner-ribbon="premium" ng-if="::enrichment.IsPremium" class="premium"><strong>premium</strong></li>
                                 <li data-corner-ribbon="internal" ng-if="::enrichment.IsInternal" class="internal"><strong>internal</strong></li>
                             </ul>
-                            <h2>
+                            <h2 title="{{::enrichment.DisplayName}}">
                                 <strong>{{::enrichment.DisplayName}}</strong>
                             </h2>
                         </div>
-                        <p class="description">{{::enrichment.Description}}</p>
+                        <p class="description" title="{{::enrichment.Description}}">{{::enrichment.Description}}</p>
                         <div class="controls">
                             <div class="toggle">
                                 <button class="button" 
@@ -156,7 +159,6 @@
             <div class="row required-fields-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
-                            ng-click="vm.clickPaginate()"
                             current="vm.metadata.current" 
                             max="vm.max = filteredList.length / vm.pagesize">
                     </pd-pagination-controls>
