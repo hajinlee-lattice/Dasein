@@ -64,7 +64,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         Long rootAttrId = getCategoryRootId(category);
         List<CategoricalAttribute> children = categoricalAttributeEntityMgr.getChildren(rootAttrId);
         for (CategoricalAttribute attribute : children) {
-            subCatIdMap.put(attribute.getAttrName(), attribute.getPid());
+            subCatIdMap.put(attribute.getAttrValue(), attribute.getPid());
         }
         return subCatIdMap;
     }
@@ -74,7 +74,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         query.setSource(PropDataConstants.ACCOUNT_MASTER_COLUMN);
         query.setDimension(AccountMasterFact.DIM_CATEGORY);
         Map<String, String> qualifiers = new HashMap<>();
-        qualifiers.put(PropDataConstants.ATTR_CATEGORY, category.getName());
+        qualifiers.put(PropDataConstants.ATTR_CATEGORY, category.name());
         query.setQualifiers(qualifiers);
         return dimensionalQueryService.findAttrId(query);
     }

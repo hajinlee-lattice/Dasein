@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.core.service.impl;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,24 +18,57 @@ import com.latticeengines.domain.exposed.metadata.Category;
 
 public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(AccountMasterStatisticsServiceImplTestNG.class);
+
     @Autowired
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
     @Autowired
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testAMCategories() {
         Map<Category, Long> catIdMap = accountMasterStatisticsService.getCategories();
         for (Map.Entry<Category, Long> entry: catIdMap.entrySet()) {
             Category category = entry.getKey();
             Long attrId = entry.getValue();
-            verifyAttribute(attrId, PropDataConstants.ATTR_CATEGORY, category.getName());
+            verifyAttribute(attrId, PropDataConstants.ATTR_CATEGORY, category.name());
         }
 
         for (Category category: Category.values()) {
             Map<String, Long> subCatIdMap = accountMasterStatisticsService.getSubCategories(category);
-            //TODO: verify the subCatIdMap
+            // This part might be broken if there is any change to category and subcategory in metadata
+            switch (category) {
+            case DEFAULT:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case FIRMOGRAPHICS:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case GROWTH_TRENDS:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case INTENT:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case LEAD_INFORMATION:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case ONLINE_PRESENCE:
+                Assert.assertEquals(subCatIdMap.size(), 1);
+                break;
+            case TECHNOLOGY_PROFILE:
+                Assert.assertEquals(subCatIdMap.size(), 92);
+                break;
+            case WEBSITE_KEYWORDS:
+                Assert.assertEquals(subCatIdMap.size(), 8);
+                break;
+            case WEBSITE_PROFILE:
+                Assert.assertEquals(subCatIdMap.size(), 184);
+                break;
+            default:
+                break;
+            }
         }
     }
 
