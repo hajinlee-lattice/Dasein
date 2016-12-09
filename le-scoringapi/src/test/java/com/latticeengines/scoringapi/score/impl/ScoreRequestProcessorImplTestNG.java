@@ -29,6 +29,15 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
 
     private CustomerSpace space;
 
+    @Mock
+    private ScoreRequest request;
+
+    @Mock
+    private ScoringArtifacts scoringArtifacts;
+
+    @Mock
+    private ModelSummary modelSummary;
+
     @Autowired
     @Mock
     private ModelRetriever modelRetriever;
@@ -36,9 +45,6 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
     @Autowired
     @Mock
     protected HttpStopWatch httpStopWatch;
-
-    @Mock
-    private ScoreRequest request;
 
     @Autowired
     @Mock
@@ -57,12 +63,10 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
         when(request.getSource()).thenReturn("");
         when(httpStopWatch.split("requestPreparation")).thenReturn(1L);
         Mockito.doNothing().when(requestInfo).put(any(String.class), any(String.class));
-        ModelSummary modelSummary = new ModelSummary();
-        modelSummary.setStatus(ModelSummaryStatus.INACTIVE);
-        modelSummary.setName("modelName");
-        modelSummary.setId("modelId");
-        ScoringArtifacts scoringArtifacts = new ScoringArtifacts(modelSummary, null, null, null, null, null, null, null,
-                null);
+        when(modelSummary.getStatus()).thenReturn(ModelSummaryStatus.INACTIVE);
+        when(modelSummary.getName()).thenReturn("modelName");
+        when(modelSummary.getId()).thenReturn("modelId");
+        when(scoringArtifacts.getModelSummary()).thenReturn(modelSummary);
         when(modelRetriever.getModelArtifacts(any(CustomerSpace.class), any(String.class)))
                 .thenReturn(scoringArtifacts);
     }
