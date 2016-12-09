@@ -1,23 +1,34 @@
 package com.latticeengines.pls.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 @DisallowConcurrentExecution
 @Component("modelSummaryService")
@@ -27,6 +38,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private KeyValueEntityMgr keyValueEntityMgr;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -150,8 +164,44 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary != null) {
             summary.setPredictors(new ArrayList<Predictor>());
             getModelSummaryTrainingFileState(summary);
+            fixBusinessAnnualSalesAbs(summary);
         }
         return summary;
+    }
+
+    public void fixBusinessAnnualSalesAbs(ModelSummary summary) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        KeyValue keyValue = summary.getDetails();
+        JsonNode details = null;
+        try {
+            details = objectMapper.readTree(keyValue.getPayload());
+        } catch (IOException e) {
+            log.error("Failed to parse model details KeyValue", e);
+        }
+        String dataCloudVersion = summary.getDataCloudVersion();
+        JsonNode fixRevenueUIIssue = details.get("RevenueUIIssueFixed");
+        if (fixRevenueUIIssue != null
+                || dataCloudVersion != null && VersionComparisonUtils.compareVersion(dataCloudVersion, "2.0.0") >= 0) {
+            return;
+        }
+        ArrayNode predictors = (ArrayNode) details.get("Predictors");
+        for (JsonNode predictor : predictors) {
+            if (!predictor.get("Name").asText().equals("BusinessAnnualSalesAbs")) {
+                continue;
+            }
+            ArrayNode elements = (ArrayNode) predictor.get("Elements");
+            for (JsonNode element : elements) {
+                if (element.get("LowerInclusive").asText() != null) {
+                    ((ObjectNode) element).put("LowerInclusive", element.get("LowerInclusive").asLong() * 1000);
+                }
+                if (element.get("UpperExclusive").asText() != null) {
+                    ((ObjectNode) element).put("UpperExclusive", element.get("UpperExclusive").asLong() * 1000);
+                }
+            }
+        }
+        ((ObjectNode) details).put("RevenueUIIssueFixed", BooleanNode.TRUE);
+        keyValue.setPayload(details.toString());
+        keyValueEntityMgr.update(keyValue);
     }
 
     @Override
