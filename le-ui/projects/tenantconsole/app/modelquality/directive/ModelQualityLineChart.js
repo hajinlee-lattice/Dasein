@@ -271,9 +271,17 @@ angular.module('app.modelquality.directive.ModelQualityLineChart', [
                 return {
                     xDomain: _.map(xDomain, function (x) {
                         return x;
-                    }).sort(function(a,b) { return (a > b) ? 1 : ((a < b) ? -1 : 0); }),
+                    }).sort(productionPipelineNameComparator),
                     yExtent: [minValue, maxValue * 1.10]
                 };
+            };
+
+            var productionPipelineNameComparator = function (a, b) {
+                // sort on version number ascending
+                // assumption that production pipeline always named 'Production-<stack>_<major.minor.patch.build>?'
+                a = a.split('_')[1];
+                b = b.split('_')[1];
+                return (a > b) ? 1 : ((a < b) ? -1 : 0);
             };
 
             scope.promise.then(function(result) {
