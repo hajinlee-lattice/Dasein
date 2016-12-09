@@ -43,6 +43,7 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -144,6 +145,8 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         modelId = modelSummary.getId();
         assertEquals(modelSummary.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(modelSummary.getPivotArtifactPath());
+
+        activateModelSummary(modelId);
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {
@@ -343,6 +346,19 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
         } finally {
             parser.close();
         }
+    }
+
+    private void activateModelSummary(String modelId) {
+        log.info("Update model " + modelId + " to active.");
+        String modelApi = getRestAPIHostPort() + "/pls/modelsummaries/" + modelId;
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Status", ModelSummaryStatus.ACTIVE.getStatusCode());
+        HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
+        restTemplate.exchange(modelApi, HttpMethod.PUT, requestEntity, Object.class);
+        // Look up the model summary with details
+        ModelSummary summary = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), modelId), ModelSummary.class);
+        assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
     }
 
 }
