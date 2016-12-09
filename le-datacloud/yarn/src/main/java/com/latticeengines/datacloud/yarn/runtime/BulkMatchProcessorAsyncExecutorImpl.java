@@ -40,7 +40,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 processorContext.setMatchInput(matchInput);
             }
 
-            log.info("Sending block " + block + " of " + input.getData().size() + " records to Async match.");
+            log.info("s block " + block + " of " + input.getData().size() + " records to Async match.");
             MatchContext matchContext = matchPlanner.plan(input);
             matchContext = matchExecutor.executeAsync(matchContext);
             if (combinedContext == null) {
@@ -48,7 +48,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             }
 
             if (CollectionUtils.isNotEmpty(matchContext.getFuturesResult())) {
-                log.info("Returned " + block + " block of " + matchContext.getFuturesResult().size()
+                log.info("Returned block " + block + " of " + matchContext.getFuturesResult().size()
                         + " futures from Async match.");
             }
             processFutures(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
@@ -57,10 +57,10 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         }
 
         while (futures.size() > 0 || completedFutures.size() > 0) {
-            processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
-                    completedFutures, combinedContext, 0, 0);
             log.info("Last batch, futures size=" + futures.size() + " completed futures size="
                     + completedFutures.size());
+            processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
+                    completedFutures, combinedContext, 0, 0);
         }
 
         log.info(String.format("Finished matching %d rows in %.2f minutes.", processorContext.getBlockSize(),
