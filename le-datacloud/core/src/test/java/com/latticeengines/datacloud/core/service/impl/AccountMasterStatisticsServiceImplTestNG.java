@@ -69,6 +69,10 @@ public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunct
             default:
                 break;
             }
+            for (String subCat : subCatIdMap.keySet()) {
+                Assert.assertNotNull(subCat);
+                Assert.assertNotNull(subCatIdMap.get(subCat));
+            }
         }
     }
 
