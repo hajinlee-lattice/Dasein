@@ -41,8 +41,8 @@ public class DnbCacheSeedCleanFlow
     private Node addFilterNode(Node node) {
         node = node.filter(DUNS_FIELD + " != null", new FieldList(DUNS_FIELD));
         return node.filter(
-                DOMESTIC_ULTIMATE_DUNS_NUMBER + " != null || !(" + LE_INDUSTRY
-                        + ".equals(\"Nonclassifiable Establishments\"))",
+                String.format("%s != null || %s == null || !(%s.equals(\"Nonclassifiable Establishments\"))",
+                        DOMESTIC_ULTIMATE_DUNS_NUMBER, LE_INDUSTRY, LE_INDUSTRY),
                 new FieldList(DOMESTIC_ULTIMATE_DUNS_NUMBER, LE_INDUSTRY));
     }
 
