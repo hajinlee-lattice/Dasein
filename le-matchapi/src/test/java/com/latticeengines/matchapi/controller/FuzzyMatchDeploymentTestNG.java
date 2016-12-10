@@ -105,7 +105,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
                 SCENARIO_INCOMPLETELOCATION };
         for (String scenario : scenarios) {
-            MatchInput input = prepareRealtimeMatchInput(scenario, false);
+            MatchInput input = prepareRealtimeMatchInput(scenario, true);
             MatchOutput output = matchProxy.matchRealTime(input);
             validateRealtimeMatchResult(scenario, output);
         }
@@ -117,7 +117,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
                 SCENARIO_INCOMPLETELOCATION };
         for (String scenario : scenarios) {
-            MatchInput input = prepareRealtimeMatchInput(scenario, true);
+            MatchInput input = prepareRealtimeMatchInput(scenario, false);
             MatchOutput output = matchProxy.matchRealTime(input);
             validateRealtimeMatchResult(scenario, output);
         }
