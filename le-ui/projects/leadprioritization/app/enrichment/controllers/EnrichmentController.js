@@ -61,6 +61,8 @@ angular.module('lp.enrichment.leadenrichment', [
     var stopGetEnrichments = false;
     $scope.$on('$destroy', function () {
         stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
+        angular.element($window).unbind("scroll", scrolled);
+        angular.element($window).unbind("resize", resized);
     });
 
     var fakeIncrement = false;
