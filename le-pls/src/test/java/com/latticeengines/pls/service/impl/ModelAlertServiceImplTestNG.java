@@ -26,7 +26,7 @@ import com.latticeengines.pls.service.ModelAlertService;
 
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    private String modelId;
+    private String modelId = generateRandomModelId();
     private String tenantId;
     private String dir;
 
@@ -56,6 +56,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
         setupUsers();
 
         tenantId = testingTenants.get(0).getId();
+        System.out.println("modelId is " + modelId);
         dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(modelId)
                 + "/container_01/";
         modelSummaryUrl = ClassLoader
