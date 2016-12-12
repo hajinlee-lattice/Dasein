@@ -505,7 +505,7 @@ angular
                             return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
-                    controller: function($scope, ResourceUtility) {
+                    controller: function($scope, $state, ResourceUtility) {
                         $scope.isCreateForm = true;
                         $scope.ResourceUtility = ResourceUtility;
                     },
