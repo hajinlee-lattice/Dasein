@@ -335,6 +335,9 @@ public class ProcessorContext {
         keyMap = jobConfiguration.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
+        if (fuzzyMatchEnabled) {
+            timeOut = timeOut * 2;
+        }
         log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
 
         useProxy = Boolean.TRUE.equals(jobConfiguration.getUseRealTimeProxy());
