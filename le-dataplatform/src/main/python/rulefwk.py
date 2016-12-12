@@ -9,39 +9,14 @@ logger = logging.getLogger(name='rulefwk')
 
 class DataRulePipeline(Pipeline):
 
-    interfaceColumns = { 'Id',
-                         'InternalId',
-                         'Event',
-                         'Domain',
-                         'LastModifiedDate',
-                         'CreatedDate',
-                         'FirstName',
-                         'LastName',
-                         'Title',
-                         'Email',
-                         'City',
-                         'State',
-                         'PostalCode',
-                         'Country',
-                         'PhoneNumber',
-                         'Website',
-                         'CompanyName',
-                         'Industry',
-                         'LeadSource',
-                         'IsClosed',
-                         'StageName',
-                         'AnnualRevenue',
-                         'NumberOfEmployees',
-                         'YearStarted' }
-
     def __init__(self, pipelineSteps):
         super(DataRulePipeline, self).__init__(pipelineSteps)
 
-    def apply(self, dataFrame, configMetadata):
+    def apply(self, dataFrame, columnMetadata, profile):
         for step in self.pipelineSteps:
             try:
                 logger.info("Applying DataRule " + step.__class__.__name__)
-                step.apply(dataFrame, configMetadata)
+                step.apply(dataFrame, columnMetadata, profile)
             except Exception as e:
                 logger.exception("Caught Exception while applying datarule. Stack trace below" + str(e))
         return dataFrame
@@ -49,137 +24,9 @@ class DataRulePipeline(Pipeline):
     def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
         for step in self.pipelineSteps:
             logger.info("Processing results for DataRule " + step.__class__.__name__)
-            fileSuffix = ""
-            detailedresults = step.getResults()
-            if isinstance(step, ColumnRule):
-                avroSchema = getColumnSchema()
-                fileSuffix = "ColumnRule"
-                results = step.getColumnsToRemove()
-            elif isinstance(step, RowRule):
-                avroSchema = getRowSchema()
-                fileSuffix = "RowRule"
-                results = step.getRowsToRemove()
-            elif isinstance(step, TableRule):
-                avroSchema = getRowSchema()
-                fileSuffix = "TableRule"
-                results = step.getRowsToRemove()
 
+            step.logAndWriteResults(dataRulesLocalDir, dataFrame, targetColumn, idColumn)
 
-            recordWriter = io.DatumWriter(avroSchema)
-            outputFileName = step.__class__.__name__ + '_' + fileSuffix + '.avro'
-            dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
-                                                 recordWriter, writers_schema=avroSchema, codec='deflate')
-            if not results:
-                logger.info("No DataRule results for " + step.__class__.__name__)
-                dataWriter.close() # write out avro file with no rows
-                continue
-            else:
-                details = ''
-                n_cols = 0
-                n_failed = 0
-                for c, r in detailedresults.iteritems():
-                    n_cols += 1
-                    if not r.isPassed():
-                        n_failed += 1
-                    if not r.isPassed():
-                        details = details + '{0:50s} FAILED: {1}\n'.format(c, r.getMessage())
-                    else:
-                        details = details + '{0:50s} PASSED: {1}\n'.format(c, r.getMessage())
-                logger.info('DataRule results: {0} columns failed ({1:.2%})\n{2}'.format(n_failed, float(n_failed)/float(n_cols), details))
-
-            index = 1
-            if isinstance(step, ColumnRule):
-                for itemId, toRemove in results.iteritems():
-                    if toRemove and itemId not in self.interfaceColumns:
-                        datum = {}
-                        datum["id"] = index
-                        datum["itemid"] = itemId
-                        index = index + 1
-                        dataWriter.append(datum)
-            else:
-                for itemId, columns in results.iteritems():
-                    datum = {}
-                    datum["id"] = index
-                    datum["itemid"] = itemId
-                    datum["isPositiveEvent"] = False
-                    if idColumn:
-                        row = dataFrame.loc[dataFrame[idColumn] == itemId]
-                        targetValue = row.iloc[0][targetColumn]
-                        if targetValue:
-                            datum["isPositiveEvent"] = True
-                    datum["columns"] = ','.join(columns)
-                    index = index + 1
-                    dataWriter.append(datum)
-
-            dataWriter.close()
-
-def getColumnSchema():
-    '''
-    Returns the schema of column rule output avro file
-    Args:
-        None
-    Returns:
-        Hardcoded schema
-    '''
-
-    ruleSchema = """
-    {
-      "type" : "record",
-      "name" : "ColumnRuleOutput",
-      "doc" : "Rule output from data review",
-      "fields" : [ {
-        "name" : "id",
-        "type" : [ "int", "null" ],
-        "columnName" : "id",
-        "sqlType" : "4"
-      }, {
-        "name" : "itemid",
-        "type" : [ "string", "null" ],
-        "columnName" : "itemid",
-        "sqlType" : "-9"
-      }],
-      "tableName" : "ColumnRuleOutput"
-    }"""
-    return schema.parse(ruleSchema)
-
-def getRowSchema():
-    '''
-    Returns the schema of row rule output avro file
-    Args:
-        None
-    Returns:
-        Hardcoded schema
-    '''
-
-    ruleSchema = """
-    {
-      "type" : "record",
-      "name" : "RowRuleOutput",
-      "doc" : "Rule output from data review",
-      "fields" : [ {
-        "name" : "id",
-        "type" : [ "int", "null" ],
-        "columnName" : "id",
-        "sqlType" : "4"
-      }, {
-        "name" : "itemid",
-        "type" : [ "string", "null" ],
-        "columnName" : "itemid",
-        "sqlType" : "-9"
-      }, {
-        "name" : "isPositiveEvent",
-        "type" : [ "boolean", "null" ],
-        "columnName" : "itemid",
-        "sqlType" : "16"
-      }, {
-        "name" : "columns",
-        "type" : [ "string", "null" ],
-        "columnName" : "columns",
-        "sqlType" : "-9"
-      }],
-      "tableName" : "RowRuleOutput"
-    }"""
-    return schema.parse(ruleSchema)
 
 class RuleResults(object):
 
@@ -199,48 +46,190 @@ class RuleResults(object):
 
 class DataRule(PipelineStep):
 
+    interfaceColumns = { 'Id',
+                        'InternalId',
+                        'Event',
+                        'Domain',
+                        'LastModifiedDate',
+                        'CreatedDate',
+                        'FirstName',
+                        'LastName',
+                        'Title',
+                        'Email',
+                        'City',
+                        'State',
+                        'PostalCode',
+                        'Country',
+                        'PhoneNumber',
+                        'Website',
+                        'CompanyName',
+                        'Industry',
+                        'LeadSource',
+                        'IsClosed',
+                        'StageName',
+                        'AnnualRevenue',
+                        'NumberOfEmployees',
+                        'YearStarted' }
+
     def __init__(self, props):
         super(DataRule, self).__init__(props)
+        self.fileSuffix = "AbstractRule"
 
     @abstractmethod
-    def apply(self, dataFrame, configMetadata):
-        return
+    def apply(self, dataFrame, columnMetadata, profile):
+        pass
 
     @abstractmethod
     def getDescription(self):
-        return
+        pass
 
     @abstractmethod
     def getConfParameters(self):
-        return
+        pass
 
     @abstractmethod
     def getResults(self):
-        return
-
-class RowRule(DataRule):
-
-    def __init__(self, props):
-        super(RowRule, self).__init__(props)
+        pass
 
     @abstractmethod
-    def getRowsToRemove(self):
-        return
+    def getSchema(self):
+        pass
+
+    @abstractmethod
+    def appendDataWriterRow(self, index, itemID, dataWriter, dataFrame, targetColumn, idColumn):
+        pass
+
+    def logAndWriteResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn):
+        results = self.getResults()
+        if not results:
+            logger.info("No DataRule results for " + self.__class__.__name__)
+            return
+
+        self.logResults(results)
+
+        with self.getDataWriter(dataRulesLocalDir) as dataWriter:
+            index = 1
+            for itemID, ruleResult in results.iteritems():
+                if not ruleResult.isPassed() and itemID not in self.interfaceColumns:
+                    self.appendDataWriterRow(index, itemID, dataWriter, dataFrame, targetColumn, idColumn)
+                    index +=1
+
+    def logResults(self, results):
+        details = ''
+        n_cols = 0
+        n_failed = 0
+        for c, r in results.iteritems():
+            n_cols += 1
+            if not r.isPassed():
+                n_failed += 1
+                details = details + '{0:50s} FAILED: {1}\n'.format(c, r.getMessage())
+            else:
+                details = details + '{0:50s} PASSED: {1}\n'.format(c, r.getMessage())
+        logger.info('DataRule results: {0} columns failed ({1:.2%})\n{2}'.format(n_failed, float(n_failed)/float(n_cols), details))
+
+    def getDataWriter(self, dataRulesLocalDir):
+        recordWriter = io.DatumWriter(self.getSchema())
+        outputFileName = self.__class__.__name__ + '_' + self.fileSuffix + '.avro'
+        dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
+                recordWriter, writers_schema=avroSchema, codec='deflate')
+        return dataWriter
+
+
 
 class ColumnRule(DataRule):
 
     def __init__(self, props):
         super(ColumnRule, self).__init__(props)
+        self.fileSuffix = "ColumnRule"
 
-    @abstractmethod
-    def getColumnsToRemove(self):
-        return
+    def getSchema(self):
+        '''
+        Returns the schema of column rule output avro file
+        Args:
+            None
+        Returns:
+            Hardcoded schema
+        '''
 
-class TableRule(DataRule):
+        ruleSchema = """
+        {
+            "type" : "record",
+            "name" : "ColumnRuleOutput",
+            "doc" : "Rule output from data review",
+            "fields" : [ {
+                "name" : "Id",
+                "type" : [ "int", "null" ],
+                "columnName" : "id",
+                "sqlType" : "4"
+                }, {
+                "name" : "ColumnName",
+                "type" : [ "string", "null" ],
+                "columnName" : "itemid",
+                "sqlType" : "-9"
+                } ],
+            "tableName" : "ColumnRuleOutput"
+        }"""
+        return schema.parse(ruleSchema)
+
+    def appendDataWriterRow(self, index, columnName, dataWriter, dataFrame, targetColumn, idColumn):
+        datum = {}
+        datum["Id"] = index
+        datum["ColumnName"] = columnName
+        dataWriter.append(datum)
+
+
+class RowRule(DataRule):
+
+    def __init__(self, props):
+        super(RowRule, self).__init__(props)
+        self.fileSuffix = "RowRule"
+
+    def getSchema(self):
+        '''
+        Returns the schema of row rule output avro file
+        Args:
+            None
+        Returns:
+            Hardcoded schema
+        '''
+
+        ruleSchema = """
+        {
+            "type" : "record",
+            "name" : "RowRuleOutput",
+            "doc" : "Rule output from data review",
+            "fields" : [ {
+                "name" : "id",
+                "type" : [ "int", "null" ],
+                "columnName" : "id",
+                "sqlType" : "4"
+                }, {
+                "name" : "itemid",
+                "type" : [ "string", "null" ],
+                "columnName" : "itemid",
+                "sqlType" : "-9"
+                }, {
+                "name" : "isPositiveEvent",
+                "type" : [ "boolean", "null" ],
+                "columnName" : "itemid",
+                "sqlType" : "16"
+                }, {
+                "name" : "columns",
+                "type" : [ "string", "null" ],
+                "columnName" : "columns",
+                "sqlType" : "-9"
+            }],
+            "tableName" : "RowRuleOutput"
+        }"""
+        return schema.parse(ruleSchema)
+
+    def appendDataWriterRow(self, index, rowId, dataWriter, dataFrame, targetColumn, idColumn):
+        ## This needs implementation
+        pass
+
+
+class TableRule(RowRule):
 
     def __init__(self, props):
         super(TableRule, self).__init__(props)
-
-    @abstractmethod
-    def getRowsToRemove(self):
-        return
+        self.fileSuffix = "TableRule"

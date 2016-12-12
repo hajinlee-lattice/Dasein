@@ -10,12 +10,12 @@ from rulefwk import DataRulePipeline
 
 logger = logging.getLogger(name='pipeline')
 
-def getDecoratedColumns(metadata):
+def getDecoratedColumns(profile):
     stringColumns = dict()
     continuousColumns = dict()
     transform = encoder.HashEncoder()
 
-    for key, value in metadata.iteritems():
+    for key, value in profile.iteritems():
         if value[0]["Dtype"] == "STR":
             stringColumns[key] = transform
         else:
@@ -42,12 +42,21 @@ def getObjectFromJSON(objectType, jsonString):
         logger.error("Error converting JSON string. JsonString: {0}, objectType: {1}, Stacktrace below".format(jsonString, objectType))
         logger.error(e)
 
-def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
-    (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
+def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps=""):
+    (categoricalColumns, continuousColumns) = getDecoratedColumns(profile)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
+
+    features = params['schema']['features']
+    customerColumns = set()
+    if columnMetadata is not None:
+        for column in columnMetadata:
+            if column['Tags'] is None or column['ColumnName'] is None:
+                continue
+            if column['Tags'][-1] in ['Internal', 'InternalTransform'] and column['ColumnName'] in features:
+                customerColumns.add(column['ColumnName'])
 
     allColumns = categoricalColumns.copy()
     allColumns.update(continuousColumns)
@@ -56,10 +65,11 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
     (names, steps, defaultDisabledSteps) = colTransform.buildPipelineFromFile(pipelinePath="./" + pipelineLib, \
                                                stringColumns=stringColumns, \
                                                categoricalColumns=categoricalColumns, \
-                                               continuousColumns=continuousColumns, \
+                                               continuousColumns=continuousColumns,
+                                               customerColumns=customerColumns, \
                                                targetColumn=targetColumn, \
                                                columnsToTransform=columnsToTransform, \
-                                               profile=metadata, \
+                                               profile=profile, \
                                                allColumns=allColumns, \
                                                params=params)
 
@@ -107,8 +117,8 @@ def setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColum
 
     return steps
 
-def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps)
+def setupPipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps=""):
+    steps = setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps)
 
     pipeline = Pipeline(steps)
 
@@ -118,8 +128,8 @@ def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetCo
 
     return pipeline, scoringPipeline
 
-def setupRulePipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
-    steps = setupSteps(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps)
+def setupRulePipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps=""):
+    steps = setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps)
 
     pipeline = DataRulePipeline(steps)
 

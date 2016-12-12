@@ -138,7 +138,8 @@ class Executor(object):
         return (metadata, realColNameToRecord)
 
     def createDataPipeline(self, params):
-        metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        (profile, profileByDepivotColName) = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        columnMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
         stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
         pipelineDriver = params["schema"]["pipeline_driver"]
         pipelineLib = params["schema"]["python_pipeline_lib"]
@@ -150,7 +151,7 @@ class Executor(object):
         execfile(script, globals())
 
         # Transform the categorical values in the metadata file into numerical values
-        globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
+        globals()["encodeCategoricalColumnsForMetadata"](profile)
 
         pipelineParams = {}
         pipelineParams["schema"] = params["schema"]
@@ -158,7 +159,8 @@ class Executor(object):
         # Create the data pipeline
         pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, \
                                                                pipelineLib, \
-                                                               metadata[0], \
+                                                               profile, \
+                                                               columnMetadata, \
                                                                stringColumns, \
                                                                params["parser"].target, \
                                                                pipelineParams, \
@@ -166,4 +168,4 @@ class Executor(object):
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
 
-        return pipeline, metadata, pipelineParams
+        return pipeline, (profile, profileByDepivotColName), pipelineParams

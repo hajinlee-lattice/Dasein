@@ -13,12 +13,12 @@ from pipelinefwk import Pipeline
 
 logger = logging.getLogger(name="evpipeline")
 
-def getDecoratedColumns(metadata):
+def getDecoratedColumns(profile):
     stringColumns = dict()
     continuousColumns = dict()
     transform = encoder.HashEncoder()
 
-    for key, value in metadata.iteritems():
+    for key, value in profile.iteritems():
         if value[0]["Dtype"] == "STR":
             stringColumns[key] = transform
         else:
@@ -26,14 +26,14 @@ def getDecoratedColumns(metadata):
 
     return (stringColumns, continuousColumns)
 
-def encodeCategoricalColumnsForMetadata(metadata):
-    for _, values in metadata.iteritems():
+def encodeCategoricalColumnsForMetadata(profile):
+    for _, values in profile.iteritems():
         for value in values:
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.encode(value["hashValue"])
 
-def setupPipeline(pipelineDriver, pipelineLib, metadata, stringColumns, targetColumn, params, pipelineProps=""):
-    (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
+def setupPipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps=""):
+    (categoricalColumns, continuousColumns) = getDecoratedColumns(profile)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers

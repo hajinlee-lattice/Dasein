@@ -1,7 +1,6 @@
 import sys
 
 from dataruletestbase import DataRuleTestBase
-from datarulestest.testrowrule import TestRowRule
 
 class DataRuleTestPipelineTest(DataRuleTestBase):
 
@@ -11,8 +10,5 @@ class DataRuleTestPipelineTest(DataRuleTestBase):
             del sys.modules['launcher']
         from launcher import Launcher
 
-        launcher = Launcher("model-datarule-test.json")
+        launcher = Launcher("SlimEventTable_Mulesoft_Metadata_Review_20160624_155355.json")
         launcher.execute(False)
-
-        self.assertRuleOutputCount(1)
-

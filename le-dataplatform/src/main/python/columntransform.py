@@ -100,6 +100,7 @@ class ColumnTransform(object):
                                        stringColumns=None,
                                        categoricalColumns=None,
                                        continuousColumns=None,
+                                       customerColumns=None,
                                        targetColumn=None,
                                        columnsToTransform=None,
                                        profile=None,
@@ -155,6 +156,7 @@ class ColumnTransform(object):
                                           stringColumns=stringColumns, \
                                           categoricalColumns=categoricalColumns, \
                                           continuousColumns=continuousColumns, \
+                                          customerColumns=customerColumns, \
                                           targetColumn=targetColumn, \
                                           columnsToTransform=columnsToTransform, \
                                           profile=profile, \
@@ -186,6 +188,7 @@ class ColumnTransform(object):
                             stringColumns=None,
                             categoricalColumns=None,
                             continuousColumns=None,
+                            customerColumns=None,
                             targetColumn=None,
                             columnsToTransform=None,
                             profile=None,
@@ -208,6 +211,8 @@ class ColumnTransform(object):
                     value = {}
                 elif namedArgumentDataTypeOrValue.lower() == "categoricalColumns".lower():
                     value = categoricalColumns
+                elif namedArgumentDataTypeOrValue.lower() == "customerColumns".lower():
+                    value = customerColumns
                 elif namedArgumentDataTypeOrValue.lower() == "emptyList".lower():
                     value = []
                 elif namedArgumentDataTypeOrValue.lower() == "targetColumn".lower():

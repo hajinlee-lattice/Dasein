@@ -1,92 +1,15 @@
 {
   "columnTransformFiles": {
-    "OverlyPredictiveDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "overlypredictiveds",
-      "MainClassName": "OverlyPredictiveDS",
+    "DistinctValueCount": {
+      "KeyWhenSortingByAscending": "1",
+      "Name": "distinctvaluecount",
+      "MainClassName": "DistinctValueCount",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "overlypredictiveds.py"
-    },
-    "LowCoverageDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "lowcoverageds",
-      "MainClassName": "LowCoverageDS",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns"
-      },
-      "ColumnTransformFilePath": "lowcoverageds.py"
-    },
-    "PopulatedRowCountDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "populatedrowcountds",
-      "MainClassName": "PopulatedRowCountDS",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns"
-      },
-      "ColumnTransformFilePath": "populatedrowcountds.py"
-    },
-    "NullIssueDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "nullissueds",
-      "MainClassName": "NullIssueDS",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "nullissueds.py"
-    },
-    "UniqueValueCountDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "uniquevaluecountds",
-      "MainClassName": "UniqueValueCountDS",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "uniquevaluecountThreshold":200
-      },
-      "ColumnTransformFilePath": "uniquevaluecountds.py"
-    },
-    "HighlyPredictiveSmallPopulationDS": {
-      "KeyWhenSortingByAscending": "4",
-      "Name": "highlypredictivesmallpopulationds",
-      "MainClassName": "HighlyPredictiveSmallPopulationDS",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "enabled": "false",
-        "columns": "allColumns",
-        "categoricalColumns": "categoricalColumns",
-        "numericalColumns": "numericalColumns",
-        "eventColumn": "targetColumn"
-      },
-      "ColumnTransformFilePath": "highlypredictivesmallpopulationds.py"
+        "columns":"customerColumns"
+        },
+      "ColumnTransformFilePath": "distinctvaluecount.py"
     }
   }
 }

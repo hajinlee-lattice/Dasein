@@ -32,8 +32,8 @@ class DataRuleExecutor(Executor):
     def transformData(self, params):
         test = params["test"]
 
-        metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
+        (profile, profileByDepivotColName) = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        columnMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
         stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
         pipelineDriver = params["schema"]["pipeline_driver"]
         pipelineLib = params["schema"]["python_pipeline_lib"]
@@ -52,22 +52,23 @@ class DataRuleExecutor(Executor):
         script = params["pipelineScript"]
         execfile(script, globals())
 
-        # Transform the categorical values in the metadata file into numerical values
-        globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
+        # Transform the categorical values in the profile file into numerical values
+        globals()["encodeCategoricalColumnsForMetadata"](profile)
 
         # Create the datarule pipeline
         pipeline = globals()["setupRulePipeline"](pipelineDriver, \
                                                                pipelineLib, \
-                                                               metadata[0], \
+                                                               profile, \
+                                                               columnMetadata, \
                                                                stringColumns, \
                                                                params["parser"].target, \
                                                                params, \
                                                                pipelineProps)
         params["pipeline"] = pipeline
-        training = pipeline.apply(params["training"], configMetadata)
+        training = pipeline.apply(params["training"], columnMetadata, profile)
         logger.info('Process results')
         pipeline.processResults(dataRulesLocalDir, params["training"], params["parser"].target, params["idColumn"])
-        return (training, test, metadata)
+        return (training, test, (profile, profileByDepivotColName))
 
     @overrides(Executor)
     def postProcessClassifier(self, clf, params): pass
