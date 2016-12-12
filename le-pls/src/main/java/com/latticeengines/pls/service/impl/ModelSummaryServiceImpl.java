@@ -1,11 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -20,6 +17,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -164,7 +162,9 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         if (summary != null) {
             summary.setPredictors(new ArrayList<Predictor>());
             getModelSummaryTrainingFileState(summary);
-            fixBusinessAnnualSalesAbs(summary);
+            if (!summary.getModelType().equals(ModelType.PMML.getModelType())) {
+                fixBusinessAnnualSalesAbs(summary);
+            }
         }
         return summary;
     }
