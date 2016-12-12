@@ -61,14 +61,12 @@ public class PythonScriptModelService extends ModelServiceBase {
         Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
         for (Attribute attribute : attributes) {
             List<String> tags = attribute.getTags();
-            // required columns consist of three categories:
+            // required columns consist of two categories:
             // 1. attributes that is part of the standard schema repository
-            // 2. attributes that come from customer data and have approved
-            // usage of modeling and above
-            // 3. attributes that has null or empty tag
+            // 2. attributes that come from customer data or does not have tag
+            // information but both have approved usage of modeling and above
             if (schema.getAttribute(attribute.getName()) != null //
-                    || tags == null || tags.isEmpty() //
-                    || tags.get(0).equals(Tag.INTERNAL.toString())
+                    || (tags == null || tags.isEmpty() || tags.get(0).equals(Tag.INTERNAL.toString()))
                             && !(attribute.getApprovedUsage() == null || attribute.getApprovedUsage().isEmpty()
                                     || attribute.getApprovedUsage().get(0).equals(ApprovedUsage.NONE.toString()))) {
                 LogicalDataType logicalDataType = attribute.getLogicalDataType();
