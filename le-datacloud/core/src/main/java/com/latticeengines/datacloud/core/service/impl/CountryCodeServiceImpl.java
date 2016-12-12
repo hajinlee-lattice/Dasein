@@ -1,6 +1,7 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.datacloud.core.service.impl;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -15,8 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.entitymgr.CountryCodeEntityMgr;
-import com.latticeengines.datacloud.match.service.CountryCodeService;
+import com.latticeengines.datacloud.core.entitymgr.CountryCodeEntityMgr;
+import com.latticeengines.datacloud.core.service.CountryCodeService;
 
 @Component("countryCodeServiceImpl")
 public class CountryCodeServiceImpl implements CountryCodeService {
@@ -54,6 +55,10 @@ public class CountryCodeServiceImpl implements CountryCodeService {
             }
         }
         return countryCode;
+    }
+
+    public Map<String, String> getStandardCountries() {
+        return countryCodeEntityMgr.findAllCountries();
     }
 
     @PostConstruct

@@ -19,7 +19,8 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 
 @Component("accountMasterSeedRebuildFlow")
-public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<TransformationFlowParameters> {
+public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<AccountMasterSeedParameters> {
 
     private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
     // dnbCacheSeed columns -> accountMasterSeed columns
@@ -43,13 +44,15 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Transf
     private String dnbIsPrimaryLocationColumn;
     private String dnbNumberOfLocationColumn;
 
+    private static final String COUNTRY = "Country";
+
     /*
         The detailed description of implementation of PD-1196 to build AccountMasterSeed is at the bottom of this java file
     */
 
 
     @Override
-    public Node construct(TransformationFlowParameters parameters) {
+    public Node construct(AccountMasterSeedParameters parameters) {
         try {
             getColumnMapping(parameters.getColumns());
         } catch (IOException e) {
@@ -107,6 +110,9 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Transf
         accountMasterSeed = retainAccountMasterSeedColumnNode(accountMasterSeed);
         accountMasterSeed = renameAccountMasterSeedColumnNode(accountMasterSeed);
         accountMasterSeed = addColumnNode(accountMasterSeed, parameters.getColumns());
+        accountMasterSeed = accountMasterSeed.apply(
+                new CountryStandardizationFunction(COUNTRY, parameters.getStandardCountries()), new FieldList(COUNTRY),
+                new FieldMetadata(COUNTRY, String.class));
         return accountMasterSeed;
     }
 

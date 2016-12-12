@@ -166,8 +166,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         try {
             switch (bulkLookupStrategy) {
             case DISPATCHER:
-                synchronized (comingContexts) {
-                    synchronized (unsubmittedReqs) {
+                synchronized (unsubmittedReqs) {
+                    synchronized (comingContexts) {
                         while (!comingContexts.isEmpty()) {
                             DnBMatchContext context = comingContexts.poll();
                             if (unsubmittedReqs.isEmpty() || unsubmittedReqs.get(unsubmittedReqs.size() - 1)
@@ -179,15 +179,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     .put(context.getLookupRequestId(), context);
                         }
                     }
-                }
-                List<DnBBatchMatchContext> batchContexts = new ArrayList<DnBBatchMatchContext>();
-                int unsubmittedNum = getUnsubmittedNum();
-                if (unsubmittedNum > 0) {
-                    log.info(String.format("There are %d requests unsubmitted before request dispatching",
-                            unsubmittedNum));
-                }
-                if (unsubmittedNum >= maximumBatchSize || unsubmittedNum == previousUnsubmittedNum.get()) {
-                    synchronized (unsubmittedReqs) {
+                    List<DnBBatchMatchContext> batchContexts = new ArrayList<DnBBatchMatchContext>();
+                    int unsubmittedNum = getUnsubmittedNum();
+                    if (unsubmittedNum > 0) {
+                        log.info(String.format("There are %d requests unsubmitted before request dispatching",
+                                unsubmittedNum));
+                    }
+                    if (unsubmittedNum >= maximumBatchSize || unsubmittedNum == previousUnsubmittedNum.get()) {
                         Iterator<DnBBatchMatchContext> iter = unsubmittedReqs.iterator();
                         while (iter.hasNext()) {
                             DnBBatchMatchContext batchContext = iter.next();
@@ -198,41 +196,39 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             }
                         }
                     }
-                }
-                if (!batchContexts.isEmpty()) {
-                    int num = unsubmittedReqs.size();
-                    for (DnBBatchMatchContext batchContext : batchContexts) {
-                        try {
-                            batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
-                        } catch (Exception ex) {
-                            log.error(String.format(
-                                    "Exception in dispatching match requests to DnB bulk match service: %s",
-                                    ex.getMessage()));
-                            batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
-                        }
-                        switch (batchContext.getDnbCode()) {
-                        case OK:
-                            submittedReqs.add(batchContext);
-                            break;
-                        case UNSUBMITTED:
-                            synchronized (unsubmittedReqs) {
+                    if (!batchContexts.isEmpty()) {
+                        int num = unsubmittedReqs.size();
+                        for (DnBBatchMatchContext batchContext : batchContexts) {
+                            try {
+                                batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
+                            } catch (Exception ex) {
+                                log.error(String.format(
+                                        "Exception in dispatching match requests to DnB bulk match service: %s",
+                                        ex.getMessage()));
+                                batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
+                            }
+                            switch (batchContext.getDnbCode()) {
+                            case OK:
+                                submittedReqs.add(batchContext);
+                                break;
+                            case UNSUBMITTED:
                                 // Too many requests are waiting for results. This request is not submitted.
                                 // Put it back to unsubmittedReqs list. Maintain the same order in the unsubmittedReqs
                                 unsubmittedReqs.add(unsubmittedReqs.size() - num, batchContext);
+                                break;
+                            default:
+                                processBulkMatchResult(batchContext, false);
+                                break;
                             }
-                            break;
-                        default:
-                            processBulkMatchResult(batchContext, false);
-                            break;
                         }
                     }
+                    unsubmittedNum = getUnsubmittedNum();
+                    if (unsubmittedNum > 0) {
+                        log.info(String.format("There are %d requests unsubmitted after request dispatching",
+                                unsubmittedNum));
+                    }
+                    previousUnsubmittedNum.set(unsubmittedNum);
                 }
-                unsubmittedNum = getUnsubmittedNum();
-                if (unsubmittedNum > 0) {
-                    log.info(String.format("There are %d requests unsubmitted after request dispatching",
-                            unsubmittedNum));
-                }
-                previousUnsubmittedNum.set(unsubmittedNum);
                 break;
             case FETCHER:
                 synchronized (submittedReqs) {
@@ -298,7 +294,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             } else {
                 dnbCacheService.addCache(context);
             }
-            String returnAddr = getReqReturnAdd(lookupRequestId);
+            String returnAddr = getReqReturnAddr(lookupRequestId);
             removeReq(lookupRequestId);
             sendResponse(lookupRequestId, context, returnAddr);
             dnBMatchHistories.add(new DnBMatchHistory(context));

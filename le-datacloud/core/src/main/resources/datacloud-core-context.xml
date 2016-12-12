@@ -14,5 +14,9 @@
     <import resource="classpath:security-no-controller-context.xml"/>
 
     <import resource="classpath:datacloud-core-persistence-context.xml" />
+    
+    <bean id="countryCodeDao" class="com.latticeengines.datacloud.core.dao.impl.CountryCodeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
 
 </beans>

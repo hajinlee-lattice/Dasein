@@ -391,10 +391,35 @@ public class LocationUtils {
     }
 
     public static String getStandardCountry(String country) {
+        if (StringUtils.isEmpty(country)) {
+            return USA;
+        }
         country = country.replaceAll("\\d", "");
         String phrase = com.latticeengines.common.exposed.util.StringUtils.getStandardString(country);
         if (StringUtils.isEmpty(phrase)) {
             return USA;
+        }
+        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replaceAll(" ISLAND$", " IS")
+                .replaceAll(" ISLANDS$", " IS").replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ");
+        phrase = phrase.replace(" SAINT ", " ST ").replaceAll(" SAINT$", " ST").replaceAll("^SAINT ", "ST ");
+        phrase = phrase.replace(" OF ", " ").replaceAll(" OF$", "").replaceAll("^OF ", "");
+        phrase = phrase.replace(" AND ", " ");
+        phrase = phrase.replace(" THE ", " ").replaceAll(" THE$", "").replaceAll("^THE ", "");
+        if (countrySynonMap.containsKey(phrase)) {
+            return countrySynonMap.get(phrase);
+        } else {
+            return phrase;
+        }
+    }
+
+    public static String getStandardCountryDefaultNull(String country) {
+        if (StringUtils.isEmpty(country)) {
+            return null;
+        }
+        country = country.replaceAll("\\d", "");
+        String phrase = com.latticeengines.common.exposed.util.StringUtils.getStandardString(country);
+        if (StringUtils.isEmpty(phrase)) {
+            return null;
         }
         phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replaceAll(" ISLAND$", " IS")
                 .replaceAll(" ISLANDS$", " IS").replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ");

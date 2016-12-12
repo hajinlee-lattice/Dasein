@@ -19,11 +19,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.service.CountryCodeService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;

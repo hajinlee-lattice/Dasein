@@ -97,7 +97,7 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
         reqs.remove(lookRequestId);
     }
 
-    protected String getReqReturnAdd(String lookupRequestId) {
+    protected String getReqReturnAddr(String lookupRequestId) {
         return reqReturnAddrs.get(lookupRequestId);
     }
 

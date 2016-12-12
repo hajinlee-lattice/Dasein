@@ -198,7 +198,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     log.debug("Didn't get anything from dynamodb for " + reqIds.get(i));
                                 }
                             }
-                            String returnAddr = getReqReturnAdd(reqIds.get(i));
+                            String returnAddr = getReqReturnAddr(reqIds.get(i));
                             removeReq(reqIds.get(i));
                             sendResponse(reqIds.get(i), result, returnAddr);
                         }
