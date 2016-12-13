@@ -20,6 +20,6 @@ COPY files/startup.sh /
 COPY files/server.xml $CATALINA_HOME/conf/server.xml
 COPY files/tomcat.jks /etc/pki/java/tomcat.jks
 
-ENTRYPOINT [ "/bin/bash", "/startup.sh" ]
+CMD [ "/bin/bash", "/startup.sh" ]
 
 
