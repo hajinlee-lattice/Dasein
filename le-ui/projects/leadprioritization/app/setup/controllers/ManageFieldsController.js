@@ -31,6 +31,8 @@ angular.module('lp.managefields', [
         Model.ModelDetails.TransformationGroupName == "none") ? false : true;
     $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
 
+    $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
     getOptionsAndFields();
 
     function getOptionsAndFields() {

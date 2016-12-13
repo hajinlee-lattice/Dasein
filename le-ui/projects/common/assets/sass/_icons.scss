@@ -71,7 +71,7 @@ Icons
 		mask: url("/assets/images/ico-model.svg");
 	}	
 	&.ico-campaign {
-		background-color: transparent;
+		background-color: transparent !important;
 		background-image: url("/assets/images/ico-campaign-white.png");
 		background-size: 16px;
 		&.ico-black {

@@ -350,6 +350,9 @@ html:not(.no-cssmask) {
         .ico:not(.no-svg) {
             background-color: #fff;
         }
+        .ico.ico-campaign:not(.no-svg) {
+            background-color: none;
+        }
     }
 }
 

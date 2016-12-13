@@ -181,6 +181,7 @@ angular
                         });
                         
                         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     templateUrl: 'app/navigation/sidebar/ModelView.html'
                 },
@@ -201,9 +202,12 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -217,9 +221,12 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="performanceTab" class="tab-content" data-performance-tab-widget></div>'))($scope);
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -233,9 +240,12 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore) {
+                    controller: function($scope, $compile, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
@@ -249,9 +259,12 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore, IsPmml) {
+                    controller: function($scope, $compile, $rootScope, Model, ModelStore, IsPmml) {
                         $scope.data = ModelStore.data;
                         $scope.IsPmml = IsPmml;
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
@@ -289,8 +302,11 @@ angular
                             return deferred.promise;
                         }
                     },
-                    controller: function($scope, ModelStore) {
+                    controller: function($scope, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   

@@ -37,8 +37,11 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    controller: function($scope, IsPmml) {
+                    controller: function($scope, $rootScope, Model, IsPmml) {
                         $scope.IsPmml = IsPmml || false;
+
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
                     },
                     templateUrl: 'app/jobs/views/ListView.html'
                 }
