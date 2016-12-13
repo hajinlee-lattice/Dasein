@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export CATALINA_HOME=/usr/local/tomcat
-export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+export CATALINA_HOME=/opt/apache-tomcat-8.5.8
+export JAVA_HOME=/usr/java/default
 
 if [ ! -f "/etc/ledp/latticeengines.properties" ]; then
     echo "copying properties file for LE_ENVIRONMENT=${LE_ENVIRONMENT}"
