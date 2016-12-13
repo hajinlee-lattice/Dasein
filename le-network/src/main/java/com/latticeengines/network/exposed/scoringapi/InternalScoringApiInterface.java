@@ -34,4 +34,7 @@ public interface InternalScoringApiInterface {
 
     List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
             String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
+
+    DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes);
 }

@@ -201,6 +201,21 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     }
 
+    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes() {
+        try {
+            String url = constructUrl("pls/internal/enrichment/all/lead");
+
+            log.debug("Get from " + url);
+            List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
+            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
+                    LeadEnrichmentAttribute.class);
+
+            return attributeList;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             LeadEnrichmentAttributesOperationMap attributes) {
         try {

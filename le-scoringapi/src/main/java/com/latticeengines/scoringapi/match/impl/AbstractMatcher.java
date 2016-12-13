@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.scoringapi.Warning;
 import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
@@ -52,6 +53,9 @@ public abstract class AbstractMatcher implements Matcher {
 
     @Autowired
     protected EnrichmentMetadataCache enrichmentMetadataCache;
+
+    @Autowired
+    protected ColumnMetadataProxy columnMetadataProxy;
 
     public boolean isAccountMasterBasedModel(ModelSummary modelSummary) {
         return modelSummary.getDataCloudVersion() != null && modelSummary.getDataCloudVersion().startsWith("2.");
@@ -198,8 +202,15 @@ public abstract class AbstractMatcher implements Matcher {
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode) {
+        String dataCloudVersion = null;
+        if (modelSummary == null) {
+            dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        } else {
+            dataCloudVersion = getDataCloudVersion(modelSummary);
+        }
+
         MatchInputBuilder matchInputBuilder = //
-                getMatchInputBuilder(getDataCloudVersion(modelSummary));
+                getMatchInputBuilder(dataCloudVersion);
         return matchInputBuilder.buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //

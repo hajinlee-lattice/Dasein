@@ -157,17 +157,31 @@ public abstract class BaseScoring extends CommonBase {
                 performFetchOnlyForMatching, requestId);
     }
 
+    protected DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, ScoreRequest scoreRequest,
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId) {
+        return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
+                false, requestId, true);
+    }
+
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             String requestId) {
+        return scoreRecord(request, scoreRequest, isDebug, customerSpace, enrichInternalAttributes,
+                performFetchOnlyForMatching, requestId, false);
+    }
+
+    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            String requestId, boolean isCalledViaApiConsole) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(scoreRequest));
             }
+
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug,
-                    enrichInternalAttributes, performFetchOnlyForMatching, requestId);
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isCalledViaApiConsole);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
@@ -212,9 +226,15 @@ public abstract class BaseScoring extends CommonBase {
         metrics.setParseRecordDurationMS(getSplit(splits, "parseRecordDurationMS"));
         metrics.setRequestDurationMS(getSplit(splits, REQUEST_DURATION_MS));
         metrics.setRequestPreparationDurationMS(getSplit(splits, REQUEST_PREPARATION_DURATION_MS));
-        metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
-        metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
-        metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
+        if (splits.containsKey("retrieveModelArtifactsDurationMS")) {
+            metrics.setRetrieveModelArtifactsDurationMS(getSplit(splits, "retrieveModelArtifactsDurationMS"));
+        }
+        if (splits.containsKey("scoreRecordDurationMS")) {
+            metrics.setScoreRecordDurationMS(getSplit(splits, "scoreRecordDurationMS"));
+        }
+        if (splits.containsKey("transformRecordDurationMS")) {
+            metrics.setTransformRecordDurationMS(getSplit(splits, "transformRecordDurationMS"));
+        }
 
         return metrics;
     }

@@ -185,4 +185,13 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         return post("scoreProbabilityRecord", url, scoreRequest, DebugScoreResponse.class);
     }
 
+    @Override
+    public DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
+            boolean enrichInternalAttributes) {
+        String url = constructUrl(
+                "/record/apiconsole/debug?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}",
+                tenantIdentifier, enrichInternalAttributes);
+        return post("scoreProbabilityRecordApiConsole", url, scoreRequest, DebugScoreResponse.class);
+    }
+
 }

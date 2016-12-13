@@ -24,7 +24,8 @@ public interface Matcher {
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs);
+            List<String> matchLogs, List<String> matchErrorLogs, //
+            boolean shouldReturnAllEnrichment);
 
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //

@@ -9,4 +9,6 @@ public interface EnrichmentMetadataCache {
 
     List<LeadEnrichmentAttribute> getEnrichmentAttributesMetadata(CustomerSpace space);
 
+    List<LeadEnrichmentAttribute> getAllEnrichmentAttributesMetadata();
+
 }

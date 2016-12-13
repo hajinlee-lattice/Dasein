@@ -29,9 +29,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
@@ -79,38 +79,54 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId) {
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
+            boolean isCalledViaApiConsole) {
         split("requestPreparation");
-        if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
-            throw new ScoringApiException(LedpCode.LEDP_31101);
-        }
-
         requestInfo.put("Rule", Strings.nullToEmpty(request.getRule()));
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
 
-        ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
-        requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
-        requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
-        if (scoringArtifacts.getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
-            throw new ScoringApiException(LedpCode.LEDP_31114,
-                    new String[] { scoringArtifacts.getModelSummary().getId() });
-        }
-        requestInfo.put("ModelType",
-                (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
+        ScoringArtifacts scoringArtifacts = null;
+        boolean shouldSkipMatching = false;
+        Map<String, FieldSchema> fieldSchemas = null;
+        ModelJsonTypeHandler modelJsonTypeHandler = null;
 
-        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+        boolean shouldSkipScoring = false;
 
-        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getFieldSchemas();
-        split("retrieveModelArtifacts");
-
-        ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts.getModelJsonType());
-
-        if (!shouldSkipMatching) {
-            ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts, fieldSchemas,
-                    request.getRecord(), modelJsonTypeHandler);
-            if (missingEssentialFieldsException != null) {
-                throw missingEssentialFieldsException;
+        if (!isCalledViaApiConsole || !StringUtils.objectIsNullOrEmptyString(request.getModelId())) {
+            if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
+                throw new ScoringApiException(LedpCode.LEDP_31101);
             }
+
+            scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
+            requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
+            requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
+            if (scoringArtifacts.getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
+                throw new ScoringApiException(LedpCode.LEDP_31114,
+                        new String[] { scoringArtifacts.getModelSummary().getId() });
+            }
+            requestInfo.put("ModelType",
+                    (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
+            shouldSkipMatching = shouldSkipMatching(scoringArtifacts);
+            fieldSchemas = scoringArtifacts.getFieldSchemas();
+
+            split("retrieveModelArtifacts");
+
+            modelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts.getModelJsonType());
+
+            if (!shouldSkipMatching) {
+                ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts,
+                        fieldSchemas, request.getRecord(), modelJsonTypeHandler);
+                if (missingEssentialFieldsException != null) {
+                    if (!performFetchOnlyForMatching || StringUtils.objectIsNullOrEmptyString(
+                            request.getRecord().get(FieldInterpretation.LatticeAccountID.toString()))) {
+                        throw missingEssentialFieldsException;
+                    }
+                }
+            }
+        } else {
+            shouldSkipScoring = true;
+            fieldSchemas = new HashMap<>();
+            modelJsonTypeHandler = getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL);
         }
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
@@ -130,11 +146,16 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             addMissingFields(fieldSchemas, formattedRecord);
             readyToTransformRecord = formattedRecord;
         } else {
+            ModelSummary modelSummary = null;
+            if (!shouldSkipScoring) {
+                modelSummary = scoringArtifacts.getModelSummary();
+            }
+
             Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
-                    parsedRecordAndInterpretedFields.getKey(), scoringArtifacts.getModelSummary(),
-                    request.isPerformEnrichment(), enrichInternalAttributes, performFetchOnlyForMatching, requestId,
-                    isDebug, matchLogs, matchErrorLogs);
+                    parsedRecordAndInterpretedFields.getKey(), modelSummary, request.isPerformEnrichment(),
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebug, matchLogs,
+                    matchErrorLogs, isCalledViaApiConsole);
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;
@@ -150,21 +171,32 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         split("matchRecord");
 
-        Map<String, Object> transformedRecord = transform(scoringArtifacts, readyToTransformRecord);
+        Map<String, Object> transformedRecord = null;
+        if (shouldSkipScoring) {
+            transformedRecord = new HashMap<>();
+        } else {
+            transformedRecord = transform(scoringArtifacts, readyToTransformRecord);
+        }
+
         split("transformRecord");
 
         ScoreResponse scoreResponse = null;
-        if (isDebug) {
-            scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                    readyToTransformRecord, matchLogs, matchErrorLogs);
+
+        if (shouldSkipScoring) {
+            scoreResponse = new DebugScoreResponse();
         } else {
-            scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+            if (isDebug) {
+                scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
+                        readyToTransformRecord, matchLogs, matchErrorLogs);
+            } else {
+                scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+            }
         }
+
         scoreResponse.setEnrichmentAttributeValues(enrichmentAttributes);
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
         split("scoreRecord");
-
         scoreHistoryEntityMgr.publish(request, scoreResponse);
         split("publishScoreHistory");
 

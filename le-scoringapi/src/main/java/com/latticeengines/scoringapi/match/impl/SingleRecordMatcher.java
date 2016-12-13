@@ -9,7 +9,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -18,16 +17,12 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
 public class SingleRecordMatcher extends AbstractMatcher {
     protected static final Log log = LogFactory.getLog(SingleRecordMatcher.class);
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public boolean accept(boolean isBulk) {
@@ -44,19 +39,27 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs) {
+            List<String> matchLogs, List<String> matchErrorLogs, //
+            boolean shouldReturnAllEnrichment) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
         if (forEnrichment) {
-            selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space, enrichInternalAttributes);
+            selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space, enrichInternalAttributes,
+                    shouldReturnAllEnrichment);
 
-            shouldCallEnrichmentExplicitly = shouldCallEnrichmentExplicitly(modelSummary, //
-                    forEnrichment, selectedLeadEnrichmentAttributes);
+            if (modelSummary != null) {
+                shouldCallEnrichmentExplicitly = shouldCallEnrichmentExplicitly(modelSummary, //
+                        forEnrichment, selectedLeadEnrichmentAttributes);
+            }
         }
 
         String currentDataCloudVersion = null;
-        if (modelSummary != null && StringUtils.isNotBlank(modelSummary.getDataCloudVersion())) {
+
+        if (modelSummary == null) {
+            // this means only enrichment is needed
+            currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        } else if (modelSummary != null && StringUtils.isNotBlank(modelSummary.getDataCloudVersion())) {
             currentDataCloudVersion = modelSummary.getDataCloudVersion() == null ? null
                     : columnMetadataProxy
                             .latestVersion(//
@@ -106,7 +109,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             // call regular match
             return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
                     record, modelSummary, forEnrichment, //
-                    selectedLeadEnrichmentAttributes, false, currentDataCloudVersion, //
+                    selectedLeadEnrichmentAttributes, (modelSummary == null), currentDataCloudVersion, //
                     performFetchOnlyForMatching, requestId, isDebugMode, //
                     matchLogs, matchErrorLogs);
         }
@@ -167,10 +170,16 @@ public class SingleRecordMatcher extends AbstractMatcher {
         return matchOutput;
     }
 
-    private List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space, boolean enrichInternalAttributes) {
+    private List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space, boolean enrichInternalAttributes,
+            boolean shouldReturnAllEnrichment) {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = new ArrayList<>();
-        List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache
-                .getEnrichmentAttributesMetadata(space);
+        List<LeadEnrichmentAttribute> tempSelectedLeadEnrichmentAttributes = null;
+        if (shouldReturnAllEnrichment) {
+            tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache.getAllEnrichmentAttributesMetadata();
+        } else {
+            tempSelectedLeadEnrichmentAttributes = enrichmentMetadataCache.getEnrichmentAttributesMetadata(space);
+        }
+
         for (LeadEnrichmentAttribute attr : tempSelectedLeadEnrichmentAttributes) {
             if (enrichInternalAttributes || !attr.getIsInternal()) {
                 selectedLeadEnrichmentAttributes.add(attr);

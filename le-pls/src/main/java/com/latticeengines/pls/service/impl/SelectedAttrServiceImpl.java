@@ -127,6 +127,16 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     }
 
     @Override
+    public List<LeadEnrichmentAttribute> getAllAttributes() {
+        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
+                currentDataCloudVersion);
+
+        return superimpose(allColumns, new ArrayList<SelectedAttribute>(), null, null, null, false, 0,
+                allColumns.size(), true);
+    }
+
+    @Override
     public int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         List<LeadEnrichmentAttribute> matchingAttr = getAttributes(tenant, attributeDisplayNameFilter, category,
@@ -396,4 +406,5 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         }
         return totalCount;
     }
+
 }

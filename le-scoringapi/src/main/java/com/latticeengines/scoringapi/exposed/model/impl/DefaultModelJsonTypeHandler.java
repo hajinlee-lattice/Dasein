@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -53,6 +55,34 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     @Autowired
     private Warnings warnings;
+
+    private Map<String, FieldSchema> defaultFieldSchemaForMatch;
+
+    @PostConstruct
+    private void init() {
+        defaultFieldSchemaForMatch = new HashMap<>();
+        populateDefaultFieldSchemas();
+    }
+
+    private void populateDefaultFieldSchemas() {
+        populateFieldSchema(FieldInterpretation.Domain);
+        populateFieldSchema(FieldInterpretation.Email);
+        populateFieldSchema(FieldInterpretation.Website);
+        populateFieldSchema(FieldInterpretation.DUNS);
+        populateFieldSchema(FieldInterpretation.City);
+        populateFieldSchema(FieldInterpretation.CompanyName);
+        populateFieldSchema(FieldInterpretation.Country);
+        populateFieldSchema(FieldInterpretation.PhoneNumber);
+        populateFieldSchema(FieldInterpretation.PostalCode);
+        populateFieldSchema(FieldInterpretation.State);
+        populateFieldSchema(FieldInterpretation.LatticeAccountID);
+    }
+
+    protected void populateFieldSchema(FieldInterpretation field) {
+        FieldSchema fieldSchema = new FieldSchema(FieldSource.REQUEST, //
+                FieldType.STRING, field);
+        defaultFieldSchemaForMatch.put(field.toString(), fieldSchema);
+    }
 
     @Override
     public boolean accept(String modelJsonType) {
@@ -216,6 +246,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
         List<String> extraFields = new ArrayList<>();
         Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes = new HashMap<>();
+
         for (String fieldName : parsedRecord.keySet()) {
             if (!fieldSchemas.containsKey(fieldName)) {
                 extraFields.add(fieldName);
@@ -227,6 +258,24 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                     shouldThrowExceptionForMismatchedDataTypes());
             interpretFields(interpretedFields, fieldName, schema);
         }
+
+        for (String fieldName : defaultFieldSchemaForMatch.keySet()) {
+            if (fieldSchemas.containsKey(fieldName)) {
+                continue;
+            } else {
+                if (!parsedRecord.containsKey(fieldName)) {
+                    continue;
+                }
+
+                if (extraFields.contains(fieldName)) {
+                    extraFields.remove(fieldName);
+                }
+            }
+
+            FieldSchema schema = defaultFieldSchemaForMatch.get(fieldName);
+            interpretFields(interpretedFields, fieldName, schema);
+        }
+
         if (!extraFields.isEmpty()) {
             addWarning(WarningCode.EXTRA_FIELDS, recordId, extraFields, modelId);
             for (String extraField : extraFields) {

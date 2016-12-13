@@ -1,10 +1,15 @@
 package com.latticeengines.scoringapi.match.impl;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +25,8 @@ import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 
 @Component
 public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
+    private static final Log log = LogFactory.getLog(EnrichmentMetadataCacheImpl.class);
+
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
@@ -31,7 +38,17 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     @Value("${scoringapi.enrichment.cache.expiration.time:5}")
     private int enrichmentCacheExpirationTime;
 
+    @Value("${scoringapi.enrichment.all.fixedDelay.seconds:2}")
+    private int fixedDelaySeconds;
+
+    @Value("${scoringapi.enrichment.all.fixedRate.seconds:600}")
+    private int fixedRateSeconds;
+
+    private ReadWriteLock readWriteLock;
+
     private LoadingCache<CustomerSpace, List<LeadEnrichmentAttribute>> leadEnrichmentAttributeCache;
+
+    private volatile List<LeadEnrichmentAttribute> allEnrichmentAttributes;
 
     @PostConstruct
     public void initialize() throws Exception {
@@ -47,6 +64,12 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
                                         null, true, true);
                             }
                         });
+
+        readWriteLock = new ReentrantReadWriteLock();
+
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(//
+                createRefreshAllEnrichmentRunnable(), fixedDelaySeconds, //
+                fixedRateSeconds, TimeUnit.SECONDS);
     }
 
     @Override
@@ -56,5 +79,59 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, e, new String[] { e.getMessage() });
         }
+    }
+
+    @Override
+    public List<LeadEnrichmentAttribute> getAllEnrichmentAttributesMetadata() {
+        try {
+
+            loadAllEnrichmentMetadataFirstTimeIfNeeded();
+
+            readWriteLock.readLock().lock();
+            return allEnrichmentAttributes;
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
+    }
+
+    private boolean loadAllEnrichmentMetadataFirstTimeIfNeeded() {
+        boolean loadedDuringCall = false;
+        if (allEnrichmentAttributes == null) {
+            try {
+                readWriteLock.writeLock().lock();
+                if (allEnrichmentAttributes == null) {
+                    allEnrichmentAttributes = loadAllEnrichmentAttributesMetadata();
+                    if (allEnrichmentAttributes != null) {
+                        loadedDuringCall = true;
+                    }
+                }
+            } finally {
+                readWriteLock.writeLock().unlock();
+            }
+        }
+        return loadedDuringCall;
+    }
+
+    private List<LeadEnrichmentAttribute> loadAllEnrichmentAttributesMetadata() {
+        log.info("Start loading all enrichment attribute metadata");
+        List<LeadEnrichmentAttribute> list = internalResourceRestApiProxy.getAllLeadEnrichmentAttributes();
+        log.info("Completed loading all enrichment attribute metadata");
+        return list;
+    }
+
+    private Runnable createRefreshAllEnrichmentRunnable() {
+        return new Runnable() {
+
+            @Override
+            public void run() {
+                boolean loadedDuringCall = loadAllEnrichmentMetadataFirstTimeIfNeeded();
+
+                if (!loadedDuringCall && allEnrichmentAttributes != null) {
+                    List<LeadEnrichmentAttribute> tempAllEnrichmentAttributes = loadAllEnrichmentAttributesMetadata();
+                    allEnrichmentAttributes = tempAllEnrichmentAttributes;
+
+                }
+            }
+        };
     }
 }

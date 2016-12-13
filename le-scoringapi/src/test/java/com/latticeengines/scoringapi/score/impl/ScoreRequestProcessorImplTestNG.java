@@ -73,7 +73,7 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
     public void testProcess() {
         boolean thrownException = false;
         try {
-            scoreRequestProcessor.process(space, request, false, false, false, "requestId");
+            scoreRequestProcessor.process(space, request, false, false, false, "requestId", false);
         } catch (Exception e) {
             thrownException = true;
             // Assert.assertTrue(e instanceof LedpException);

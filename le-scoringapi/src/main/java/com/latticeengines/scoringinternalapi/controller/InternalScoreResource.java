@@ -150,4 +150,20 @@ public class InternalScoreResource extends BaseScoring {
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
                 performFetchOnlyForMatching, requestId);
     }
+
+    @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiIgnore
+    @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
+    public DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, //
+            @RequestBody ScoreRequest scoreRequest, //
+            @RequestParam(value = "tenantIdentifier", required = true) //
+            String tenantIdentifier, //
+            @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
+            boolean enrichInternalAttributes) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
+        String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
+        return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes,
+                requestId);
+    }
+
 }

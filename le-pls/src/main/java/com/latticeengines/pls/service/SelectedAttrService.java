@@ -20,6 +20,8 @@ public interface SelectedAttrService {
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes);
 
+    List<LeadEnrichmentAttribute> getAllAttributes();
+
     int getAttributesCount(Tenant tenant, String attributeDisplayNameFilter, Category categoryEnum, String subcategory,
             Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 

@@ -54,7 +54,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean enrichInternalAttributes, //
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs) {
+            List<String> matchLogs, List<String> matchErrorLogs, //
+            boolean shouldReturnAllEnrichment) {
         throw new NotImplementedException();
     }
 

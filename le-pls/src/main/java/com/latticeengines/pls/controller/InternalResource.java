@@ -16,7 +16,6 @@ import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
@@ -75,6 +74,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -83,6 +83,7 @@ import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -165,6 +166,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private VersionManager versionManager;
+
+    @Autowired
+    private InternalScoringApiProxy internalScoringApiProxy;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -650,6 +654,14 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         return selectedAttrService.getSelectedAttributePremiumCount(tenant, Boolean.FALSE);
+    }
+
+    @RequestMapping(value = "/enrichment/all"
+            + EnrichmentResource.LEAD_ENRICH_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all lead enrichment")
+    public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(HttpServletRequest request) {
+        return selectedAttrService.getAllAttributes();
     }
 
     @RequestMapping(value = "/emails/createmodel/result/{result}/"
