@@ -3,23 +3,48 @@
 
     .filters {
         @include flex-container;
+        border-bottom: 1px solid #d0d1d0;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        margin-right: 14px;
         & > li {
             @include flex-item(0 1 auto);
-            margin-right: 5px;
+            margin-right: 10px;
             label {
                 width: auto;
+            }
+            &[disabled] {
+                pointer-events: none;
+                opacity: .4;
+            }
+            &.query {
+                margin-right: 16px;
+            }
+            &.info {
+                flex: 1 1 auto;
+                & > div {
+                    position: relative;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    border-left: 1px solid #d0d1d0;
+                    padding-left: 18px;
+                    i {
+                        color: #457eba;
+                    }
+                }
             }
         }
     }
 
     pd-pagination-controls .pd-pagination {
         text-align: right;
-        margin-right: 11px;
+        margin-right: 15px;
     }
 
    .categories {
         @include flex-container;
         margin-bottom: 20px;
+        margin-right: 2px;
         &:not(.has-category) {
             -webkit-flex-wrap: wrap;
             -ms-flex-wrap: wrap;
@@ -28,7 +53,7 @@
                 @include flex-item(0 0 auto);
                 width: $box-width;
                 height: 200px;
-                padding: 14px 14px 0 0;
+                padding: 10px 14px 0 0;
                 .box-inner {
                     position: relative;
                     h2 {
@@ -91,12 +116,23 @@
                     text-align: center;
                     font-size: 15px;
                     margin-bottom: 5px;
-                    img {
-                        display: block;
+                    .category-icon {
+                        height: 36px;
+                        width: 36px;
+                        border-width: 1px;
+                        border-style: solid;
+                        border-color: #d0d1d0;
+                        padding: 8px;
+                        border-radius: 50%;
                         margin: 0 auto;
                         margin-bottom: 5px;
-                        height: 29px;
-                        width: 29px;
+                        img {
+                            display: block;
+                            margin: 0 auto;
+                            margin-bottom: 5px;
+                            height: 100%;
+                            width: 100%;
+                        }
                     }
                 }
                 .count {
@@ -127,12 +163,23 @@
                     font-size: 16px;
                     margin-top: 20%;
                     margin-bottom: 5px;
-                    img {
-                        display: block;
+                    .category-icon {
+                        height: 36px;
+                        width: 36px;
+                        border-width: 1px;
+                        border-style: solid;
+                        border-color: #d0d1d0;
+                        padding: 8px;
+                        border-radius: 50%;
                         margin: 0 auto;
                         margin-bottom: 5px;
-                        height: 29px;
-                        width: 29px;
+                        img {
+                            display: block;
+                            margin: 0 auto;
+                            margin-bottom: 5px;
+                            height: 100%;
+                            width: 100%;
+                        }
                     }
                 }
                 .count {
@@ -166,16 +213,33 @@
                 padding-bottom: 30px;
                 //height: 200px;
                 .header {
-                    img.ico {
-                        width: 29px;
-                        height: 29px;
-                    }
                     h2 {
                         font-size: 18px;
                         margin: 5px 0;
                         margin-top: 15px;
-                        max-height: 3.2em;
-                        overflow: hidden;
+                        .category-icon {
+                            height: 36px;
+                            width: 36px;
+                            border-width: 1px;
+                            border-style: solid;
+                            border-color: #d0d1d0;
+                            padding: 8px;
+                            border-radius: 50%;
+                            margin: 0 auto;
+                            margin-bottom: 5px;
+                            img {
+                                display: block;
+                                margin: 0 auto;
+                                margin-bottom: 5px;
+                                height: 100%;
+                                width: 100%;
+                            }
+                        }
+                        strong {
+                            display: block;
+                            max-height: 3.2em;
+                            overflow: hidden;
+                        }
                     }
                 }
                 .description {
@@ -286,7 +350,7 @@
         .dropdown {
             position: absolute;
             bottom: 3px;
-            left: 0;
+            left: 1px;
             transform: translateY(100%);
             background: #1a1a1a;
             color: #fafafa;
@@ -305,8 +369,8 @@
 
     [data-corner-ribbon] {
         position: absolute;
-        left: -5px; 
-        top: -8px;
+        left: -6px; 
+        top: -9px;
         z-index: 1;
         overflow: hidden;
         height: 77px;
@@ -480,13 +544,25 @@
             border-color: #26649b;
         }
     }
+    .enrichments-loading-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10000;
+        & > div {
+            height: 5px;
+            background-color: #70bf4a;
+        }
+
+    }
     .status-alert-box {
         @include flex-container;
         position: fixed;
         top: 130px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 100;
+        z-index: 200;
         background: white;
         border-radius: 4px;
         border: 1px solid rgb(253,188,84);

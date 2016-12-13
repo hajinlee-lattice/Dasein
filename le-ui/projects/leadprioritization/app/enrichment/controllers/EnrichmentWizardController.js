@@ -59,9 +59,29 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         view: 'list'
     });
 
+    vm.orders = {
+        attribute: 'DisplayName',
+        subcategory: 'toString()',
+        category: 'toString()'
+    }
+    vm.sortPrefix = '+';
+
+    vm.sortOrder = function() {
+        var sortPrefix = vm.sortPrefix.replace('+','');
+        if(!vm.category) {
+            return sortPrefix + vm.orders.category;
+        } else if(vm.subcategory) {
+            return sortPrefix + vm.orders.subcategory;
+        } else {
+            return sortPrefix + vm.orders.attribute;
+        }
+    }
+
     var stopGetEnrichments = false;
     $scope.$on('$destroy', function () {
         stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
+        angular.element($window).unbind("scroll", scrolled);
+        angular.element($window).unbind("resize", resized);
     });
 
     var fakeIncrement = false;
@@ -119,6 +139,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                     vm.hasSaved = $filter('filter')(vm.enrichments, {'IsDirty': true}).length;
                 }
             }
+            var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true});
+            vm.generalSelectedTotal = $filter('filter')(selectedTotal, {'IsSelected': true}).length;
+            vm.premiumSelectedTotal = $filter('filter')(selectedTotal, {'IsPremium': true, 'IsSelected': true}).length;
         });
     }
 
@@ -198,16 +221,19 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
-        var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
-        if(selectedTotal > vm.generalSelectLimit) {
+        var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true});
+        vm.generalSelectedTotal = $filter('filter')(selectedTotal, {'IsSelected': true}).length;
+        //vm.generalSelectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
+        if(vm.generalSelectedTotal > vm.generalSelectLimit) {
             enrichment.IsSelected = false;
             enrichment.IsDirty = false;
             vm.statusMessage(vm.label.generalTotalSelectError);
             return false;
         }
         if(enrichment.IsPremium) {
-            var premiums = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
-            if(premiums > vm.premiumSelectLimit) {
+            //vm.premiumSelectedTotal = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
+            vm.premiumSelectedTotal = $filter('filter')(selectedTotal, {'IsPremium': true, 'IsSelected': true}).length;
+            if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
                 vm.statusMessage(vm.label.premiumTotalSelectError);
@@ -432,6 +458,19 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return filtered.length;
     }
 
+    vm.categoryClick = function(category) {
+        var category = category || '';
+        if(vm.subcategory && vm.category == category) {
+            vm.subcategory = '';
+        } else if(vm.category == category) {
+            vm.subcategory = '';
+            vm.category = '';
+        } else {
+            vm.subcategory = '';
+            vm.category = category;
+        }
+   }
+
     var _scrolled = function() {
         var el = document.querySelector('.subheader-container');
             if(el) {
@@ -487,6 +526,36 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
     });
 
+    var EnrichmentCount = function() {
+        var opts = {};
+        EnrichmentStore.getCount(opts).then(function(result) {
+            vm.count = result.data;
+        });
+    }
+    vm.percentage = function(number, total) {
+        if(number && total) {
+            return (total / number) * 100;
+        }
+        return 0;
+    }
+
+    angular.element('.dropdown-container > h2').click(function(e){
+        angular.element(this).toggleClass('active');
+        angular.element('.dropdown-container ul.dropdown').toggleClass('open');
+        e.stopPropagation();
+    });
+
+    angular.element(document).click(function(event) {
+        var target = angular.element(event.target),
+        el = angular.element('.dropdown-container ul.dropdown'),
+        has_parent = target.parents().is('.dropdown-container'),
+        is_visible = el.is(':visible');
+        if(!has_parent) {
+            el.removeClass('open');
+            el.siblings('.button.active').removeClass('active');
+        }
+    });
+
     vm.init = function() {
         _resized();
         getEnrichmentData();
@@ -496,6 +565,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
         vm.statusMessageBox = angular.element('.status-alert');
+
+        EnrichmentCount();
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);

@@ -6,7 +6,8 @@
             </div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-        <div class="loading-enrichments"><span ng-if="!vm.enrichments_completed"><i lass="fa fa-spinner fa-spin fa-fw"></i> Loading </span>Enrichments: {{vm.enrichments.length|number}}</div>
+        <div class="loading-enrichments"><span ng-if="!vm.enrichments_completed"><i lass="fa fa-spinner fa-spin fa-fw"></i> Loading </span>Enrichments: {{vm.enrichments.length|number}} / {{vm.count|number}}</div>
+        <div class="enrichments-loading-bar" ng-if="vm.percentage(vm.count, vm.enrichments.length) !== 100"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -18,24 +19,39 @@
                         <input type="text" class="form-control" placeholder="Search" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
-                <li class="filter dropdown-container">
-                    <h2 ng-click="openFilters = !openFilters" class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
+                <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
+                    <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
                     </h2>
-                    <ul class="dropdown" ng-class="{open: openFilters}">
+                    <ul class="dropdown">
                         <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
                         <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
                         <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
                         <li ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
                     </ul>
                 </li>
-                <li class="sort">
-                    <a class="button icon-button white-button" ng-click="vm.SortOrder = (vm.SortOrder == 'DisplayName' ? '-DisplayName' : 'DisplayName'); vm.metadata.current = 1;" ng-init="vm.SortOrder = 'DisplayName';">
-                        <span class="fa fa-sort-amount-{{vm.SortOrder == 'DisplayName' ? 'asc' : 'desc'}}"></span>
+                <li class="sort" ng-disabled="!vm.category">
+                    <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
+                        <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
                     </a>
                 </li>
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
+                </li>
+                <li class="info">
+                    <div ng-if="vm.enrichments_completed || 1">
+                        Enrichment: {{vm.generalSelectedTotal}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal}} of {{vm.premiumSelectLimit}} premium <i class="fa fa-info-circle"></i>
+                    </div>
+                </li>
+                <li class="download">
+                    <ul class="actions" ng-if="vm.enrichments_completed || 1">
+                        <li class="download-all">
+                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization={{vm.authToken}}">{{vm.label.button_download}}</a>
+                        </li>
+                        <li class="download-selected">
+                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization={{vm.authToken}}">{{vm.label.button_download_selected}}</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>
@@ -43,11 +59,13 @@
         <ul class="categories" ng-class="{'has-category': vm.category}">
             <li ng-repeat="category in vm.categories" class="category" 
                 ng-class="{active: vm.category == category}" 
-                ng-click="(vm.category == category ? vm.category = '' : vm.category = category); vm.subcategory = ''; vm.metadata.current = 1;">
+                ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
                 <div class="box-inner {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
                     <span>
                         <h2>
-                            <img ng-src="{{vm.categoryIcon(category)}}" />
+                            <div class="category-icon">
+                                <img ng-src="{{vm.categoryIcon(category)}}" />
+                            </div>
                             {{category}}
                         </h2>
                         <span class="count">
@@ -70,6 +88,7 @@
             </div>
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = (vm.subcategories[vm.category])) 
+                        | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize" 
                     class="subcategory" 
@@ -78,7 +97,9 @@
                     <div class="box-inner {{vm.categoryClass(vm.category)}} border-top round-box"
                          ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
-                            <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
+                            <div class="category-icon">
+                                <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
+                            </div>
                             {{subcategory}}
                         </h2>
                         <span class="count">
@@ -114,7 +135,7 @@
                 <li class="box" 
                     ng-repeat="enrichment in (filteredList = (vm.enrichments 
                 | filter: vm.searchFields
-                | orderBy: vm.SortOrder
+                | orderBy: vm.sortOrder()
                 | filter: { 
                             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
                             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -128,12 +149,14 @@
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
-                            <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico" />
                             <ul class="tags">
                                 <li data-corner-ribbon="premium" ng-if="::enrichment.IsPremium" class="premium"><strong>premium</strong></li>
                                 <li data-corner-ribbon="internal" ng-if="::enrichment.IsInternal" class="internal"><strong>internal</strong></li>
                             </ul>
                             <h2 title="{{::enrichment.DisplayName}}">
+                                <div class="category-icon">
+                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico" />
+                                </div>
                                 <strong>{{::enrichment.DisplayName}}</strong>
                             </h2>
                         </div>
