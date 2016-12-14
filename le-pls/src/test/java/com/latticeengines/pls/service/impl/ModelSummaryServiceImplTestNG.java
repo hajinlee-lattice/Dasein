@@ -48,6 +48,7 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         tenant1 = tenantService.findByTenantId("TENANT1");
@@ -172,17 +173,19 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         JsonNode details = objectMapper.readTree(keyValue.getPayload());
         ArrayNode predictors = (ArrayNode) details.get("Predictors");
         for (JsonNode predictor : predictors) {
+            assertTrue(!predictor.get("Name").asText().equals("WebMasterRegistrationsTopAttributes"));
             if (!predictor.get("Name").asText().equals("BusinessAnnualSalesAbs")) {
                 continue;
             }
             ArrayNode elements = (ArrayNode) predictor.get("Elements");
             for (JsonNode element : elements) {
                 if (element.get("LowerInclusive").asText() != null) {
-                    assertTrue(element.get("LowerInclusive").asLong() == 0 || 
-                            element.get("LowerInclusive").asLong() > 20000000); 
+                    assertTrue(element.get("LowerInclusive").asLong() == 0
+                            || element.get("LowerInclusive").asLong() > 20000000);
                 }
                 if (element.get("UpperExclusive").asText() != null) {
-                    assertTrue(element.get("UpperExclusive").asLong() == 0 || element.get("UpperExclusive").asLong() > 20000000); 
+                    assertTrue(element.get("UpperExclusive").asLong() == 0
+                            || element.get("UpperExclusive").asLong() > 20000000);
                 }
             }
         }

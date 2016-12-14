@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -73,6 +74,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         return modelSummary;
     }
 
+    @Override
     public boolean modelIdinTenant(String modelId, String tenantId) {
         ModelSummary modelSummary = modelSummaryEntityMgr.findByModelId(modelId, false, false, false);
         if (modelSummary == null) {
@@ -121,6 +123,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         modelSummary.setName(possibleName);
     }
 
+    @Override
     public void updatePredictors(String modelId, AttributeMap attrMap) {
         if (modelId == null) {
             throw new NullPointerException("ModelId should not be null when updating the predictors");
@@ -164,6 +167,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             getModelSummaryTrainingFileState(summary);
             if (!summary.getModelType().equals(ModelType.PMML.getModelType())) {
                 fixBusinessAnnualSalesAbs(summary);
+                fixLATTICEGT200DiscreteValue(summary);
             }
         }
         return summary;
@@ -200,6 +204,51 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
             }
         }
         ((ObjectNode) details).put("RevenueUIIssueFixed", BooleanNode.TRUE);
+        keyValue.setPayload(details.toString());
+        keyValueEntityMgr.update(keyValue);
+    }
+
+    public void fixLATTICEGT200DiscreteValue(ModelSummary summary) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        KeyValue keyValue = summary.getDetails();
+        ObjectNode details = null;
+        try {
+            details = (ObjectNode) objectMapper.readTree(keyValue.getPayload());
+        } catch (IOException e) {
+            log.error("Failed to parse model details KeyValue", e);
+        }
+        JsonNode latticeGT200DiscreteValueFixed = details.get("LATTICEGT200DiscreteValueFixed");
+        if (latticeGT200DiscreteValueFixed != null) {
+            return;
+        }
+        ArrayNode predictors = (ArrayNode) details.get("Predictors");
+        List<Integer> predictorsToRemove = new ArrayList<>();
+        for (int i = 0; i < predictors.size(); i++) {
+            JsonNode predictor = predictors.get(i);
+            Boolean removePredictor = false;
+            ArrayNode elements = (ArrayNode) predictor.get("Elements");
+            for (JsonNode element : elements) {
+                ArrayNode values = (ArrayNode) element.get("Values");
+                for (JsonNode valueNode : values) {
+                    String value = valueNode.asText();
+                    if (value.equals("LATTICE_GT200_DiscreteValue")) {
+                        removePredictor = true;
+                        break;
+                    }
+                }
+                if (removePredictor) {
+                    break;
+                }
+            }
+            if (removePredictor) {
+                predictorsToRemove.add(i);
+            }
+        }
+        for (Integer i : predictorsToRemove) {
+            predictors.remove(i);
+        }
+        details.put("LATTICEGT200DiscreteValueFixed", BooleanNode.TRUE);
+        details.replace("Predictors", predictors);
         keyValue.setPayload(details.toString());
         keyValueEntityMgr.update(keyValue);
     }

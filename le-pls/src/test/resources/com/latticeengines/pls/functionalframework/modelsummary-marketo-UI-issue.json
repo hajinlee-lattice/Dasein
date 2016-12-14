@@ -1379,6 +1379,45 @@
     },
     {
       "Elements": [
+          {
+              "CorrelationSign": 1, 
+              "Count": 2330, 
+              "Lift": 3.424150950610321, 
+              "Name": "2a98a7ed-e32f-489c-baa2-6315dde7b7a0", 
+              "UncertaintyCoefficient": 0.04303310404949291, 
+              "Values": [
+                  "LATTICE_GT200_DiscreteValue"
+              ], 
+              "IsVisible": true
+          }, 
+          {
+              "CorrelationSign": -1, 
+              "Count": 18497, 
+              "Lift": 0.6946384973281046, 
+              "Name": "2c79b857-95c3-42e0-a283-9ef85c6195b0", 
+              "UncertaintyCoefficient": 0.009805828984998873, 
+              "Values": [
+                  "null"
+              ], 
+              "IsVisible": true
+          }
+      ], 
+      "Name": "WebMasterRegistrationsTopAttributes", 
+      "Tags": [
+          "External"
+      ], 
+      "DataType": "string", 
+      "DisplayName": "Top Website Technology: Webmaster", 
+      "Description": "A popular Webmaster Registration  is detected in use", 
+      "ApprovedUsage": [
+          "Model"
+      ], 
+      "FundamentalType": "alpha", 
+      "Category": "Website Profile", 
+      "UncertaintyCoefficient": 0.05283893303449179
+    }, 
+    {
+      "Elements": [
         {
           "CorrelationSign": 1,
           "Count": 1030,
