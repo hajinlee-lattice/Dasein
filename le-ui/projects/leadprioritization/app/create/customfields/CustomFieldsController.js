@@ -88,7 +88,8 @@ angular
         vm.UnmappedFieldsMap = {};
 
         vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.mappedField && !fieldMapping.ignored) {
+            if (fieldMapping.mappedField && !fieldMapping.ignored
+                && !(vm.RequiredFields.indexOf(fieldMapping.mappedField) > -1 && !fieldMapping.mappedToLatticeField)) {
                 vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
             }
         });
