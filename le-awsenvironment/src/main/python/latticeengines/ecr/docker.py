@@ -13,11 +13,21 @@ def main():
     args = parse_args()
     args.func(args)
 
+def login(args):
+    print "logging in the docker repo for %s" % args.environment
+    login_cmd = login_internal(args.environment)
+    subprocess.call(login_cmd, shell=True)
+
 def push(args):
     tag_for_remote(args)
     config = AwsEnvironment(args.environment)
     print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
-    login_cmd = login(args.environment)
+
+    if args.skiplogin:
+        login_cmd = "echo skipping docker login ..."
+    else:
+        login_cmd = login_internal(args.environment)
+        
     reg_url = config.ecr_registry()
     if args.environment == 'dev':
         reg_url = NEXUS_DOCKER_REGISTRY
@@ -41,7 +51,7 @@ def pull_internal(environment, image, remotetag, localtag):
     if environment == 'dev':
         registry = NEXUS_DOCKER_REGISTRY
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
-    login_cmd = login(environment)
+    login_cmd = login_internal(environment)
     subprocess.call(login_cmd + "; docker pull %s" % source, shell=True)
     tag_for_local(registry, image, remotetag, localtag)
     subprocess.call("docker rmi " + source, shell=True)
@@ -102,7 +112,8 @@ def tag_for_local(registry, image, remotetag, localtag):
     destination = "" + NAMESPACE + "/" +  image + ":" + localtag
     subprocess.call(["docker", "tag", source, destination])
 
-def login(environment):
+
+def login_internal(environment):
     if environment == 'dev':
         return login_nexus()
     else:
@@ -127,11 +138,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Docker image management')
     commands = parser.add_subparsers(help="commands")
 
+    subparser = commands.add_parser("login")
+    subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
+    subparser.set_defaults(func=login)
+
     subparser = commands.add_parser("push")
     subparser.add_argument('image', metavar='IMAGE', type=str, help='local docker image name. you can ignore the namespace ' + NAMESPACE)
     subparser.add_argument('-e', dest='environment', type=str, default='dev', choices=['dev', 'qacluster','prodcluster'], help='environment')
     subparser.add_argument('-t', dest='remotetag', type=str, default="latest", help='remote tag (default=latest)')
     subparser.add_argument('--local-tag', dest='localtag', type=str, default="latest", help='local tag (default=latest)')
+    subparser.add_argument('--skip-login', dest='skiplogin', action="store_true", help='skip docker login')
     subparser.set_defaults(func=push)
 
     subparser = commands.add_parser("pull")
