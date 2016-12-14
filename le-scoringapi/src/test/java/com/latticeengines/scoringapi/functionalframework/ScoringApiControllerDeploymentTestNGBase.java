@@ -22,7 +22,6 @@ import org.testng.annotations.BeforeClass;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -47,19 +46,20 @@ import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 
-    protected String MODEL_ID = generateRandomModelId();
-    protected String TEST_MODEL_FOLDERNAME = UuidUtils.extractUuid(MODEL_ID);
-    protected String MODEL_NAME = TEST_MODEL_FOLDERNAME;
-    protected String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/3MulesoftAllRows20160314_112802/";
-    protected String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
+    protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
 
+    protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME + "_";
+    protected static final String MODEL_NAME = TEST_MODEL_FOLDERNAME;
+    protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME
+            + "/";
     protected static final String TENANT_ID = "ScoringApiTestTenant.ScoringApiTestTenant.Production";
     protected static final String APPLICATION_ID = "application_1457046993615_3821";
     protected static final String PARSED_APPLICATION_ID = "1457046993615_3821";
     protected static final String MODEL_VERSION = "8ba99b36-c222-4f93-ab8a-6dcc11ce45e9";
+    protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     public static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
-    private String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
+    private static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
     private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
