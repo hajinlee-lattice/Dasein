@@ -1,9 +1,9 @@
 section.container.setup-import {
-    font-size: 1.4em;
-    
+    font-size: 1.2em;
     tooltip._bottom {
         position: absolute;
         margin-top: -2px;
+        margin-left: .5em;
         tip {
             width: 600px;
             transform: translateY(4px) translateX(70%);
@@ -80,10 +80,14 @@ section.container.setup-import {
         font-size: 1em;
         margin-right: .8em;
         margin-top: 0.2em;
-        input { 
+        input[type="radio"] { 
             margin-top: 0.5em;
             margin-right: 0.5em;
             margin-left: 1.5em;
+        }
+
+        input[type="checkbox"] {
+            margin-top: 0.5em;
         }
     }
     div.progress { 
@@ -565,11 +569,20 @@ Media Queries
     }
 
     &.with-padding {
-        padding: 1.5em 2.75em;
+        padding: 1.5em;
+    }
+
+    hr {
+        display: block;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid #d0d0d0;
+        margin: 1em 0;
+        padding: 0; 
     }
 
     .section-header {
-        padding: 1.5em 2.75em;
+        padding: 1.2em 2em 0em;
         
         h4 {
             font-size: 18pt;
@@ -584,7 +597,6 @@ Media Queries
         h5 {
             font-weight: bold;
             font-size: 12pt;
-            margin-top: 0.5em;
             line-height: 20px;
             color: #666;
         }
@@ -593,7 +605,7 @@ Media Queries
     .section-actions {
         border: none;
         padding: 0;
-        margin: 2em 2.5em;
+        margin: 1em 2em 1.2em;
         
         .section-actions-tertiary {
             margin-right: 0.75em;
@@ -603,6 +615,12 @@ Media Queries
     .section-body {
         margin-bottom: 0;
         
+        .row .columns.align-right {
+            float: right;
+            clear: none;
+            margin: 0;
+        }
+
         table {
             margin-bottom: 0;
             
@@ -614,7 +632,7 @@ Media Queries
         }
         
         &.with-padding {
-            margin: 0em 2.5em;
+            margin: 0em 2em;
         }
         
         tr {

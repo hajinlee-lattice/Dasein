@@ -1,0 +1,55 @@
+.lookup-summary {
+    div.lookup-back {
+        margin: 1.5em 0;
+        font-weight: bold;
+    }
+    ul {
+        display: block;
+        border-bottom: 1px solid #d0d0d0;
+        margin: 1.5em 0 0.5em;
+        font-weight: bold;
+        
+        li {
+            padding: 0.6em 1.5em;
+            margin-right: 0.5em;
+            margin-bottom: -1px;
+            border: 1px solid #d0d0d0;
+            display: inline-block;
+            background: #f1f1f1;
+            cursor: pointer;
+
+            &.active {
+                background: inherit;
+                border-bottom-color: #fafafa;
+                cursor: default;
+            }
+        }
+    }
+    div.lookup-response-area {
+        margin: 2em 0 1.5em;
+        padding: 2em 2.5em;
+        background: #fff;
+        border: 1px solid #d0d0d0;
+        
+        label {
+            display: block;
+            margin-right: 1em;
+            
+            span {
+                font-weight: bold;
+            }
+        }
+    }
+    div.lookup-response-elapsed {
+        font-weight: bold;
+    }
+}
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+     -khtml-user-select: none; /* Konqueror */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  not supported by any browser */
+}

@@ -1,0 +1,217 @@
+<section class="container setup-import">
+    <form name="uploadForm" ng-controller="csvImportController as vm" novalidate>
+        <div class="row">
+            <div class="global-error local-error" data-ng-show="vm.showImportError">
+                {{vm.importErrorMsg}}
+            </div>
+            <div class="columns eight offset-two box-outline">
+                <div class="section-header">
+                    <h4>Account Lookup</h4>
+                    <h5>At least one field marked in orange is required</h5>
+                </div>
+
+                <hr size="1" />
+
+                <div class="section-body with-padding">
+                    <div class="form-group">
+                      <div class="toggle-check">
+                        <label>
+                            <input type="checkbox" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" />
+                            Fuzzy Match
+                            <span 
+                              tooltips 
+                              tooltip-template="Fuzzy Match?"
+                              tooltip-size="small"
+                              tooltip-side="bottom"
+                              tooltip-close-button="false" 
+                              class="more-info">&#105;</span>
+                        </label>
+                      </div>          
+                    </div>
+                    
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                      <label>Website Address</label>
+                      <input 
+                        type="text" 
+                        class="form-control required" 
+                        name="modelDisplayName"
+                        ng-model="vm.modelDisplayName"
+                        ng-value="vm.modelDisplayName"
+                        placeholder="Ex: www.domain.com" />
+                    </div>
+
+                    <div class="row">
+                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>D-U-N-S Number</label>
+                          <input 
+                            type="text" 
+                            class="form-control required" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="" />
+                        </div>
+                        
+                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>Lattice ID</label>
+                          <input 
+                            type="text" 
+                            class="form-control required" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                      <label>Email Address</label>
+                      <input 
+                        type="text" 
+                        class="form-control required" 
+                        name="modelDisplayName"
+                        ng-model="vm.modelDisplayName"
+                        ng-value="vm.modelDisplayName"
+                        placeholder="Ex: anything@domain.com" />
+                    </div>
+                    
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                      <label>Company Name</label>
+                      <input 
+                        type="text" 
+                        class="form-control required" 
+                        name="modelDisplayName"
+                        ng-model="vm.modelDisplayName"
+                        ng-value="vm.modelDisplayName"
+                        placeholder="" />
+                    </div>
+                    
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                      <label>City</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        name="modelDisplayName"
+                        ng-model="vm.modelDisplayName"
+                        ng-value="vm.modelDisplayName"
+                        placeholder="" />
+                    </div>
+
+                    <div class="row">
+                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>State</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="" />
+                        </div>
+                        
+                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>Zip</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="Ex: 12345" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>County</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="" />
+                        </div>
+                        
+                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                          <label>Phone Number</label>
+                          <input 
+                            type="text" 
+                            class="form-control" 
+                            name="modelDisplayName"
+                            ng-model="vm.modelDisplayName"
+                            ng-value="vm.modelDisplayName"
+                            placeholder="Ex: 999-555-1234" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                      <label>City</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        name="modelDisplayName"
+                        ng-model="vm.modelDisplayName"
+                        ng-value="vm.modelDisplayName"
+                        placeholder="" />
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="section-body with-padding">
+                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
+                        <label>Select a Model (optional)
+                            <span 
+                              tooltips 
+                              tooltip-template="Select a model from the drop down"
+                              tooltip-size="small"
+                              tooltip-side="bottom"
+                              tooltip-close-button="false" 
+                              class="more-info">&#105;</span>
+                        </label>
+                        <select name="SelectModel"
+                                class="form-control"
+                                ng-model="field.userField"
+                                ng-change="vm.changeLatticeField(field, field.userField)">
+                            <option value="{{ vm.ignoredFieldLabel }}"
+                                    ng-if="field.userField && field.userField != vm.ignoredFieldLabel""
+                                    ng-selected="!field.userField">
+                                {{ vm.ignoredFieldLabel }}
+                            </option>
+                            <option value="{{ field.userField }}"
+                                    ng-selected="true">
+                                {{ field.userField }}
+                            </option>
+                            <option value="{{ AvailableField }}"
+                                    ng-repeat="AvailableField in vm.AvailableFields"
+                                    ng-if="AvailableField != field.userField">
+                                {{ AvailableField }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr size="1" />
+                
+                <div class="section-actions container row form-actions">
+                    <div class="pull-left">
+                        <button 
+                            type="button" 
+                            class="button white-button block-button"
+                            ng-click="vm.cancelJob()">
+                          {{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+                    </div>
+                    <div class="pull-right">
+                        <button 
+                            type="button" 
+                            ui-sref="home.lookup.tabs"
+                            class="button orange-button block-button">
+                          {{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+                        </button>
+                    </div>
+                </div>
+            </div><!-- End .six.columns -->
+        </div><!-- End .container.row -->
+    </form>
+</section>

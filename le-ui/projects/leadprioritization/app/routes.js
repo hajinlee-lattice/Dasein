@@ -12,7 +12,7 @@ angular
 
         if (toState.redirectTo) {
             evt.preventDefault();
-            $state.go(toState.redirectTo, params)
+            $state.go(toState.redirectTo, params);
         }
 
         ShowSpinner(LoadingString);
@@ -288,11 +288,11 @@ angular
                             var suppressedCategories = data.SuppressedCategories;
 
                             ModelService.GetModelAlertsByModelId(id).then(function(result) {
-                                if (result != null && result.success === true) {
+                                if (result !== null && result.success === true) {
                                     data.ModelAlerts = result.resultObj;
                                     data.SuppressedCategories = suppressedCategories;
                                     deferred.resolve(result);
-                                } else if (result != null && result.success === false) {
+                                } else if (result !== null && result.success === false) {
                                     data.ModelAlerts = result.resultObj;
                                     data.SuppressedCategories = null;
                                     deferred.reject('nope');
@@ -428,7 +428,7 @@ angular
         })
         .state('home.marketosettings', {
             url: '/marketosettings',
-            redirectto: 'marketosettings.apikey',
+            redirectto: 'home.marketosettings.apikey',
             resolve: { 
                 urls: function($q, $http) { 
                     var deferred = $q.defer();
@@ -482,7 +482,7 @@ angular
                             var flags = FeatureFlagService.Flags();
                             $scope.latticeIsEnabled = FeatureFlagService.FlagIsEnabled(flags.LATTICE_MARKETO_PAGE);
 
-                            if ($scope.latticeIsEnabled != true) {
+                            if ($scope.latticeIsEnabled !== true) {
                                 $state.go('home.marketosettings.credentials');
                             }
 
@@ -999,9 +999,9 @@ angular
 
                             UserManagementService.GetUsers().then(function(result) {
                                 if (result.Success) {
-                                    deferred.resolve(result.ResultObj)
+                                    deferred.resolve(result.ResultObj);
                                 } else {
-                                    deferred.reject(result)
+                                    deferred.reject(result);
                                 }
 
                             });
@@ -1053,6 +1053,65 @@ angular
                     controller: 'SetupController',
                     templateUrl: 'app/setup/views/SetupView.html'
                 }   
+            }
+        })
+        .state('home.lookup', {
+            url: '/lookup',
+            redirectTo: 'home.lookup.form'
+        })
+        .state('home.lookup.form', {
+            url: '/form',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
+                "summary@": {
+
+                },
+                "main@": {
+                    templateUrl: 'app/lookup/form/FormView.html'
+                }
+            }
+        })
+        .state('home.lookup.tabs', {
+            url: '/tabs',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            redirectTo: 'home.lookup.tabs.response',
+            views: {
+                "summary@": {
+                    templateUrl: 'app/lookup/tabs/TabsView.html'
+                }
+            }
+        })
+        .state('home.lookup.tabs.attr', {
+            url: '/attr',
+            views: {
+                "main@": {
+                    template: 'attr'
+                }
+            }
+        })
+        .state('home.lookup.tabs.response', {
+            url: '/response',
+            views: {
+                "main@": {
+                    templateUrl: 'app/lookup/response/ResponseView.html'
+                }
+            }
+        })
+        .state('home.lookup.tabs.matching', {
+            url: '/matching',
+            views: {
+                "main@": {
+                    templateUrl: 'app/lookup/matching/MatchingView.html'
+                }
             }
         })
         .state('home.enrichment-new', {
@@ -1199,5 +1258,5 @@ function ShowSpinner(LoadingString, type) {
 
     setTimeout(function() {
         $('section.loading-spinner').addClass('show-spinner');
-    },1)
+    },1);
 }

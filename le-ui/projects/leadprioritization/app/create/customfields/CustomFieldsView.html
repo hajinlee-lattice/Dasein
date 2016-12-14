@@ -6,6 +6,9 @@
 				<h4>Required fields</h4>
 				<h5>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MUST_MAP_LABEL')}}: <span ng-repeat="RequiredField in vm.RequiredFields"><span ng-if="$index != 0">,&nbsp;</span><span class="orange-text">{{::RequiredField}}</span></span></h5>
 			</div>
+
+            <hr />
+            
 			<table class="section-body unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>

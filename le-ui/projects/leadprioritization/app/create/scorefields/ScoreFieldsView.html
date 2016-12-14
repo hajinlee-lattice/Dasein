@@ -17,6 +17,7 @@
 				<h4>Required fields</h4>
 				<h5>Make sure all the required fields are mapped correctly.</h5>
 			</div>
+			<hr />
 			<table class="section-body unstyled">
 				<thead ng-if="vm.initialized">
 					<tr>
@@ -109,6 +110,8 @@
 					Check that all the fields you want mapped are mapped correctly.
 				</h5>
 			</div>
+			<span ng-if="!vm.NextClicked" style="display:block;margin-top:1em;"></span>
+			<hr ng-if="vm.NextClicked" />
 			<table class="section-body unstyled" ng-if="vm.NextClicked">
 				<thead ng-if="vm.initialized">
 					<tr>

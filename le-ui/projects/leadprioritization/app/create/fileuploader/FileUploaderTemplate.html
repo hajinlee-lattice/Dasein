@@ -10,7 +10,7 @@
       tooltip-close-button="true" 
       class="more-info">&#105;</span>
 </label>
-<div class="fileUpload button form-control">
+<div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired }">
     <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
       {{ vm_uploader.defaultMessage }}
     </span>
