@@ -1,23 +1,23 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
 public class AttributeStatistics {
-    private int nonNullCount;
+    private AttributeStatsDetails uniqueLocationBasedStatistics;
 
-    private Buckets buckets;
+    private AttributeStatsDetails rowBasedStatistics;
 
-    public int getNonNullCount() {
-        return nonNullCount;
+    public AttributeStatsDetails getUniqueLocationBasedStatistics() {
+        return uniqueLocationBasedStatistics;
     }
 
-    public void setNonNullCount(int nonNullCount) {
-        this.nonNullCount = nonNullCount;
+    public void setUniqueLocationBasedStatistics(AttributeStatsDetails uniqueLocationBasedStatistics) {
+        this.uniqueLocationBasedStatistics = uniqueLocationBasedStatistics;
     }
 
-    public Buckets getBuckets() {
-        return buckets;
+    public AttributeStatsDetails getRowBasedStatistics() {
+        return rowBasedStatistics;
     }
 
-    public void setBuckets(Buckets buckets) {
-        this.buckets = buckets;
+    public void setRowBasedStatistics(AttributeStatsDetails rowBasedStatistics) {
+        this.rowBasedStatistics = rowBasedStatistics;
     }
 }
