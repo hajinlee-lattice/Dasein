@@ -86,8 +86,10 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
-    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
-        return tenantService.deleteTenant(contractId, tenantId);
+    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId,
+            @RequestParam(value = "deleteZookeeper", required = false, defaultValue = "true") Boolean deleteZookeeper,
+            @PathVariable String tenantId) {
+        return tenantService.deleteTenant(contractId, tenantId, deleteZookeeper);
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")

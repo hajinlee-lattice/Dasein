@@ -144,6 +144,13 @@ public class PLSComponentManager {
         assignAccessLevelByEmails(thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId());
     }
 
+    public void discardTenant(String tenantId) {
+        Tenant tenant = tenantService.findByTenantId(tenantId);
+        if (tenant != null) {
+            discardTenant(tenant);
+        }
+    }
+
     public void discardTenant(Tenant tenant) {
         List<User> users = userService.getUsers(tenant.getId());
         if (users != null) {

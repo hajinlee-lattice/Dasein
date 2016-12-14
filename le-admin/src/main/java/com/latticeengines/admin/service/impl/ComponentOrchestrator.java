@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,13 +129,39 @@ public class ComponentOrchestrator {
         }
     }
 
-    public void orchestrate(String contractId, String tenantId, String spaceId,
-            Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
+    public void orchestrateForInstall(String contractId, String tenantId, String spaceId,
+                                      Map<String, Map<String, String>> properties, ProductAndExternalAdminInfo prodAndExternalAminInfo) {
         OrchestratorVisitor visitor = new OrchestratorVisitor(contractId, tenantId, spaceId, properties);
         TopologicalTraverse traverser = new TopologicalTraverse();
         traverser.traverse(components, visitor);
 
         postInstall(visitor, prodAndExternalAminInfo, tenantId);
+    }
+
+    public void orchestrateForUninstall(String contractId, String tenantId, String spaceId,
+                                        Map<String, Map<String, String>> properties,
+                                        ProductAndExternalAdminInfo prodAndExternalAminInfo, boolean deleteZookeeper) {
+        OrchestratorVisitorForUninstall visitor = new OrchestratorVisitorForUninstall(contractId, tenantId, spaceId, properties);
+        LatticeComponent modelingComponent = null;
+        for (LatticeComponent component : components) {
+            if (component.getName() == ModelingComponent.componentName) {
+                modelingComponent = component;
+            } else {
+                visitor.visit(component, null);
+            }
+        }
+        if (modelingComponent != null) {
+            visitor.visit(modelingComponent, null);
+        }
+        postUninstall(contractId, tenantId, deleteZookeeper);
+    }
+
+    private void postUninstall(String contractId, String tenantId, boolean deleteZookeeper) {
+        if (deleteZookeeper) {
+            boolean success = batonService.deleteContract(contractId);
+            log.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId,
+                    String.valueOf(success)));
+        }
     }
 
     void postInstall(OrchestratorVisitor visitor, ProductAndExternalAdminInfo prodAndExternalAminInfo, String tenantId) {
@@ -285,6 +312,50 @@ public class ComponentOrchestrator {
                     } while (numOfRetries > 0 && state.state.equals(BootstrapState.State.INITIAL));
 
                     if (!state.state.equals(BootstrapState.State.OK)) {
+                        failed.add(component.getName());
+                    }
+
+                }
+            }
+        }
+    }
+
+    private static class OrchestratorVisitorForUninstall extends  OrchestratorVisitor {
+
+        public OrchestratorVisitorForUninstall(String contractId, String tenantId, String spaceId,
+                Map<String, Map<String, String>> properties) {
+            super(contractId, tenantId, spaceId, properties);
+        }
+
+        @Override
+        public void visit(Object o, VisitorContext ctx) {
+            if (o instanceof LatticeComponent) {
+                LatticeComponent component = (LatticeComponent) o;
+
+                if (properties.containsKey(component.getName())) {
+
+                    log.info("Attempt to uninstall component " + component.getName());
+
+                    Map<String, String> bootstrapProperties = properties.get(component.getName());
+                    batonService.bootstrap(contractId, tenantId, spaceId, component.getName(), bootstrapProperties);
+
+                    int numOfRetries = NUM_RETRIES;
+                    BootstrapState state;
+                    do {
+                        state = batonService.getTenantServiceBootstrapState(contractId, tenantId, spaceId,
+                                component.getName());
+                        if (numOfRetries-- % 10 == 0) {
+                            log.info(String.format("Bootstrap status of [%s] is %s, %d out of %d retries remained.",
+                                    component.getName(), state.state.toString(), numOfRetries, NUM_RETRIES));
+                        }
+                        try {
+                            Thread.sleep(WAIT_INTERVAL);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    } while (numOfRetries > 0 && state.state.equals(BootstrapState.State.UNINSTALLING));
+
+                    if (!state.state.equals(BootstrapState.State.UNINSTALLED)) {
                         failed.add(component.getName());
                     }
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +16,12 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.CustomerSpaceServiceInstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.UpgraderAdaptor;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.DestroyerAdaptor;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
@@ -33,15 +32,16 @@ public class CustomerSpaceServiceBootstrapManager {
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
     public static void register(String serviceName, ServiceProperties properties,
-            CustomerSpaceServiceInstaller installer, CustomerSpaceServiceUpgrader upgrader) {
+            CustomerSpaceServiceInstaller installer, CustomerSpaceServiceUpgrader upgrader,
+            CustomerSpaceServiceDestroyer destroyer) {
 
         // Retrieve/Set the bootstrapper for the provided service
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, properties, installer, upgrader);
+            bootstrapper = new Bootstrapper(serviceName, properties, installer, upgrader, destroyer);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.set(properties, installer, upgrader);
+            bootstrapper.set(properties, installer, upgrader, destroyer);
         }
     }
 
@@ -101,27 +101,30 @@ public class CustomerSpaceServiceBootstrapManager {
         private final String serviceName;
         private CustomerSpaceServiceInstaller installer;
         private CustomerSpaceServiceUpgrader upgrader;
+        private CustomerSpaceServiceDestroyer destroyer;
         private ServiceProperties properties;
         private final ConcurrentMap<CustomerSpace, CustomerBootstrapper> customerBootstrappers = new ConcurrentHashMap<CustomerSpace, CustomerBootstrapper>();
 
         public Bootstrapper(String serviceName, ServiceProperties properties, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader) {
+                CustomerSpaceServiceUpgrader upgrader, CustomerSpaceServiceDestroyer destroyer) {
             this.serviceName = serviceName;
             this.properties = properties;
             this.installer = installer;
             this.upgrader = upgrader;
+            this.destroyer = destroyer;
         }
 
         public void set(ServiceProperties properties, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader) {
+                CustomerSpaceServiceUpgrader upgrader, CustomerSpaceServiceDestroyer destroyer) {
             this.properties = properties;
             this.installer = installer;
             this.upgrader = upgrader;
+            this.destroyer = destroyer;
         }
 
         public void bootstrap(CustomerSpace space, Map<String, String> bootstrapProperties) throws Exception {
-            customerBootstrappers.putIfAbsent(space, new CustomerBootstrapper(space, serviceName, installer, upgrader,
-                    bootstrapProperties));
+            customerBootstrappers.put(space, new CustomerBootstrapper(space, serviceName, installer,
+                    upgrader, destroyer, bootstrapProperties));
             CustomerBootstrapper bootstrapper = customerBootstrappers.get(space);
             bootstrapper.bootstrap(this.properties.dataVersion);
         }
@@ -143,36 +146,40 @@ public class CustomerSpaceServiceBootstrapManager {
         private final String serviceName;
         private final CustomerSpaceServiceInstaller installer;
         private final CustomerSpaceServiceUpgrader upgrader;
+        private final CustomerSpaceServiceDestroyer destroyer;
         private final Path serviceDirectoryPath;
-        private boolean bootstrapped;
         private final String logPrefix;
         private final Map<String, String> bootstrapProperties;
 
         public CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader, Map<String, String> bootstrapProperties) {
+                CustomerSpaceServiceUpgrader upgrader, CustomerSpaceServiceDestroyer destroyer,
+                Map<String, String> bootstrapProperties) {
             this.space = space;
             this.serviceName = serviceName;
             this.installer = installer;
             this.upgrader = upgrader;
+            this.destroyer = destroyer;
             this.serviceDirectoryPath = getServiceDirectoryPath(space, serviceName);
             this.logPrefix = String.format("[Customer=%s, Service=%s] ", space, serviceName);
             this.bootstrapProperties = bootstrapProperties;
         }
 
         public void bootstrap(int executableVersion) throws Exception {
-            log.info("{}On entry to bootstrap, bootstrapped = {}", logPrefix, bootstrapped);
-            if (!bootstrapped) {
-                synchronized (this) {
-                    if (!bootstrapped) {
-                        log.info("{}Running bootstrap", logPrefix);
-                        if (!SpaceLifecycleManager.exists(space.getContractId(), space.getTenantId(),
-                                space.getSpaceId())) {
-                            throw new RuntimeException("Customerspace " + space + " does not exist");
-                        }
-                        install(executableVersion);
-                        upgrade(executableVersion);
-                        bootstrapped = true;
+            log.info("{}On entry to bootstrap", logPrefix);
+            synchronized (this) {
+                log.info("{}Running bootstrap", logPrefix);
+                if(bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND)) {
+                    if (bootstrapProperties.get(BootstrapPropertyConstant.BOOTSTRAP_COMMAND).equals
+                            (BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL)) {
+                        destroy(executableVersion);
                     }
+                } else {
+                    if (!SpaceLifecycleManager.exists(space.getContractId(), space.getTenantId(),
+                            space.getSpaceId())) {
+                        throw new RuntimeException("Customerspace " + space + " does not exist");
+                    }
+                    install(executableVersion);
+                    upgrade(executableVersion);
                 }
             }
         }
@@ -186,6 +193,11 @@ public class CustomerSpaceServiceBootstrapManager {
         private void upgrade(int executableVersion) throws Exception {
             UpgraderAdaptor adaptor = new UpgraderAdaptor(upgrader, space, serviceName, bootstrapProperties);
             BootstrapUtil.upgrade(adaptor, executableVersion, serviceDirectoryPath, space, serviceName, logPrefix);
+        }
+
+        private void destroy(int executableVersion) throws Exception {
+            DestroyerAdaptor adaptor = new DestroyerAdaptor(destroyer, space, serviceName);
+            BootstrapUtil.destroy(adaptor, executableVersion, serviceDirectoryPath, space, serviceName, logPrefix);
         }
 
         private static Path getServiceDirectoryPath(CustomerSpace space, String serviceName) {

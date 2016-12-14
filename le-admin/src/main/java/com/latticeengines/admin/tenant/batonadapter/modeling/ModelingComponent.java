@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,8 +25,12 @@ public class ModelingComponent extends LatticeComponent {
     @Autowired
     private DataEncryptionService dataEncryptionService;
 
+    @Autowired
+    private ModelingComponentManager modelingComponentManager;
+
     private ModelingInstaller installer = new ModelingInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new ModelingUpgrader();
+    private ModelingDestroyer destroyer = new ModelingDestroyer();
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
@@ -53,6 +58,13 @@ public class ModelingComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        destroyer.setDataEncryptionService(dataEncryptionService);
+        destroyer.setModelingComponentManager(modelingComponentManager);
+        return destroyer;
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -44,6 +45,7 @@ import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -145,7 +147,7 @@ public class TenantServiceImpl implements TenantService {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
                         orchestratorProps, prodAndExternalAminInfo);
             }
         });
@@ -223,10 +225,45 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean deleteTenant(String contractId, String tenantId) {
-        keyManagementService.deleteKey(new CustomerSpace(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
-        return tenantEntityMgr.deleteTenant(contractId, tenantId);
+    public boolean deleteTenant(final String contractId, final String tenantId, final boolean deleteZookeeper) {
+        CustomerSpace space = new CustomerSpace(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        Map<String, Map<String, String>> props = new HashMap<>();
+        for (LatticeComponent component : orchestrator.components) {
+            BootstrapState state = getTenantServiceState(contractId, tenantId, component.getName());
+            if (state.state.equals(BootstrapState.State.INITIAL) ||
+                    state.state.equals(BootstrapState.State.UNINSTALLED) ||
+                    state.state.equals(BootstrapState.State.UNINSTALLING)) {
+                continue;
+            }
+            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(
+                    batonService.getDefaultConfiguration(component.getName()));
+            Map<String, String> properties = sDir.flatten();
+
+            properties.put(BootstrapPropertyConstant.BOOTSTRAP_COMMAND, BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL);
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                    space.getContractId(), space.getTenantId(), space.getSpaceId(), component.getName());
+            try {
+                BootstrapStateUtil.setState(path, BootstrapState.constructDeletingState());
+            } catch (Exception e) {
+                log.error("Can't set bootstrap state to uninstalling!");
+                if (deleteZookeeper) {
+                    return tenantEntityMgr.deleteTenant(contractId, tenantId);
+                } else {
+                    return true;
+                }
+            }
+            props.put(component.getName(), properties);
+        }
+        final Map<String, Map<String, String>> orchestratorProps = props;
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                orchestrator.orchestrateForUninstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                        orchestratorProps, prodAndExternalAminInfo, deleteZookeeper);
+            }
+        });
+        return true;
     }
 
     @Override

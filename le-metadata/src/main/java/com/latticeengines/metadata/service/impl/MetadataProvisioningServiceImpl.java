@@ -3,8 +3,11 @@ package com.latticeengines.metadata.service.impl;
 import java.io.File;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("metadataProvisioningService")
 public class MetadataProvisioningServiceImpl implements MetadataProvisioningService {
+
+    private static final Log log = LogFactory.getLog(MetadataProvisioningServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;
@@ -46,6 +51,18 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void removeImportTables(CustomerSpace customerSpace) {
+        try {
+            List<Table> tables = mdService.getTables(customerSpace);
+            for (Table table : tables) {
+                mdService.deleteTable(customerSpace, table.getName());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 }

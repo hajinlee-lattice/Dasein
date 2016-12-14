@@ -22,4 +22,9 @@ public class MetadataComponentManager {
         metadataProvisioningService.provisionImportTables(space);
     }
 
+    public void removeImportTables(CustomerSpace space) {
+        log.info(String.format("Removing tenant %s", space.toString()));
+        metadataProvisioningService.removeImportTables(space);
+    }
+
 }

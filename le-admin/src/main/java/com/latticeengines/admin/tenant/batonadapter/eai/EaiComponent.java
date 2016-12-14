@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class EaiComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new EaiInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new EaiUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new EaiDestroyer();
     public static final String componentName = "Eai";
 
     @Override
@@ -54,6 +56,11 @@ public class EaiComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

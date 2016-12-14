@@ -9,11 +9,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.bootstrap.*;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
-import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
@@ -44,7 +41,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
     public abstract BootstrapState getState() throws Exception;
 
     public static class Bootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
-            ServiceInstaller {
+            CustomerSpaceServiceDestroyer, ServiceInstaller {
 
         @Override
         public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
@@ -77,10 +74,15 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
                 throw new IllegalStateException();
             }
         }
+
+        @Override
+        public boolean destroy(CustomerSpace space, String serviceName) {
+            return false;
+        }
     }
 
     public static class EvilBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
-            ServiceInstaller {
+            CustomerSpaceServiceDestroyer, ServiceInstaller {
         @Override
         public DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties) {
             throw new RuntimeException("Death!");
@@ -96,6 +98,11 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
                 Map<String, String> properties) {
             throw new RuntimeException("VisiDB!");
+        }
+
+        @Override
+        public boolean destroy(CustomerSpace space, String serviceName) {
+            throw new RuntimeException("Destroyer!");
         }
     }
 

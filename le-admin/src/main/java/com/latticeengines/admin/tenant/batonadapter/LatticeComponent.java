@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +53,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     public abstract CustomerSpaceServiceUpgrader getUpgrader();
 
+    public abstract CustomerSpaceServiceDestroyer getDestroyer();
+
     public abstract String getVersionString();
 
     public abstract Set<LatticeProduct> getAssociatedProducts();
@@ -64,6 +67,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
             ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
                     getInstaller(), //
                     getUpgrader(), //
+                    getDestroyer(), //
                     null);
             ServiceWarden.registerService(getName(), serviceInfo);
             return true;

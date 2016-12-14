@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 public class TestLatticeComponent extends LatticeComponent {
 
     private CustomerSpaceServiceUpgrader upgrader = new TestLatticeComponentUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new TestLatticeComponentDestroyer();
     public String componentName = "TestComponent";
     public boolean dryrun = true;
 
@@ -68,6 +70,11 @@ public class TestLatticeComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

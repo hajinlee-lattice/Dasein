@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ public class VisiDBDLComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new VisiDBDLInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBDLUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new VisiDBDLDestroyer();
     public static final String componentName = "VisiDBDL";
 
     @Override
@@ -78,6 +80,13 @@ public class VisiDBDLComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        ((VisiDBDLDestroyer) destroyer).setDataloaderService(dataLoaderService);
+        ((VisiDBDLDestroyer) destroyer).setTenantService(tenantService);
+        return destroyer;
     }
 
     @Override

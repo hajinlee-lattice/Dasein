@@ -86,7 +86,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
     public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
-        return tenantService.deleteTenant(contractId, tenantId);
+        return tenantService.deleteTenant(contractId, tenantId, true);
     }
 
     @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")

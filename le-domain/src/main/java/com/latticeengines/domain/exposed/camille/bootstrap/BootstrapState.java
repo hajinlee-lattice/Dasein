@@ -47,6 +47,24 @@ public class BootstrapState extends VersionedDocument {
         return toReturn;
     }
 
+    public static BootstrapState constructDeletingState() {
+        BootstrapState toReturn = new BootstrapState();
+        toReturn.state = State.UNINSTALLING;
+        toReturn.desiredVersion = -1;
+        toReturn.installedVersion = -1;
+        toReturn.errorMessage = null;
+        return toReturn;
+    }
+
+    public static BootstrapState constructDeletedState(int version) {
+        BootstrapState toReturn = new BootstrapState();
+        toReturn.state = State.UNINSTALLED;
+        toReturn.desiredVersion = version;
+        toReturn.installedVersion = version;
+        toReturn.errorMessage = null;
+        return toReturn;
+    }
+
     public BootstrapState() {
     }
 
@@ -66,6 +84,16 @@ public class BootstrapState extends VersionedDocument {
          * Bootstrap has run and configured the service without error.
          */
         OK,
+
+        /**
+         * Bootstrap is going to send delete message to destroyer.
+         */
+        UNINSTALLING,
+
+        /**
+         * Bootstrap has run the destroyer.
+         */
+        UNINSTALLED,
 
         /**
          * Bootstrap has run and failed to configure the service.

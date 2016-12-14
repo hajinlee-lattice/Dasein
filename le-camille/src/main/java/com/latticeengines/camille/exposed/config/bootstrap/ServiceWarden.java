@@ -10,6 +10,7 @@ import com.latticeengines.camille.exposed.messaging.MessageConsumer;
 import com.latticeengines.camille.exposed.messaging.MessageQueue;
 import com.latticeengines.camille.exposed.messaging.MessageQueueFactory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapPropertyConstant;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
@@ -24,7 +25,7 @@ public class ServiceWarden {
     public static void registerService(String serviceName, ServiceInfo info) {
         log.info("Registering service {} with properties {}", serviceName, info.properties);
         CustomerSpaceServiceBootstrapManager
-                .register(serviceName, info.properties, info.cssInstaller, info.cssUpgrader);
+                .register(serviceName, info.properties, info.cssInstaller, info.cssUpgrader, info.cssDestroyer);
         ServiceBootstrapManager.register(serviceName, info.properties, info.installer);
 
         BootstrapMessageConsumer consumer = new BootstrapMessageConsumer();
@@ -60,7 +61,11 @@ public class ServiceWarden {
                 ServiceScope serviceScope = new ServiceScope(message.serviceName, message.bootstrapProperties);
                 CustomerSpaceServiceScope cssScope = new CustomerSpaceServiceScope(message.space, message.serviceName,
                         message.bootstrapProperties);
-                ServiceBootstrapManager.bootstrap(serviceScope);
+                if (!message.bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND) ||
+                        !message.bootstrapProperties.get(BootstrapPropertyConstant.BOOTSTRAP_COMMAND).equals
+                                (BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL)) {
+                    ServiceBootstrapManager.bootstrap(serviceScope);
+                }
                 CustomerSpaceServiceBootstrapManager.bootstrap(cssScope);
             } catch (Exception e) {
                 String error = String

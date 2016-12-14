@@ -106,4 +106,10 @@ public class DataEncryptionServiceImpl implements DataEncryptionService {
         paths.add(modelPath);
         return paths;
     }
+
+    @Override
+    public void deleteKey(CustomerSpace space) {
+        log.info(String.format("Deleting customer %s's key", space));
+        keyManagementService.deleteKey(space);
+    }
 }

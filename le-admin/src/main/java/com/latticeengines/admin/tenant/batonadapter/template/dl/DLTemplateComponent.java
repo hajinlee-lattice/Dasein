@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public class DLTemplateComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new DLTemplateInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DLTemplateUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new DLTemplateDestroyer();
     public static final String componentName = "DLTemplate";
 
     @Autowired
@@ -75,6 +77,11 @@ public class DLTemplateComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

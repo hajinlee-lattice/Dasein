@@ -129,7 +129,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
         properties.put(getServiceName(), jamsConfig.flatten());
         ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
-        orchestrator.orchestrate(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
+        orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
                 prodAndExternalAminInfo);
     }
 

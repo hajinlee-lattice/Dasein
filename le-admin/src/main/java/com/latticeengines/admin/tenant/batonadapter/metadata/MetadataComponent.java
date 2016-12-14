@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class MetadataComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new MetadataInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new MetadataUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new MetadataDestroyer();
 
     public static final String componentName = "Metadata";
 
@@ -68,6 +70,11 @@ public class MetadataComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

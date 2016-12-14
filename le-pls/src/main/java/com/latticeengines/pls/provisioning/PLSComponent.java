@@ -2,6 +2,7 @@ package com.latticeengines.pls.provisioning;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class PLSComponent {
     public static final String componentName = "PLS";
     private static final String versionString = "2.0";
     private PLSInstaller installer = new PLSInstaller();
+    private PLSDestroyer destroyer = new PLSDestroyer();
 
     public PLSComponent() { }
 
@@ -37,6 +39,7 @@ public class PLSComponent {
             ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
                     getInstaller(), //
                     new PLSUpgrader(), //
+                    getDestroyer(),
                     null);
             ServiceWarden.registerService(componentName, serviceInfo);
         }
@@ -45,5 +48,10 @@ public class PLSComponent {
     private CustomerSpaceServiceInstaller getInstaller() {
         installer.setComponentManager(componentManager);
         return installer;
+    }
+
+    private CustomerSpaceServiceDestroyer getDestroyer() {
+        destroyer.setComponentManager(componentManager);
+        return destroyer;
     }
 }

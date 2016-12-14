@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.*;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.zookeeper.KeeperException;
@@ -21,11 +22,7 @@ import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
-import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class BootstrapUtil {
 
@@ -187,6 +184,28 @@ public class BootstrapUtil {
         }
     }
 
+    public static void destroy(DestroyerAdaptor destroyer, int executableVersion, Path serviceDirectoryPath,
+                               CustomerSpace space, String serviceName, String logPrefix) throws Exception {
+        log.info(String.format("Running destroy of version %d", executableVersion));
+        BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
+        try {
+            if (state.state == State.UNINSTALLING) {
+                log.info(String.format("Service %s running uninstall on space: %s", serviceName, space.toString()));
+                destroyer.destory();
+                BootstrapStateUtil.setState(serviceDirectoryPath, BootstrapState.constructDeletedState(executableVersion));
+            }
+        } catch (Exception e) {
+            log.error("{}Unexpected failure occurred attempting uninstall", logPrefix, e);
+            String stackTrace = ExceptionUtils.getStackTrace(e);
+            getHostName();
+            BootstrapStateUtil.setState(
+                    serviceDirectoryPath,
+                    BootstrapState.constructErrorState(executableVersion, state.installedVersion,
+                            String.format("[%s] %s:: %s", hostname, e.getMessage(), stackTrace)));
+        }
+
+    }
+
     private static InterProcessMutex createLock(Path serviceDirectoryPath) {
         return new InterProcessMutex(CamilleEnvironment.getCamille().getCuratorClient(), serviceDirectoryPath.append(
                 PathConstants.BOOTSTRAP_LOCK).toString());
@@ -257,6 +276,25 @@ public class BootstrapUtil {
         }
     }
 
+    public static class DestroyerAdaptor {
+        private final CustomerSpace space;
+        private final String service;
+        private final CustomerSpaceServiceDestroyer destroyer;
+
+        public DestroyerAdaptor(CustomerSpaceServiceDestroyer destroyer, CustomerSpace space, String service) {
+            this.space = space;
+            this.service = service;
+            Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                    service);
+            this.destroyer = BootstrapUtil.sandbox(destroyer, serviceDirectoryPath);
+
+        }
+
+        public boolean destory() {
+            return destroyer.destroy(space, service);
+        }
+    }
+
     public static CustomerSpaceServiceInstaller sandbox(final CustomerSpaceServiceInstaller installer,
             final Path serviceDirectoryPath) {
         return new CustomerSpaceServiceInstaller() {
@@ -305,6 +343,16 @@ public class BootstrapUtil {
                 BootstrapUtil.removeSystemFiles(toReturn);
                 toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
+            }
+        };
+    }
+
+    public static CustomerSpaceServiceDestroyer sandbox(final CustomerSpaceServiceDestroyer destroyer,
+            final Path serviceDirectoryPath) {
+        return new CustomerSpaceServiceDestroyer() {
+            @Override
+            public boolean destroy(CustomerSpace space, String serviceName) {
+                return destroyer.destroy(space, serviceName);
             }
         };
     }

@@ -2,6 +2,7 @@ package com.latticeengines.metadata.provisioning;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class MetadataComponent {
     public static final String componentName = "Metadata";
     private static final String versionString = "1.0";
     private MetadataInstaller installer = new MetadataInstaller();
+    private MetadataDestroyer destroyer = new MetadataDestroyer();
 
     public MetadataComponent() { }
 
@@ -37,6 +39,7 @@ public class MetadataComponent {
             ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
                     getInstaller(), //
                     new MetadataUpgrader(), //
+                    getDestroyer(),
                     null);
             ServiceWarden.registerService(componentName, serviceInfo);
         }
@@ -45,5 +48,10 @@ public class MetadataComponent {
     private CustomerSpaceServiceInstaller getInstaller() {
         installer.setComponentManager(componentManager);
         return installer;
+    }
+
+    private CustomerSpaceServiceDestroyer getDestroyer() {
+        destroyer.setComponentManager(componentManager);
+        return destroyer;
     }
 }

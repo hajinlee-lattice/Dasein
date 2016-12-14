@@ -115,8 +115,13 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected void deleteTenant(String contractId, String tenantId) throws Exception {
+        deleteTenant(contractId, tenantId, true);
+    }
+
+    protected void deleteTenant(String contractId, String tenantId, boolean deleteZookeeper) throws Exception {
         log.info(String.format("Begin deleting the tenant %s", tenantId));
-        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
+        String url = String.format("%s/admin/tenants/%s?contractId=%s&deleteZookeeper=%b", getRestHostPort(), tenantId,
+                contractId, deleteZookeeper);
         restTemplate.delete(url, new HashMap<>());
         log.info(String.format("Successfully deleted the tenant %s", tenantId));
     }
@@ -206,6 +211,22 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
             int numOfRetries) {
         BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
         while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0) {
+            numOfRetries--;
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Waiting for component state update interrupted", e);
+            }
+            state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        }
+        return state;
+    }
+
+    protected BootstrapState waitUntilStateIsNotUninstalling(String contractId, String tenantId, String serviceName,
+                                                        int numOfRetries) {
+        BootstrapState state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        while ((state.state.equals(BootstrapState.State.UNINSTALLING) ||
+                state.state.equals(BootstrapState.State.INITIAL))  && numOfRetries > 0) {
             numOfRetries--;
             try {
                 Thread.sleep(1000L);

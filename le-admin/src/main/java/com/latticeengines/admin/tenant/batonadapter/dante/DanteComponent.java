@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ public class DanteComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new DanteInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DanteUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new DanteDestroyer();
 
     private Map<String, RestApiClient> danteClients;
 
@@ -79,6 +81,11 @@ public class DanteComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

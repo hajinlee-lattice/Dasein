@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ public class BardJamsComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new BardJamsInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new BardJamsUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new BardJamsDestroyer();
     public static final String componentName = "BardJams";
 
     @PostConstruct
@@ -84,6 +86,12 @@ public class BardJamsComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        ((BardJamsDestroyer) destroyer).setBardJamsEntityMgr(bardJamsEntityMgr);
+        return destroyer;
     }
 
     @Override

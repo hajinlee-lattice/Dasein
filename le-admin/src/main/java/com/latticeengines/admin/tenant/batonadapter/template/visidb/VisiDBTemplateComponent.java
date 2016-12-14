@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLDestroyer;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ public class VisiDBTemplateComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new VisiDBTemplateInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBTemplateUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new VisiDBDLDestroyer();
     public static final String componentName = "VisiDBTemplate";
 
     @Autowired
@@ -75,6 +78,11 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        return destroyer;
     }
 
     @Override

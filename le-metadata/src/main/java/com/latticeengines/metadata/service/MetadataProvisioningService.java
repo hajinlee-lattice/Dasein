@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public interface MetadataProvisioningService {
 
     void provisionImportTables(CustomerSpace customerSpace);
+
+    void removeImportTables(CustomerSpace customerSpace);
 }

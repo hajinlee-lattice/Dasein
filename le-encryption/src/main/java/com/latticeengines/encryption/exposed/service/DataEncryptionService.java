@@ -10,4 +10,6 @@ public interface DataEncryptionService {
     void encrypt(CustomerSpace space);
 
     List<String> getEncryptedPaths(CustomerSpace space);
+
+    void deleteKey(CustomerSpace space);
 }

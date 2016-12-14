@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ public class PLSComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new PLSInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
+    private CustomerSpaceServiceDestroyer destroyer = new PLSDestroyer();
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
@@ -57,6 +59,12 @@ public class PLSComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
+    }
+
+    @Override
+    public CustomerSpaceServiceDestroyer getDestroyer() {
+        ((PLSDestroyer) destroyer).setTenantService(tenantService);
+        return destroyer;
     }
 
     @Override
