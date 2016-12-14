@@ -1,14 +1,11 @@
-package com.latticeengines.datacloud.core.service;
+package com.latticeengines.network.exposed.propdata;
 
 import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
-import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 
-public interface DimensionalQueryService {
-
-    Long findAttrId (DimensionalQuery query);
+public interface DimensionAttributenterface {
 
     List<CategoricalDimension> getAllDimensions();
 

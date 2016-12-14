@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.DimensionalQueryService;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
+import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -83,10 +84,23 @@ public class DimensionalQueryServiceImpl implements DimensionalQueryService {
         return null;
     }
 
-    // clone is required to detect ambiguous paths: more than one paths satisfying the qualifiers
-    // if we assume no ambiguity and want to remove the performance impact from clone
+    // clone is required to detect ambiguous paths: more than one paths
+    // satisfying the qualifiers
+    // if we assume no ambiguity and want to remove the performance impact from
+    // clone
     // we can skip clone.
     private Map<String, String> cloneQualifiers(Map<String, String> qualifiers) {
         return new HashMap<>(qualifiers);
     }
+
+    @Override
+    public List<CategoricalDimension> getAllDimensions() {
+        return attributeEntityMgr.getAllDimensions();
+    }
+
+    @Override
+    public List<CategoricalAttribute> getAllAttributes(Long rootId) {
+        return attributeEntityMgr.getAllAttributes(rootId);
+    }
+    
 }

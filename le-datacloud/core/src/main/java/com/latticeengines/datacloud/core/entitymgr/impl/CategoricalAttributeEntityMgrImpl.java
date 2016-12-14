@@ -1,7 +1,9 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 
 @Component("categoricalAttributeEntityMgrImpl")
-public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEntityMgr{
-
+public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEntityMgr {
     @Autowired
     private CategoricalAttributeDao attributeDao;
 
@@ -45,7 +46,6 @@ public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEn
         return attributeDao.findByKey(CategoricalAttribute.class, pid);
     }
 
-
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public CategoricalAttribute getAttribute(String attrName, String attrValue) {
@@ -54,6 +54,24 @@ public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEn
         } else {
             return null;
         }
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<CategoricalDimension> getAllDimensions() {
+        return dimensionDao.findAll();
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<CategoricalAttribute> getAllAttributes(Long parentId) {
+        CategoricalAttribute parentAttribute = getAttribute(parentId);
+        List<CategoricalAttribute> childAttributes = getChildren(parentAttribute.getPid());
+        if (CollectionUtils.isEmpty(childAttributes)) {
+            childAttributes = new ArrayList<CategoricalAttribute>();
+        }
+        childAttributes.add(0, parentAttribute);
+        return childAttributes;
     }
 
 }
