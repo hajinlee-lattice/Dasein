@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.domain.exposed.util.DataRuleUtils;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
@@ -66,11 +65,14 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Value("${pls.modeling.validation.min.dedupedrows:300}")
-    private long minDedupedRows;
+    @Value("${pls.modeling.validation.min.rows:300}")
+    private long minRows;
 
     @Value("${pls.modeling.validation.min.eventrows:50}")
     private long minPositiveEvents;
+
+    @Value("${pls..modeling.validation.min.negativerows:250}")
+    private long minNegativeEvents;
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
@@ -187,9 +189,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .inputProperties(inputProperties)
                 //
-                .minDedupedRows(minDedupedRows)
+                .minRows(minRows)
                 //
                 .minPositiveEvents(minPositiveEvents)
+                //
+                .minNegativeEvents(minNegativeEvents)
                 //
                 .transformationGroup(parameters.getTransformationGroup())
                 //

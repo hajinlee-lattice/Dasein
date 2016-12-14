@@ -65,8 +65,8 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(importData) //
                 .next(createTableImportReport) //
-                .next(dedupEventTable) //
                 .next(modelValidationWorkflow) //
+                .next(dedupEventTable) //
                 .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributes) //
                 .next(modelWorkflow) //

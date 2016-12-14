@@ -13,7 +13,10 @@ public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowRep
     private Long minPositiveEvents;
 
     @NotNull
-    private Long minDedupedRows;
+    private Long minNegativeEvents;
+
+    @NotNull
+    private Long minRows;
 
     public String getSourceTableName() {
         return sourceTableName;
@@ -31,11 +34,19 @@ public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowRep
         this.minPositiveEvents = minPositiveEvents;
     }
 
-    public Long getMinDedupedRows() {
-        return minDedupedRows;
+    public Long getMinNegativeEvents() {
+        return minNegativeEvents;
     }
 
-    public void setMinDedupedRows(Long minDedupedRows) {
-        this.minDedupedRows = minDedupedRows;
+    public void setMinNegativeEvents(Long minNegativeEvents) {
+        this.minNegativeEvents = minNegativeEvents;
+    }
+
+    public Long getMinRows() {
+        return minRows;
+    }
+
+    public void setMinRows(Long minRows) {
+        this.minRows = minRows;
     }
 }

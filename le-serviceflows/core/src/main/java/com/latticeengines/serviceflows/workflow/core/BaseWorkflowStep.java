@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -238,8 +238,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         saveReport(map);
         putObjectInContext(WorkflowContextConstants.REPORTS, map);
 
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
-                .getInternalResourceHostPort());
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         proxy.registerReport(report, customerSpace.toString());
     }
 
