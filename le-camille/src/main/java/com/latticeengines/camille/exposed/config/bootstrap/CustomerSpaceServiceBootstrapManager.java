@@ -168,7 +168,8 @@ public class CustomerSpaceServiceBootstrapManager {
             log.info("{}On entry to bootstrap", logPrefix);
             synchronized (this) {
                 log.info("{}Running bootstrap", logPrefix);
-                if(bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND)) {
+                if(bootstrapProperties != null &&
+                        bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND)) {
                     if (bootstrapProperties.get(BootstrapPropertyConstant.BOOTSTRAP_COMMAND).equals
                             (BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL)) {
                         destroy(executableVersion);

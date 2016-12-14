@@ -61,7 +61,8 @@ public class ServiceWarden {
                 ServiceScope serviceScope = new ServiceScope(message.serviceName, message.bootstrapProperties);
                 CustomerSpaceServiceScope cssScope = new CustomerSpaceServiceScope(message.space, message.serviceName,
                         message.bootstrapProperties);
-                if (!message.bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND) ||
+                if (message.bootstrapProperties == null ||
+                        !message.bootstrapProperties.containsKey(BootstrapPropertyConstant.BOOTSTRAP_COMMAND) ||
                         !message.bootstrapProperties.get(BootstrapPropertyConstant.BOOTSTRAP_COMMAND).equals
                                 (BootstrapPropertyConstant.BOOTSTRAP_UNINSTALL)) {
                     ServiceBootstrapManager.bootstrap(serviceScope);
