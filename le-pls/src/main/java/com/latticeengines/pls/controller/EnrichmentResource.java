@@ -251,7 +251,7 @@ public class EnrichmentResource {
     // ------------END for LeadEnrichment-------------------//
 
     // ------------START for statistics---------------------//
-    @RequestMapping(value = AM_STATS_PATH, //
+    @RequestMapping(value = AM_STATS_PATH + "/cube", //
             method = RequestMethod.POST, //
             headers = "Accept=application/json")
     @ResponseBody
@@ -261,7 +261,7 @@ public class EnrichmentResource {
         return createDummyCube();
     }
 
-    @RequestMapping(value = AM_STATS_PATH, //
+    @RequestMapping(value = AM_STATS_PATH + "/topn", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
