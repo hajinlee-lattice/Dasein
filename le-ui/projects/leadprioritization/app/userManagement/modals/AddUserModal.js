@@ -58,10 +58,10 @@ app.controller('AddUserController', function ($scope, $rootScope, $state, _, Res
             }
         } else if (currentLevel && currentLevel.ordinal == 3) {
             if(!isLatticeEmail(email)) {
-                $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
             }
             if(isLatticeEmail(email)) {
-                $scope.levelsToSelect.push(RightsUtility.accessLevel.EXTERNAL_ADMIN.name);
+                $scope.levelsToSelect.push(RightsUtility.accessLevel.INTERNAL_ADMIN.name);
             }
         }
         if($scope.user && $scope.user.AccessLevel) {
