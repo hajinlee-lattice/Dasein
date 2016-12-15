@@ -1,4 +1,4 @@
-// grid view multple of 12, dynamic across
+// grid view multple of 12 (24), dynamic across
 angular.module('lp.enrichmentwizard.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
@@ -6,7 +6,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
 
     var vm = this,
-        across = 3, // how many across in grid view
+        across = 4, // how many across in grid view
         approximate_pagesize = 25,
         pagesize = Math.round(approximate_pagesize / across) * across,
         enrichment_chunk_size = 5000;
@@ -70,12 +70,30 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         var sortPrefix = vm.sortPrefix.replace('+','');
         if(!vm.category) {
             return sortPrefix + vm.orders.category;
-        } else if(vm.subcategory) {
+        } else if(vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
             return sortPrefix + vm.orders.subcategory;
         } else {
             return sortPrefix + vm.orders.attribute;
         }
     }
+
+    vm.download_button = {
+        label: 'Download',
+        class: 'orange-button select-label',
+        icon: 'fa fa-chevron-down',
+        iconclass: 'orange-button select-more',
+        iconrotate: true
+    };
+
+    vm.download_button.items = [{ 
+        href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
+        label: vm.label.button_download,
+        icon: 'fa fa-file-o' 
+    },{
+        href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
+        label: vm.label.button_download_selected,
+        icon: 'fa fa-file-o' 
+    }];
 
     var stopGetEnrichments = false;
     $scope.$on('$destroy', function () {
@@ -121,6 +139,15 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             if (result != null && result.status === 200) {
                 vm.enrichments_loaded = true;
                 vm.enrichments = vm.enrichments.concat(result.data);
+                for(var i in result.data) {
+                    var _result = result.data[i];
+                    if(vm.enrichmentsObj[_result.Category]) {
+                        vm.enrichmentsObj[_result.Category].push(result.data[i]);
+                    } else if(_result.Category){
+                        vm.enrichmentsObj[_result.Category] = [];
+                        vm.enrichmentsObj[_result.Category].push(result.data[i]);
+                    }
+                }
                 numbersNumber = 0;
 
                 _store = result; // just a copy of the correct data strucuture and properties for later
@@ -145,11 +172,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         });
     }
 
+    vm.enrichmentsObj = {};
     var getEnrichmentCategories = function() {
         EnrichmentStore.getCategories().then(function(result) {
             vm.categories = result.data;
             _.each(vm.categories, function(value, key){
                 getEnrichmentSubcategories(value);
+                vm.enrichmentsObj[value] = [];
             });
             vm.enable_category_dropdown = true;
         });
@@ -418,7 +447,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     var subcategoryCountList = [];
     vm.subcategoryCount = function(category, subcategory) {
-        var filtered = vm.enrichments;
+        var filtered = vm.enrichmentsObj[category];
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -431,6 +460,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.subcategoryFilter = function(subcategory) {
+        //return true;
         if(!vm.enrichments_completed) {
             return true;
         }
@@ -447,7 +477,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.categoryCount = function(category) {
-        var filtered = vm.enrichments;
+        var filtered = vm.enrichmentsObj[category];
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -555,6 +585,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             el.siblings('.button.active').removeClass('active');
         }
     });
+
+    var c = 0;
+    var debugCounter = function(){
+        c++;
+        console.log('debugCounter: ', c);
+    }
+
 
     vm.init = function() {
         _resized();

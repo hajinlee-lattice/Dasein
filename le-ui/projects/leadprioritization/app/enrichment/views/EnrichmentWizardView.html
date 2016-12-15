@@ -44,14 +44,7 @@
                     </div>
                 </li>
                 <li class="download">
-                    <ul class="actions" ng-if="vm.enrichments_completed || 1">
-                        <li class="download-all">
-                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization={{vm.authToken}}">{{vm.label.button_download}}</a>
-                        </li>
-                        <li class="download-selected">
-                            <a href="/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization={{vm.authToken}}">{{vm.label.button_download_selected}}</a>
-                        </li>
-                    </ul>
+                    <menu-dropdown config="vm.download_button"></menu-dropdown>
                 </li>
             </ul>
         </div>
@@ -88,17 +81,19 @@
             </div>
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = (vm.subcategories[vm.category])) 
+                        | filter: vm.subcategoryFilter
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-                        | limitTo: vm.pagesize" 
+                        | limitTo: vm.pagesize 
+                        track by $index" 
                     class="subcategory" 
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
-                    <div class="box-inner {{vm.categoryClass(vm.category)}} border-top round-box"
+                    <div class="box-inner {{::vm.categoryClass(vm.category)}} border-top round-box"
                          ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
                             <div class="category-icon">
-                                <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
+                                <img ng-src="{{::vm.subcategoryIcon(vm.category, subcategory)}}" />
                             </div>
                             {{subcategory}}
                         </h2>
@@ -133,7 +128,7 @@
             </div>
             <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
                 <li class="box" 
-                    ng-repeat="enrichment in (filteredList = (vm.enrichments 
+                    ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category] 
                 | filter: vm.searchFields
                 | orderBy: vm.sortOrder()
                 | filter: { 
@@ -144,9 +139,10 @@
                             'Subcategory': vm.subcategory
                             })) 
                 | startFrom: (vm.metadata.current - 1) * vm.pagesize 
-                | limitTo: vm.pagesize" 
+                | limitTo: vm.pagesize 
+                track by enrichment.FieldNameInTarget" 
                 ng-class="{'active': enrichment.IsSelected}">
-                    <div class="box-inner {{vm.categoryClass(enrichment.Category)}} border-top round-box ngAnimate"
+                    <div class="box-inner {{::vm.categoryClass(enrichment.Category)}} border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
                             <ul class="tags">
@@ -155,7 +151,7 @@
                             </ul>
                             <h2 title="{{::enrichment.DisplayName}}">
                                 <div class="category-icon">
-                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico" />
+                                    <img ng-src="{{::vm.categoryIcon(enrichment.Category)}}" class="ico" />
                                 </div>
                                 <strong>{{::enrichment.DisplayName}}</strong>
                             </h2>
