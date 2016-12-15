@@ -124,6 +124,9 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         if (bucket == null) {
             return "";
         }
+        if (bucket.LowerInclusive > 0 && bucket.UpperExclusive == 0) {
+            bucket.UpperExclusive = null;
+        }
         var toReturn = null;
         var lowerValue;
         var upperValue;
