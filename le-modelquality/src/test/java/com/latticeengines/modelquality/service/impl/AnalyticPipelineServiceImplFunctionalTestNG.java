@@ -9,8 +9,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 
-public class AnalyticPipelineServiceImplFunctionalTestNG  extends ModelQualityFunctionalTestNGBase {
-    @Test(groups = "functional")
+public class AnalyticPipelineServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
+    @Test(groups = "functional", enabled = false)
     public void createLatestWithValidVersion() {
         try {
             AnalyticPipeline ap = analyticPipelineEntityMgr.getLatestProductionVersion();
@@ -19,7 +19,8 @@ public class AnalyticPipelineServiceImplFunctionalTestNG  extends ModelQualityFu
                 initialVersion = ap.getVersion();
             }
 
-            AnalyticPipelineServiceImpl spiedAnalyticPipelineService = spy((AnalyticPipelineServiceImpl) analyticPipelineService);
+            AnalyticPipelineServiceImpl spiedAnalyticPipelineService = spy(
+                    (AnalyticPipelineServiceImpl) analyticPipelineService);
             doReturn("z/9.9.8-SNAPSHOT").when(spiedAnalyticPipelineService).getVersion();
 
             ap = spiedAnalyticPipelineService.createLatestProductionAnalyticPipeline();
@@ -47,6 +48,5 @@ public class AnalyticPipelineServiceImplFunctionalTestNG  extends ModelQualityFu
             }
         }
     }
-
 
 }
