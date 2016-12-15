@@ -15,16 +15,22 @@ logger = logging.getLogger(name="evpipeline")
 
 def getDecoratedColumns(profile):
     stringColumns = dict()
-    continuousColumns = dict()
+    continuousColumnsMedian = dict()
+    continuousColumnsMax = dict()
+    continuousColumnsMin = dict()
     transform = encoder.HashEncoder()
 
     for key, value in profile.iteritems():
         if value[0]["Dtype"] == "STR":
             stringColumns[key] = transform
         else:
-            continuousColumns[key] = value[0]["median"]
+            continuousColumnsMedian[key] = value[0]["median"]
+            if "globalMaxV" in value[0]:
+                continuousColumnsMax[key] = value[0]["globalMaxV"]
+            if "globalMinV" in value[0]:
+                continuousColumnsMin[key] = value[0]["globalMinV"]
 
-    return (stringColumns, continuousColumns)
+    return (stringColumns, continuousColumnsMedian, continuousColumnsMax, continuousColumnsMin)
 
 def encodeCategoricalColumnsForMetadata(profile):
     for _, values in profile.iteritems():
@@ -33,7 +39,7 @@ def encodeCategoricalColumnsForMetadata(profile):
                 value["hashValue"] = encoder.encode(value["hashValue"])
 
 def setupPipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringColumns, targetColumn, params, pipelineProps=""):
-    (categoricalColumns, continuousColumns) = getDecoratedColumns(profile)
+    (categoricalColumns, continuousColumnsMedian, continuousColumnsMax, continuousColumnsMin) = getDecoratedColumns(profile)
     # stringColumns refer to the columns that are categorical from the physical schema
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
@@ -41,8 +47,8 @@ def setupPipeline(pipelineDriver, pipelineLib, profile, columnMetadata, stringCo
 
     steps = [EnumeratedColumnTransformStep(categoricalColumns), \
              ColumnTypeConversionStep(columnsToTransform), \
-             RevenueColumnTransformStep(OrderedDict(continuousColumns)), \
-             ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
+             RevenueColumnTransformStep(OrderedDict(continuousColumnsMedian)), \
+             ImputationStep(OrderedDict(continuousColumnsMedian), {}, [], [], OrderedDict(continuousColumnsMax), [], targetColumn)]
     pipeline = Pipeline(steps)
 
     scoringSteps = [x for x in steps if x.includeInScoringPipeline()]

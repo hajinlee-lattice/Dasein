@@ -93,6 +93,16 @@ def getSchema():
         "columnName" : "minV",
         "sqlType" : "8"
       }, {
+        "name" : "globalMaxV",
+        "type" : [ "double", "null" ],
+        "columnName" : "globalMaxV",
+        "sqlType" : "8"
+      }, {
+        "name" : "globalMinV",
+        "type" : [ "double", "null" ],
+        "columnName" : "globalMinV",
+        "sqlType" : "8"
+      }, {
         "name" : "mode",
         "type" : [ "string", "null" ],
         "columnName" : "mode",
@@ -452,6 +462,8 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["Dtype"] = "STR"
         datum["minV"] = None
         datum["maxV"] = None
+        datum["globalMinV"] = None
+        datum["globalMaxV"] = None
         datum["mean"] = None
         datum["median"] = None
         datum["mode"] = mode
@@ -509,6 +521,8 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["Dtype"] = "BND"
         datum["minV"] = band[0]
         datum["maxV"] = band[1]
+        datum["globalMinV"] = columnVector.min()
+        datum["globalMaxV"] = columnVector.max()
         datum["mean"] = mean
         datum["median"] = median
         datum["mode"] = None

@@ -50,19 +50,21 @@ class ColumnTypeConversionStep(PipelineStep):
         
 class ImputationStep(PipelineStep):
     columns = OrderedDict()
+    columnsMax = OrderedDict()
     imputationValues = {}
     targetColumn = ""    
     scalingArray = []
     meanColumn = []
     componentMatrix = []
       
-    def __init__(self, enumMappings, imputationValues, scalingArray, meanColumn, componentMatrix, targetCol):
+    def __init__(self, enumMappings, imputationValues, scalingArray, meanColumn, columnsMax, componentMatrix, targetCol):
         self.columns = enumMappings
         self.imputationValues = imputationValues
         self.targetColumn = targetCol
         self.scalingArray = scalingArray
         self.meanColumn = meanColumn
         self.componentMatrix = componentMatrix
+        self.columnsMax = columnsMax
      
     def transform(self, dataFrame, configMetadata, test):
         calculateImputationValues = True
@@ -155,8 +157,58 @@ class ImputationStep(PipelineStep):
             componentsMatrix = np.vstack((componentsMatrix, complementaryColumns))
 
         return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
-        
+    
     def __computeImputationValues(self, dataFrame, nullValues, calculateImputationValues):
+        outputFrame = dataFrame
+        if len(self.columns) <= 0 or not calculateImputationValues:
+            return dataFrame
+        imputedColumns = list(self.columns.keys())
+        
+        dret = self.defaultValuesForNumerical(imputedColumns)
+        for column in self.columns:
+            if column not in dataFrame:
+                continue
+            if column in nullValues and nullValues[column] == 0:
+                 continue
+            if column in dret['noImputation']:
+                print 'Not imputed column:' + column
+                continue
+            if column in dret['zeroValues']:
+                outputFrame[column] = outputFrame[column].fillna(0)
+                print 'Zero imputed column:' + column
+                continue
+            if column in dret['max']:
+                if column in columnsMax:
+                    outputFrame[column] = outputFrame[column].fillna(columnsMax[column])
+                else:
+                    outputFrame[column] = outputFrame[column].fillna(0)
+                print 'Max imputed column:' + column
+                continue
+            outputFrame[column] = outputFrame[column].fillna(0)
+            print 'Zero imputed column (rarely):' + column
+        return outputFrame
+    
+    def defaultValuesForNumerical(self, hd):  # includes float,integer,double
+        ProductStrings0 = ['RevenueMomentum3', 'Revenue', 'Units', 'RevenueRollingSum6', 'Span']
+        # SPAN SHOULD BE TREATED AS A CATEGORICAL VALUE, use median or use smallest non-zerovalue
+
+        # zeroMapx: list of all product derived variables in playmaker whose default value should be zero
+        # noImputation: this is a list of all fields for which imputation makes no sense
+        # spanValues: this is a list of all product values with span
+        zeroMapx = [x for x in hd if any([y.lower() in x.lower()  and 'product_' in x.lower() for y in ProductStrings0])]
+        noImputation = [x for x in hd if 'ext_' not in x.lower() and 'product_' not in x.lower() and '__revenue' not in x.lower()]
+        spanValues = [x for x in hd if 'product_' in x.lower() and '_span' in x.lower()]
+        # if len(spanValues) != 0:  print "ERROR: SPAN IS CATEGORICAL"
+        # hdx:  all variables not in previous 3, expect to be data cloud
+        hdx = [x for x in hd if 'ext_' in x.lower() and not any([x in y for y in [noImputation, zeroMapx, spanValues]])]
+        remainder = [x for x in hd if x not in zeroMapx + noImputation + spanValues + hdx]
+        dret = {}
+        dret['max'] = [x for x in hdx if 'rank' in x.lower() and 'change' not in x.lower()]
+        dret['zeroValues'] = zeroMapx + [x for x in hdx if x not in dret['max']]
+        dret['noImputation'] = noImputation
+        return dret
+        
+    def __computeImputationValues2(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
         if len(self.columns) > 0:
             expectedLabelValue = 0.0
@@ -283,7 +335,7 @@ class RevenueColumnTransformStep(PipelineStep):
         dataFrame[column] = dataFrame[column].apply(lambda x : x)
         dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
     
-        
+
 class EVModelStep(PipelineStep):
     model = None
     modelInputColumns = []
@@ -314,3 +366,4 @@ class EVModelStep(PipelineStep):
         else:
             outputFrame["PredictedRevenue"] = 0
         return outputFrame
+
