@@ -55,7 +55,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
         Set<String> columnsToRemove = new HashSet<>();
 
         for (DataRule dataRule : dataRules) {
-            if (dataRule.isEnabled()) {
+            if (dataRule.isEnabled() && dataRule.hasMandatoryRemoval()) {
                 List<String> columnNames = new ArrayList<>();
                 if (isDefault) {
                     Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS, String.class, List.class);
@@ -65,16 +65,16 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                         for (ColumnRuleResult result : results) {
                             if (result.getDataRuleName().equals(dataRule.getName())) {
                                 columnNames = result.getFlaggedColumnNames();
-                                dataRule.setColumnsToRemediate(columnNames);
+                                dataRule.setFlaggedColumnNames(columnNames);
                             }
                         }
                     }
                 } else {
-                    if (!CollectionUtils.isEmpty(dataRule.getColumnsToRemediate())) {
-                        columnNames = dataRule.getColumnsToRemediate();
+                    if (!CollectionUtils.isEmpty(dataRule.getFlaggedColumnNames())) {
+                        columnNames = dataRule.getFlaggedColumnNames();
                     }
                 }
-                log.info(String.format("Enabled Datarule %s flagged %d columns for remediation: %s",
+                log.info(String.format("Enabled mandatory Datarule %s flagged %d columns for remediation: %s",
                         dataRule.getName(), columnNames.size(), JsonUtils.serialize(columnNames)));
                 for (String columnName : columnNames) {
                     columnsToRemove.add(columnName);

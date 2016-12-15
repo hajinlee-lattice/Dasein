@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
-import com.latticeengines.domain.exposed.util.DataRuleUtils;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.ModelReviewService;
 import com.latticeengines.metadata.service.RuleResultService;
@@ -34,7 +33,6 @@ public class ModelReviewServiceImpl implements ModelReviewService {
     public ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName) {
         Table eventTable = metadataService.getTable(CustomerSpace.parse(customerSpace), eventTableName);
         List<DataRule> rules = eventTable.getDataRules();
-        DataRuleUtils.populateDataRuleDisplayNameAndDescriptions(rules);
 
         List<ColumnRuleResult> columnResults = ruleResultService.findColumnResults(modelId);
         List<RowRuleResult> rowResults = ruleResultService.findRowResults(modelId);
@@ -64,15 +62,15 @@ public class ModelReviewServiceImpl implements ModelReviewService {
         for (DataRule rule : rules) {
             ColumnRuleResult columnResult = ruleNameToColumnRuleResults.get(rule.getName());
             if (columnResult != null && columnResult.getFlaggedColumnNames() != null) {
-                Set<String> columnsToRemediateSet = new HashSet<>(rule.getColumnsToRemediate());
+                Set<String> columnsToReviewSet = new HashSet<>(rule.getFlaggedColumnNames());
                 Set<String> flaggedColumnNames = new HashSet<>(columnResult.getFlaggedColumnNames());
-                columnsToRemediateSet.retainAll(flaggedColumnNames);
-                List<String> columnsToRemediate = new ArrayList<>(columnsToRemediateSet);
-                rule.setColumnsToRemediate(columnsToRemediate);
+                columnsToReviewSet.retainAll(flaggedColumnNames);
+                List<String> columnsToReview = new ArrayList<>(columnsToReviewSet);
+                rule.setFlaggedColumnNames(columnsToReview);
             }
-            if (rule.isEnabled() && rule.getColumnsToRemediate().isEmpty()
+            if (rule.isEnabled() && rule.getFlaggedColumnNames().isEmpty()
                     && !columnResult.getFlaggedColumnNames().isEmpty()) {
-                rule.setColumnsToRemediate(columnResult.getFlaggedColumnNames());
+                rule.setFlaggedColumnNames(columnResult.getFlaggedColumnNames());
             }
         }
 

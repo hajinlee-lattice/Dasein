@@ -27,6 +27,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private MetadataService metadataService;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
@@ -70,20 +71,18 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         validateTable(deserializedTable);
     }
 
-
     private void addDataRules(Table table) {
         List<DataRule> dataRules = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            DataRule rule = new DataRule();
+            DataRule rule = new DataRule("rule" + i);
             rule.setTable(table);
 
-            List<String> columnsToRemediate = new ArrayList<>();
-            columnsToRemediate.add("Column" + i);
-            rule.setColumnsToRemediate(columnsToRemediate);
+            List<String> columnsToReview = new ArrayList<>();
+            columnsToReview.add("Column" + i);
+            rule.setFlaggedColumnNames(columnsToReview);
             rule.setDescription("desc");
             rule.setEnabled(true);
-            rule.setFrozenEnablement(false);
-            rule.setName("rule" + i);
+            rule.setMandatoryRemoval(false);
             Map<String, String> properties = new HashMap<>();
             properties.put("customdomains", "a.com, b.com, c.com");
             rule.setProperties(properties);

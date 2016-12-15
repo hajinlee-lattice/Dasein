@@ -50,12 +50,15 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
 
     features = params['schema']['features']
+    keys = params['schema']['keys']
     customerColumns = set()
     if columnMetadata is not None:
         for column in columnMetadata:
             if column['Tags'] is None or column['ColumnName'] is None:
                 continue
-            if column['Tags'][-1] in ['Internal', 'InternalTransform'] and column['ColumnName'] in features:
+            if column['ColumnName'] in keys or column['ColumnName'] == targetColumn:
+                continue
+            if column['Tags'][-1] in ['Internal'] and column['ColumnName'] in features:
                 customerColumns.add(column['ColumnName'])
 
     allColumns = categoricalColumns.copy()

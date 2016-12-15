@@ -22,8 +22,8 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
-import com.latticeengines.domain.exposed.modelreview.ModelReviewDataRule;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -98,8 +98,7 @@ public class ModelResource {
     public ResponseDocument<String> model(@PathVariable String modelName, //
             @RequestBody ModelingParameters parameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format(
-                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
@@ -116,15 +115,14 @@ public class ModelResource {
     @PreAuthorize("hasRole('Edit_PLS_Refine_Clone')")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
-        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s",
-                parameters.toString(), parameters.getDeduplicationType()));
+        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
+                parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());
 
         ModelSummary modelSummary = modelSummaryService
                 .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
 
-        SourceFile sourceFile = sourceFileService
-                .findByTableName(modelSummary.getTrainingTableName());
+        SourceFile sourceFile = sourceFileService.findByTableName(modelSummary.getTrainingTableName());
         if (sourceFile != null) {
             sourceFileService.copySourceFile(clone.getName(), sourceFile,
                     tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId()));
@@ -134,12 +132,11 @@ public class ModelResource {
 
         Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
                 modelSummary.getEventTableName());
-        List<Attribute> userRefinedAttributes = modelMetadataService.getAttributesFromFields(
-                parentModelEventTable.getAttributes(), parameters.getAttributes());
+        List<Attribute> userRefinedAttributes = modelMetadataService
+                .getAttributesFromFields(parentModelEventTable.getAttributes(), parameters.getAttributes());
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         return ResponseDocument.successResponse( //
-                modelWorkflowSubmitter
-                        .submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
+                modelWorkflowSubmitter.submit(clone.getName(), parameters, userRefinedAttributes, modelSummary)
                         .toString());
     }
 
@@ -153,14 +150,14 @@ public class ModelResource {
             @RequestParam(value = "pmmlfile") String pmmlFileName,
             @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
         if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format(
-                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             throw new RuntimeException(message);
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        String appId = pmmlModelWorkflowSubmitter.submit(modelName, modelDisplayName, moduleName,
-                pivotFileName, pmmlFileName, schemaInterpretation).toString();
+        String appId = pmmlModelWorkflowSubmitter
+                .submit(modelName, modelDisplayName, moduleName, pivotFileName, pmmlFileName, schemaInterpretation)
+                .toString();
         return ResponseDocument.successResponse(appId);
 
     }
@@ -186,58 +183,56 @@ public class ModelResource {
                 modelReplaceService.replaceModel(sourceModelId, targetTenantId, targetModelId));
     }
 
-    @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reviewmodel/{modelName}/{eventTableName}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the model review data rules and rule output for the model")
     public ResponseDocument<ModelReviewData> getModelReviewData(@PathVariable String modelName,
             @PathVariable String eventTableName) throws IOException {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ResponseDocument.successResponse(
-                metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
+        return ResponseDocument.successResponse(metadataProxy.getReviewData(tenant.getId(), modelName, eventTableName));
     }
 
-    @RequestMapping(value = "/modelreview/mocked/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelreview/mocked/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the data rules for model")
-    public ResponseDocument<List<ModelReviewDataRule>> getModelDataRules(
-            @PathVariable String modelId) throws IOException {
+    public ResponseDocument<List<DataRule>> getModelDataRules(@PathVariable String modelId) throws IOException {
         return ResponseDocument.successResponse(generateMockedDataRules());
     }
 
-    @RequestMapping(value = "/modelreview/attributes/mocked/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelreview/attributes/mocked/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
-    public ResponseDocument<List<VdbMetadataField>> getCustomModelAttributes(
-            @PathVariable String modelId) {
+    public ResponseDocument<List<VdbMetadataField>> getCustomModelAttributes(@PathVariable String modelId) {
         return ResponseDocument.successResponse(generateMockedAttributes());
     }
 
     @RequestMapping(value = "/reviewmodel/column", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create the column results")
-    public ResponseDocument<Boolean> createModelColumnResults(
-            @RequestBody List<ColumnRuleResult> columnRuleResults) {
-        return ResponseDocument
-                .successResponse(metadataProxy.createColumnResults(columnRuleResults));
+    public ResponseDocument<Boolean> createModelColumnResults(@RequestBody List<ColumnRuleResult> columnRuleResults) {
+        return ResponseDocument.successResponse(metadataProxy.createColumnResults(columnRuleResults));
     }
 
     @RequestMapping(value = "/reviewmodel/row", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Create the row results")
-    public ResponseDocument<Boolean> createModelRowResults(
-            @RequestBody List<RowRuleResult> rowRuleResults) {
+    public ResponseDocument<Boolean> createModelRowResults(@RequestBody List<RowRuleResult> rowRuleResults) {
         return ResponseDocument.successResponse(metadataProxy.createRowResults(rowRuleResults));
     }
 
-    @RequestMapping(value = "/reviewmodel/column/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reviewmodel/column/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the column results")
-    public ResponseDocument<List<ColumnRuleResult>> getColumnRuleResults(
-            @PathVariable String modelId) {
+    public ResponseDocument<List<ColumnRuleResult>> getColumnRuleResults(@PathVariable String modelId) {
         return ResponseDocument.successResponse(metadataProxy.getColumnResults(modelId));
     }
 
-    @RequestMapping(value = "/reviewmodel/row/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/reviewmodel/row/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the row results")
     public ResponseDocument<List<RowRuleResult>> getRowRuleResults(@PathVariable String modelId) {
@@ -304,46 +299,47 @@ public class ModelResource {
         METADATA_8.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_8.setTags("Internal");
         METADATA_8.setIsCoveredByOptionalRule(true);
-        METADATA_8.setAssociatedRules(
-                Arrays.asList(new String[] { "LowCoverage", "MissingPredictiveValues" }));
+        METADATA_8.setAssociatedRules(Arrays.asList(new String[] { "LowCoverage", "MissingPredictiveValues" }));
 
-        return Arrays.asList(new VdbMetadataField[] { METADATA_1, METADATA_2, METADATA_3,
-                METADATA_4, METADATA_5, METADATA_6, METADATA_7, METADATA_8 });
+        return Arrays.asList(new VdbMetadataField[] { METADATA_1, METADATA_2, METADATA_3, METADATA_4, METADATA_5,
+                METADATA_6, METADATA_7, METADATA_8 });
     }
 
     @SuppressWarnings("unchecked")
-    private List<ModelReviewDataRule> generateMockedDataRules() {
-        ModelReviewDataRule DATA_RULE_1 = new ModelReviewDataRule();
-        DATA_RULE_1.setName("LowCoverage");
+    private List<DataRule> generateMockedDataRules() {
+        DataRule DATA_RULE_1 = new DataRule("LowCoverage");
+        DATA_RULE_1.setEnabled(true);
+        DATA_RULE_1.setMandatoryRemoval(false);
         DATA_RULE_1.setDisplayName("Low Coverage");
         DATA_RULE_1.setDescription(
                 "This attribute is missing value for more than 98% of records, which causes scores to be less accurate");
-        DATA_RULE_1.setColumnsToRemediate(Arrays.asList(new String[] { "NumnberOfOffices" }));
+        DATA_RULE_1.setFlaggedColumnNames(Arrays.asList(new String[] { "NumnberOfOffices" }));
 
-        ModelReviewDataRule DATA_RULE_2 = new ModelReviewDataRule();
-        DATA_RULE_2.setName("MissingPredictiveValues");
+        DataRule DATA_RULE_2 = new DataRule("MissingPredictiveValues");
+        DATA_RULE_2.setEnabled(true);
+        DATA_RULE_2.setMandatoryRemoval(false);
         DATA_RULE_2.setDisplayName("Missing Values are predictive");
         DATA_RULE_2.setDescription(
                 "When this attribute is missing a value, it is more likely to convert. This often caues...");
-        DATA_RULE_2.setColumnsToRemediate(Arrays.asList(new String[] { "NumberOfOffices" }));
+        DATA_RULE_2.setFlaggedColumnNames(Arrays.asList(new String[] { "NumberOfOffices" }));
 
-        ModelReviewDataRule DATA_RULE_3 = new ModelReviewDataRule();
-        DATA_RULE_3.setName("ModelBias");
+        DataRule DATA_RULE_3 = new DataRule("ModelBias");
+        DATA_RULE_3.setEnabled(true);
+        DATA_RULE_3.setMandatoryRemoval(false);
         DATA_RULE_3.setDisplayName("Model Bias");
         DATA_RULE_3.setDescription(
                 "This attribute is introducing bias into the model. This mean it will more than look like it's improving the model during training");
-        DATA_RULE_3.setColumnsToRemediate(Arrays.asList(new String[] { "CompanyType" }));
+        DATA_RULE_3.setFlaggedColumnNames(Arrays.asList(new String[] { "CompanyType" }));
 
-        ModelReviewDataRule DATA_RULE_4 = new ModelReviewDataRule();
-        DATA_RULE_4.setName("TooManyValues");
+        DataRule DATA_RULE_4 = new DataRule("TooManyValues");
+        DATA_RULE_4.setEnabled(true);
+        DATA_RULE_4.setMandatoryRemoval(true);
         DATA_RULE_4.setDisplayName("Too many values");
         DATA_RULE_4.setDescription(
                 "This text attribute cannot be included in models because it has too many values, which causes scores to be less accurate. For text attributes, ...");
-        DATA_RULE_4.setColumnsToRemediate(Arrays.asList(new String[] { "NumberOfEmployees" }));
-        DATA_RULE_4.setIsMandatory(true);
+        DATA_RULE_4.setFlaggedColumnNames(Arrays.asList(new String[] { "NumberOfEmployees" }));
 
-        return Arrays.asList(
-                new ModelReviewDataRule[] { DATA_RULE_1, DATA_RULE_2, DATA_RULE_3, DATA_RULE_4 });
+        return Arrays.asList(new DataRule[] { DATA_RULE_1, DATA_RULE_2, DATA_RULE_3, DATA_RULE_4 });
     }
 
 }

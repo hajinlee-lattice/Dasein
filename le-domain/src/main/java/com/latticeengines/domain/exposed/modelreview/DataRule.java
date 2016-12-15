@@ -51,6 +51,10 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private String name;
 
     @JsonProperty
+    @Column(name = "MANDATORY_REMOVAL", nullable = false)
+    private boolean mandatoryRemoval;
+
+    @JsonProperty
     @Transient
     private String displayName;
 
@@ -59,10 +63,10 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private String description;
 
     @JsonProperty
-    @Column(name = "COLUMNS_REMEDIATE", nullable = true)
+    @Column(name = "FLAGGED_COLUMNS", nullable = true)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
-    private List<String> columnsToRemediate;
+    private List<String> flaggedColumnNames;
 
     @JsonProperty
     @Column(name = "PROPERTIES", nullable = true)
@@ -74,9 +78,18 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     @Column(name = "ENABLED", nullable = false)
     private boolean enabled;
 
-    @JsonProperty
-    @Transient
-    private boolean frozenEnablement;
+    public DataRule() {
+    }
+
+    public DataRule(String name) {
+        this.name = name;
+        this.mandatoryRemoval = false;
+        this.displayName = name;
+        this.description = name;
+        this.flaggedColumnNames = new ArrayList<String>();
+        this.properties = new HashMap<String, String>();
+        this.enabled = true;
+    }
 
     @Override
     public Long getPid() {
@@ -106,6 +119,14 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
         this.name = name;
     }
 
+    public boolean hasMandatoryRemoval() {
+        return mandatoryRemoval;
+    }
+
+    public void setMandatoryRemoval(boolean mandatoryRemoval) {
+        this.mandatoryRemoval = mandatoryRemoval;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
@@ -122,12 +143,12 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
         this.description = description;
     }
 
-    public List<String> getColumnsToRemediate() {
-        return columnsToRemediate;
+    public List<String> getFlaggedColumnNames() {
+        return flaggedColumnNames;
     }
 
-    public void setColumnsToRemediate(List<String> columnsToRemediate) {
-        this.columnsToRemediate = columnsToRemediate;
+    public void setFlaggedColumnNames(List<String> flaggedColumnNames) {
+        this.flaggedColumnNames = flaggedColumnNames;
     }
 
     public Map<String, String> getProperties() {
@@ -144,14 +165,6 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public boolean isFrozenEnablement() {
-        return frozenEnablement;
-    }
-
-    public void setFrozenEnablement(boolean isFrozenEnablement) {
-        this.frozenEnablement = isFrozenEnablement;
     }
 
     @Override

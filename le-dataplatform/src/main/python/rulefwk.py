@@ -24,7 +24,6 @@ class DataRulePipeline(Pipeline):
     def processResults(self, dataRulesLocalDir, dataFrame, targetColumn, idColumn = None):
         for step in self.pipelineSteps:
             logger.info("Processing results for DataRule " + step.__class__.__name__)
-
             step.logAndWriteResults(dataRulesLocalDir, dataFrame, targetColumn, idColumn)
 
 
@@ -110,7 +109,7 @@ class DataRule(PipelineStep):
         with self.getDataWriter(dataRulesLocalDir) as dataWriter:
             index = 1
             for itemID, ruleResult in results.iteritems():
-                if not ruleResult.isPassed() and itemID not in self.interfaceColumns:
+                if not ruleResult.isPassed():
                     self.appendDataWriterRow(index, itemID, dataWriter, dataFrame, targetColumn, idColumn)
                     index +=1
 
@@ -131,7 +130,7 @@ class DataRule(PipelineStep):
         recordWriter = io.DatumWriter(self.getSchema())
         outputFileName = self.__class__.__name__ + '_' + self.fileSuffix + '.avro'
         dataWriter = datafile.DataFileWriter(codecs.open(dataRulesLocalDir + outputFileName, 'wb'),
-                recordWriter, writers_schema=avroSchema, codec='deflate')
+                recordWriter, writers_schema=self.getSchema(), codec='deflate')
         return dataWriter
 
 

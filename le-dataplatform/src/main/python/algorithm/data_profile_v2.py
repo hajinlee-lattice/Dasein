@@ -197,7 +197,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 
 
     attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[],
-                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
+                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DistinctValue":[]}
 
     otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
     categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)
@@ -378,8 +378,8 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
-            if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
-            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DiscreteValue' if not isnull(x) else None)
+            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
+            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DistinctValue' if not isnull(x) else None)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])

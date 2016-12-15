@@ -115,25 +115,25 @@ public class ModelingServiceImplUnitTestNG {
         Map<String, String> propA = new HashMap<>();
         propA.put("threshold", "200");
         propA.put("limit", "10");
-        DataRule ruleA = new DataRule();
-        ruleA.setName("RuleA");
+        DataRule ruleA = new DataRule("RuleA");
         ruleA.setEnabled(true);
+        ruleA.setMandatoryRemoval(false);
         ruleA.setProperties(propA);
         dataRules.add(ruleA);
 
         Map<String, String> propB = new HashMap<>();
         propB.put("Battr", "200");
         propB.put("Battr2", "10");
-        DataRule ruleB = new DataRule();
-        ruleB.setName("RuleB");
+        DataRule ruleB = new DataRule("RuleB");
         // confirm that rule enablement does not impact review configuration
         ruleB.setEnabled(false);
+        ruleB.setMandatoryRemoval(true);
         ruleB.setProperties(propB);
         dataRules.add(ruleB);
 
-        DataRule ruleC = new DataRule();
-        ruleC.setName("RuleC");
+        DataRule ruleC = new DataRule("RuleC");
         ruleC.setEnabled(true);
+        ruleC.setMandatoryRemoval(false);
         dataRules.add(ruleC);
 
         String pipelineProps = modelingService.getReviewPipelineProps(dataRules);

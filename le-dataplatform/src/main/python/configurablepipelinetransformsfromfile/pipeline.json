@@ -15,20 +15,18 @@
       },
       "ColumnTransformFilePath": "addtitleattributesstep.py"
     },
-    "RemediateDataRulesStep": {
+    "HighNumberUniqueValuesRemovalStep": {
       "KeyWhenSortingByAscending": "2",
-      "Name": "remediatedatarulesstep",
-      "MainClassName": "RemediateDataRulesStep",
+      "Name": "highnumberuniquevaluesremovalstep",
+      "MainClassName": "HighNumberUniqueValuesRemovalStep",
       "UniqueColumnTransformName": "",
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {
-        "params": "params",
-        "enabledRules": {
-            "PopulatedRowCountDS": [],
-            "UniqueValueCountDS": []
-        }
+        "maxNumberUniqueValues": 200,
+        "categoricalColumns": "categoricalColumns",
+        "params": "params"
       },
-      "ColumnTransformFilePath": "remediatedatarulesstep.py"
+      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
     "PivotStep": {
       "KeyWhenSortingByAscending": "3",
@@ -85,21 +83,8 @@
       },
       "ColumnTransformFilePath": "imputationstep.py"
     },
-    "HighNumberUniqueValuesRemovalStep": {
-      "KeyWhenSortingByAscending": "7",
-      "Name": "highnumberuniquevaluesremovalstep",
-      "MainClassName": "HighNumberUniqueValuesRemovalStep",
-      "UniqueColumnTransformName": "",
-      "OperatesOnColumns": [],
-      "NamedParameterListToInit": {
-        "maxNumberUniqueValues": 200,
-        "categoricalColumns": "categoricalColumns",
-        "params": "params"
-      },
-      "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
-    },
     "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": "8",
+      "KeyWhenSortingByAscending": "7",
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -112,7 +97,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": "9",
+      "KeyWhenSortingByAscending": "8",
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",

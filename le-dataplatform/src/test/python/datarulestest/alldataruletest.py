@@ -16,24 +16,7 @@ class AllDataRuleTest(TestBase):
     @classmethod
     def setUpClass(cls):
         cls.logger.info("=========Current test: " + str(cls) + " ===========")
-        cls.eventtable_mulesoft = DataRuleEventTable(
-                'Mulesoft NA',
-                'Mulesoft_Migration_LP3_ModelingLead_ReducedRows_Training_20160624_155355.avro')
-        cls.eventtable_telogis = DataRuleEventTable(
-                'Telogis POC',
-                'Telogis_POC_Training.avro')
-        cls.eventtable_hostingcom = DataRuleEventTable(
-                'Hosting.com POC',
-                'Hostingcom_POC_Training.avro')
-        cls.eventtable_alfresco = DataRuleEventTable(
-                'Alfresco',
-                'Alfresco_SFDC_LP3_ModelingLead_ReducedRowsEnhanced_Training_20160712_125241.avro')
-        cls.eventtable_nginx = DataRuleEventTable(
-                'NGINX',
-                'NGINX_PLS_LP3_ModelingLead_ReducedRowsEnhanced_Training_20160712_125224.avro')
-        cls.eventtable_seagate = DataRuleEventTable(
-                'Seagate',
-                'Seagate.avro')
+        cls.eventtable_mulesoft = DataRuleEventTable('Mulesoft NA', 'allTraining_MulesoftNA.avro', ['Id'], 'metadata_MulesoftNA.avsc', 'profile_v1_MulesoftNA.avro')
 
     @classmethod
     def tearDownClass(cls):
@@ -80,14 +63,13 @@ class AllDataRuleTest(TestBase):
         self.logger.info('* ALL COLUMNS TO REMOVE ({0} TOTAL):\n{1}'.format(len(colstoremove), colstr))
 
     def testDistinctValueCount(self):
-        for et in [self.eventtable_nginx]:
+        for et in [self.eventtable_mulesoft]:
             self.logger.info('________________________________________\n' + \
                         '                                                     ' + \
                         'DistinctValueCount: Using dataset {}'.format(et.getName()))
-            columns = et.getAllColsAsDict()
+            columns = et.getCustomerCols()
             rule = DistinctValueCount(columns)
-            columnMetadata = {}
-            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), columnMetadata, None, 'all')
+            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), et.getColumnMetadata(), et.getProfile(), 'all')
 
     def _testCombination(self):
         for et in [self.eventtable_hostingcom]:

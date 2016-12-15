@@ -193,8 +193,8 @@ public class ModelingServiceExecutor {
                 if (dataRule.isEnabled()) {
                     enabledRules.put(
                             dataRule.getName(),
-                            dataRule.getColumnsToRemediate() == null ? new ArrayList<String>() : dataRule
-                                    .getColumnsToRemediate());
+                            dataRule.getFlaggedColumnNames() == null ? new ArrayList<String>() : dataRule
+                                    .getFlaggedColumnNames());
                 }
             }
             enabledRulesProp = String.format("remediatedatarulesstep.enabledRules=%s",

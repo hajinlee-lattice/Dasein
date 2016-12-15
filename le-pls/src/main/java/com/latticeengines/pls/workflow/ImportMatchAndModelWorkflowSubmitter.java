@@ -1,6 +1,5 @@
 package com.latticeengines.pls.workflow;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +27,10 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
-import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
+import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -206,7 +205,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .moduleName(moduleName != null ? moduleName : null) //
                 .runTimeParams(parameters.runTimeParams) //
                 .isDefaultDataRules(true) //
-                .dataRules(createDefaultDataRules(sourceFile.getSchemaInterpretation()));
+                .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD));
 
         if (parameters.getDeduplicationType() == DedupType.ONELEADPERDOMAIN) {
             builder.dedupTargetTableName(sourceFile.getTableName() + "_deduped");
@@ -264,13 +263,4 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         trainingTable.setAttributes(attrs);
         metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);
     }
-
-    private List<DataRule> createDefaultDataRules(SchemaInterpretation schemaInterpretation) {
-        List<DataRule> defaultRules = new ArrayList<DataRule>();
-
-        log.info("Do not create any default data rules.");
-
-        return defaultRules;
-    }
-
 }

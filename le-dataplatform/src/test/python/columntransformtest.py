@@ -15,7 +15,6 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
         self.checkThatTransformsDontThrowExceptions()
         self.assertNamedParameterListStatic()
-        self.assertSortingOfTransform(pipeline)
 
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePath)
@@ -127,29 +126,6 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         self.assertIsNone(namedParameterList["orderedDictContinuousColumns"], "OrderedDictContinuousolumn should be None")
         self.assertTrue(isinstance(namedParameterList["emptyDictionary"], dict), "Couldn't create Empty Dictionary")
         self.assertTrue(isinstance(namedParameterList["emptyList"], list), "Couldn't create Empty List")
-
-    def assertSortingOfTransform(self, pipeline):
-        for i, step in enumerate(pipeline):
-            print i, step
-
-            if i == 0:
-                self.assertEquals(step.__class__.__name__ , "AddTitleAttributesStep")
-            if i == 1:
-                self.assertEquals(step.__class__.__name__ , "RemediateDataRulesStep")
-            if i == 2:
-                self.assertEquals(step.__class__.__name__ , "PivotStep")
-            if i == 3:
-                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
-            if i == 4:
-                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
-            if i == 5:
-                self.assertEquals(step.__class__.__name__ , "ImputationStep")
-            if i == 6:
-                self.assertEquals(step.__class__.__name__ , "HighNumberUniqueValuesRemovalStep")
-            if i == 7:
-                self.assertEquals(step.__class__.__name__ , "FeatureSelectionStep")
-            if i == 8:
-                self.assertEquals(step.__class__.__name__ , "ExportDataFrameStep")
 
     def assertSortingOfEVTransform(self, pipeline):
         for i, step in enumerate(pipeline):

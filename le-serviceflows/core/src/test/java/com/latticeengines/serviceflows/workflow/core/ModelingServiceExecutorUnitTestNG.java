@@ -19,23 +19,24 @@ public class ModelingServiceExecutorUnitTestNG {
         ModelingServiceExecutor modelingServiceExecutor = new ModelingServiceExecutor(bldr);
 
         List<DataRule> dataRules = new ArrayList<>();
-        DataRule ruleA = new DataRule();
-        ruleA.setName("RuleA");
+        DataRule ruleA = new DataRule("RuleA");
+        ruleA.setMandatoryRemoval(false);
         ruleA.setEnabled(true);
-        ruleA.setColumnsToRemediate(Arrays.asList("ColA", "ColB", "ColC"));
+        ruleA.setFlaggedColumnNames(Arrays.asList("ColA", "ColB", "ColC"));
         ruleA.setProperties(ImmutableMap.of("k1", "v1", "k2", "v2"));
         dataRules.add(ruleA);
-        DataRule ruleB = new DataRule();
-        ruleB.setName("RuleB");
+        DataRule ruleB = new DataRule("RuleB");
+        ruleB.setMandatoryRemoval(false);
         ruleB.setEnabled(false);
         dataRules.add(ruleB);
-        DataRule ruleC = new DataRule();
-        ruleC.setName("RuleC");
+        DataRule ruleC = new DataRule("RuleC");
+        ruleC.setMandatoryRemoval(false);
         ruleC.setEnabled(true);
         dataRules.add(ruleC);
 
         String result = modelingServiceExecutor.getEnabledRulesAsPipelineProp(dataRules);
-        assertEquals(result, "remediatedatarulesstep.enabledRules={\"RuleA\":[\"ColA\",\"ColB\",\"ColC\"],\"RuleC\":[]}");
+        assertEquals(result,
+                "remediatedatarulesstep.enabledRules={\"RuleA\":[\"ColA\",\"ColB\",\"ColC\"],\"RuleC\":[]}");
     }
 
 }

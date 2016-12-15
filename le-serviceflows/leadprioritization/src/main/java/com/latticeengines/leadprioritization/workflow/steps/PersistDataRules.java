@@ -69,7 +69,7 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
                     for (ColumnRuleResult result : results) {
                         if (result.getDataRuleName().equals(dataRule.getName())) {
                             columnNames = result.getFlaggedColumnNames();
-                            dataRule.setColumnsToRemediate(columnNames);
+                            dataRule.setFlaggedColumnNames(columnNames);
                         }
                     }
                 }
@@ -97,8 +97,7 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
 
             List<ColumnRuleResult> columnResults = JsonUtils.convertList(eventToColumnResults.get(event),
                     ColumnRuleResult.class);
-            List<RowRuleResult> rowResults = JsonUtils
-                    .convertList(eventToColumnResults.get(event), RowRuleResult.class);
+            List<RowRuleResult> rowResults = JsonUtils.convertList(eventToRowResults.get(event), RowRuleResult.class);
             setModelIdAndTenantOnRuleResults(columnResults, modelId, tenant);
             setModelIdAndTenantOnRuleResults(rowResults, modelId, tenant);
             metadataProxy.createColumnResults(columnResults);
@@ -106,7 +105,8 @@ public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
         }
     }
 
-    private void setModelIdAndTenantOnRuleResults(List<? extends BaseRuleResult> results, String modelId, Tenant tenant) {
+    private void setModelIdAndTenantOnRuleResults(List<? extends BaseRuleResult> results, String modelId,
+            Tenant tenant) {
         for (BaseRuleResult result : results) {
             result.setModelId(modelId);
             result.setTenant(tenant);
