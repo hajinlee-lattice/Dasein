@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.VersionComparisonUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -217,21 +218,20 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         } catch (IOException e) {
             log.error("Failed to parse model details KeyValue", e);
         }
-        JsonNode latticeGT200DiscreteValueFixed = details.get("LATTICEGT200DiscreteValueFixed");
-        if (latticeGT200DiscreteValueFixed != null) {
+        JsonNode noPredictorsWithMoreThan200DistinctValues = details.get("NoPredictorsWithMoreThan200DistinctValues");
+        if (noPredictorsWithMoreThan200DistinctValues != null) {
             return;
         }
-        ArrayNode predictors = (ArrayNode) details.get("Predictors");
-        List<Integer> predictorsToRemove = new ArrayList<>();
-        for (int i = 0; i < predictors.size(); i++) {
-            JsonNode predictor = predictors.get(i);
+        ArrayNode predictorsNodeOrig = (ArrayNode) details.get("Predictors");
+        ArrayNode predictorsNodeModified = JsonNodeFactory.instance.arrayNode();
+        for (JsonNode predictorNode : predictorsNodeOrig) {
             Boolean removePredictor = false;
-            ArrayNode elements = (ArrayNode) predictor.get("Elements");
+            ArrayNode elements = (ArrayNode) predictorNode.get("Elements");
             for (JsonNode element : elements) {
                 ArrayNode values = (ArrayNode) element.get("Values");
                 for (JsonNode valueNode : values) {
                     String value = valueNode.asText();
-                    if (value.equals("LATTICE_GT200_DiscreteValue")) {
+                    if (value.equals("LATTICE_GT200_DiscreteValue") || value.equals("LATTICE_GT200_DistinctValue")) {
                         removePredictor = true;
                         break;
                     }
@@ -240,15 +240,12 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
                     break;
                 }
             }
-            if (removePredictor) {
-                predictorsToRemove.add(i);
+            if (!removePredictor) {
+                predictorsNodeModified.add(predictorNode);
             }
         }
-        for (Integer i : predictorsToRemove) {
-            predictors.remove(i);
-        }
-        details.put("LATTICEGT200DiscreteValueFixed", BooleanNode.TRUE);
-        details.replace("Predictors", predictors);
+        details.put("Predictors", predictorsNodeModified);
+        details.put("NoPredictorsWithMoreThan200DistinctValues", BooleanNode.TRUE);
         keyValue.setPayload(details.toString());
         keyValueEntityMgr.update(keyValue);
     }
