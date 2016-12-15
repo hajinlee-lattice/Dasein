@@ -22,7 +22,7 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
     public DataCloudVersion latestApprovedForMajorVersion(String majorVersion) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
-                "from %s where MajorVersion = :majorVersion and Status = '%s' order by CreateDate desc",
+                "from %s where MajorVersion = :majorVersion and Status = '%s' order by Version desc",
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
         Query query = session.createQuery(queryStr);
         query.setString("majorVersion", majorVersion);

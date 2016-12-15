@@ -39,32 +39,32 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
 
     @Test(groups = "functional")
     public void testLatestApproved() {
-        DataCloudVersion version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("1.0.12345");
+        DataCloudVersion version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("98.0.12345");
         Assert.assertNotNull(version);
-        Assert.assertEquals(version.getMajorVersion(), "1.0");
-        Assert.assertEquals(version.getVersion(), "1.0.0");
+        Assert.assertEquals(version.getMajorVersion(), "98.0");
+        Assert.assertEquals(version.getVersion(), "98.0.1");
 
-        version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("1.0");
+        version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("98.0");
         Assert.assertNotNull(version);
-        Assert.assertEquals(version.getMajorVersion(), "1.0");
-        Assert.assertEquals(version.getVersion(), "1.0.0");
+        Assert.assertEquals(version.getMajorVersion(), "98.0");
+        Assert.assertEquals(version.getVersion(), "98.0.1");
     }
 
     private List<DataCloudVersion> prepareVersions() {
         DataCloudVersion version1 = new DataCloudVersion();
-        version1.setVersion("1.0.0");
+        version1.setVersion("98.0.0");
         version1.setCreateDate(new Date());
         version1.setAccountMasterHdfsVersion("version1");
         version1.setAccountLookupHdfsVersion("version1");
-        version1.setMajorVersion("1.0");
+        version1.setMajorVersion("98.0");
         version1.setStatus(DataCloudVersion.Status.APPROVED);
 
         DataCloudVersion version2 = new DataCloudVersion();
-        version2.setVersion("1.0.1");
+        version2.setVersion("98.0.1");
         version2.setCreateDate(new Date());
         version2.setAccountMasterHdfsVersion("version2");
         version2.setAccountLookupHdfsVersion("version2");
-        version2.setMajorVersion("1.0");
+        version2.setMajorVersion("98.0");
         version2.setStatus(DataCloudVersion.Status.APPROVED);
 
         return Arrays.asList(version1, version2);
