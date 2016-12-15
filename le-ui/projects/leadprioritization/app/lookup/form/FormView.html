@@ -1,213 +1,179 @@
 <section class="container setup-import">
-    <form name="uploadForm" ng-controller="csvImportController as vm" novalidate>
+    <form name="AccountLookupForm" novalidate>
         <div class="row">
-            <div class="global-error local-error" data-ng-show="vm.showImportError">
-                {{vm.importErrorMsg}}
-            </div>
             <div class="columns eight offset-two box-outline">
                 <div class="section-header">
-                    <h4>Account Lookup</h4>
-                    <h5>At least one field marked in orange is required</h5>
+                    <h4>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_HEADER') }}</h4>
+                    <h5>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_SUBHEADER') }}</h5>
                 </div>
 
                 <hr size="1" />
 
                 <div class="section-body with-padding">
                     <div class="form-group">
-                      <div class="toggle-check">
-                        <label>
-                            <input type="checkbox" value="SalesforceAccount" ng-model="vm.accountLeadCheck" ng-change="vm.changeType()" />
-                            Fuzzy Match
-                            <span 
-                              tooltips 
-                              tooltip-template="Fuzzy Match?"
-                              tooltip-size="small"
-                              tooltip-side="bottom"
-                              tooltip-close-button="false" 
-                              class="more-info">&#105;</span>
-                        </label>
-                      </div>          
+                        <div class="toggle-check">
+                            <label>
+                                <input type="checkbox" value="true" ng-model="vm.request.record.IsFuzzy" />
+                                {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_FUZZY') }}
+                                <span 
+                                  tooltips 
+                                  tooltip-template="{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_FUZZY_TOOLTIP') }}"
+                                  tooltip-size="small"
+                                  tooltip-side="bottom"
+                                  tooltip-close-button="false" 
+                                  class="more-info">&#105;</span>
+                            </label>
+                        </div>          
                     </div>
                     
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                      <label>Website Address</label>
-                      <input 
-                        type="text" 
-                        class="form-control required" 
-                        name="modelDisplayName"
-                        ng-model="vm.modelDisplayName"
-                        ng-value="vm.modelDisplayName"
-                        placeholder="Ex: www.domain.com" />
-                    </div>
-
-                    <div class="row">
-                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>D-U-N-S Number</label>
-                          <input 
+                    <div class="form-group">
+                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_WEBSITE') }}</label>
+                        <input 
                             type="text" 
                             class="form-control required" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
-                            placeholder="" />
+                            name="WebsiteAddress"
+                            ng-model="vm.request.record.WebsiteAddress"
+                            placeholder="Ex: www.domain.com" />
+                    </div>
+
+                    <div class="row">
+                        <div class="columns six form-group">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_DUNSNUMBER') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control required" 
+                                name="DUNSNumber"
+                                ng-model="vm.request.record.DUNSNumber"
+                                placeholder="" />
                         </div>
                         
-                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>Lattice ID</label>
-                          <input 
+                        <div class="columns six offset-six form-group align-right">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_LATTICEID') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control required" 
+                                name="Id"
+                                ng-model="vm.request.record.Id"
+                                placeholder="" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_EMAIL') }}</label>
+                        <input 
                             type="text" 
                             class="form-control required" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
+                            name="Email"
+                            ng-model="vm.request.record.Email"
+                            placeholder="Ex: anything@domain.com" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_COMPANYNAME') }}</label>
+                        <input 
+                            type="text" 
+                            class="form-control required" 
+                            name="CompanyName"
+                            ng-model="vm.request.record.CompanyName"
                             placeholder="" />
-                        </div>
                     </div>
                     
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                      <label>Email Address</label>
-                      <input 
-                        type="text" 
-                        class="form-control required" 
-                        name="modelDisplayName"
-                        ng-model="vm.modelDisplayName"
-                        ng-value="vm.modelDisplayName"
-                        placeholder="Ex: anything@domain.com" />
-                    </div>
-                    
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                      <label>Company Name</label>
-                      <input 
-                        type="text" 
-                        class="form-control required" 
-                        name="modelDisplayName"
-                        ng-model="vm.modelDisplayName"
-                        ng-value="vm.modelDisplayName"
-                        placeholder="" />
-                    </div>
-                    
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                      <label>City</label>
-                      <input 
-                        type="text" 
-                        class="form-control" 
-                        name="modelDisplayName"
-                        ng-model="vm.modelDisplayName"
-                        ng-value="vm.modelDisplayName"
-                        placeholder="" />
+                    <div class="form-group">
+                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CITY') }}</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            name="City"
+                            ng-model="vm.request.record.City"
+                            placeholder="" />
                     </div>
 
                     <div class="row">
-                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>State</label>
-                          <input 
-                            type="text" 
-                            class="form-control" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
-                            placeholder="" />
+                        <div class="columns six form-group">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_STATE') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="State"
+                                ng-model="vm.request.record.State"
+                                placeholder="" />
                         </div>
                         
-                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>Zip</label>
-                          <input 
-                            type="text" 
-                            class="form-control" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
-                            placeholder="Ex: 12345" />
+                        <div class="columns six offset-six form-group align-right">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_ZIP') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="Zip"
+                                ng-model="vm.request.record.Zip"
+                                placeholder="Ex: 12345" />
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="columns six form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>County</label>
-                          <input 
-                            type="text" 
-                            class="form-control" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
-                            placeholder="" />
+                        <div class="columns six form-group">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_COUNTY') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="County"
+                                ng-model="vm.request.record.County"
+                                placeholder="" />
                         </div>
                         
-                        <div class="columns six offset-six form-group align-right" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                          <label>Phone Number</label>
-                          <input 
-                            type="text" 
-                            class="form-control" 
-                            name="modelDisplayName"
-                            ng-model="vm.modelDisplayName"
-                            ng-value="vm.modelDisplayName"
-                            placeholder="Ex: 999-555-1234" />
+                        <div class="columns six offset-six form-group align-right">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_PHONE') }}</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                name="PhoneNumber"
+                                ng-model="vm.request.record.PhoneNumber"
+                                placeholder="Ex: 999-555-1234" />
                         </div>
-                    </div>
-                    
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                      <label>City</label>
-                      <input 
-                        type="text" 
-                        class="form-control" 
-                        name="modelDisplayName"
-                        ng-model="vm.modelDisplayName"
-                        ng-value="vm.modelDisplayName"
-                        placeholder="" />
                     </div>
                 </div>
 
                 <hr />
 
                 <div class="section-body with-padding">
-                    <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelDisplayName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.modelDisplayName.$pristine }">
-                        <label>Select a Model (optional)
+                    <div class="form-group">
+                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_MODELSELECT') }}
                             <span 
-                              tooltips 
-                              tooltip-template="Select a model from the drop down"
-                              tooltip-size="small"
-                              tooltip-side="bottom"
-                              tooltip-close-button="false" 
-                              class="more-info">&#105;</span>
+                                tooltips 
+                                tooltip-template="{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_MODELSELECT_TOOLTIP') }}"
+                                tooltip-size="small"
+                                tooltip-side="bottom"
+                                tooltip-close-button="false" 
+                                class="more-info">&#105;</span>
                         </label>
-                        <select name="SelectModel"
+                        <select name="modelId"
                                 class="form-control"
-                                ng-model="field.userField"
-                                ng-change="vm.changeLatticeField(field, field.userField)">
-                            <option value="{{ vm.ignoredFieldLabel }}"
-                                    ng-if="field.userField && field.userField != vm.ignoredFieldLabel""
-                                    ng-selected="!field.userField">
-                                {{ vm.ignoredFieldLabel }}
-                            </option>
-                            <option value="{{ field.userField }}"
-                                    ng-selected="true">
-                                {{ field.userField }}
-                            </option>
-                            <option value="{{ AvailableField }}"
-                                    ng-repeat="AvailableField in vm.AvailableFields"
-                                    ng-if="AvailableField != field.userField">
-                                {{ AvailableField }}
+                                ng-model="vm.request.modelId">
+                            <option value="{{ model.Id }}"
+                                    ng-repeat="model in vm.models"
+                                    ng-if="model.Status == 'Active'">
+                                {{ model.DisplayName }}
                             </option>
                         </select>
                     </div>
                 </div>
 
-                <hr size="1" />
+                <hr />
                 
                 <div class="section-actions container row form-actions">
                     <div class="pull-left">
                         <button 
                             type="button" 
                             class="button white-button block-button"
-                            ng-click="vm.cancelJob()">
-                          {{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
+                            ng-click="vm.cancel()">
+                          {{::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CANCEL')}}</button>
                     </div>
                     <div class="pull-right">
                         <button 
                             type="button" 
-                            ui-sref="home.lookup.tabs"
-                            class="button orange-button block-button">
-                          {{::vm.ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_NEXT')}}
+                            ng-click="vm.next()"
+                            class="button blue-button block-button">
+                          {{::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_NEXT')}}
                         </button>
                     </div>
                 </div>

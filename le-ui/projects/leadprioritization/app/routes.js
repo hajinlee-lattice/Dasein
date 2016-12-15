@@ -1065,6 +1065,17 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud'
             },
+            resolve: {
+                Models: function($q, ModelStore) {
+                    var deferred = $q.defer();
+
+                    ModelStore.getModels().then(function(data) {
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -1073,6 +1084,8 @@ angular
 
                 },
                 "main@": {
+                    controller: 'LookupFormController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/lookup/form/FormView.html'
                 }
             }
@@ -1083,12 +1096,29 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud'
             },
-            redirectTo: 'home.lookup.tabs.response',
+            resolve: {
+                LookupResponse: function($q, LookupService, LookupStore) {
+                    var deferred = $q.defer();
+
+                    LookupService.submit().then(function(data) {
+                        console.log('response', data);
+                        var current = new Date().getTime();
+                        var old = LookupStore.get('timestamp');
+
+                        LookupStore.add('elapsedTime', current - old);
+
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/lookup/tabs/TabsView.html'
                 }
-            }
+            },
+            redirectTo: 'home.lookup.tabs.response'
         })
         .state('home.lookup.tabs.attr', {
             url: '/attr',
@@ -1102,6 +1132,15 @@ angular
             url: '/response',
             views: {
                 "main@": {
+                    controller: function(LookupResponse, LookupStore) {
+                        var vm = this;
+
+                        angular.extend(vm, {
+                            elapsedTime: LookupStore.get('elapsedTime'),
+                            response: LookupResponse
+                        });
+                    },
+                    controllerAs: 'vm',
                     templateUrl: 'app/lookup/response/ResponseView.html'
                 }
             }
@@ -1110,6 +1149,15 @@ angular
             url: '/matching',
             views: {
                 "main@": {
+                    controller: function(LookupResponse, LookupStore) {
+                        var vm = this;
+
+                        angular.extend(vm, {
+                            elapsedTime: LookupStore.get('elapsedTime'),
+                            response: LookupResponse
+                        });
+                    },
+                    controllerAs: 'vm',
                     templateUrl: 'app/lookup/matching/MatchingView.html'
                 }
             }
@@ -1199,7 +1247,7 @@ angular
                             EnrichmentStore.setMetadata('toggle.show.selected', bool);
                             EnrichmentStore.setMetadata('current', 1);
                         }
-                    },
+                    }//,
                     //templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {
@@ -1238,8 +1286,10 @@ function ShowSpinner(LoadingString, type) {
         LoadingString = LoadingString || '',
         type = type || 'lattice';
         
+    // jump to top of page during state change
+    angular.element(window).scrollTop(0,0);
+
     element
-        .scrollTop(0)
         .children()
             .addClass('inactive-disabled');
     
@@ -1258,5 +1308,5 @@ function ShowSpinner(LoadingString, type) {
 
     setTimeout(function() {
         $('section.loading-spinner').addClass('show-spinner');
-    },1);
+    }, 1);
 }

@@ -7,14 +7,14 @@ angular
         response: function(response) {
             //console.log('response', response.status, response);
             var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
-            ServiceErrorUtility.check(response);
+            ServiceErrorUtility.process(response);
 
             return response || $q.when(response);
         },
         responseError: function(rejection) {
             //console.log('responseError', rejection.status, rejection);
             var ServiceErrorUtility = $injector.get('ServiceErrorUtility');
-            ServiceErrorUtility.check(rejection);
+            ServiceErrorUtility.process(rejection);
 
             return $q.reject(rejection);
         }
@@ -25,10 +25,12 @@ angular
 })
 .service('ServiceErrorUtility', function ($compile, $templateCache, $http, $rootScope) {
     this.check = function (response) {
+        console.log('check',response);
         return (response && response.data && (response.data.errorCode || response.data.errorMsg));
     };
 
     this.process = function (response) {
+        console.log('process',response);
         if (this.check(response)) {
             var config = response.config || { headers: {} },
                 params = (config.headers.ErrorDisplayMethod || 'banner').split('|'),

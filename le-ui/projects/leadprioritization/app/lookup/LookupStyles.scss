@@ -33,15 +33,18 @@
         
         label {
             display: block;
-            margin-right: 1em;
             
             span {
                 font-weight: bold;
+                margin-right: .333em;
             }
         }
     }
     div.lookup-response-elapsed {
         font-weight: bold;
+    }
+    div.lookup-back {
+        cursor: pointer;
     }
 }
 .noselect {

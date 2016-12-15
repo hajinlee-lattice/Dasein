@@ -2,13 +2,13 @@
     <div class="container">
         <div class="row">
             <div class="columns twelve lookup-response-area">
-                <label><span>Score:</span>75</label>
-                <label><span>Score Timestamp:</span>2016-11-11T01:58:31.358Z</label>
-                <label><span>Warning:</span>[{"warning":"missing stuff"}]</label>
+                <label><span>Score:</span>{{ vm.response.score }}</label>
+                <label><span>Score Timestamp:</span>{{ vm.response.timestamp }}</label>
+                <label><span>Warnings:</span>{{ vm.response.warnings }}</label>
             </div>
             
             <div class="lookup-response-elapsed">
-                Time elapsed: 1984 MS
+                Time elapsed: {{ vm.elapsedTime }} MS
             </div>
         </div>
     </div>

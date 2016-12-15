@@ -21,6 +21,7 @@ var mainApp = angular.module('mainApp', [
     'lp.create.import',
     'lp.enrichment.leadenrichment',
     'lp.enrichmentwizard.leadenrichment',
+    'lp.lookup.form',
     'lp.sfdc.credentials',
     'lp.managefields',
     'lp.marketo.enrichment'
