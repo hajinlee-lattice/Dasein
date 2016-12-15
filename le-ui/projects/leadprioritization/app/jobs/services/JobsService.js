@@ -439,12 +439,12 @@ angular
 
         return stepDisplayName;
     }
-    
+
     function getStepsCompleted(job) {
         if (job.steps == null) {
             return [];
         }
-        
+
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {

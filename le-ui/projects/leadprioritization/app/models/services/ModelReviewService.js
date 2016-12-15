@@ -10,7 +10,7 @@ angular
         var reviewData = this.reviewDataMap[modelId];
         for (var i in reviewData.dataRules) {
             if (dataRule.name == reviewData.dataRules[i].name) {
-              ModelReviewStore.RemoveDataRule(modelId, dataRule.name);
+                ModelReviewStore.RemoveDataRule(modelId, dataRule.name);
             }
         }
         reviewData.dataRules.push(dataRule);
@@ -40,25 +40,25 @@ angular
         if (typeof reviewData == 'object') {
             deferred.resolve(reviewData);
         } else {
-             ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
-                 if (result.Success === true) {
-                     var modelReviewData = result.Result;
-                     ModelReviewStore.SetReviewData(modelId, modelReviewData);
-                     for (var ruleName in modelReviewData.ruleNameToColumnRuleResults) {
+            ModelReviewService.GetModelReviewData(modelId, eventTableName).then(function(result) {
+                if (result.Success === true) {
+                    var modelReviewData = result.Result;
+                    ModelReviewStore.SetReviewData(modelId, modelReviewData);
+                    for (var ruleName in modelReviewData.ruleNameToColumnRuleResults) {
                         var foundRule = false;
                         modelReviewData.dataRules.forEach(function(dataRule) {
                             if (dataRule.name == ruleName) {
-                                foundRule = true;
+                            foundRule = true;
                             }
                         });
                         if (!foundRule || ruleName == "OverlyPredictiveDS") {
                             delete modelReviewData.ruleNameToColumnRuleResults[ruleName];
                             console.log("rule in the column results is not valid, removing column result: " + ruleName);
                         }
-                     }
-                     deferred.resolve(result.Result);
-                 }
-             });
+                    }
+                    deferred.resolve(result.Result);
+                }
+            });
         }
         return deferred.promise;
     };

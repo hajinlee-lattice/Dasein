@@ -61,7 +61,7 @@ module.exports = function (grunt) {
                 HTTPS_PASS: false
             },
             devb: {
-                NODE_APPS: 'leui,leadmin',
+                NODE_APPS: 'leui',
                 NODE_ENV: 'development',
                 API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 API_ADMIN_URL: 'https://10.41.0.26:8085',

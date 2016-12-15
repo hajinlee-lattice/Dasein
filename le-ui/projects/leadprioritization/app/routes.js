@@ -19,11 +19,10 @@ angular
         ServiceErrorUtility.hideBanner();
     });
 
-    
     $rootScope.$on('$stateChangeSuccess', function(evt, toState, params) {
 
     });
-    
+
     $rootScope.$on('$stateChangeError', function(evt, toState, params) {
         if ($state.current.name != toState.name) {
             console.log('-!- error; could not load '+toState.name);
@@ -380,7 +379,52 @@ angular
                     controller: 'ModelReviewColumnController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/RefineModelColumnsView.html'
-                }   
+                }
+            }
+        })
+        .state('home.model.remodel', {
+            url: '/remodel',
+            params: {
+                pageIcon: 'ico-remodel',
+                pageTitle: ''
+            },
+            resolve: {
+                DataRules: function($q, $stateParams, $http, RemodelStore) {
+                    var deferred = $q.defer(),
+                        modelId = $stateParams.modelId;
+
+                    RemodelStore.GetModelReviewDataRules(modelId).then(function(result) {
+                        deferred.resolve(result);
+                    }).catch(function(error) {
+                        deferred.reject(error);
+                    });
+
+                    return deferred.promise;
+                },
+                Attributes: function ($q, $stateParams, RemodelStore) {
+                    var deferred = $q.defer(),
+                        modelId = $stateParams.modelId;
+
+                    RemodelStore.GetModelReviewAttributes(modelId).then(function(result) {
+                        deferred.resolve(result);
+                    }).catch(function(error) {
+                        deferred.reject(error);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                "summary@": {
+                    controller: function ($rootScope, Model) {
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                    }
+                },
+                "main@": {
+                    controller: 'RemodelController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/views/RemodelView.html'
+                }
             }
         })
         .state('home.campaigns', {

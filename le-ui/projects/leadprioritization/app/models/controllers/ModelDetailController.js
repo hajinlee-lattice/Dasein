@@ -8,11 +8,12 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.WidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
-    'mainApp.models.controllers.ModelDetailController', 
+    'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.create.csvBulkUpload',
+    'mainApp.models.remodel',
     'mainApp.models.review',
     'lp.navigation.review'
 ])

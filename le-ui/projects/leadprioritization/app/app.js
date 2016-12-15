@@ -17,6 +17,7 @@ var mainApp = angular.module('mainApp', [
     'lp.apiconsole',
     'lp.campaigns.list',
     'lp.models.list',
+    'lp.models.remodel',
     'lp.models.review',
     'lp.create.import',
     'lp.enrichment.leadenrichment',
