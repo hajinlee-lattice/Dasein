@@ -9,12 +9,8 @@ $pad-sides: 51px;
 
 .remodel-model {
     .remodel-header {
-        padding-left: $pad-sides;
-        padding-right: $pad-sides;
+        padding: 1.2em $pad-sides !important;
 
-        div {
-            font-size: 24px;
-        }
         p {
             font-size: 18px;
         }
@@ -93,7 +89,7 @@ $pad-sides: 51px;
 
     button.attribute-toggle {
         font-family: ProximaNova-Regular;
-        min-width: 100px;
+        min-width: 104px;
         position: relative;
         padding: 3px 9px;
         font-size: 12px;
