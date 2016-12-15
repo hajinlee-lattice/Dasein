@@ -28,7 +28,7 @@ var mainApp = angular.module('mainApp', [
     'lp.marketo.enrichment'
 ])
 .controller('MainController', function (
-    $scope, $state, $rootScope, $analytics, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
+    $scope, $state, $rootScope, BrowserStorageUtility, SessionTimeoutUtility, TimestampIntervalUtility
 ) {
     var previousSession = BrowserStorageUtility.getClientSession();
     var loginDocument = BrowserStorageUtility.getLoginDocument();
@@ -46,29 +46,6 @@ var mainApp = angular.module('mainApp', [
     function mustUserChangePassword(loginDocument) {
         return loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
     }
-
-
-
-    var ClientSession = BrowserStorageUtility.getClientSession();
-    if (ClientSession != null) {
-      var LoginDocument = BrowserStorageUtility.getLoginDocument();
-      var Tenant = ClientSession ? ClientSession.Tenant : {};
-
-      $scope.userDisplayName = LoginDocument.UserName;
-      $scope.tenantName = window.escape(Tenant.DisplayName);
-    }
-
-    angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
-        var userEmail = $scope.userDisplayName;
-        $analytics.registerSetUsername(function (userEmail) {
-          
-          mixpanel.identify(userEmail);
-          mixpanel.people.set({
-            "$tenant": $scope.tenantName
-          });
-
-        });
-    });
 
 })
 // adds Authorization token to $http requests to access API
@@ -97,6 +74,29 @@ var mainApp = angular.module('mainApp', [
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })
+// .config(['$analyticsProvider', function ($analyticsProvider) {
+//     angulartics.waitForVendorApi('mixpanel', 500, '__loaded', function (mixpanel) {
+
+//         var ClientSession = BrowserStorageUtility.getClientSession();
+//         if (ClientSession != null) {
+//           var LoginDocument = BrowserStorageUtility.getLoginDocument();
+//           var Tenant = ClientSession ? ClientSession.Tenant : {};
+
+//           $scope.userDisplayName = LoginDocument.UserName;
+//           $scope.tenantName = window.escape(Tenant.DisplayName);
+//         }
+//         var userEmail = $scope.userDisplayName;
+        
+//         $analyticsProvider.registerSetUsername(function (userEmail) {
+          
+//           mixpanel.identify(userEmail);
+//           mixpanel.people.set({
+//             "$tenant": $scope.tenantName
+//           });
+
+//         });
+//     });
+// }])
 // prevent $http caching of API results
 .config(function($httpProvider) {
     //initialize get if not there
