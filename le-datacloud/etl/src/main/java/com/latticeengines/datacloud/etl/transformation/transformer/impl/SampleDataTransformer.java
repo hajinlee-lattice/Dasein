@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceSampleFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SampleTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component("sampleDataTransformer")
 public class SampleDataTransformer extends AbstractDataflowTransformer<SampleTransformerConfig, SourceSampleFlowParameters> {
@@ -44,7 +45,7 @@ public class SampleDataTransformer extends AbstractDataflowTransformer<SampleTra
     }
 
     @Override
-    protected Class<SampleTransformerConfig> getConfigurationClass() {
+    protected Class<? extends TransformerConfig> getConfigurationClass() {
         return SampleTransformerConfig.class;
     }
 

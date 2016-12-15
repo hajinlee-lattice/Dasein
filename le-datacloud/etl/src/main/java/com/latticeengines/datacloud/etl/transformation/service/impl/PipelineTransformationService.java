@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 
 /**
- * This transformation service allows paramterizing the source and target, pipelining the tranformation process.
+ * This transformation service allows parameterizing the source and target, pipelining the tranformation process.
  */
 @Component("pipelineTransformationService")
 public class PipelineTransformationService
@@ -74,84 +75,13 @@ public class PipelineTransformationService
 
     @Override
     protected TransformationProgress transformHook(TransformationProgress progress, PipelineTransformationConfiguration transConf) {
-        String workflowDir = initialDataFlowDirInHdfs(progress);
-        if (!cleanupHdfsDir(workflowDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
-            return null;
-        }
 
-        Map<String, Source> sourceMap = new HashMap<String, Source>();
-
-        Source[] baseSources = null;
-        Source[] baseTemplates = null;
-        List<String> baseVersions = transConf.getBaseVersions();
-
-        List<String> baseSourceNames = transConf.getBaseSources();
-        if (baseSourceNames.size() != 0) {
-            baseSources = new Source[baseSourceNames.size()];
-            for (int i = 0; i < baseSources.length; i++) {
-                String sourceName = baseSourceNames.get(i);
-                Source source = sourceService.findBySourceName(sourceName);
-                if (source == null) {
-                    updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
-                    return null;
-                }
-                sourceMap.put(source.getSourceName(), source);
-                baseSources[i] = source;
-            }
-
-            baseTemplates = new Source[baseSourceNames.size()];
-            List<String> baseTemplateNames = transConf.getBaseTemplates();
-            if (baseTemplateNames == null) {
-                baseTemplateNames = baseSourceNames;
-            }
-            for (int i = 0; i < baseTemplateNames.size(); i++) {
-                String sourceName = baseTemplateNames.get(i);
-                Source source = sourceService.findBySourceName(sourceName);
-                if (source == null) {
-                    updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
-                    return null;
-                }
-                baseTemplates[i] = source;
-            }
-
-            if (baseVersions == null) {
-                baseVersions = new ArrayList<String>();
-                for (int i = 0; i < baseSources.length; i++) {
-                    String latestBaseVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSources[i]);
-                    baseVersions.add(latestBaseVersion);
-                }
-            } else if (baseVersions.size() != baseSources.length) {
-                updateStatusToFailed(progress, "Number of base versions is different with number of base sources.",
-                                     null);
-                return null;
-            }
-        }
-
-        String targetName = transConf.getTargetSource();
-        Source target = sourceService.findOrCreateSource(targetName);
-
-        String targetVersion = transConf.getTargetVersion();
-        if (targetVersion == null) {
-            if (baseSources != null) {
-                targetVersion = baseVersions.get(0);
-             } else {
-                targetVersion = createNewVersionStringFromNow();
-             }
-        }
-
-        Source targetTemplate = target;
-        String targetTemplateName = transConf.getTargetTemplate();
-        if (targetTemplateName != null) {
-            targetTemplate = sourceService.findBySourceName(targetTemplateName);
-        }
-
-
-
-        TransformStep[] steps = null;
-        steps = initiateTransformSteps(progress, transConf, baseSources, baseVersions, baseTemplates,
-                                       target, targetVersion, targetTemplate, sourceMap);
         boolean succeeded = false;
+        String workflowDir = initialDataFlowDirInHdfs(progress);
+
+        cleanupWorkflowDir(progress, workflowDir);
+
+        TransformStep[] steps = initiateTransformSteps(progress, transConf);
         if (steps == null) {
             updateStatusToFailed(progress, "Failed to initiate transfom steps", null);
         } else {
@@ -190,30 +120,23 @@ public class PipelineTransformationService
         return TEMP_SOURCE + progress.getRootOperationUID() + STEP + step;
     }
 
+    private String getTempSourceName(int step) {
+        return TEMP_SOURCE + UUID.randomUUID().toString() + STEP + step;
+    }
+
     private boolean isTempSource(Source source) {
         return source.getSourceName().startsWith(TEMP_SOURCE);
     }
 
     private TransformStep[] initiateTransformSteps(TransformationProgress progress,
-                                           PipelineTransformationConfiguration transConf,
-                                           Source[] baseSources, List<String> baseVersions, Source[] baseTemplates,
-                                           Source target, String targetVersion, Source targetTemplate,
-                                           Map<String, Source> sourceMap) {
+                                           PipelineTransformationConfiguration transConf) {
 
         List<TransformationStepConfig> stepConfigs = transConf.getSteps();
         TransformStep[] steps = new TransformStep[stepConfigs.size()];
+        Map<Source, String> sourceVersions = new HashMap<Source, String>();
 
-        for (int i = stepConfigs.size() - 1; i >= 0; i--) {
-            TransformationStepConfig config = stepConfigs.get(i);
-            if (config.getTargetSource() == null) {
-                config.setTargetSource(target.getSourceName());
-                config.setTargetVersion(targetVersion);
-                break;
-            }
-        }
-
-        for (int i = 0; i < steps.length; i++) {
-            TransformationStepConfig config = stepConfigs.get(i);
+        for (int stepIdx = 0; stepIdx < steps.length; stepIdx++) {
+            TransformationStepConfig config = stepConfigs.get(stepIdx);
             Transformer transformer = transformerService.findTransformerByName(config.getTransformer());
 
             if (transformer == null) {
@@ -221,55 +144,101 @@ public class PipelineTransformationService
                 return null;
             }
 
-            Source stepTargetTemplate = targetTemplate;
 
-            Source[] stepInputs = baseSources;
-            List<String> stepInputVersions = baseVersions;
-            Source[] stepInputTemplates = baseTemplates;
+            List<Integer> inputSteps = config.getInputSteps();
 
-            Integer inputStep = config.getInputStep();
-
-            if (inputStep != null) {
-                stepInputs = new Source[1];
-                stepInputs[0] = steps[inputStep].getTarget();
-                stepInputVersions = new ArrayList<String>();
-                stepInputVersions.add(steps[inputStep].getTargetVersion());
-                stepInputTemplates = new Source[1];
-                stepInputTemplates[0] = steps[inputStep].getTargetTemplate();
-                stepTargetTemplate = steps[inputStep].getTargetTemplate();
+            List<String> baseSourceNames = config.getBaseSources();
+            List<String> baseTemplateNames = config.getBaseTemplates();
+            List<String> inputBaseVersions = config.getBaseVersions();
+            if (baseTemplateNames == null) {
+                baseTemplateNames = baseSourceNames;
             }
 
+            int baseSourceCount = 0;
+            if (inputSteps != null) {
+                baseSourceCount += inputSteps.size();
+            }
+            if (baseSourceNames != null) {
+                baseSourceCount += baseSourceNames.size();
+            }
 
-            Source stepTarget = null;
+            Source[] baseSources = new Source[baseSourceCount];
+            Source[] baseTemplates = new Source[baseSourceCount];
+            List<String> baseVersions = new ArrayList<String>();
+
+            int baseSourceIdx = 0;
+
+            if (inputSteps != null) {
+                for (Integer inputStep : inputSteps) {
+                    baseSources[baseSourceIdx] = steps[inputStep].getTarget();
+                    baseTemplates[baseSourceIdx++] = steps[inputStep].getTargetTemplate();
+                    baseVersions.add(steps[inputStep].getTargetVersion());
+                }
+            }
+
+            if ((baseSourceNames != null) && (baseSourceNames.size() != 0)) {
+                for (int i = 0; i < baseSourceNames.size(); i++, baseSourceIdx++) {
+                    String sourceName = baseSourceNames.get(i);
+                    Source source = sourceService.findBySourceName(sourceName);
+                    if (source == null) {
+                        updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
+                        return null;
+                    }
+                    baseSources[baseSourceIdx] = source;
+
+                    String templateName = baseTemplateNames.get(i);
+                    Source template = sourceService.findBySourceName(templateName);
+                    if (template == null) {
+                        updateStatusToFailed(progress, "Base source " + templateName + " not found", null);
+                        return null;
+                    }
+                    baseTemplates[baseSourceIdx] = template;
+
+                    String sourceVersion = null;
+                    if (inputBaseVersions == null) {
+                         sourceVersion = sourceVersions.get(source);
+                         if (sourceVersion == null) {
+                             sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSources[i]);
+                         }
+                    } else {
+                         sourceVersion = inputBaseVersions.get(i);
+                    }
+                    sourceVersions.put(source, sourceVersion);
+                    baseVersions.add(sourceVersion);
+                }
+            }
+
+            Source target = null;
+            Source targetTemplate = null;
             String targetName = config.getTargetSource();
             if (targetName == null) {
-                targetName = getTempSourceName(progress, i);
-                stepTarget = sourceService.createSource(targetName);
+                targetName = getTempSourceName(progress, stepIdx);
+                target = sourceService.createSource(targetName);
             } else {
-                stepTarget = sourceService.findOrCreateSource(targetName);
-                sourceMap.put(targetName, stepTarget);
-                stepTargetTemplate = stepTarget;
+                target = sourceService.findOrCreateSource(targetName);
+                targetTemplate = target;
             }
 
             String targetTemplateName = config.getTargetTemplate();
             if (targetTemplateName != null) {
-                stepTargetTemplate = sourceService.findBySourceName(targetTemplateName);
+                targetTemplate = sourceService.findBySourceName(targetTemplateName);
+            }
+            if (targetTemplate == null) {
+                targetTemplate = baseTemplates[0];
             }
 
-            log.info("step " + i + " target " + stepTarget.getSourceName() + " template " + stepTargetTemplate.getSourceName());
-
-            String stepTargetVersion = config.getTargetVersion();
-            if (stepTargetVersion == null) {
-                if ((sourceMap.get(targetName) == null) & (stepInputs != null)) {
-                    stepTargetVersion = stepInputVersions.get(0);
-                } else {
-                    stepTargetVersion = createNewVersionStringFromNow();
-                }
+            String targetVersion = config.getTargetVersion();
+            if (targetVersion == null) {
+                targetVersion = baseVersions.get(0);
             }
+
+            sourceVersions.put(target, targetVersion);
+            log.info("step " + stepIdx + " target " + target.getSourceName() + " template " + targetTemplate.getSourceName());
 
             String confStr = config.getConfiguration();
-            TransformStep step = new TransformStep(transformer, stepInputs, stepInputVersions, stepInputTemplates, stepTarget, stepTargetVersion, stepTargetTemplate, confStr);
-            steps[i] = step;
+            TransformStep step = new TransformStep(transformer, baseSources, baseVersions, baseTemplates,
+                                                   target, targetVersion, targetTemplate, confStr);
+            steps[stepIdx] = step;
         }
         return steps;
     }
@@ -306,56 +275,9 @@ public class PipelineTransformationService
 
         log.info("Creating Pipeline configuration");
 
-        List<String> baseSourceNames = request.getBaseSources();
-        if (baseSourceNames == null) {
-            log.error("Base sources attribute must be specified even in case of 0 base source ");
-            return null;
-        }
-
-        for (String sourceName : baseSourceNames) {
-            Source source = sourceService.findBySourceName(sourceName);
-            if (source == null) {
-                log.error("Base source " + sourceName + "does not exist");
-                return null;
-            }
-        }
-        List<String> baseVersions = request.getBaseVersions();
-        if ((baseVersions != null) && (baseVersions.size() != baseSourceNames.size())) {
-            log.error("Base versions(" + baseVersions.size() + ") does match base sources(" + baseSourceNames.size() + ")");
-            return null;
-        }
-
-
-        List<String> baseTemplates = request.getBaseTemplates();
-        if (baseTemplates == null) {
-            baseTemplates = baseSourceNames;
-        } else if (baseTemplates.size() != baseSourceNames.size()) {
-            log.error("Base templates(" + baseTemplates.size() + ") does match base sources(" + baseSourceNames.size() + ")");
-            return null;
-        } else {
-            for (String sourceName : baseTemplates) {
-                 Source source = sourceService.findBySourceName(sourceName);
-                 if (source == null) {
-                     log.error("Base source " + sourceName + "does not exist");
-                     return null;
-                 }
-            }
-        }
-
-        String targetSourceName = request.getTargetSource();
-        if (targetSourceName == null) {
-            log.error("Target source must be specified");
-            return null;
-        }
-
-        String targetTemplate = request.getTargetTemplate();
-        if (targetTemplate == null) {
-            targetTemplate = targetSourceName;
-        }
-
-        String targetVersion = request.getTargetVersion();
         List<TransformationStepConfig> steps = request.getSteps();
-        int i = 1;
+
+        int currentStep = 0;
         for (TransformationStepConfig step : steps) {
             Transformer transformer = transformerService.findTransformerByName(step.getTransformer());
             if (transformer == null) {
@@ -363,32 +285,81 @@ public class PipelineTransformationService
                 return null;
             }
 
-            Integer input = step.getInputStep();
-            if ((input != null) && (input >= i)) {
-                log.error("Step " + i + " uses future step " + input + " result");
+            List<Integer> inputSteps = step.getInputSteps();
+            if (inputSteps != null) {
+                for (Integer inputStep : inputSteps) {
+                    if (inputStep < 0) {
+                        log.error("Input Step " + currentStep + " uses invalid step " + inputStep);
+                        return null;
+                    } else if (inputStep >= currentStep) {
+                        log.error("Step " + currentStep + " uses future step " + inputStep + " result");
+                        return null;
+                    }
+                }
+            }
+
+            List<String> baseSourceNames = step.getBaseSources();
+            if (((baseSourceNames == null) || (baseSourceNames.size() == 0)) &&
+                ((inputSteps == null) || (inputSteps.size() == 0))) {
+                log.error("Step " + currentStep + " does not have any input source specified");
                 return null;
             }
+
+            List<String> baseVersions = step.getBaseVersions();
+            if ((baseVersions != null) && (baseVersions.size() != baseSourceNames.size())) {
+                log.error("Base versions(" + baseVersions.size() + ") does match base sources(" + baseSourceNames.size() + ")");
+                return null;
+            }
+
+
+            List<String> baseTemplates = step.getBaseTemplates();
+            if (baseTemplates != null) {
+                if (baseTemplates.size() != baseSourceNames.size()) {
+                    log.error("Base templates(" + baseTemplates.size() + ") does match base sources(" + baseSourceNames.size() + ")");
+                    return null;
+                } else {
+                    for (String sourceName : baseTemplates) {
+                        Source source = sourceService.findBySourceName(sourceName);
+                        if (source == null) {
+                            log.error("Base template" + sourceName + "does not exist");
+                            return null;
+                        }
+                    }
+                }
+            }
+
+            String targetTemplate = step.getTargetTemplate();
+            if (targetTemplate != null) {
+                Source source = sourceService.findBySourceName(targetTemplate);
+                if (source == null) {
+                    log.error("targetTemplate source " + targetTemplate + "does not exist");
+                    return null;
+                }
+            }
+
             String config = step.getConfiguration();
-            if (transformer.validateConfig(config, baseSourceNames) == false) {
-                log.error("Invalid configuration for step " + i);
+            List<String> sourceNames;
+            if (inputSteps == null) {
+                sourceNames = baseSourceNames;
+            } else {
+                sourceNames = new ArrayList<String>();
+                for (int i = 0; i < inputSteps.size(); i++) {
+                    sourceNames.add(getTempSourceName(currentStep));
+                }
+                if (baseSourceNames != null) {
+                    for (String sourceName : baseSourceNames) {
+                        sourceNames.add(sourceName);
+                    }
+                }
+            }
+            if (transformer.validateConfig(config, sourceNames) == false) {
+                log.error("Invalid configuration for step " + currentStep);
                 return null;
             }
-            i++;
+            currentStep++;
         }
 
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-        configuration.setBaseSources(baseSourceNames);
-        configuration.setBaseVersions(baseVersions);
-
-        for (String template : baseTemplates) {
-            log.info("Base Template " + template);
-        }
-
-        configuration.setBaseTemplates(baseTemplates);
-        configuration.setTargetSource(targetSourceName);
-        configuration.setTargetVersion(targetVersion);
-        configuration.setTargetTemplate(targetTemplate);
-
         configuration.setServiceBeanName(getServiceBeanName());
         configuration.setVersion(createNewVersionStringFromNow());
         configuration.setSteps(steps);

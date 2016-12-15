@@ -9,9 +9,13 @@ import org.datanucleus.util.StringUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttributes;
-import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
+import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import com.latticeengines.domain.exposed.datafabric.DynamoRangeKey;
+import com.latticeengines.domain.exposed.datafabric.DynamoBucketKey;
+import com.latticeengines.domain.exposed.datafabric.DynamoStampKey;
+import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
+import com.latticeengines.domain.exposed.datafabric.TimeSeriesFabricEntity;
 
 public class DynamoUtil {
 
@@ -35,10 +39,35 @@ public class DynamoUtil {
     }
 
     public static String constructIndex(Class<?> entityClass) {
+        DynamoIndex index = null;
+        if (TimeSeriesFabricEntity.class.isAssignableFrom(entityClass)) {
+            DynamoIndex cInd = constructIndexInternal(CompositeFabricEntity.class);
+            DynamoIndex bInd = constructIndexInternal(TimeSeriesFabricEntity.class);
+            index = new DynamoIndex(cInd.getHashKeyAttr(), cInd.getHashKeyField(),
+                                    cInd.getRangeKeyAttr(), cInd.getRangeKeyField(),
+                                    bInd.getBucketKeyField(), bInd.getStampKeyField());
+        } else if (CompositeFabricEntity.class.isAssignableFrom(entityClass)) {
+            index = constructIndexInternal(CompositeFabricEntity.class);
+        }  else {
+            index = constructIndexInternal(entityClass);
+        }
+
+        if (index.getHashKeyAttr() == null) {
+            return null;
+        } else {
+           return JsonUtils.serialize(index);
+        }
+    }
+
+
+    public static DynamoIndex constructIndexInternal(Class<?> entityClass) {
+
         String hashKeyAttr = null;
         String hashKeyField = null;
         String rangeKeyAttr = null;
         String rangeKeyField = null;
+        String bucketKeyField = null;
+        String stampKeyField = null;
         for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(DynamoHashKey.class)) {
                 DynamoHashKey annotation = field.getAnnotation(DynamoHashKey.class);
@@ -50,13 +79,16 @@ public class DynamoUtil {
                 rangeKeyAttr = annotation.name();
                 rangeKeyField = field.getName();
             }
+            if (field.isAnnotationPresent(DynamoBucketKey.class)) {
+                bucketKeyField = field.getName();
+            }
+            if (field.isAnnotationPresent(DynamoStampKey.class)) {
+                stampKeyField = field.getName();
+            }
         }
-        if (hashKeyAttr == null) {
-            return null;
-        } else {
-            DynamoIndex index = new DynamoIndex(hashKeyAttr, hashKeyField, rangeKeyAttr, rangeKeyField);
-            return JsonUtils.serialize(index);
-        }
+
+        return new DynamoIndex(hashKeyAttr, hashKeyField, rangeKeyAttr, rangeKeyField,
+                               bucketKeyField, stampKeyField);
     }
 
     public static String constructAttributes(Class<?> entityClass) {

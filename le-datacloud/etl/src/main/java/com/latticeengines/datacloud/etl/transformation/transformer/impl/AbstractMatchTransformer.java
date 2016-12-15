@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 
 abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransformerConfig> {
@@ -28,13 +29,13 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
     }
 
     @Override
-    protected Class<MatchTransformerConfig> getConfigurationClass() {
+    protected Class<? extends TransformerConfig> getConfigurationClass() {
         return MatchTransformerConfig.class;
     }
 
     @Override
     protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseSourceVersions,
-                                Source[] baseTemplates, Source targetTemplate, MatchTransformerConfig config) {
+                                Source[] baseTemplates, Source targetTemplate, MatchTransformerConfig config, String confStr) {
 
          String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(baseSources[0], baseSourceVersions.get(0)).toString();
 

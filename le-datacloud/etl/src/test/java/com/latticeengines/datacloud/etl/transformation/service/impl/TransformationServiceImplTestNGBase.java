@@ -62,7 +62,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     @BeforeMethod(groups = { "functional" })
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod(source.getSourceName());
+//        prepareCleanPod(source.getSourceName());
         transformationService = getTransformationService();
     }
 

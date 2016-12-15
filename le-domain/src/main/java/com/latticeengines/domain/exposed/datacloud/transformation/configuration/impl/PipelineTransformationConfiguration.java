@@ -20,12 +20,6 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
     private List<SourceColumn> sourceColumns = new ArrayList<SourceColumn>();
     private InputSourceConfig inputSourceConfig = null;
 
-    private List<String> baseSources;
-    private List<String> baseVersions;
-    private List<String> baseTemplates;
-    private String  targetSource;
-    private String  targetTemplate;
-    private String  targetVersion;
     private List<TransformationStepConfig> steps;
 
     @Override
@@ -98,53 +92,5 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setSteps(List<TransformationStepConfig> steps) {
         this.steps = steps;
-    }
-
-    public void setBaseSources(List<String> baseSources) {
-        this.baseSources = baseSources;
-    }
-
-    public List<String> getBaseSources() {
-        return baseSources;
-    }
-
-    public void setBaseTemplates(List<String> baseTemplates) {
-        this.baseTemplates = baseTemplates;
-    }
-
-    public List<String> getBaseTemplates() {
-        return baseTemplates;
-    }
-
-    public void setBaseVersions(List<String> baseVersions) {
-        this.baseVersions = baseVersions;
-    }
-
-    public List<String> getBaseVersions() {
-        return baseVersions;
-    }
-
-    public void setTargetSource(String targetSource) {
-        this.targetSource = targetSource;
-    }
-
-    public String getTargetSource() {
-        return targetSource;
-    }
-
-    public void setTargetTemplate(String targetTemplate) {
-        this.targetTemplate = targetTemplate;
-    }
-
-    public String getTargetTemplate() {
-        return targetTemplate;
-    }
-
-    public void setTargetVersion(String targetVersion) {
-        this.targetVersion = targetVersion;
-    }
-
-    public String getTargetVersion() {
-        return targetVersion;
     }
 }

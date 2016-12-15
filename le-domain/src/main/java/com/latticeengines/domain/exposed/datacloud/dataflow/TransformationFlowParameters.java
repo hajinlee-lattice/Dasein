@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
@@ -11,6 +12,9 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
     @JsonProperty("ConfJsonPath")
     private String confJsonPath;
+
+    @JsonProperty("ConfJson")
+    private String confJson;
 
     @JsonProperty("TimestampField")
     private String timestampField;
@@ -30,12 +34,23 @@ public class TransformationFlowParameters extends DataFlowParameters {
     @JsonProperty("Timestamp")
     private Date timestamp;
 
+    @JsonProperty("TemplateSourceMap")
+    private Map<String, String> templateSourceMap;
+
     public String getConfJsonPath() {
         return confJsonPath;
     }
 
     public void setConfJsonPath(String confJsonPath) {
         this.confJsonPath = confJsonPath;
+    }
+
+    public String getConfJson() {
+        return confJson;
+    }
+
+    public void setConfJson(String confJson) {
+        this.confJson = confJson;
     }
 
     public String getTimestampField() {
@@ -68,6 +83,14 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
     public void setColumns(List<SourceColumn> columns) {
         this.columns = columns;
+    }
+
+    public Map<String, String> getTemplateSourceMap() {
+        return templateSourceMap;
+    }
+
+    public void setTemplateSourceMap(Map<String, String> templateSourceMap) {
+        this.templateSourceMap = templateSourceMap;
     }
 
     public Date getTimestamp() {

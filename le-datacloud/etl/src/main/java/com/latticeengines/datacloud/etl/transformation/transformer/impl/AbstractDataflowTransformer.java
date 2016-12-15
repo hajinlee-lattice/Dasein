@@ -43,13 +43,16 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return;
     }
 
-    private P getParameters(TransformationProgress progress, Source[] baseTemplates, Source targetTemplate, T configuration) {
+    private P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates, Source targetTemplate, T configuration,
+                            String confJson) {
         P parameters;
         try {
             parameters = getDataFlowParametersClass().newInstance();
         } catch (IllegalAccessException|InstantiationException e) {
             throw new RuntimeException("Failed construct a new progress object by empty constructor", e);
         }
+
+        parameters.setConfJson(confJson);
 
         parameters.setTimestampField(targetTemplate.getTimestampField());
         try {
@@ -62,7 +65,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
 
         List<String> baseTables = new ArrayList<String>();
-        for (Source baseSource : baseTemplates) {
+        for (Source baseSource : baseSources) {
                 baseTables.add(baseSource.getSourceName());
         }
         parameters.setBaseTables(baseTables);
@@ -73,17 +76,25 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             parameters.setPrimaryKeys(Arrays.asList(targetTemplate.getPrimaryKey()));
         }
 
+        Map<String, String> templateSourceMap = new HashMap<String, String>();
+
+        for (int i = 0; i < baseTemplates.length; i++) {
+            templateSourceMap.put(baseTemplates[i].getSourceName(), baseSources[i].getSourceName());
+        }
+
+        parameters.setTemplateSourceMap(templateSourceMap);
+
         updateParameters(parameters, baseTemplates, targetTemplate, configuration);
         return parameters;
     }
 
     @Override
     protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseSourceVersions,
-                                Source[] baseTemplates, Source targetTemplate, T configuration) {
+                                Source[] baseTemplates, Source targetTemplate, T configuration, String confStr) {
         try {
             // The order of base sources in the source object should match with
             // the order of base versions in the configuration
-            P parameters = getParameters(progress, baseTemplates, targetTemplate, configuration);
+            P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr);
             Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
             for (int i = 0; i < baseSources.length; i++) {
                 Source baseSource = baseSources[i];

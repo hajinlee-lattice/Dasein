@@ -39,6 +39,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
+import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
@@ -56,11 +57,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private static final Log log = LogFactory.getLog(DynamoDataStoreImpl.class);
 
-    private static final String ERRORMESSAGE = //
-    "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
+    private static final String ERRORMESSAGE = "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
 
     private static final String REPO = "_REPO_";
     private static final String RECORD = "_RECORD_";
+
     private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
     private static final int DYNAMODB_BATCH_LIMIT = 100;
 
@@ -87,6 +88,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         String keyProp = schema.getProp(DynamoUtil.KEYS);
         this.tableIndex = DynamoUtil.getIndex(keyProp);
 
+        if (tableIndex == null) {
+             tableIndex = new DynamoIndex();
+             tableIndex.setHashKeyAttr(ID);
+             tableIndex.setHashKeyField(ID);
+        }
+
         String attrProp = schema.getProp(DynamoUtil.ATTRIBUTES);
         this.tableAttributes = DynamoUtil.getAttributes(attrProp);
 
@@ -96,6 +103,269 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public void createRecord(String id, GenericRecord record) {
+
+        if (isTimeSeriesStore()) {
+            Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+            records.put(id, record);
+            updateBuckets(records);
+        } else {
+            writeRecord(id, record);
+        }
+    }
+
+    @Override
+    public void createRecords(Map<String, GenericRecord> records) {
+
+        if (isTimeSeriesStore()) {
+            updateBuckets(records);
+        } else {
+            writeRecords(records);
+        }
+    }
+
+    @Override
+    public void deleteRecord(String id, GenericRecord record) {
+        DynamoKey dk = constructDynamoKey(id, record);
+        deleteRecordByKey(dk);
+    }
+
+    public void deleteRecords(Map<String,String> properties) {
+        DynamoKey dk= constructDynamoKey(properties);
+        if (dk == null) {
+            return;
+        }
+        deleteRecordByKey(dk);
+    }
+
+    @Override
+    public void updateRecord(String id, GenericRecord record) {
+
+        if (isTimeSeriesStore()) {
+            log.info("Timeseries update is not supported");
+            return;
+        }
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
+        Table table = dynamoDB.getTable(tableName);
+
+        UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, record);
+        if (updateItemSpec == null) {
+            return;
+        }
+
+        try {
+            table.updateItem(updateItemSpec);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException(ERRORMESSAGE, e);
+        } catch (Exception e) {
+            log.error("Unable to update record " + tableName + " id " + id, e);
+        }
+    }
+
+    @Override
+    public GenericRecord findRecord(String id) {
+
+        DynamoKey dk = constructDynamoKey(id);
+
+        if (dk == null) {
+            log.error("Invalid id for this Dynamo table");
+            return null;
+        }
+
+        GenericRecord record = null;
+
+        if (!isTimeSeriesStore()) {
+            DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
+            Table table = dynamoDB.getTable(tableName);
+            Item item = null;
+            try {
+                item = table.getItem(dk.getPrimaryKey());
+            } catch (NoSuchMethodError e) {
+                log.info("The table name is " + tableName);
+                log.info("The key is " + id);
+                throw new RuntimeException(ERRORMESSAGE, e);
+            } catch (Exception e) {
+                log.error("Unable to find record " + tableName + " id " + id, e);
+            }
+            if (item != null) {
+                List<GenericRecord> records;
+                records = extractRecords(item);
+                record = records.get(0);
+            }
+        } else {
+            List<GenericRecord> records = findRecords(dk);
+            record = records.get(0);
+        }
+        return record;
+    }
+
+    @Override
+    public List<GenericRecord> findRecords(Map<String, String> properties) {
+        DynamoKey dk = constructDynamoKey(properties);
+        return findRecords(dk);
+    }
+
+
+    private ItemCollection<QueryOutcome> queryByKey(DynamoKey dk) {
+        ItemCollection<QueryOutcome> items = null;
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
+        Table table = dynamoDB.getTable(tableName);
+
+        QuerySpec spec = new QuerySpec().withHashKey(tableIndex.getHashKeyAttr(), dk.getHashKey());
+
+        String rangeKey = dk.getRangeKey();
+        if (rangeKey != null) {
+            spec = spec.withRangeKeyCondition(new RangeKeyCondition(tableIndex.getRangeKeyAttr()).eq(dk.getRangeKey()));
+        }
+
+        String bucketKey = dk.getBucketKey();
+        if (bucketKey != null) {
+            spec = spec.withAttributesToGet(bucketKey);
+        }
+        try {
+            items = table.query(spec);
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException(ERRORMESSAGE, e);
+        } catch (Exception e) {
+            log.error("Unable to find records " + tableName, e);
+        }
+        return items;
+
+    }
+
+    private List<GenericRecord> findRecords(DynamoKey dk) {
+
+        ItemCollection<QueryOutcome> items = queryByKey(dk);
+        if (items == null) {
+            return null;
+        }
+
+        List<GenericRecord> records = new ArrayList<GenericRecord>();
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            extractRecords(item, records);
+        }
+
+        String stampKey = dk.getStampKey();
+        if (stampKey != null) {
+            List<GenericRecord> filtered = new ArrayList<GenericRecord>();
+            for (GenericRecord record : records) {
+                DynamoKey key = constructDynamoKey(record);
+                if (key.getStampKey().equals(stampKey)) {
+                    filtered.add(record);
+                    break;
+                }
+            }
+            records = filtered;
+        }
+
+        return records;
+    }
+
+
+    private void deleteRecordByKey(DynamoKey dk) {
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
+        Table table = dynamoDB.getTable(tableName);
+        PrimaryKey pk = dk.getPrimaryKey();
+        String bucketKey = dk.getBucketKey();
+        String stampKey = dk.getStampKey();
+
+        try {
+            if (stampKey != null) {
+                deleteStamp(pk, bucketKey, stampKey);
+            } else if (bucketKey != null) {
+                deleteBucket(pk, bucketKey);
+            } else {
+               table.deleteItem(pk);
+            }
+        } catch (NoSuchMethodError e) {
+            throw new RuntimeException(ERRORMESSAGE, e);
+        } catch (Exception e) {
+            log.error("Unable to delete record " + tableName);
+        }
+    }
+
+    private void deleteStamp(PrimaryKey pk, String bucketKey, String stampKey) {
+        return;
+    }
+
+    private void deleteBucket(PrimaryKey pk, String bucketKey) {
+        return;
+    }
+
+    private Set<ByteBuffer> findBucket(DynamoKey dk) {
+
+        Set<ByteBuffer> bucket = null;
+
+        ItemCollection<QueryOutcome> items = queryByKey(dk);
+        if (items == null) {
+            return null;
+        }
+
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            bucket = item.getByteBufferSet(dk.getBucketKey());
+            break;
+        }
+
+        return bucket;
+    }
+
+    private void updateBuckets(Map<String, GenericRecord> records) {
+
+        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
+        Table table = dynamoDB.getTable(tableName);
+
+        Map<String, Map<String, Map<String, Set<ByteBuffer>>>> buckets =
+            new HashMap<String, Map<String, Map<String, Set<ByteBuffer>>>>();
+        for (Map.Entry<String, GenericRecord> entry : records.entrySet()) {
+            GenericRecord record = entry.getValue();
+            DynamoKey dk = constructDynamoKey(record);
+            Set<ByteBuffer> bucket = null;
+            Map<String, Map<String, Set<ByteBuffer>>> rangeBuckets = buckets.get(dk.getHashKey());
+            if (rangeBuckets == null) {
+                rangeBuckets = new HashMap<String, Map<String, Set<ByteBuffer>>>();
+                buckets.put(dk.getHashKey(), rangeBuckets);
+            }
+            Map<String, Set<ByteBuffer>> attrBuckets = rangeBuckets.get(dk.getRangeKey());
+            if (attrBuckets == null) {
+                attrBuckets = new HashMap<String, Set<ByteBuffer>>();
+                rangeBuckets.put(dk.getRangeKey(), attrBuckets);
+            }
+
+            bucket = attrBuckets.get(dk.getBucketKey());
+            if (bucket == null) {
+                bucket = findBucket(dk);
+                if (bucket == null) {
+                    bucket = new HashSet<ByteBuffer>();
+                }
+                attrBuckets.put(dk.getBucketKey(), bucket);
+            }
+            bucket.add(avroToBytes(record));
+        }
+
+        String hashAttr = tableIndex.getHashKeyAttr();
+        String rangeAttr = tableIndex.getRangeKeyAttr();
+
+        for (Map.Entry<String, Map<String, Map<String, Set<ByteBuffer>>>> hashEntry : buckets.entrySet()) {
+            String hashKey = hashEntry.getKey();
+            Map<String, Map<String, Set<ByteBuffer>>> rangeBuckets = hashEntry.getValue();
+            for (Map.Entry<String, Map<String, Set<ByteBuffer>>> rangeEntry : rangeBuckets.entrySet()) {
+                String rangeKey = rangeEntry.getKey();
+                UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(new PrimaryKey(hashAttr, hashKey, rangeAttr, rangeKey));
+                Map<String, Set<ByteBuffer>> attrBuckets = rangeEntry.getValue();
+                for (Map.Entry<String, Set<ByteBuffer>> attrBucketEntry : attrBuckets.entrySet()) {
+                    String bucketKey = attrBucketEntry.getKey();
+                    Set<ByteBuffer> bucket = attrBucketEntry.getValue();
+                    updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(bucketKey).put(bucket));
+                }
+                table.updateItem(updateItemSpec);
+            }
+        }
+    }
+
+    private void writeRecord(String id, GenericRecord record) {
         DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         Item item = buildItem(id, record);
@@ -108,59 +378,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         }
     }
 
-    @Override
-    public void deleteRecord(String id, GenericRecord record) {
-        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
-        Table table = dynamoDB.getTable(tableName);
-
-        try {
-            table.deleteItem(ID, id);
-        } catch (NoSuchMethodError e) {
-            throw new RuntimeException(ERRORMESSAGE, e);
-        } catch (Exception e) {
-            log.error("Unable to delete record " + tableName + " id " + id, e);
-        }
-    }
-
-    @Override
-    public void updateRecord(String id, GenericRecord record) {
-        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
-        Table table = dynamoDB.getTable(tableName);
-
-        UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, record);
-        try {
-            table.updateItem(updateItemSpec);
-        } catch (NoSuchMethodError e) {
-            throw new RuntimeException(ERRORMESSAGE, e);
-        } catch (Exception e) {
-            log.error("Unable to update record " + tableName + " id " + id, e);
-        }
-    }
-
-    @Override
-    public GenericRecord findRecord(String id) {
-        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
-        Table table = dynamoDB.getTable(tableName);
-        GenericRecord record = null;
-        Item item = null;
-        try {
-            item = table.getItem(ID, id);
-        } catch (NoSuchMethodError e) {
-            log.info("The table name is " + tableName);
-            log.info("The key is " + id);
-            throw new RuntimeException(ERRORMESSAGE, e);
-        } catch (Exception e) {
-            log.error("Unable to find record " + tableName + " id " + id, e);
-        }
-        if (item != null) {
-            ByteBuffer blob = item.getByteBuffer(BLOB);
-            record = bytesToAvro(blob);
-        }
-        return record;
-    }
-
-    @Override
-    public void createRecords(Map<String, GenericRecord> records) {
+    private void writeRecords(Map<String, GenericRecord> records) {
         DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         TableWriteItems writeItems = new TableWriteItems(tableName);
 
@@ -215,6 +433,12 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     @Override
     public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
+
+        if (isTimeSeriesStore()) {
+            log.info("Batch find records is not supported for time series store");
+            return null;
+        }
+
         Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
 
         if (CollectionUtils.isEmpty(idList)) {
@@ -257,7 +481,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         for (String id : idList) {
             if (id == null)
                 continue;
-            keys = keys.addPrimaryKey(new PrimaryKey(ID, id));
+            DynamoKey dk = constructDynamoKey(id);
+            if (dk ==  null) {
+                continue;
+            }
+            keys = keys.addPrimaryKey(dk.getPrimaryKey());
         }
 
         List<PrimaryKey> pKs = keys.getPrimaryKeys();
@@ -274,8 +502,11 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             do {
                 List<Item> items = outcome.getTableItems().get(tableName);
                 for (Item item : items) {
-                    GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
-                    records.put(item.getString(ID), record);
+                    List<GenericRecord> recordsFromItem = extractRecords(item);
+                    for (GenericRecord record : recordsFromItem) {
+                        DynamoKey key = constructDynamoKey(record);
+                        records.put(key.getId(), record);
+                    }
                 }
 
                 // Check for unprocessed keys which could happen if you exceed
@@ -294,35 +525,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         } catch (Exception e) {
             log.error("Unable to batch get records " + tableName, e);
         }
-    }
-
-    @Override
-    public List<GenericRecord> findRecords(Map<String, String> properties) {
-        DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
-        Table table = dynamoDB.getTable(tableName);
-        QuerySpec querySpec = buildQuerySpec(properties);
-
-        if (querySpec == null) {
-            return null;
-        }
-
-        List<GenericRecord> records = new ArrayList<GenericRecord>();
-        try {
-            ItemCollection<QueryOutcome> items = table.query(querySpec);
-
-            Iterator<Item> iterator = items.iterator();
-            while (iterator.hasNext()) {
-                Item item = iterator.next();
-                GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
-                records.add(record);
-            }
-        } catch (NoSuchMethodError e) {
-            throw new RuntimeException(ERRORMESSAGE, e);
-        } catch (Exception e) {
-            log.error("Unable to find records " + tableName, e);
-        }
-
-        return records;
     }
 
     private ByteBuffer avroToBytes(GenericRecord record) {
@@ -397,9 +599,19 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     private Item buildItem(String id, GenericRecord record) {
+
         Map<String, Object> attrMap = new HashMap<>();
 
-        attrMap.put(ID, id);
+        Object hashKeyValue = record.get(tableIndex.getHashKeyField());
+        if (hashKeyValue == null) {
+            attrMap.put(ID, id);
+        } else {
+            attrMap.put(tableIndex.getHashKeyAttr(), hashKeyValue.toString());
+            if (tableIndex.getRangeKeyAttr() != null) {
+                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()).toString());
+            }
+        }
+
         attrMap.put(BLOB, avroToBytes(record));
 
         if (tableAttributes != null) {
@@ -408,17 +620,15 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             }
         }
 
-        if (tableIndex != null) {
-            attrMap.put(tableIndex.getHashKeyAttr(), record.get(tableIndex.getHashKeyField()).toString());
-            if (tableIndex.getRangeKeyAttr() != null) {
-                attrMap.put(tableIndex.getRangeKeyAttr(), record.get(tableIndex.getRangeKeyField()).toString());
-            }
-        }
         return Item.fromMap(attrMap);
     }
 
     private UpdateItemSpec buildUpdateItemSpec(String id, GenericRecord record) {
-        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(ID, id);
+
+        DynamoKey dk = constructDynamoKey(id, record);
+
+
+        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(dk.getPrimaryKey());
 
         updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToBytes(record)));
 
@@ -432,28 +642,151 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return updateItemSpec;
     }
 
-    private QuerySpec buildQuerySpec(Map<String, String> properties) {
-        String hashValue = properties.get(tableIndex.getHashKeyField());
-        if (hashValue == null)
-            return null;
-        String rangeValue = properties.get(tableIndex.getRangeKeyField());
-
-        StringBuilder builder = new StringBuilder();
-        builder.append(tableIndex.getHashKeyAttr() + " = " + hashValue);
-        if (rangeValue != null) {
-            builder.append(" and " + tableIndex.getRangeKeyAttr() + " = " + rangeValue);
+    private DynamoKey constructDynamoKey(String id, GenericRecord record) {
+        DynamoKey dk = constructDynamoKey(record);
+        if (dk == null ) {
+            return constructDynamoKey(id);
         }
-        return new QuerySpec().withKeyConditionExpression(builder.toString());
+        return dk;
+    }
+    private DynamoKey constructDynamoKey(String id) {
+
+        String[] ids = new String[4];
+        String[] compositeIds = id.split("#");
+        if (compositeIds.length > 4) {
+            return null;
+        } else if (compositeIds.length == 0) {
+            ids[0] = id;
+        } else {
+            for (int i = 0; i < compositeIds.length; i++) {
+                ids[i] = compositeIds[i];
+            }
+        }
+        return constructDynamoKey(ids);
+    }
+
+    private DynamoKey constructDynamoKey(GenericRecord record) {
+        String[] ids = new String[4];
+
+        String hashKeyField = tableIndex.getHashKeyField();
+        if (hashKeyField != null) {
+            ids[0] = record.get(hashKeyField).toString();
+        }
+
+        String rangeKeyField = tableIndex.getRangeKeyField();
+        if (rangeKeyField != null) {
+            ids[1] = record.get(rangeKeyField).toString();
+            String bucketField = tableIndex.getBucketKeyField();
+            if (bucketField != null) {
+                ids[2] = record.get(bucketField).toString();
+                String stampField = tableIndex.getStampKeyField();
+                if (stampField != null) {
+                    ids[3] = record.get(stampField).toString();
+                }
+            }
+        }
+
+        return constructDynamoKey(ids);
+    }
+
+    private DynamoKey constructDynamoKey(Map<String, String> properties) {
+        String[] ids = new String[4];
+
+        String hashKeyField = tableIndex.getHashKeyField();
+        if (hashKeyField != null) {
+            ids[0] = properties.get(hashKeyField);
+        }
+
+        String rangeKeyField = tableIndex.getRangeKeyField();
+        if (rangeKeyField != null) {
+            ids[1] = properties.get(rangeKeyField);
+            String bucketField = tableIndex.getBucketKeyField();
+            if (bucketField != null) {
+                ids[2] = properties.get(bucketField);
+                String stampField = tableIndex.getStampKeyField();
+                if (stampField != null) {
+                    ids[3] = properties.get(stampField);
+                }
+            }
+        }
+        return constructDynamoKey(ids);
+
+    }
+
+    private DynamoKey constructDynamoKey(String[] ids) {
+        String hashKeyAttr = tableIndex.getHashKeyAttr();
+        String rangeKeyAttr = tableIndex.getRangeKeyAttr();
+        return new DynamoKey(hashKeyAttr, rangeKeyAttr, ids);
+    }
+
+
+   private boolean isTimeSeriesStore() {
+       return (tableIndex.getBucketKeyField() != null);
+   }
+
+    private List<GenericRecord> extractRecords(Item item) {
+        List<GenericRecord> records = new ArrayList<GenericRecord>();
+        extractRecords(item, records);
+        return records;
+    }
+
+
+    private void extractRecords(Item item, List<GenericRecord> records) {
+        if (isTimeSeriesStore()) {
+            for (Map.Entry<String,Object> entry : item.attributes()) {
+                if (isBucketAttr(entry.getKey())) {
+                    try {
+                        Set<ByteBuffer> stampSet = item.getByteBufferSet(entry.getKey());
+                        for (ByteBuffer stamp : stampSet) {
+                            GenericRecord record = bytesToAvro(stamp);
+                            records.add(record);
+                        }
+                    } catch (Exception e) {
+                        log.error("Invalid time stamp records", e);
+                    }
+                }
+             }
+        } else {
+             GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
+             records.add(record);
+        }
+    }
+
+    private boolean isBucketAttr(String key) {
+        return key.matches("[0-9]+");
     }
 
     @Override
     public Map<String, Object> findAttributes(String id) {
+        if (isTimeSeriesStore()) {
+            log.info("Find attributes for timeseries table is not supported");
+        }
+        DynamoKey dk = constructDynamoKey(id);
+        if (dk == null) {
+            return null;
+        }
+        return findAttributes(dk);
+    }
+
+    public Map<String, Object> findAttributes(Map<String, String> properties) {
+        if (isTimeSeriesStore()) {
+            log.info("Find attributes for timeseries table is not supported");
+        }
+        DynamoKey dk = constructDynamoKey(properties);
+        if (dk == null) {
+            return null;
+        }
+
+        return findAttributes(dk);
+    }
+
+    private Map<String, Object> findAttributes(DynamoKey dk) {
         DynamoDB dynamoDB = new DynamoDB(dynamoService.getClient());
         Table table = dynamoDB.getTable(tableName);
         Map<String, Object> map = new HashMap<>();
 
         try {
-            Item item = table.getItem(ID, id);
+            Item item = table.getItem(dk.getPrimaryKey());
             Map<String, Object> items = item.asMap();
             Set<String> attrNames = new HashSet<>(tableAttributes.getNames());
             for (Map.Entry<String, Object> entry : items.entrySet()) {
@@ -463,13 +796,57 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             }
         } catch (NoSuchMethodError e) {
             log.info("The table name is " + tableName);
-            log.info("The key is " + id);
             throw new RuntimeException(ERRORMESSAGE, e);
         } catch (Exception e) {
-            log.error("Unable to find record " + tableName + " id " + id, e);
+            log.error("Unable to find record " + tableName);
         }
 
         return map;
     }
 
+    class DynamoKey {
+        PrimaryKey pk;
+        String[] ids;
+
+        public DynamoKey(String hashAttr, String rangeAttr, String[] ids) {
+            this.ids = ids;
+            if (rangeAttr == null) {
+                pk = new PrimaryKey(hashAttr, ids[0]);
+            } else {
+                pk = new PrimaryKey(hashAttr, ids[0], rangeAttr, ids[1]);
+            }
+        }
+
+        public PrimaryKey getPrimaryKey() {
+            return pk;
+        }
+
+        public String getHashKey() {
+            return ids[0];
+        }
+
+        public String getRangeKey() {
+            return ids[1];
+        }
+
+        public String getBucketKey() {
+            return ids[2];
+        }
+
+        public String getStampKey() {
+            return ids[3];
+        }
+
+        public String getId() {
+            String id = ids[0];
+            for (int i = 1; i < ids.length; i++) {
+                if (ids[i] != null) {
+                    id = id + "." + ids[i];
+                } else {
+                    break;
+                }
+            }
+            return id;
+       }
+   }
 }

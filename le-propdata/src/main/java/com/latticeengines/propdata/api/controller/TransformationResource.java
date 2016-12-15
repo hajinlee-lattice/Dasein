@@ -126,7 +126,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
             }
             return progress;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getTargetSource() });
+            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { "Failed to start pipeline transformation" });
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);

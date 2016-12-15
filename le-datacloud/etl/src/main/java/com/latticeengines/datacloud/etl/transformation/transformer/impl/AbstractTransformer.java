@@ -31,15 +31,15 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     abstract protected boolean validateConfig(T config, List<String> sourceNames);
 
     abstract protected boolean transform(TransformationProgress progress, String workflowDir, Source[] baseSources, List<String> baseVersions,
-                             Source[] baseTemplates, Source targetTemplate, T configuration);
+                             Source[] baseTemplates, Source targetTemplate, T configuration, String confStr);
 
     protected Log getLogger() {
         return log;
     }
 
     @SuppressWarnings("unchecked")
-    protected Class<T> getConfigurationClass() {
-        return (Class<T>) TransformerConfig.class;
+    protected Class<? extends TransformerConfig> getConfigurationClass() {
+        return TransformerConfig.class;
     }
 
     @Override
@@ -56,19 +56,20 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected T getConfiguration(String confStr) {
         T configuration = null;
-        Class<T> configClass = getConfigurationClass();
+        Class<? extends TransformerConfig> configClass = getConfigurationClass();
         if (confStr == null) {
             if (configClass == TransformerConfig.class) {
                 try {
-                    configuration = configClass.newInstance();
+                    configuration = (T)configClass.newInstance();
                 } catch (Exception e) {
                 }
             }
         } else {
             try {
-                configuration = JsonUtils.deserialize(confStr, configClass);
+                configuration = (T)JsonUtils.deserialize(confStr, configClass);
             } catch (Exception e) {
                 log.error("Failed to convert tranformer config.", e);
             }
@@ -87,13 +88,12 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
                 updateStatusToFailed(progress, "Failed to transform data.", null);
                 return false;
             }
-            return transform(progress, workflowDir, baseSources, baseVersions, baseTemplates, targetTemplate, configuration);
+            return transform(progress, workflowDir, baseSources, baseVersions, baseTemplates, targetTemplate, configuration, confStr);
         } catch (Exception e) {
             log.error("Transformer failed to transform", e);
             updateStatusToFailed(progress, "Failed to transform data.", e);
             return false;
         }
-
     }
 
     protected void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {

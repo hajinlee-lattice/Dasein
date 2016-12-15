@@ -5,16 +5,21 @@ public class DynamoIndex {
     private String rangeKeyAttr;
     private String hashKeyField;
     private String rangeKeyField;
+    private String bucketKeyField;
+    private String stampKeyField;
 
     public DynamoIndex() {
 
     }
 
-    public DynamoIndex(String hashKeyAttr, String hashKeyField, String rangeKeyAttr, String rangeKeyField) {
+    public DynamoIndex(String hashKeyAttr, String hashKeyField, String rangeKeyAttr, String rangeKeyField,
+                       String bucketKeyField, String stampKeyField) {
         this.hashKeyAttr = hashKeyAttr;
         this.hashKeyField = hashKeyField;
         this.rangeKeyAttr = rangeKeyAttr;
         this.rangeKeyField = rangeKeyField;
+        this.bucketKeyField = bucketKeyField;
+        this.stampKeyField = stampKeyField;
     }
 
     public void setHashKeyAttr(String hashKeyAttr) {
@@ -47,6 +52,22 @@ public class DynamoIndex {
 
     public String getRangeKeyField() {
         return rangeKeyField;
+    }
+
+    public void setBucketKeyField(String bucketKeyField) {
+        this.bucketKeyField = bucketKeyField;
+    }
+
+    public String getBucketKeyField() {
+        return bucketKeyField;
+    }
+
+    public void setStampKeyField(String stampKeyField) {
+        this.stampKeyField = stampKeyField;
+    }
+
+    public String getStampKeyField() {
+        return stampKeyField;
     }
 }
 

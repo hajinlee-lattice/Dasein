@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SourceValidationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ValidationReportTransformerConfig;
 
 @Component("validationReportTransformer")
@@ -52,7 +53,7 @@ public class ValidationReportTransformer extends AbstractDataflowTransformer<Val
     }
 
     @Override
-    protected Class<ValidationReportTransformerConfig> getConfigurationClass() {
+    protected Class<? extends TransformerConfig> getConfigurationClass() {
         return ValidationReportTransformerConfig.class;
     }
 

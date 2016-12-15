@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
+import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
@@ -72,6 +73,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     protected FabricDataStore dataStore;
 
     private Class<T> entityClass;
+
+    protected DynamoIndex tableIndex;
 
     public BaseFabricEntityMgrImpl(Builder builder) {
         this.store = builder.store;
@@ -111,8 +114,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         // add dynamo key attributes
         String dynamoProp = DynamoUtil.constructIndex(entityClass);
+        log.info("Index : " + dynamoProp);
         if (dynamoProp != null) {
             schema.addProp(DynamoUtil.KEYS, dynamoProp);
+            tableIndex = DynamoUtil.getIndex(dynamoProp);
         }
         // add dynamo attributes
         dynamoProp = DynamoUtil.constructAttributes(entityClass);
@@ -282,6 +287,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             if (entity instanceof FabricEntity) {
                 return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
             }
+            log.info("Create Entity " + entity + "Schema " + schema.toString());
             return AvroReflectionUtils.toGenericRecord(entity, schema);
         } catch (Exception e) {
             log.error("Failed to convert entity to generic record", e);
@@ -396,4 +402,5 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public Map<String, Object> findAttributesByKey(String id) {
         return dataStore.findAttributes(id);
     }
+
 }
