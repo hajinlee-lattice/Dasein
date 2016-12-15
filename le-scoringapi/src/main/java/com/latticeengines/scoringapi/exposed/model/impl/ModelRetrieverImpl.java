@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +37,7 @@ import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NetworkUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -72,6 +74,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     private static final String MODEL_TYPE_KEY = "__type";
     private static final String MODEL_KEY = "Model";
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
+    private static final String UUID_IDENTIFIER = UUID.randomUUID().toString();
     public static final String HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR = "/user/s-analytics/customers/%s/data/%s-*-Metadata/";
     public static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
@@ -81,8 +84,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
 
-    static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
-                                                                                    // modelId
+    @VisibleForTesting
     static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
 
     @Value("${common.pls.url}")
@@ -109,10 +111,16 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     private String localPathToPersist = null;
 
+    @Value("${scoringapi.modeljson.cache.dir}")
+    private String localModelJsonCacheDirProperty;
+
+    private String localModelJsonCacheDirIdentifier;
+
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         instantiateCache();
+        localModelJsonCacheDirIdentifier = StringUtils.defaultIfBlank(NetworkUtils.getHostName(), UUID_IDENTIFIER);
     }
 
     @Override
@@ -271,8 +279,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
-        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType)
-                .getScoreDerivation(hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
+        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType).getScoreDerivation(
+                hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
@@ -335,8 +343,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
-                throw new LedpException(LedpCode.LEDP_31007,
-                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
+                throw new LedpException(LedpCode.LEDP_31007, new String[] { modelSummary.getId(),
+                        JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
@@ -472,7 +480,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             throw new LedpException(LedpCode.LEDP_31001, new String[] { hdfsScoreArtifactBaseDir });
         }
 
-        String localModelJsonCacheDir = String.format(LOCAL_MODELJSON_CACHE_DIR, customerSpace.toString(), modelId);
+        String localModelJsonCacheDir = String.format(localModelJsonCacheDirProperty, localModelJsonCacheDirIdentifier,
+                customerSpace.toString(), modelId);
         File modelArtifactsDir = new File(localModelJsonCacheDir + LOCAL_MODEL_ARTIFACT_CACHE_DIR);
 
         // the model artifacts already exists in the local file system
@@ -488,12 +497,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
                 if (!StringUtils.isBlank(localPathToPersist)) {
-                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0),
-                            localPathToPersist + MODEL_JSON);
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
+                            + MODEL_JSON);
                 }
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_31002,
-                        new String[] { modelJsonHdfsPath.get(0), localModelJsonCacheDir });
+                throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
+                        localModelJsonCacheDir });
             }
         } else if (modelJsonHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31003, new String[] { hdfsScoreArtifactBaseDir });
@@ -513,8 +522,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, //
             String modelId) {
-        return scoreArtifactCache
-                .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
+        return scoreArtifactCache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace,
+                modelId));
     }
 
     private void instantiateCache() {
@@ -633,6 +642,16 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 models.add(modelDetail);
             }
         }
+    }
+
+    @VisibleForTesting
+    String getLocalModelJsonCacheDirProperty() {
+        return localModelJsonCacheDirProperty;
+    }
+
+    @VisibleForTesting
+    String getLocalModelJsonCacheDirIdentifier() {
+        return localModelJsonCacheDirIdentifier;
     }
 
 }

@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
@@ -18,7 +17,7 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     private static final Log log = LogFactory.getLog(ModelRetrieverDeploymentTestNG.class);
 
     @Autowired
-    private ModelRetriever modelRetriever;
+    private ModelRetrieverImpl modelRetriever;
 
     @Test(groups = "deployment", enabled = true)
     public void testRetrieveModelArtifacts() throws Exception {
@@ -33,8 +32,8 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
 
     private void testArtifacts(ScoringArtifacts artifacts) {
         Assert.assertNotNull(artifacts);
-        String localModelJsonCacheDir = String.format(ModelRetrieverImpl.LOCAL_MODELJSON_CACHE_DIR,
-                customerSpace.toString(), MODEL_ID);
+        String localModelJsonCacheDir = String.format(modelRetriever.getLocalModelJsonCacheDirProperty(),
+                modelRetriever.getLocalModelJsonCacheDirIdentifier(), customerSpace.toString(), MODEL_ID);
         File modelArtifactsDir = new File(localModelJsonCacheDir + ModelRetrieverImpl.LOCAL_MODEL_ARTIFACT_CACHE_DIR);
         Assert.assertEquals(artifacts.getModelArtifactsDir(), modelArtifactsDir);
     }
@@ -42,7 +41,7 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
     /**
      * Use this as a tool to download a model into test resources for running
      * scoring tests against.
-     * 
+     *
      * @throws Exception
      */
     @Test(groups = "deployment", enabled = false)
