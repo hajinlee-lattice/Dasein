@@ -88,6 +88,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.download_button = {
         label: 'Download',
+        labelIcon: 'fa-download',
         class: 'orange-button select-label',
         icon: 'fa fa-chevron-down',
         iconclass: 'orange-button select-more',

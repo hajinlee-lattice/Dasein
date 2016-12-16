@@ -34,7 +34,14 @@
     button {
         vertical-align: top;
         padding: 0.75em 1em;
-                        
+        
+        span.label-icon {
+            margin-right: 0.4em;
+            margin-left: 0 !important;
+            padding-left: 0;
+            vertical-align: middle;
+        }
+        
         &.select-label {
             border-top-right-radius: 1px;
             border-bottom-right-radius: 1px;

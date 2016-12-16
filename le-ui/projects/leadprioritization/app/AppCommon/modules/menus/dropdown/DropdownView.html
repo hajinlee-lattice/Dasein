@@ -6,6 +6,7 @@
             ng-click="click()"
             ui-sref="{{ sref || '.' }}"
             ng-class="{ 'open': visible }">
+        <span ng-if="labelIcon" class="label-icon fa {{ labelIcon }}"></span>
         {{ label }}
     </button
     ><button 
