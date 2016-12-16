@@ -39,7 +39,7 @@
                             <td><i class="fa"
                                 ng-if="attribute.warning"
                                 ng-class="{'fa-exclamation-triangle':attribute.warning === 'optional', 'fa-exclamation-circle': attribute.warning === 'mandatory'}"
-                                ng-mouseover="vm.showTooltip($event, attribute)"
+                                ng-mouseenter="vm.showTooltip($event, attribute)"
                                 ng-mouseleave="vm.hideTooltip()"></i>
                             </td>
                             <td>
