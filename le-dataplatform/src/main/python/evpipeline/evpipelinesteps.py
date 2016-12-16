@@ -196,7 +196,7 @@ class ImputationStep(PipelineStep):
         # noImputation: this is a list of all fields for which imputation makes no sense
         # spanValues: this is a list of all product values with span
         zeroMapx = [x for x in hd if any([y.lower() in x.lower()  and 'product_' in x.lower() for y in ProductStrings0])]
-        noImputation = [x for x in hd if 'ext_' not in x.lower() and 'product_' not in x.lower() and '__revenue' not in x.lower()]
+        noImputation = [x for x in hd if 'ext_' not in x.lower() and 'product_' not in x.lower() and '__revenue_' not in x.lower()]
         spanValues = [x for x in hd if 'product_' in x.lower() and '_span' in x.lower()]
         # if len(spanValues) != 0:  print "ERROR: SPAN IS CATEGORICAL"
         # hdx:  all variables not in previous 3, expect to be data cloud
