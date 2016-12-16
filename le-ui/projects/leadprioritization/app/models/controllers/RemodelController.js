@@ -108,7 +108,7 @@ angular.module('mainApp.models.remodel', [
                 vm.messageTitle = ResourceUtility.getString('MODEL_REMODEL_REMODELING_TITLE');
                 vm.message = ResourceUtility.getString('MODEL_REMODEL_REMODELING_MESSAGE');
 
-                vm.dirty = false;
+                vm.isDirty = false;
             } else {
                 vm.error = true;
                 vm.messageTitle = 'Error';
