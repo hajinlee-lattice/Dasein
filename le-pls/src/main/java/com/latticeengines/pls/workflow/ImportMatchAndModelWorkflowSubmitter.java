@@ -141,6 +141,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .sourceFileName(sourceFile.getName())
                 //
+                .eventTableReportSourceFileName(sourceFile.getTableName())
+                //
                 .sourceType(SourceType.FILE)
                 //
                 .internalResourceHostPort(internalResourceHostPort)

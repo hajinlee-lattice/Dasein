@@ -91,10 +91,14 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder eventTableReportSourceFileName(String eventTableReportSourceFileName) {
+            createEventTableReport.setSourceTableName(eventTableReportSourceFileName);
+            return this;
+        }
+
         public Builder dedupTargetTableName(String targetTableName) {
             dedupEventTable.setTargetTableName(targetTableName);
             match.setInputTableName(targetTableName);
-            createEventTableReport.setSourceTableName(targetTableName);
             return this;
         }
 
