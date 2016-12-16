@@ -15,7 +15,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             // Specify Dimensions
             //==================================================
-            var margin = {top: 47, right: 0, bottom: 89, left: 130},
+            var margin = {top: 47, right: 10, bottom: 89, left: 130},
                 width = 936 - margin.left - margin.right,
                 height = 336 - margin.top - margin.bottom;
 
