@@ -63,34 +63,6 @@ def main():
             print 'Writing to ' + target_path
             f.write(aggregated)
 
-    # qacluster2
-    environment="qacluster"
-    aggregated=""
-    keys={}
-    for dir_name, _, _ in os.walk(WSHOME):
-        end_with = PROPERTY_DIR + environment + "2"
-        if dir_name[-len(end_with):] == end_with \
-                and 'le-config' not in dir_name \
-                and 'le-docker' not in dir_name \
-                and 'le-awsenvironment' not in dir_name:
-            aggregated += aggregate_props(dir_name, keys)
-
-    for dir_name, _, _ in os.walk(WSHOME):
-        end_with = PROPERTY_DIR + environment
-        if dir_name[-len(end_with):] == end_with \
-                and 'le-config' not in dir_name \
-                and 'le-docker' not in dir_name \
-                and 'le-awsenvironment' not in dir_name:
-            aggregated += aggregate_props(dir_name, keys, quiet=True)
-
-    target_path=os.path.join(confdir(environment + "2"), 'latticeengines.properties')
-    if os.path.isfile(target_path):
-        os.remove(target_path)
-    with open(target_path, 'w') as f:
-        print 'Writing to ' + target_path
-        f.write(aggregated)
-
-
 def aggregate_props(dir, keys, quiet=False):
     prop_files = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
     aggregated = ""
