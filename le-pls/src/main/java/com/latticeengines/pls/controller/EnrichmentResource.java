@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,17 +28,12 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
-import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.EnrichmentService;
 import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
@@ -63,6 +57,9 @@ public class EnrichmentResource {
 
     @Autowired
     private SelectedAttrService selectedAttrService;
+
+    @Autowired
+    private EnrichmentService enrichmentService;
 
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = LEAD_ENRICH_PATH + "/categories", method = RequestMethod.GET, //
@@ -256,9 +253,18 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection")
-    public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
-            @RequestBody AccountMasterFactQuery query) {
-        return createDummyCube();
+    public AccountMasterCube loadAMStatisticsCubeByPost(@RequestBody(required = false) AccountMasterFactQuery query) {
+        return enrichmentService.getCube(query);
+    }
+
+    @RequestMapping(value = AM_STATS_PATH + "/cube", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Load account master cube based on dimension selection")
+    public AccountMasterCube loadAMStatisticsCube(@RequestParam(value = "q", required = false) String query) {
+        System.out.println("q=[" + query + "]");
+        return enrichmentService.getCube(query);
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/topn", //
@@ -268,85 +274,20 @@ public class EnrichmentResource {
     @ApiOperation(value = "Get top N attributes per subcategory for a given category")
     public TopNAttributes getTopNAttributes(HttpServletRequest request, //
             @ApiParam(value = "category", required = true) //
-            @RequestParam String category, //
-            @ApiParam(value = "category", required = false, defaultValue = "5") //
-            @RequestParam Integer max) {
-        return createTopNAttributes(category, max);
-    }
-
-    private AccountMasterCube createDummyCube() {
-        List<LeadEnrichmentAttribute> allAttrs = selectedAttrService.getAllAttributes();
-        return createDummyCube(allAttrs);
-    }
-
-    private AccountMasterCube createDummyCube(List<LeadEnrichmentAttribute> allAttrs) {
-        AccountMasterCube cube = new AccountMasterCube();
-
-        Map<String, AttributeStatistics> statistics = new HashMap<>();
-
-        int count = 500000;
-        for (LeadEnrichmentAttribute attr : allAttrs) {
-            AttributeStatistics value = new AttributeStatistics();
-            AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
-            rowBasedStatistics.setNonNullCount(count--);
-            Buckets buckets = new Buckets();
-            buckets.setType(BucketType.Numerical);
-            List<Bucket> bucketList = new ArrayList<>();
-            Bucket bucket = new Bucket();
-            bucket.setBucketLabel("First Bucket");
-            bucket.setCount(count - 10);
-            bucketList.add(bucket);
-            bucket = new Bucket();
-            bucket.setBucketLabel("Second Bucket");
-            bucket.setCount(10);
-            bucketList.add(bucket);
-            buckets.setBucketList(bucketList);
-            rowBasedStatistics.setBuckets(buckets);
-            value.setRowBasedStatistics(rowBasedStatistics);
-
-            statistics.put(attr.getFieldName(), value);
-        }
-
-        cube.setStatistics(statistics);
-        return cube;
-    }
-
-    private TopNAttributes createTopNAttributes(String category, int max) {
-        List<LeadEnrichmentAttribute> allAttrs = selectedAttrService.getAllAttributes();
-        TopNAttributes topNAttributes = new TopNAttributes();
-        AccountMasterCube cube = createDummyCube(allAttrs);
-        Map<String, List<TopAttribute>> topAttributes = new HashMap<>();
-        topNAttributes.setTopAttributes(topAttributes);
-
-        for (LeadEnrichmentAttribute attr : allAttrs) {
-            if (!attr.getCategory().equalsIgnoreCase(category)) {
-                continue;
+            @RequestParam(value = "category") String categoryName, //
+            @ApiParam(value = "max", defaultValue = "5") //
+            @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
+        Category category;
+        try {
+            category = Category.fromName(categoryName);
+        } catch (Exception e) {
+            try {
+                category =  Category.valueOf(categoryName);
+            } catch (Exception e1) {
+                throw new RuntimeException("Cannot recogonize category name " + categoryName, e1);
             }
-
-            String subcategory = attr.getSubcategory();
-            if (!topAttributes.containsKey(subcategory)) {
-                List<TopAttribute> topNList = new ArrayList<>();
-                topAttributes.put(subcategory, topNList);
-            }
-            List<TopAttribute> topNList = topAttributes.get(subcategory);
-
-            updateTopNList(attr, max, topNList, cube.getStatistics().get(attr.getFieldName()).getRowBasedStatistics());
-
         }
-
-        return topNAttributes;
-    }
-
-    private void updateTopNList(LeadEnrichmentAttribute attr, int max, List<TopAttribute> topNList,
-            AttributeStatsDetails rowBasedStatistics) {
-        if (topNList.size() >= max) {
-            return;
-        } else {
-            TopAttribute topAttr = new TopAttribute();
-            topAttr.setAttribute(attr.getFieldName());
-            topAttr.setNonNullCount(rowBasedStatistics.getNonNullCount());
-            topNList.add(topAttr);
-        }
+        return enrichmentService.getTopAttrs(category);
     }
 
     // ------------End for statistics---------------------//

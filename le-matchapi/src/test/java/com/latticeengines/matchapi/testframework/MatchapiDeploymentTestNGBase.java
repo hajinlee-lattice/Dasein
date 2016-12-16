@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -36,6 +37,9 @@ public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @Autowired
     protected MatchProxy matchProxy;
+
+    @Autowired
+    protected AMStatsProxy amStatsProxy;
 
     protected String getRestAPIHostPort() {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;

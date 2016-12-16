@@ -1,9 +1,19 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TopNAttributes {
+
+    @JsonProperty("SubCategories")
     private Map<String, List<TopAttribute>> topAttributes;
 
     public Map<String, List<TopAttribute>> getTopAttributes() {
@@ -14,10 +24,31 @@ public class TopNAttributes {
         this.topAttributes = topAttributes;
     }
 
+    public void addTopAttribute(String subCategory, TopAttribute attribute) {
+        if (topAttributes == null) {
+            topAttributes = new HashMap<>();
+        }
+        if (!topAttributes.containsKey(subCategory)) {
+            topAttributes.put(subCategory, new ArrayList<TopAttribute>());
+        }
+        topAttributes.get(subCategory).add(attribute);
+    }
+
     public static class TopAttribute {
+
+        @JsonProperty("Attribute")
         private String attribute;
 
+        @JsonProperty("NonNullCount")
         private Integer nonNullCount;
+
+        // dummy constructor for jackson
+        private TopAttribute() {}
+
+        public TopAttribute(String attribute, Integer nonNullCount) {
+            this.attribute = attribute;
+            this.nonNullCount = nonNullCount;
+        }
 
         public String getAttribute() {
             return attribute;

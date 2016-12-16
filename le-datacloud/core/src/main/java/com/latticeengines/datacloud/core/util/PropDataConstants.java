@@ -9,10 +9,4 @@ public final class PropDataConstants {
             .toString();
     public static final String SCAN_SUBMITTER = "RESTScanner";
 
-    public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
-    public static final String ACCOUNT_MASTER = "AccountMaster";
-
-    public static final String ATTR_CATEGORY = "Category";
-    public static final String ATTR_SUB_CATEGORY = "SubCategory";
-
 }

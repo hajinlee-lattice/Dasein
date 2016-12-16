@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.AccountMasterStatisticsService;
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 
@@ -32,7 +32,7 @@ public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunct
         for (Map.Entry<Category, Long> entry: catIdMap.entrySet()) {
             Category category = entry.getKey();
             Long attrId = entry.getValue();
-            verifyAttribute(attrId, PropDataConstants.ATTR_CATEGORY, category.name());
+            verifyAttribute(attrId, DataCloudConstants.ATTR_CATEGORY, category.name());
         }
 
         for (Category category: Category.values()) {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -71,10 +72,10 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     private Long getCategoryRootId(Category category) {
         DimensionalQuery query = new DimensionalQuery();
-        query.setSource(PropDataConstants.ACCOUNT_MASTER_COLUMN);
+        query.setSource(DataCloudConstants.ACCOUNT_MASTER_COLUMN);
         query.setDimension(AccountMasterFact.DIM_CATEGORY);
         Map<String, String> qualifiers = new HashMap<>();
-        qualifiers.put(PropDataConstants.ATTR_CATEGORY, category.name());
+        qualifiers.put(DataCloudConstants.ATTR_CATEGORY, category.name());
         query.setQualifiers(qualifiers);
         return dimensionalQueryService.findAttrId(query);
     }
