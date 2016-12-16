@@ -223,6 +223,7 @@ angular.module('lp.apiconsole.ScoringRequestController', [
                         $scope.warnings = result.ResultObj.warnings;
                         $scope.scoreId = result.ResultObj.scoreId;
                         $scope.scoreTimestamp = result.ResultObj.timestamp;
+                        $scope.classification = result.ResultObj.classification;
 
                         $scope.scoringRequestError = null;
                         deferred.resolve(scoringResult);
