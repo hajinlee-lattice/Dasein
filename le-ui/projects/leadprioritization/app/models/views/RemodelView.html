@@ -18,7 +18,7 @@
     <div class="container row">
         <div class="columns twelve panel panel-default box-outline">
             <div class="remodel-table-title">
-                <p>Lattice recommendations based on your attributes <span class="header-count">({{vm.attributes.length}})</span></p>
+                <p>Lattice recommendations based on your attributes <span class="header-count">({{filteredAttributes.length}})</span></p>
             </div>
             <div class="section-body attribute-table">
                 <table >
@@ -34,7 +34,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="attribute in vm.attributes | filter:{attribute:{Tags:'Internal'}}:true | orderBy:vm.sortBy:!vm.sortAsc">
+                        <tr ng-repeat="attribute in vm.attributes | filter:{attribute:{Tags:'Internal'}}:true | orderBy:vm.sortBy:!vm.sortAsc as filteredAttributes">
                             <td>{{attribute.name}}</td>
                             <td><i class="fa"
                                 ng-if="attribute.warning"
