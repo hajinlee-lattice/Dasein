@@ -635,7 +635,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     // purpose
                     fields = new Fields(model.getModelId(), new ArrayList<Field>());
                 } else {
-                    fields = getModelFields(customerSpace, model.getModelId(), modelSummary.getPredictors());
+                    try {
+                        fields = getModelFields(customerSpace, model.getModelId(), modelSummary.getPredictors());
+                    } catch (Exception e) {
+                        //skip the bad model
+                        continue;
+                    }
                 }
                 ModelDetail modelDetail = new ModelDetail(model, status, fields,
                         BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
