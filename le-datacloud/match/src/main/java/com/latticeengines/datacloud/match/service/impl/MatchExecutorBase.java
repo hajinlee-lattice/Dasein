@@ -42,14 +42,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @MatchStep
     protected MatchContext complete(MatchContext matchContext) {
         DbHelper dbHelper = beanDispatcher.getDbHelper(matchContext);
-        matchContext = dbHelper.updateInternalResults(matchContext);
+        matchContext = updateInternalResults(dbHelper, matchContext);
         matchContext = mergeResults(matchContext);
         matchContext.getOutput().setFinishedAt(new Date());
         Long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - receiveTime);
         return matchContext;
     }
-    
+
     @Override
     public MatchContext executeAsync(MatchContext matchContext) {
         return matchContext;
@@ -60,6 +60,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         return matchContext;
     }
 
+    @MatchStep
+    private MatchContext updateInternalResults(DbHelper dbHelper, MatchContext matchContext) {
+        matchContext = dbHelper.updateInternalResults(matchContext);
+        return matchContext;
+    }
 
     @SuppressWarnings("unchecked")
     @VisibleForTesting
@@ -67,7 +72,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Trace
     MatchContext mergeResults(MatchContext matchContext) {
         ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(matchContext);
-        MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher.getMetadataColumnService(matchContext);
+        MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher
+                .getMetadataColumnService(matchContext);
 
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());

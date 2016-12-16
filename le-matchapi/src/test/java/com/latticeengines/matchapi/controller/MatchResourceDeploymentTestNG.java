@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.Path;
@@ -13,19 +15,23 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -69,8 +75,14 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @Autowired
     private MatchCommandService matchCommandService;
 
+    @Autowired
+    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
+
+    @Value("${datacloud.match.latest.data.cloud.major.version}")
+    private String latestMajorVersion;
+
     // Test against DerivedColumnsCache
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
@@ -82,7 +94,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAccountMasterRTSMatch() {
         testAccountMasterRTSMatch(true, "a@fb.com", true, false, null);
         testAccountMasterRTSMatch(true, "a@salesforce.com", false, true, "null");
@@ -92,7 +104,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private void testAccountMasterRTSMatch(boolean resolveKeyMap, String domain, boolean isEmail,
             boolean setUnionSelection, String duns) {
         MatchInput input = prepareSimpleMatchInput(resolveKeyMap, domain, isEmail, setUnionSelection, duns);
-        input.setDataCloudVersion("2.0.0");
+        String latestVersion = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
+        input.setDataCloudVersion(latestVersion);
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         output = matchProxy.matchRealTime(input);
@@ -107,78 +120,71 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testRealtimeBulkMatch() throws IOException {
-        String[] versions = { "1.0.0", "2.0.0" };
-        for (String version : versions) {
-            int size = 200;
-            List<MatchInput> inputList = prepareBulkMatchInput(size, version, true);
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
+    public void testRealtimeBulkMatch(String version) throws IOException {
+        int size = 200;
+        List<MatchInput> inputList = prepareBulkMatchInput(size, version, true);
 
-            BulkMatchInput input = new BulkMatchInput();
-            input.setHomogeneous(false);
-            input.setInputList(inputList);
+        BulkMatchInput input = new BulkMatchInput();
+        input.setHomogeneous(false);
+        input.setInputList(inputList);
 
-            ObjectMapper om = new ObjectMapper();
-            System.out.println(om.writeValueAsString(input));
+        ObjectMapper om = new ObjectMapper();
+        System.out.println(om.writeValueAsString(input));
 
-            long startLookup = System.currentTimeMillis();
-            BulkMatchOutput output = matchProxy.matchRealTime(input);
+        long startLookup = System.currentTimeMillis();
+        BulkMatchOutput output = matchProxy.matchRealTime(input);
+        System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
+                + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                + (System.currentTimeMillis() - startLookup) + " millis");
+        Assert.assertNotNull(output);
+        Assert.assertNotNull(output.getOutputList());
+        Assert.assertEquals(output.getOutputList().size(), size);
+
+        int idx = 0;
+
+        for (MatchOutput outputRecord : output.getOutputList()) {
+            Assert.assertNotNull(outputRecord);
+            Assert.assertTrue(outputRecord.getResult().size() > 0);
+            Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
+            if ("yahoo.com".equals(domains.get(idx % domains.size())) //
+                    || "gmail.com".equals(domains.get(idx % domains.size()))) {
+                Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
+            }
+            idx++;
+        }
+    }
+
+    @Test(groups = "deployment", dataProvider = "latestDataCloudVersions")
+    public void testRealtimeMatchWithMultipleRecords(String version) throws IOException {
+        int size = 200;
+        MatchInput matchInput = prepareMatchInputWithMultipleRecords(size, version);
+
+        long startLookup = System.currentTimeMillis();
+        MatchOutput output = matchProxy.matchRealTime(matchInput);
+        if (version.equals("1.0.0")) {
+            System.out.println("Time taken to do DerivedColumnsCache lookup for " + size + " entries (with "
+                    + (size > domains.size() ? domains.size() : size) + " unique domains) = "
+                    + (System.currentTimeMillis() - startLookup) + " millis");
+        } else {
             System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
                     + (size > domains.size() ? domains.size() : size) + " unique domains) = "
                     + (System.currentTimeMillis() - startLookup) + " millis");
-            Assert.assertNotNull(output);
-            Assert.assertNotNull(output.getOutputList());
-            Assert.assertEquals(output.getOutputList().size(), size);
-
-            int idx = 0;
-
-            for (MatchOutput outputRecord : output.getOutputList()) {
-                Assert.assertNotNull(outputRecord);
-                Assert.assertTrue(outputRecord.getResult().size() > 0);
-                Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
-                if ("yahoo.com".equals(domains.get(idx % domains.size())) //
-                        || "gmail.com".equals(domains.get(idx % domains.size()))) {
-                    Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
-                }
-                idx++;
-            }
         }
+        Assert.assertNotNull(output);
+        Assert.assertNotNull(output.getResult());
+        Assert.assertEquals(output.getResult().size(), size);
 
-    }
+        int idx = 0;
 
-    @Test(groups = "deployment", enabled = true)
-    public void testRealtimeMatchWithMultipleRecords() throws IOException {
-        String[] versions = { "1.0.0", "2.0.0" };
-        for (String version : versions) {
-            int size = 200;
-            MatchInput matchInput = prepareMatchInputWithMultipleRecords(size, version);
-
-            long startLookup = System.currentTimeMillis();
-            MatchOutput output = matchProxy.matchRealTime(matchInput);
-            if (version.equals("1.0.0")) {
-                System.out.println("Time taken to do DerivedColumnsCache lookup for " + size + " entries (with "
-                        + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                        + (System.currentTimeMillis() - startLookup) + " millis");
+        for (OutputRecord outputRecord : output.getResult()) {
+            Assert.assertNotNull(outputRecord);
+            Assert.assertTrue(outputRecord.getOutput().size() > 0);
+            if ("yahoo.com".equals(domains.get(idx % domains.size())) //
+                    || "gmail.com".equals(domains.get(idx % domains.size()))) {
+                Assert.assertFalse(outputRecord.isMatched());
             } else {
-                System.out.println("Time taken to do dnb based AM lookup for " + size + " entries (with "
-                        + (size > domains.size() ? domains.size() : size) + " unique domains) = "
-                        + (System.currentTimeMillis() - startLookup) + " millis");
-            }
-            Assert.assertNotNull(output);
-            Assert.assertNotNull(output.getResult());
-            Assert.assertEquals(output.getResult().size(), size);
-
-            int idx = 0;
-
-            for (OutputRecord outputRecord : output.getResult()) {
-                Assert.assertNotNull(outputRecord);
-                Assert.assertTrue(outputRecord.getOutput().size() > 0);
-                if ("yahoo.com".equals(domains.get(idx % domains.size())) //
-                        || "gmail.com".equals(domains.get(idx % domains.size()))) {
-                    Assert.assertFalse(outputRecord.isMatched());
-                } else {
-                    Assert.assertTrue(outputRecord.isMatched());
-                }
+                Assert.assertTrue(outputRecord.isMatched());
             }
         }
     }
@@ -243,7 +249,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         return input;
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -256,8 +262,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testBulkMatchWithSchema() throws Exception {
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
+    public void testBulkMatchWithSchema(String version) throws Exception {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(avroDir);
         List<Class<?>> fieldTypes = new ArrayList<>();
@@ -271,80 +277,132 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
 
-        String[] versions = { "1.0.0", "2.0.1" };
-        for (String version : versions) {
-            // use avr dir and with schema
-            MatchInput input = createAvroBulkMatchInput(true, schema, version);
-            MatchCommand command = matchProxy.matchBulk(input, podId);
-            ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        // use avro dir and with schema
+        MatchInput input = createAvroBulkMatchInput(true, schema, version);
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-            Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
 
-            MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
-            Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getProgress(), 1f);
-            Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
-            Assert.assertEquals(finalStatus.getResultLocation(),
-                    hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getProgress(), 1f);
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(finalStatus.getResultLocation(),
+                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
 
-            Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(100));
-
-            // use avro file and without schema
-            input = createAvroBulkMatchInput(false, null, version);
-            input.setExcludeUnmatchedWithPublicDomain(true);
-            command = matchProxy.matchBulk(input, podId);
-            appId = ConverterUtils.toApplicationId(command.getApplicationId());
-            status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-            matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-            Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-            Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
-        }
-
+        Assert.assertEquals(finalStatus.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testMultiBlockBulkMatch() throws InterruptedException {
-        String[] versions = { "1.0.0", "2.0.1" };
-        for (String version : versions) {
-            HdfsPodContext.changeHdfsPodId(podId);
-            cleanupAvroDir(hdfsPathBuilder.podDir().toString());
-            cleanupAvroDir(avroDir);
-            uploadTestAVro(avroDir, fileName);
+    @Test(groups = "deployment")
+    public void testBulkMatchWithoutSchema() throws Exception {
+        String version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
-            MatchInput input = createAvroBulkMatchInput(true, null, version);
-            // input.setExcludeUnmatchedWithPublicDomain(true);
-            MatchCommand command = matchProxy.matchBulk(input, podId);
-            ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        HdfsPodContext.changeHdfsPodId(podId);
+        cleanupAvroDir(avroDir);
+        List<Class<?>> fieldTypes = new ArrayList<>();
+        fieldTypes.add(Integer.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        fieldTypes.add(String.class);
+        uploadDataCsv(avroDir, fileName, "matchinput/BulkMatchInput.csv", fieldTypes, "ID");
 
-            // mimic one block failed
-            while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
-                Thread.sleep(1000L);
-                command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-            }
-            String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-            YarnUtils.kill(yarnConfiguration, ConverterUtils.toApplicationId(blockAppId));
+        // use avro file and without schema
+        MatchInput input = createAvroBulkMatchInput(false, null, version);
+        input.setExcludeUnmatchedWithPublicDomain(true);
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
+    }
 
-            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-            Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
+    public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+        HdfsPodContext.changeHdfsPodId(podId);
+        cleanupAvroDir(hdfsPathBuilder.podDir().toString());
+        cleanupAvroDir(avroDir);
+        uploadTestAVro(avroDir, fileName);
 
-            MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
-            Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getProgress(), 1f);
-            Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
-            Assert.assertEquals(finalStatus.getResultLocation(),
-                    hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+        MatchInput input = createAvroBulkMatchInput(true, null, version);
+        // input.setExcludeUnmatchedWithPublicDomain(true);
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+
+        // mimic one block failed
+        while (command.getMatchBlocks() == null || command.getMatchBlocks().isEmpty()) {
+            Thread.sleep(1000L);
+            command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
+        String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
+        YarnUtils.kill(yarnConfiguration, ConverterUtils.toApplicationId(blockAppId));
 
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
+        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getProgress(), 1f);
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(finalStatus.getResultLocation(),
+                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+    }
+
+    @DataProvider(name = "allDataCloudVersions")
+    public Object[][] allDataCloudVersions() {
+        List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
+        Set<String> latestVersions = new HashSet<>();
+        for (DataCloudVersion version: versions) {
+            if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
+                continue;
+            }
+            String vString = version.getVersion();
+            if (vString.compareTo("3") < 0) {
+                latestVersions.add(vString);
+            }
+        }
+        Object[][] objs = new Object[latestVersions.size() + 1][1];
+        objs[0] = new Object[] { "1.0.0" };
+        int i = 1;
+        for (String latestVersion: latestVersions) {
+            objs[i++] = new Object[]{ latestVersion };
+        }
+        return objs;
+    }
+
+    @DataProvider(name = "latestDataCloudVersions")
+    public Object[][] latestDataCloudVersions() {
+        List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
+        Set<String> latestVersions = new HashSet<>();
+        for (DataCloudVersion version: versions) {
+            if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
+                continue;
+            }
+            String majorVersion = version.getMajorVersion();
+            if (majorVersion.compareTo("3") < 0) {
+                latestVersions.add(dataCloudVersionEntityMgr.latestApprovedForMajorVersion(majorVersion).getVersion());
+            }
+        }
+        Object[][] objs = new Object[latestVersions.size() + 1][1];
+        objs[0] = new Object[] { "1.0.0" };
+        int i = 1;
+        for (String latestVersion: latestVersions) {
+            objs[i++] = new Object[]{ latestVersion };
+        }
+        return objs;
     }
 
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema, String dataCloudVersion) {

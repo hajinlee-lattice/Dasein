@@ -68,7 +68,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     @Override
-    public ColumnSelection parsePredefinedColumnSelection(Predefined predefined) {
+    public ColumnSelection parsePredefinedColumnSelection(Predefined predefined, String dataCloudVersion) {
         if (Predefined.supportedSelections.contains(predefined)) {
             return predefinedSelectionMap.get(predefined);
         } else {

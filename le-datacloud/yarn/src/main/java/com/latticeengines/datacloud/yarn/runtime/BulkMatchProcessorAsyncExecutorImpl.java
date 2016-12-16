@@ -40,7 +40,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 processorContext.setMatchInput(matchInput);
             }
 
-            log.info("s block " + block + " of " + input.getData().size() + " records to Async match.");
+            log.info("a block " + block + " of " + input.getData().size() + " records to Async match.");
             MatchContext matchContext = matchPlanner.plan(input);
             matchContext = matchExecutor.executeAsync(matchContext);
             if (combinedContext == null) {

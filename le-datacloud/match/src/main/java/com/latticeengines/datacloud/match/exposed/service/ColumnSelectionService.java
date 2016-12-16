@@ -14,7 +14,7 @@ public interface ColumnSelectionService extends HasDataCloudVersion {
 
     List<String> getMatchedColumns(ColumnSelection selection);
 
-    ColumnSelection parsePredefinedColumnSelection(Predefined predefined);
+    ColumnSelection parsePredefinedColumnSelection(Predefined predefined, String dataCloudVersion);
 
     Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection);
 

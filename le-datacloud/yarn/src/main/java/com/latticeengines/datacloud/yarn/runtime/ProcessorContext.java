@@ -373,7 +373,6 @@ public class ProcessorContext {
         inputSchema = jobConfiguration.getInputAvroSchema();
         outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                 jobConfiguration.getDataCloudVersion());
-
         cleanup();
     }
 

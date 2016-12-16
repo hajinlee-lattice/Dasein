@@ -87,9 +87,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         ColumnSelectionService columnSelectionService = beanDispatcher
                 .getColumnSelectionService(input.getDataCloudVersion());
         if (input.getUnionSelection() != null) {
-            return combineSelections(columnSelectionService, input.getUnionSelection());
+            return combineSelections(columnSelectionService, input.getUnionSelection(), input.getDataCloudVersion());
         } else if (input.getPredefinedSelection() != null) {
-            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection());
+            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(), input.getDataCloudVersion());
         } else {
             return input.getCustomSelection();
         }
@@ -97,12 +97,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @MatchStep(threshold = 100L)
     public ColumnSelection combineSelections(ColumnSelectionService columnSelectionService,
-            UnionSelection unionSelection) {
+            UnionSelection unionSelection, String dataCloudVersion) {
         List<ColumnSelection> selections = new ArrayList<>();
         for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
             Predefined predefined = entry.getKey();
             validateOrAssignPredefinedVersion(columnSelectionService, predefined, entry.getValue());
-            selections.add(columnSelectionService.parsePredefinedColumnSelection(predefined));
+            selections.add(columnSelectionService.parsePredefinedColumnSelection(predefined, dataCloudVersion));
         }
         if (unionSelection.getCustomSelection() != null && !unionSelection.getCustomSelection().isEmpty()) {
             selections.add(unionSelection.getCustomSelection());

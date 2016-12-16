@@ -31,6 +31,7 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -43,10 +44,10 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
 
-    private ConcurrentMap<Predefined, ColumnSelection> predefinedSelectionMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, ConcurrentMap<Predefined, ColumnSelection>> predefinedSelectionMap = new ConcurrentHashMap<>();
 
-    private Map<String, BitCodeBook> completeCodeBookCache;
-    private Map<String, String> codeBookLookup;
+    private ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> completeCodeBookCache = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookup = new ConcurrentHashMap<>();
 
     @Autowired
     @Qualifier("taskScheduler")
@@ -72,9 +73,17 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     }
 
     @Override
-    public ColumnSelection parsePredefinedColumnSelection(Predefined predefined) {
+    public ColumnSelection parsePredefinedColumnSelection(Predefined predefined, String dataCloudVersion) {
         if (Predefined.supportedSelections.contains(predefined)) {
-            return predefinedSelectionMap.get(predefined);
+            if (StringUtils.isEmpty(dataCloudVersion)) {
+                dataCloudVersion = getLatestVersion();
+            }
+            if (predefinedSelectionMap.containsKey(dataCloudVersion)) {
+                return predefinedSelectionMap.get(dataCloudVersion).get(predefined);
+            } else {
+                throw new RuntimeException(
+                        "Cannot find selection " + predefined + " for version " + dataCloudVersion + " in cache.");
+            }
         } else {
             throw new UnsupportedOperationException("Selection " + predefined + " is not supported.");
         }
@@ -99,7 +108,11 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     public Map<String, Pair<BitCodeBook, List<String>>> getDecodeParameters(ColumnSelection columnSelection,
             String dataCloudVersion) {
 
-        // TODO: after implementing minor version, should check if dataCloudVersion is the same as cachedVersion
+        if (StringUtils.isEmpty(dataCloudVersion)) {
+            dataCloudVersion = getLatestVersion();
+        }
+        Map<String, String> codeBookLookup = this.codeBookLookup.get(dataCloudVersion);
+        Map<String, BitCodeBook> codeBookMap = this.completeCodeBookCache.get(dataCloudVersion);
 
         Set<String> codeBooks = new HashSet<>();
         Map<String, List<String>> decodeFieldMap = new HashMap<>();
@@ -120,7 +133,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
         Map<String, Pair<BitCodeBook, List<String>>> toReturn = new HashMap<>();
         for (String encodedClolumn : codeBooks) {
-            BitCodeBook codeBook = completeCodeBookCache.get(encodedClolumn);
+            BitCodeBook codeBook = codeBookMap.get(encodedClolumn);
             List<String> decodeFields = decodeFieldMap.get(encodedClolumn);
             toReturn.put(encodedClolumn, Pair.of(codeBook, decodeFields));
         }
@@ -185,34 +198,70 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         }
     }
 
-    private void loadCaches() {
-        String cachedVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+    private ColumnSelection getPredefinedColumnSelectionFromDb(Predefined selection, String dataCloudVersion) {
+        List<AccountMasterColumn> externalColumns = accountMasterColumnService.findByColumnSelection(selection,
+                dataCloudVersion);
+        ColumnSelection cs = new ColumnSelection();
+        cs.createAccountMasterColumnSelection(externalColumns);
+        return cs;
+    }
 
+    private void loadCacheForVersion(String version,
+            ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> completeCodeBookCache,
+            ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookup) {
+        if (!predefinedSelectionMap.containsKey(version)) {
+            predefinedSelectionMap.put(version, new ConcurrentHashMap<Predefined, ColumnSelection>());
+        }
+
+        predefinedSelectionMap.put(version, new ConcurrentHashMap<Predefined, ColumnSelection>());
         for (Predefined selection : Predefined.supportedSelections) {
             try {
-                List<AccountMasterColumn> externalColumns = accountMasterColumnService.findByColumnSelection(selection, cachedVersion);
-                ColumnSelection cs = new ColumnSelection();
-                cs.createAccountMasterColumnSelection(externalColumns);
-                predefinedSelectionMap.put(selection, cs);
+                ColumnSelection cs = getPredefinedColumnSelectionFromDb(selection, version);
+                predefinedSelectionMap.get(version).put(selection, cs);
             } catch (Exception e) {
                 log.error(e);
             }
         }
 
-        Map<String, BitCodeBook> codeBookMapBak = completeCodeBookCache;
-        Map<String, String> codeBookLookupBak = codeBookLookup;
+        ConcurrentMap<String, BitCodeBook> newCodeBookMap = new ConcurrentHashMap<>();
+        ConcurrentMap<String, String> newCodeBookLookup = new ConcurrentHashMap<>();
+        constructCodeBookMap(newCodeBookMap, newCodeBookLookup, version);
+        completeCodeBookCache.put(version, newCodeBookMap);
+        codeBookLookup.put(version, newCodeBookLookup);
+        log.info("Loaded " + newCodeBookMap.size() + " bit code books for version " + version + " into cache.");
+        log.info("Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version " + version);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadCaches() {
+        ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> codeBookMapBak = completeCodeBookCache;
+        ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookupBak = codeBookLookup;
         try {
-            Map<String, BitCodeBook> newCodeBookMap = new HashMap<>();
-            Map<String, String> newCodeBookLookup = new HashMap<>();
-            constructCodeBookMap(newCodeBookMap, newCodeBookLookup, cachedVersion);
-            completeCodeBookCache = newCodeBookMap;
+            ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> newCompleteCodeBookCache = new ConcurrentHashMap<>();
+            ConcurrentMap<String, ConcurrentMap<String, String>> newCodeBookLookup = new ConcurrentHashMap<>();
+            List<String> cachedVersions = getAllVersions();
+            for (String version : cachedVersions) {
+                loadCacheForVersion(version, newCompleteCodeBookCache, newCodeBookLookup);
+            }
+            completeCodeBookCache = newCompleteCodeBookCache;
             codeBookLookup = newCodeBookLookup;
-            log.info("Loaded " + completeCodeBookCache.size() + " bit code books in cache.");
-            log.info("Loaded " + codeBookLookup.size() + " columns in bit code lookup.");
         } catch (Exception e) {
             log.error(e);
             completeCodeBookCache = codeBookMapBak;
             codeBookLookup = codeBookLookupBak;
         }
+    }
+
+    private List<String> getAllVersions() {
+        List<DataCloudVersion> dataCloudVersions = versionEntityMgr.allVerions();
+        List<String> versions = new ArrayList<>();
+        for (DataCloudVersion dataCloudVersion : dataCloudVersions) {
+            versions.add(dataCloudVersion.getVersion());
+        }
+        return versions;
+    }
+
+    private String getLatestVersion() {
+        return versionEntityMgr.currentApprovedVersion().getVersion();
     }
 }

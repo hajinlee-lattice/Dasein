@@ -75,7 +75,7 @@ public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBa
         unionSelection.setCustomSelection(columnSelection);
         input.setUnionSelection(unionSelection);
         MatchContext context = matchPlanner.plan(input);
-        Integer expectedColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.RTS).getColumns()
+        Integer expectedColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.RTS, null).getColumns()
                 .size() + 3;
         Assert.assertEquals((Integer) context.getColumnSelection().getColumns().size(), expectedColumns);
     }
