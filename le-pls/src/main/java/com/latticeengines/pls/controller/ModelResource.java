@@ -278,8 +278,8 @@ public class ModelResource {
         METADATA_5.setAssociatedRules(new ArrayList<String>());
 
         VdbMetadataField METADATA_6 = new VdbMetadataField();
-        METADATA_6.setColumnName("City");
-        METADATA_6.setDisplayName("City");
+        METADATA_6.setColumnName("Currency");
+        METADATA_6.setDisplayName("Currency");
         METADATA_6.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_6.setTags("Internal");
         METADATA_6.setAssociatedRules(new ArrayList<String>());
@@ -287,15 +287,15 @@ public class ModelResource {
         VdbMetadataField METADATA_7 = new VdbMetadataField();
         METADATA_7.setColumnName("NumberOfEmployees");
         METADATA_7.setDisplayName("NumberOfEmployees");
-        METADATA_7.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
+        METADATA_7.setApprovedUsage(ApprovedUsage.NONE.toString());
         METADATA_7.setTags("Internal");
         METADATA_7.setIsCoveredByOptionalRule(true);
         METADATA_7.setIsCoveredByMandatoryRule(true);
         METADATA_7.setAssociatedRules(Arrays.asList(new String[] { "TooManyValues" }));
 
         VdbMetadataField METADATA_8 = new VdbMetadataField();
-        METADATA_8.setColumnName("CompanyType");
-        METADATA_8.setDisplayName("CompanyType");
+        METADATA_8.setColumnName("NumberOfOffices");
+        METADATA_8.setDisplayName("NumberOfOffices");
         METADATA_8.setApprovedUsage(ApprovedUsage.MODEL_ALLINSIGHTS.toString());
         METADATA_8.setTags("Internal");
         METADATA_8.setIsCoveredByOptionalRule(true);
