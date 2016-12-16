@@ -14,8 +14,14 @@
                             class="default">[change]</span>
                         password
                     </li>
-                    <li class="value" ng-if="$ctrl.login.expireDays > 90">expires on {{$ctrl.login.expires | date:'MM/dd/yyyy'}}</li>
-                    <li class="value" ng-if="$ctrl.login.expireDays <= 90">expires in {{$ctrl.login.expireDays}} days</li>
+                    <li class="value" ng-if="$ctrl.login.alreadyExpired && $ctrl.login.expireDays > 0">
+                        expired {{$ctrl.login.expireDays}} days ago</li>
+                    <li class="value" ng-if="$ctrl.login.alreadyExpired && $ctrl.login.expireDays == 0">
+                        expired today</li>
+                    <li class="value" ng-if="!$ctrl.login.alreadyExpired && $ctrl.login.expireDays > 90">
+                        expires on {{$ctrl.login.expires | date:'MM/dd/yyyy'}}</li>
+                    <li class="value" ng-if="!$ctrl.login.alreadyExpired && $ctrl.login.expireDays <= 90">
+                        expires in {{$ctrl.login.expireDays}} days</li>
                     <li class="label" ng-if="$ctrl.login.tenant">
                         <span 
                             ui-sref="login.tenants" 

@@ -3,13 +3,15 @@ angular.module('login')
     this.login = {
         username: '',
         expires: null,
+        alreadyExpired: false,
         expireDays: 0,
         tenant: ''
     };
 
     this.set = function(LoginDocument, ClientSession) {
         this.login.username = LoginDocument.UserName;
-        this.login.expires = LoginDocument.PasswordLastModified;
+        this.login.expires = TimestampIntervalUtility.getDateNinetyDaysAway(LoginDocument.PasswordLastModified);
+        this.login.alreadyExpired = TimestampIntervalUtility.getDays(LoginDocument.PasswordLastModified) >= 90;
         this.login.expireDays = Math.abs(TimestampIntervalUtility.getDays(LoginDocument.PasswordLastModified) - 90);
 
         if (ClientSession && ClientSession.Tenant) {
