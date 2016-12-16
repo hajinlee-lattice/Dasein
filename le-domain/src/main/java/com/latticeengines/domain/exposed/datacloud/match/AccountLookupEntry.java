@@ -8,7 +8,6 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
@@ -44,7 +43,6 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
     private String duns = UNKNOWN;
 
     @JsonProperty(LATTICE_ACCOUNT_ID)
-    @DynamoHashKey(name = "AccountId")
     private String latticeAccountId = UNKNOWN;
 
     public String getId() {

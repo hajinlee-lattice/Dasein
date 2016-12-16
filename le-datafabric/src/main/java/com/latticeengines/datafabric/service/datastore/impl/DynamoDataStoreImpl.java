@@ -504,8 +504,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 for (Item item : items) {
                     List<GenericRecord> recordsFromItem = extractRecords(item);
                     for (GenericRecord record : recordsFromItem) {
-                        DynamoKey key = constructDynamoKey(record);
-                        records.put(key.getId(), record);
+                        records.put(item.getString(ID), record);
                     }
                 }
 
@@ -666,27 +665,32 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     private DynamoKey constructDynamoKey(GenericRecord record) {
-        String[] ids = new String[4];
+        try {
+            String[] ids = new String[4];
 
-        String hashKeyField = tableIndex.getHashKeyField();
-        if (hashKeyField != null) {
-            ids[0] = record.get(hashKeyField).toString();
-        }
+            String hashKeyField = tableIndex.getHashKeyField();
+            if (hashKeyField != null) {
+                ids[0] = record.get(hashKeyField).toString();
+            }
 
-        String rangeKeyField = tableIndex.getRangeKeyField();
-        if (rangeKeyField != null) {
-            ids[1] = record.get(rangeKeyField).toString();
-            String bucketField = tableIndex.getBucketKeyField();
-            if (bucketField != null) {
-                ids[2] = record.get(bucketField).toString();
-                String stampField = tableIndex.getStampKeyField();
-                if (stampField != null) {
-                    ids[3] = record.get(stampField).toString();
+            String rangeKeyField = tableIndex.getRangeKeyField();
+            if (rangeKeyField != null) {
+                ids[1] = record.get(rangeKeyField).toString();
+                String bucketField = tableIndex.getBucketKeyField();
+                if (bucketField != null) {
+                    ids[2] = record.get(bucketField).toString();
+                    String stampField = tableIndex.getStampKeyField();
+                    if (stampField != null) {
+                        ids[3] = record.get(stampField).toString();
+                    }
                 }
             }
+
+            return constructDynamoKey(ids);
+        } catch (Exception ex) {
+            return null;
         }
 
-        return constructDynamoKey(ids);
     }
 
     private DynamoKey constructDynamoKey(Map<String, String> properties) {
