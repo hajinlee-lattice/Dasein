@@ -137,9 +137,9 @@ class ModelPredictorGenerator(State):
         for element in otherElements:
             leadCount = element["Count"]
             mergedCount += leadCount if leadCount is not None else 0
-            if (element["Lift"] is not None and leadCount is not None):
-                mergedLift += element["Lift"] * leadCount; 
-            
+            if ("Lift" in element and element["Lift"] is not None and leadCount is not None):
+                mergedLift += element["Lift"] * leadCount;
+
         mergedElement["Count"] = mergedCount
         if (mergedCount != 0) :
             mergedElement["Lift"] = mergedLift / float(mergedCount)
