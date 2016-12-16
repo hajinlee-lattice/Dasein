@@ -25,6 +25,25 @@ public class DataRuleLists {
         distinctValueCount.setMandatoryRemoval(true);
         ruleList.add(distinctValueCount);
 
+        DataRule valuePercentage = new DataRule("ValuePercentage");
+        valuePercentage.setDisplayName("Value Percentage");
+        valuePercentage
+                .setDescription("Attributes may not have a single value with a population rate above a threshold");
+        valuePercentage.setMandatoryRemoval(false);
+        ruleList.add(valuePercentage);
+
+        DataRule nullLift = new DataRule("NullLift");
+        nullLift.setDisplayName("Lift from NULL");
+        nullLift.setDescription("Attributes may not indicate significant lift based on NULL values");
+        nullLift.setMandatoryRemoval(false);
+        ruleList.add(nullLift);
+
+        DataRule futureInfo = new DataRule("FutureInfo");
+        futureInfo.setDisplayName("Future Information");
+        futureInfo.setDescription("Attributes may not be populated after a buying event");
+        futureInfo.setMandatoryRemoval(false);
+        ruleList.add(futureInfo);
+
         return ruleList;
     }
 }

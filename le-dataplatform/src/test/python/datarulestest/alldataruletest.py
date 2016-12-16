@@ -7,6 +7,9 @@ import logging
 
 from dataruleeventtable import DataRuleEventTable
 from datarules.distinctvaluecount import DistinctValueCount
+from datarules.valuepercentage import ValuePercentage
+from datarules.nulllift import NullLift
+from datarules.futureinfo import FutureInfo
 from testbase import TestBase
 
 class AllDataRuleTest(TestBase):
@@ -69,7 +72,34 @@ class AllDataRuleTest(TestBase):
                         'DistinctValueCount: Using dataset {}'.format(et.getName()))
             columns = et.getCustomerCols()
             rule = DistinctValueCount(columns)
-            self.columnRuleTestAlgorithm(rule, et.getDataFrame(), et.getColumnMetadata(), et.getProfile(), 'all')
+            self.columnRuleTestAlgorithm(rule, None, et.getColumnMetadata(), et.getProfile(), 'all')
+
+    def testValuePercentage(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n' + \
+                        '                                                     ' + \
+                        'ValuePercentage: Using dataset {}'.format(et.getName()))
+            columns = et.getCustomerCols()
+            rule = ValuePercentage(columns, 0.98)
+            self.columnRuleTestAlgorithm(rule, None, et.getColumnMetadata(), et.getProfile(), 'all')
+
+    def testNullLift(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n' + \
+                        '                                                     ' + \
+                        'NullLift: Using dataset {}'.format(et.getName()))
+            columns = et.getCustomerCols()
+            rule = NullLift(columns, 0.7, 1.2)
+            self.columnRuleTestAlgorithm(rule, None, et.getColumnMetadata(), et.getProfile(), 'all')
+
+    def testFutureInfo(self):
+        for et in [self.eventtable_mulesoft]:
+            self.logger.info('________________________________________\n' + \
+                        '                                                     ' + \
+                        'FutureInfo: Using dataset {}'.format(et.getName()))
+            columns = et.getCustomerCols()
+            rule = FutureInfo(columns, 0.5, 0.6, 1.5)
+            self.columnRuleTestAlgorithm(rule, None, et.getColumnMetadata(), et.getProfile(), 'all')
 
     def _testCombination(self):
         for et in [self.eventtable_hostingcom]:

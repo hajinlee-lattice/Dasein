@@ -18,9 +18,10 @@ class DataRuleEventTable(object):
     def __init__(self, name, filename, keys, columnMetadataFilename, profileFilename, datapath=datapath_default, loggername='AllDataRuleTests'):
 
         self.filetype = 'unknown'
-        filetype_idx = filename.rfind('.')
-        if filetype_idx != -1:
-            self.filetype = filename[filetype_idx+1:]
+        if filename is not None:
+            filetype_idx = filename.rfind('.')
+            if filetype_idx != -1:
+                self.filetype = filename[filetype_idx+1:]
 
         self.datapath = datapath
         self.filename = filename
@@ -41,26 +42,27 @@ class DataRuleEventTable(object):
         self.columnMetadata = []
         self.profile = dict()
 
-        with open(os.path.join(self.datapath, self.filename), mode='rb') as file:
-            if self.filetype.lower() == 'avro':
-                reader = avro.reader(file)
-                schema = reader.schema
-                fields = schema['fields']
-                for col in fields:
-                    if 'InterfaceName' in col.keys() and col['InterfaceName'] == 'Event':
+        if self.filename is not None:
+            with open(os.path.join(self.datapath, self.filename), mode='rb') as file:
+                if self.filetype.lower() == 'avro':
+                    reader = avro.reader(file)
+                    schema = reader.schema
+                    fields = schema['fields']
+                    for col in fields:
+                        if 'InterfaceName' in col.keys() and col['InterfaceName'] == 'Event':
+                            self.includedCols.append(col['name'])
+                            self.eventCol = col['name']
+                        if col['ApprovedUsage'] == '[None]':
+                            continue
+                        self.allColsDict[col['name']] = None
                         self.includedCols.append(col['name'])
-                        self.eventCol = col['name']
-                    if col['ApprovedUsage'] == '[None]':
-                        continue
-                    self.allColsDict[col['name']] = None
-                    self.includedCols.append(col['name'])
-                    datatype = col['type'][0]
-                    if datatype in ['int','long','double','boolean']:
-                        self.numericalCols[col['name']] = None
-                    elif datatype in ['string']:
-                        self.categoricalCols[col['name']] = None
-            else:
-                raise ValueError('Filetype {} not supported'.format(filetype))
+                        datatype = col['type'][0]
+                        if datatype in ['int','long','double','boolean']:
+                            self.numericalCols[col['name']] = None
+                        elif datatype in ['string']:
+                            self.categoricalCols[col['name']] = None
+                else:
+                    raise ValueError('Filetype {} not supported'.format(filetype))
 
         with open(os.path.join(self.datapath, self.columnMetadataFilename), mode='rb') as self.columnMetadataFile:
             self.columnMetadata = json.load(self.columnMetadataFile)['Metadata']
