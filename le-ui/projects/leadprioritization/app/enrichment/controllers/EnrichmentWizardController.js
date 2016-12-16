@@ -58,7 +58,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enable_grid: true,
         view: 'list'
     });
-
     vm.orders = {
         attribute: 'DisplayName',
         subcategory: 'toString()',
@@ -75,6 +74,16 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         } else {
             return sortPrefix + vm.orders.attribute;
         }
+    }
+
+    vm.filter = function(items, property, value) {
+        for (var i=0, result=[]; i < items.length; i++) {
+            if (items[i][property] && items[i][property] == value) {
+                result.push(items[i]);
+            }
+        }
+
+        return result;
     }
 
     vm.download_button = {
@@ -163,12 +172,12 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                     EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                     stopNumbersInterval();
                     vm.enrichments_completed = true;
-                    vm.hasSaved = $filter('filter')(vm.enrichments, {'IsDirty': true}).length;
+                    vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
                 }
             }
-            var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true});
-            vm.generalSelectedTotal = $filter('filter')(selectedTotal, {'IsSelected': true}).length;
-            vm.premiumSelectedTotal = $filter('filter')(selectedTotal, {'IsPremium': true, 'IsSelected': true}).length;
+            var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+            vm.generalSelectedTotal = selectedTotal.length;
+            vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
         });
     }
 
@@ -250,8 +259,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     vm.selectEnrichment = function(enrichment){
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
-        var selectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true});
-        vm.generalSelectedTotal = $filter('filter')(selectedTotal, {'IsSelected': true}).length;
+        var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+        vm.generalSelectedTotal = selectedTotal.length;
         //vm.generalSelectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
         if(vm.generalSelectedTotal > vm.generalSelectLimit) {
             enrichment.IsSelected = false;
@@ -261,7 +270,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
         if(enrichment.IsPremium) {
             //vm.premiumSelectedTotal = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
-            vm.premiumSelectedTotal = $filter('filter')(selectedTotal, {'IsPremium': true, 'IsSelected': true}).length;
+            vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
             if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
@@ -276,7 +285,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.userSelectedCount--;
             if(!enrichment.WasDirty) {
                 enrichment.WasDirty = true;
-                vm.disabled_count = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': false}).length;
+                var notselected = vm.filter(vm.enrichments, 'IsSelected', false).length;
+                vm.disabled_count = vm.filter(notselected, 'IsDirty', true).length;
                 vm.label.disabled_alert = '<p><strong>You have disabled ' + vm.disabled_count + ' attribute' + (vm.disabled_count > 1 ? 's' : '') + '</strong>. If you are using any of these attributes for real-time scoring, these attributes will no longer be updated in your system.</p>';
                 vm.label.disabled_alert += '<p>No changes will be saved until you press the \'Save\' button.</p>';
                 vm.statusMessage(vm.label.disabled_alert, {type: 'disabling', wait: 0});
@@ -319,8 +329,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.saveSelected = function(){
-        var selectedObj = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': true}),
-            deselectedObj = $filter('filter')(vm.enrichments, {'IsDirty': true, 'IsSelected': false}),
+        var dirtyEnrichments = vm.filter(vm.enrichments, 'IsDirty', true),
+            selectedObj = vm.filter(dirtyEnrichments, 'IsSelected', true),
+            deselectedObj = vm.filter(dirtyEnrichments, 'IsSelected', false),
             selected = [],
             deselected = [];
 
@@ -347,7 +358,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
             vm.saveDisabled = 1;
             if(selectedObj.length > 0 || deselectedObj.length > 0) {
-                var dirtyObj = $filter('filter')(vm.enrichments, {'IsDirty': true});
+                var dirtyObj = vm.filter(vm.enrichments, 'IsDirty', true);
                 for(i in dirtyObj){
                     dirtyObj[i].IsDirty = false;
                 }
@@ -448,6 +459,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     var subcategoryCountList = [];
     vm.subcategoryCount = function(category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
+        /*
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -456,7 +468,24 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             'Subcategory': subcategory
         });
         filtered = $filter('filter')(filtered, vm.searchFields);
-        return filtered.length;
+        */
+
+        for (var i=0, result=[]; i < filtered.length; i++) {
+            var item = filtered[i];
+            if (item && vm.searchFields(item)) {
+                if ((item.Category != category) 
+                || (item.Subcategory != subcategory)
+                || (vm.metadata.toggle.show.selected && !item.IsSelected) 
+                || (vm.metadata.toggle.show.premium && !item.IsPremium) 
+                || (vm.metadata.toggle.hide.premium && item.IsPremium) 
+                || (vm.metadata.toggle.show.internal && !item.IsInternal)) {
+                    continue;
+                }
+                result.push(item);
+            }
+        }
+
+        return result.length;
     }
 
     vm.subcategoryFilter = function(subcategory) {
@@ -478,6 +507,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
+
+        /*
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
             'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
@@ -485,7 +516,23 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             'Category': category
         });
         filtered = $filter('filter')(filtered, vm.searchFields);
-        return filtered.length;
+        */
+
+        for (var i=0, result=[]; i < filtered.length; i++) {
+            var item = filtered[i];
+            if (item && vm.searchFields(item)) {
+                if ((item.Category != category)
+                || (vm.metadata.toggle.show.selected && !item.IsSelected) 
+                || (vm.metadata.toggle.show.premium && !item.IsPremium) 
+                || (vm.metadata.toggle.hide.premium && item.IsPremium) 
+                || (vm.metadata.toggle.show.internal && !item.IsInternal)) {
+                    continue;
+                }
+                result.push(item);
+            }
+        }
+
+        return result.length;
     }
 
     vm.categoryClick = function(category) {

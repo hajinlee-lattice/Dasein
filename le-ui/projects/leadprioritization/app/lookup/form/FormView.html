@@ -7,13 +7,17 @@
                     <h5>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_SUBHEADER') }}</h5>
                 </div>
 
-                <hr size="1" />
+                <hr />
 
                 <div class="section-body with-padding">
                     <div class="form-group">
                         <div class="toggle-check">
                             <label>
-                                <input type="checkbox" value="true" ng-model="vm.request.record.IsFuzzy" />
+                                <input 
+                                    type="checkbox"
+                                    name="enforceFuzzyMatch"
+                                    ng-checked="vm.params.enforceFuzzyMatch"
+                                    ng-model="vm.params.enforceFuzzyMatch" />
                                 {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_FUZZY') }}
                                 <span 
                                   tooltips 
@@ -31,8 +35,8 @@
                         <input 
                             type="text" 
                             class="form-control required" 
-                            name="WebsiteAddress"
-                            ng-model="vm.request.record.WebsiteAddress"
+                            name="Domain"
+                            ng-model="vm.request.record.Domain"
                             placeholder="Ex: www.domain.com" />
                     </div>
 
@@ -42,8 +46,8 @@
                             <input 
                                 type="text" 
                                 class="form-control required" 
-                                name="DUNSNumber"
-                                ng-model="vm.request.record.DUNSNumber"
+                                name="DUNS"
+                                ng-model="vm.request.record.DUNS"
                                 placeholder="" />
                         </div>
                         
@@ -64,7 +68,7 @@
                             type="text" 
                             class="form-control required" 
                             name="Email"
-                            ng-model="vm.request.record.Email"
+                            ng-model="vm.request.record.Email1"
                             placeholder="Ex: anything@domain.com" />
                     </div>
                     

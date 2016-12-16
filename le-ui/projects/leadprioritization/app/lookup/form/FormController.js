@@ -7,12 +7,10 @@ angular
 
     angular.extend(vm, {
         request: LookupStore.get('request'),
+        params: LookupStore.get('params'),
         ResourceUtility: ResourceUtility,
         models: Models
     });
-
-    console.log(Models, LookupStore);
-
     vm.cancel = function() {
         $state.go('home.enrichments');
     }
@@ -22,20 +20,25 @@ angular
 
         LookupStore.add('timestamp', timestamp);
         LookupStore.add('request', vm.request);
+        LookupStore.add('params', vm.params);
         
         $state.go('home.lookup.tabs');
     }
 })
 .service('LookupStore', function() {
     this.timestamp = 0;
+    this.params = { 
+        enforceFuzzyMatch: true 
+    };
     this.response = {};
     this.request = {
         modelId: '',
+        performEnrichment: true,
         record: {
-            WebsiteAddress: 'www.lattice-engines.com',
-            DUNSNumber: '',
+            Domain: 'www.lattice-engines.com',
+            DUNS: '',
             Id: '',
-            EmailAddress: '',
+            Email1: '',
             CompanyName: 'Lattice Engines',
             City: '',
             State: 'CA',
@@ -61,17 +64,14 @@ angular
         $http({
             method: 'POST',
             url: '/pls/scores/apiconsole/record/debug',
+            params: LookupStore.get('params'),
             data: LookupStore.get('request'),
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
-            console.log('success', status, data);
-
             deferred.resolve(data);
         })
         .error(function(data, status, headers, config) {
-            console.log('error', status, data);
-
             deferred.resolve(data);
         });
 

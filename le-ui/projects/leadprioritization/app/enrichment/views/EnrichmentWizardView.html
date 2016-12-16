@@ -80,13 +80,13 @@
                 </div>
             </div>
             <ul class="subcategories">
-                <li ng-repeat="subcategory in (subcategoriesList = (vm.subcategories[vm.category])) 
-                        | filter: vm.subcategoryFilter
+                <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category]) 
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
                         track by $index" 
-                    class="subcategory" 
+                    class="subcategory"
+                    ng-init="console.log($index, vm.subcategoryCount(vm.category, subcategory)); subcategoriesList = ($index == 0 ? [] : subcategoriesList); (vm.subcategoryCount(vm.category, subcategory) > 0 ? subcategoriesList.push(subcategory) : null);"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
                     <div class="box-inner {{::vm.categoryClass(vm.category)}} border-top round-box"
@@ -98,7 +98,7 @@
                             {{subcategory}}
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{vm.subcategoryCount(vm.category, subcategory)}}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory) }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                             </span>
                     </div>

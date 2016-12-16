@@ -2,9 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="columns twelve lookup-response-area">
-                <label><span>Score:</span>{{ vm.response.score }}</label>
-                <label><span>Score Timestamp:</span>{{ vm.response.timestamp }}</label>
-                <label><span>Match Errors:</span>{{ vm.response.matchErrorMessages }}</label>
+                <label><span>Match Log:</span><div ng-repeat="log in vm.response.matchLogs">{{log}}</div></label>
             </div>
             
             <div class="lookup-response-elapsed">
