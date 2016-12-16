@@ -40,7 +40,14 @@
                 </li>
                 <li class="info">
                     <div ng-if="vm.enrichments_completed || 1">
-                        Enrichment: {{vm.generalSelectedTotal}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal}} of {{vm.premiumSelectLimit}} premium <i class="fa fa-info-circle"></i>
+                        Enrichment: {{vm.generalSelectedTotal}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal}} of {{vm.premiumSelectLimit}} premium 
+                        <span 
+                              tooltips 
+                              tooltip-template="stuff"
+                              tooltip-size="small"
+                              tooltip-side="top"
+                              tooltip-close-button="false" 
+                              class="more-info">&#105;</span>
                     </div>
                 </li>
                 <li class="download">
