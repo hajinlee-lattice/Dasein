@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
@@ -10,6 +11,9 @@ import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 
 @Component("dnbMatchResultValidatorImpl")
 public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
+
+    @Value("${datacloud.dnb.confidencecode.threshold}")
+    private int confidenceCodeThreshold;
 
     public boolean validate(DnBMatchContext res) {
         if (discardConfidenceCode(res.getConfidenceCode()) && discardMatchGrade(res.getMatchGrade())) {
@@ -21,7 +25,7 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
     }
 
     private boolean discardConfidenceCode(Integer confidenceCode) {
-        return confidenceCode != null && confidenceCode < 7;
+        return confidenceCode != null && confidenceCode < confidenceCodeThreshold;
     }
 
     private boolean discardMatchGrade(DnBMatchGrade matchGrade) {

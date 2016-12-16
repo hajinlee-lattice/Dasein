@@ -185,7 +185,8 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 url.append(context.getInputNameLocation().getState());
                 url.append("&");
             }
-            url.append("cleansematch=true");
+            url.append(
+                    "cleansematch=true&ConfidenceLowerLevelThresholdValue=1&ExclusionCriteria-n=Exclude Unreachable&IncludeCleansedAndStandardizedInformationIndicator=true");
             return url.toString();
         case REALTIME_EMAIL:
             if (!StringUtils.isEmpty(context.getInputEmail())) {
