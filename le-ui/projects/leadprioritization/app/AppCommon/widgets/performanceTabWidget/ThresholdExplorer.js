@@ -15,7 +15,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             // Specify Dimensions
             //==================================================
-            var margin = {top: 47, right: 10, bottom: 89, left: 130},
+            var margin = {top: 47, right: 40, bottom: 89, left: 130},
                 width = 936 - margin.left - margin.right,
                 height = 336 - margin.top - margin.bottom;
 
@@ -497,9 +497,15 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 if (targetSet) {
                     return;
                 }
+
                 var x0 = x.invert(d3.mouse(this)[0]),
-                    i = bisectLeads(data, x0, 1),
-                    d0 = data[i - 1],
+                    i = bisectLeads(data, x0, 1);
+
+                if (i > 99) {
+                    return;
+                }
+
+                var d0 = data[i - 1],
                     d1 = data[i],
                     d = x0 - d0.leads > d1.leads - x0 ? d1 : d0;
 
