@@ -106,7 +106,7 @@ angular.module('mainApp.models.remodel', [
             if (result.Success === true) {
                 vm.success = true;
                 vm.messageTitle = ResourceUtility.getString('MODEL_REMODEL_REMODELING_TITLE');
-                vm.message = ResourceUtility.getString('MODEL_REMODEL_REMODELING_MESSAGE');
+                vm.message = ResourceUtility.getString('MODEL_REMODEL_REMODELING_MESSAGE') + ' Now redirecting to jobs page...';
 
                 vm.isDirty = false;
             } else {
@@ -115,8 +115,11 @@ angular.module('mainApp.models.remodel', [
                 vm.message = result.ResultErrors;
             }
         }).finally(function() {
-            vm.remodeling = false;
             RemodelingModal.hide();
+            vm.remodeling = false;
+            if (vm.success) {
+                $state.go('home.jobs.status', { 'jobCreationSuccess': true });
+            }
         });
     };
 
