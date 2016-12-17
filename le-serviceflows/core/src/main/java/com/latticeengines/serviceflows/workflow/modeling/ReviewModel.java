@@ -83,7 +83,7 @@ public class ReviewModel extends BaseModelStep<ModelStepConfiguration> {
 
         List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, filePath);
         for (GenericRecord avroRecord : avroRecords) {
-            Object columnNameObj = avroRecord.get("itemid");
+            Object columnNameObj = avroRecord.get("ColumnName");
             columnNames.add(String.valueOf(columnNameObj));
         }
 
