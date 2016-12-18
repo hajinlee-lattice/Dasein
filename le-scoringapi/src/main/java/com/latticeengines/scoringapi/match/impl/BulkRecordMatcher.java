@@ -60,6 +60,22 @@ public class BulkRecordMatcher extends AbstractMatcher {
     }
 
     @Override
+    public Map<String, Map<String, Object>> matchAndJoin(//
+            CustomerSpace space, InterpretedFields interpreted, //
+            Map<String, FieldSchema> fieldSchemas, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            boolean forEnrichment, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId, boolean isDebugMode, //
+            List<String> matchLogs, List<String> matchErrorLogs, //
+            boolean shouldReturnAllEnrichment, //
+            boolean enforceFuzzyMatch) {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
             CustomerSpace space, List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
@@ -251,7 +267,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
                         modelSummary, null, false, currentDataCloudVersion, //
-                        performFetchOnlyForMatching, requestId, isDebugMode);
+                        performFetchOnlyForMatching, requestId, isDebugMode, false);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
             }
@@ -271,7 +287,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
                     true, currentDataCloudVersionForEnrichment, //
-                    performFetchOnlyForMatching, requestId, isDebugMode);
+                    performFetchOnlyForMatching, requestId, isDebugMode, false);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
         } else {
@@ -280,7 +296,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode);
+                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode, false);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null

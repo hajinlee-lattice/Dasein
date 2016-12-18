@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,6 +16,9 @@ public class TopNAttributes {
 
     @JsonProperty("SubCategories")
     private Map<String, List<TopAttribute>> topAttributes;
+
+    @JsonProperty("EnrichmentAttributes")
+    private List<LeadEnrichmentAttribute> enrichmentAttributes;
 
     public Map<String, List<TopAttribute>> getTopAttributes() {
         return topAttributes;
@@ -34,6 +38,14 @@ public class TopNAttributes {
         topAttributes.get(subCategory).add(attribute);
     }
 
+    public List<LeadEnrichmentAttribute> getEnrichmentAttributes() {
+        return enrichmentAttributes;
+    }
+
+    public void setEnrichmentAttributes(List<LeadEnrichmentAttribute> enrichmentAttributes) {
+        this.enrichmentAttributes = enrichmentAttributes;
+    }
+
     public static class TopAttribute {
 
         @JsonProperty("Attribute")
@@ -43,7 +55,8 @@ public class TopNAttributes {
         private Integer nonNullCount;
 
         // dummy constructor for jackson
-        private TopAttribute() {}
+        private TopAttribute() {
+        }
 
         public TopAttribute(String attribute, Integer nonNullCount) {
             this.attribute = attribute;

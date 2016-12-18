@@ -81,6 +81,14 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
             boolean isCalledViaApiConsole) {
+        return process(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
+                isCalledViaApiConsole, false);
+    }
+
+    @Override
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
+            boolean isCalledViaApiConsole, boolean enforceFuzzyMatch) {
         split("requestPreparation");
         requestInfo.put("Rule", Strings.nullToEmpty(request.getRule()));
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
@@ -155,7 +163,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
                     parsedRecordAndInterpretedFields.getKey(), modelSummary, request.isPerformEnrichment(),
                     enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebug, matchLogs,
-                    matchErrorLogs, isCalledViaApiConsole);
+                    matchErrorLogs, isCalledViaApiConsole, enforceFuzzyMatch);
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
             addMissingFields(fieldSchemas, matchedRecord);
             readyToTransformRecord = matchedRecord;

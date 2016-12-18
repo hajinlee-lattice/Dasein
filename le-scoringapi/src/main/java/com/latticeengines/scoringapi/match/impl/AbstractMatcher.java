@@ -201,7 +201,8 @@ public abstract class AbstractMatcher implements Matcher {
             boolean skipPredefinedSelection, //
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, boolean isDebugMode, //
+            boolean enforceFuzzyMatch) {
         String dataCloudVersion = null;
         if (modelSummary == null) {
             dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
@@ -217,7 +218,7 @@ public abstract class AbstractMatcher implements Matcher {
                 skipPredefinedSelection, //
                 overrideDataCloudVersion, //
                 performFetchOnlyForMatching, //
-                requestId, isDebugMode);
+                requestId, isDebugMode, enforceFuzzyMatch);
     }
 
     private List<Column> getCustomSelectionColumns(MatchInput matchInput) {

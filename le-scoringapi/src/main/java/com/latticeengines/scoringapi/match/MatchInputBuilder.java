@@ -33,6 +33,17 @@ public interface MatchInputBuilder {
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode);
 
+    MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion, //
+            boolean performFetchOnlyForMatching, //
+            String requestId, boolean isDebugMode, //
+            boolean enforceFuzzyMatch);
+
     BulkMatchInput buildMatchInput(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             List<ModelSummary> originalOrderModelSummaryList, //

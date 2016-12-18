@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Level;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.StringUtils;
@@ -27,6 +28,9 @@ import com.latticeengines.scoringapi.match.MatchInputBuilder;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
+
+    @Value("${datacloud.match.fuzzymatch.decision.graph}")
+    private String fuzzyMatchGraph;
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //
@@ -52,7 +56,25 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean skipPredefinedSelection, //
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode) {
+            String requestId, //
+            boolean isDebugMode) {
+        return buildMatchInput(space, interpreted, record, modelSummary, selectedLeadEnrichmentAttributes,
+                skipPredefinedSelection, overrideDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode,
+                false);
+    }
+
+    @Override
+    public MatchInput buildMatchInput(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
+            boolean skipPredefinedSelection, //
+            String overrideDataCloudVersion, //
+            boolean performFetchOnlyForMatching, //
+            String requestId, //
+            boolean isDebugMode, //
+            boolean enforceFuzzyMatch) {
         MatchInput matchInput = new MatchInput();
 
         setMatchKeyMap(interpreted, record, matchInput);
@@ -79,6 +101,12 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         if (isDebugMode) {
             matchInput.setLogLevel(Level.DEBUG);
         }
+
+        if (enforceFuzzyMatch) {
+            matchInput.setFuzzyMatchEnabled(true);
+            matchInput.setDecisionGraph(fuzzyMatchGraph);
+        }
+
         return matchInput;
     }
 
@@ -116,8 +144,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                 }
             } else {
                 matchInputList.add(//
-                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                .getParsedData().getKey(), modelSummary, null, //
+                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                recordModelTuple.getParsedData().getKey(), modelSummary, null, //
                                 skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
             }
         }

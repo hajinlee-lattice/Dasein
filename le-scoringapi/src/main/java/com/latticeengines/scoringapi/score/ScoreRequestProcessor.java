@@ -14,6 +14,10 @@ public interface ScoreRequestProcessor {
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
             boolean isCalledViaApiConsole);
 
+    ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
+            boolean isCalledViaApiConsole, boolean enforceFuzzyMatch);
+
     List<RecordScoreResponse> process(CustomerSpace customerSpace, BulkRecordScoreRequest scoreRequests,
             boolean isDebug, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId);
 }

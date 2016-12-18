@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
+import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -253,8 +254,21 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection")
-    public AccountMasterCube loadAMStatisticsCubeByPost(@RequestBody(required = false) AccountMasterFactQuery query) {
-        return enrichmentService.getCube(query);
+    public AccountMasterCube loadAMStatisticsCubeByPost(HttpServletRequest request, //
+            @ApiParam(value = "Should load enrichment attribute metadata", //
+                    required = false) //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
+            Boolean loadEnrichmentMetadata, //
+            @RequestBody(required = false) AccountMasterFactQuery query) {
+
+        AccountMasterCube cube = enrichmentService.getCube(query);
+
+        if (loadEnrichmentMetadata) {
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null, null, null,
+                    null, null, null);
+            cube.setEnrichmentAttributes(enrichmentAttributes);
+        }
+        return cube;
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
@@ -262,9 +276,22 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection")
-    public AccountMasterCube loadAMStatisticsCube(@RequestParam(value = "q", required = false) String query) {
+    public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
+            @ApiParam(value = "Should load enrichment attribute metadata", //
+                    required = false) //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
+            Boolean loadEnrichmentMetadata, //
+            @RequestParam(value = "q", required = false) String query) {
         System.out.println("q=[" + query + "]");
-        return enrichmentService.getCube(query);
+
+        AccountMasterCube cube = enrichmentService.getCube(query);
+
+        if (loadEnrichmentMetadata) {
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null, null, null,
+                    null, null, null);
+            cube.setEnrichmentAttributes(enrichmentAttributes);
+        }
+        return cube;
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/topn", //
@@ -273,6 +300,10 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get top N attributes per subcategory for a given category")
     public TopNAttributes getTopNAttributes(HttpServletRequest request, //
+            @ApiParam(value = "Should load enrichment attribute metadata", //
+                    required = false) //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
+            Boolean loadEnrichmentMetadata, //
             @ApiParam(value = "category", required = true) //
             @RequestParam(value = "category") String categoryName, //
             @ApiParam(value = "max", defaultValue = "5") //
@@ -282,12 +313,35 @@ public class EnrichmentResource {
             category = Category.fromName(categoryName);
         } catch (Exception e) {
             try {
-                category =  Category.valueOf(categoryName);
+                category = Category.valueOf(categoryName);
             } catch (Exception e1) {
                 throw new RuntimeException("Cannot recogonize category name " + categoryName, e1);
             }
         }
-        return enrichmentService.getTopAttrs(category);
+
+        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category);
+
+        if (loadEnrichmentMetadata) {
+            Set<String> allEnrichAttrNames = new HashSet<>();
+            for (String subCategoryKey : topNAttr.getTopAttributes().keySet()) {
+                for (TopAttribute attr : topNAttr.getTopAttributes().get(subCategoryKey)) {
+                    allEnrichAttrNames.add(attr.getAttribute());
+                }
+            }
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null,
+                    categoryName, null, null, null, null);
+            List<LeadEnrichmentAttribute> attrs = new ArrayList<>();
+
+            for (LeadEnrichmentAttribute attr : enrichmentAttributes) {
+                if (allEnrichAttrNames.contains(attr.getFieldName())) {
+                    attrs.add(attr);
+                }
+            }
+
+            topNAttr.setEnrichmentAttributes(attrs);
+        }
+
+        return topNAttr;
     }
 
     // ------------End for statistics---------------------//

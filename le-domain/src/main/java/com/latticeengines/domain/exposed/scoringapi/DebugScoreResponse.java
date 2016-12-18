@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -33,6 +34,9 @@ public class DebugScoreResponse extends ScoreResponse {
 
     @JsonProperty("matchErrorMessages")
     private List<String> matchErrorMessages;
+
+    @JsonProperty("enrichmentMetadataList")
+    private List<LeadEnrichmentAttribute> enrichmentMetadataList;
 
     public Map<String, Object> getMatchedRecord() {
         return matchedRecord;
@@ -104,6 +108,14 @@ public class DebugScoreResponse extends ScoreResponse {
 
     public void setMatchErrorMessages(List<String> matchErrorMessages) {
         this.matchErrorMessages = matchErrorMessages;
+    }
+
+    public List<LeadEnrichmentAttribute> getEnrichmentMetadataList() {
+        return enrichmentMetadataList;
+    }
+
+    public void setEnrichmentMetadataList(List<LeadEnrichmentAttribute> enrichmentMetadataList) {
+        this.enrichmentMetadataList = enrichmentMetadataList;
     }
 
 }

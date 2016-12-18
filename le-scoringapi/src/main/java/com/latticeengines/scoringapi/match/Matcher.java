@@ -27,6 +27,19 @@ public interface Matcher {
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment);
 
+    Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
+            InterpretedFields interpreted, //
+            Map<String, FieldSchema> fieldSchemas, //
+            Map<String, Object> record, //
+            ModelSummary modelSummary, //
+            boolean forEnrichment, //
+            boolean enrichInternalAttributes, //
+            boolean performFetchOnlyForMatching, //
+            String requestId, boolean isDebugMode, //
+            List<String> matchLogs, List<String> matchErrorLogs, //
+            boolean shouldReturnAllEnrichment, //
+            boolean enforceFuzzyMatch);
+
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //

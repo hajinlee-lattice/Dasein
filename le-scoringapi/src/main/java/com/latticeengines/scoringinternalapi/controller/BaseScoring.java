@@ -51,6 +51,8 @@ public abstract class BaseScoring extends CommonBase {
 
     private static final String TOTAL_RECORDS = "TotalRecords";
 
+    private static final String ENFORCE_FUZZY_MATCH = "EnforceFuzzyMatch";
+
     private static final String ID_TYPE = "IdType";
 
     private static final String RULE = "Rule";
@@ -158,21 +160,22 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     protected DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId) {
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId,
+            boolean enforceFuzzyMatch) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
-                false, requestId, true);
+                false, requestId, true, enforceFuzzyMatch);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             String requestId) {
         return scoreRecord(request, scoreRequest, isDebug, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, false);
+                performFetchOnlyForMatching, requestId, false, false);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
-            String requestId, boolean isCalledViaApiConsole) {
+            String requestId, boolean isCalledViaApiConsole, boolean enforceFuzzyMatch) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
@@ -181,7 +184,8 @@ public abstract class BaseScoring extends CommonBase {
             }
 
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug,
-                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isCalledViaApiConsole);
+                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isCalledViaApiConsole,
+                    enforceFuzzyMatch);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));
@@ -198,6 +202,8 @@ public abstract class BaseScoring extends CommonBase {
             requestInfo.put(RECORD_ID, response.getId());
             requestInfo.put(LATTICE_ID, response.getLatticeId());
             requestInfo.put(ID_TYPE, scoreRequest.getIdType());
+            requestInfo.put(ENFORCE_FUZZY_MATCH,
+                    enforceFuzzyMatch ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
 
             requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
