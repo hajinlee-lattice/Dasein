@@ -5,6 +5,8 @@ import { TimestampUtility } from '../../shared/utilities/timestamp.utility';
 import { LoginService } from '../../shared/services/login.service';
 import { LoginStore } from "../login.store";
 import { StateService } from "ui-router-ng2";
+import { TimeoutUtility } from '../../shared/utilities/timeout.utility';
+
 declare var $:any;
 
 @Component({
@@ -38,16 +40,17 @@ export class TenantsComponent implements OnInit {
         private stringsUtility: StringsUtility,
         private storageUtility: StorageUtility,
         private timestampUtility: TimestampUtility,
+        private timeoutUtility: TimeoutUtility,
         private stateService: StateService
     ) { 
-        console.log('tenants.component',loginDocument, tenantList);
         this.strings = stringsUtility;
         this.isLoggedInWithTempPassword = this.loginDocument.MustChangePassword;
         this.timestamp = timestampUtility;
     }
 
     ngOnInit(): void {
-        var ClientSession = this.storageUtility.getClientSession();
+        let ClientSession = this.storageUtility.getClientSession();
+        let loginDocument = this.storageUtility.getLoginDocument() || {};
         
         this.isPasswordOlderThanNinetyDays = this.timestamp.checkLastModified(this.loginDocument.PasswordLastModified);
         this.loginStore.set(this.loginDocument, ClientSession);
@@ -59,6 +62,11 @@ export class TenantsComponent implements OnInit {
         
         if (this.tenantList.length == 1) {
             this.select(this.tenantList[0]);
+            return;
+        }
+        
+        if (this.timeoutUtility.hasSessionTimedOut() && loginDocument.UserName) {
+            this.loginService.Logout();
             return;
         }
 
@@ -77,8 +85,8 @@ export class TenantsComponent implements OnInit {
             self.tenantMap[tenant.Identifier] = tenant;
         });
 
-        //SessionTimeoutUtility.init();
-        
+        this.timeoutUtility.init();
+
         this.initialize = true;
 
         $(document.body).click(function(event) { this.focus(); });

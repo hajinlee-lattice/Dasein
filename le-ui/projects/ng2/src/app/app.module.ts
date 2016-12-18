@@ -4,8 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { HttpClient } from './shared/services/interceptor.service';
 
-import { ModalModule } from 'angular2-modal';
-import { BootstrapModalModule } from 'angular2-modal/plugins/bootstrap';
 
 import { trace, Category, UIRouterModule, UIView } from "ui-router-ng2";
 import { MAIN_STATES } from "./app.states";
@@ -34,8 +32,7 @@ import { TimeoutUtility } from "./shared/utilities/timeout.utility";
   ],
   imports: [
     BrowserModule,
-    ModalModule.forRoot(),
-    BootstrapModalModule,
+
     FormsModule,
     HttpModule,
     LoginModule,
@@ -49,13 +46,13 @@ import { TimeoutUtility } from "./shared/utilities/timeout.utility";
     }),
   ],
   providers: [
+    StorageUtility,
     SessionService,
     StringsService, 
     StringsUtility,
     TimeoutUtility,
     StringUtility, 
     LoginService,
-    StorageUtility,
     HttpClient
   ],
   bootstrap: [ 

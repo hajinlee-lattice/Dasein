@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { StateService } from "ui-router-ng2";
 import { LoginService } from '../services/login.service';
 import { StorageUtility } from './storage.utility';
-import { Modal } from 'angular2-modal/plugins/bootstrap';
 import { TimedoutComponent } from '../components/timedout/timedout.component';
 
 declare var $:any;
@@ -11,7 +10,7 @@ declare var $:any;
 export class TimeoutUtility {
 
     TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS: number = 30 * 1000;
-    TIME_INTERVAL_INACTIVITY_BEFORE_WARNING: number = 14.5 * 60 * 1000;  // 14.5 minutes
+    TIME_INTERVAL_INACTIVITY_BEFORE_WARNING: number = 60 * 1000;  // 14.5 minutes
     TIME_INTERVAL_WARNING_BEFORE_LOGOUT: number = 30 * 1000;
     inactivityCheckingId: any = null;
     warningModalInstance: any = null;
@@ -21,8 +20,7 @@ export class TimeoutUtility {
     constructor(
         private storageUtility: StorageUtility,
         private loginService: LoginService,
-        private stateService: StateService,
-        public modal: Modal
+        private stateService: StateService
     ) { 
         this.state = stateService;
     }
@@ -41,7 +39,7 @@ export class TimeoutUtility {
                 }
             }
         );
-    };
+    }
 
     startObservingUserActivtyThroughMouseAndKeyboard() {
         $('body').mousemove((event) => {
@@ -71,6 +69,7 @@ export class TimeoutUtility {
             'home.models.import','home.models.pmml','home.model.scoring',
             'home.models.import.job','home.models.pmml.job'
         ];
+        
         console.log('<!> timeout check', this.state, this);
 
         if (ignoreStates.indexOf(this.state.current.name) >= 0) {
@@ -102,13 +101,13 @@ export class TimeoutUtility {
     openWarningModal() {
         this.stateService.go('app.login.timedout');
         this.warningModalInstance = true;
+        /*
         this.modal.alert()
             .size('lg')
             .showClose(true)
             .title('Session Timeout Warning')
             .body(`Your session is about to timeout`)
             .open();
-        /*
         this.warningModalInstance = $modal.open({
             animation: true,
             backdrop: true,
