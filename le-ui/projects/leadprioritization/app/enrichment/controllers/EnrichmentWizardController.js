@@ -3,7 +3,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('EnrichmentWizardController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
-    BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCategories, EnrichmentPremiumSelectMaximum){
+    BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCount, EnrichmentCategories, 
+    EnrichmentPremiumSelectMaximum){
 
     var vm = this,
         across = 4, // how many across in grid view
@@ -34,6 +35,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
+        count: EnrichmentCount.data,
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
@@ -140,46 +142,45 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
         opts.max = (vm.enrichments.length ? enrichment_chunk_size : 100);
 
-        var max = opts.max,
+        var concurrent = 6, // most browsers allow a max of 6 concurrent connections per domain
+            max = Math.ceil(vm.count / concurrent),
             offset = opts.offset || 0,
+            iterations = Math.ceil(vm.count / max),
             _store;
 
+        setTimeout(function() {
+            for (var j=0; j<iterations; j++) {
+                EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(function(result) {
+                    if (result != null && result.status === 200) {
+                        vm.enrichments_loaded = true;
+                        vm.enrichments = vm.enrichments.concat(result.data);
+                        for(var i in result.data) {
+                            var _result = result.data[i];
+                            if(vm.enrichmentsObj[_result.Category]) {
+                                vm.enrichmentsObj[_result.Category].push(result.data[i]);
+                            } else if(_result.Category){
+                                vm.enrichmentsObj[_result.Category] = [];
+                                vm.enrichmentsObj[_result.Category].push(result.data[i]);
+                            }
+                        }
+                        numbersNumber = 0;
 
-        EnrichmentStore.getEnrichments(opts).then(function(result) {
-            if (result != null && result.status === 200) {
-                vm.enrichments_loaded = true;
-                vm.enrichments = vm.enrichments.concat(result.data);
-                for(var i in result.data) {
-                    var _result = result.data[i];
-                    if(vm.enrichmentsObj[_result.Category]) {
-                        vm.enrichmentsObj[_result.Category].push(result.data[i]);
-                    } else if(_result.Category){
-                        vm.enrichmentsObj[_result.Category] = [];
-                        vm.enrichmentsObj[_result.Category].push(result.data[i]);
+                        _store = result; // just a copy of the correct data strucuture and properties for later
+
+                        if (vm.enrichments.length >= vm.count) {
+                            _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
+                            EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
+                            //stopNumbersInterval();
+                            vm.enrichments_completed = true;
+                            vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
+                        }
                     }
-                }
-                numbersNumber = 0;
-
-                _store = result; // just a copy of the correct data strucuture and properties for later
-                if(stopGetEnrichments) {
-                    vm.enrichments = []; // unset enrichments
-                    stopNumbersInterval();
-                    return false; // stop getting enrichments
-                }
-                if(result.data.length === max) {
-                    getEnrichmentData({max: max, offset: offset + max});
-                } else {
-                    _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
-                    EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
-                    stopNumbersInterval();
-                    vm.enrichments_completed = true;
-                    vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
-                }
+                    var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+                    vm.generalSelectedTotal = selectedTotal.length;
+                    vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
+                });
             }
-            var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-            vm.generalSelectedTotal = selectedTotal.length;
-            vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-        });
+        }, 1);
     }
 
     vm.enrichmentsObj = {};
@@ -604,12 +605,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
     });
 
-    var EnrichmentCount = function() {
-        var opts = {};
-        EnrichmentStore.getCount(opts).then(function(result) {
-            vm.count = result.data;
-        });
-    }
     vm.percentage = function(number, total) {
         if(number && total) {
             return (total / number) * 100;
@@ -650,8 +645,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
         vm.statusMessageBox = angular.element('.status-alert');
-
-        EnrichmentCount();
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);

@@ -1238,6 +1238,15 @@ angular
                 },
                 "main@": {
                     resolve: {
+                        EnrichmentCount: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getCount().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
                         EnrichmentCategories: function($q, EnrichmentStore) {
                             return false;
                             var deferred = $q.defer();

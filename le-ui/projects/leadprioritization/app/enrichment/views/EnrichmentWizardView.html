@@ -96,11 +96,11 @@
                     ng-init="console.log($index, vm.subcategoryCount(vm.category, subcategory)); subcategoriesList = ($index == 0 ? [] : subcategoriesList); (vm.subcategoryCount(vm.category, subcategory) > 0 ? subcategoriesList.push(subcategory) : null);"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
-                    <div class="box-inner {{::vm.categoryClass(vm.category)}} border-top round-box"
+                    <div class="box-inner {{vm.categoryClass(vm.category)}} border-top round-box"
                          ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
                             <div class="category-icon">
-                                <img ng-src="{{::vm.subcategoryIcon(vm.category, subcategory)}}" />
+                                <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
                             </div>
                             {{subcategory}}
                         </h2>
