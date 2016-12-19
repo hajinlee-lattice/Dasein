@@ -1,5 +1,7 @@
 package com.latticeengines.pls.end2end;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -42,17 +44,15 @@ public class SelfServiceModelingToScoringEndToEndDeploymentTestNG extends PlsDep
         Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenant.getId(),
                 RESOURCE_BASE + "/" + fileName, modelId, 1000);
 
-        // Should enbale the check after Michael changes the precision
-        // String expectedDiffCountStr = System.getProperty("DIFFCOUNT");
-        //
-        // if (expectedDiffCountStr != null) {
-        // int expectedDiffCount = Integer.valueOf(expectedDiffCountStr);
-        // log.info("Checking if expected diff count is equal to " +
-        // expectedDiffCountStr);
-        // assertEquals(diffRecords.size(), expectedDiffCount);
-        // } else {
-        // log.info("Property DIFFCOUNT not set.");
-        // }
+        String expectedDiffCountStr = System.getProperty("DIFFCOUNT");
+
+        if (expectedDiffCountStr != null) {
+            int expectedDiffCount = Integer.valueOf(expectedDiffCountStr);
+            log.info("Checking if expected diff count is equal to " + expectedDiffCountStr);
+            assertEquals(diffRecords.size(), expectedDiffCount);
+        } else {
+            log.info("Property DIFFCOUNT not set.");
+        }
     }
 
     @Test(groups = "deployment.lp", enabled = false)
