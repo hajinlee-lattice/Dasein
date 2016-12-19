@@ -1,11 +1,11 @@
-<div class="select-menu">
+<div class="select-menu" tooltip="{{ tooltip }}">
     <button 
             ng-if="label"
             type="button"
             class="button icon-button {{ class }}"
             ng-click="click()"
             ui-sref="{{ sref || '.' }}"
-            ng-class="{ 'open': visible }">
+            ng-class="{ 'open': visible, 'no-label': !label }">
         <span ng-if="labelIcon" class="label-icon fa {{ labelIcon }}"></span>
         {{ label }}
     </button

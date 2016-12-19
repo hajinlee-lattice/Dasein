@@ -1,25 +1,30 @@
 angular.module('lp.enrichment.leadenrichment')
 .service('EnrichmentStore', function($q, EnrichmentService){
     var EnrichmentStore = this;
-    this.enrichments = null;
-    this.categories = null;
-    this.subcategories = {};
-    this.count = null;
-    this.selectedCount = null;
-    this.premiumSelectMaximum = null;
-    this.metadata = {
-        current: 1,
-        toggle: {
-            show: {
-                selected: false,
-                premium: false,
-                internal: false
-            },
-            hide: {
-                premium: false
+
+    this.init = function() {
+        this.enrichments = null;
+        this.categories = null;
+        this.subcategories = {};
+        this.count = null;
+        this.selectedCount = null;
+        this.premiumSelectMaximum = null;
+        this.metadata = {
+            current: 1,
+            toggle: {
+                show: {
+                    selected: false,
+                    premium: false,
+                    internal: false
+                },
+                hide: {
+                    premium: false
+                }
             }
-        }
-    };
+        };
+    }
+
+    this.init();
 
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {

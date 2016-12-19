@@ -35,10 +35,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
-        count: EnrichmentCount.data,
+        count: EnrichmentCount.data || 0,
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
+        enrichmentsObj: {},
         enrichments: [],
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
@@ -89,12 +90,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.download_button = {
-        label: 'Download',
-        labelIcon: 'fa-download',
+        //label: 'Download',
+        //labelIcon: 'fa-download',
         class: 'orange-button select-label',
-        icon: 'fa fa-chevron-down',
-        iconclass: 'orange-button select-more',
-        iconrotate: true
+        icon: 'fa fa-download',
+        iconclass: 'white-button select-more',
+        iconrotate: false,
+        tooltip: 'Download Enrichments'
     };
 
     vm.download_button.items = [{ 
@@ -148,48 +150,64 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             iterations = Math.ceil(vm.count / max),
             _store;
 
-        setTimeout(function() {
-            for (var j=0; j<iterations; j++) {
-                EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(function(result) {
-                    if (result != null && result.status === 200) {
-                        vm.enrichments_loaded = true;
-                        vm.enrichments = vm.enrichments.concat(result.data);
-                        for(var i in result.data) {
-                            var _result = result.data[i];
-                            if(vm.enrichmentsObj[_result.Category]) {
-                                vm.enrichmentsObj[_result.Category].push(result.data[i]);
-                            } else if(_result.Category){
-                                vm.enrichmentsObj[_result.Category] = [];
-                                vm.enrichmentsObj[_result.Category].push(result.data[i]);
-                            }
-                        }
-                        numbersNumber = 0;
-
-                        _store = result; // just a copy of the correct data strucuture and properties for later
-
-                        if (vm.enrichments.length >= vm.count) {
-                            _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
-                            EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
-                            //stopNumbersInterval();
-                            vm.enrichments_completed = true;
-                            vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
-                        }
-                    }
-                    var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-                    vm.generalSelectedTotal = selectedTotal.length;
-                    vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-                });
-            }
-        }, 1);
+        if (EnrichmentStore.enrichments) {
+            vm.xhrResult(EnrichmentStore.enrichments, true);
+        } else {
+            setTimeout(function() {
+                for (var j=0; j<iterations; j++) {
+                    EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
+                }
+            }, 1);
+        }
     }
 
-    vm.enrichmentsObj = {};
+    vm.xhrResult = function(result, ignore) {
+        var _store, key, item;
+
+        if (ignore) {
+            vm.enrichmentsObj = {};
+            EnrichmentStore.init();
+        }
+
+        if (result != null && result.status === 200) {
+            vm.enrichments_loaded = true;
+            vm.enrichments = vm.enrichments.concat(result.data);
+
+            for (key in result.data) {
+                item = result.data[key];
+
+                if (!vm.enrichmentsObj[item.Category]) {
+                    vm.enrichmentsObj[item.Category] = [];
+                }
+
+                vm.enrichmentsObj[item.Category].push(item);
+            }
+
+            numbersNumber = 0;
+
+            _store = result; // just a copy of the correct data strucuture and properties for later
+
+            if (vm.enrichments.length >= vm.count) {
+                _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
+                EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
+                vm.enrichments_completed = true;
+                vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
+            }
+        }
+
+        var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
+        vm.generalSelectedTotal = selectedTotal.length;
+        vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
+    }
+
     var getEnrichmentCategories = function() {
         EnrichmentStore.getCategories().then(function(result) {
             vm.categories = result.data;
             _.each(vm.categories, function(value, key){
                 getEnrichmentSubcategories(value);
-                vm.enrichmentsObj[value] = [];
+                if (!vm.enrichmentsObj[value]) {
+                    vm.enrichmentsObj[value] = [];
+                }
             });
             vm.enable_category_dropdown = true;
         });
@@ -509,7 +527,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
-
+console.log(category, filtered)
         /*
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
@@ -638,9 +656,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.init = function() {
         _resized();
-        getEnrichmentData();
 
         getEnrichmentCategories();
+        getEnrichmentData();
 
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;
