@@ -240,6 +240,8 @@ angular
 
                 if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
+                } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
+                    stepRunning = 'generate_insights';
                 }
                 result = {
                     success: true,
@@ -298,6 +300,8 @@ angular
 
                 if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
+                } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
+                    stepRunning = 'generate_insights';
                 }
                 result = {
                     success: true,
