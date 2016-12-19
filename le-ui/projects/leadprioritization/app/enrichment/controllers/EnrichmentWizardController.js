@@ -153,7 +153,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             iterations = Math.ceil(vm.count / max),
             _store;
 
-            console.log('EnrichmentAccountLookup', EnrichmentAccountLookup);
         setTimeout(function() {
             if (EnrichmentStore.enrichments) {
                 vm.xhrResult(EnrichmentStore.enrichments, true);
@@ -204,11 +203,23 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
     }
 
+    vm.topAttributes = {};
+    var getTopAttributes = function(opts) {
+        var opts = opts || {},
+            category = opts.category;
+
+        EnrichmentStore.getTopAttributes(opts).then(function(result) {
+            vm.topAttributes[category] = result.data;
+            console.log(result.data);
+        });
+    }
+
     var getEnrichmentCategories = function() {
         EnrichmentStore.getCategories().then(function(result) {
             vm.categories = result.data;
             _.each(vm.categories, function(value, key){
                 getEnrichmentSubcategories(value);
+                getTopAttributes({category: value});
                 if (!vm.enrichmentsObj[value]) {
                     vm.enrichmentsObj[value] = [];
                 }

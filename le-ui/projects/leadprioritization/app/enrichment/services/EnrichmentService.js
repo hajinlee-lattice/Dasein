@@ -9,6 +9,7 @@ angular.module('lp.enrichment.leadenrichment')
         this.count = null;
         this.selectedCount = null;
         this.premiumSelectMaximum = null;
+        this.topAttributes = null;
         this.metadata = {
             current: 1,
             toggle: {
@@ -150,6 +151,26 @@ angular.module('lp.enrichment.leadenrichment')
         }
         return deferred.promise;
     }
+
+    this.getTopAttributes = function(opts) {
+        var deferred = $q.defer(),
+        opts = opts || {};
+        opts.category = opts.category || 'firmographics';
+        opts.limit = opts.limit || 5;
+        if (this.topAttributes) {
+            deferred.resolve(this.topAttributes);
+        } else {
+            EnrichmentService.getTopAttributes(opts).then(function(response) {
+                EnrichmentStore.setTopAttributes(response);
+                deferred.resolve(response);
+            });
+        }
+        return deferred.promise;
+    }
+
+    this.setTopAttributes = function(item) {
+        this.topAttributes = item;
+    }
 })
 .service('EnrichmentService', function($q, $http){
     this.getPremiumSelectMaximum = function(){
@@ -240,6 +261,24 @@ angular.module('lp.enrichment.leadenrichment')
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.getTopAttributes = function(opts) {
+        var deferred = $q.defer(),
+        opts = opts || {};
+        opts.category = opts.category || 'firmographics';
+        opts.limit = opts.limit || 5;
+        $http({
+            method: 'get',
+            url: '/pls/enrichment/stats/topn',
+            params: {
+                category: opts.category,
+                limit: opts.limit
+            }
+        }).then(function(response) {
+            deferred.resolve(response);
         });
         return deferred.promise;
     }

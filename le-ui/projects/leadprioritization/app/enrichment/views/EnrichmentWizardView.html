@@ -6,11 +6,6 @@
             </div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-        <div class="loading-enrichments" ng-if="!vm.lookupmode">
-            <span ng-if="!vm.enrichments_completed">
-            <i lass="fa fa-spinner fa-spin fa-fw"></i> Loading </span>
-            Enrichments: {{vm.enrichments.length|number}} / {{vm.count|number}}
-        </div>
         <div class="enrichments-loading-bar" ng-if="vm.percentage(vm.count, vm.enrichments.length) !== 100"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
         <div class="filters-container">
             <ul class="filters" >
@@ -45,13 +40,18 @@
                 <li class="info" ng-if="!vm.lookupmode">
                     <div ng-if="vm.enrichments_completed || 1">
                         Enrichment: {{vm.generalSelectedTotal}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal}} of {{vm.premiumSelectLimit}} premium 
-                        <span 
-                              tooltips 
-                              tooltip-template="stuff"
-                              tooltip-size="small"
-                              tooltip-side="top"
-                              tooltip-close-button="false" 
-                              class="more-info">&#105;</span>
+                       <span class="more-info">&#105;
+                           <div class="tooltip_">
+                               <div class="cover">
+                                   <p>
+                                       Up to {{vm.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.premiumSelectLimit}} may be premium.
+                                   </p>
+                                   <p>
+                                       When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
+                                   </p>
+                               </div>
+                           </div>
+                       </span>
                     </div>
                 </li>
                 <li class="download" ng-if="!vm.lookupmode">
@@ -77,7 +77,7 @@
                         </h2>
                         <span class="count">
                             <strong ng-if="vm.enrichments_completed">{{vm.categoryCount(category)}}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+                            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                     </span>
                 </div>
@@ -95,6 +95,7 @@
             </div>
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category]) 
+                        | filter: vm.subcategoryFilter
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
@@ -113,7 +114,13 @@
                         <span class="count">
                             <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory) }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
-                            </span>
+                        </span>
+                        <ul ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]" class="attributes">
+                           <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
+                               <div class="column label">{{::attribute.Attribute}}</div>
+                               <div class="column data">{{::attribute.NonNullCount|number}}</div>
+                           </li>
+                       </ul>
                     </div>
                 </li>
             </ul>
