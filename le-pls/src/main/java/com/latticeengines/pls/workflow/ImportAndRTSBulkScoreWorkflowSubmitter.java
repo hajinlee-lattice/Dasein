@@ -95,14 +95,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
-        String dataCloudVersion = null;
+        String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(modelSummary);
         boolean skipIdMatch = true;
         if (modelSummary != null) {
-            dataCloudVersion = modelSummary.getDataCloudVersion();
-            dataCloudVersion = columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch || ModelType.PMML.equals(modelSummary.getModelType());
+        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelSummary.getModelType());
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
