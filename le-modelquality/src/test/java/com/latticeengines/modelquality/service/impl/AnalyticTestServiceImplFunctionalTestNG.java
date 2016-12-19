@@ -87,7 +87,7 @@ public class AnalyticTestServiceImplFunctionalTestNG extends ModelQualityFunctio
         Assert.assertEquals(prodRuns.size(), 1);
     }
 
-    @AfterTest(groups = "functional")
+    @AfterTest(groups = "manual")
     public void cleanup() {
         AnalyticTest at = analyticTestEntityMgr.findByName(spFunctionalTestName);
         if (at != null) {
