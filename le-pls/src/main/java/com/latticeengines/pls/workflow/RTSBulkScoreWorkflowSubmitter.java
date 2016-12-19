@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -40,9 +39,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     public ApplicationId submit(String modelId, String tableToScore, boolean enableLeadEnrichment,
             String sourceDisplayName, boolean enableDebug) {
@@ -76,14 +72,12 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
         }
 
-        String dataCloudVersion = null;
+        String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(modelSummary);
         boolean skipIdMatch = true;
         if (modelSummary != null) {
-            dataCloudVersion = modelSummary.getDataCloudVersion();
-            dataCloudVersion = columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch || ModelType.PMML.equals(modelSummary.getModelType());
+        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelSummary.getModelType());
         log.info("Data Cloud Version=" + dataCloudVersion);
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);

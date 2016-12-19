@@ -3,7 +3,6 @@ package com.latticeengines.pls.workflow;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
@@ -42,9 +41,6 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,
             TransformationGroup transformationGroup) {
@@ -98,10 +94,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 selectionVersion = summary.getPredefinedSelectionVersion();
             }
         }
-        String dataCloudVersion = null;
-        if (summary != null) {
-            dataCloudVersion = columnMetadataProxy.latestVersion(summary.getDataCloudVersion()).getVersion();
-        }
+        String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(summary);
 
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -116,7 +109,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .columnSelection(selection, selectionVersion) //
-                .dataCloudVersion(dataCloudVersion).outputFileFormat(ExportFormat.CSV) //
+                .dataCloudVersion(dataCloudVersion) //
+                .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"
                         + StringUtils.substringBeforeLast(sourceDisplayName.replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                         + "_scored_" + DateTime.now().getMillis()) //

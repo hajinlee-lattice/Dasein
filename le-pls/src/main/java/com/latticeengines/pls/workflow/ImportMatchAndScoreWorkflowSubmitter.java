@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -49,9 +48,6 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private ModelSummaryService modelSummaryService;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String fileName, TransformationGroup transformationGroup) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
@@ -111,7 +107,6 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
         Predefined selection = Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
-        String dataCloudVersion = null;
         if (summary != null) {
             if (summary.getPredefinedSelection() != null) {
                 selection = summary.getPredefinedSelection();
@@ -119,10 +114,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                     selectionVersion = summary.getPredefinedSelectionVersion();
                 }
             }
-            dataCloudVersion = summary.getDataCloudVersion();
-            dataCloudVersion = columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
         }
-
+        String dataCloudVersion = getComplatibleDataCloudVersionFromModelSummary(modelSummary);
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
 
         return new ImportMatchAndScoreWorkflowConfiguration.Builder() //
