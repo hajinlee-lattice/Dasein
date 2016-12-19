@@ -65,7 +65,7 @@ class FutureInfo(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "Attributes may not have lift from NULL values less than {0} or greater than {1}".format(self.minLift, self.maxLift)
+        return "Attributes may not have NULL population > {0:2%}, lift from NULL values less than {1}, and lift from non-NULL values greater than {2}".format(self.maxNullPopulation, self.minNullLift, sself.maxNonNullLift)
 
     @overrides(ColumnRule)
     def getConfParameters(self):

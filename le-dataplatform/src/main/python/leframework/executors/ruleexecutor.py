@@ -20,7 +20,7 @@ class DataRuleExecutor(Executor):
 
     @overrides(Executor)
     def loadData(self):
-        return True, True
+        return False, False
 
     @overrides(Executor)
     def parseData(self, parser, trainingFile, testFile, postProcessClf):

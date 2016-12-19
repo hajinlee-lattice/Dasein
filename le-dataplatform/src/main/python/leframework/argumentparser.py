@@ -162,7 +162,7 @@ class ArgumentParser(object):
             return float(cell)
         return cell
 
-    def createList(self, dataFileName, postProcessClf=True):
+    def createList(self, dataFileName, postProcessClf=True, readData=True):
         '''
           Creates a pandas dataframe from the data set in dataFileName. It only creates data in memory for features and targets.
         '''
@@ -192,34 +192,35 @@ class ArgumentParser(object):
                     self.stringColNames.add(fName)
 
         tmpData = []
-
-        reader = None
-        filedescriptor = open(dataFileName, 'rb')
-        if self.isAvro():
-            reader = avro.reader(filedescriptor)
-        else:
-            reader = csv.reader(filedescriptor)
-
         numberOfNullTarget = 0
-        for row in reader:
-            rowlist = list(reservedFieldDefaultValues) if postProcessClf else []
-            if len(row) != len(self.fields):
-                msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
-                raise Exception(msg)
 
+        if readData:
+            reader = None
+            filedescriptor = open(dataFileName, 'rb')
             if self.isAvro():
-                targetName = self.target
-                if row[targetName] is None:
-                    numberOfNullTarget += 1
-                    continue
-                else:
-                    row[targetName] = float(row[targetName])
-                rowlist += [None if row[name] is None else str(row[name]) if name in self.stringColNames else float(row[name]) for name in includedNames]
+                reader = avro.reader(filedescriptor)
             else:
-                # CSV format
-                rowlist += [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
+                reader = csv.reader(filedescriptor)
 
-            tmpData.append(rowlist)
+            for row in reader:
+                rowlist = list(reservedFieldDefaultValues) if postProcessClf else []
+                if len(row) != len(self.fields):
+                    msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
+                    raise Exception(msg)
+
+                if self.isAvro():
+                    targetName = self.target
+                    if row[targetName] is None:
+                        numberOfNullTarget += 1
+                        continue
+                    else:
+                        row[targetName] = float(row[targetName])
+                    rowlist += [None if row[name] is None else str(row[name]) if name in self.stringColNames else float(row[name]) for name in includedNames]
+                else:
+                    # CSV format
+                    rowlist += [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
+
+                tmpData.append(rowlist)
 
         if numberOfNullTarget > 0:
             self.numOfSkippedRow += numberOfNullTarget
@@ -232,7 +233,7 @@ class ArgumentParser(object):
 
         dataFrameColumns = reservedFields + includedNames if postProcessClf else includedNames
 
-        if len(tmpData) == 0:
+        if len(tmpData) == 0 or not readData:
             return pd.DataFrame(columns=dataFrameColumns)
 
         return pd.DataFrame(tmpData, columns=dataFrameColumns)

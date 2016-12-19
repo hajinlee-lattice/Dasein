@@ -146,11 +146,8 @@ class Launcher(object):
             schema["pipeline_driver"] = "pipeline.json"
 
         loadTrainingData, loadTestData = executor.loadData()
-        if loadTrainingData:
-            self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
-
-        if loadTestData:
-            self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
+        self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf, loadTrainingData)
+        self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf, loadTestData)
 
         params["training"] = self.training
         params["test"] = self.test
