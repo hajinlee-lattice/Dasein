@@ -82,7 +82,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "scoreWorkflow");
 
-        ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
+        ModelSummary summary = modelSummaryService.findByModelId(modelId, false, true, false);
         if (summary != null) {
             inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, summary.getDisplayName());
         }

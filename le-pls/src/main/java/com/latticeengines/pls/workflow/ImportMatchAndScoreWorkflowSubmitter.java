@@ -87,7 +87,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             SourceFile sourceFile, String sourceDisplayName, TransformationGroup transformationGroup) {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);
 
         Table modelingEventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                 modelSummary.getEventTableName());
@@ -99,19 +99,15 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndScoreWorkflow");
-        if (modelSummary != null) {
-            inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
-        }
-
-        ModelSummary summary = modelSummaryService.getModelSummaryEnrichedByDetails(modelId);
+        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
 
         Predefined selection = Predefined.getLegacyDefaultSelection();
         String selectionVersion = null;
-        if (summary != null) {
-            if (summary.getPredefinedSelection() != null) {
-                selection = summary.getPredefinedSelection();
-                if (StringUtils.isNotEmpty(summary.getPredefinedSelectionVersion())) {
-                    selectionVersion = summary.getPredefinedSelectionVersion();
+        if (modelSummary != null) {
+            if (modelSummary.getPredefinedSelection() != null) {
+                selection = modelSummary.getPredefinedSelection();
+                if (StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
+                    selectionVersion = modelSummary.getPredefinedSelectionVersion();
                 }
             }
         }
@@ -127,7 +123,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
                 .inputTableName(sourceFile.getTableName()) //
-                .skipMatchingStep(summary.getModelSummaryConfiguration()
+                .skipMatchingStep(modelSummary.getModelSummaryConfiguration()
                         .getBoolean(ProvenancePropertyName.ExcludePropdataColumns)) //
                 .matchClientDocument(matchClientDocument) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
