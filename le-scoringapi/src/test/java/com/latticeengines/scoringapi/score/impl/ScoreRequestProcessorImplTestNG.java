@@ -14,6 +14,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
@@ -52,7 +54,7 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
     @InjectMocks
     private ScoreRequestProcessor scoreRequestProcessor;
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void setup() {
         MockitoAnnotations.initMocks(this);
         space = CustomerSpace.parse("space");
@@ -76,9 +78,8 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
             scoreRequestProcessor.process(space, request, false, false, false, "requestId", false);
         } catch (Exception e) {
             thrownException = true;
-            // Assert.assertTrue(e instanceof LedpException);
-            // Assert.assertEquals(((LedpException) e).getCode(),
-            // LedpCode.LEDP_31114);
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_31114);
         }
         Assert.assertTrue(thrownException, "Should have thrown exception");
     }
