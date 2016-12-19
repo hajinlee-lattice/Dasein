@@ -46,7 +46,7 @@ angular.module('lp.enrichment.leadenrichment')
             } else {
                 var obj = target[level] || {};
                 target[level] = obj;
-                  target = obj;
+                target = obj;
             }
         });
     }

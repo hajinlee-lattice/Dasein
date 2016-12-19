@@ -4,7 +4,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 ])
 .controller('EnrichmentWizardController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
     BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCount, EnrichmentCategories, 
-    EnrichmentPremiumSelectMaximum){
+    EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup){
 
     var vm = this,
         across = 4, // how many across in grid view
@@ -59,7 +59,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enable_category_dropdown: false,
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
-        view: 'list'
+        view: 'list',
+        lookupmode: EnrichmentAccountLookup !== null,
+        lookupFiltered: EnrichmentAccountLookup
     });
     vm.orders = {
         attribute: 'DisplayName',
@@ -111,7 +113,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     var stopGetEnrichments = false;
     $scope.$on('$destroy', function () {
-        stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
+        // lets load all enrichments anyway incase they go to Account Lookup tool -jlazarus
+        //stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
         angular.element($window).unbind("scroll", scrolled);
         angular.element($window).unbind("resize", resized);
     });
@@ -150,15 +153,16 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             iterations = Math.ceil(vm.count / max),
             _store;
 
-        if (EnrichmentStore.enrichments) {
-            vm.xhrResult(EnrichmentStore.enrichments, true);
-        } else {
-            setTimeout(function() {
+            console.log('EnrichmentAccountLookup', EnrichmentAccountLookup);
+        setTimeout(function() {
+            if (EnrichmentStore.enrichments) {
+                vm.xhrResult(EnrichmentStore.enrichments, true);
+            } else {
                 for (var j=0; j<iterations; j++) {
                     EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
                 }
-            }, 1);
-        }
+            }
+        }, 250);
     }
 
     vm.xhrResult = function(result, ignore) {
@@ -527,7 +531,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
-console.log(category, filtered)
         /*
         filtered =  $filter('filter')(filtered, {
             'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
@@ -653,12 +656,12 @@ console.log(category, filtered)
         console.log('debugCounter: ', c);
     }
 
-
     vm.init = function() {
         _resized();
 
-        getEnrichmentCategories();
         getEnrichmentData();
+
+        getEnrichmentCategories();
 
         vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
         vm.generalSelectLimit = 100;

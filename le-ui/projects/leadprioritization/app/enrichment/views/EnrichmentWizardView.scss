@@ -57,7 +57,10 @@
             }
         }
     }
-
+    .enrichment-wizard-pagination {
+        float: right;
+        display: inline-block;
+    }
     pd-pagination-controls .pd-pagination {
         text-align: right;
         margin-right: 15px;
@@ -173,6 +176,7 @@
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
         flex-wrap: wrap;
+        clear: both;
         .subcategory {
             @include flex-item(0 0 auto);
             width: $box-width;
@@ -189,6 +193,7 @@
                     font-size: 16px;
                     margin-top: 20%;
                     margin-bottom: 5px;
+                    overflow: hidden;
                     .category-icon {
                         height: 36px;
                         width: 36px;
@@ -221,6 +226,7 @@
     .subcategory-back {
         font-size: 18px;
         margin-top: 10px;
+        display: inline-block;
     }
 
     .enrichments {
@@ -228,6 +234,7 @@
         -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
         flex-wrap: wrap;
+        clear: both;
         .box {
             @include flex-item(0 0 auto);
             width: $box-width;
@@ -449,8 +456,9 @@
         &.color {
             color: #33bdb7;
         }
-        &.background {
-            background: #33bdb7;
+        &.background:not(.active):hover {
+            background-color: rgba(51,189,183,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #33bdb7;
@@ -467,8 +475,9 @@
         &.color {
             color: #65b7e6;
         }
-        &.background {
-            background: #65b7e6;
+        &.background:not(.active):hover {
+            background-color: rgba(101,183,230,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #65b7e6;
@@ -485,8 +494,9 @@
         &.color {
             color: #f15a5a;
         }
-        &.background {
-            background: #f15a5a;
+        &.background:not(.active):hover {
+            background-color: rgba(241,90,90,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #f15a5a;
@@ -503,8 +513,9 @@
         &.color {
             color: #8e71b2;
         }
-        &.background {
-            background: #8e71b2;
+        &.background:not(.active):hover {
+            background-color: rgba(142,113,178,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #8e71b2;
@@ -521,8 +532,9 @@
         &.color {
             color: #70bf4a;
         }
-        &.background {
-            background: #70bf4a;
+        &.background:not(.active):hover {
+            background-color: rgba(112,191,74,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #70bf4a;
@@ -539,8 +551,9 @@
         &.color {
             color: #fdbc49;
         }
-        &.background {
-            background: #fdbc49;
+        &.background:not(.active):hover {
+            background-color: rgba(253,188,73,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #fdbc49;
@@ -557,8 +570,9 @@
         &.color {
             color: #26649b;
         }
-        &.background {
-            background: #26649b;
+        &.background:not(.active):hover {
+            background-color: rgba(38,100,155,.033) !important;
+            transition-duration: 0s;
         }
         &.border {
             border-color: #26649b;

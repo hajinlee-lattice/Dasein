@@ -1142,35 +1142,32 @@ angular
             },
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore) {
-                    var deferred = $q.defer();
+                    //var deferred = $q.defer();
+                    var data = LookupStore.get('response');
 
-                    LookupService.submit().then(function(data) {
+                    //LookupService.submit().then(function(data) {
                         console.log('response', data);
                         var current = new Date().getTime();
                         var old = LookupStore.get('timestamp');
 
                         LookupStore.add('elapsedTime', current - old);
 
-                        deferred.resolve(data);
-                    });
+                        //deferred.resolve(data);
+                    //});
 
-                    return deferred.promise;
+                    return data;//deferred.promise;
                 }
             },
             views: {
                 "summary@": {
+                    controller: function(LookupResponse) {
+                        this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                    },
+                    controllerAs: 'vm',
                     templateUrl: 'app/lookup/tabs/TabsView.html'
                 }
             },
             redirectTo: 'home.lookup.tabs.response'
-        })
-        .state('home.lookup.tabs.attr', {
-            url: '/attr',
-            views: {
-                "main@": {
-                    template: 'attr'
-                }
-            }
         })
         .state('home.lookup.tabs.response', {
             url: '/response',
@@ -1203,6 +1200,55 @@ angular
                     },
                     controllerAs: 'vm',
                     templateUrl: 'app/lookup/matching/MatchingView.html'
+                }
+            }
+        })
+        .state('home.lookup.tabs.attr', {
+            url: '/attr',
+            views: {
+                "main@": {
+                    resolve: {
+                        EnrichmentCount: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getCount().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentCategories: function($q, EnrichmentStore) {
+                            return false;
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getCategories().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentPremiumSelectMaximum: function($q, EnrichmentStore) {
+                            var deferred = $q.defer();
+
+                            EnrichmentStore.getPremiumSelectMaximum().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        EnrichmentAccountLookup: function($q, EnrichmentStore, LookupResponse) {
+                            var deferred = $q.defer();
+
+                            //EnrichmentStore.getPremiumSelectMaximum().then(function(result) {
+                                deferred.resolve(LookupResponse.enrichmentAttributeValues);
+                            //});
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'EnrichmentWizardController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/enrichment/views/EnrichmentWizardView.html'
                 }
             }
         })
@@ -1265,6 +1311,9 @@ angular
                             });
 
                             return deferred.promise;
+                        },
+                        EnrichmentAccountLookup: function() {
+                            return null;
                         }
                     },
                     controller: 'EnrichmentWizardController',
