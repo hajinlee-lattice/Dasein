@@ -243,19 +243,11 @@ public class FuzzyMatchHelper implements DbHelper {
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
+        
+        Map<String, Object> decodedAttributes = decodeAttributes(parameters, amAttributes);
         for (Column column : columnSelection.getColumns()) {
             String columnId = column.getExternalColumnId();
             String columnName = column.getColumnName();
-
-            Map<String, Object> decodedAttributes = new HashMap<>();
-            for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : parameters.entrySet()) {
-                BitCodeBook codeBook = entry.getValue().getLeft();
-                List<String> decodeFields = entry.getValue().getRight();
-                String encodeField = entry.getKey();
-                String encodedStr = (String) amAttributes.get(encodeField);
-                decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
-            }
-
             if (amAttributes.containsKey(columnId)) {
                 queryResult.put(columnName, amAttributes.get(columnId));
             } else if (decodedAttributes.containsKey(columnId)) {
@@ -266,6 +258,19 @@ public class FuzzyMatchHelper implements DbHelper {
         }
 
         return queryResult;
+    }
+
+    private Map<String, Object> decodeAttributes(Map<String, Pair<BitCodeBook, List<String>>> parameters,
+            Map<String, Object> amAttributes) {
+        Map<String, Object> decodedAttributes = new HashMap<>();
+        for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : parameters.entrySet()) {
+            BitCodeBook codeBook = entry.getValue().getLeft();
+            List<String> decodeFields = entry.getValue().getRight();
+            String encodeField = entry.getKey();
+            String encodedStr = (String) amAttributes.get(encodeField);
+            decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
+        }
+        return decodedAttributes;
     }
 
 }
