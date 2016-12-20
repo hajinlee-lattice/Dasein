@@ -643,6 +643,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                             BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
                 } catch (Exception e) {
                     //skip the bad model
+                    log.error(String.format("Error converting model summary to model detail for model summary: %s",
+                            modelSummary.getId()));
                     continue;
                 }
                 models.add(modelDetail);
