@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
@@ -21,14 +22,17 @@ public class DimensionAttributeProxy extends BaseRestApiProxy implements Dimensi
     @SuppressWarnings({ "unchecked" })
     public List<CategoricalDimension> getAllDimensions() {
         String url = constructUrl("/dimensions");
-        return get("getAllDimensions", url, List.class);
+        List<?> dimensions = get("getAllDimensions", url, List.class);
+        return JsonUtils.convertList(dimensions, CategoricalDimension.class);
     }
 
     @Override
     @SuppressWarnings({ "unchecked" })
     public List<CategoricalAttribute> getAllAttributes(Long rootId) {
         String url = constructUrl("/attributes?rootId={rootId}", rootId);
-        return get("getAllAttributes", url, List.class);
+        List<?> attributes = get("getAllAttributes", url, List.class);
+
+        return JsonUtils.convertList(attributes, CategoricalAttribute.class);
     }
 
 }

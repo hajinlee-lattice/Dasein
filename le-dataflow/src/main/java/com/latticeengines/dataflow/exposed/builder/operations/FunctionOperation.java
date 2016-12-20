@@ -51,20 +51,35 @@ public class FunctionOperation extends Operation {
         init(prior, function, sourceFields, targetFields, outputFields);
     }
 
+    public FunctionOperation(Input prior, Function<?> function, FieldList sourceFields,
+            List<FieldMetadata> targetFields, FieldList outputFields, Fields overrideFieldStrategy) {
+        init(prior, function, sourceFields, targetFields, outputFields, overrideFieldStrategy);
+    }
+
     private void init(Input prior, Function<?> function, FieldList sourceFields, List<FieldMetadata> targetFields,
             FieldList outputFields) {
+        init(prior, function, sourceFields, targetFields, outputFields, null);
+    }
+
+    private void init(Input prior, Function<?> function, FieldList sourceFields, List<FieldMetadata> targetFields,
+            FieldList outputFields, Fields overrideFieldStrategy) {
         Fields fieldStrategy = Fields.ALL;
 
         List<FieldMetadata> fm = Lists.newArrayList(prior.metadata);
 
-        if (sourceFields.getFields().length == 1 && targetFields.size() == 1
-                && sourceFields.getFields()[0].equals(targetFields.get(0).getFieldName())) {
-            fieldStrategy = Fields.REPLACE;
+        if (overrideFieldStrategy == null) {
+            if (sourceFields.getFields().length == 1 && targetFields.size() == 1
+                    && sourceFields.getFields()[0].equals(targetFields.get(0).getFieldName())) {
+                fieldStrategy = Fields.REPLACE;
+            }
+
+            if (outputFields != null) {
+                fieldStrategy = DataFlowUtils.convertToFields(outputFields.getFields());
+            }
+        } else {
+            fieldStrategy = overrideFieldStrategy;
         }
 
-        if (outputFields != null) {
-            fieldStrategy = DataFlowUtils.convertToFields(outputFields.getFields());
-        }
         Pipe each = new Each(prior.pipe, DataFlowUtils.convertToFields(sourceFields.getFieldsAsList()), function,
                 fieldStrategy);
 
@@ -77,7 +92,7 @@ public class FunctionOperation extends Operation {
             Map<String, FieldMetadata> nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(fm);
             for (FieldMetadata targetField : targetFields) {
                 FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
-                if (targetFm.getJavaType() != targetField.getJavaType()) {
+                if (targetFm !=null && targetFm.getJavaType() != targetField.getJavaType()) {
                     FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
                             targetField.getFieldName(), null);
                     nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);

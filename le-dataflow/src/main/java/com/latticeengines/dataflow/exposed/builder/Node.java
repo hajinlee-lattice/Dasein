@@ -42,6 +42,7 @@ import cascading.operation.Buffer;
 import cascading.operation.Function;
 import cascading.operation.buffer.FirstNBuffer;
 import cascading.pipe.Pipe;
+import cascading.tuple.Fields;
 
 public class Node {
     private String identifier;
@@ -246,9 +247,13 @@ public class Node {
 
     public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
             FieldList outputFields) {
-        return new Node(builder.register(
-                new FunctionOperation(opInput(identifier), function, fieldsToApply, targetFields, outputFields)),
-                builder);
+        return apply(function, fieldsToApply, targetFields, outputFields, null);
+    }
+
+    public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
+            FieldList outputFields, Fields overrideFieldStrategy) {
+        return new Node(builder.register(new FunctionOperation(opInput(identifier), function, fieldsToApply,
+                targetFields, outputFields, overrideFieldStrategy)), builder);
     }
 
     public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
@@ -349,8 +354,8 @@ public class Node {
     }
 
     public Node bitDecode(String encodedField, String[] decodeFields, BitCodeBook codeBook) {
-        return new Node(builder.register(
-                new BitDecodeOperation(opInput(identifier), encodedField, decodeFields, codeBook)),
+        return new Node(
+                builder.register(new BitDecodeOperation(opInput(identifier), encodedField, decodeFields, codeBook)),
                 builder);
     }
 
@@ -405,4 +410,5 @@ public class Node {
         return new Node(builder.addHashJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType),
                 builder);
     }
+
 }

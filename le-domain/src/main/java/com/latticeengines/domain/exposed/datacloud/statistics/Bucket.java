@@ -1,8 +1,12 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Bucket {
+    @JsonProperty("Lbl")
     private String bucketLabel;
 
+    @JsonProperty("Cnt")
     private Integer count;
 
     public String getBucketLabel() {
