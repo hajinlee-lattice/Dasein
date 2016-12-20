@@ -53,8 +53,14 @@
                        </span>
                     </div>
                 </li>
-                <li class="download" ng-if="!vm.lookupmode">
-                    <menu-dropdown config="vm.download_button"></menu-dropdown>
+                <li class="download test dropdown-container" ng-show="!vm.lookupmode">
+                    <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
+                        <i class="fa fa-download"></i>
+                    </h2>
+                    <ul class="dropdown">
+                        <li ng-repeat="button in vm.download_button.items"><a href="{{button.href}}"><i class="{{button.icon}}"></i>{{button.label}}</a></li>
+                    </ul>
+                    <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
                 </li>
                 <li class="account-lookup" ng-if="!vm.lookupmode">
                     <button class="button white-button" ui-sref="home.lookup">Account Lookup</button>

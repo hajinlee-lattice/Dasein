@@ -665,10 +665,21 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return 0;
     }
 
-    angular.element('.dropdown-container > h2').click(function(e){
-        angular.element(this).toggleClass('active');
-        angular.element('.dropdown-container ul.dropdown').toggleClass('open');
+    var download_buttons = angular.element('.dropdown-container > h2');
+    download_buttons.click(function(e){
+        var button = angular.element(this),
+            toggle_on = !button.hasClass('active');
+
+        download_buttons.removeClass('active');
+        download_buttons.siblings('ul.dropdown').removeClass('open');
+
+        if(toggle_on) {
+            button.addClass('active');
+            button.siblings('ul.dropdown').addClass('open');
+        }
+
         e.stopPropagation();
+
     });
 
     angular.element(document).click(function(event) {

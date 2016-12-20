@@ -1256,8 +1256,8 @@ angular
                 }
             }
         })
-        .state('home.enrichment-new', {
-            url: '/enrichment-new',
+        .state('home.data-cloud', {
+            url: '/data-cloud',
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud'

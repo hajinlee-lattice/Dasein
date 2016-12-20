@@ -32,11 +32,34 @@
             }
             &.query {
                 margin-right: 16px;
+                .ng-search {
+                    white-space: nowrap;
+                }
             }
-            &.download button.select-more span::before {
-                -webkit-transition: color 0s linear 0s;
-                -moz-transition: color 0s linear 0s;
-                transition: color 0s linear 0s;
+            &.download {
+                li {
+                    padding: 5px;
+                }
+                a {
+                    color: #fafafa;
+                    &:hover {
+                        color: #fafafa;
+                    }
+                    i {
+                        margin-right: 5px;
+                    }
+                }
+                button {
+                    &.select-more {
+                        span {
+                            &::before {
+                                -webkit-transition: color 0s linear 0s;
+                                -moz-transition: color 0s linear 0s;
+                                transition: color 0s linear 0s;
+                            }
+                        }
+                    }
+                }
             }
             &.account-lookup button {
                 height: 3em;
@@ -164,6 +187,9 @@
             }
         }
         &.has-category {
+            * {
+                transition: none;
+            }
             .category {
                 width: 50px;
                 h2 {
@@ -508,6 +534,7 @@
             color: #fafafa;
         }
         .dropdown {
+            @include box-shadow(0,0,0);
             position: absolute;
             bottom: 3px;
             left: 1px;
@@ -516,6 +543,7 @@
             color: #fafafa;
             white-space: nowrap;
             padding: 5px;
+            border-radius: 0 4px 4px 4px;
             display: none;
             &.open {
                 display: inline-block;
@@ -725,7 +753,7 @@
         top: 130px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 200;
+        z-index: 1000;
         background: white;
         border-radius: 4px;
         border: 1px solid rgb(253,188,84);
