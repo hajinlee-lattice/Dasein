@@ -14,12 +14,15 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
         scoreTarget = [(0.5, 1) if random.random() > aucTarget else (0.5, 0) for _ in range(0, numPointsToGenerate)]
         revenue = [100 + (100 * i) for i in range(0, numPointsToGenerate)]
         predictedRevenue = [200 + (100 * i) for i in range(0, numPointsToGenerate)]
+        random.seed(2)
+        periodId = [random.randint(1,5) for i in range(0, numPointsToGenerate)]
         self.loadMediator(generator, scoreTarget)
         mediator = generator.getMediator()
         mediator.schema["reserved"]["predictedrevenue"] = "PredictedRevenue"
         mediator.data['PredictedRevenue'] = predictedRevenue
         mediator.revenueColumn = "Revenue"
         mediator.data['Revenue'] = revenue
+        mediator.data['Period_ID'] = periodId
 
         generator.execute()
 
@@ -30,8 +33,8 @@ class RevenueModelQualityGeneratorTest(ScoreTargetBase):
 
         # The AUC should be around the AUCTarget and we should have 100 buckets
         modelQuality = generator.getJsonProperty()
-        calculatedAUC = modelQuality["eventScores"]["auc"]
+        calculatedAUC = modelQuality["eventScores"]["allPeriods"]["auc"]
         self.assertTrue(calculatedAUC > aucTarget - 0.2 and
                          calculatedAUC < aucTarget + 0.2
                         , "AUC doesn't seem correct in ModelQuality")
-        self.assertEquals(len(modelQuality["expectedValueScores"]["percTotalRev"]), 100)
+        self.assertEquals(len(modelQuality["expectedValueScores"]["allPeriods"]["percTotalRev"]), 100)
