@@ -4,11 +4,14 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
+import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.metadata.Category;
 
 public interface AccountMasterStatisticsService {
 
     AccountMasterCube query(AccountMasterFactQuery query);
+
+    TopNAttributeTree getTopAttrTree();
 
     Map<Category, Long> getCategories();
 

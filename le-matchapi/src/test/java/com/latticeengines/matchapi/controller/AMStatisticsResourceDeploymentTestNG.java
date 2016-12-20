@@ -1,8 +1,11 @@
 package com.latticeengines.matchapi.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,15 +15,30 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
+import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    @Test(groups={ "deployment" }, enabled = false)
+    private static final Log log = LogFactory.getLog(AMStatisticsResourceDeploymentTestNG.class);
+
+    @Test(groups = { "deployment" }, enabled = false)
     public void testGetTopAttrTree() {
-        TopNAttributeTree tree = amStatsProxy.getTopAttrTree();
-        Assert.assertNotNull(tree);
-        // TODO: other assertions
+        TopNAttributeTree topNAttributeTree = amStatsProxy.getTopAttrTree();
+        Assert.assertNotNull(topNAttributeTree);
+        Assert.assertNotNull(topNAttributeTree.get(Category.WEBSITE_PROFILE));
+        Assert.assertTrue(topNAttributeTree.get(Category.WEBSITE_PROFILE).getTopAttributes().size() > 0);
+        Map<String, List<TopAttribute>> topAttributes = topNAttributeTree.get(Category.WEBSITE_PROFILE)
+                .getTopAttributes();
+        for (String subCategory : topAttributes.keySet()) {
+            log.info(String.format("SubCategory: %s", subCategory));
+            List<TopAttribute> attributes = topAttributes.get(subCategory);
+            for (TopAttribute attribute : attributes) {
+                log.info(String.format("Attribute: %s, Count: %d", attribute.getAttribute(),
+                        attribute.getNonNullCount()));
+            }
+        }
     }
 
     @Test(groups = { "deployment" }, enabled = false)
@@ -30,6 +48,9 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         Assert.assertNotNull(cube);
         Assert.assertNotNull(cube.getStatistics());
         Assert.assertTrue(cube.getStatistics().size() > 0);
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
     }
 
     private AccountMasterFactQuery createQuery() {
