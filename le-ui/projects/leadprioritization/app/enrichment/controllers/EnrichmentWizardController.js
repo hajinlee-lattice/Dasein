@@ -206,7 +206,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
             _store = result; // just a copy of the correct data strucuture and properties for later
 
-                console.log('xhrfinish', cached, vm.count, vm.enrichments.length, vm.concurrentIndex, vm.concurrent);
+            //console.log('xhrfinish', cached, vm.count, vm.enrichments.length, vm.concurrentIndex, vm.concurrent);
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes

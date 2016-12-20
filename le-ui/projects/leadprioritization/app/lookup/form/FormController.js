@@ -28,7 +28,7 @@ angular
 .service('LookupStore', function() {
     this.timestamp = 0;
     this.params = { 
-        shouldSkipLoadingEnrichmentMetadata: false,
+        shouldSkipLoadingEnrichmentMetadata: true,
         enforceFuzzyMatch: true 
     };
     this.request = {
@@ -49,7 +49,7 @@ angular
         }
     };
     this.response = {
-        
+        /* 
         "warnings": [{
             "warning": "extra_fields",
             "warning_description": "Input record contains extra columns: County,Email1,Id,Zip"
@@ -68,7 +68,7 @@ angular
         "matchErrorMessages": null,
         "enrichmentMetadataList": [],
         "latticeID": null
-        
+        */ 
     };
 
     this.add = function(type, request) {

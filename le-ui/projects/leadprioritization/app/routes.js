@@ -1142,26 +1142,30 @@ angular
             },
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore) {
-                    //var deferred = $q.defer();
-                    var data = LookupStore.get('response');
+                    var deferred = $q.defer();
+                    //var data = LookupStore.get('response');
 
-                    //LookupService.submit().then(function(data) {
-                        console.log('response', data);
+                    LookupService.submit().then(function(data) {
+                        //console.log('response', data);
                         var current = new Date().getTime();
                         var old = LookupStore.get('timestamp');
 
                         LookupStore.add('elapsedTime', current - old);
 
-                        //deferred.resolve(data);
-                    //});
+                        deferred.resolve(data);
+                    });
 
-                    return data;//deferred.promise;
+                    return deferred.promise;
                 }
             },
             views: {
                 "summary@": {
                     controller: function(LookupResponse) {
-                        this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                        if (LookupResponse.enrichmentAttributeValues) {
+                            this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                        } else {
+                            this.count = 0;
+                        }
                     },
                     controllerAs: 'vm',
                     templateUrl: 'app/lookup/tabs/TabsView.html'
