@@ -229,7 +229,7 @@ angular
             method: 'GET',
             url: '/pls/jobs/' + jobId,
             headers: { 
-                'ErrorDisplayMethod': 'banner',
+                'ErrorDisplayMethod': 'none',
                 'If-Modified-Since': 0
             }
         }).then(
