@@ -3,4 +3,5 @@
 2,Industry,52,AccountMaster
 3,EmployeeRange,1056,AccountMaster
 4,RevenueRange,1068,AccountMaster
-5,Category,1079,AccountMasterColumn
+5,LocationNum,1079,AccountMaster
+6,Category,1080,AccountMasterColumn

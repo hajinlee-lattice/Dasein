@@ -1,14 +1,14 @@
 package com.latticeengines.datacloud.core.service;
 
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
-import com.latticeengines.domain.exposed.metadata.Category;
-
 import java.util.Map;
+
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
+import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
+import com.latticeengines.domain.exposed.metadata.Category;
 
 public interface AccountMasterStatisticsService {
 
-    AccountMasterFact query(AccountMasterFactQuery query);
+    AccountMasterCube query(AccountMasterFactQuery query);
 
     Map<Category, Long> getCategories();
 

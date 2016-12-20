@@ -23,10 +23,10 @@ public class AccountMasterFactDaoImpl extends BaseDaoWithAssignedSessionFactoryI
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s " //
                         + "where location = :location " //
-                        + "and industry = :industry" //
-                        + "and numEmpRange = :numEmpRange" //
-                        + "and revRange = :revRange" //
-                        + "and numLocRange = :numLocRange" //
+                        + "and industry = :industry " //
+                        + "and numEmpRange = :numEmpRange " //
+                        + "and revRange = :revRange " //
+                        + "and numLocRange = :numLocRange " //
                         + "and category = :category", //
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
