@@ -619,31 +619,32 @@ public class ModelRetrieverImpl implements ModelRetriever {
             CustomerSpace customerSpace) {
         if (modelSummaries != null) {
             for (ModelSummary modelSummary : modelSummaries) {
-                ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
+                ModelDetail modelDetail = null;
+                try {
+                    ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
 
-                ModelSummaryStatus status = modelSummary.getStatus();
+                    ModelSummaryStatus status = modelSummary.getStatus();
 
-                Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
-                Long lastModifiedTimestamp = modelSummary.getLastUpdateTime();
+                    Model model = new Model(modelSummary.getId(), modelSummary.getDisplayName(), modelType);
+                    Long lastModifiedTimestamp = modelSummary.getLastUpdateTime();
 
-                Fields fields = null;
-                if (ModelSummaryStatus.DELETED.equals(status)) {
-                    // if the model is deleted then there is no point in making
-                    // costly operation of loading filed details we return
-                    // deleted entries only to inform caller that model has been
-                    // deleted. Deleted models are not used for any other
-                    // purpose
-                    fields = new Fields(model.getModelId(), new ArrayList<Field>());
-                } else {
-                    try {
+                    Fields fields = null;
+                    if (ModelSummaryStatus.DELETED.equals(status)) {
+                        // if the model is deleted then there is no point in making
+                        // costly operation of loading filed details we return
+                        // deleted entries only to inform caller that model has been
+                        // deleted. Deleted models are not used for any other
+                        // purpose
+                        fields = new Fields(model.getModelId(), new ArrayList<Field>());
+                    } else {
                         fields = getModelFields(customerSpace, model.getModelId(), modelSummary.getPredictors());
-                    } catch (Exception e) {
-                        //skip the bad model
-                        continue;
                     }
+                    modelDetail = new ModelDetail(model, status, fields,
+                            BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
+                } catch (Exception e) {
+                    //skip the bad model
+                    continue;
                 }
-                ModelDetail modelDetail = new ModelDetail(model, status, fields,
-                        BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
                 models.add(modelDetail);
             }
         }
