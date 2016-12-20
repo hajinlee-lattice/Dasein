@@ -3,8 +3,10 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import scala.concurrent.Future;
 
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
@@ -31,6 +31,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;
+
+import scala.concurrent.Future;
 
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
@@ -90,8 +92,8 @@ public class FuzzyMatchHelper implements DbHelper {
                             dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache());
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
-                            context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph, context
-                                    .getInput().getLogLevel(), context.isUseDnBCache());
+                            context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
+                            context.getInput().getLogLevel(), context.isUseDnBCache());
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {
@@ -102,7 +104,8 @@ public class FuzzyMatchHelper implements DbHelper {
 
     private String setDecisionGraph(MatchContext context) {
         String decisionGraph = context.getInput().getDecisionGraph();
-        if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null && context.getInput().getTenant() != null) {
+        if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null
+                && context.getInput().getTenant() != null) {
             CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
             if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
                 decisionGraph = fuzzyMatchGraph;
@@ -186,8 +189,8 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean latticeAccountIdOnly = context.isSeekingIdOnly();
         if (!latticeAccountIdOnly) {
             for (InternalOutputRecord record : context.getInternalResults()) {
-                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(), context.getInput()
-                        .getDataCloudVersion());
+                updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
+                        context.getInput().getDataCloudVersion());
             }
         }
         return context;
@@ -238,13 +241,15 @@ public class FuzzyMatchHelper implements DbHelper {
     @Trace
     private Map<String, Object> parseLatticeAccount(LatticeAccount account, ColumnSelection columnSelection,
             String dataCloudVersion) {
-        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService.getDecodeParameters(
-                columnSelection, dataCloudVersion);
+        Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
+                .getDecodeParameters(columnSelection, dataCloudVersion);
         Map<String, Object> queryResult = new HashMap<>();
         Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
-        
-        Map<String, Object> decodedAttributes = decodeAttributes(parameters, amAttributes);
+
+        Set<String> attrMask = new HashSet<>();
+        attrMask.addAll(columnSelection.getColumnIds());
+        Map<String, Object> decodedAttributes = decodeAttributes(parameters, amAttributes, attrMask);
         for (Column column : columnSelection.getColumns()) {
             String columnId = column.getExternalColumnId();
             String columnName = column.getColumnName();
@@ -261,14 +266,17 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private Map<String, Object> decodeAttributes(Map<String, Pair<BitCodeBook, List<String>>> parameters,
-            Map<String, Object> amAttributes) {
+            Map<String, Object> amAttributes, Set<String> attrMask) {
         Map<String, Object> decodedAttributes = new HashMap<>();
         for (Map.Entry<String, Pair<BitCodeBook, List<String>>> entry : parameters.entrySet()) {
             BitCodeBook codeBook = entry.getValue().getLeft();
             List<String> decodeFields = entry.getValue().getRight();
             String encodeField = entry.getKey();
             String encodedStr = (String) amAttributes.get(encodeField);
-            decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
+            decodeFields.retainAll(attrMask);
+            if (!decodeFields.isEmpty()) {
+                decodedAttributes.putAll(codeBook.decode(encodedStr, decodeFields));
+            }
         }
         return decodedAttributes;
     }
