@@ -222,14 +222,14 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
     public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
-        List<VdbMetadataField> metadataFields = modelMetadataService.getMetadata(modelId);
+        List<VdbMetadataField> internalMetadataFields = new ArrayList<>();
 
-        for (VdbMetadataField metadataField : metadataFields) {
-            if (!metadataField.getTags().contains("Internal")) {
-                metadataFields.remove(metadataField);
+        for (VdbMetadataField metadataField : modelMetadataService.getMetadata(modelId)) {
+            if (metadataField.getTags().contains("Internal")) {
+                internalMetadataFields.add(metadataField);
             }
         }
-        return ResponseDocument.successResponse(metadataFields);
+        return ResponseDocument.successResponse(internalMetadataFields);
     }
 
     @RequestMapping(value = "/reviewmodel/column", method = RequestMethod.POST)
