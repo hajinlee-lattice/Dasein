@@ -95,7 +95,7 @@ public class ContractLifecycleManager {
                     toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
                 }
             } catch (Exception ex) {
-                log.warn("Failed to get Contract Info.", ex);
+                log.warn("Failed to get Contract Info.");
             }
         }
 
