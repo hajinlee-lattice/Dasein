@@ -28,11 +28,12 @@ angular
 .service('LookupStore', function() {
     this.timestamp = 0;
     this.params = { 
-        enforceFuzzyMatch: false 
+        shouldSkipLoadingEnrichmentMetadata: false,
+        enforceFuzzyMatch: true 
     };
     this.request = {
         modelId: '',
-        performEnrichment: false,
+        performEnrichment: true,
         record: {
             Domain: 'www.lattice-engines.com',
             DUNS: '',
@@ -48,6 +49,7 @@ angular
         }
     };
     this.response = {
+        
         "warnings": [{
             "warning": "extra_fields",
             "warning_description": "Input record contains extra columns: County,Email1,Id,Zip"
@@ -66,6 +68,7 @@ angular
         "matchErrorMessages": null,
         "enrichmentMetadataList": [],
         "latticeID": null
+        
     };
 
     this.add = function(type, request) {

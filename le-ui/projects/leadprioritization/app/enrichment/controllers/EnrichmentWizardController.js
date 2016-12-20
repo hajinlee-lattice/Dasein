@@ -35,7 +35,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
-        count: EnrichmentCount.data || 0,
+        lookupmode: EnrichmentAccountLookup !== null,
+        lookupFiltered: EnrichmentAccountLookup,
+        count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
@@ -59,9 +61,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enable_category_dropdown: false,
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
-        view: 'list',
-        lookupmode: EnrichmentAccountLookup !== null,
-        lookupFiltered: EnrichmentAccountLookup
+        view: 'list'
     });
     vm.orders = {
         attribute: 'DisplayName',
@@ -145,15 +145,18 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         var deferred = $q.defer(),
             opts = opts || {};
 
-        opts.max = (vm.enrichments.length ? enrichment_chunk_size : 100);
+        opts.max = (EnrichmentCount.data ? enrichment_chunk_size : 100);
 
         var concurrent = 6, // most browsers allow a max of 6 concurrent connections per domain
-            max = Math.ceil(vm.count / concurrent),
+            max = Math.ceil(EnrichmentCount.data / concurrent),
             offset = opts.offset || 0,
             iterations = Math.ceil(vm.count / max),
             _store;
 
-        setTimeout(function() {
+        vm.concurrent = concurrent;
+        vm.concurrentIndex = 0;
+
+        $timeout(function() {
             if (EnrichmentStore.enrichments) {
                 vm.xhrResult(EnrichmentStore.enrichments, true);
             } else {
@@ -161,23 +164,36 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                     EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
                 }
             }
-        }, 250);
+        }, 500);
     }
 
-    vm.xhrResult = function(result, ignore) {
+    vm.xhrResult = function(result, cached) {
         var _store, key, item;
 
-        if (ignore) {
+        if (cached) {
             vm.enrichmentsObj = {};
             EnrichmentStore.init();
         }
 
-        if (result != null && result.status === 200) {
-            vm.enrichments_loaded = true;
-            vm.enrichments = vm.enrichments.concat(result.data);
+        vm.concurrentIndex++;
 
-            for (key in result.data) {
-                item = result.data[key];
+        if (result != null && result.status === 200) {
+            if (vm.lookupFiltered) {
+                for (var i=0, data=[]; i<result.data.length; i++) {
+                    if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
+                        data.push(result.data[i]);
+                    }
+                }
+            } else {
+                var data = result.data;
+            }
+
+            vm.enrichments_loaded = true;
+            vm.enrichmentsStored = vm.enrichments.concat(result.data);
+            vm.enrichments = vm.enrichments.concat(data);
+
+            for (key in data) {
+                item = data[key];
 
                 if (!vm.enrichmentsObj[item.Category]) {
                     vm.enrichmentsObj[item.Category] = [];
@@ -190,11 +206,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
             _store = result; // just a copy of the correct data strucuture and properties for later
 
-            if (vm.enrichments.length >= vm.count) {
-                _store.data = vm.enrichments; // so object looks like what a typical set/get in the store wants with status, config, etc
+                console.log('xhrfinish', cached, vm.count, vm.enrichments.length, vm.concurrentIndex, vm.concurrent);
+            if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
+                _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                 vm.enrichments_completed = true;
                 vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
+
             }
         }
 
@@ -210,7 +228,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
         EnrichmentStore.getTopAttributes(opts).then(function(result) {
             vm.topAttributes[category] = result.data;
-            console.log(result.data);
         });
     }
 
@@ -551,6 +568,10 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         });
         filtered = $filter('filter')(filtered, vm.searchFields);
         */
+
+        if (!filtered) {
+            return 0;
+        }
 
         for (var i=0, result=[]; i < filtered.length; i++) {
             var item = filtered[i];

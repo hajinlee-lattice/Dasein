@@ -1,12 +1,11 @@
-<div class="enrichment-wizard-container">
-    <section id="main-content" class="container">
+<div class="enrichment-wizard-container container">
         <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
             <div class="icon"></div>
             <div class="message" ng-bind-html="vm.status_alert.message">
             </div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-        <div class="enrichments-loading-bar" ng-if="vm.percentage(vm.count, vm.enrichments.length) !== 100"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
+        <div class="enrichments-loading-bar" ng-if="!vm.lookupmode && vm.percentage(vm.count, vm.enrichments.length) !== 100"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -103,7 +102,7 @@
                     class="subcategory"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
-                    <div class="box-inner background {{vm.categoryClass(vm.category)}} border-top round-box"
+                    <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
                          ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
                             <div class="category-icon">
@@ -163,7 +162,7 @@
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupmode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
-                    <div class="box-inner background {{vm.categoryClass(enrichment.Category)}} border-top round-box ngAnimate"
+                    <div class="box-inner {{vm.categoryClass(enrichment.Category)}} background color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
                             <ul class="tags">
@@ -177,10 +176,13 @@
                                 <strong>{{enrichment.DisplayName}}</strong>
                             </h2>
                         </div>
-                        <p class="description" title="{{enrichment.Description}}">{{enrichment.Description}}</p>
-                        <h5 class="color" ng-if="vm.lookupFiltered[enrichment.FieldName]">
-                            {{ vm.lookupFiltered[enrichment.FieldName] }}
-                        </h5>
+                        <p class="description" title="{{enrichment.Description}}">
+                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName]">{{vm.lookupFiltered[enrichment.FieldName]}}</strong>
+                            <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
+                        </p>
+                        <span class="lesser-description" ng-if="vm.lookupmode">
+                            {{ enrichment.Description }}
+                        </span>
                         <div class="controls" ng-if="!vm.lookupmode">
                             <div class="toggle">
                                 <button class="button" 
@@ -209,5 +211,4 @@
             </div>
         </div>
 
-    </section>
 </div>

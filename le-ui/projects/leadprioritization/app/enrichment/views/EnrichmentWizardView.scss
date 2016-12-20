@@ -1,4 +1,5 @@
 .enrichment-wizard-container {
+    margin-top: 1.5em;
     $box-width: calc(100%/4);
     @mixin box-shadow($r,$g,$b) {
         box-shadow: 0px 0px 11px 2px rgba($r,$g,$b,0.33);
@@ -172,7 +173,7 @@
         }
         .category {
             @include flex-item(1 0 auto);
-            padding: 12px 12px 0 0;
+            padding: 0px 12px 0 0;
             .box-inner {
                 padding: 10px;
                 text-align: center;
@@ -267,8 +268,9 @@
                 h2 {
                     text-align: center;
                     font-size: 16px;
-                    margin-top: 20%;
-                    margin-bottom: 5px;
+                    margin-top: 0.5em;
+                    margin-bottom: 1em;
+                    font-weight: bold;
                     .category-label {
                         height: 35px;
                         overflow: hidden;
@@ -294,9 +296,10 @@
                 }
                 .count {
                     position: absolute;
-                    top: 5px;
-                    right: 5px;
+                    top: 0.5em;
+                    right: 1em;
                     font-weight: bold;
+                    font-size: 16px;
                 }
             }
         } 
@@ -321,15 +324,15 @@
             .box-inner {
                 position: relative;
                 text-align: center;
-                padding: 10px;
-                padding-bottom: 30px;
+                padding: 1em;
+                padding-bottom: 3.5em;
                 background-color: white;
                 //height: 200px;
                 .header {
                     h2 {
-                        font-size: 18px;
-                        margin: 5px 0;
-                        margin-top: 15px;
+                        font-size: 16px;
+                        margin: 0.25em 0 1em;
+                        font-weight: bold;
                         .category-icon {
                             height: 36px;
                             width: 36px;
@@ -356,19 +359,38 @@
                     }
                 }
                 .description {
-                    font-size: 12px;
-                    margin: 20px 0;
+                    margin: 1em 0;
                     border: 1px solid #d0d1d0;
                     border-left: 0;
                     border-right: 0;
                     overflow: hidden;
                     max-height: 9.5em;
+                    span {
+                        font-size: 12px;
+                        color: black;
+                        line-height: 1.4em;
+                        display: inline-block;
+                        padding: 0.5em 0;
+                        text-align: left;
+                    }
+                    strong {
+                        font-size: 16px;
+                        font-weight: bold;
+                        padding: .5em 0;
+                        display: inline-block;
+                    }
+                }
+                span.lesser-description {
+                    line-height: 1.3em;
+                    display: inline-block;
+                    color: black;
+                    text-align: left;
                 }
                 .controls {
                     position: absolute;
                     left: 0;
                     right: 0;
-                    bottom: 10px;
+                    bottom: 1.5em;
                     .toggle {
                         @include flex-item(1 0 auto);
                         @include flex-container;
@@ -388,7 +410,7 @@
                             color: #1a1a1a;
                             border-radius: 1px;
                             box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
-                            background-color: #d0d1d0;
+                            background-color: #e5e5e5;
                             border: solid 1px #bbb;
                             span {
                                  padding-right: 20px;
@@ -453,6 +475,7 @@
             & > li {
                 @include flex-container;
                 padding: 5px;
+                background-color: #fff;
                 &:nth-child(odd) {
                     background-color: #f2f1f1;
                 }
