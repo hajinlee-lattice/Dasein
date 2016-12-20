@@ -5,7 +5,7 @@
                 <h4>Modeling Log</h4>
                 <div class="pull-left number-of-items" ng-if="models.length > 0">
                     Total: <span class="badge blue-badge">{{ models.length }}</span>&nbsp;
-                    Active: <span class="badge gray-badge">{{ (models | filter: { 'Status': '!Inactive' }).length }}</span>
+                    Active: <span class="badge gray-badge">{{ (models | filter: { Status: 'Active' }: true).length }}</span>
                 </div>
                 <!--button class="pull-right button orange-button" id="model-mgmt-import-model-btn" data-ng-click="importClicked()">
                     {{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}
