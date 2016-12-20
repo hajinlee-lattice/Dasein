@@ -42,6 +42,7 @@ angular
             'createModel':                          'create_global_target_market',
             'reviewModel':                          'create_global_target_market',
             'downloadAndProcessModelSummaries':     'create_global_target_market',
+            'persistDataRules':                     'create_global_target_market',
             'setConfigurationForScoring':           'score_training_set',
             // 'matchDataCloud':                       'score_training_set',
             // 'processMatchResult':                   'score_training_set',
@@ -393,16 +394,10 @@ angular
     }
 
     this.cancelJob = function(jobId) {
-        $http({
+        return $http({
             method: 'POST',
             url: '/pls/jobs/' + jobId +'/cancel'
-        }).then(
-            function onSuccess(response) {
-                
-            }, function onError(response) {
-                
-            }
-        );
+        });
     }
 
     function getStepFailed(job) {

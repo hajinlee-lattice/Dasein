@@ -18,19 +18,18 @@ angular.module('lp.create.import.job', [
 
     REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppIdAndPerformCalc, TIME_BETWEEN_JOB_REFRESH);
 
-    $scope.jobStepsRunningStates = {
-        load_data: false, 
-        generate_insights: false, 
-        create_global_target_market: false,
-        score_training_set: false
-    };
+    var lastKnownStepBeforeCancel = null;
+    var jobSteps = ['load_data', 'generate_insights', 'create_global_target_market', 'score_training_set'];
 
-    $scope.jobStepsCompletedStates = {
-        load_data: false, 
-        generate_insights: false, 
-        create_global_target_market: false,
-        score_training_set: false
-    };
+    $scope.jobStepsRunningStates = jobSteps.reduce(function(state, step) {
+        state[step] = false;
+        return state;
+    }, {});
+
+    $scope.jobStepsCompletedStates = jobSteps.reduce(function(state, step) {
+        state[step] = false;
+        return state;
+    }, {});
 
     $scope.isPMMLJob = $state.includes('home.models.pmml.job');
     $scope.isPMMLCompleted = false;
@@ -96,7 +95,7 @@ angular.module('lp.create.import.job', [
 
         $scope.stepsCompletedTimes = job.completedTimes;
 
-        var stepFailed = job.stepFailed;
+        var stepFailed = lastKnownStepBeforeCancel || job.stepFailed;
         if (stepFailed) {
             $scope.jobStepsRunningStates[stepFailed] = false;
             $scope.jobStepsCompletedStates[stepFailed] = false;
@@ -152,4 +151,16 @@ angular.module('lp.create.import.job', [
             $state.go('home.jobs.status');
         });
     }
+
+    $scope.$on('updateAsCancelledJob', function() {
+
+        for (var i = 0; i < jobSteps.length; i++) {
+            var step = jobSteps[i];
+            if ($scope.jobStepsRunningStates[step] && !$scope.jobStepsCompletedStates[step]) {
+                lastKnownStepBeforeCancel = step;
+                break;
+            }
+        }
+
+    });
 });

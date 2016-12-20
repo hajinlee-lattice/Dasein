@@ -35,8 +35,10 @@ angular.module('lp.jobs.modals.cancelmodal', [
             $event.preventDefault();
         }
         $("#modalContainer").modal('hide');
-        JobsService.cancelJob($scope.jobId);
-        $rootScope.$broadcast("updateAsCancelledJob", $scope.jobId);
+        JobsService.cancelJob($scope.jobId).then(function (result) {
+
+            $rootScope.$broadcast("updateAsCancelledJob", $scope.jobId);
+        });
     };
 
     $scope.cancelClick = function () {
