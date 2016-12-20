@@ -24,6 +24,8 @@ angular
             $scope.jobRunning = false;
             $scope.jobCompleted = false;
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
+            $scope.job.isDeleted = job.isDeleted;
+            $scope.job.modelName = job.modelName;
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
             $scope.isPMML = (['pmmlModelWorkflow'].indexOf(job.jobType) > -1);
@@ -239,7 +241,6 @@ angular
                 $scope.job.source = jobStatus.source;
                 $scope.job.applicationId = jobStatus.applicationId;
                 $scope.job.applicationLogUrl = jobStatus.applicationLogUrl;
-                $scope.job.isDeleted = jobStatus.isDeleted;
                 for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                     $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;

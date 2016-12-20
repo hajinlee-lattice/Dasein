@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,9 +90,48 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         if (jobs == null) {
-            jobs = Collections.emptyList();
+            return Collections.emptyList();
         }
+
+        updateAllJobsWithModelModelSummaries(jobs);
         return jobs;
+    }
+
+    private void updateAllJobsWithModelModelSummaries(List<Job> jobs) {
+        Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
+        for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
+            modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
+        }
+
+        for (Job job : jobs) {
+            String modelId = null;
+            if (job.getInputs() != null
+                    && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+                modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            } else if (job.getOutputs() != null
+                    && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+                modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
+            }
+            if (modelId == null) {
+                continue;
+            }
+
+            ModelSummary modelSummary = modelIdToModelSummaries.get(modelId);
+            if (modelSummary != null) {
+                if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
+                    job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
+                }
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
+                        modelSummary.getDisplayName());
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
+                        modelSummary.getModelType());
+            } else {
+                log.warn(String.format(
+                        "ModelSummary: %s for job: %s cannot be found in the database. Please check",
+                        modelId, job.getId()));
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
+            }
+        }
     }
 
     private void updateJobWithModelSummary(Job job) {

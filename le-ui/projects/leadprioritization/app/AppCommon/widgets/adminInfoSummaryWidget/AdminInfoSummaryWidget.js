@@ -38,7 +38,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     }
 
     $scope.modelCreationJobFinished = false;
-    if ($scope.workflowJobId != null) {
+    if ($scope.workflowJobId != null && $scope.workflowJobId > 0) {
         JobsStore.getJob($scope.workflowJobId).then(function(job) {
             if (job != null && job.jobStatus == "Completed") {
                 $scope.modelCreationJobFinished = true;
