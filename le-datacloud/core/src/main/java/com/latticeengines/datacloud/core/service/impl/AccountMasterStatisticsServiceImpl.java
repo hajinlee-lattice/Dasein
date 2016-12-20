@@ -60,10 +60,14 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         Long categoryId = dimensionalQueryService.findAttrId(query.getCategoryQry());
         AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId, industryId,
                 numEmpRangeId, revRangeId, numLocRangeId, categoryId);
-        Map<String, AttributeStatistics> statistics = getAMStatisticsFromAMFact(accountMasterFact);
-        AccountMasterCube cube = new AccountMasterCube();
-        cube.setStatistics(statistics);
-        return cube;
+        if (accountMasterFact != null) {
+            Map<String, AttributeStatistics> statistics = getAMStatisticsFromAMFact(accountMasterFact);
+            AccountMasterCube cube = new AccountMasterCube();
+            cube.setStatistics(statistics);
+            return cube;
+        } else {
+            return null;
+        }
     }
 
     @Override
