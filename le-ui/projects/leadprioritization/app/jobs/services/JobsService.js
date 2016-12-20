@@ -40,6 +40,7 @@ angular
             'writeMetadataFiles':                   'create_global_target_market',
             'profile':                              'create_global_target_market',
             'createModel':                          'create_global_target_market',
+            'reviewModel':                          'create_global_target_market',
             'downloadAndProcessModelSummaries':     'create_global_target_market',
             'setConfigurationForScoring':           'score_training_set',
             // 'matchDataCloud':                       'score_training_set',
