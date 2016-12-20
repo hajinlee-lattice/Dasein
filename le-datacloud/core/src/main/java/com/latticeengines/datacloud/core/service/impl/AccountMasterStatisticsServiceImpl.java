@@ -13,9 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.Base64Utils;
+import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.datacloud.core.entitymgr.AccountMasterFactEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.AccountMasterStatisticsService;
@@ -61,10 +59,12 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId, industryId,
                 numEmpRangeId, revRangeId, numLocRangeId, categoryId);
         if (accountMasterFact != null) {
-            Map<String, AttributeStatistics> statistics = getAMStatisticsFromAMFact(accountMasterFact);
-            AccountMasterCube cube = new AccountMasterCube();
-            cube.setStatistics(statistics);
-            return cube;
+            try {
+                return AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(), AccountMasterCube.class);
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
+            }
         } else {
             return null;
         }
@@ -87,7 +87,15 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                 AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId,
                         industryId, numEmpRangeId, revRangeId, numLocRangeId, subCategories.get(subCategory));
                 if (accountMasterFact != null) {
-                    Map<String, AttributeStatistics> statistics = getAMStatisticsFromAMFact(accountMasterFact);
+                    AccountMasterCube cube;
+                    try {
+                        cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
+                                AccountMasterCube.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException(
+                                String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
+                    }
+                    Map<String, AttributeStatistics> statistics = cube.getStatistics();
                     List<Entry<String, AttributeStatistics>> sortedStatistics = new ArrayList<Entry<String, AttributeStatistics>>(
                             statistics.entrySet());
                     Collections.sort(sortedStatistics, new Comparator<Entry<String, AttributeStatistics>>() {
@@ -154,21 +162,6 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         qualifiers.put(DataCloudConstants.ATTR_CATEGORY, category.name());
         query.setQualifiers(qualifiers);
         return dimensionalQueryService.findAttrId(query);
-    }
-
-    private Map<String, AttributeStatistics> getAMStatisticsFromAMFact(AccountMasterFact accountMasterFact) {
-        byte[] decodeCubeArr = Base64Utils.decodeBase64(accountMasterFact.getEncodedCube());
-        String decodeCube = new String(decodeCubeArr);
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Map<String, AttributeStatistics>> statistics = new HashMap<>();
-        try {
-            statistics = mapper.readValue(decodeCube,
-                    new TypeReference<Map<String, Map<String, AttributeStatistics>>>() {
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Fail to parse json object of %s", decodeCube));
-        }
-        return statistics.get(ACCOUNTMASTER_STATISTICS_KEY);
     }
 
     private AccountMasterFactQuery createQueryForTopAttrTree() {
