@@ -177,7 +177,10 @@ public class ModelSummaryParser {
             configuration.setBoolean(ProvenancePropertyName.IsV2ProfilingEnabled,
                     JsonUtils.getOrDefault(eventTableProvenance.get("Is_V2_Profiling_Enabled"),
                             Boolean.class, false));
-            
+            configuration.setBoolean(ProvenancePropertyName.ConflictWithOptionalRules,
+                    JsonUtils.getOrDefault(eventTableProvenance.get("Conflict_With_Optional_Rules"),
+                            Boolean.class, false));
+
             summary.setModelSummaryConfiguration(configuration);
         }
 

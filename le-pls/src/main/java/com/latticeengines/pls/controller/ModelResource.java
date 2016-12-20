@@ -197,16 +197,39 @@ public class ModelResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the data rules for model")
-    public ResponseDocument<List<DataRule>> getModelDataRules(@PathVariable String modelId) throws IOException {
+    public ResponseDocument<List<DataRule>> getMockedDataRules(@PathVariable String modelId) throws IOException {
         return ResponseDocument.successResponse(generateMockedDataRules());
+    }
+
+    @RequestMapping(value = "/modelreview/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the data rules for model")
+    public ResponseDocument<List<DataRule>> getDataRules(@PathVariable String modelId) throws IOException {
+        return ResponseDocument.successResponse(modelMetadataService.getEventTableFromModelId(modelId).getDataRules());
     }
 
     @RequestMapping(value = "/modelreview/attributes/mocked/{modelId}", method = RequestMethod.GET,
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get customer provided attributes for model")
-    public ResponseDocument<List<VdbMetadataField>> getCustomModelAttributes(@PathVariable String modelId) {
+    public ResponseDocument<List<VdbMetadataField>> getMockedModelAttributes(@PathVariable String modelId) {
         return ResponseDocument.successResponse(generateMockedAttributes());
+    }
+
+    @RequestMapping(value = "/modelreview/attributes/{modelId}", method = RequestMethod.GET,
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get customer provided attributes for model")
+    public ResponseDocument<List<VdbMetadataField>> getModelAttributes(@PathVariable String modelId) {
+        List<VdbMetadataField> metadataFields = modelMetadataService.getMetadata(modelId);
+
+        for (VdbMetadataField metadataField : metadataFields) {
+            if (!metadataField.getTags().contains("Internal")) {
+                metadataFields.remove(metadataField);
+            }
+        }
+        return ResponseDocument.successResponse(metadataFields);
     }
 
     @RequestMapping(value = "/reviewmodel/column", method = RequestMethod.POST)
@@ -313,7 +336,7 @@ public class ModelResource {
         DATA_RULE_1.setDisplayName("Low Coverage");
         DATA_RULE_1.setDescription(
                 "This attribute is missing value for more than 98% of records, which causes scores to be less accurate");
-        DATA_RULE_1.setFlaggedColumnNames(Arrays.asList(new String[] { "NumnberOfOffices" }));
+        DATA_RULE_1.setFlaggedColumnNames(Arrays.asList(new String[]{"NumnberOfOffices"}));
 
         DataRule DATA_RULE_2 = new DataRule("MissingPredictiveValues");
         DATA_RULE_2.setEnabled(true);
@@ -321,7 +344,7 @@ public class ModelResource {
         DATA_RULE_2.setDisplayName("Missing Values are predictive");
         DATA_RULE_2.setDescription(
                 "When this attribute is missing a value, it is more likely to convert. This often caues...");
-        DATA_RULE_2.setFlaggedColumnNames(Arrays.asList(new String[] { "NumberOfOffices" }));
+        DATA_RULE_2.setFlaggedColumnNames(Arrays.asList(new String[]{"NumberOfOffices"}));
 
         DataRule DATA_RULE_3 = new DataRule("ModelBias");
         DATA_RULE_3.setEnabled(true);
@@ -329,7 +352,7 @@ public class ModelResource {
         DATA_RULE_3.setDisplayName("Model Bias");
         DATA_RULE_3.setDescription(
                 "This attribute is introducing bias into the model. This mean it will more than look like it's improving the model during training");
-        DATA_RULE_3.setFlaggedColumnNames(Arrays.asList(new String[] { "CompanyType" }));
+        DATA_RULE_3.setFlaggedColumnNames(Arrays.asList(new String[]{"CompanyType"}));
 
         DataRule DATA_RULE_4 = new DataRule("TooManyValues");
         DATA_RULE_4.setEnabled(true);
@@ -337,7 +360,7 @@ public class ModelResource {
         DATA_RULE_4.setDisplayName("Too many values");
         DATA_RULE_4.setDescription(
                 "This text attribute cannot be included in models because it has too many values, which causes scores to be less accurate. For text attributes, ...");
-        DATA_RULE_4.setFlaggedColumnNames(Arrays.asList(new String[] { "NumberOfEmployees" }));
+        DATA_RULE_4.setFlaggedColumnNames(Arrays.asList(new String[]{"NumberOfEmployees"}));
 
         return Arrays.asList(new DataRule[] { DATA_RULE_1, DATA_RULE_2, DATA_RULE_3, DATA_RULE_4 });
     }

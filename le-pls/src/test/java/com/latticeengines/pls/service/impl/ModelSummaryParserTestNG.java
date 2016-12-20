@@ -62,6 +62,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated 
         assertTrue(provenance.getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled));
         assertNotNull(provenance.getString(ProvenancePropertyName.TrainingFilePath));
         assertNotNull(provenance.getString(ProvenancePropertyName.WorkflowJobId));
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ConflictWithOptionalRules));
     }
 
     private boolean topPredictorsAreSortedAndSet(List<Predictor> predictors) {

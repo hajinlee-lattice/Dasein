@@ -146,6 +146,15 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                     excludedColumns.add(attr.getName());
                 }
             }
+
+            if (!(attr.getApprovedUsage() == null //
+                    || attr.getApprovedUsage().size() == 0 //
+                    || attr.getApprovedUsage().get(0).equals("None"))
+                    && attr.getTags() != null
+                    && attr.getTags().contains(Tag.INTERNAL.getName())
+                    && attr.getIsCoveredByOptionalRule()) {
+                configuration.addProvenanceProperty(ProvenancePropertyName.ConflictWithOptionalRules, true);
+            }
         }
 
         String[] excludeList = new String[excludedColumns.size()];

@@ -11185,6 +11185,7 @@
         "Exclude_Public_Domains": "true",
         "Is_One_Lead_Per_Domain": "false",
         "Exclude_Propdata_Columns": "true",
-        "Is_V2_Profiling_Enabled": "true"
+        "Is_V2_Profiling_Enabled": "true",
+        "Conflict_With_Optional_Rules": "true"
     }
 }

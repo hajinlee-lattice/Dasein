@@ -149,6 +149,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         field.setDisplayDiscretization(attribute.getDisplayDiscretizationStrategy());
         field.setStatisticalType(attribute.getStatisticalType());
         field.setSourceToDisplay(getSourceToDisplay(field.getSource()));
+        field.setIsCoveredByMandatoryRule(attribute.getIsCoveredByMandatoryRule());
+        field.setIsCoveredByOptionalRule(attribute.getIsCoveredByOptionalRule());
 
         return field;
     }

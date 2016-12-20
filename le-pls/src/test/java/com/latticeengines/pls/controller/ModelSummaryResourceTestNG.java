@@ -436,6 +436,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertFalse(provenance.getBoolean(ProvenancePropertyName.IsOneLeadPerDomain));
         assertNotNull(provenance.getLong(ProvenancePropertyName.WorkflowJobId));
         assertTrue(provenance.getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled));
+        assertTrue(provenance.getBoolean(ProvenancePropertyName.ConflictWithOptionalRules));
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), originalNumModels + 1);

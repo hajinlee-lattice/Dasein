@@ -437,6 +437,38 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (List<String>) properties.get("ApprovedUsage");
     }
 
+    @Transient
+    @JsonIgnore
+    public void setIsCoveredByOptionalRule(boolean isCoveredByOptionalRule) {
+        properties.put("IsCoveredByOptionalRule", isCoveredByOptionalRule);
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public boolean getIsCoveredByOptionalRule() {
+        if (properties.containsKey("IsCoveredByOptionalRule")) {
+            return (Boolean) properties.get("IsCoveredByOptionalRule");
+        }
+        return false;
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setIsCoveredByMandatoryRule(boolean isCoveredByMandatoryRule) {
+        properties.put("IsCoveredByMandatoryRule", isCoveredByMandatoryRule);
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public boolean getIsCoveredByMandatoryRule() {
+        if (properties.containsKey("IsCoveredByMandatoryRule")) {
+            return (Boolean) properties.get("IsCoveredByMandatoryRule");
+        }
+        return false;
+    }
+
     /**
      * Used for VisiDB/legacy systems
      */
