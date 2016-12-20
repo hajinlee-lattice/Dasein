@@ -39,12 +39,7 @@ angular.module('mainApp.models.remodel', [
 
     for (var i = 0; i < DataRules.length; i++) {
         var dataRule = DataRules[i];
-        var dataRuleName = dataRule.name;
-
-        if (!vm.dataRulesMap[dataRuleName]) {
-            vm.dataRulesMap[dataRuleName] = [];
-        }
-        vm.dataRulesMap[dataRuleName].push(dataRule);
+        vm.dataRulesMap[dataRule.name] = dataRule;
     }
 
     vm.attributes = Attributes.map(function(attribute) {
@@ -65,12 +60,14 @@ angular.module('mainApp.models.remodel', [
             attributeObj.warning = 'optional';
         }
 
-        for (var i = 0; i < attribute.AssociatedRules.length; i++) {
-            var associatedRule = attribute.AssociatedRules[i];
+        if (attribute.AssociatedRules) {
+            for (var i = 0; i < attribute.AssociatedRules.length; i++) {
+                var associatedRule = attribute.AssociatedRules[i];
 
-            var dataRuleList = vm.dataRulesMap[associatedRule];
-            if (dataRuleList) {
-                attributeObj.recommendations = dataRuleList;
+                var dataRuleList = vm.dataRulesMap[associatedRule];
+                if (dataRuleList) {
+                    attributeObj.recommendations.push(dataRuleList);
+                }
             }
         }
 
