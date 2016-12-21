@@ -191,7 +191,14 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         ScoreResponse scoreResponse = null;
 
         if (shouldSkipScoring) {
-            scoreResponse = new DebugScoreResponse();
+            if (isDebug) {
+                DebugScoreResponse nonScoreResponse = new DebugScoreResponse();
+                nonScoreResponse.setMatchLogs(matchLogs);
+                nonScoreResponse.setMatchErrorMessages(matchErrorLogs);
+                scoreResponse = nonScoreResponse;
+            } else {
+                scoreResponse = new ScoreResponse();
+            }
         } else {
             if (isDebug) {
                 scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
@@ -204,6 +211,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         scoreResponse.setEnrichmentAttributeValues(enrichmentAttributes);
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+
         split("scoreRecord");
         scoreHistoryEntityMgr.publish(request, scoreResponse);
         split("publishScoreHistory");
