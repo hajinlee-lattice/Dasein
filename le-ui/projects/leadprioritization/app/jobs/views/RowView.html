@@ -132,7 +132,7 @@ jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStep
                     </li>
                     <li ng-class="{success : jobStepsCompletedStates.create_global_target_market, error : (stepFailed == 'create_global_target_market')}">
                         <div>
-                                
+
                             <span class="building-model">
                                 <p>Building Model</p>
                                 <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
@@ -160,10 +160,9 @@ jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && 
                                 <span 
                                     class="loading-small" 
 data-ng-if="
-
 jobStepsRunningStates.score_training_set || 
-jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market
-
+jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market &&
+job.status === 'Running'
 "></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.score_training_set"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'score_training_set'"></i>
