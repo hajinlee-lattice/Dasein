@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -52,6 +56,8 @@ public class EnrichmentResource {
     public static final String LEAD_ENRICH_PATH = "/lead";
 
     public static final String AM_STATS_PATH = "/stats";
+
+    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private SessionService sessionService;
@@ -253,14 +259,13 @@ public class EnrichmentResource {
             method = RequestMethod.POST, //
             headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Load account master cube based on dimension selection")
-    public AccountMasterCube loadAMStatisticsCubeByPost(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata", //
-                    required = false) //
+    @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
+    public void loadAMStatisticsCubeByPost(HttpServletRequest request, //
+            HttpServletResponse response, //
+            @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestBody(required = false) AccountMasterFactQuery query) {
-
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
@@ -268,7 +273,7 @@ public class EnrichmentResource {
                     null, null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
-        return cube;
+        writeToGzipStream(response, cube);
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
@@ -282,8 +287,6 @@ public class EnrichmentResource {
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestParam(value = "q", required = false) String query) {
-        System.out.println("q=[" + query + "]");
-
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
@@ -300,8 +303,7 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Get top N attributes per subcategory for a given category")
     public TopNAttributes getTopNAttributes(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata", //
-                    required = false) //
+            @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @ApiParam(value = "category", required = true) //
@@ -315,7 +317,7 @@ public class EnrichmentResource {
             try {
                 category = Category.valueOf(categoryName);
             } catch (Exception e1) {
-                throw new RuntimeException("Cannot recogonize category name " + categoryName, e1);
+                throw new RuntimeException("Cannot recognize category name " + categoryName, e1);
             }
         }
 
@@ -345,4 +347,18 @@ public class EnrichmentResource {
     }
 
     // ------------End for statistics---------------------//
+
+    private void writeToGzipStream(HttpServletResponse response, Object output) {
+        try {
+            OutputStream os = response.getOutputStream();
+            response.setHeader("Content-Encoding", "gzip");
+            response.setHeader("Content-Type", "application/json");
+            GzipCompressorOutputStream gzipOs = new GzipCompressorOutputStream(os);
+            OM.writeValue(gzipOs, output);
+            gzipOs.flush();
+            gzipOs.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
