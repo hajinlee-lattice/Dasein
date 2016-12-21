@@ -1,6 +1,6 @@
-$warn-red: #f44336;
+$warn-red: #f55a5d;
 $warn-yel: #fdbc54;
-$exclude-red: #f44336;
+$exclude-red: #d22027;
 $include-green: #6fbe4a;
 $disabled-gray: #f1f1f1;
 $disabled-dark-gray: #c2c2c2;
@@ -95,8 +95,8 @@ $pad-sides: 51px;
         font-size: 12px;
         font-weight: bold;
         color: #fff;
-        background-color: $exclude-red;
-        border: 1px solid $exclude-red;
+        background-color: $warn-red;
+        border: 1px solid $warn-red;
         border-radius: 1px;
         box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
         text-transform: uppercase;
@@ -112,7 +112,7 @@ $pad-sides: 51px;
                 bottom: 0;
                 left: auto;
                 right: 0;
-                color: $exclude-red;
+                color: $warn-red;
                 background-color: #fff;
                 padding: 3px 5px;
             }
