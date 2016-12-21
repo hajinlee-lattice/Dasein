@@ -147,6 +147,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return id;
     }
 
+    @JsonIgnore
     @MetricField(name = "ModelID", fieldType = MetricField.FieldType.STRING)
     public String getIdAsString() {
         return id;
