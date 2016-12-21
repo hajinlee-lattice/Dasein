@@ -151,6 +151,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         field.setSourceToDisplay(getSourceToDisplay(field.getSource()));
         field.setIsCoveredByMandatoryRule(attribute.getIsCoveredByMandatoryRule());
         field.setIsCoveredByOptionalRule(attribute.getIsCoveredByOptionalRule());
+        field.setAssociatedRules(attribute.getAssociatedDataRules());
 
         return field;
     }

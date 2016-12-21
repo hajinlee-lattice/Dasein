@@ -469,6 +469,26 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return false;
     }
 
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public void addAssociatedDataRuleName(String dataRuleName) {
+        if (!properties.containsKey("AssociatedDataRules")) {
+            properties.put("AssociatedDataRules", new ArrayList<String>());
+        }
+        ((List<String>) properties.get("AssociatedDataRules")).add(dataRuleName);
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getAssociatedDataRules() {
+        if (!properties.containsKey("AssociatedDataRules")) {
+            return new ArrayList<String>();
+        }
+        return (List<String>) properties.get("AssociatedDataRules");
+    }
+
     /**
      * Used for VisiDB/legacy systems
      */

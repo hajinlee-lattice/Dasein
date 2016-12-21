@@ -39,9 +39,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             List<DataRule> dataRules = new ArrayList<>(configuration.getDataRules());
             log.info("Remediating datarules: " + JsonUtils.serialize(dataRules));
             Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-            eventTable = remediateAttributesAgainstMandatoryRules(dataRules, eventTable,
-                    configuration.isDefaultDataRuleConfiguration());
-            eventTable = markAttributesAgainstOptionalRules(dataRules, eventTable,
+            editTableAgainstDataRules(dataRules, eventTable,
                     configuration.isDefaultDataRuleConfiguration());
             eventTable.setDataRules(dataRules);
             if (configuration.isDefaultDataRuleConfiguration()) {
@@ -54,87 +52,43 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
     }
 
     @SuppressWarnings("rawtypes")
-    public Table remediateAttributesAgainstMandatoryRules(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
-        Set<String> columnsToRemove = new HashSet<>();
-
+    private void editTableAgainstDataRules(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
         for (DataRule dataRule : dataRules) {
-            if (dataRule.isEnabled() && dataRule.hasMandatoryRemoval()) {
-                List<String> columnNames = new ArrayList<>();
+            if (dataRule.isEnabled()){
                 if (isDefault) {
-                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS, String.class, List.class);
+                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS,
+                            String.class, List.class);
                     Iterator<List> iter = eventToColumnResults.values().iterator();
                     if (iter.hasNext()) {
                         List<ColumnRuleResult> results = JsonUtils.convertList(iter.next(), ColumnRuleResult.class);
                         for (ColumnRuleResult result : results) {
                             if (result.getDataRuleName().equals(dataRule.getName())) {
-                                columnNames = result.getFlaggedColumnNames();
-                                dataRule.setFlaggedColumnNames(columnNames);
+                                dataRule.setFlaggedColumnNames(result.getFlaggedColumnNames());
                             }
                         }
                     }
-                } else {
-                    if (!CollectionUtils.isEmpty(dataRule.getFlaggedColumnNames())) {
-                        columnNames = dataRule.getFlaggedColumnNames();
-                    }
                 }
-                log.info(String.format("Enabled mandatory Datarule %s flagged %d columns for remediation: %s",
-                        dataRule.getName(), columnNames.size(), JsonUtils.serialize(columnNames)));
-                for (String columnName : columnNames) {
-                    columnsToRemove.add(columnName);
-                }
+                log.info(String.format("Enabled columns: %s for data rule: %s",
+                        JsonUtils.serialize(dataRule.getFlaggedColumnNames()), dataRule.getName()));
+                editTableAttributesAgainstDataRule(dataRule, eventTable);
             }
         }
-
-        log.info(String.format("Remediating total %d columns: %s", columnsToRemove.size(),
-                JsonUtils.serialize(columnsToRemove)));
-        for (Attribute attr : eventTable.getAttributes()) {
-            if (columnsToRemove.contains(attr.getName())) {
-                attr.setApprovedUsage(ApprovedUsage.NONE);
-                attr.setIsCoveredByMandatoryRule(true);
-            } else {
-                attr.setIsCoveredByMandatoryRule(false);
-            }
-        }
-
-        return eventTable;
     }
 
     @SuppressWarnings("rawtypes")
-    public Table markAttributesAgainstOptionalRules(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
-        Set<String> columnsCoveredByOptionalRules = new HashSet<>();
-
-        for (DataRule dataRule : dataRules) {
-            if (dataRule.isEnabled() && !dataRule.hasMandatoryRemoval()) {
-                if (isDefault) {
-                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS, String.class, List.class);
-                    Iterator<List> iter = eventToColumnResults.values().iterator();
-                    if (iter.hasNext()) {
-                        List<ColumnRuleResult> results = JsonUtils.convertList(iter.next(), ColumnRuleResult.class);
-                        for (ColumnRuleResult result : results) {
-                            if (result.getDataRuleName().equals(dataRule.getName())) {
-                                columnsCoveredByOptionalRules.addAll(result.getFlaggedColumnNames());
-                            }
-                        }
-                    }
+    private void editTableAttributesAgainstDataRule(DataRule dataRule, Table eventTable) {
+        if (!CollectionUtils.isEmpty(dataRule.getFlaggedColumnNames())) {
+            for (String flaggedColumn : dataRule.getFlaggedColumnNames()) {
+                Attribute attribute = eventTable.getAttribute(flaggedColumn);
+                attribute.addAssociatedDataRuleName(dataRule.getName());
+                if (dataRule.hasMandatoryRemoval()) {
+                    attribute.setApprovedUsage(ApprovedUsage.NONE);
+                    attribute.setIsCoveredByMandatoryRule(true);
                 } else {
-                    if (!CollectionUtils.isEmpty(dataRule.getFlaggedColumnNames())) {
-                        columnsCoveredByOptionalRules.addAll(dataRule.getFlaggedColumnNames());
-                    }
+                    attribute.setIsCoveredByOptionalRule(true);
                 }
             }
         }
-
-        log.info(String.format("Columns with name: %s are covered by optional data rules. Marking their properties",
-                JsonUtils.serialize(columnsCoveredByOptionalRules)));
-        for (Attribute attribute : eventTable.getAttributes()) {
-            if (columnsCoveredByOptionalRules.contains(attribute.getName())) {
-                attribute.setIsCoveredByOptionalRule(true);
-            } else {
-                attribute.setIsCoveredByOptionalRule(false);
-            }
-        }
-
-        return eventTable;
     }
 
 }
