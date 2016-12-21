@@ -7,7 +7,16 @@
 
 import argparse, datetime, json, shutil, sys, os
 
-from . import *
+from algorithm import Algorithm
+from dataflow import Dataflow
+from pipeline import Pipeline
+from propdata import PropData
+from sampling import Sampling
+from dataset import Dataset
+from analyticpipeline import AnalyticPipeline
+from modelrun import ModelRun
+from envconfig import EnvConfig
+from entityresource import EntityResource
 
 ENTITIES = { \
     'algorithm' : Algorithm, \
@@ -23,7 +32,7 @@ ENTITIES = { \
 def main():
     parser = argparse.ArgumentParser(description='Command-line interface to the Lattice model quality framework')
     parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel','qa','prod'], default='prod', help='select environment (prod, qa, devel)')
+    parser.add_argument('-e', '--env', metavar='ENV', choices=['devel', 'qa', 'prod'], default='prod', help='select environment (prod, qa, devel)')
 
     subparsers = parser.add_subparsers(dest='subcommand', title='available commands', metavar='command <arguments> ...')
 
@@ -97,12 +106,12 @@ def main():
 
 
 def get_examples():
-    shutil.copyfile(os.path.join(os.path.dirname(__file__),'examples.py'), 'examples.py')
+    shutil.copyfile(os.path.join(os.path.dirname(__file__), 'examples.py'), 'examples.py')
 
 def workspace_initialize(name, tenant, username, password):
 
     env = EnvConfig().getName()
-    pathname = os.path.join('modelquality-'+env,name)
+    pathname = os.path.join('modelquality-' + env, name)
 
     if not os.path.exists(pathname):
         os.makedirs(pathname)
@@ -112,7 +121,7 @@ def workspace_initialize(name, tenant, username, password):
         'username' : username, \
         'password' : password \
     }
-    
+
     with open(os.path.join(pathname, 'modelconfig.json'), mode='wb') as outfile:
         outfile.write(json.dumps(modelconfig, indent=4))
 
@@ -223,7 +232,7 @@ def model(name, description, addTimestamp):
         workspace = workspace_config.read()
 
     modelconfig = {}
-    with open(os.path.join('modelquality-'+env, workspace, 'modelconfig.json')) as modelconfigfile:
+    with open(os.path.join('modelquality-' + env, workspace, 'modelconfig.json')) as modelconfigfile:
         modelconfig = json.loads(modelconfigfile.read())
 
     tenant = modelconfig['tenant']
@@ -249,7 +258,7 @@ def _write_entity(entitytype, entity):
         print 'No workspace set; run \"init-workspace\"'
         return
 
-    entitypath = os.path.join('modelquality-'+env, workspace, entitytype+'.json')
+    entitypath = os.path.join('modelquality-' + env, workspace, entitytype + '.json')
     try:
         with open(entitypath, mode='wb') as outfile:
             outfile.write(json.dumps(config, indent=4))
@@ -268,7 +277,7 @@ def _read_entity(entitytype, entitycls):
         print 'No workspace set; run \"init-workspace\"'
         return None
 
-    entitypath = os.path.join('modelquality-'+env, workspace, entitytype+'.json')
+    entitypath = os.path.join('modelquality-' + env, workspace, entitytype + '.json')
     config = '{}'
     try:
         with open(entitypath, mode='rb') as infile:
