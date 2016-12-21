@@ -55,11 +55,11 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private boolean mandatoryRemoval;
 
     @JsonProperty
-    @Transient
+    @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
 
     @JsonProperty
-    @Transient
+    @Column(name = "DESCRIPTION", nullable = false)
     private String description;
 
     @JsonProperty
