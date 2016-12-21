@@ -20,7 +20,7 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 6395662991286452847L;
     private int pos;
-    private Map<String, List<Long>> dimensionValues;
+    private Map<Long, List<Long>> dimensionValues;
 
     public DimensionExpandFunction(Params parameterObject) {
         super(parameterObject.numArgs, parameterObject.fieldDeclaration);
@@ -44,7 +44,7 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
 
             ancestorPath.add(parentId);
 
-            dimensionValues.put(attr.getPid() + "", ancestorPath);
+            dimensionValues.put(attr.getPid(), ancestorPath);
         }
     }
 
@@ -55,13 +55,13 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
         Tuple originalTuple = group.getTuple();
         functionCall.getOutputCollector().add(originalTuple);
 
-        String id = originalTuple.getString(pos);
+        Long id = originalTuple.getLong(pos);
 
         for (Long ancestorId : dimensionValues.get(id)) {
-            if (!id.equals(ancestorId + "")) {
+            if (!id.equals(ancestorId)) {
                 Tuple rollupTuple = group.getTupleCopy();
 
-                rollupTuple.setString(pos, ancestorId + "");
+                rollupTuple.setLong(pos, ancestorId);
                 functionCall.getOutputCollector().add(rollupTuple);
             }
         }

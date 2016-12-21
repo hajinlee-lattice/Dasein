@@ -83,26 +83,22 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
                 continue;
             }
 
-            if (value != null && value instanceof String) {
-                try {
-                    Integer valueInt = Integer.parseInt((String) value);
-                    AttributeStatistics stats = new AttributeStatistics();
-                    AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
-                    rowBasedStatistics.setNonNullCount(valueInt);
-                    Buckets buckets = new Buckets();
-                    buckets.setType(BucketType.Numerical);
-                    List<Bucket> bucketList = new ArrayList<>();
-                    Bucket bucket = new Bucket();
-                    bucket.setBucketLabel("All");
-                    bucket.setCount(valueInt);
-                    bucketList.add(bucket);
-                    buckets.setBucketList(bucketList);
-                    rowBasedStatistics.setBuckets(buckets);
-                    stats.setRowBasedStatistics(rowBasedStatistics);
-                    statsList.put(field, stats);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
+            if (value != null && value instanceof Long) {
+                Long valueInt = ((Long) value);
+                AttributeStatistics stats = new AttributeStatistics();
+                AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
+                rowBasedStatistics.setNonNullCount(valueInt.intValue());
+                Buckets buckets = new Buckets();
+                buckets.setType(BucketType.Numerical);
+                List<Bucket> bucketList = new ArrayList<>();
+                Bucket bucket = new Bucket();
+                bucket.setBucketLabel("All");
+                bucket.setCount(valueInt.intValue());
+                bucketList.add(bucket);
+                buckets.setBucketList(bucketList);
+                rowBasedStatistics.setBuckets(buckets);
+                stats.setRowBasedStatistics(rowBasedStatistics);
+                statsList.put(field, stats);
             }
         }
 

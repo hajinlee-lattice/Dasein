@@ -66,7 +66,7 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
         long totalCount = countAttrsForArgument(attrCount, arguments);
 
         for (int i = 0; i < attrCount.length - dimensionIdFieldNames.length; i++) {
-            result.setString(i, attrCount[i] + "");
+            result.setLong(i, attrCount[i]);
         }
 
         result.setLong(totalLoc, totalCount);

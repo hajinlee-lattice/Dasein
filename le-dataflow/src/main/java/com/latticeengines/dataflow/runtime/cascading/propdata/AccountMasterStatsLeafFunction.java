@@ -110,7 +110,7 @@ public class AccountMasterStatsLeafFunction extends BaseOperation implements Fun
             Map<String, Long> dimensionValues = dimensionFieldValuesMap.get(dimension);
             Long dimensionId = dimensionValues.values().iterator().next();
             int pos = fields.getPos(dimension);
-            result.set(pos, dimensionId + "");
+            result.set(pos, dimensionId);
         }
     }
 

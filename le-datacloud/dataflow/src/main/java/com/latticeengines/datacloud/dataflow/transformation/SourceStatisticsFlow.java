@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -200,7 +201,7 @@ public class SourceStatisticsFlow
         List<FieldMetadata> finalReportColumns = new ArrayList<>();
 
         for (String dimensionKey : finalDimensionsList) {
-            finalReportColumns.add(new FieldMetadata(dimensionKey, String.class));
+            finalReportColumns.add(new FieldMetadata(dimensionKey, Long.class));
         }
 
         finalReportColumns.add(new FieldMetadata(encodedCubeColumnName, String.class));
@@ -282,7 +283,9 @@ public class SourceStatisticsFlow
                 }
 
                 tempTrackingMap.put(dimensionId, 1);
-                FieldMetadata dimensionIdSchema = new FieldMetadata(field);
+                FieldMetadata dimensionIdSchema = new FieldMetadata(//
+                        Schema.Type.LONG, Long.class, field.getFieldName(), //
+                        field.getField(), field.getProperties(), null);
                 dimensionIdSchema.setFieldName(dimensionId);
                 leafSchemaNewColumns.add(dimensionIdSchema);
                 fieldIds.add(dimensionId);
