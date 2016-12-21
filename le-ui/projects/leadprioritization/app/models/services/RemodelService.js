@@ -59,7 +59,7 @@ angular
 
         $http({
             method: 'GET',
-            url: '/pls/models/modelreview/mocked/' + modelId,
+            url: '/pls/models/modelreview/' + modelId,
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
@@ -97,7 +97,7 @@ angular
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: '/pls/models/modelreview/attributes/mocked/' + modelId,
+            url: '/pls/models/modelreview/attributes/' + modelId,
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
