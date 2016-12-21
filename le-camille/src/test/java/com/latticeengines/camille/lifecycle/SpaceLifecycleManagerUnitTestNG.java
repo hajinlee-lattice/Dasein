@@ -13,12 +13,17 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 
 public class SpaceLifecycleManagerUnitTestNG {
@@ -47,6 +52,36 @@ public class SpaceLifecycleManagerUnitTestNG {
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)));
         SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
+    }
+
+    @Test(groups = "unit")
+    public void testUpdateFeatureFlags() throws Exception {
+
+        Document tenantFeatureFlagDoc = DocumentUtils.toRawDocument(CamilleTestEnvironment.getDefaultFeatureFlags());
+        Document featureFlagDefinitionDoc = DocumentUtils
+                .toRawDocument(CamilleTestEnvironment.getFeatureFlagDefinitions());
+        Document productsDoc = DocumentUtils.toRawDocument(CamilleTestEnvironment.getDefaultProducts());
+
+        String ret = SpaceLifecycleManager.updateFeatureFlags(tenantFeatureFlagDoc, featureFlagDefinitionDoc,
+                productsDoc, tenantId);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode updateFeatureFlags = mapper.readTree(ret);
+        Assert.assertTrue(updateFeatureFlags.get("flag1").asBoolean());
+        Assert.assertFalse(updateFeatureFlags.get("flag2").asBoolean());
+        Assert.assertFalse(updateFeatureFlags.get("flag3").asBoolean());
+    }
+
+    @Test(groups = "unit")
+    public void testOverlappingProductsExists() {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode array1 = mapper.createArrayNode();
+        ArrayNode array2 = mapper.createArrayNode();
+        array1.add("1");
+        array2.add("2");
+        array2.add("3");
+        Assert.assertFalse(SpaceLifecycleManager.overlappingProductsExists(array1, array2));
+        array1.add("2");
+        Assert.assertTrue(SpaceLifecycleManager.overlappingProductsExists(array1, array2));
     }
 
     @Test(groups = "unit")
@@ -80,7 +115,8 @@ public class SpaceLifecycleManagerUnitTestNG {
             SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
         }
 
-        List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll(contractId, tenantId);
+        List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll(contractId,
+                tenantId);
         List<String> allSpaces = new ArrayList<String>();
         for (AbstractMap.SimpleEntry<String, CustomerSpaceInfo> pair : all) {
             allSpaces.add(pair.getKey());

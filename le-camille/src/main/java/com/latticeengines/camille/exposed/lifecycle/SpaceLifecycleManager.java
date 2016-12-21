@@ -1,14 +1,25 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -94,10 +105,99 @@ public class SpaceLifecycleManager {
                 CustomerSpaceProperties.class);
 
         Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));
-        String flags = spaceFlagsDocument.getData();
-        
+        Document featureFlagDefinitionDocument = c
+                .get(PathBuilder.buildFeatureFlagDefinitionPath(CamilleEnvironment.getPodId()));
+        Document productsDocument = c.get(
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId).append(
+                        new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE)));
+
+        String flags = updateFeatureFlags(spaceFlagsDocument, featureFlagDefinitionDocument, productsDocument,
+                tenantId);
+
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, flags);
         return spaceInfo;
+    }
+
+    public static void test() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+        Document featureFlagDefinitionDocument = c
+                .get(PathBuilder.buildFeatureFlagDefinitionPath(CamilleEnvironment.getPodId()));
+
+        System.out.println(featureFlagDefinitionDocument.getData());
+    }
+
+    public static String updateFeatureFlags(Document tenantFeatureFlagDoc, Document featureFlagDefinitionDoc,
+            Document productsDoc, String tenantId) throws JsonProcessingException, IOException {
+
+        boolean orignalFeatureFlagIsEmpty = false;
+        String tenantFeatureFlags = tenantFeatureFlagDoc.getData();
+        if (StringUtils.isEmpty(tenantFeatureFlags)) {
+            orignalFeatureFlagIsEmpty = true;
+            log.info(String.format("Tenant %s original feature flags is empty", tenantId));
+        }
+        String featureFlagDefinitions = featureFlagDefinitionDoc.getData();
+        if (StringUtils.isEmpty(featureFlagDefinitions)) {
+            throw new RuntimeException("featureFlagDefinitions is empty.");
+        }
+        String products = productsDoc.getData();
+        if (StringUtils.isEmpty(products)) {
+            log.info(String.format("Tenant %s does not have products information", tenantId));
+            return "";
+        }
+
+        Set<String> productFeatureFlagSet = new HashSet<String>();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode featureFlagDefinitionsNode = mapper.readTree(featureFlagDefinitions);
+        ArrayNode productsForTenant = (ArrayNode) mapper.readTree(products);
+        Iterator<Entry<String, JsonNode>> featureFlagDefinitionIter = featureFlagDefinitionsNode.fields();
+        while (featureFlagDefinitionIter.hasNext()) {
+            Entry<String, JsonNode> featureFlagDefinition = featureFlagDefinitionIter.next();
+            JsonNode productsForFeatureFlag = featureFlagDefinition.getValue().get("AvailableProducts");
+            if (productsForFeatureFlag.isNull()) {
+                log.info(String.format("featureFlagDefinition %s does not have AvailableProducts",
+                        featureFlagDefinition.getValue().get("DisplayName").asText()));
+                continue;
+            }
+            if (overlappingProductsExists((ArrayNode) productsForFeatureFlag, productsForTenant)) {
+                productFeatureFlagSet.add(featureFlagDefinition.getValue().get("DisplayName").asText());
+            }
+        }
+
+        JsonNode featureFlags = null;
+        if (!orignalFeatureFlagIsEmpty) {
+            featureFlags = mapper.readTree(tenantFeatureFlags);
+        }
+        JsonNode updatedFeatureFlag = mapper.createObjectNode();
+        for (String selectedFeatureFlag : productFeatureFlagSet) {
+            boolean matchedValue = false;
+            if (featureFlags != null) {
+                Iterator<Entry<String, JsonNode>> featureFlagIter = featureFlags.fields();
+                while (featureFlagIter.hasNext()) {
+                    Entry<String, JsonNode> featureFlag = featureFlagIter.next();
+                    if (selectedFeatureFlag.equals(featureFlag.getKey())) {
+                        matchedValue = featureFlag.getValue().asBoolean();
+                        break;
+                    }
+                }
+            }
+            ((ObjectNode) updatedFeatureFlag).put(selectedFeatureFlag, matchedValue);
+        }
+
+        return updatedFeatureFlag.toString();
+    }
+
+    public static boolean overlappingProductsExists(ArrayNode productsForFeatureFlag, ArrayNode productsForTenant) {
+        if (productsForFeatureFlag == null || productsForTenant == null) {
+            return false;
+        }
+        for (JsonNode productForFeatureFlag : productsForFeatureFlag) {
+            for (JsonNode productForTenant : productsForTenant) {
+                if (productForFeatureFlag.asText().equals(productForTenant.asText())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId)
@@ -107,15 +207,15 @@ public class SpaceLifecycleManager {
         List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildCustomerSpacesPath(
-                CamilleEnvironment.getPodId(), contractId, tenantId));
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
+                .getChildren(PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
             String spaceId = "";
             try {
                 spaceId = childPair.getValue().getSuffix();
-                toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId,
-                        tenantId, spaceId)));
+                toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId,
+                        getInfo(contractId, tenantId, spaceId)));
             } catch (Exception ex) {
                 log.warn("Failed to add spaceId=" + spaceId, ex);
             }
@@ -128,23 +228,24 @@ public class SpaceLifecycleManager {
         List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> contracts = c.getChildren(PathBuilder
-                .buildContractsPath(CamilleEnvironment.getPodId()));
+        List<AbstractMap.SimpleEntry<Document, Path>> contracts = c
+                .getChildren(PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
         for (AbstractMap.SimpleEntry<Document, Path> contract : contracts) {
             String contractId = contract.getValue().getSuffix();
-            List<AbstractMap.SimpleEntry<Document, Path>> tenants = c.getChildren(PathBuilder.buildTenantsPath(
-                    CamilleEnvironment.getPodId(), contractId));
+            List<AbstractMap.SimpleEntry<Document, Path>> tenants = c
+                    .getChildren(PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId));
             for (AbstractMap.SimpleEntry<Document, Path> tenant : tenants) {
                 String tenantId = tenant.getValue().getSuffix();
-                List<AbstractMap.SimpleEntry<Document, Path>> spaces = c.getChildren(PathBuilder
-                        .buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
+                List<AbstractMap.SimpleEntry<Document, Path>> spaces = c.getChildren(
+                        PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
 
                 for (AbstractMap.SimpleEntry<Document, Path> space : spaces) {
                     String spaceId = "";
                     try {
                         spaceId = space.getValue().getSuffix();
-                        toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(
-                                contractId, tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
+                        toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(
+                                new CustomerSpace(contractId, tenantId, spaceId),
+                                getInfo(contractId, tenantId, spaceId)));
                     } catch (Exception ex) {
                         log.warn("Failed to add spaceId=" + spaceId, ex);
                     }

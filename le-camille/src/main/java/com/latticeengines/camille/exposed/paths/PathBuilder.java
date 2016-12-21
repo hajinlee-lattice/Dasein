@@ -48,17 +48,18 @@ public final class PathBuilder {
     }
 
     public static Path buildTenantPath(String podId, String contractId, String tenantId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId);
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
+                tenantId);
     }
 
     public static Path buildCustomerSpacesPath(String podId, String contractId, String tenantId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
-                tenantId, PathConstants.SPACES);
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId,
+                PathConstants.SPACES);
     }
 
     public static Path buildCustomerSpacePath(String podId, String contractId, String tenantId, String spaceId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
-                tenantId, PathConstants.SPACES, spaceId);
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId,
+                PathConstants.SPACES, spaceId);
     }
 
     public static Path buildDataTablePath(String podId, CustomerSpace space) {
@@ -91,9 +92,10 @@ public final class PathBuilder {
         return buildCustomerSpaceServicesPath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
     }
 
-    public static Path buildCustomerSpaceServicesPath(String podId, String contractId, String tenantId, String spaceId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
-                tenantId, PathConstants.SPACES, spaceId, PathConstants.SERVICES);
+    public static Path buildCustomerSpaceServicesPath(String podId, String contractId, String tenantId,
+            String spaceId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId,
+                PathConstants.SPACES, spaceId, PathConstants.SERVICES);
     }
 
     public static Path buildCustomerSpaceServicePath(String podId, CustomerSpace space, String serviceName) {
@@ -103,8 +105,8 @@ public final class PathBuilder {
 
     public static Path buildCustomerSpaceServicePath(String podId, String contractId, String tenantId, String spaceId,
             String serviceName) {
-        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
-                tenantId, PathConstants.SPACES, spaceId, PathConstants.SERVICES, serviceName);
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId,
+                PathConstants.SPACES, spaceId, PathConstants.SERVICES, serviceName);
     }
 
     public static Path buildDataInterfacePath(String podId, String interfaceName, Long version, String contractId,
@@ -124,5 +126,19 @@ public final class PathBuilder {
 
     public static Path buildModelingServicePath(String contractId, String tenantId, String spaceId) {
         return new Path(String.format("/user/s-analytics/customers/%s.%s.%s", contractId, tenantId, spaceId));
+    }
+
+    public static Path buildScoringServicePath(String contractId, String tenantId, String spaceId) {
+        return new Path(String.format("/user/s-analytics/customers/%s.%s.%s/scoring", contractId, tenantId, spaceId));
+    }
+
+    public static Path buildFeatureFlagDefinitionPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE);
+    }
+
+    public static Path buildFeatureFlagPath(String podId, CustomerSpace space) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, space.getContractId(),
+                PathConstants.TENANTS, space.getTenantId(), PathConstants.SPACES, space.getSpaceId(),
+                PathConstants.FEATURE_FLAGS_FILE);
     }
 }
