@@ -312,24 +312,27 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.saveDisabled = 0;
         vm.selectDisabled = 0;
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-        vm.generalSelectedTotal = selectedTotal.length;
-        //vm.generalSelectedTotal = $filter('filter')(vm.enrichments, {'IsSelected': true}).length;
-        if(vm.generalSelectedTotal > vm.generalSelectLimit) {
-            enrichment.IsSelected = false;
-            enrichment.IsDirty = false;
-            vm.statusMessage(vm.label.generalTotalSelectError);
-            return false;
-        }
+        
         if(enrichment.IsPremium) {
-            //vm.premiumSelectedTotal = $filter('filter')(vm.enrichments, {'IsPremium': true, 'IsSelected': true}).length;
             vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-            if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
+            if(vm.premiumSelectedTotal >= vm.premiumSelectLimit) {
+                vm.premiumSelectedTotal = vm.premiumSelectLimit;
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
                 vm.statusMessage(vm.label.premiumTotalSelectError);
                 return false;
             }
         }
+
+        vm.generalSelectedTotal = selectedTotal.length;
+        if(vm.generalSelectedTotal >= vm.generalSelectLimit) {
+            vm.generalSelectedTotal = vm.generalSelectLimit;
+            enrichment.IsSelected = false;
+            enrichment.IsDirty = false;
+            vm.statusMessage(vm.label.generalTotalSelectError);
+            return false;
+        }
+        
         if (enrichment.IsSelected){
             vm.userSelectedCount++;
             vm.statusMessage(vm.label.changed_alert);
@@ -344,9 +347,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                 vm.statusMessage(vm.label.disabled_alert, {type: 'disabling', wait: 0});
             }
         }
+
         if(vm.userSelectedCount < 1) {
             vm.selectDisabled = 1;
         }
+
         if(!vm.enabledManualSave) {
             vm.saveSelected();
         }

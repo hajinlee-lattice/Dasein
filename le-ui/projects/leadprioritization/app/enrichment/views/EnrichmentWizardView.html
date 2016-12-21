@@ -78,10 +78,10 @@
                             <div class="category-icon">
                                 <img ng-src="{{vm.categoryIcon(category)}}" />
                             </div>
-                            {{category}}
+                            <div class="category-label">{{category}}</div>
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{vm.categoryCount(category)}}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{vm.categoryCount(category)|number}}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                     </span>
@@ -114,10 +114,10 @@
                             <div class="category-icon">
                                 <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
                             </div>
-                            {{ subcategory }}
+                            <div class="category-label">{{subcategory}}</div>
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory) }}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                         <ul ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]" class="attributes">
