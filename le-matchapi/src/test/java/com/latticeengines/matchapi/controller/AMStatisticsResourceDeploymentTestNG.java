@@ -10,6 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
@@ -43,8 +44,31 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
 
     @Test(groups = { "deployment" }, enabled = false)
     public void testGetTopCube() {
-        AccountMasterCube cube = amStatsProxy.getCube(createQuery());
+        AccountMasterCube cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL));
         Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
+
+        cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, null));
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
+
+        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), null));
+        Assert.assertNotNull(cube);
+        Assert.assertNotNull(cube.getStatistics());
+        Assert.assertTrue(cube.getStatistics().size() > 0);
+        for (String attribute : cube.getStatistics().keySet()) {
+            Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
+
+        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), "File Management"));
         Assert.assertNotNull(cube);
         Assert.assertNotNull(cube.getStatistics());
         Assert.assertTrue(cube.getStatistics().size() > 0);
@@ -53,48 +77,53 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         }
     }
 
-    private AccountMasterFactQuery createQuery() {
+    private AccountMasterFactQuery createQuery(String category, String subCategory) {
         AccountMasterFactQuery query = new AccountMasterFactQuery();
         DimensionalQuery locationQry = new DimensionalQuery();
         locationQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        locationQry.setDimension(DataCloudConstants.DIMENSION_LOCATION);
+        locationQry.setDimension(AccountMasterFact.DIM_LOCATION);
         Map<String, String> qualifiers = new HashMap<String, String>();
         qualifiers.put(DataCloudConstants.ATTR_COUNTRY, CategoricalAttribute.ALL);
         locationQry.setQualifiers(qualifiers);
         query.setLocationQry(locationQry);
         DimensionalQuery industryQry = new DimensionalQuery();
         industryQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        industryQry.setDimension(DataCloudConstants.DIMENSION_INDUSTRY);
+        industryQry.setDimension(AccountMasterFact.DIM_INDUSTRY);
         qualifiers = new HashMap<String, String>();
         qualifiers.put(DataCloudConstants.ATTR_INDUSTRY, CategoricalAttribute.ALL);
         industryQry.setQualifiers(qualifiers);
         query.setIndustryQry(industryQry);
         DimensionalQuery numEmpRangeQry = new DimensionalQuery();
         numEmpRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        numEmpRangeQry.setDimension(DataCloudConstants.DIMENSION_NUM_EMP_RANGE);
+        numEmpRangeQry.setDimension(AccountMasterFact.DIM_NUM_EMP_RANGE);
         qualifiers = new HashMap<String, String>();
         qualifiers.put(DataCloudConstants.ATTR_NUM_EMP_RANGE, CategoricalAttribute.ALL);
         numEmpRangeQry.setQualifiers(qualifiers);
         query.setNumEmpRangeQry(numEmpRangeQry);
         DimensionalQuery revRangeQry = new DimensionalQuery();
         revRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        revRangeQry.setDimension(DataCloudConstants.DIMENSION_REV_RANGE);
+        revRangeQry.setDimension(AccountMasterFact.DIM_REV_RANGE);
         qualifiers = new HashMap<String, String>();
         qualifiers.put(DataCloudConstants.ATTR_REV_RANGE, CategoricalAttribute.ALL);
         revRangeQry.setQualifiers(qualifiers);
         query.setRevRangeQry(revRangeQry);
         DimensionalQuery numLocRangeQry = new DimensionalQuery();
         numLocRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        numLocRangeQry.setDimension(DataCloudConstants.DIMENSION_NUM_LOC_RANGE);
+        numLocRangeQry.setDimension(AccountMasterFact.DIM_NUM_LOC_RANGE);
         qualifiers = new HashMap<String, String>();
         qualifiers.put(DataCloudConstants.ATTR_NUM_LOC_RANGE, CategoricalAttribute.ALL);
         numLocRangeQry.setQualifiers(qualifiers);
         query.setNumLocRangeQry(numLocRangeQry);
         DimensionalQuery categoryQry = new DimensionalQuery();
         categoryQry.setSource(DataCloudConstants.ACCOUNT_MASTER_COLUMN);
-        categoryQry.setDimension(DataCloudConstants.DIMENSION_CATEGORY);
+        categoryQry.setDimension(AccountMasterFact.DIM_CATEGORY);
         qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_CATEGORY, CategoricalAttribute.ALL);
+        if (category != null) {
+            qualifiers.put(DataCloudConstants.ATTR_CATEGORY, category);
+        }
+        if (subCategory != null) {
+            qualifiers.put(DataCloudConstants.ATTR_SUB_CATEGORY, subCategory);
+        }
         categoryQry.setQualifiers(qualifiers);
         query.setCategoryQry(categoryQry);
         return query;
