@@ -40,6 +40,7 @@ angular.module('lp.models.list', [
             },
             create: {
                 label: 'Create Model',
+                //labelIcon: 'fa-plus',
                 sref: 'home.models.import',
                 class: 'orange-button select-label',
                 icon: 'fa fa-chevron-down',

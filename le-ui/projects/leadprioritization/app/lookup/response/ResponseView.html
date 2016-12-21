@@ -4,11 +4,11 @@
             <div class="columns twelve lookup-response-area">
                 <label><span>Score:</span>{{ vm.response.score }}</label>
                 <label><span>Score Timestamp:</span>{{ vm.response.timestamp }}</label>
-                <label><span>Warnings:</span>{{ vm.response.warnings }}</label>
+                <label><span>Warnings:</span><pre ng-bind-html="vm.warnings"></pre></label>
             </div>
             
             <div class="lookup-response-elapsed">
-                Time elapsed: {{ vm.elapsedTime }} MS
+                Time elapsed: {{ vm.elapsedTime | number }} MS
             </div>
         </div>
     </div>

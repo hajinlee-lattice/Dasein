@@ -153,6 +153,7 @@
                         <select name="modelId"
                                 class="form-control"
                                 ng-model="vm.request.modelId">
+                            <option value=""></option>
                             <option value="{{ model.Id }}"
                                     ng-repeat="model in vm.models"
                                     ng-if="model.Status == 'Active'">
@@ -169,7 +170,7 @@
                         <button 
                             type="button" 
                             class="button white-button block-button"
-                            ng-click="vm.cancel()">
+                            ui-sref="home.data-cloud">
                           {{::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CANCEL')}}</button>
                     </div>
                     <div class="pull-right">

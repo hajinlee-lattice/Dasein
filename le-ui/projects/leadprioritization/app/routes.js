@@ -1179,12 +1179,13 @@ angular
             url: '/response',
             views: {
                 "main@": {
-                    controller: function(LookupResponse, LookupStore) {
+                    controller: function(LookupResponse, LookupStore, $sce) {
                         var vm = this;
 
                         angular.extend(vm, {
                             elapsedTime: LookupStore.get('elapsedTime'),
-                            response: LookupResponse
+                            response: LookupResponse,
+                            warnings: LookupStore.syntaxHighlight(LookupResponse.warnings)
                         });
                     },
                     controllerAs: 'vm',
@@ -1201,7 +1202,8 @@ angular
 
                         angular.extend(vm, {
                             elapsedTime: LookupStore.get('elapsedTime'),
-                            response: LookupResponse
+                            response: LookupResponse,
+                            matchLogs: LookupStore.syntaxHighlight(LookupResponse.matchLogs)
                         });
                     },
                     controllerAs: 'vm',

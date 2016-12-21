@@ -2,11 +2,11 @@
     <div class="container">
         <div class="row">
             <div class="columns twelve lookup-response-area">
-                <label><span>Match Log:</span><div ng-repeat="log in vm.response.matchLogs">{{log}}</div></label>
+                <label><span>Match Log:</span><pre ng-bind-html="vm.matchLogs"></pre></label>
             </div>
             
             <div class="lookup-response-elapsed">
-                Time elapsed: {{ vm.elapsedTime }} MS
+                Time elapsed: {{ vm.elapsedTime | number }} MS
             </div>
         </div>
     </div>

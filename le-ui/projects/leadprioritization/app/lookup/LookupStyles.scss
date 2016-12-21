@@ -1,4 +1,13 @@
 .lookup-summary {
+    pre {
+        padding: 0 0 0 1em;
+        white-space: pre-wrap;
+    }
+    .string { color: #629acc; }
+    .number { color: #ff8c36; }
+    .boolean { color: #cc5200; }
+    .null { color: #8d66c6; }
+    .key { color: #f75959; }
     div.lookup-back {
         margin: 1.5em 0;
         font-weight: bold;
@@ -33,7 +42,7 @@
         
         label {
             display: block;
-            
+            word-wrap: break-word;
             span {
                 font-weight: bold;
                 margin-right: .333em;

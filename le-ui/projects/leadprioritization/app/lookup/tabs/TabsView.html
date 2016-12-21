@@ -1,10 +1,10 @@
 <div class="container lookup-summary">
     <div class="row">
         <div class="columns twelve">
-            <div class="lookup-back" ui-sref="home.lookup.form"><-- NEW LOOKUP</div>
+            <div class="lookup-back" ui-sref="home.lookup.form"><ico class="fa fa-arrow-left"></ico>&nbsp;NEW LOOKUP</div>
             <ul class="lookup-tabs noselect">
                 <li ui-sref="home.lookup.tabs.attr" ui-sref-active-eq="active">
-                    Attributes ( {{vm.count}} )
+                    Attributes ( {{ vm.count | number }} )
                 </li>
                 <li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
                     API Response
