@@ -71,9 +71,6 @@ public class AccountMasterFact implements HasPid {
     @Column(name = "EncodedCube", nullable = false)
     private String encodedCube;
 
-    @Transient
-    private CategoricalCube cube;
-
     @Override
     public Long getPid() {
         return pid;
@@ -138,13 +135,5 @@ public class AccountMasterFact implements HasPid {
 
     public void setEncodedCube(String encodedCube) {
         this.encodedCube = encodedCube;
-    }
-
-    public void setCube(CategoricalCube cube) {
-        this.cube = cube;
-    }
-
-    public CategoricalCube getCube() {
-        return cube;
     }
 }

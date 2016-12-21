@@ -16,14 +16,17 @@ public class MetricAnnotationScanUnitTestNG {
         Reflections reflections = new Reflections("com.latticeengines.domain.exposed");
 
         for (Class<?> clz: reflections.getSubTypesOf(Dimension.class)) {
+            System.out.println("Scanning tags for dimension class " + clz.getSimpleName());
             MetricUtils.scanTags(clz);
         }
 
         for (Class<?> clz: reflections.getSubTypesOf(Fact.class)) {
+            System.out.println("Scanning fields for fact class " + clz.getSimpleName());
             MetricUtils.scanFields(clz);
         }
 
         for (Class<?> clz: reflections.getSubTypesOf(Measurement.class)) {
+            System.out.println("Scanning tags and fields for measurement class " + clz.getSimpleName());
             MetricUtils.scan((Class<Measurement<?, ?>>) clz);
         }
     }

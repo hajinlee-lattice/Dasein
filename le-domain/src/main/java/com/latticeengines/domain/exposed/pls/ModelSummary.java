@@ -143,8 +143,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Id")
     @Column(name = "ID", unique = true, nullable = false)
     @Index(name = "MODEL_SUMMARY_ID_IDX")
-    @MetricField(name = "ModelID", fieldType = MetricField.FieldType.STRING)
     public String getId() {
+        return id;
+    }
+
+    @MetricField(name = "ModelID", fieldType = MetricField.FieldType.STRING)
+    public String getIdAsString() {
         return id;
     }
 
