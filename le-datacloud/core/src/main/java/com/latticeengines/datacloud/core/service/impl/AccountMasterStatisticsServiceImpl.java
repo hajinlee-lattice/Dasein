@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,6 +12,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AMStatsUtils;
@@ -40,6 +42,9 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     private static final Log log = LogFactory.getLog(AccountMasterStatisticsServiceImpl.class);
 
+    @Value("${datacloud.core.accountmasterstats.locationbased}")
+    private boolean isLocationBased;
+
     @Autowired
     private AccountMasterFactEntityMgr accountMasterFactEntityMgr;
 
@@ -59,81 +64,93 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         Long numEmpRangeId = dimensionalQueryService.findAttrId(query.getNumEmpRangeQry());
         Long revRangeId = dimensionalQueryService.findAttrId(query.getRevRangeQry());
         Long numLocRangeId = dimensionalQueryService.findAttrId(query.getNumLocRangeQry());
-        Long categoryId = dimensionalQueryService.findAttrId(createCategoryQuery());
+        Long categoryId = dimensionalQueryService.findAttrId(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER_COLUMN,
+                AccountMasterFact.DIM_CATEGORY, DataCloudConstants.ATTR_CATEGORY));
         AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId, industryId,
                 numEmpRangeId, revRangeId, numLocRangeId, categoryId);
-        if (accountMasterFact != null) {
-            try {
-                AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
-                        AccountMasterCube.class);
-                cube = filterByCategory(cube,
-                        query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
-                        query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
-                return cube;
-            } catch (IOException e) {
-                throw new RuntimeException(
-                        String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
-            }
-        } else {
+        if (accountMasterFact == null) {
             return null;
+        }
+        try {
+            AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
+                    AccountMasterCube.class);
+            cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
+                    query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
+            return cube;
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
         }
     }
 
     @Override
     public TopNAttributeTree getTopAttrTree() {
-        TopNAttributeTree topNAttributeTree = new TopNAttributeTree();
         AccountMasterFactQuery query = createQueryForTopAttrTree();
         Long locationId = dimensionalQueryService.findAttrId(query.getLocationQry());
         Long industryId = dimensionalQueryService.findAttrId(query.getIndustryQry());
         Long numEmpRangeId = dimensionalQueryService.findAttrId(query.getNumEmpRangeQry());
         Long revRangeId = dimensionalQueryService.findAttrId(query.getRevRangeQry());
         Long numLocRangeId = dimensionalQueryService.findAttrId(query.getNumLocRangeQry());
-        Map<Category, Long> categories = getCategories();
-        for (Category category : categories.keySet()) {
-            TopNAttributes topNAttributes = new TopNAttributes();
-            Map<String, Long> subCategories = getSubCategories(category);
-            for (String subCategory : subCategories.keySet()) {
-                AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId,
-                        industryId, numEmpRangeId, revRangeId, numLocRangeId, subCategories.get(subCategory));
-                if (accountMasterFact != null) {
-                    AccountMasterCube cube;
-                    try {
-                        cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
-                                AccountMasterCube.class);
-                    } catch (IOException e) {
-                        throw new RuntimeException(
-                                String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
-                    }
-                    Map<String, AttributeStatistics> statistics = cube.getStatistics();
-                    List<Entry<String, AttributeStatistics>> sortedStatistics = new ArrayList<Entry<String, AttributeStatistics>>(
-                            statistics.entrySet());
-                    Collections.sort(sortedStatistics, new Comparator<Entry<String, AttributeStatistics>>() {
-                        // Descending order
-                        public int compare(Entry<String, AttributeStatistics> s1,
-                                Entry<String, AttributeStatistics> s2) {
-                            if (s1.getValue().getRowBasedStatistics().getNonNullCount() > s2.getValue()
-                                    .getRowBasedStatistics()
-                                    .getNonNullCount()) {
-                                return -1;
-                            } else if (s1.getValue().getRowBasedStatistics().getNonNullCount() < s2.getValue()
-                                    .getRowBasedStatistics()
-                                    .getNonNullCount()) {
-                                return 1;
-                            } else {
-                                return 0;
-                            }
-                        }
-                    });
-                    for (Entry<String, AttributeStatistics> statistic : sortedStatistics) {
-                        TopAttribute topAttribute = new TopAttribute(statistic.getKey(),
-                                statistic.getValue().getRowBasedStatistics().getNonNullCount());
-                        topNAttributes.addTopAttribute(subCategory, topAttribute);
-                    }
+        Long categoryId = dimensionalQueryService.findAttrId(query.getCategoryQry());
+        AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId, industryId,
+                numEmpRangeId, revRangeId, numLocRangeId, categoryId);
+        if (accountMasterFact == null) {
+            return null;
+        }
+        AccountMasterCube cube;
+        try {
+            cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(), AccountMasterCube.class);
+            cube = filterAttributes(cube, null, null);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Fail to parse json object %s", accountMasterFact.getEncodedCube()));
+        }
+        return createTopAttrTree(cube);
+    }
+
+    private TopNAttributeTree createTopAttrTree(AccountMasterCube cube) {
+        Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
+        Map<String, AttributeStatistics> statistics = cube.getStatistics();
+        List<Entry<String, AttributeStatistics>> sortedStatistics = new ArrayList<Entry<String, AttributeStatistics>>(
+                statistics.entrySet());
+        Collections.sort(sortedStatistics, new Comparator<Entry<String, AttributeStatistics>>() {
+            // Descending order
+            public int compare(Entry<String, AttributeStatistics> s1, Entry<String, AttributeStatistics> s2) {
+                int valueS1, valueS2;
+                if (isLocationBased) {
+                    valueS1 = s1.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
+                    valueS2 = s2.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
+                } else {
+                    valueS1 = s1.getValue().getRowBasedStatistics().getNonNullCount();
+                    valueS2 = s2.getValue().getRowBasedStatistics().getNonNullCount();
+                }
+                if (valueS1 > valueS2) {
+                    return -1;
+                } else if (valueS1 < valueS2) {
+                    return 1;
+                } else {
+                    return 0;
                 }
             }
-            topNAttributeTree.put(category, topNAttributes);
+        });
+        TopNAttributeTree tree = new TopNAttributeTree();
+        for (Entry<String, AttributeStatistics> statistic : sortedStatistics) {
+            Category category = columnsMetadata.get(statistic.getKey()).getCategory();
+            String subCategory = columnsMetadata.get(statistic.getKey()).getSubcategory();
+            TopNAttributes topNAttributes = tree.get(category);
+            if (topNAttributes == null) {
+                topNAttributes = new TopNAttributes();
+            }
+            if (isLocationBased) {
+                topNAttributes.addTopAttribute(subCategory, new TopAttribute(statistic.getKey(),
+                        statistic.getValue().getUniqueLocationBasedStatistics().getNonNullCount()));
+            } else {
+                topNAttributes.addTopAttribute(subCategory, new TopAttribute(statistic.getKey(),
+                        statistic.getValue().getRowBasedStatistics().getNonNullCount()));
+            }
+            tree.put(category, topNAttributes);
         }
-        return topNAttributeTree;
+        return tree;
     }
 
     @Override
@@ -173,69 +190,58 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         return dimensionalQueryService.findAttrId(query);
     }
 
-    private AccountMasterCube filterByCategory(AccountMasterCube cube, String category, String subCategory) {
-        if (category == null || category.equals(CategoricalAttribute.ALL)) {
-            return cube;
-        }
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
-                currentDataCloudVersion);
-        for (ColumnMetadata columnMetadata : allColumns) {
-            if ((!columnMetadata.getCategory().name().equals(category))
+    // UI only shows attributes for enrichment
+    private AccountMasterCube filterAttributes(AccountMasterCube cube, String category, String subCategory) {
+        Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
+        Map<String, AttributeStatistics> statistics = cube.getStatistics();
+        Iterator<Entry<String, AttributeStatistics>> iter = statistics.entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<String, AttributeStatistics> entry = iter.next();
+            if ((!columnsMetadata.containsKey(entry.getKey()))
+                    || (category != null && !category.equals(CategoricalAttribute.ALL)
+                            && !columnsMetadata.get(entry.getKey()).getCategory().name().equals(category))
                     || (subCategory != null && !subCategory.equals(CategoricalAttribute.ALL)
-                            && !columnMetadata.getSubcategory().equals(subCategory))) {
-                cube.getStatistics().remove(columnMetadata.getColumnName());
+                            && !columnsMetadata.get(entry.getKey()).getSubcategory().equals(subCategory))) {
+                iter.remove();
             }
         }
         return cube;
     }
 
+    private Map<String, ColumnMetadata> getColumnMetadata() {
+        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+                currentDataCloudVersion);
+        Map<String, ColumnMetadata> columnsMetadata = new HashMap<String, ColumnMetadata>();
+        for (ColumnMetadata columnMetadata : allColumns) {
+            columnsMetadata.put(columnMetadata.getColumnName(), columnMetadata);
+        }
+        return columnsMetadata;
+    }
+
     private AccountMasterFactQuery createQueryForTopAttrTree() {
         AccountMasterFactQuery query = new AccountMasterFactQuery();
-        DimensionalQuery locationQry = new DimensionalQuery();
-        locationQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        locationQry.setDimension(AccountMasterFact.DIM_LOCATION);
-        Map<String, String> qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_COUNTRY, CategoricalAttribute.ALL);
-        locationQry.setQualifiers(qualifiers);
-        query.setLocationQry(locationQry);
-        DimensionalQuery industryQry = new DimensionalQuery();
-        industryQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        industryQry.setDimension(AccountMasterFact.DIM_INDUSTRY);
-        qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_INDUSTRY, CategoricalAttribute.ALL);
-        industryQry.setQualifiers(qualifiers);
-        query.setIndustryQry(industryQry);
-        DimensionalQuery numEmpRangeQry = new DimensionalQuery();
-        numEmpRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        numEmpRangeQry.setDimension(AccountMasterFact.DIM_NUM_EMP_RANGE);
-        qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_NUM_EMP_RANGE, CategoricalAttribute.ALL);
-        numEmpRangeQry.setQualifiers(qualifiers);
-        query.setNumEmpRangeQry(numEmpRangeQry);
-        DimensionalQuery revRangeQry = new DimensionalQuery();
-        revRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        revRangeQry.setDimension(AccountMasterFact.DIM_REV_RANGE);
-        qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_REV_RANGE, CategoricalAttribute.ALL);
-        revRangeQry.setQualifiers(qualifiers);
-        query.setRevRangeQry(revRangeQry);
-        DimensionalQuery numLocRangeQry = new DimensionalQuery();
-        numLocRangeQry.setSource(DataCloudConstants.ACCOUNT_MASTER);
-        numLocRangeQry.setDimension(AccountMasterFact.DIM_NUM_LOC_RANGE);
-        qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_NUM_LOC_RANGE, CategoricalAttribute.ALL);
-        numLocRangeQry.setQualifiers(qualifiers);
-        query.setNumLocRangeQry(numLocRangeQry);
+        query.setLocationQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_LOCATION,
+                DataCloudConstants.ATTR_COUNTRY));
+        query.setIndustryQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_INDUSTRY,
+                DataCloudConstants.ATTR_INDUSTRY));
+        query.setNumEmpRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER,
+                AccountMasterFact.DIM_NUM_EMP_RANGE, DataCloudConstants.ATTR_NUM_EMP_RANGE));
+        query.setRevRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_REV_RANGE,
+                DataCloudConstants.ATTR_REV_RANGE));
+        query.setNumLocRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER,
+                AccountMasterFact.DIM_NUM_LOC_RANGE, DataCloudConstants.ATTR_NUM_LOC_RANGE));
+        query.setCategoryQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER_COLUMN, AccountMasterFact.DIM_CATEGORY,
+                DataCloudConstants.ATTR_CATEGORY));
         return query;
     }
 
-    private DimensionalQuery createCategoryQuery() {
+    private DimensionalQuery createQueryForAll(String source, String dimension, String attribute) {
         DimensionalQuery query = new DimensionalQuery();
-        query.setSource(DataCloudConstants.ACCOUNT_MASTER_COLUMN);
-        query.setDimension(AccountMasterFact.DIM_CATEGORY);
+        query.setSource(source);
+        query.setDimension(dimension);
         Map<String, String> qualifiers = new HashMap<String, String>();
-        qualifiers.put(DataCloudConstants.ATTR_CATEGORY, CategoricalAttribute.ALL);
+        qualifiers.put(attribute, CategoricalAttribute.ALL);
         query.setQualifiers(qualifiers);
         return query;
     }

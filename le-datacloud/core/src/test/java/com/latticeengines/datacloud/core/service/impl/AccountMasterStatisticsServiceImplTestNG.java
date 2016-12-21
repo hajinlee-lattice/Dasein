@@ -37,7 +37,8 @@ public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunct
 
         for (Category category: Category.values()) {
             Map<String, Long> subCatIdMap = accountMasterStatisticsService.getSubCategories(category);
-            // This part might be broken if there is any change to category and subcategory in metadata
+            log.info(String.format("Category: %s, Size: %d", category, subCatIdMap.size()));
+            // This part might be broken if there is any change to category, subcategory and enrichment tag in metadata
             switch (category) {
             case DEFAULT:
                 Assert.assertEquals(subCatIdMap.size(), 1);

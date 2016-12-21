@@ -67,14 +67,6 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         for (String attribute : cube.getStatistics().keySet()) {
             Assert.assertNotNull(cube.getStatistics().get(attribute));
         }
-
-        cube = amStatsProxy.getCube(createQuery(Category.WEBSITE_PROFILE.name(), "File Management"));
-        Assert.assertNotNull(cube);
-        Assert.assertNotNull(cube.getStatistics());
-        Assert.assertTrue(cube.getStatistics().size() > 0);
-        for (String attribute : cube.getStatistics().keySet()) {
-            Assert.assertNotNull(cube.getStatistics().get(attribute));
-        }
     }
 
     private AccountMasterFactQuery createQuery(String category, String subCategory) {
