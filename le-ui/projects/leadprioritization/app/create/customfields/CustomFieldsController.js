@@ -48,7 +48,7 @@ angular
 
         switch (selectedOption.id) {
             case 0: // custom user mapping
-                mapping.mappedField = mapping.mappedField || mapping.userField;
+                mapping.mappedField = mapping.userField;
                 mapping.mappedToLatticeField = false;
                 break;
             case 1: // map to lattice cloud
@@ -59,7 +59,9 @@ angular
                 mapping.mappedToLatticeField = true;
                 break;
             case 2: // ignore this field
-                mapping.ignored = true; 
+                mapping.mappedField = mapping.userField;
+                mapping.mappedToLatticeField = false;
+                mapping.ignored = true;
                 break;
         }
 
@@ -119,8 +121,6 @@ angular
                 vm.ignoredFields.push(fieldMapping.userField);
 
                 delete fieldMapping.ignored;
-                fieldMapping.mappedField = "";
-                fieldMapping.mappedToLatticeField = false;
             }
         });
 

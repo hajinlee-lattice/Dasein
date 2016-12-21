@@ -56,6 +56,7 @@
 	                            </option>
                             </select>
 					        <input 	required
+									disabled
 									type="text"
 									class="form-control" 
 									name="mapping_custom_field_input_{{ ::fieldMapping.userField }}"
@@ -64,7 +65,7 @@
 									ng-model="fieldMapping.mappedField"
 									ng-value="fieldMapping.mappedField"
 									ng-keyup="vm.validateForm()"
-									ng-if="selectedOption.id == 0" />
+									ng-if="selectedOption.id != 1" />
 						</td>
 
 						<td class="field_mapping_type">
@@ -72,9 +73,8 @@
 									class="custom-select" 
 									name="columnType_{{ ::fieldMapping.userField }}" 
 									ng-model="fieldMapping.fieldType" 
-									ng-init="fieldMapping.fieldType=fieldMapping.fieldType" 
+									ng-init="fieldMapping.fieldType=fieldMapping.fieldType"
 									ng-disabled="selectedOption.id == 1"
-									ng-hide="selectedOption.id == 2"
 									value="{{fieldMapping.fieldType}}">
 								<option value="TEXT" selected>Text</option>
 								<option value="NUMBER">Number</option>
