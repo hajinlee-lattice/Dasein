@@ -28,7 +28,7 @@ angular
             $scope.job.modelName = job.modelName;
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
-            $scope.isPMML = (['pmmlModelWorkflow'].indexOf(job.jobType) > -1);
+            $scope.isPMML = job.modelType === 'PmmlModel';
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
