@@ -195,6 +195,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         Map<String, ColumnMetadata> columnsMetadata = getColumnMetadata();
         Map<String, AttributeStatistics> statistics = cube.getStatistics();
         Iterator<Entry<String, AttributeStatistics>> iter = statistics.entrySet().iterator();
+        long nonNullCount = 0;
         while (iter.hasNext()) {
             Entry<String, AttributeStatistics> entry = iter.next();
             if ((!columnsMetadata.containsKey(entry.getKey()))
@@ -204,7 +205,15 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
                             && !columnsMetadata.get(entry.getKey()).getSubcategory().equals(subCategory))) {
                 iter.remove();
             }
+            if (isLocationBased
+                    && entry.getValue().getUniqueLocationBasedStatistics().getNonNullCount() > nonNullCount) {
+                nonNullCount = entry.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
+            }
+            if (!isLocationBased && entry.getValue().getRowBasedStatistics().getNonNullCount() > nonNullCount) {
+                nonNullCount = entry.getValue().getRowBasedStatistics().getNonNullCount();
+            }
         }
+        cube.setNonNullCount(nonNullCount);
         return cube;
     }
 
