@@ -8,6 +8,13 @@ angular.module('mainApp.models.remodel', [
 ])
 .controller('RemodelController', function($scope, $filter, $state, MetadataService, RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal, RemodelingModal, ResourceUtility) {
 
+    if (Model.ModelDetails.ConflictWithOptionalRules !== true ||
+        Model.ModelType === 'PmmlModel' ||
+        Model.ModelDetails.Uploaded === true) {
+        backToModel();
+        return;
+    }
+
     var vm = this;
     angular.extend(vm, {
         messageTitle: null,

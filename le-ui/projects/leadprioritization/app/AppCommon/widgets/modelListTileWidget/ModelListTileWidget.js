@@ -34,7 +34,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
 
-            $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
+            $scope.canRemodel = ($scope.data.ConflictWithOptionalRules === true) && ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
 
             //TODO:pierce Field names subject to change
             $scope.isActive = data.Status === "Active";

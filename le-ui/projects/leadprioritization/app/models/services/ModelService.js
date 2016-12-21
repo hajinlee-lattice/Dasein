@@ -78,7 +78,7 @@ angular.module('mainApp.models.services.ModelService', [
         delete this.modelsMap[modelId];
     };
 })
-.service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
+.service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService, ModelServiceUtility) {
 
     this.GetAllModels = function (isValidOnly) {
             var deferred = $q.defer();
@@ -113,17 +113,19 @@ angular.module('mainApp.models.services.ModelService', [
                     data = _.sortBy(data, 'ConstructionTime').reverse();
                     // sync with front-end json structure
                     result.resultObj = _.map(data, function(rawObj) {
-                            return {
-                                Id          : rawObj.Id,
-                                DisplayName : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
-                                CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
-                                ModelFileType: rawObj.ModelType,
-                                Status      : rawObj.Status,
-                                Incomplete  : rawObj.Incomplete,
-                                ModelType   : rawObj.SourceSchemaInterpretation,
-                                Uploaded    : rawObj.Uploaded
-                            };}
-                    );
+
+                        return {
+                            Id          : rawObj.Id,
+                            DisplayName : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
+                            CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
+                            ModelFileType: rawObj.ModelType,
+                            Status      : rawObj.Status,
+                            Incomplete  : rawObj.Incomplete,
+                            ModelType   : rawObj.SourceSchemaInterpretation,
+                            Uploaded    : rawObj.Uploaded,
+                            ConflictWithOptionalRules : ModelServiceUtility.getModelSummaryProvenanceProperties(rawObj.ModelSummaryProvenanceProperties, 'ConflictWithOptionalRules')
+                        };
+                    });
 
                 }
                 deferred.resolve(result);
@@ -398,7 +400,8 @@ angular.module('mainApp.models.services.ModelService', [
                 modelSummary.ModelDetails.PivotArtifactPath = data.PivotArtifactPath;
                 modelSummary.ModelDetails.SourceSchemaInterpretation = data.SourceSchemaInterpretation;
                 modelSummary.ModelDetails.TrainingFileExist = data.TrainingFileExist;
-                modelSummary.ModelDetails.ModelSummaryProvenanceProperties = data.ModelSummaryProvenanceProperties
+                modelSummary.ModelDetails.ModelSummaryProvenanceProperties = data.ModelSummaryProvenanceProperties;
+                modelSummary.ModelDetails.ConflictWithOptionalRules =ModelServiceUtility.getModelSummaryProvenanceProperties(data.ModelSummaryProvenanceProperties, 'ConflictWithOptionalRules');
 
                 // sync with front-end json structure
                 result.resultObj = modelSummary;
@@ -934,5 +937,24 @@ angular.module('mainApp.models.services.ModelService', [
         });
 
         return deferred.promise;
+    };
+})
+.service('ModelServiceUtility', function () {
+    this.getModelSummaryProvenanceProperties = function (properties, target) {
+        for (var i = 0; i < properties.length; i++) {
+            var prop = properties[i].ModelSummaryProvenanceProperty;
+            if (prop.option === target) {
+                switch (prop.value) {
+                    case "true":
+                        return true;
+                    case "false":
+                        return false;
+                    default:
+                        return prop.value;
+                }
+            }
+        }
+
+        return null;
     };
 });
