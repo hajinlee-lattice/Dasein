@@ -402,11 +402,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $uibModal.open({
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">Delete tenant</h3></div>' +
-            '<div class="modal-body"> </div>' +
             '<div class="modal-body">' +
-            'Deleting a tenant from this UI only remove it from ZK. ' +
-            'To fully delete it, you also need to remove it from eacn component. ' +
-            'Are you sure you want to delete the tenant {{ tenantId }} from ZK?' +
+            'Are you sure you want to delete the tenant {{ tenantId }}?' +
             '</div>' +
             '<div class="modal-footer">' +
             '<button class="btn btn-primary" ng-click="ok()">YES</button>' +
