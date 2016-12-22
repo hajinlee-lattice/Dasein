@@ -1,13 +1,14 @@
 package com.latticeengines.eai.file.runtime.mapreduce;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
 import org.springframework.format.number.NumberFormatter;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -72,7 +74,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private CSVPrinter csvFilePrinter;
 
-    private long lineNum = 1;
+    private long lineNum = 2;
 
     private String avroFileName;
 
@@ -90,8 +92,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
 
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), LECSVFormat.format.withHeader("LineNumber", "Id",
-                "ErrorMessage"));
+        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
+                LECSVFormat.format.withHeader("LineNumber", "Id", "ErrorMessage"));
 
         if (StringUtils.isEmpty(table.getName())) {
             avroFileName = "file.avro";
@@ -114,31 +116,35 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             throw new RuntimeException("Not able to find csv file from localized files");
         }
 
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(csvFileName))) {
-            CSVFormat format = LECSVFormat.format;
-            try (CSVParser parser = new CSVParser(reader, format)) {
-                Set<String> headers = parser.getHeaderMap().keySet();
-                DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
-                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
-                    dataFileWriter.create(schema, new File(avroFileName));
-                    for (Iterator<CSVRecord> iterator = parser.iterator(); iterator.hasNext(); lineNum++) {
+        String[] headers;
+        try (CSVParser parser = new CSVParser(new InputStreamReader((new FileInputStream(csvFileName))),
+                LECSVFormat.format)) {
+            headers = new ArrayList<String>(parser.getHeaderMap().keySet()).toArray(new String[] {});
+        }
+        DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+        try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
+            dataFileWriter.create(schema, new File(avroFileName));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFileName)))) {
+                CSVFormat format = LECSVFormat.format.withHeader(headers);
+                String line = reader.readLine(); // skip header
+                for (; (line = reader.readLine()) != null; lineNum++) {
+                    LOG.info("Start to processing line: " + lineNum);
+                    try (CSVParser parser = CSVParser.parse(line, format)) {
                         beforeEachRecord();
-                        LOG.info("Start to processing line: " + lineNum);
-                        CSVRecord csvRecord = null;
-                        try {
-                            csvRecord = iterator.next();
-                        } catch (Exception e) {
-                            LOG.error(e);
-                            handleErrorWhenReadFromCSV(context);
-                            continue;
-                        }
-                        GenericRecord avroRecord = toGenericRecord(headers, csvRecord);
+                        CSVRecord csvRecord = parser.getRecords().get(0);
+                        GenericRecord avroRecord = toGenericRecord(Sets.newHashSet(headers), csvRecord);
                         if (errorMap.size() == 0) {
                             dataFileWriter.append(avroRecord);
                             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
                         } else {
-                            handleErrorWhenConvertToAvro(context, parser.getRecordNumber() + 1);
+                            handleError(context, lineNum);
                         }
+                    } catch (Exception e) {
+                        LOG.warn(e);
+                        rowError = true;
+                        errorMap.put(String.valueOf(lineNum), String.format(
+                                "%s, try to remove single quote \' or double quote \"  in the row and try again", e.getMessage()).toString());
+                        handleError(context, lineNum);
                     }
                 }
             }
@@ -147,17 +153,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private void beforeEachRecord() {
         id = null;
-        missingRequiredColValue = false;
-        fieldMalFormed = false;
-        rowError = false;
+        missingRequiredColValue = Boolean.FALSE;
+        fieldMalFormed = Boolean.FALSE;
+        rowError = Boolean.FALSE;
     }
 
-    private void handleErrorWhenReadFromCSV(Context context) {
-        context.getCounter(RecordImportCounter.ROW_ERROR).increment(1);
-        context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-    }
-
-    private void handleErrorWhenConvertToAvro(Context context, long lineNumber) throws IOException {
+    private void handleError(Context context, long lineNumber) throws IOException {
         if (missingRequiredColValue) {
             context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
         } else if (fieldMalFormed) {
@@ -193,7 +194,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 try {
                     csvFieldValue = String.valueOf(csvRecord.get(attr.getDisplayName()));
                 } catch (Exception e) { // This catch is for the row error
-                    LOG.error(e);
+                    LOG.warn(e);
                 }
                 List<InputValidator> validators = attr.getValidators();
                 try {
@@ -206,7 +207,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                     avroRecord.put(attr.getName(), avroFieldValue);
                 } catch (Exception e) {
-                    LOG.error(e);
+                    LOG.warn(e);
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
@@ -263,17 +264,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             default:
                 LOG.info("size is:" + fieldCsvValue.length());
-                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType
-                        + ", physicalDatalType:" + attr.getPhysicalDataType());
+                throw new IllegalArgumentException("Not supported Field, avroType: " + avroType + ", physicalDatalType:"
+                        + attr.getPhysicalDataType());
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
-            LOG.error(e);
+            LOG.warn(e);
             throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.", fieldCsvValue,
                     avroType, attr.getDisplayName()));
         } catch (Exception e) {
             fieldMalFormed = true;
-            LOG.error(e);
+            LOG.warn(e);
             throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
                     fieldCsvValue, attr.getDisplayName()));
         }
