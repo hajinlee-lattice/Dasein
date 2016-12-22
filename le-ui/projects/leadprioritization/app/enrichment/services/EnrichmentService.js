@@ -158,18 +158,19 @@ angular.module('lp.enrichment.leadenrichment')
         opts.category = opts.category || 'firmographics';
         opts.limit = opts.limit || 5;
         if (this.topAttributes) {
-            deferred.resolve(this.topAttributes);
+            deferred.resolve(this.topAttributes[opts.category]);
         } else {
             EnrichmentService.getTopAttributes(opts).then(function(response) {
-                EnrichmentStore.setTopAttributes(response);
+                EnrichmentStore.setTopAttributes(response, opts.category);
                 deferred.resolve(response);
             });
         }
         return deferred.promise;
     }
 
-    this.setTopAttributes = function(item) {
-        this.topAttributes = item;
+    this.setTopAttributes = function(items, category) {
+        this.topAttributes = this.topAttributes || [];
+        this.topAttributes[category] = items;
     }
 })
 .service('EnrichmentService', function($q, $http){

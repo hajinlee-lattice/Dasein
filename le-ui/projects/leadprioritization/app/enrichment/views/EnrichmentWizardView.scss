@@ -340,7 +340,8 @@
                     border-left: 0;
                     border-right: 0;
                     overflow: hidden;
-                    max-height: 9.5em;
+                    overflow-y: auto;
+                    max-height: 9.8em;
                     span {
                         font-size: 12px;
                         color: black;

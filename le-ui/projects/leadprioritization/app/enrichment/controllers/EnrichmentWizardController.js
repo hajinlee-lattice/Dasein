@@ -221,7 +221,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
     }
 
-    vm.topAttributes = {};
+    vm.topAttributes = [];
     var getTopAttributes = function(opts) {
         var opts = opts || {},
             category = opts.category;

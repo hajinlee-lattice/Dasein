@@ -127,8 +127,8 @@
                                     <div class="column data">Records</div>
                                 </li>
                                 <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
-                                    <div class="column label">{{::attribute.Attribute}}</div>
-                                    <div class="column data">{{::attribute.NonNullCount|number}}</div>
+                                    <div class="column label">{{attribute.Attribute}}</div>
+                                    <div class="column data">{{attribute.NonNullCount|number}}</div>
                                 </li>
                             </ul>
                             <div class="attributes-more">More</div>
