@@ -205,7 +205,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         } catch (Exception e) {
             log.warn("Failed to parse value " + value + " of attribute " + columnId + " to " + javaClass
-                    + ". Using null instead", e);
+                    + ". Using null instead");
             return null;
         }
         return value;
@@ -253,7 +253,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             MatchResponse response = new MatchResponse(context);
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 

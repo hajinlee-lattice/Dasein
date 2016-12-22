@@ -44,7 +44,7 @@ public class SamplingFactory extends ModelFactory {
                             .setTestPercentage(Integer.parseInt(paramMap.get(MODEL_SAMPLING_TEST_PERCENTAGE_KEY)));
                 }
             } catch (Exception ex) {
-                log.warn("Failed to config sampling!", ex);
+                log.warn("Failed to config sampling!");
             }
             log.info("Successfully configured the Sampling");
         } else if (runTimeParams != null) {

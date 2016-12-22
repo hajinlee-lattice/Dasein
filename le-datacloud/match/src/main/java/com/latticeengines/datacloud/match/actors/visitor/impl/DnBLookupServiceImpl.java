@@ -309,7 +309,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             message.setMetricDB(MetricDB.LDC_Match);
             getActorSystem().getMetricActor().tell(message, null);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 

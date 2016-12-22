@@ -60,7 +60,7 @@ public class ModelExtractor {
             try {
                 parser.close();
             } catch (IOException e) {
-                log.warn(e);
+                log.warn("Failed to close JsonParser!");
             }
         }
 

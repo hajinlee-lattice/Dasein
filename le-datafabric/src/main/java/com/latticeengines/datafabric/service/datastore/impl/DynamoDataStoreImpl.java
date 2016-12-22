@@ -399,13 +399,13 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 submitBatchWrite(dynamoDB, writeItems);
                 return;
             } catch (NoSuchMethodError e) {
-                log.warn(ERRORMESSAGE, e);
+                log.warn(ERRORMESSAGE);
                 try {
                     Thread.sleep(interval);
                     interval *= 2;
                     retries++;
                 } catch (Exception e1) {
-                    log.warn("Failed to sleep. Ignoring the error.", e1);
+                    log.warn("Failed to sleep. Ignoring the error.");
                 }
             }
         }
@@ -536,7 +536,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             output.flush();
             return ByteBuffer.wrap(Snappy.compress(output.toByteArray()));
         } catch (Exception e) {
-            log.warn("Exception in encoding generic record.", e);
+            log.warn("Exception in encoding generic record.");
             return null;
         }
     }
@@ -551,7 +551,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 return reader.read(null, decoder);
             }
         } catch (Exception e) {
-            log.warn("Exception in decoding generic record.", e);
+            log.warn("Exception in decoding generic record.");
             return null;
         }
     }

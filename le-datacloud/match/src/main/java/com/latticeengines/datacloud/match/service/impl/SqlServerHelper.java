@@ -329,7 +329,7 @@ public class SqlServerHelper implements DbHelper {
             url = dataSource.getUrl();
             url = url.substring(0, url.indexOf(";"));
         } catch (Exception e) {
-            log.warn("Failed to get url from jdbc template", e);
+            log.warn("Failed to get url from jdbc template");
         }
         log.info("Retrieved " + results.size() + " results from SQL Server. Duration="
                 + (System.currentTimeMillis() - beforeQuerying) + " Rows=" + results.size() + " URL=" + url);
@@ -557,7 +557,7 @@ public class SqlServerHelper implements DbHelper {
                         fetcherActivity.put(name, System.currentTimeMillis());
                     }
                 } catch (Exception e) {
-                    log.warn("Error from fetcher.", e);
+                    log.warn("Error from fetcher.");
                 } finally {
                     try {
                         Thread.sleep(50L);

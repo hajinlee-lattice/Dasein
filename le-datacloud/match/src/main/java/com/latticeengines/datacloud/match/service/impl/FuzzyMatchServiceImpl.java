@@ -123,7 +123,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             message.setMetricDB(MetricDB.LDC_Match);
             actorSystem.getMetricActor().tell(message, null);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 

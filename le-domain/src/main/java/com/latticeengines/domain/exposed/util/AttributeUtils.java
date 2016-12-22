@@ -109,7 +109,7 @@ public class AttributeUtils {
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     log.warn(
                             String.format("Failed to set property %s on attribute %s", propertyName,
-                                    attribute.getName()), e);
+                                    attribute.getName()));
                 }
             }
         } catch (Exception e) {
@@ -145,7 +145,7 @@ public class AttributeUtils {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         log.warn(
                                 String.format("Failed to set property %s on attribute %s", propertyName,
-                                        attribute.getName()), e);
+                                        attribute.getName()));
                     }
                 }
             }

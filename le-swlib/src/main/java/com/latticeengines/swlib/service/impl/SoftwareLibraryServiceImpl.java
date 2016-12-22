@@ -119,11 +119,11 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
                     packages.add(JsonUtils.deserialize(HdfsUtils.getHdfsFileContents(yarnConfiguration, file),
                             SoftwarePackage.class));
                 } catch (Exception e) {
-                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_27003, new String[] { file }), e);
+                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_27003, new String[] { file }));
                 }
             }
         } catch (FileNotFoundException e) {
-            log.warn(e);
+            log.warn(e.getMessage());
         }catch (Exception e) {
             log.error(e);
         }

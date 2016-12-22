@@ -650,7 +650,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             jobsInString += new ObjectMapper().writerWithDefaultPrettyPrinter()
                     .writeValueAsString(JsonUtils.serialize(rawJobs));
         } catch (IOException e) {
-            log.warn(e);
+            log.warn(e.getMessage());
         }
         assertTrue(Iterables.any(jobs, new Predicate<Job>() {
             @Override

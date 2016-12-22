@@ -69,8 +69,7 @@ public class FileSystemGetChildrenFunction implements Function<Path, List<Map.En
                 childPath = parentPath.append(relChildPathStr);
             } catch (IllegalArgumentException e) {
                 log.warn(
-                        MessageFormatter.format("File {} is in an invalid path format.", relChildPathStr).getMessage(),
-                        e);
+                        MessageFormatter.format("File {} is in an invalid path format.", relChildPathStr).getMessage());
                 continue;
             }
             String absoluteChildPathStr = toAbsolutePath(childPath);

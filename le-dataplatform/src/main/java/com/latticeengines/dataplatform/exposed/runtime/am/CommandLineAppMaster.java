@@ -250,7 +250,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
         try {
             HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {
-            log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
+            log.warn("Could not delete job dir " + dir + " due to exception:\n" + e.getMessage());
         }
 
     }

@@ -222,7 +222,7 @@ public class SpaceLifecycleManager {
                 toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId,
                         getInfo(contractId, tenantId, spaceId)));
             } catch (Exception ex) {
-                log.warn("Failed to add spaceId=" + spaceId, ex);
+                log.warn("Failed to add spaceId=" + spaceId);
             }
         }
 
@@ -252,7 +252,7 @@ public class SpaceLifecycleManager {
                                 new CustomerSpace(contractId, tenantId, spaceId),
                                 getInfo(contractId, tenantId, spaceId)));
                     } catch (Exception ex) {
-                        log.warn("Failed to add spaceId=" + spaceId, ex);
+                        log.warn("Failed to add spaceId=" + spaceId);
                     }
                 }
             }

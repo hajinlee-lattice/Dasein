@@ -187,7 +187,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         } catch (Exception ex) {
             log.warn(
                     "Failed to get " + (isProduction ? "production" : "sandbox") + " sfdcOrgId for "
-                            + crmCredential.toString(), ex);
+                            + crmCredential.toString());
             throw new LedpException(LedpCode.LEDP_18030, ex);
         }
     }

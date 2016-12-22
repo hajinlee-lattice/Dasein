@@ -106,7 +106,7 @@ public class SimpleCascadingExecutor {
                 flowDef.addToClassPath(file);
             }
         } catch (Exception e) {
-            log.warn("Exception retrieving library jars for this flow.", e);
+            log.warn("Exception retrieving library jars for this flow.");
         }
 
         Flow<?> wcFlow = flowConnector.connect(flowDef);

@@ -113,7 +113,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             log.info("Many records, sleep for seconds! size=" + count);
             Thread.sleep(10_000L);
         } catch (Exception ex) {
-            log.warn("Failed to sleep!", ex);
+            log.warn("Failed to sleep!");
         }
     }
 

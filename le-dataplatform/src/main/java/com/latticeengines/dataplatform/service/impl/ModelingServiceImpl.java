@@ -501,7 +501,7 @@ public class ModelingServiceImpl implements ModelingService {
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, "profile.avro");
         } catch (Exception e) {
-            log.warn(e);
+            log.warn(e.getMessage());
         }
 
         if (files.size() != 1) {
@@ -517,7 +517,7 @@ public class ModelingServiceImpl implements ModelingService {
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, HdfsFileFormat.AVSC_FILE);
         } catch (Exception e) {
-            log.warn(e);
+            log.warn(e.getMessage());
         }
 
         if (files.size() != 1) {
@@ -759,7 +759,7 @@ public class ModelingServiceImpl implements ModelingService {
                 featureScoreMap.put(columnName, uc + Double.parseDouble(columnValue));
             }
         } catch (Exception ex) {
-            log.warn("Failed to pupoluate feature score!", ex);
+            log.warn("Failed to pupoluate feature score!");
         }
     }
 

@@ -73,7 +73,7 @@ public class ProcessingStateProcessor extends BaseStateProcessor {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                log.warn(e);
+                log.warn(e.getMessage());
             }
             fileDeleter.deleteFile(queuedFile);
             numTries++;

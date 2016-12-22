@@ -367,7 +367,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 String jsonResponse = HttpClientWithOptionalRetryUtils.sendDeleteRequest(url, false, adHeaders);
                 log.info("DELETE customer space " + customerSpace + " in tenant console: " + jsonResponse);
             } catch (Exception e) {
-                log.warn("DELETE customer space " + customerSpace + " in tenant console failed.", e);
+                log.warn("DELETE customer space " + customerSpace + " in tenant console failed.");
             }
         }
     }

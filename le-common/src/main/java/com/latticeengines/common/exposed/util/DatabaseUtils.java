@@ -35,12 +35,12 @@ public class DatabaseUtils {
                     if (StringUtils.objectIsNullOrEmptyString(customExcetionMessageSubstr) //
                             || exception.getMessage().trim().toLowerCase()
                                     .contains(customExcetionMessageSubstr.trim().toLowerCase())) {
-                        log.warn(String.format("%s %s", customMessage, operationName), exception);
+                        log.warn(String.format("%s %s", customMessage, operationName));
                         shouldRetry = true;
                     }
                 } else if (defaultExceptionClazz != null//
                         && defaultExceptionClazz.isAssignableFrom(exception.getClass())) {
-                    log.warn(String.format("%s %s", defaultMessage, operationName), exception);
+                    log.warn(String.format("%s %s", defaultMessage, operationName));
                     shouldRetry = true;
                 }
 

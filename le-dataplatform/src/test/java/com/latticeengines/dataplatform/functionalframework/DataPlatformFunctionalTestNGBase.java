@@ -160,7 +160,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 entityMgr.deleteAll();
             }
         } catch (Exception e) {
-            log.warn("Could not clear tables for all entity managers.", e);
+            log.warn("Could not clear tables for all entity managers.");
         }
     }
 

@@ -435,7 +435,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             return sp.getTemplate();
 
         } catch (Exception ex) {
-            log.warn("Can not get template version! tenantName=" + tenantName + " dlUrl=" + dlUrl, ex);
+            log.warn("Can not get template version! tenantName=" + tenantName + " dlUrl=" + dlUrl);
             return "";
         }
     }

@@ -54,7 +54,7 @@ public class SafeUpserter {
                 }
                 return;
             } catch (KeeperException.BadVersionException | KeeperException.NodeExistsException e) {
-                log.warn(String.format("Possibly temporary failure attempting to safely upsert to path %s", path), e);
+                log.warn(String.format("Possibly temporary failure attempting to safely upsert to path %s", path));
                 sleep((numRetries - remaining + 1) * retryBackoffMilliseconds);
             } catch (Exception e) {
                 throw new RuntimeException(String.format(

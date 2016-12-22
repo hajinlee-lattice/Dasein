@@ -46,7 +46,7 @@ public class GASessionCache {
                                     }
                                 } catch (Exception e) {
                                     log.warn("Failed to retrieve session " + token + " from GA - retried " + retries
-                                            + " out of " + MAX_RETRY + " times", e);
+                                            + " out of " + MAX_RETRY + " times");
                                 }
                                 try {
                                     retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000))
@@ -64,7 +64,7 @@ public class GASessionCache {
                             log.warn(
                                     String.format(
                                             "Encountered an error when retrieving session %s from GA: "
-                                                    + e.getMessage() + " Invalidate the cache.", token), e);
+                                                    + e.getMessage() + " Invalidate the cache.", token));
                             return null;
                         }
                     }

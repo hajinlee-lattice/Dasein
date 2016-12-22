@@ -67,7 +67,7 @@ public abstract class AvroTypeConverter {
                 DateTime dateTime = dtf.parseDateTime((String) value);
                 return dateTime.getMillis();
             } catch (Exception e) {
-                log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value), e);
+                log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
             }
         case STRING:
             targetType = String.class;

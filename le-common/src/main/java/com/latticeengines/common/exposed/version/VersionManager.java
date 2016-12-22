@@ -33,7 +33,7 @@ public class VersionManager {
         try {
             return Manifests.read("LE-SCM-Revision");
         } catch (Exception e) {
-            log.warn("Failed to read LE-SCM-Revision from Jar manifest", e);
+            log.warn("Failed to read LE-SCM-Revision from Jar manifest");
             return null;
         }
     }

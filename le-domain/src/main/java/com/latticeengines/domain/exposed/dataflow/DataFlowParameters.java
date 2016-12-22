@@ -63,7 +63,6 @@ public class DataFlowParameters {
                 }
             } catch (IllegalAccessException e) {
                 log.warn("Not able to add source for field " + field.getName());
-                log.warn(ExceptionUtils.getStackTrace(e));
                 // pass
             }
         }

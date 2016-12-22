@@ -24,7 +24,7 @@ public class ModelFactory {
             SelectedConfig selectedConfig = JsonUtils.deserialize(runTimeParams.get(MODEL_CONFIG), SelectedConfig.class);
             return selectedConfig;
         } catch (Exception ex) {
-            log.warn("Failed to get model config!", ex);
+            log.warn("Failed to get model config!");
         }
 
         return null;

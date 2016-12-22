@@ -135,7 +135,7 @@ public class TenantLifecycleManager {
                 }
             } catch (Exception ex) {
                 log.warn("Failed to retrieve the properties.json at path="
-                        + (childPair.getValue() != null ? childPair.getValue().toString() : ""), ex);
+                        + (childPair.getValue() != null ? childPair.getValue().toString() : ""));
             }
         }
 

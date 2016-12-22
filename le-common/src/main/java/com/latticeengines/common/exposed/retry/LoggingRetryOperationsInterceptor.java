@@ -30,11 +30,11 @@ public class LoggingRetryOperationsInterceptor implements MethodInterceptor {
                         return retval;
                     } catch (Exception e) {
                         log.warn(String.format("Caught exception %s in retryable block (attempt %d) ", e.getMessage(),
-                                context.getRetryCount() + 1), e);
+                                context.getRetryCount() + 1));
                         throw e;
                     } catch (Error e) {
                         log.warn(String.format("Caught exception %s in retryable block (attempt %d) ", e.getMessage(),
-                                context.getRetryCount() + 1), e);
+                                context.getRetryCount() + 1));
                         throw e;
                     } catch (Throwable e) {
                         throw new IllegalStateException(e);

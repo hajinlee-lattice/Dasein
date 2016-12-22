@@ -109,7 +109,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 try {
                     setFeatureImportance(summary, file);
                 } catch (IOException e) {
-                    log.warn("Errors fetching RF feature importance file. Skipping...", e);
+                    log.warn("Errors fetching RF feature importance file. Skipping...");
                 }
 
                 try {

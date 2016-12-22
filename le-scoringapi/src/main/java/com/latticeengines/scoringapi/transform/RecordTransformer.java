@@ -62,14 +62,14 @@ public class RecordTransformer {
                             value = null;
                         }
                     } catch (Exception e) {
-                        log.warn(String.format("Problem casting Transform value to Java Double"), e);
+                        log.warn(String.format("Problem casting Transform value to Java Double"));
                     }
                 }
 
                 result.put(entry.output, value);
             } catch (Exception e) {
                 if (log.isWarnEnabled()) {
-                    log.warn(String.format("Problem invoking %s", entry.name), e);
+                    log.warn(String.format("Problem invoking %s", entry.name));
                 }
             }
         }
@@ -93,7 +93,7 @@ public class RecordTransformer {
                 Object value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                 result.put(entry.output, value);
             } catch (Exception e) {
-                log.warn(String.format("Problem invoking %s with args %s", entry.name, entry.arguments), e);
+                log.warn(String.format("Problem invoking %s with args %s", entry.name, entry.arguments));
             }
         }
 

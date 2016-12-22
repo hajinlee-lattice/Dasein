@@ -91,7 +91,7 @@ public class PodLifecycleManager {
                         getInfo(childPair.getValue().getSuffix())));
             } catch (Exception ex) {
                 log.warn("Failed to get Pod Info for "
-                        + (childPair.getValue() != null ? childPair.getValue().getSuffix() : ""), ex);
+                        + (childPair.getValue() != null ? childPair.getValue().getSuffix() : ""));
             }
         }
 

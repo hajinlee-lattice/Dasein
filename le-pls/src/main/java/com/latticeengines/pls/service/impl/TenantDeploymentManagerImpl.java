@@ -470,7 +470,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                     }
                 } catch (Exception e) { }
 
-                log.warn(String.format("Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.", tenantId), ex);
+                log.warn(String.format("Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.", tenantId));
             }
         }
 

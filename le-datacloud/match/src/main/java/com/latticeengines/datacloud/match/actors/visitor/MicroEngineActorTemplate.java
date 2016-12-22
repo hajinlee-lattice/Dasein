@@ -86,7 +86,7 @@ public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorT
             message.setMetricDB(MetricDB.LDC_Match);
             matchActorSystem.getMetricActor().tell(message, null);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 

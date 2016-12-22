@@ -55,7 +55,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
             MatchResponse response = new MatchResponse(matchContext);
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 
@@ -65,7 +65,7 @@ class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
             BulkMatchResponse response = new BulkMatchResponse(bulkMatchOutput);
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.", e);
+            log.warn("Failed to extract output metric.");
         }
     }
 }

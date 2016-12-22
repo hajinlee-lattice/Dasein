@@ -102,7 +102,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                 modelSummaryIds.add(UuidUtils.extractUuid(summary.getId()));
             } catch (Exception e) {
                 // Skip any model summaries that have unexpected ID syntax
-                log.warn(e);
+                log.warn(e.getMessage());
             }
         }
         return modelSummaryIds;

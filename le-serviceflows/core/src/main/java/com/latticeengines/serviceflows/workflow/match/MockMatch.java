@@ -55,10 +55,10 @@ public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
                putLongValueInContext(MATCH_COMMAND_ID, MATCH_COMMAND_ID_NUMBER);
                ensureHDFSFilesAreDeleted();
            } catch (SQLException exp) {
-               log.warn(String.format("Exception opening a connection with jdbcUrl: %s", dbCreds.getJdbcUrl()), exp);
+               log.warn(String.format("Exception opening a connection with jdbcUrl: %s", dbCreds.getJdbcUrl()));
            }
         } catch (ClassNotFoundException e) {
-            log.warn("Class not found: com.microsoft.sqlserver.jdbc.SQLServerDriver", e);
+            log.warn("Class not found: com.microsoft.sqlserver.jdbc.SQLServerDriver");
         }
     }
 
@@ -71,7 +71,7 @@ public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
             fs.delete(new Path(targetHdfsPathForMatchFiles), true);
             fs.delete(new Path(targetHdfsPathForSampleFiles), true);
         } catch (IOException e) {
-            log.warn(String.format("Cannot delete file path from HDFS: %s", targetHdfsPathForMatchFiles), e);
+            log.warn(String.format("Cannot delete file path from HDFS: %s", targetHdfsPathForMatchFiles));
         }
     }
 

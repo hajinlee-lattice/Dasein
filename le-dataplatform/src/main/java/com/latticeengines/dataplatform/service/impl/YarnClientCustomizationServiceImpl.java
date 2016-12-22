@@ -197,7 +197,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         try {
             FileUtils.deleteDirectory(new File(dir));
         } catch (IOException e) {
-            log.warn("Could not delete local job directory.", e);
+            log.warn("Could not delete local job directory.");
         }
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);

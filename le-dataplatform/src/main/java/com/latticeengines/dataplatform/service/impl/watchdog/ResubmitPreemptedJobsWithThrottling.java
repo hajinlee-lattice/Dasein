@@ -167,7 +167,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                         modelingJobService.killJob(modelingJob.getAppId());
                         appsKilled.add(jobId);
                     } catch (Exception e) {
-                        log.warn("Cannot kill job " + jobId, e);
+                        log.warn("Cannot kill job " + jobId);
                     }
                 }
             }
@@ -181,7 +181,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
             try {
                 HdfsUtils.rmdir(yarnConfiguration, dir);
             } catch (Exception e) {
-                log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
+                log.warn("Could not delete job dir " + dir + " due to exception:\n" + e.getMessage());
             }
         }
         return appsKilled.size();

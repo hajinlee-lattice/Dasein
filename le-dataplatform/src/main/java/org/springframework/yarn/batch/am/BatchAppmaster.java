@@ -275,7 +275,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         try {
             HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {
-            log.warn("Could not delete job dir " + dir + ".", e);
+            log.warn("Could not delete job dir " + dir + ".");
         }
 
     }

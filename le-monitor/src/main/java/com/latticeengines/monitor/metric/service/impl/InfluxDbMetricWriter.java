@@ -102,7 +102,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
                 enabled = true;
             } catch (Exception e) {
                 if (enabled) {
-                    log.warn("Had problem connecting influxDb at " + url + ". Disable the metric service.", e);
+                    log.warn("Had problem connecting influxDb at " + url + ". Disable the metric service.");
                     enabled = false;
                 }
             }

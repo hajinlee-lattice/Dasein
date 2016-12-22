@@ -36,7 +36,7 @@ public class MailSender {
             Transport.send(message);
             return true;
         } catch (MessagingException ex) {
-            log.warn("Cannot send email. " + ex);
+            log.warn("Cannot send email. ");
             return false;
         }
     }

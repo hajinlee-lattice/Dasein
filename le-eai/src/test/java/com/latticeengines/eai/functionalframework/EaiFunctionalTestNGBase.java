@@ -120,7 +120,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         try {
             camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
         } catch (Exception e) {
-            log.warn(e);
+            log.warn(e.getMessage());
         }
     }
 

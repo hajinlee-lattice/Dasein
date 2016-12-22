@@ -67,7 +67,7 @@ public class TransformFunction extends BaseOperation implements Function {
                     value = null;
                 }
             } catch (Exception e) {
-                log.warn(String.format("Problem casting Transform value to Java Double"), e);
+                log.warn(String.format("Problem casting Transform value to Java Double"));
             }
         } else if (definition.type.type() == Long.class) {
             value = Long.valueOf(value.toString());

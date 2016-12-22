@@ -85,7 +85,7 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
             try {
                 Thread.sleep(WAIT_INTERVAL);
             } catch (Exception ex) {
-                log.warn("Warning!", ex);
+                log.warn(String.format("Warning: %s", ex.getMessage()));
             }
             currTime = System.currentTimeMillis();
         }

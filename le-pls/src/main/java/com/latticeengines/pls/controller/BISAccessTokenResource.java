@@ -49,7 +49,7 @@ public class BISAccessTokenResource {
             emailService.sendPlsOnetimeSfdcAccessTokenEmail(user, tenantId, apiToken);
         } catch (Exception e) {
             log.warn(String.format("Generate bis access token failed for user: %s and tenant: %s",
-                    username, tenantId), e);
+                    username, tenantId));
             return ResponseDocument.failedResponse(e);
         }
         return ResponseDocument.successResponse(true);

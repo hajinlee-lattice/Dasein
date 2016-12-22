@@ -37,7 +37,7 @@ public class HadoopFileSystemOperations {
                 HdfsUtils.rmdir(conf, folderName);
 
         } catch (Exception e) {
-            log.warn("Failed to delete dir!", e);
+            log.warn("Failed to delete dir!");
         }
 
     }
@@ -58,7 +58,7 @@ public class HadoopFileSystemOperations {
             }
 
         } catch (Exception e) {
-            log.warn("Failed!", e);
+            log.warn("Failed!");
         }
         return fileNumber;
     }
@@ -79,7 +79,7 @@ public class HadoopFileSystemOperations {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to check if " + folderName + "exists or not.", e);
+            log.warn("Failed to check if " + folderName + "exists or not.");
         }
 
         return false;
@@ -96,7 +96,7 @@ public class HadoopFileSystemOperations {
                 flow.addToClassPath(file);
             }
         } catch (Exception e) {
-            log.warn("Exception retrieving library jars for this flow.", e);
+            log.warn("Exception retrieving library jars for this flow.");
         }
     }
 }

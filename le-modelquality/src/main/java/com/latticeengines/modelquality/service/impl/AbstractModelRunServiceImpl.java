@@ -116,7 +116,7 @@ public abstract class AbstractModelRunServiceImpl implements ModelRunService {
             String deployedHostPort = getDeployedRestAPIHostPort();
             restTemplate.getForObject(deployedHostPort + "/pls/logout", Object.class);
         } catch (Exception ex) {
-            log.warn("Failed to logout!", ex);
+            log.warn("Failed to logout!");
         }
     }
 

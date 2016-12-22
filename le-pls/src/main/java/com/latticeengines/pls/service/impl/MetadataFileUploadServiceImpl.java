@@ -78,7 +78,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
                 modules.add(module);
             }
         } catch (IOException e) {
-            log.warn(e);
+            log.warn(e.getMessage());
             return new ArrayList<>();
         }
         return modules;
@@ -104,7 +104,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
                 artifacts.add(artifact);
             }
         } catch (IOException e) {
-            log.warn(e);
+            log.warn(e.getMessage());
             return new ArrayList<>();
         }
 
