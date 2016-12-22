@@ -321,6 +321,7 @@ public class ProcessorContext {
 
         decisionGraph = jobConfiguration.getDecisionGraph();
         fuzzyMatchEnabled = zkConfigurationService.fuzzyMatchEnabled(space) || jobConfiguration.isFuzzyMatchEnabled();
+        fuzzyMatchEnabled = fuzzyMatchEnabled && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
         log.info("Fuzzy match enabled ? " + fuzzyMatchEnabled);
         if (StringUtils.isEmpty(decisionGraph)) {
             if (fuzzyMatchEnabled) {
