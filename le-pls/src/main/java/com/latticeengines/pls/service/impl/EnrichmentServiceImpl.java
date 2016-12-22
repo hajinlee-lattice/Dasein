@@ -58,7 +58,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                     public TopNAttributeTree load(String dummyKey) throws Exception {
                         TopNAttributeTree attributeTree = new TopNAttributeTree();
                         for (Category category: Category.values()) {
-                            attributeTree.put(category, createTopNAttributes(category.getName(), 5));
+                            attributeTree.put(category, createTopNAttributes(category.getName(), 20));
                         }
                         // TODO: after proxy is ready, uncomment this
                         // TopNAttributeTree attributeTree = amStatisticsProxy.getTopAttrTree();
@@ -85,8 +85,8 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     }
 
     @Override
-    public TopNAttributes getTopAttrs(Category category) {
-        return getTopAttrTree().get(category);
+    public TopNAttributes getTopAttrs(Category category, int max) {
+        return selectTopN(getTopAttrTree().get(category), max);
     }
 
     private TopNAttributeTree getTopAttrTree() {
@@ -102,6 +102,25 @@ public class EnrichmentServiceImpl implements EnrichmentService {
             // TopNAttributeTree attributeTree = amStatisticsProxy.getTopAttrTree();
             return attributeTree;
         }
+    }
+
+    private TopNAttributes selectTopN(TopNAttributes attributes, int max) {
+        Map<String, List<TopNAttributes.TopAttribute>> topAttrs = new HashMap<>();
+        for (Map.Entry<String, List<TopNAttributes.TopAttribute>> entry: attributes.getTopAttributes().entrySet()) {
+            List<TopNAttributes.TopAttribute> attrs = new ArrayList<>();
+            String subCategory = entry.getKey();
+            for (TopNAttributes.TopAttribute attr : entry.getValue()) {
+                if (attrs.size() < max) {
+                    attrs.add(attr);
+                } else {
+                    break;
+                }
+            }
+            topAttrs.put(subCategory, attrs);
+        }
+        TopNAttributes topNAttributes = new TopNAttributes();
+        topNAttributes.setTopAttributes(topAttrs);
+        return topNAttributes;
     }
 
     private AccountMasterFactQuery parseAMFactQuery(String strQuery) {

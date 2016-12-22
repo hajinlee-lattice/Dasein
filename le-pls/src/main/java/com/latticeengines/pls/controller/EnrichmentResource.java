@@ -282,8 +282,7 @@ public class EnrichmentResource {
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection")
     public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata", //
-                    required = false) //
+            @ApiParam(value = "Should load enrichment attribute metadata") //
             @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestParam(value = "q", required = false) String query) {
@@ -321,7 +320,7 @@ public class EnrichmentResource {
             }
         }
 
-        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category);
+        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category, max);
 
         if (loadEnrichmentMetadata) {
             Set<String> allEnrichAttrNames = new HashSet<>();
