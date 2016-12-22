@@ -59,11 +59,35 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     @Override
     public AccountMasterCube query(AccountMasterFactQuery query) {
+        if (query.getLocationQry() == null) {
+            query.setLocationQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_LOCATION,
+                    DataCloudConstants.ATTR_COUNTRY));
+        }
         Long locationId = dimensionalQueryService.findAttrId(query.getLocationQry());
+        if (query.getIndustryQry() == null) {
+            query.setIndustryQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_INDUSTRY,
+                    DataCloudConstants.ATTR_INDUSTRY));
+        }
         Long industryId = dimensionalQueryService.findAttrId(query.getIndustryQry());
+        if (query.getNumEmpRangeQry() == null) {
+            query.setNumEmpRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER,
+                    AccountMasterFact.DIM_NUM_EMP_RANGE, DataCloudConstants.ATTR_NUM_EMP_RANGE));
+        }
         Long numEmpRangeId = dimensionalQueryService.findAttrId(query.getNumEmpRangeQry());
+        if (query.getRevRangeQry() == null) {
+            query.setRevRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER, AccountMasterFact.DIM_REV_RANGE,
+                    DataCloudConstants.ATTR_REV_RANGE));
+        }
         Long revRangeId = dimensionalQueryService.findAttrId(query.getRevRangeQry());
+        if (query.getNumLocRangeQry() == null) {
+            query.setNumLocRangeQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER,
+                    AccountMasterFact.DIM_NUM_LOC_RANGE, DataCloudConstants.ATTR_NUM_LOC_RANGE));
+        }
         Long numLocRangeId = dimensionalQueryService.findAttrId(query.getNumLocRangeQry());
+        if (query.getCategoryQry() == null) {
+            query.setCategoryQry(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER_COLUMN,
+                    AccountMasterFact.DIM_CATEGORY, DataCloudConstants.ATTR_CATEGORY));
+        }
         Long categoryId = dimensionalQueryService.findAttrId(createQueryForAll(DataCloudConstants.ACCOUNT_MASTER_COLUMN,
                 AccountMasterFact.DIM_CATEGORY, DataCloudConstants.ATTR_CATEGORY));
         AccountMasterFact accountMasterFact = accountMasterFactEntityMgr.findByDimensions(locationId, industryId,
