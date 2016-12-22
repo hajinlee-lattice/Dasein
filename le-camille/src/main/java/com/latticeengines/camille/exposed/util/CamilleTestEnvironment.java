@@ -23,6 +23,7 @@ import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -126,7 +127,7 @@ public class CamilleTestEnvironment {
     }
 
     public static CustomerSpaceInfo getCustomerSpaceInfo() {
-        return new CustomerSpaceInfo(new CustomerSpaceProperties(), getDefaultFeatureFlags().toString());
+        return new CustomerSpaceInfo(new CustomerSpaceProperties(), JsonUtils.serialize(getDefaultFeatureFlags()));
     }
 
     public static List<String> getDefaultProducts() {
@@ -187,7 +188,7 @@ public class CamilleTestEnvironment {
     public synchronized static void stop() throws Exception {
         try {
             CamilleEnvironment.stop();
-
+            FeatureFlagClient.teardown();
             if (server != null) {
                 server.close();
             }

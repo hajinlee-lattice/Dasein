@@ -65,5 +65,9 @@ public class FeatureFlagClient {
         }
     }
 
+    public static void teardown() {
+        provider = null;
+    }
+
     private static FeatureFlagProvider provider;
 }

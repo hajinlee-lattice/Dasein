@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
@@ -107,10 +107,15 @@ public class SpaceLifecycleManager {
         Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));
         Document featureFlagDefinitionDocument = c
                 .get(PathBuilder.buildFeatureFlagDefinitionPath(CamilleEnvironment.getPodId()));
-        Document productsDocument = c.get(
-                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId).append(
-                        new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE)));
-
+        Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId).append(
+                new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE));
+        Document productsDocument = new Document();
+        if (c.exists(productsPath)) {
+            productsDocument = c.get(productsPath);
+        } else {
+            productsDocument.setData("");
+            log.warn("Cannot find products path, using empty product list.");
+        }
         String flags = updateFeatureFlags(spaceFlagsDocument, featureFlagDefinitionDocument, productsDocument,
                 tenantId);
 
