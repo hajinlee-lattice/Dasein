@@ -28,10 +28,10 @@ public class AvroCacheLoaderServiceImpl extends BaseCacheLoaderService<GenericRe
 
     @Override
     protected DnBMatchContext createMatchContext(GenericRecord record, CacheLoaderConfig config) {
-        if (record.get("DUNS") == null) {
+        if (record.get("LDC_DUNS") == null) {
             return null;
         }
-        String duns = record.get("DUNS").toString();
+        String duns = record.get("LDC_DUNS").toString();
         if (StringUtils.isEmpty(duns.trim())) {
             return null;
         }
@@ -46,7 +46,7 @@ public class AvroCacheLoaderServiceImpl extends BaseCacheLoaderService<GenericRe
         setFieldValues(record, nameLocation, config);
         matchContext.setInputNameLocation(nameLocation);
 
-        matchContext.setDuns(record.get("DUNS").toString());
+        matchContext.setDuns(record.get("LDC_DUNS").toString());
         matchContext.setConfidenceCode(8);
         matchContext.setMatchGrade("AAAAAAAAA");
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);

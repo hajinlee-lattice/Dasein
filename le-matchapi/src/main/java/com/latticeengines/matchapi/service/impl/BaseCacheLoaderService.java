@@ -66,12 +66,12 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     // Map from source fields to NameLocation fields
     protected static Map<String, String> defaultFieldMap = new HashMap<>();
     static {
-        defaultFieldMap.put("Name", "name");
-        defaultFieldMap.put("Country", "countryCode");
-        defaultFieldMap.put("State", "state");
-        defaultFieldMap.put("City", "city");
-        defaultFieldMap.put("PhoneNumber", "phoneNumber");
-        defaultFieldMap.put("ZipCode", "zipcode");
+        defaultFieldMap.put("LDC_Name", "name");
+        defaultFieldMap.put("LDC_Country", "countryCode");
+        defaultFieldMap.put("LDC_State", "state");
+        defaultFieldMap.put("LDC_City", "city");
+        defaultFieldMap.put("LDC_PhoneNumber", "phoneNumber");
+        defaultFieldMap.put("LDC_ZipCode", "zipcode");
     }
 
     @Override
@@ -257,7 +257,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                 log.info("Starting to load cache! record start=" + recordStart + " batch size=" + records.size());
                 List<DnBMatchContext> matchContexts = toCacheContexts(records, config);
                 if (matchContexts.size() == 0) {
-                    log.info("Batch has not DUNS#, record start=" + recordStart);
+                    log.info("Batch has no DUNS#, record start=" + recordStart);
                     return 0;
                 }
                 List<DnBWhiteCache> caches = dnbCacheService.batchAddWhiteCache(matchContexts);
