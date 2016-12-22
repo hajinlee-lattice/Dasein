@@ -250,7 +250,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             EnrichmentStore.getSubcategories(category).then(function(result) {
                 if(result.data.length > 1){
                     vm.subcategories[category] = result.data;
-                    vm.test = vm.subcategories;
                 }
             });
         }
@@ -513,19 +512,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return path + icon;
     }
 
-    var subcategoryCountList = [];
     vm.subcategoryCount = function(category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
-        /*
-        filtered =  $filter('filter')(filtered, {
-            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
-            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
-            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
-            'Category': category, 
-            'Subcategory': subcategory
-        });
-        filtered = $filter('filter')(filtered, vm.searchFields);
-        */
 
         for (var i=0, result=[]; i < filtered.length; i++) {
             var item = filtered[i];
@@ -546,12 +534,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.subcategoryFilter = function(subcategory) {
-        //return true;
         if(!vm.enrichments_completed) {
             return true;
         }
-        var category = vm.category;
-        return (vm.subcategoryCount(category, subcategory) ? true : false);
+        var category = vm.category,
+            count = vm.subcategoryCount(category, subcategory);
+
+        return (count ? true : false);
     }
 
     vm.categoryIcon = function(category){
@@ -564,15 +553,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
-        /*
-        filtered =  $filter('filter')(filtered, {
-            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true),
-            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
-            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
-            'Category': category
-        });
-        filtered = $filter('filter')(filtered, vm.searchFields);
-        */
 
         if (!filtered) {
             return 0;
@@ -601,7 +581,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.subcategory = '';
         } else if(vm.category == category) {
             vm.subcategory = '';
-            vm.category = '';
+            //vm.category = '';
         } else {
             vm.subcategory = '';
             vm.category = category;

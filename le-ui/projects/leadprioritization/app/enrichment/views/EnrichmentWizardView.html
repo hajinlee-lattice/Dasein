@@ -74,7 +74,7 @@
                 ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
                 <div class="box-inner background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
                     <span>
-                        <h2>
+                        <h2 title="{{category}}">
                             <div class="category-icon">
                                 <img ng-src="{{vm.categoryIcon(category)}}" />
                             </div>
@@ -118,15 +118,28 @@
                         </h2>
                         <span class="count">
                             <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
-                            <strong ng-if="!vm.enrichments_completed"><em>??</em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+                            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
-                        <ul ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]" class="attributes">
-                           <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
-                               <div class="column label">{{::attribute.Attribute}}</div>
-                               <div class="column data">{{::attribute.NonNullCount|number}}</div>
-                           </li>
-                       </ul>
+                        <div class="attributes-container" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]">
+                            <ul class="attributes">
+                                <li class="header">
+                                    <div class="column label">Top 5 attributes</div>
+                                    <div class="column data">Records</div>
+                                </li>
+                                <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
+                                    <div class="column label">{{::attribute.Attribute}}</div>
+                                    <div class="column data">{{::attribute.NonNullCount|number}}</div>
+                                </li>
+                            </ul>
+                            <div class="attributes-more">More</div>
+                       </div>
                     </div>
+                </li>
+                <li class="load-status" ng-show="subcategoriesList.length">
+                    <div ng-show="!vm.enrichments_loaded">
+                        <div class="loader"></div>
+                    </div>       
+                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
             <div class="row enrichment-wizard-pagination" ng-show="vm.max > 1">
@@ -200,7 +213,7 @@
                         </div>
                     </div>
                 </li>
-                <li ng-show="!filteredList.length">
+                <li class="load-status" ng-show="!filteredList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"> </div>
                     </div>       

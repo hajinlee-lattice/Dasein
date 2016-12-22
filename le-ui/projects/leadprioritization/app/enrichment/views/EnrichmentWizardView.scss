@@ -174,7 +174,6 @@
                         font-size: 20px;
                         .category-label {
                             height: 45px;
-                            overflow: hidden;
                         }
                     }
                     .count {
@@ -195,11 +194,19 @@
                 h2 {
                     margin-top: 10px;
                 }
+                @media screen and (max-width: 850px) {
+                    .category-label {
+                        display: none;
+                    }
+                }
             }
         }
         .category {
             @include flex-item(1 0 auto);
             padding: 0px 12px 0 0;
+            &.active {
+                cursor: default;
+            }
             .box-inner {
                 padding: 10px;
                 text-align: center;
@@ -263,6 +270,9 @@
                             height: 100%;
                             width: 100%;
                         }
+                    }
+                    .category-label {
+                        @include text-ellipsis();
                     }
                 }
                 .count {
@@ -472,6 +482,10 @@
         } 
     }
 
+    .load-status {
+        margin: 0 auto;
+    }
+
     .count {
         em {
             font-style: italic;
@@ -479,6 +493,7 @@
         i {
             font-size: 10px;
             margin-left: 5px;
+            color: rgba(0,0,0,.5);
         }
     }
 
@@ -502,8 +517,17 @@
                 @include flex-container;
                 padding: 5px;
                 background-color: #fff;
-                &:nth-child(odd) {
+                &:nth-child(even) {
                     background-color: #f2f1f1;
+                }
+                &:first-child {
+                    font-size: 9px;
+                    color: #adadad;
+                    text-transform: uppercase;
+                    padding-bottom: 0;
+                    .column.label {
+                        text-transform: uppercase;
+                    }
                 }
                 & > .column {
                     @include flex-item(1 1 auto);
@@ -518,8 +542,12 @@
                 }
             }
         }
+        .attributes-more {
+            text-transform: uppercase;
+            color: #2a73b9;
+            margin-top: 10px;
+        }
     }
-
 
     .dropdown-container {
         position: relative;
