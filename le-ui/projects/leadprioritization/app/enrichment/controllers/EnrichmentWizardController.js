@@ -83,7 +83,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
     vm.filter = function(items, property, value) {
         for (var i=0, result=[]; i < items.length; i++) {
-            if (items[i][property] && items[i][property] == value) {
+            if (typeof items[i][property] != 'undefined' && items[i][property] == value) {
                 result.push(items[i]);
             }
         }
