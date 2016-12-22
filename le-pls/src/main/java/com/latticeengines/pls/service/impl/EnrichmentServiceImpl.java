@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.CacheBuilder;
@@ -42,6 +43,9 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private static final Log log = LogFactory.getLog(EnrichmentServiceImpl.class);
     private static final String DUMMY_KEY = "TopNAttrTree";
 
+    @Value("${pls.enrichment.dummydata}")
+    private boolean useDummyData;
+
     private LoadingCache<String, TopNAttributeTree> topAttrsCache;
 
     @Autowired
@@ -56,12 +60,15 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                 .build(new CacheLoader<String, TopNAttributeTree>() {
                     @Override
                     public TopNAttributeTree load(String dummyKey) throws Exception {
-                        TopNAttributeTree attributeTree = new TopNAttributeTree();
-                        for (Category category: Category.values()) {
-                            attributeTree.put(category, createTopNAttributes(category.getName(), 20));
+                        TopNAttributeTree attributeTree;
+                        if (useDummyData) {
+                            attributeTree = new TopNAttributeTree();
+                            for (Category category : Category.values()) {
+                                attributeTree.put(category, createTopNAttributes(category.getName(), 20));
+                            }
+                        } else {
+                            attributeTree = amStatsProxy.getTopAttrTree();
                         }
-                        // TODO: after proxy is ready, uncomment this
-                        // TopNAttributeTree attributeTree = amStatisticsProxy.getTopAttrTree();
                         log.info("Loaded attributeTree into LoadingCache.");
                         return attributeTree;
                     }
@@ -75,7 +82,11 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     @Override
     public AccountMasterCube getCube(AccountMasterFactQuery query) {
-        return createDummyCube();
+        if (useDummyData) {
+            return createDummyCube();
+        } else {
+            return amStatsProxy.getCube(query);
+        }
     }
 
     @Override
@@ -94,12 +105,15 @@ public class EnrichmentServiceImpl implements EnrichmentService {
             return topAttrsCache.get(DUMMY_KEY);
         } catch (Exception e) {
             log.error("Failed to load top attr tree from cache", e);
-            TopNAttributeTree attributeTree = new TopNAttributeTree();
-            for (Category category: Category.values()) {
-                attributeTree.put(category, createTopNAttributes(category.getName(), 5));
+            TopNAttributeTree attributeTree;
+            if (useDummyData) {
+                attributeTree = new TopNAttributeTree();
+                for (Category category : Category.values()) {
+                    attributeTree.put(category, createTopNAttributes(category.getName(), 5));
+                }
+            } else {
+                attributeTree = amStatsProxy.getTopAttrTree();
             }
-            // TODO: after proxy is ready, uncomment this
-            // TopNAttributeTree attributeTree = amStatisticsProxy.getTopAttrTree();
             return attributeTree;
         }
     }
