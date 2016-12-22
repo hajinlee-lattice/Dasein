@@ -59,7 +59,7 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private String displayName;
 
     @JsonProperty
-    @Column(name = "DESCRIPTION", nullable = false)
+    @Column(name = "DESCRIPTION", length = 4000, nullable = false)
     private String description;
 
     @JsonProperty
