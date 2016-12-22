@@ -61,6 +61,12 @@ public abstract class BaseScoringEntityMgrImpl<T extends HasPid> implements Base
         return getDao().findByKey(entity);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public T findByField(String fieldName, Object value) {
+        return getDao().findByField(fieldName, value);
+    }
+    
     @Transactional(value="scoring", propagation = Propagation.REQUIRED, readOnly=true)
     @Override
     public List<T> findAll() {

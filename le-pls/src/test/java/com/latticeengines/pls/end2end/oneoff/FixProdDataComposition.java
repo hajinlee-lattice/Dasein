@@ -1,4 +1,4 @@
-package com.latticeengines.pls.end2end;
+package com.latticeengines.pls.end2end.oneoff;
 
 import java.io.File;
 import java.io.IOException;

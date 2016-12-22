@@ -63,6 +63,12 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public T findByField(String fieldName, Object value) {
+        return getDao().findByField(fieldName, value);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<T> findAll() {
         return getDao().findAll();
     }
