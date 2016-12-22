@@ -65,7 +65,7 @@ class FutureInfo(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "Attributes may not have NULL population > {0:2%}, lift from NULL values less than {1}, and lift from non-NULL values greater than {2}".format(self.maxNullPopulation, self.minNullLift, sself.maxNonNullLift)
+        return "This attribute looks like it was populated later in the business cycle, often called future information. This warning comes when available values show good lift (greater than {2}), but {0:.2%} or more records are unpopulated and have low lift (below {1}).".format(self.maxNullPopulation, self.minNullLift, sself.maxNonNullLift)
 
     @overrides(ColumnRule)
     def getConfParameters(self):

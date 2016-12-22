@@ -37,7 +37,7 @@ class DistinctValueCount(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "Categorical attributes may not have more than 200 distinct values"
+        return "This attribute has more than 200 category values. Attributes with more than 200 different category values cannot be used in modeling. Where possible, replace with a picklist attribute instead of a free field."
 
     @overrides(ColumnRule)
     def getConfParameters(self):

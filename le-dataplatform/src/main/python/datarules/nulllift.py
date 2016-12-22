@@ -40,7 +40,7 @@ class NullLift(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "Attributes may not have lift from NULL values less than {0} or greater than {1}".format(self.minLift, self.maxLift)
+        return "This attribute brings prediction from missing data into the model. When unpopulated numbers or categories show signifiant prediction (less than {0} or greater than {1}), later scores are often inaccurate. ".format(self.minLift, self.maxLift)
 
     @overrides(ColumnRule)
     def getConfParameters(self):

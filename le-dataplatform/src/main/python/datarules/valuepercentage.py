@@ -58,7 +58,7 @@ class ValuePercentage(ColumnRule):
 
     @overrides
     def getDescription(self):
-        return "Attributes may not have a single value with a population rate above {0:.2%}".format(self.maxPercentage)
+        return "This attribute has the same value for {0:.2%} or more records. This can lead to poor segments or inaccurate scores.".format(self.maxPercentage)
 
     @overrides(ColumnRule)
     def getConfParameters(self):
