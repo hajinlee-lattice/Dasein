@@ -24,7 +24,8 @@ public class ExternalColumnDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     public List<ExternalColumn> findByTag(String tag) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ExternalColumn> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where Tags like :tag", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where Tags like :tag order by category asc, subcategory asc",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("tag", "%" + tag + "%");
         return query.list();
