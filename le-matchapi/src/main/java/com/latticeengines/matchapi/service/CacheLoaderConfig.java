@@ -14,6 +14,8 @@ public class CacheLoaderConfig {
     private String dirPath;
     @JsonProperty("fieldMap")
     private Map<String, String> fieldMap;
+    @JsonProperty("dunsField")
+    private String dunsField;
 
     public String getVersion() {
         return version;
@@ -47,10 +49,18 @@ public class CacheLoaderConfig {
         this.fieldMap = fieldMap;
     }
 
+    public String getDunsField() {
+        return dunsField;
+    }
+
+    public void setDunsField(String dunsField) {
+        this.dunsField = dunsField;
+    }
+
     @Override
     public String toString() {
         return "CacheLoaderConfig [sourceName=" + sourceName + ", version=" + version + ", dirPath=" + dirPath
-                + ", fieldMap=" + fieldMap + "]";
+                + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + "]";
     }
 
 }

@@ -74,6 +74,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         defaultFieldMap.put("LDC_ZipCode", "zipcode");
     }
 
+    protected static String defaultDunsField = "LDC_DUNS";
+
     @Override
     public void loadCache(CacheLoaderConfig config) {
         try {

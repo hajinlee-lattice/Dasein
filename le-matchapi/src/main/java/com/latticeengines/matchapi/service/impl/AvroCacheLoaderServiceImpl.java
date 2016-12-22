@@ -28,10 +28,11 @@ public class AvroCacheLoaderServiceImpl extends BaseCacheLoaderService<GenericRe
 
     @Override
     protected DnBMatchContext createMatchContext(GenericRecord record, CacheLoaderConfig config) {
-        if (record.get("LDC_DUNS") == null) {
+        String dunsField = getDunsField(config);
+        if (record.get(dunsField) == null) {
             return null;
         }
-        String duns = record.get("LDC_DUNS").toString();
+        String duns = record.get(dunsField).toString();
         if (StringUtils.isEmpty(duns.trim())) {
             return null;
         }
@@ -40,13 +41,22 @@ public class AvroCacheLoaderServiceImpl extends BaseCacheLoaderService<GenericRe
         return matchContext;
     }
 
+    private String getDunsField(CacheLoaderConfig config) {
+        String dunsField = config.getDunsField();
+        if (StringUtils.isEmpty(dunsField)) {
+            dunsField = defaultDunsField;
+        }
+        return dunsField;
+    }
+
     private void createNameLocation(DnBMatchContext matchContext, GenericRecord record, CacheLoaderConfig config) {
 
         NameLocation nameLocation = new NameLocation();
         setFieldValues(record, nameLocation, config);
         matchContext.setInputNameLocation(nameLocation);
 
-        matchContext.setDuns(record.get("LDC_DUNS").toString());
+        String dunsField = getDunsField(config);
+        matchContext.setDuns(record.get(dunsField).toString());
         matchContext.setConfidenceCode(8);
         matchContext.setMatchGrade("AAAAAAAAA");
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);

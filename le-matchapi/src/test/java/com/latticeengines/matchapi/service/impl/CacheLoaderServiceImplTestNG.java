@@ -1,5 +1,8 @@
 package com.latticeengines.matchapi.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +47,16 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
             uploadTestAVro(avroDir, AM_CACHE_FILE);
             CacheLoaderConfig config = new CacheLoaderConfig();
             config.setDirPath(avroDir);
+            Map<String, String> fieldMap = new HashMap<>();
+
+            fieldMap.put("Name", "name");
+            fieldMap.put("Country", "countryCode");
+            fieldMap.put("State", "state");
+            fieldMap.put("City", "city");
+            fieldMap.put("PhoneNumber", "phoneNumber");
+            fieldMap.put("ZipCode", "zipcode");
+            config.setFieldMap(fieldMap);
+            config.setDunsField("DUNS");
             long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
 
             Assert.assertEquals(count, 83);
