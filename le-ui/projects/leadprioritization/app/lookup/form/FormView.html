@@ -19,13 +19,21 @@
                                     ng-checked="vm.params.enforceFuzzyMatch"
                                     ng-model="vm.params.enforceFuzzyMatch" />
                                 {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_FUZZY') }}
-                                <span 
-                                  tooltips 
-                                  tooltip-template="{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_FUZZY_TOOLTIP') }}"
-                                  tooltip-size="small"
-                                  tooltip-side="bottom"
-                                  tooltip-close-button="false" 
-                                  class="more-info">&#105;</span>
+                                <span class="more-info">&#105;
+                                    <div class="tooltip_">
+                                        <div class="cover">
+                                            <h5>
+                                                Fuzzy Match
+                                            </h5>
+                                            <p>
+                                                Fuzzy matching is a process that locates accounts that are likely to be relevant even if the information provided isn't exact.
+                                            </p>
+                                            <p>
+                                                Note that the LatticeID and D-U-N-S number always need to be entered exactly regardless of this option.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </span>
                             </label>
                         </div>          
                     </div>
@@ -142,13 +150,18 @@
                 <div class="section-body with-padding">
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_MODELSELECT') }}
-                            <span 
-                                tooltips 
-                                tooltip-template="{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_MODELSELECT_TOOLTIP') }}"
-                                tooltip-size="small"
-                                tooltip-side="bottom"
-                                tooltip-close-button="false" 
-                                class="more-info">&#105;</span>
+                                <span class="more-info">&#105;
+                                    <div class="tooltip_">
+                                        <div class="cover">
+                                            <h5>
+                                                Select a Model
+                                            </h5>
+                                            <p>
+                                                Select a model to have the account scored (optional).  You can still see all of the attributes associated with the account even if a model is not selected.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </span>
                         </label>
                         <select name="modelId"
                                 class="form-control"
@@ -171,14 +184,15 @@
                             type="button" 
                             class="button white-button block-button"
                             ui-sref="home.data-cloud">
-                          {{::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CANCEL')}}</button>
+                          {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CANCEL') }}</button>
                     </div>
                     <div class="pull-right">
                         <button 
                             type="button" 
                             ng-click="vm.next()"
-                            class="button blue-button block-button">
-                          {{::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_NEXT')}}
+                            class="button blue-button block-button"
+                            ng-disabled="!vm.validate()">
+                          {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_NEXT') }}
                         </button>
                     </div>
                 </div>

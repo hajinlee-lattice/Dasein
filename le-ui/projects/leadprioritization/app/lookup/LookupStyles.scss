@@ -3,11 +3,21 @@
         padding: 0 0 0 1em;
         white-space: pre-wrap;
     }
-    .string { color: #629acc; }
-    .number { color: #ff8c36; }
-    .boolean { color: #cc5200; }
-    .null { color: #8d66c6; }
-    .key { color: #f75959; }
+    .string { 
+        color: #629acc; 
+    }
+    .number { 
+        color: #ff8c36; 
+    }
+    .boolean { 
+        color: #cc5200; 
+    }
+    .null { 
+        color: #8d66c6; 
+    }
+    .key { 
+        color: #f75959; 
+    }
     div.lookup-back {
         margin: 1.5em 0;
         font-weight: bold;
@@ -32,6 +42,13 @@
                 border-bottom-color: #fafafa;
                 cursor: default;
             }
+
+            &:hover {
+                text-decoration: underline;
+                &.active {
+                    text-decoration: inherit;
+                }
+            }
         }
     }
     div.lookup-response-area {
@@ -39,6 +56,7 @@
         padding: 2em 2.5em;
         background: #fff;
         border: 1px solid #d0d0d0;
+        border-radius: 3px;
         
         label {
             display: block;
@@ -54,6 +72,12 @@
     }
     div.lookup-back {
         cursor: pointer;
+        &:hover {
+            text-decoration: underline;
+        }
+        ico {
+            margin-right: .33em
+        }
     }
 }
 .noselect {
