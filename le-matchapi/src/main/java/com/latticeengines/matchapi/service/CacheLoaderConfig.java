@@ -16,6 +16,10 @@ public class CacheLoaderConfig {
     private Map<String, String> fieldMap;
     @JsonProperty("dunsField")
     private String dunsField;
+    @JsonProperty("confidenceCode")
+    private Integer confidenceCode;
+    @JsonProperty("matchGrade")
+    private String matchGrade;
 
     public String getVersion() {
         return version;
@@ -57,10 +61,27 @@ public class CacheLoaderConfig {
         this.dunsField = dunsField;
     }
 
+    public Integer getConfidenceCode() {
+        return this.confidenceCode;
+    }
+
+    public String getMatchGrade() {
+        return this.matchGrade;
+    }
+
+    public void setConfidenceCode(Integer confidenceCode) {
+        this.confidenceCode = confidenceCode;
+    }
+
+    public void setMatchGrade(String matchGrade) {
+        this.matchGrade = matchGrade;
+    }
+
     @Override
     public String toString() {
         return "CacheLoaderConfig [sourceName=" + sourceName + ", version=" + version + ", dirPath=" + dirPath
-                + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + "]";
+                + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + ", confidenceCode=" + confidenceCode
+                + ", matchGrade=" + matchGrade + "]";
     }
 
 }

@@ -57,8 +57,9 @@ public class AvroCacheLoaderServiceImpl extends BaseCacheLoaderService<GenericRe
 
         String dunsField = getDunsField(config);
         matchContext.setDuns(record.get(dunsField).toString());
-        matchContext.setConfidenceCode(8);
-        matchContext.setMatchGrade("AAAAAAAAA");
+
+        matchContext.setConfidenceCode(config.getConfidenceCode());
+        matchContext.setMatchGrade(config.getMatchGrade());
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
     }
 

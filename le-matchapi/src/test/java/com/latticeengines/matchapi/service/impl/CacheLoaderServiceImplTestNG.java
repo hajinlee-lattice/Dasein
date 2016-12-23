@@ -57,6 +57,8 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
             fieldMap.put("ZipCode", "zipcode");
             config.setFieldMap(fieldMap);
             config.setDunsField("DUNS");
+            config.setConfidenceCode(6);
+            config.setMatchGrade("AAA");
             long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
 
             Assert.assertEquals(count, 83);
@@ -91,13 +93,13 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocation.setZipcode("917374428");
         nameLocation.setPhoneNumber(null);
         context.setInputNameLocation(nameLocation);
-
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+
         Assert.assertTrue(whiteCache != null);
         Assert.assertEquals(whiteCache.getDuns(), "039891115");
-        Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(8));
-        Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AAAAAAAAA");
+        Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(6));
+        Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AAA");
     }
 
     private void uploadTestAVro(String avroDir, String fileName) {
