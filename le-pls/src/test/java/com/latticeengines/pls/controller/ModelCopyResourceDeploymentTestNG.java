@@ -193,7 +193,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
         log.info("Wait for 60 seconds to download model summary");
-        Thread.sleep(60000L);
+        Thread.sleep(180000L);
 
         setupSecurityContext(tenant2);
 
