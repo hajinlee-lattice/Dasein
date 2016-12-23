@@ -25,7 +25,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
-    private static final String SEARCH_DISPLAY_NAME_STR3 = "lication Development Tech";
+    private static final String SEARCH_DISPLAY_NAME_STR3 = "DAY 30 ers ChangE: dAtA";
+    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "ers 30 DAY ChangE: dAtA";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
@@ -347,13 +348,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(combinedAttributeList.size(), 1);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
-                Category.TECHNOLOGY_PROFILE);
+                Category.INTENT);
         Assert.assertNotNull(combinedAttributeList);
         Assert.assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             System.out.println("Check for " + SEARCH_DISPLAY_NAME_STR3 + " - " + attr.getDisplayName());
-            Assert.assertTrue(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
+            Assert.assertFalse(attr.getDisplayName().toUpperCase().contains(SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
+            Assert.assertTrue(attr.getDisplayName().toUpperCase().contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
         }
 
         Assert.assertEquals(combinedAttributeList.size(), 1);
