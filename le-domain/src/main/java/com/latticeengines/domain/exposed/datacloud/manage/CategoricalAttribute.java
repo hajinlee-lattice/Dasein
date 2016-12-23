@@ -25,6 +25,8 @@ public class CategoricalAttribute implements HasPid {
 
     public static final String ALL = "_ALL_";
 
+    public static final String OTHER = "_OTHER_";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
