@@ -350,6 +350,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         combinedAttributeList = getLeadEnrichmentAttributeList(true, CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3,
                 Category.INTENT);
         Assert.assertNotNull(combinedAttributeList);
+        System.out.println("Check for " + CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 + " size is " + combinedAttributeList.size());
+        assertTrue(combinedAttributeList.size() > 0);
         Assert.assertFalse(combinedAttributeList.isEmpty());
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
