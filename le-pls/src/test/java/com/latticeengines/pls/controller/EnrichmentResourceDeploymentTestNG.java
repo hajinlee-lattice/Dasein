@@ -375,7 +375,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
         assertEquals(combinedAttributeList.size(), 1);
 
-        combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR3,
+        combinedAttributeList = getLeadEnrichmentAttributeList(true, CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3,
                 Category.INTENT, false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
