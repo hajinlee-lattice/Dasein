@@ -96,7 +96,7 @@ angular.module('mainApp.models.remodel', [
             useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns === "false",
             enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name || Model.ModelDetails.TransformationGroupName === "none") ? false : true,
             modelName = vm.newModelName,
-            modelDisplayName = Model.ModelDetails.DisplayName + (Model.ModelDetails.DisplayName.length + copy_text.length <= 50 ? copy_text : ''),
+            modelDisplayName = vm.newModelName,
             originalModelSummaryId = Model.ModelDetails.ModelID,
             fields = vm.attributes.map(function(attribute) {
                 return attribute.attribute;
