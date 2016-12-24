@@ -388,7 +388,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
             assertTrue(attr.getDisplayName().toUpperCase().contains(CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3.toUpperCase()));
         }
 
-        assertEquals(combinedAttributeList.size(), 1);
+        assertEquals(combinedAttributeList.size(), 2);
 
         combinedAttributeList = getLeadEnrichmentAttributeList(true, SEARCH_DISPLAY_NAME_STR2,
                 Category.TECHNOLOGY_PROFILE, false);
