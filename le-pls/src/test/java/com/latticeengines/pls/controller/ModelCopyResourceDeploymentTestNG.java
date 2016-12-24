@@ -90,8 +90,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
         cleanup();
         setupHdfs();
-        log.info("Wait for 60 seconds to download model summary");
-        Thread.sleep(60000L);
+        log.info("Wait for 180 seconds to download model summary");
+        Thread.sleep(180000L);
         setupTables();
         testModelCopy();
         cleanup();
@@ -192,7 +192,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
 
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
-        log.info("Wait for 60 seconds to download model summary");
+        log.info("Wait for 180 seconds to download model summary");
         Thread.sleep(180000L);
 
         setupSecurityContext(tenant2);
