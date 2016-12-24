@@ -33,7 +33,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
     private static final String SEARCH_DISPLAY_NAME_STR3 = "DAY 30 ers ChangE: dAtA";
-    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "ers 30 DAY ChangE: dAtA";
+    private static final String CORRECT_ORDER_SEARCH_DISPLAY_NAME_STR3 = "30 Day Change: Ad Tech";
     private static final String SEARCH_DISPLAY_NAME_STR4 = "as Acc";
     private static final int MAX_DESELECT = 2;
     private static final int MAX_SELECT = 1;
