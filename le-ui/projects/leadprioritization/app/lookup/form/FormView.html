@@ -4,13 +4,13 @@
             <div class="columns eight offset-two box-outline">
                 <div class="section-header">
                     <h4>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_HEADER') }}</h4>
-                    <h5>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_SUBHEADER') }}</h5>
+                    <!--h5>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_SUBHEADER') }}</h5-->
                 </div>
 
                 <hr />
 
                 <div class="section-body with-padding">
-                    <div class="form-group">
+                    <div class="form-group" ng-if="vm.EnableFuzzyMatch">
                         <div class="toggle-check">
                             <label>
                                 <input 
@@ -43,12 +43,13 @@
                         <input 
                             type="text" 
                             class="form-control required" 
-                            name="Domain"
+                            name="Website"
                             ng-model="vm.request.record.Domain"
+                            ng-change="vm.request.record.Website = vm.request.record.Domain"
                             placeholder="Ex: www.domain.com" />
                     </div>
 
-                    <div class="row">
+                    <!--div class="row">
                         <div class="columns six form-group">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_DUNSNUMBER') }}</label>
                             <input 
@@ -76,9 +77,9 @@
                             type="text" 
                             class="form-control required" 
                             name="Email"
-                            ng-model="vm.request.record.Email1"
+                            ng-model="vm.request.record.Email"
                             placeholder="Ex: anything@domain.com" />
-                    </div>
+                    </div-->
                     
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_COMPANYNAME') }}</label>
@@ -145,7 +146,7 @@
                     </div>
                 </div>
 
-                <hr />
+                <!--hr />
 
                 <div class="section-body with-padding">
                     <div class="form-group">
@@ -174,7 +175,7 @@
                             </option>
                         </select>
                     </div>
-                </div>
+                </div-->
 
                 <hr />
                 

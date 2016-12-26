@@ -1173,7 +1173,7 @@ angular
                     templateUrl: 'app/lookup/tabs/TabsView.html'
                 }
             },
-            redirectTo: 'home.lookup.tabs.response'
+            redirectTo: 'home.lookup.tabs.attr'
         })
         .state('home.lookup.tabs.response', {
             url: '/response',

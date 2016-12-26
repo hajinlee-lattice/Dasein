@@ -94,22 +94,23 @@
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
-                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                            max="vm.max = (vm.subcategoriesList ? vm.subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>
             <ul class="subcategories">
-                <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category]) 
-                        | filter: vm.subcategoryFilter
+                <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
                         | orderBy: vm.sortOrder()
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
                         track by $index" 
                     class="subcategory"
+                    ng-if="subcategoryCount = vm.subcategoryCount(vm.category, subcategory, subcategoriesList);"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
-                    <div class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
-                         ng-class="{active: vm.subcategory == subcategory}">
+                    <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
+                            ng-if="vm.subcategoryInit($index, $first, $last, subcategory, subcategoryCount)"
+                            ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
                             <div class="category-icon">
                                 <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
@@ -117,7 +118,7 @@
                             <div class="category-label">{{subcategory}}</div>
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{ subcategoryCount|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                         <div class="attributes-container" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]">
@@ -135,7 +136,7 @@
                        </div>
                     </div>
                 </li>
-                <li class="load-status" ng-show="subcategoriesList.length">
+                <li class="load-status" ng-show="vm.subcategoriesList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"></div>
                     </div>       
@@ -146,7 +147,7 @@
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
-                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
+                            max="vm.max = (vm.subcategoriesList ? vm.subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>

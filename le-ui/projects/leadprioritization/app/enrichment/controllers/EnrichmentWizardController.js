@@ -43,6 +43,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enrichments_completed: false,
         enrichmentsObj: {},
         enrichments: [],
+        subcategoriesList: [],
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -61,7 +62,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         enable_category_dropdown: false,
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
-        view: 'list'
+        view: 'list',
+        blah: {}
     });
     vm.orders = {
         attribute: 'DisplayName',
@@ -530,6 +532,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             }
         }
 
+        vm.blah[subcategory] = result.length;
+
         return result.length;
     }
 
@@ -638,10 +642,37 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     });
 
     $scope.$watch('vm.query', function(newvalue, oldvalue){
+        console.log('watch query', newvalue, oldvalue, vm.subcategoriesList.length);
         if(!vm.category && newvalue) {
             vm.category = vm.categories[0];
         }
     });
+
+
+    vm.subcategoryInit = function(index, first, last, cat, count, list) {
+        if (first) { 
+        }
+//console.log(index, count);
+
+        if (last) {
+            //$timeout.cancel(vm.subcatTimeout);
+            //vm.subcatTimeout = $timeout(function() {
+                //console.log(vm.blah);
+                vm.subcategoriesList = [];
+                //console.log(list);
+                for (var category in vm.blah) {
+                    if (vm.blah[category] >= 0) {
+                        //console.log(category, index);
+                        vm.subcategoriesList.push(category);
+                    }
+                }
+               //console.log(vm.subcategoriesList);
+            //}, 1000);
+            //$scope.$digest();
+        }
+
+        return true;
+    }
 
     vm.percentage = function(number, total) {
         if(number && total) {

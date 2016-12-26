@@ -63,7 +63,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         USE_SALESFORCE_SETTINGS: 'UseSalesforceSettings',
 
         ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES: 'EnableInternalEnrichmentAttributes',
-        ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2'
+        ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
+        ENABLE_FUZZY_MATCH: 'EnableFuzzyMatch'
     };
     this.Flags = function(){ return flags; };
 

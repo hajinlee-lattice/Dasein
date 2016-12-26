@@ -1,29 +1,23 @@
 angular
 .module('lp.lookup.form')
-.service('LookupStore', function($sce) {
+.service('LookupStore', function($sce, FeatureFlagService) {
+    var LookupStore = this;
+
     this.timestamp = 0;
     this.params = { 
         shouldSkipLoadingEnrichmentMetadata: true,
-        enforceFuzzyMatch: true 
+        enforceFuzzyMatch: false
     };
     this.response = {};
     this.request = {
         modelId: '',
         performEnrichment: true,
-        record: {
-            Domain: '',
-            DUNS: '',
-            Id: '',
-            Email1: '',
-            CompanyName: '',
-            City: '',
-            State: '',
-            Zip: '',
-            County: '',
-            PhoneNumber: '',
-            City: ''
-        }
+        record: { }
     };
+
+    this.setParam = function(property, value) {
+        this.params[property] = value;
+    }
 
     this.add = function(type, request) {
         this[type] = request;
