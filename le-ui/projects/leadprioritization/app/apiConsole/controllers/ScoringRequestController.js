@@ -24,6 +24,8 @@ angular.module('lp.apiconsole.ScoringRequestController', [
             var oldFieldsValuesHash = {};
 
             $scope.modelChanged = function ($event) {
+                $scope.scoringRequested = false;
+
                 if ($event != null) {
                     $event.preventDefault();
                 }
