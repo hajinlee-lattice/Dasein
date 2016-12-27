@@ -56,6 +56,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         initialized: false,
         status_alert: {},
         enrichments: [],
+        _subcategories: [],
         subcategories: [],
         categories: [],
         selected_categories: {},
@@ -63,6 +64,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enable_grid: true,
         view: 'list',
+        queryText: '',
         blah: {}
     });
     vm.orders = {
@@ -251,6 +253,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         if(category) {
             EnrichmentStore.getSubcategories(category).then(function(result) {
                 if(result.data.length > 1){
+                    vm._subcategories[category] = result.data;
                     vm.subcategories[category] = result.data;
                 }
             });
@@ -260,10 +263,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     var textSearch = function(haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
         if(case_insensitive) {
-            var haystack = haystack.toUpperCase(),
-            needle = needle.toUpperCase();
+            var haystack = haystack.toLowerCase(),
+            needle = needle.toLowerCase();
         }
-        return haystack.includes(needle);
+        // .indexOf is faster than .includes
+        return (haystack.indexOf(needle) >= 0);
     }
 
     vm.searchFields = function(enrichment){
@@ -532,8 +536,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             }
         }
 
-        vm.blah[subcategory] = result.length;
-
         return result.length;
     }
 
@@ -589,6 +591,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         } else {
             vm.subcategory = '';
             vm.category = category;
+
+            vm.filterEmptySubcategories();
         }
    }
 
@@ -641,13 +645,42 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         _resized(event, 100);
     });
 
-    $scope.$watch('vm.query', function(newvalue, oldvalue){
-        console.log('watch query', newvalue, oldvalue, vm.subcategoriesList.length);
-        if(!vm.category && newvalue) {
-            vm.category = vm.categories[0];
+    $scope.$watch('vm.queryText', function(newvalue, oldvalue){
+        vm.queryInProgress = true;
+
+        if (vm.queryTimeout) {
+            $timeout.cancel(vm.queryTimeout);
         }
+
+        // debounce timeout to speed things up
+        vm.queryTimeout = $timeout(function() {
+            if(!vm.category && newvalue) {
+                vm.category = vm.categories[0];
+            }
+
+            vm.query = vm.queryText;
+            
+            vm.filterEmptySubcategories();
+
+            vm.queryInProgress = false;
+        }, 333);
+
+        //console.log(newvalue, vm.category, vm.subcategory, vm);
     });
 
+    vm.filterEmptySubcategories = function() {
+        //for (var category in vm._subcategories) {
+        if (vm._subcategories[vm.category]) {
+            for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
+                var subcategory = vm._subcategories[vm.category][i];
+                //console.log(category, subcategory, vm.subcategoryCount(category, subcategory));
+                if (vm.subcategoryCount(vm.category, subcategory) > 0) {
+                    newCategories.push(subcategory);
+                }
+            }
+            vm.subcategories[vm.category] = newCategories;
+        }
+    }
 
     vm.subcategoryInit = function(index, first, last, cat, count, list) {
         if (first) { 

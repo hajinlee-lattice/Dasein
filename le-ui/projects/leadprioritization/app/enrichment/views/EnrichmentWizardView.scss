@@ -31,9 +31,15 @@
                 opacity: .4;
             }
             &.query {
-                margin-right: 16px;
+                margin-right: .5em;
                 .ng-search {
                     white-space: nowrap;
+                }
+                span.fa {
+                    min-width: 1.3em;
+                }
+                input {
+                    padding-left: 0;
                 }
             }
             &.download {

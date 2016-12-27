@@ -10,11 +10,12 @@
             <ul class="filters" >
                 <li class="query">
                     <div class="ng-search">
-                        <a class="button icon-button white-button" ng-click="vm.query.length ? vm.query = null : ''">
-                            <span class="fa fa-search" ng-show="!vm.query.length"></span>
-                            <span class="fa fa-times" ng-show="vm.query.length"></span>
+                        <a class="button icon-button white-button" ng-click="vm.queryText.length ? vm.queryText = null : ''">
+                            <span class="fa fa-search" ng-show="!vm.query.length && !vm.queryInProgress"></span>
+                            <span class="fa fa-times" ng-show="vm.query.length && !vm.queryInProgress"></span>
+                            <span class="fa fa-spinner fa-pulse fa-fw" ng-show="vm.queryInProgress"></span>
                         </a>
-                        <input type="text" class="form-control" placeholder="Search" ng-model="vm.query" ng-change="vm.metadata.current = 1" />
+                        <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
@@ -105,11 +106,9 @@
                         | limitTo: vm.pagesize 
                         track by $index" 
                     class="subcategory"
-                    ng-if="subcategoryCount = vm.subcategoryCount(vm.category, subcategory, subcategoriesList);"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
                     <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
-                            ng-if="vm.subcategoryInit($index, $first, $last, subcategory, subcategoryCount)"
                             ng-class="{active: vm.subcategory == subcategory}">
                         <h2>
                             <div class="category-icon">
@@ -118,7 +117,7 @@
                             <div class="category-label">{{subcategory}}</div>
                         </h2>
                         <span class="count">
-                            <strong ng-if="vm.enrichments_completed">{{ subcategoryCount|number }}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                         <div class="attributes-container" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]">
