@@ -272,8 +272,6 @@ angular
                         }
                 };
 
-                console.log( stepRunning );
-
                 deferred.resolve(result);
             }
         );
