@@ -94,7 +94,7 @@
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
-                            max="vm.max = (vm.subcategoriesList ? vm.subcategoriesList.length / vm.pagesize : 0)">
+                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                        </div>
                     </div>
                 </li>
-                <li class="load-status" ng-show="vm.subcategoriesList.length">
+                <li class="load-status" ng-show="subcategoriesList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"></div>
                     </div>       
@@ -147,7 +147,7 @@
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
-                            max="vm.max = (vm.subcategoriesList ? vm.subcategoriesList.length / vm.pagesize : 0)">
+                            max="vm.max = (subcategoriesList ? subcategoriesList.length / vm.pagesize : 0)">
                     </pd-pagination-controls>
                 </div>
             </div>
