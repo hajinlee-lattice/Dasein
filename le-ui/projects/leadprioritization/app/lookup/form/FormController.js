@@ -36,14 +36,29 @@ angular
     }
 
     vm.validate = function() {
-        for (var key in vm.request.record) {
-            if (vm.request.record[key]) {
-                return true;
-            }
-        }
+        var validFormStates = [
+            ['CompanyName', 'City', 'State', 'Country'],
+            ['Website']
+        ];
 
-        if (vm.request.modelId) {
-            return true;
+        for (var i = 0; i < validFormStates.length; i++) {
+            var state = validFormStates[i];
+            var valid = true;
+
+            for (var j = 0; j < state.length; j++) {
+                var key = state[j];
+                if (!vm.request.record[key]) {
+                    valid = false;
+                    dirty = true;
+                    break;
+                }
+            }
+
+            if (valid) {
+                return true;
+            } else if (dirty) {
+                // hightlight required fields
+            }
         }
 
         return false;
