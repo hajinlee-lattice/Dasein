@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PipelineTransformationRequest {
+public class PipelineTransformationReport {
 
     @JsonProperty("Submitter")
     private String submitter;
@@ -12,14 +12,8 @@ public class PipelineTransformationRequest {
     @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("Version")
-    private String version;
-
-    @JsonProperty("KeepTemp")
-    private boolean keepTemp;
-
     @JsonProperty("Steps")
-    private List<TransformationStepConfig> steps;
+    private List<TransformationStepReport> steps;
 
     public String getSubmitter() {
         return submitter;
@@ -37,27 +31,11 @@ public class PipelineTransformationRequest {
         this.name = name;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public boolean getKeepTemp() {
-        return keepTemp;
-    }
-
-    public void setKeepTemp(boolean keepTemp) {
-        this.keepTemp = keepTemp;
-    }
-
-    public List<TransformationStepConfig> getSteps() {
+    public List<TransformationStepReport> getSteps() {
         return steps;
     }
 
-    public void setSteps(List<TransformationStepConfig> steps) {
+    public void setSteps(List<TransformationStepReport> steps) {
         this.steps = steps;
     }
 }

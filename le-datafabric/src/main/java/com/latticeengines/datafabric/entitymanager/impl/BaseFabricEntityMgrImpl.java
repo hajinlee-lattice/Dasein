@@ -125,9 +125,16 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             schema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
 
-        dataStore = dataService.constructDataStore(store, repository, recordType, schema);
+        if (store != null) {
+            try {
+                dataStore = dataService.constructDataStore(store, repository, recordType, schema);
+            } catch (Exception e) {
+                log.error("Failed to create data store " + store);
+                disabled = true;
+            }
+        }
 
-        if (topic != null) {
+        if (!disabled && (topic != null)) {
             producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
                     .messageService(this.messageService).topic(this.topic).scope(scope));
 

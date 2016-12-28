@@ -58,6 +58,6 @@ public class SampleDataTransformer extends AbstractDataflowTransformer<SampleTra
     protected void updateParameters(SourceSampleFlowParameters parameters, Source[] baseTemplates, Source targetTemplate, SampleTransformerConfig config) {
         parameters.setFraction(config.getFraction());
         parameters.setFilter(config.getFilter());
-        parameters.setFilterAttrs(config.getFilterAttrs());
+        parameters.setFilterAttrs(config.getReportAttrs());
     }
 }

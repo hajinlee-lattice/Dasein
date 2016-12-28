@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,9 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
 
 /**
  * This transformation service allows parameterizing the source and target, pipelining the tranformation process.
@@ -44,8 +44,8 @@ public class PipelineTransformationService
     @Autowired
     private TransformerService transformerService;
 
-    private final String TEMP_SOURCE = "temp_source_";
-
+    private final String PIPELINE = "Pipeline_";
+    private final String VERSION = "_version_";
     private final String STEP = "_step_";
 
     @Override
@@ -86,7 +86,10 @@ public class PipelineTransformationService
             updateStatusToFailed(progress, "Failed to initiate transfom steps", null);
         } else {
             succeeded = executeTransformSteps(progress, steps, workflowDir);
-            cleanupTempSources(progress, steps);
+            reportPipelineExec(progress, transConf, steps);
+            if (!transConf.getKeepTemp()) {
+                cleanupTempSources(progress, steps);
+            }
         }
         if (doPostProcessing(progress, workflowDir, false) & succeeded) {
             return progress;
@@ -116,16 +119,12 @@ public class PipelineTransformationService
         }
     }
 
-    private String getTempSourceName(TransformationProgress progress, int step) {
-        return TEMP_SOURCE + progress.getRootOperationUID() + STEP + step;
-    }
-
-    private String getTempSourceName(int step) {
-        return TEMP_SOURCE + UUID.randomUUID().toString() + STEP + step;
+    private String getTempSourceName(String pipelineName, String version, int step) {
+        return PIPELINE + pipelineName + VERSION + version + STEP + step;
     }
 
     private boolean isTempSource(Source source) {
-        return source.getSourceName().startsWith(TEMP_SOURCE);
+        return source.getSourceName().startsWith(PIPELINE);
     }
 
     private TransformStep[] initiateTransformSteps(TransformationProgress progress,
@@ -134,6 +133,7 @@ public class PipelineTransformationService
         List<TransformationStepConfig> stepConfigs = transConf.getSteps();
         TransformStep[] steps = new TransformStep[stepConfigs.size()];
         Map<Source, String> sourceVersions = new HashMap<Source, String>();
+        String pipelineVersion = transConf.getVersion();
 
         for (int stepIdx = 0; stepIdx < steps.length; stepIdx++) {
             TransformationStepConfig config = stepConfigs.get(stepIdx);
@@ -212,7 +212,7 @@ public class PipelineTransformationService
             Source targetTemplate = null;
             String targetName = config.getTargetSource();
             if (targetName == null) {
-                targetName = getTempSourceName(progress, stepIdx);
+                targetName = getTempSourceName(transConf.getName(), pipelineVersion, stepIdx);
                 target = sourceService.createSource(targetName);
             } else {
                 target = sourceService.findOrCreateSource(targetName);
@@ -229,7 +229,7 @@ public class PipelineTransformationService
 
             String targetVersion = config.getTargetVersion();
             if (targetVersion == null) {
-                targetVersion = baseVersions.get(0);
+                targetVersion = pipelineVersion;
             }
 
             sourceVersions.put(target, targetVersion);
@@ -249,15 +249,19 @@ public class PipelineTransformationService
             Transformer transformer = step.getTransformer();
             try {
                 log.info("Transforming step " + i);
-                boolean succeeded = transformer.transform(progress, workflowDir, step.getBaseSources(), step.getBaseVersions(),
-                                                            step.getBaseTemplates(), step.getTargetTemplate(),
-                                                            step.getConfig());
-                if (!succeeded) {
-                    updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
-                    return false;
-                }
-                saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
-                cleanupWorkflowDir(progress, workflowDir);
+                if (hdfsSourceEntityMgr.checkSourceExist(step.getTarget(), step.getTargetVersion())) {
+                    log.info("Skip executed step " + i);
+                } else {
+                    boolean succeeded = transformer.transform(progress, workflowDir, step.getBaseSources(), step.getBaseVersions(),
+                                                              step.getBaseTemplates(), step.getTargetTemplate(),
+                                                              step.getConfig());
+                    if (!succeeded) {
+                        updateStatusToFailed(progress, "Failed to transform data at step " + i, null);
+                        return false;
+                    }
+                    saveSourceVersion(progress, step.getTarget(), step.getTargetVersion(), workflowDir);
+                    cleanupWorkflowDir(progress, workflowDir);
+               }
             } catch (Exception e) {
                 updateStatusToFailed(progress, "Failed to transform data at step " + i, e);
                 return false;
@@ -266,16 +270,82 @@ public class PipelineTransformationService
         return true;
     }
 
+    private void reportPipelineExec(TransformationProgress progress, PipelineTransformationConfiguration transConf, TransformStep[] steps) {
+        String name = transConf.getName();
+
+        if (name == null) {
+            log.info("Report will not be generated for anonymous pipeline");
+            return;
+        }
+
+        PipelineTransformationReport report = new PipelineTransformationReport();
+        report.setName(name);
+        String version = transConf.getVersion();
+
+        List<TransformationStepConfig> stepConfigs = transConf.getSteps();
+        List<TransformationStepReport> stepReports = new ArrayList<TransformationStepReport>();
+        for (int i = 0; i < steps.length; i++) {
+            TransformationStepReport stepReport = new TransformationStepReport();
+            stepReports.add(stepReport);
+            TransformStep step = steps[i];
+            Source[] baseSources = step.getBaseSources();
+            List<String> baseVersions = step.getBaseVersions();
+            TransformationStepConfig stepConfig = stepConfigs.get(i);
+            stepReport.setTransformer(stepConfig.getTransformer());
+            Source targetSource = step.getTarget();
+            String targetVersion = step.getTargetVersion();
+            for (int j = 0; j < baseSources.length; j++) {
+                Source baseSource = baseSources[j];
+                stepReport.addBaseSource(baseSource.getSourceName(), baseVersions.get(j));
+            }
+
+            if (hdfsSourceEntityMgr.checkSourceExist(targetSource, targetVersion)) {
+                stepReport.setExecuted(true);
+                Long targetRecords = hdfsSourceEntityMgr.count(targetSource, targetVersion);
+                stepReport.setTargetSource(targetSource.getSourceName(), targetVersion, targetRecords);
+            }
+        }
+        report.setSteps(stepReports);
+        hdfsSourceEntityMgr.saveReport(pipelineSource, name, version, JsonUtils.serialize(report));
+    }
+
     @Override
     public PipelineTransformationConfiguration createTransformationConfiguration(List<String> baseVersions, String targetVersion) {
         return null;
     }
 
-    public PipelineTransformationConfiguration createTransformationConfiguration(PipelineTransformationRequest request) {
+    public PipelineTransformationConfiguration createTransformationConfiguration(PipelineTransformationRequest inputRequest) {
+
+        PipelineTransformationRequest request = inputRequest;
+
+        String pipelineName = request.getName();
+        String version = request.getVersion();
+        if (version == null) {
+            version = createNewVersionStringFromNow();
+        }
 
         log.info("Creating Pipeline configuration");
 
         List<TransformationStepConfig> steps = request.getSteps();
+
+        if (((steps == null) || (steps.size() == 0)) && (pipelineName != null)) {
+            log.info("Building pipeline " + pipelineName + " from templates in hdfs");
+            try {
+                String requestJson = hdfsSourceEntityMgr.getRequest(pipelineSource, pipelineName);
+                if  (requestJson != null) {
+                     request = JsonUtils.deserialize(requestJson, PipelineTransformationRequest.class);
+                     steps = request.getSteps();
+                }
+            } catch (Exception e) {
+                log.error("Failed to load pipeline template " + pipelineName + " from hdfs", e);
+                steps = null;
+            }
+        }
+
+        if ((steps == null) || (steps.size() == 0)) {
+            log.info("Invalid pipeline " + pipelineName + " without steps");
+            return null;
+        }
 
         int currentStep = 0;
         for (TransformationStepConfig step : steps) {
@@ -344,7 +414,7 @@ public class PipelineTransformationService
             } else {
                 sourceNames = new ArrayList<String>();
                 for (int i = 0; i < inputSteps.size(); i++) {
-                    sourceNames.add(getTempSourceName(currentStep));
+                    sourceNames.add(getTempSourceName(pipelineName, version, i));
                 }
                 if (baseSourceNames != null) {
                     for (String sourceName : baseSourceNames) {
@@ -360,8 +430,10 @@ public class PipelineTransformationService
         }
 
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName(pipelineName);
+        configuration.setVersion(version);
         configuration.setServiceBeanName(getServiceBeanName());
-        configuration.setVersion(createNewVersionStringFromNow());
+        configuration.setKeepTemp(inputRequest.getKeepTemp());
         configuration.setSteps(steps);
 
         return configuration;

@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 
 public class PipelineTransformationConfiguration extends BasicTransformationConfiguration implements TransformationConfiguration {
 
+    private String name;
     private String sourceName;
     private String version;
     private String serviceBeanName;
@@ -21,6 +22,8 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
     private InputSourceConfig inputSourceConfig = null;
 
     private List<TransformationStepConfig> steps;
+
+    private boolean keepTemp;
 
     @Override
     public String getSourceName() {
@@ -92,5 +95,21 @@ public class PipelineTransformationConfiguration extends BasicTransformationConf
 
     public void setSteps(List<TransformationStepConfig> steps) {
         this.steps = steps;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean getKeepTemp() {
+        return keepTemp;
+    }
+
+    public void setKeepTemp(boolean keepTemp) {
+        this.keepTemp = keepTemp;
     }
 }

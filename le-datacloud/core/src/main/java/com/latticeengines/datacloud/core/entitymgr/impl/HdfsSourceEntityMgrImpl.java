@@ -11,6 +11,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -201,6 +202,47 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public String getRequest(Source source, String requestName) {
+        String request = null;
+        try {
+            String requestFile = hdfsPathBuilder.constructSourceDir(source).append("requests").append(requestName + ".json").toString();
+            request = HdfsUtils.getHdfsFileContents(yarnConfiguration, requestFile);
+        } catch (Exception e) {
+            log.error("Failed to load request " + requestName + " from source " + source.getSourceName(), e);
+            request = null;
+        }
+        return request;
+    }
+
+    @Override
+    public boolean saveReport(Source source, String reportName, String version, String report) {
+
+        try {
+            Path reportPath = hdfsPathBuilder.constructSourceDir(source).append("reports");
+
+            if (!HdfsUtils.fileExists(yarnConfiguration, reportPath.toString())) {
+                HdfsUtils.mkdir(yarnConfiguration, reportPath.toString());
+            }
+
+            reportPath = reportPath.append(reportName);
+            if (!HdfsUtils.fileExists(yarnConfiguration, reportPath.toString())) {
+                HdfsUtils.mkdir(yarnConfiguration, reportPath.toString());
+            }
+
+            String reportFile = reportPath.append(version + ".json").toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, reportFile)) {
+                HdfsUtils.rmdir(yarnConfiguration, reportFile);
+            }
+            HdfsUtils.writeToFile(yarnConfiguration, reportFile, report);
+        } catch (Exception e) {
+            log.error("Failed to save report", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public Table getCollectedTableSince(IngestedRawSource source, Date earliest) {
         String firstVersion = HdfsPathBuilder.dateFormat.format(earliest);
 
@@ -249,6 +291,21 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             throw new RuntimeException("Failed to count source " + source.getSourceName() + " at version " + version,
                     e);
+        }
+    }
+
+    @Override
+    public boolean checkSourceExist(Source source, String version) {
+        boolean sourceExists = false;
+        String avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        try {
+            if (HdfsUtils.isDirectory(yarnConfiguration, avroDir))  {
+                sourceExists = true;
+            }
+        } catch (Exception e) {
+            log.info("Failed to check " + source.getSourceName() + "@version " + version + " in HDFS");
+        } finally {
+            return sourceExists;
         }
     }
 

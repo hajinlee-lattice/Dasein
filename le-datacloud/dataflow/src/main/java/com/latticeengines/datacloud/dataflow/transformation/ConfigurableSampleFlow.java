@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -7,10 +9,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SampleTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component("configurableSampleFlow")
 public class ConfigurableSampleFlow
@@ -21,17 +21,40 @@ public class ConfigurableSampleFlow
 
         SampleTransformerConfig config = getTransformerConfig(parameters);
 
-        Node source = addSource(parameters.getBaseTables().get(0));
-
-        Node sampled = source.sample(config.getFraction());
+        Node sampled = addSource(parameters.getBaseTables().get(0));
 
         String filter = config.getFilter();
-
-        List<String> attrs = config.getFilterAttrs();
-
-        if ((filter != null) && (attrs != null)) {
+        List<String> attrs = sampled.getFieldNames();
+        if (filter != null) {
             sampled = sampled.filter(filter, new FieldList(attrs.toArray(new String[attrs.size()])));
         }
+
+        Float fraction = config.getFraction();
+
+        if (fraction != null) {
+            sampled = sampled.sample(config.getFraction());
+        }
+
+        List<String> reportAttrs = config.getReportAttrs();
+
+        if (reportAttrs != null) {
+            attrs = reportAttrs;
+        }
+
+        List<String> excludeAttrs = config.getExcludeAttrs();
+        if (excludeAttrs != null) {
+            HashSet<String> excludeSet = new HashSet<String>(excludeAttrs);
+
+            List<String> finalAttrs = new ArrayList<String>();
+            for (String attr : attrs) {
+                if (!excludeSet.contains(attr)) {
+                    finalAttrs.add(attr);
+                }
+            }
+            attrs = finalAttrs;
+        }
+
+        sampled = sampled.retain(new FieldList(attrs.toArray(new String[attrs.size()])));
 
         return sampled;
     }

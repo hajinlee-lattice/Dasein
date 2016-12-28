@@ -12,8 +12,11 @@ public class SampleTransformerConfig extends TransformerConfig {
     @JsonProperty("Filter")
     private String filter;
 
-    @JsonProperty("FilterAttrs")
-    private List<String> filterAttrs;
+    @JsonProperty("ReportAttrs")
+    private List<String> reportAttrs;
+
+    @JsonProperty("ExcludeAttrs")
+    private List<String> excludeAttrs;
 
     public Float getFraction() {
         return fraction;
@@ -31,11 +34,19 @@ public class SampleTransformerConfig extends TransformerConfig {
         this.filter = filter;
     }
 
-    public List<String> getFilterAttrs() {
-        return filterAttrs;
+    public List<String> getReportAttrs() {
+        return reportAttrs;
     }
 
-    public void setFilterAttrs(List<String> filterAttrs) {
-        this.filterAttrs = filterAttrs;
+    public void setReportAttrs(List<String> reportAttrs) {
+        this.reportAttrs = reportAttrs;
+    }
+
+    public List<String> getExcludeAttrs() {
+        return excludeAttrs;
+    }
+
+    public void setExcludeAttrs(List<String> excludeAttrs) {
+        this.excludeAttrs = excludeAttrs;
     }
 }

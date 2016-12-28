@@ -34,4 +34,10 @@ public interface HdfsSourceEntityMgr {
     void deleteSource(Source source);
 
     boolean checkSourceExist(Source source);
+
+    boolean checkSourceExist(Source source, String version);
+
+    String getRequest(Source source, String requestName);
+
+    boolean saveReport(Source source, String reportName, String version, String report);
 }
