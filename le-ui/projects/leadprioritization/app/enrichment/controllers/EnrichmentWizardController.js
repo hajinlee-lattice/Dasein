@@ -249,12 +249,17 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         });
     }
 
+    var subcategoriesExclude = [];
     var getEnrichmentSubcategories = function(category) {
         if(category) {
             EnrichmentStore.getSubcategories(category).then(function(result) {
                 if(result.data.length > 1){
-                    vm._subcategories[category] = result.data;
-                    vm.subcategories[category] = result.data;
+                    var subcategories = result.data;
+                    vm._subcategories[category] = subcategories;
+                    vm.subcategories[category] = subcategories;
+                    if(subcategories.length <= 1) {
+                        subcategoriesExclude.push(category);
+                    }
                 }
             });
         }
@@ -580,16 +585,22 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         var category = category || '';
         if(vm.subcategory && vm.category == category) {
             vm.subcategory = '';
+            if(subcategoriesExclude.includes(category)) { // don't show subcategories
+                vm.subcategory = vm.subcategories[category][0];
+            }
         } else if(vm.category == category) {
             vm.subcategory = '';
             //vm.category = '';
         } else {
             vm.subcategory = '';
+            if(subcategoriesExclude.includes(category)) {
+                vm.subcategory = vm.subcategories[category][0];
+            }
             vm.category = category;
 
             vm.filterEmptySubcategories();
         }
-   }
+    }
 
     var _scrolled = function() {
         var el = document.querySelector('.subheader-container');
