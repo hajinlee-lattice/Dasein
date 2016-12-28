@@ -90,7 +90,7 @@ public class PipelineStep implements HasName, HasPid, Serializable {
     @Transient
     private String uniqueColumnTransformName;
     
-    @Column(name = "NAMED_PARAMS_TO_INIT")
+    @Column(name = "NAMED_PARAMS_TO_INIT", length = 2000)
     private String namedParameterListToInit;
     
     @JsonProperty("LoadFromHdfs")
