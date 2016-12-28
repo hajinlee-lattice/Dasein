@@ -240,7 +240,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.categories = result.data;
             _.each(vm.categories, function(value, key){
                 getEnrichmentSubcategories(value);
-                getTopAttributes({category: value});
+                getTopAttributes({category: value, loadEnrichmentMetadata: true});
                 if (!vm.enrichmentsObj[value]) {
                     vm.enrichmentsObj[value] = [];
                 }
@@ -320,7 +320,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         
         if(enrichment.IsPremium) {
             vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-            if(vm.premiumSelectedTotal >= vm.premiumSelectLimit) {
+            if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
                 vm.premiumSelectedTotal = vm.premiumSelectLimit;
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
@@ -330,7 +330,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
 
         vm.generalSelectedTotal = selectedTotal.length;
-        if(vm.generalSelectedTotal >= vm.generalSelectLimit) {
+        if(vm.generalSelectedTotal > vm.generalSelectLimit) {
             vm.generalSelectedTotal = vm.generalSelectLimit;
             enrichment.IsSelected = false;
             enrichment.IsDirty = false;
@@ -479,11 +479,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                     target.on('click', function(){
                         open_subcategory();
                     });
-                    /*
-                    target.on('mouseover', function(){
-                        open_subcategory();
-                    });
-                    */
                 }
             });
 
@@ -645,6 +640,15 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         _resized(event, 100);
     });
 
+    $scope.$watchGroup([
+            'vm.metadata.toggle.show.selected', 
+            'vm.metadata.toggle.show.premium', 
+            'vm.metadata.toggle.hide.premium', 
+            'vm.metadata.toggle.show.internal'
+        ], function(newValues, oldValues, scope) {
+        vm.filterEmptySubcategories();
+    });
+
     $scope.$watch('vm.queryText', function(newvalue, oldvalue){
         vm.queryInProgress = true;
 
@@ -664,16 +668,12 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
             vm.queryInProgress = false;
         }, 333);
-
-        //console.log(newvalue, vm.category, vm.subcategory, vm);
     });
 
     vm.filterEmptySubcategories = function() {
-        //for (var category in vm._subcategories) {
         if (vm._subcategories[vm.category]) {
             for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
                 var subcategory = vm._subcategories[vm.category][i];
-                //console.log(category, subcategory, vm.subcategoryCount(category, subcategory));
                 if (vm.subcategoryCount(vm.category, subcategory) > 0) {
                     newCategories.push(subcategory);
                 }
@@ -685,23 +685,14 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     vm.subcategoryInit = function(index, first, last, cat, count, list) {
         if (first) { 
         }
-//console.log(index, count);
-
         if (last) {
-            //$timeout.cancel(vm.subcatTimeout);
-            //vm.subcatTimeout = $timeout(function() {
-                //console.log(vm.blah);
                 vm.subcategoriesList = [];
-                //console.log(list);
                 for (var category in vm.blah) {
                     if (vm.blah[category] >= 0) {
                         //console.log(category, index);
                         vm.subcategoriesList.push(category);
                     }
                 }
-               //console.log(vm.subcategoriesList);
-            //}, 1000);
-            //$scope.$digest();
         }
 
         return true;

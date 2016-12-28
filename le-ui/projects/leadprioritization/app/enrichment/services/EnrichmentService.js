@@ -161,6 +161,14 @@ angular.module('lp.enrichment.leadenrichment')
             deferred.resolve(this.topAttributes[opts.category]);
         } else {
             EnrichmentService.getTopAttributes(opts).then(function(response) {
+                for(var i in response.data.SubCategories) {
+                    var items = response.data.SubCategories[i];
+                    for(var j in items) {
+                        var item = items[j],
+                            attribute = _.findWhere(response.data.EnrichmentAttributes, {FieldName: item.Attribute});
+                        item.DisplayName = (attribute ? attribute.DisplayName : null);
+                    }
+                }
                 EnrichmentStore.setTopAttributes(response, opts.category);
                 deferred.resolve(response);
             });
@@ -271,12 +279,14 @@ angular.module('lp.enrichment.leadenrichment')
         opts = opts || {};
         opts.category = opts.category || 'firmographics';
         opts.limit = opts.limit || 5;
+        opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',
             url: '/pls/enrichment/stats/topn',
             params: {
                 category: opts.category,
-                limit: opts.limit
+                limit: opts.limit,
+                loadEnrichmentMetadata: opts.loadEnrichmentMetadata
             }
         }).then(function(response) {
             deferred.resolve(response);

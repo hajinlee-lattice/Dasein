@@ -127,7 +127,7 @@
                                     <div class="column data">Records</div>
                                 </li>
                                 <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
-                                    <div class="column label">{{attribute.Attribute}}</div>
+                                    <div class="column label" title="{{attribute.DisplayName}}">{{attribute.DisplayName}}</div>
                                     <div class="column data">{{attribute.NonNullCount|number}}</div>
                                 </li>
                             </ul>
@@ -135,7 +135,7 @@
                        </div>
                     </div>
                 </li>
-                <li class="load-status" ng-show="subcategoriesList.length">
+                <li class="load-status" ng-show="!subcategoriesList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"></div>
                     </div>       
