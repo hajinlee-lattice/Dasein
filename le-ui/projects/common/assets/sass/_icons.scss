@@ -182,10 +182,6 @@ Icons
 		-webkit-mask-image: url("/assets/images/ico-remodel.svg");
 		mask: url("/assets/images/ico-remodel.svg");
 	}
-	&.ico-remodel-large {
-		-webkit-mask-image: url("/assets/images/ico-remodel-large.svg");
-		mask: url("/assets/images/ico-remodel-large.svg");
-	}
 	&.ico-attributes {
 		-webkit-mask-image: url("/assets/images/ico-attributes.svg");
 		mask: url("/assets/images/ico-attributes.svg");
@@ -372,7 +368,7 @@ Icons
 		&.ico-refine {
 			background-image: url("/assets/images/ico-refine.png");
 		}
-		&.ico-remodel, &.ico-remodel-large {
+		&.ico-remodel {
 			background-image: url("/assets/images/ico-remodel.png");
 			&.ico-black {
 				background-image: url("/assets/images/ico-remodel-black.png");

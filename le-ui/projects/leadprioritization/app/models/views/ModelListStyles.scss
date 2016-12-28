@@ -399,5 +399,10 @@ Model List
 }
 
 .yellow-flag {
-    content: url("/assets/images/ico-yellow-flag.svg");
+    &:before {
+        content: url("/assets/images/ico-yellow-flag.svg");
+    }
+    &:after {
+        content: none;
+    }
 }
