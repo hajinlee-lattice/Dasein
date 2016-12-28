@@ -27,16 +27,15 @@ angular
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
-        /*
-        for (var i=0; i < FieldDocument.fieldMappings.length; i++) {
-            vm.fieldMappings.push(FieldDocument.fieldMappings[i]);
-        }
-        */
-
-        vm.UnmappedFields.forEach(function(field, index) {
+        vm.UnmappedFields.forEach(function(field) {
             if (field.requiredType == 'Required') {
                 vm.RequiredFields.push(field.name);
             }
+        });
+
+        vm.UnmappedFieldsMap = {};
+        vm.UnmappedFields.forEach(function(UnmappedField) {
+            vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
         });
 
         vm.refreshLatticeFields();
@@ -67,38 +66,30 @@ angular
 
         vm.refreshLatticeFields();
 
-        setTimeout(function() {
-            vm.validateForm();
-            $scope.$digest();
-        },1);
+        $timeout(vm.validateForm, 0);
     }
 
     vm.changeLatticeField = function(mapping) {
         mapping.mappedToLatticeField = true;
         mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField].fieldType;
-        
+
         vm.refreshLatticeFields();
 
-        setTimeout(function() {
-            vm.validateForm();
-            $scope.$digest();
-        },1);
+        $timeout(vm.validateForm, 0);
     }
 
     vm.refreshLatticeFields = function() {
         vm.fieldMappingsMapped = {};
-        vm.UnmappedFieldsMap = {};
 
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.mappedField && !fieldMapping.ignored
-                && !(vm.RequiredFields.indexOf(fieldMapping.mappedField) > -1 && !fieldMapping.mappedToLatticeField)) {
+        vm.fieldMappings.forEach(function(fieldMapping) {
+            if (fieldMapping.mappedField && !fieldMapping.ignored &&
+                !(vm.RequiredFields.indexOf(fieldMapping.mappedField) > -1 &&
+                !fieldMapping.mappedToLatticeField)) {
+
                 vm.fieldMappingsMapped[fieldMapping.mappedField] = fieldMapping;
             }
         });
-        
-        vm.UnmappedFields.forEach(function(UnmappedField, index) {
-            vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
-        });
+
     }
 
     vm.resetClicked = function($event) {
@@ -116,7 +107,7 @@ angular
         ShowSpinner('Saving Field Mappings...');
 
         // build ignoredFields list from temp 'ignored' fieldMapping property
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
+        vm.fieldMappings.forEach(function(fieldMapping) {
             if (fieldMapping.ignored) {
                 vm.ignoredFields.push(fieldMapping.userField);
 
@@ -129,9 +120,9 @@ angular
 
             ImportService.StartModeling(vm.csvMetadata).then(function(result) {
                 if (result.Result && result.Result != "") {
-                    setTimeout(function() {
+                    $timeout(function() {
                         $state.go('home.models.import.job', { applicationId: result.Result });
-                    }, 1);
+                    }, 0);
                 }
             });
         });
@@ -151,8 +142,8 @@ angular
     }
 
     vm.validateIsReserved = function(name, mapping) {
-        var isReserved = !!vm.UnmappedFieldsMap[mapping.mappedField];
-        
+        var isReserved = !!vm.UnmappedFieldsMap[mapping.mappedField] && !mapping.ignored;
+
         if ($scope.fieldMappingForm[name + mapping.userField]) {
             $scope.fieldMappingForm[name + mapping.userField].$setValidity("Reserved", !isReserved);
         }
@@ -162,14 +153,16 @@ angular
         var value = mapping.mappedField;
         var isDuplicate = false;
 
-        vm.fieldMappings.forEach(function(field) {
-            if (field.mappedField == value && !field.ignored) {
-                if (mapping.userField != field.userField) {
-                    isDuplicate = true;
+        if (!mapping.ignored) {
+            vm.fieldMappings.forEach(function(field) {
+                if (field.mappedField == value && !field.ignored) {
+                    if (mapping.userField != field.userField) {
+                        isDuplicate = true;
+                    }
                 }
-            }
-        }); 
-        
+            });
+        }
+
         if ($scope.fieldMappingForm[name + mapping.userField]) {
             $scope.fieldMappingForm[name + mapping.userField].$setValidity("Duplicate", !isDuplicate);
         }
@@ -180,11 +173,7 @@ angular
         vm.FormValidated = true;
 
         // make sure there are no empty drop-down selection
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (fieldMapping.ignored) {
-                return;
-            }
-
+        vm.fieldMappings.forEach(function(fieldMapping) {
             if (!fieldMapping.mappedField && fieldMapping.mappedToLatticeField) {
                 vm.FormValidated = false;
             }
@@ -197,14 +186,12 @@ angular
         });
 
         // make sure all lattice required fields are mapped
-        vm.RequiredFields.forEach(function(requiredField, index) {
+        vm.RequiredFields.forEach(function(requiredField) {
             if (!vm.fieldMappingsMapped[requiredField]) {
                 vm.FormValidated = false;
             }
         });
     }
 
-    //$timeout(function() {
-        vm.init();
-    //}, 1);
+    vm.init();
 });
