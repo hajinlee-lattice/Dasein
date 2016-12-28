@@ -4,7 +4,8 @@ public enum BardJamsTenantStatus {
 
     NEW("New"), //
     FINISHED("Succeeded"), //
-    FAILED("Failed");
+    FAILED("Failed"), //
+    UNINSTALLED("Uninstalled"); //
 
     private String status;
 

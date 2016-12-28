@@ -2,6 +2,7 @@ package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
+import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 
@@ -14,7 +15,8 @@ public class BardJamsDestroyer implements CustomerSpaceServiceDestroyer {
         String tenantId = space.getTenantId();
         BardJamsTenant tenant = bardJamsEntityMgr.findByTenant(tenantId);
         if (tenant != null) {
-            bardJamsEntityMgr.delete(tenant);
+            tenant.setStatus(BardJamsTenantStatus.UNINSTALLED.getStatus());
+            bardJamsEntityMgr.update(tenant);
         }
         return true;
     }
