@@ -1,4 +1,6 @@
 .lookup-summary {
+    position: relative;
+    
     pre {
         padding: 0 0 0 1em;
         white-space: pre-wrap;
@@ -48,6 +50,21 @@
                 &.active {
                     text-decoration: inherit;
                 }
+            }
+        }
+    }
+    div.lookup-summary-info {
+        position: relative;
+        right: 0;
+        bottom: 5em;
+        text-align: right;
+        float: right;
+        height: 0;
+        
+        span {
+            
+            h4 {
+                
             }
         }
     }

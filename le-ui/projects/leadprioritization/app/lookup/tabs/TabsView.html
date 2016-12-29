@@ -6,13 +6,19 @@
                 <li ui-sref="home.lookup.tabs.attr" ui-sref-active-eq="active">
                     Attributes ( {{ vm.count | number }} )
                 </li>
-                <li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
+                <!--li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
                     API Response
-                </li>
+                </li-->
                 <li ui-sref="home.lookup.tabs.matching" ui-sref-active-eq="active">
                     Matching Logic
                 </li>
             </ul>
+            <div class="lookup-summary-info">
+                <h4>{{ vm.ldc_name }}</h4> 
+                <div class="lookup-response-elapsed">
+                    Time Elapsed: {{ vm.elapsedTime | number }} MS
+                </div>
+            </div>
         </div>
     </div>
 </div>

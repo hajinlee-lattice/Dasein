@@ -182,7 +182,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrentIndex++;
 
         if (result != null && result.status === 200) {
-            if (vm.lookupFiltered) {
+            console.log(vm.lookupFiltered)
+            if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
                     if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
                         data.push(result.data[i]);
@@ -209,8 +210,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             numbersNumber = 0;
 
             _store = result; // just a copy of the correct data strucuture and properties for later
-
-            //console.log('xhrfinish', cached, vm.count, vm.enrichments.length, vm.concurrentIndex, vm.concurrent);
+console.log(vm.enrichments.length)
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
@@ -271,7 +271,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             var haystack = haystack.toLowerCase(),
             needle = needle.toLowerCase();
         }
-        // .indexOf is faster than .includes
+        // .indexOf is faster and more supported than .includes
         return (haystack.indexOf(needle) >= 0);
     }
 
@@ -682,13 +682,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     });
 
     var addUniqueToArray = function(array, item) {
-        if(array && item && !array.includes(item)) {
+        if (array && item && !array.includes(item)) {
             array.push(item);
         }
     }
 
     var removeFromArray = function(array, item) {
-        if(array && item) {
+        if (array && item) {
             var index = array.indexOf(item);
             if (index > -1) {
                 array.splice(index, 1);
@@ -700,41 +700,27 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         if (vm._subcategories[vm.category]) {
             for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
                 var subcategory = vm._subcategories[vm.category][i];
+
                 if (vm.subcategoryCount(vm.category, subcategory) > 0) {
                     newCategories.push(subcategory);
                 }
             }
-            if(newCategories.length <= 1) {
+
+            if (newCategories.length <= 1) {
                 addUniqueToArray(subcategoriesExclude, vm.category);
                 vm.subcategory = vm.subcategories[vm.category][0];
             } else {
-                if(subcategoriesExclude.includes(vm.category)) {
+                if (subcategoriesExclude.includes(vm.category)) {
                     vm.subcategory = '';
                 }
-               removeFromArray(subcategoriesExclude, vm.category);
+                removeFromArray(subcategoriesExclude, vm.category);
             }
             vm.subcategories[vm.category] = newCategories;
         }
     }
 
-    vm.subcategoryInit = function(index, first, last, cat, count, list) {
-        if (first) { 
-        }
-        if (last) {
-                vm.subcategoriesList = [];
-                for (var category in vm.blah) {
-                    if (vm.blah[category] >= 0) {
-                        //console.log(category, index);
-                        vm.subcategoriesList.push(category);
-                    }
-                }
-        }
-
-        return true;
-    }
-
     vm.percentage = function(number, total) {
-        if(number && total) {
+        if (number && total) {
             return (total / number) * 100;
         }
         return 0;

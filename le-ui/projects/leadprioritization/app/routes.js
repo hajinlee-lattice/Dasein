@@ -1162,12 +1162,16 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: function(LookupResponse) {
+                    controller: function(LookupResponse, LookupStore) {
                         if (LookupResponse.enrichmentAttributeValues) {
                             this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                            this.ldc_name = LookupResponse.enrichmentAttributeValues.LDC_Name;
                         } else {
                             this.count = 0;
+                            this.ldc_name = '';
                         }
+
+                        this.elapsedTime = LookupStore.get('elapsedTime');
                     },
                     controllerAs: 'vm',
                     templateUrl: 'app/lookup/tabs/TabsView.html'
@@ -1248,7 +1252,7 @@ angular
                             var deferred = $q.defer();
 
                             //EnrichmentStore.getPremiumSelectMaximum().then(function(result) {
-                                deferred.resolve(LookupResponse.enrichmentAttributeValues);
+                                deferred.resolve(LookupResponse.enrichmentAttributeValues || {});
                             //});
 
                             return deferred.promise;
