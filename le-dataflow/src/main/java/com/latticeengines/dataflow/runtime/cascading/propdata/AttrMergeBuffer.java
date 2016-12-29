@@ -37,7 +37,7 @@ public class AttrMergeBuffer extends BaseOperation implements Buffer {
             Fields fields = arguments.getFields();
             int size = fields.size();
             if (result == null) {
-                result = arguments;
+                result = new TupleEntry(arguments);
                 notNulls = new boolean[size];
                 for (int i = 0; i < size; i++) {
                     if (arguments.getObject(i) != null) {
