@@ -210,7 +210,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             numbersNumber = 0;
 
             _store = result; // just a copy of the correct data strucuture and properties for later
-
+console.log(vm.enrichments.length)
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
@@ -226,6 +226,14 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.generalSelectedTotal = selectedTotal.length;
         vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
     }
+
+   vm.filterLookupFiltered = function(item, type) {
+        if(type === 'PERCENTAGE') {
+            var percentage = Math.round(item * 100) + '%';
+            return percentage;
+        }
+        return item;
+   }
 
     vm.topAttributes = [];
     var getTopAttributes = function(opts) {
