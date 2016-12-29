@@ -708,7 +708,7 @@ console.log(vm.enrichments.length)
 
             if (newCategories.length <= 1) {
                 addUniqueToArray(subcategoriesExclude, vm.category);
-                vm.subcategory = vm.subcategories[vm.category][0];
+                vm.subcategory = newCategories[0];
             } else {
                 if (subcategoriesExclude.includes(vm.category)) {
                     vm.subcategory = '';
