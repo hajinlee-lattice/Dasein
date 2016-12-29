@@ -35,7 +35,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
-        lookupmode: EnrichmentAccountLookup !== null,
+        lookupMode: EnrichmentAccountLookup !== null,
         lookupFiltered: EnrichmentAccountLookup,
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
         enabledManualSave: false,
@@ -182,7 +182,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrentIndex++;
 
         if (result != null && result.status === 200) {
-            console.log(vm.lookupFiltered)
+            console.log('filtered', vm.lookupFiltered)
             if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
                     if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
@@ -210,13 +210,15 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             numbersNumber = 0;
 
             _store = result; // just a copy of the correct data strucuture and properties for later
-console.log(vm.enrichments.length)
+
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
-                vm.enrichments_completed = true;
                 vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
-
+                
+                $timeout(function() {
+                    vm.enrichments_completed = true;
+                }, 500);
             }
         }
 
@@ -773,6 +775,7 @@ console.log(vm.enrichments.length)
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);
+console.log('buh',vm);
     }
 
     vm.init();

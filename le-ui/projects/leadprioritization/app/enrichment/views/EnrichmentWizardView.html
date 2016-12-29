@@ -5,7 +5,7 @@
             </div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-        <div class="enrichments-loading-bar" ng-if="!vm.lookupmode && vm.percentage(vm.count, vm.enrichments.length) !== 100"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
+        <div class="enrichments-loading-bar" ng-if="!vm.enrichments_completed"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -37,7 +37,7 @@
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
-                <li class="info" ng-if="!vm.lookupmode">
+                <li class="info" ng-if="!vm.lookupMode">
                     <div ng-if="vm.enrichments_completed || 1">
                         Enrichment: {{vm.generalSelectedTotal||0}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal||0}} of {{vm.premiumSelectLimit}} premium 
                        <span class="more-info">&#105;
@@ -54,7 +54,7 @@
                        </span>
                     </div>
                 </li>
-                <li class="download test dropdown-container" ng-show="!vm.lookupmode">
+                <li class="download test dropdown-container" ng-show="!vm.lookupMode">
                     <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
                         <i class="fa fa-download"></i>
                     </h2>
@@ -63,7 +63,7 @@
                     </ul>
                     <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
                 </li>
-                <li class="account-lookup" ng-if="!vm.lookupmode">
+                <li class="account-lookup" ng-if="!vm.lookupMode">
                     <button class="button white-button" ui-sref="home.lookup">Account Lookup</button>
                 </li>
             </ul>
@@ -128,7 +128,8 @@
                                 </li>
                                 <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{attribute.DisplayName}}</div>
-                                    <div class="column data">{{attribute.NonNullCount|number}}</div>
+                                    <div class="column data" ng-if="!vm.lookupMode">{{attribute.NonNullCount|number}}</div>
+                                    <div class="column data" ng-if="vm.lookupMode">{{ vm.lookupFiltered[attribute.Attribute] }}</div>
                                 </li>
                             </ul>
                             <div class="attributes-more">More</div>
@@ -179,7 +180,7 @@
                         | startFrom: (vm.metadata.current - 1) * vm.pagesize 
                         | limitTo: vm.pagesize 
                         track by enrichment.FieldNameInTarget"
-                    ng-if="!vm.lookupmode || vm.lookupFiltered[enrichment.FieldName]"
+                    ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
@@ -199,10 +200,10 @@
                             <strong ng-if="vm.lookupFiltered[enrichment.FieldName]">{{vm.lookupFiltered[enrichment.FieldName]}}</strong>
                             <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
                         </p>
-                        <span class="lesser-description" ng-if="vm.lookupmode">
+                        <span class="lesser-description" ng-if="vm.lookupMode">
                             {{ enrichment.Description }}
                         </span>
-                        <div class="controls" ng-if="!vm.lookupmode">
+                        <div class="controls" ng-if="!vm.lookupMode">
                             <div class="toggle">
                                 <button class="button" 
                                         ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 

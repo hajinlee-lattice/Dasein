@@ -456,6 +456,10 @@
         border-top-width: 5px;
         border-radius: 0 0 4px 4px;
         border-color: #d0d1d0;
+
+        &:active {
+            border-style: inset;
+        }
     }
 
     .box-inner {
