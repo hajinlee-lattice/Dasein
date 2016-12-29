@@ -39,7 +39,7 @@
                 </li>
                 <li class="info" ng-if="!vm.lookupmode">
                     <div ng-if="vm.enrichments_completed || 1">
-                        Enrichment: {{vm.generalSelectedTotal}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal}} of {{vm.premiumSelectLimit}} premium 
+                        Enrichment: {{vm.generalSelectedTotal||0}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal||0}} of {{vm.premiumSelectLimit}} premium 
                        <span class="more-info">&#105;
                            <div class="tooltip_">
                                <div class="cover">

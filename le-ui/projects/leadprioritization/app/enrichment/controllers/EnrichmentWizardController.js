@@ -681,6 +681,21 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }, 333);
     });
 
+    var addUniqueToArray = function(array, item) {
+        if(array && item && !array.includes(item)) {
+            array.push(item);
+        }
+    }
+
+    var removeFromArray = function(array, item) {
+        if(array && item) {
+            var index = array.indexOf(item);
+            if (index > -1) {
+                array.splice(index, 1);
+            }
+        }
+    }
+
     vm.filterEmptySubcategories = function() {
         if (vm._subcategories[vm.category]) {
             for (var i=0, newCategories = []; i<vm._subcategories[vm.category].length; i++) {
@@ -688,6 +703,15 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                 if (vm.subcategoryCount(vm.category, subcategory) > 0) {
                     newCategories.push(subcategory);
                 }
+            }
+            if(newCategories.length <= 1) {
+                addUniqueToArray(subcategoriesExclude, vm.category);
+                vm.subcategory = vm.subcategories[vm.category][0];
+            } else {
+                if(subcategoriesExclude.includes(vm.category)) {
+                    vm.subcategory = '';
+                }
+               removeFromArray(subcategoriesExclude, vm.category);
             }
             vm.subcategories[vm.category] = newCategories;
         }
