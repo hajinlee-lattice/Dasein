@@ -337,7 +337,7 @@ angular
                         cancelPeriodJobStatusQuery();
                     }
                     if (jobStatus == "Completed") {
-                        $rootScope.$broadcast("JobCompleted");
+                        $rootScope.$broadcast("JobCompleted", response);
                     }
                     updateStatesBasedOnJobStatus(response);
                 });

@@ -122,9 +122,9 @@ angular.module('lp.jobs', [
             BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
         }
 
-        $scope.$on("JobCompleted", function() {
+        $scope.$on("JobCompleted", function(evt, data) {
             $scope.succeeded = true;
-            if ($scope.state == 'model') {
+            if ($scope.state == 'model' || data.jobType.toUpperCase().indexOf('SCORE')) {
                 $scope.successMsg = 'Success! Scoring job has completed.';
             } else {
                 $scope.successMsg = 'Success! Modeling job has completed.';
