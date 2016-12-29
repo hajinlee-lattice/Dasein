@@ -354,6 +354,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         attr.setFieldNameInTarget(column.getColumnName());
         attr.setFieldType(column.getDataType());
         attr.setFieldJavaType(column.getJavaClass());
+        attr.setFundamentalType(column.getFundamentalType());
         attr.setDataSource(column.getMatchDestination());
         attr.setDescription(column.getDescription());
         attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));

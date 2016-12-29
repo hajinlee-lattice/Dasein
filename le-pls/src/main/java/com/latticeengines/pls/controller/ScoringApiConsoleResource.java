@@ -68,10 +68,11 @@ public class ScoringApiConsoleResource {
             enforceFuzzyMatch = true;
         }
         DebugScoreResponse resp = internalScoringApiProxy.scoreAndEnrichRecordApiConsole(scoreRequest, tenant.getId(),
-                enrichmentEnabledForInternalAttributes, enforceFuzzyMatch);
+                true, enforceFuzzyMatch);
 
         Map<String, Object> enrichValueMap = resp.getEnrichmentAttributeValues();
         Map<String, Object> nonNullEnrichValueMap = new HashMap<>();
+        Map<String, Object> nonNullInternalEnrichValueMap = new HashMap<>();
 
         resp.setEnrichmentAttributeValues(nonNullEnrichValueMap);
         resp.setMatchedRecord(null);
@@ -93,18 +94,29 @@ public class ScoringApiConsoleResource {
             needEnrichmentMetadataLoading = //
                     needEnrichmentMetadataLoading && !shouldSkipLoadingEnrichmentMetadata;
 
-            if (needEnrichmentMetadataLoading) {
-                List<LeadEnrichmentAttribute> fullEnrichmentMetadataList = selectedAttrService.getAttributes(tenant,
-                        null, null, null, null, null, null, null);
+            List<LeadEnrichmentAttribute> fullEnrichmentMetadataList = selectedAttrService.getAttributes(tenant, null,
+                    null, null, null, null, null, true);
 
-                List<LeadEnrichmentAttribute> requiredEnrichmentMetadataList = new ArrayList<>();
+            List<LeadEnrichmentAttribute> requiredEnrichmentMetadataList = new ArrayList<>();
 
-                for (LeadEnrichmentAttribute attr : fullEnrichmentMetadataList) {
-                    if (nonNullEnrichValueMap.containsKey(attr.getFieldName())) {
-                        requiredEnrichmentMetadataList.add(attr);
+            for (LeadEnrichmentAttribute attr : fullEnrichmentMetadataList) {
+                if (nonNullEnrichValueMap.containsKey(attr.getFieldName())) {
+                    requiredEnrichmentMetadataList.add(attr);
+                    if (attr.getIsInternal()) {
+                        nonNullInternalEnrichValueMap.put(attr.getFieldName(),
+                                nonNullEnrichValueMap.get(attr.getFieldName()));
                     }
                 }
+            }
+            resp.setCompanyInfo(nonNullInternalEnrichValueMap);
 
+            if (!enrichmentEnabledForInternalAttributes) {
+                for (String key : nonNullInternalEnrichValueMap.keySet()) {
+                    nonNullEnrichValueMap.remove(key);
+                }
+            }
+
+            if (needEnrichmentMetadataLoading) {
                 resp.setEnrichmentMetadataList(requiredEnrichmentMetadataList);
             }
         }

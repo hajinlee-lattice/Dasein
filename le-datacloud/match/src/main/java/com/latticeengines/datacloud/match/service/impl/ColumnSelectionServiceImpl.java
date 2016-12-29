@@ -110,6 +110,11 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         return Collections.emptyMap();
     }
 
+    @Override
+    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection, String dataCloudVersion) {
+        return Collections.emptyMap();
+    }
+
     @Trace(dispatcher = true)
     private void loadCaches() {
         for (Predefined selection : Predefined.supportedSelections) {

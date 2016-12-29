@@ -190,7 +190,7 @@ public class SourceStatisticsFlow
         List<FieldMetadata> fms1 = new ArrayList<>();
         fms1.addAll(newColumns);
 
-        Node report = generateFinalReport(grouped, dimensionIdFieldNames, //
+        Node report = generateFinalReport(grouped, //
                 getFieldList(fms), newColumns, //
                 getFieldList(fms1), Fields.RESULTS, parameters.getCubeColumnName(),
                 parameters.getRootIdsForNonRequiredDimensions());
@@ -205,12 +205,13 @@ public class SourceStatisticsFlow
         }
 
         finalReportColumns.add(new FieldMetadata(encodedCubeColumnName, String.class));
+        finalReportColumns.add(new FieldMetadata("PID", Long.class));
         return finalReportColumns;
     }
 
-    private Node generateFinalReport(Node grouped, String[] dimensionIdFieldNames, FieldList applyToFieldList,
-            List<FieldMetadata> newColumns, FieldList outputFieldList, Fields overrideFieldStrategy,
-            String cubeColumnName, Map<String, Long> rootIdsForNonRequiredDimensions) {
+    private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> newColumns,
+            FieldList outputFieldList, Fields overrideFieldStrategy, String cubeColumnName,
+            Map<String, Long> rootIdsForNonRequiredDimensions) {
 
         String[] fields = outputFieldList.getFields();
 

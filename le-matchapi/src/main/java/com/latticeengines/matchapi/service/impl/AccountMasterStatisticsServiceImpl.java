@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.core.service.impl;
+package com.latticeengines.matchapi.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,18 +12,23 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.datacloud.core.entitymgr.AccountMasterFactEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
-import com.latticeengines.datacloud.core.service.AccountMasterStatisticsService;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.DimensionalQueryService;
+import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
+import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
@@ -32,7 +37,9 @@ import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -56,6 +63,17 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Autowired
+    @Qualifier("accountMasterColumnSelectionService")
+    private ColumnSelectionService columnSelectionService;
+
+    @Autowired
+    @Qualifier("accountMasterColumnEntityMgr")
+    private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
+
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override
     public AccountMasterCube query(AccountMasterFactQuery query) {
@@ -98,6 +116,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         try {
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
+            expandEncodedAttributes(cube);
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
             return cube;
@@ -277,6 +296,31 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         qualifiers.put(attribute, CategoricalAttribute.ALL);
         query.setQualifiers(qualifiers);
         return query;
+    }
+
+    private void expandEncodedAttributes(AccountMasterCube cube) {
+        String dataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+
+        ColumnSelection columnSelection = new ColumnSelection();
+        List<Column> columnList = new ArrayList<>();
+
+        for (String columnName : cube.getStatistics().keySet()) {
+            columnList.add(new Column(columnName));
+        }
+        columnSelection.setColumns(columnList);
+
+        Map<String, List<String>> codeBookInfo = columnSelectionService.getEncodedColumnMapping(columnSelection,
+                dataCloudVersion);
+
+        for (String encodedColumnName : codeBookInfo.keySet()) {
+            if (cube.getStatistics().containsKey(encodedColumnName)) {
+                AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
+
+                for (String attrName : codeBookInfo.get(encodedColumnName)) {
+                    cube.getStatistics().put(attrName, encodedValueCountInfo);
+                }
+            }
+        }
     }
 
 }

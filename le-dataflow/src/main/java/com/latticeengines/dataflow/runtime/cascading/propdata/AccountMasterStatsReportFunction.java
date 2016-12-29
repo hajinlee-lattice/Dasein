@@ -91,10 +91,6 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
                 Buckets buckets = new Buckets();
                 buckets.setType(BucketType.Numerical);
                 List<Bucket> bucketList = new ArrayList<>();
-                Bucket bucket = new Bucket();
-                bucket.setBucketLabel("All");
-                bucket.setCount(valueInt.intValue());
-                bucketList.add(bucket);
                 buckets.setBucketList(bucketList);
                 rowBasedStatistics.setBuckets(buckets);
                 stats.setRowBasedStatistics(rowBasedStatistics);

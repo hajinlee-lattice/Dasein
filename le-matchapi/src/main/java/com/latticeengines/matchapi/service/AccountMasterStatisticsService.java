@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.core.service;
+package com.latticeengines.matchapi.service;
 
 import java.util.Map;
 

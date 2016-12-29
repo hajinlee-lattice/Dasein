@@ -21,4 +21,7 @@ public interface ColumnSelectionService extends HasDataCloudVersion {
     Map<String, Pair<BitCodeBook, List<String>>> getDecodeParameters(ColumnSelection columnSelection, String dataCloudVersion);
 
     String getCurrentVersion(Predefined predefined);
+
+    Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection,
+            String dataCloudVersion);
 }

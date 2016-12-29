@@ -1,5 +1,4 @@
-package com.latticeengines.datacloud.core.service.impl;
-
+package com.latticeengines.matchapi.service.impl;
 
 import java.util.Map;
 
@@ -10,13 +9,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
-import com.latticeengines.datacloud.core.service.AccountMasterStatisticsService;
-import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
+import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
 
-public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
+public class AccountMasterStatisticsServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(AccountMasterStatisticsServiceImplTestNG.class);
 
@@ -29,16 +28,17 @@ public class AccountMasterStatisticsServiceImplTestNG extends DataCloudCoreFunct
     @Test(groups = "functional", enabled = true)
     public void testAMCategories() {
         Map<Category, Long> catIdMap = accountMasterStatisticsService.getCategories();
-        for (Map.Entry<Category, Long> entry: catIdMap.entrySet()) {
+        for (Map.Entry<Category, Long> entry : catIdMap.entrySet()) {
             Category category = entry.getKey();
             Long attrId = entry.getValue();
             verifyAttribute(attrId, DataCloudConstants.ATTR_CATEGORY, category.name());
         }
 
-        for (Category category: Category.values()) {
+        for (Category category : Category.values()) {
             Map<String, Long> subCatIdMap = accountMasterStatisticsService.getSubCategories(category);
             log.info(String.format("Category: %s, Size: %d", category, subCatIdMap.size()));
-            // This part might be broken if there is any change to category, subcategory and enrichment tag in metadata
+            // This part might be broken if there is any change to category,
+            // subcategory and enrichment tag in metadata
             switch (category) {
             case DEFAULT:
                 Assert.assertEquals(subCatIdMap.size(), 1);

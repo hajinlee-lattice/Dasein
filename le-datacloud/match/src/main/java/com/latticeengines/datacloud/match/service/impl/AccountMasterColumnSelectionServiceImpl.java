@@ -140,6 +140,37 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
 
         return toReturn;
     }
+    
+    @Override
+    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection,
+            String dataCloudVersion) {
+
+        if (StringUtils.isEmpty(dataCloudVersion)) {
+            dataCloudVersion = getLatestVersion();
+        }
+        Map<String, String> codeBookLookup = this.codeBookLookup.get(dataCloudVersion);
+        Map<String, BitCodeBook> codeBookMap = this.completeCodeBookCache.get(dataCloudVersion);
+
+        Map<String, List<String>> decodeFieldMap = new HashMap<>();
+        for (String columnId : columnSelection.getColumnIds()) {
+            // This cannot handle user overwriting column name and assume it is
+            // the same as ColumnID.
+            // It is fine because there is no such use case for now
+
+            if (codeBookMap.containsKey(columnId)) {
+                for(String decodedField: codeBookLookup.keySet()){
+                    if(codeBookLookup.get(decodedField).equals(columnId)) {
+                        if (!decodeFieldMap.containsKey(columnId)) {
+                            decodeFieldMap.put(columnId, new ArrayList<String>());
+                        }
+                        decodeFieldMap.get(columnId).add(decodedField);
+                    }
+                }
+            }
+        }
+
+        return decodeFieldMap;
+    }
 
     private void constructCodeBookMap(Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup,
             String dataCloudVersion) {

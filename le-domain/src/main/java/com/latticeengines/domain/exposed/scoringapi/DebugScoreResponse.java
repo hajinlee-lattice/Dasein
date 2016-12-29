@@ -38,6 +38,9 @@ public class DebugScoreResponse extends ScoreResponse {
     @JsonProperty("enrichmentMetadataList")
     private List<LeadEnrichmentAttribute> enrichmentMetadataList;
 
+    @JsonProperty("companyInfo")
+    private Map<String, Object> companyInfo;
+
     public Map<String, Object> getMatchedRecord() {
         return matchedRecord;
     }
@@ -116,6 +119,14 @@ public class DebugScoreResponse extends ScoreResponse {
 
     public void setEnrichmentMetadataList(List<LeadEnrichmentAttribute> enrichmentMetadataList) {
         this.enrichmentMetadataList = enrichmentMetadataList;
+    }
+
+    public Map<String, Object> getCompanyInfo() {
+        return companyInfo;
+    }
+
+    public void setCompanyInfo(Map<String, Object> companyInfo) {
+        this.companyInfo = companyInfo;
     }
 
 }

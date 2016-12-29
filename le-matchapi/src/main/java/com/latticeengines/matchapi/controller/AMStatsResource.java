@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.service.AccountMasterStatisticsService;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
+import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

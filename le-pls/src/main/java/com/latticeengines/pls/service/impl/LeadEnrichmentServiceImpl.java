@@ -70,6 +70,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
         attribute.setFieldName(columnName);
         attribute.setFieldNameInTarget(lpFunctions.fieldNameRestrictDefaultLength(columnName));
         attribute.setFieldType(columnMetadata.getDataType());
+        attribute.setFundamentalType(columnMetadata.getFundamentalType());
         attribute.setFieldJavaType(columnMetadata.getJavaClass());
         attribute.setDisplayName(columnMetadata.getDisplayName());
         attribute.setDataSource(columnMetadata.getMatchDestination());

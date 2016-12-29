@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 @JsonIgnoreType
 public class LeadEnrichmentAttribute {
@@ -44,6 +45,9 @@ public class LeadEnrichmentAttribute {
 
     @JsonProperty("IsInternal")
     private Boolean isInternal;
+
+    @JsonProperty("FundamentalType")
+    private FundamentalType fundamentalType;
 
     public String getDisplayName() {
         return displayName;
@@ -147,6 +151,14 @@ public class LeadEnrichmentAttribute {
 
     public void setIsInternal(Boolean isInternal) {
         this.isInternal = isInternal;
+    }
+
+    public FundamentalType getFundamentalType() {
+        return fundamentalType;
+    }
+
+    public void setFundamentalType(FundamentalType fundamentalType) {
+        this.fundamentalType = fundamentalType;
     }
 
 }
