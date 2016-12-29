@@ -464,6 +464,17 @@
 
     .box-inner {
         height: 100%;
+        &:hover {
+            ul.attributes {
+                transition-duration: 0s;
+                & > li {
+                    background-color: inherit;
+                    &:nth-child(even) {
+                        background-color: #e7e7e7;
+                    }
+                }
+            }
+        }
         ul.attributes {
             margin-top: 15px;
             color: #1a1a1a;

@@ -197,7 +197,7 @@
                             </h2>
                         </div>
                         <p class="description" title="{{enrichment.Description}}">
-                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName]">{{vm.lookupFiltered[enrichment.FieldName]}}</strong>
+                            <strong ng-if="vm.lookupFiltered[enrichment.FieldName]" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
                             <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
                         </p>
                         <span class="lesser-description" ng-if="vm.lookupMode">
