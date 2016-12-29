@@ -154,7 +154,7 @@
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
-                <span ng-click="vm.subcategory = ''">Back</span> | {{vm.subcategory}}
+                <span ng-click="vm.subcategory = ''; vm.metadata.current = 1;">Back</span> | {{vm.subcategory}}
             </div>
             <div class="row enrichment-wizard-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
