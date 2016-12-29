@@ -91,7 +91,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         boolean foundFilesToDownload = false;
 
         for (String file : files) {
-            String contraintViolationId = StringUtils.EMPTY;
+            long startTime = System.currentTimeMillis();
+            String constraintViolationId = StringUtils.EMPTY;
             try {
                 String modelSummaryId = UuidUtils.parseUuid(file);
                 synchronized (modelSummaryIds) {
@@ -118,9 +119,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     log.error(String.format("Cannot set application id of model summary with id %s.",
                             modelSummaryId));
                 }
-                log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
-                        summary.getId(), summary.getApplicationId(), file));
-                contraintViolationId = summary.getId();
+                long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+                log.info(String.format("Creating model summary with id %s appId %s from file %s. Duration: %d seconds.", //
+                        summary.getId(), summary.getApplicationId(), file, totalSeconds));
+                constraintViolationId = summary.getId();
                 modelSummaryEntityMgr.create(summary);
                 foundFilesToDownload = true;
             } catch (BlockMissingException e) {
@@ -132,7 +134,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 log.fatal(ExceptionUtils.getFullStackTrace(e));
             } catch (ConstraintViolationException e) {
                 log.info(String.format("Cannot create model summary with Id %s, constraint violation.",
-                        contraintViolationId));
+                        constraintViolationId));
             } catch (Exception e) {
                 log.error(e);
             }

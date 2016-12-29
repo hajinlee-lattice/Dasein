@@ -120,7 +120,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     }
 
     private Boolean partialDownload() {
-        log.debug("Perform partial download!");
+        long startTime = System.currentTimeMillis();
         List<ModelSummaryDownloadFlag> waitingFlags = modelSummaryDownloadFlagEntityMgr.getWaitingFlags();
         if (waitingFlags != null && waitingFlags.size() > 0) {
             HashSet<String> tenantIds = new HashSet<> ();
@@ -129,6 +129,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             }
             Set<String> modelSummaryIds = getModelSummaryIds();
             List<Future<Boolean>> futures = new ArrayList<>();
+            log.info(String.format("Begin download following tenants: %s", tenantIds.toString()));
             for (String tenantId : tenantIds) {
                 Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
                 if (tenant != null) {
@@ -143,15 +144,18 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                     return false;
                 }
             }
+            long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+            log.info(String.format("Partial download duration: %d seconds", totalSeconds));
         }
         return true;
     }
 
     private Boolean fullDownload() {
-        log.debug("Perform full download!");
+        long startTime = System.currentTimeMillis();
         List<Tenant> tenants = tenantEntityMgr.findAll();
 
         Set<String> modelSummaryIds = getModelSummaryIds();
+        log.info(String.format("Full download for total %d tenants", tenants.size()));
         List<Future<Boolean>> futures = new ArrayList<>();
         for (Tenant tenant : tenants) {
             futures.add(downloadModel(tenant, modelSummaryIds));
@@ -165,6 +169,8 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                 return false;
             }
         }
+        long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+        log.info(String.format("Full download duration: %d seconds", totalSeconds));
         return true;
     }
 
