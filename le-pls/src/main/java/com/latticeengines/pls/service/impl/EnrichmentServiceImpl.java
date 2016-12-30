@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,20 +120,24 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     private TopNAttributes selectTopN(TopNAttributes attributes, int max) {
         Map<String, List<TopNAttributes.TopAttribute>> topAttrs = new HashMap<>();
-        for (Map.Entry<String, List<TopNAttributes.TopAttribute>> entry : attributes.getTopAttributes().entrySet()) {
-            List<TopNAttributes.TopAttribute> attrs = new ArrayList<>();
-            String subCategory = entry.getKey();
-            for (TopNAttributes.TopAttribute attr : entry.getValue()) {
-                if (attrs.size() < max) {
-                    attrs.add(attr);
-                } else {
-                    break;
-                }
-            }
-            topAttrs.put(subCategory, attrs);
-        }
         TopNAttributes topNAttributes = new TopNAttributes();
         topNAttributes.setTopAttributes(topAttrs);
+
+        if (attributes != null && !MapUtils.isEmpty(attributes.getTopAttributes())) {
+            for (Map.Entry<String, List<TopNAttributes.TopAttribute>> entry : attributes.getTopAttributes()
+                    .entrySet()) {
+                List<TopNAttributes.TopAttribute> attrs = new ArrayList<>();
+                String subCategory = entry.getKey();
+                for (TopNAttributes.TopAttribute attr : entry.getValue()) {
+                    if (attrs.size() < max) {
+                        attrs.add(attr);
+                    } else {
+                        break;
+                    }
+                }
+                topAttrs.put(subCategory, attrs);
+            }
+        }
         return topNAttributes;
     }
 
