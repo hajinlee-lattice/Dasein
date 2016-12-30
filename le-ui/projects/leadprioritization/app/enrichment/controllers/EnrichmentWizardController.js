@@ -182,7 +182,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrentIndex++;
 
         if (result != null && result.status === 200) {
-            console.log('filtered', vm.lookupFiltered)
             if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
                     if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
@@ -783,7 +782,6 @@ console.log(vm.enrichments.length)
 
         angular.element($window).bind("scroll", scrolled);
         angular.element($window).bind("resize", resized);
-console.log('buh',vm);
     }
 
     vm.init();
