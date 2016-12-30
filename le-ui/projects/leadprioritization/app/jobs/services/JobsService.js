@@ -41,6 +41,7 @@ angular
             'profile':                              'create_global_target_market',
             'createModel':                          'create_global_target_market',
             'reviewModel':                          'create_global_target_market',
+            'remediateDataRules':                   'create_global_target_market',
             'downloadAndProcessModelSummaries':     'create_global_target_market',
             'persistDataRules':                     'create_global_target_market',
             'setConfigurationForScoring':           'score_training_set',
@@ -64,11 +65,12 @@ angular
             'setMatchSelection':                        'create_global_target_market',
             'writeMetadataFiles':                       'create_global_target_market',
             'profile':                                  'create_global_target_market',
+            'reviewModel':                              'create_global_target_market',
+            'remediateDataRules':                       'create_global_target_market',
             'createModel':                              'create_global_target_market',
             'downloadAndProcessModelSummaries':         'create_global_target_market', 
-            'combineInputTableWithScoreDataFlow':       'create_global_target_market',
-            'exportData':                               'create_global_target_market',
-            'pivotScoreAndEvent':                       'create_global_target_market',
+            'persistDataRules':                         'create_global_target_market',
+            'setConfigurationForScoring':               'score_training_set',
             // 'matchDataCloud':                        'score_training_set',
             // 'processMatchResult':                    'score_training_set', 
             // 'addStandardAttributes':                 'score_training_set',
@@ -422,7 +424,7 @@ angular
             //return null;
         }
 
-        if (!job.steps || job.jobType === "modelAndEmailWorkflow") {
+        if (!job.steps) {
             return;
         }
         for (var i = 0; i < job.steps.length; i++) {
