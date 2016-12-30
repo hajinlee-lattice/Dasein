@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
@@ -24,12 +24,15 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.translators.PathTranslator;
+import com.latticeengines.camille.exposed.translators.PathTranslatorFactory;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 
 public class SpaceLifecycleManager {
 
@@ -105,10 +108,10 @@ public class SpaceLifecycleManager {
                 CustomerSpaceProperties.class);
 
         Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));
-        Document featureFlagDefinitionDocument = c
-                .get(PathBuilder.buildFeatureFlagDefinitionPath(CamilleEnvironment.getPodId()));
-        Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId).append(
-                new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE));
+        Document featureFlagDefinitionDocument = c.get(buildFeatureFlagDefinitionPath());
+        Path productsPath = PathBuilder
+                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)
+                .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE));
         Document productsDocument = new Document();
         if (c.exists(productsPath)) {
             productsDocument = c.get(productsPath);
@@ -123,12 +126,9 @@ public class SpaceLifecycleManager {
         return spaceInfo;
     }
 
-    public static void test() throws Exception {
-        Camille c = CamilleEnvironment.getCamille();
-        Document featureFlagDefinitionDocument = c
-                .get(PathBuilder.buildFeatureFlagDefinitionPath(CamilleEnvironment.getPodId()));
-
-        System.out.println(featureFlagDefinitionDocument.getData());
+    public static Path buildFeatureFlagDefinitionPath() throws IllegalArgumentException, Exception {
+        PathTranslator translator = PathTranslatorFactory.getTranslator(new PodDivisionScope());
+        return translator.getAbsolutePath(new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE));
     }
 
     public static String updateFeatureFlags(Document tenantFeatureFlagDoc, Document featureFlagDefinitionDoc,
@@ -139,10 +139,14 @@ public class SpaceLifecycleManager {
         if (StringUtils.isEmpty(tenantFeatureFlags)) {
             orignalFeatureFlagIsEmpty = true;
             log.info(String.format("Tenant %s original feature flags is empty", tenantId));
+        } else {
+            log.info(String.format("existing feature flag is %s", tenantFeatureFlags));
         }
         String featureFlagDefinitions = featureFlagDefinitionDoc.getData();
         if (StringUtils.isEmpty(featureFlagDefinitions)) {
             throw new RuntimeException("featureFlagDefinitions is empty.");
+        } else {
+            log.info(String.format("featureFlagDefinitions is %s", featureFlagDefinitions));
         }
         String products = productsDoc.getData();
         if (StringUtils.isEmpty(products)) {

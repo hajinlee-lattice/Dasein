@@ -132,10 +132,6 @@ public final class PathBuilder {
         return new Path(String.format("/user/s-analytics/customers/%s.%s.%s/scoring", contractId, tenantId, spaceId));
     }
 
-    public static Path buildFeatureFlagDefinitionPath(String podId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE);
-    }
-
     public static Path buildFeatureFlagPath(String podId, CustomerSpace space) {
         return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, space.getContractId(),
                 PathConstants.TENANTS, space.getTenantId(), PathConstants.SPACES, space.getSpaceId(),
