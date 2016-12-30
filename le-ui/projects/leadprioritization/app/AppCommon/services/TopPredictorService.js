@@ -550,7 +550,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         };
         
         // number that comfortably fit on screen without resizing
-        var maxElementsToDisplay = 7;
+        var maxElementsToDisplay = 8;
         var nullBucket = null;
         var otherBucket = null;
         var otherBucketElements = [];
