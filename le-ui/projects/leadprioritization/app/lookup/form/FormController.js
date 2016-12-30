@@ -27,7 +27,8 @@ angular
     }
 
     vm.next = function() {
-        if (!vm.validate()) {
+        vm.formIsValid = vm.validate();
+        if (!vm.formIsValid) {
             return;
         }
 
@@ -46,24 +47,24 @@ angular
             ['CompanyName', 'City', 'State', 'Country']
         ];
 
-        vm.formIsValid = false;
+        for (var i = 0; i < validFormStates.length; i++) {
+            var state = validFormStates[i];
+            var valid = true;
+            vm.requiredMissingField = {}
 
-        if (vm.request.record.Website) {
-            vm.formIsValid = true;
-        } else if (vm.request.record.CompanyName ||
-            vm.request.record.City ||
-            vm.request.record.State || 
-            vm.request.record.Zip) {
-            vm.requiredMissingField = {};
-
-            validFormStates[1].forEach(function(field)  {
+            for (var j = 0; j < state.length; j++) {
+                var field = state[j];
                 if (!vm.request.record[field]) {
                     vm.requiredMissingField[field] = true;
-                    vm.formIsValid = false;
+                    valid = false;
                 }
-            });
+            }
+
+            if (valid) {
+                return true;
+            }
         }
 
-        return vm.formIsValid || Object.keys(vm.requiredMissingField) === 0;
+        return false;
     }
 });
