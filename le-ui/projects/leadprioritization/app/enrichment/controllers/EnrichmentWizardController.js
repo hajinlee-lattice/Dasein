@@ -209,7 +209,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             numbersNumber = 0;
 
             _store = result; // just a copy of the correct data strucuture and properties for later
-console.log(vm.enrichments.length)
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
@@ -529,6 +528,10 @@ console.log(vm.enrichments.length)
 
     vm.subcategoryCount = function(category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
+
+        if (!filtered || filtered.length <= 0) {
+            return 0;
+        }
 
         for (var i=0, result=[]; i < filtered.length; i++) {
             var item = filtered[i];

@@ -37,7 +37,7 @@
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
-                <li class="info" ng-if="!vm.lookupMode">
+                <li class="info noselect-children" ng-if="!vm.lookupMode">
                     <div ng-if="vm.enrichments_completed || 1">
                         Enrichment: {{vm.generalSelectedTotal||0}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal||0}} of {{vm.premiumSelectLimit}} premium 
                        <span class="more-info">&#105;
@@ -73,7 +73,7 @@
             <li ng-repeat="category in vm.categories" class="category" 
                 ng-class="{active: vm.category == category}" 
                 ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
-                <div class="box-inner background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
+                <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
                     <span>
                         <h2 title="{{category}}">
                             <div class="category-icon">
@@ -91,7 +91,7 @@
         </ul>
         
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
-            <div class="row enrichment-wizard-pagination" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
@@ -110,21 +110,23 @@
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
                     <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
                             ng-class="{active: vm.subcategory == subcategory}">
-                        <h2>
+                        <h2 class="noselect-children">
                             <div class="category-icon">
                                 <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
                             </div>
                             <div class="category-label">{{subcategory}}</div>
                         </h2>
-                        <span class="count">
+                        <span class="count noselect-children">
                             <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                         <div class="attributes-container" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]">
-                            <ul class="attributes">
+                            <ul class="attributes noselect-children">
                                 <li class="header">
-                                    <div class="column label">Top 5 attributes</div>
-                                    <div class="column data">Records</div>
+                                    <div class="column label" ng-if="!vm.lookupMode">Top 5 attributes</div>
+                                    <div class="column label" ng-if="vm.lookupMode">Attributes</div>
+                                    <div class="column data" ng-if="!vm.lookupMode">Records</div>
+                                    <div class="column data" ng-if="vm.lookupMode">Values</div>
                                 </li>
                                 <li ng-repeat="attribute in vm.topAttributes[vm.category].SubCategories[subcategory]">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{attribute.DisplayName}}</div>
@@ -132,7 +134,7 @@
                                     <div class="column data" ng-if="vm.lookupMode">{{ vm.lookupFiltered[attribute.Attribute] }}</div>
                                 </li>
                             </ul>
-                            <div class="attributes-more">More</div>
+                            <div class="attributes-more noselect" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory].length > 4">More</div>
                        </div>
                     </div>
                 </li>
@@ -143,7 +145,7 @@
                     <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
-            <div class="row enrichment-wizard-pagination" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
@@ -157,7 +159,7 @@
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1;">Back</span> | {{vm.subcategory}}
             </div>
-            <div class="row enrichment-wizard-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
@@ -186,12 +188,12 @@
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
                             <ul class="tags">
-                                <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium"><strong>premium</strong></li>
-                                <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal"><strong>internal</strong></li>
+                                <li data-corner-ribbon="premium" ng-if="enrichment.IsPremium" class="premium noselect-children"><strong>premium</strong></li>
+                                <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
                             </ul>
                             <h2 title="{{enrichment.DisplayName}}">
                                 <div class="category-icon">
-                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico" />
+                                    <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
                                 </div>
                                 <strong>{{enrichment.DisplayName}}</strong>
                             </h2>
@@ -218,10 +220,10 @@
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"> </div>
                     </div>       
-                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
+                    <h2 ng-show="vm.enrichments_loaded noselect">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
-            <div class="row enrichment-wizard-pagination" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
+            <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
                             current="vm.metadata.current" 
