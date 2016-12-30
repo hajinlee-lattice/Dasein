@@ -240,7 +240,7 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
 
-                if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
                 } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
                     stepRunning = 'generate_insights';
@@ -298,7 +298,7 @@ angular
                 var stepsCompleted = getStepsCompleted(job);
                 var stepFailed = getStepFailed(job);
 
-                if ((stepRunning == "generate_insights" || stepRunning == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                if ((stepRunning === "generate_insights" || stepRunning === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     stepRunning = "score_training_set";
                 } else if (stepRunning === "load_data" && stepsCompleted.indexOf("generate_insights") > -1) {
                     stepRunning = 'generate_insights';
@@ -360,31 +360,38 @@ angular
         );
         return deferred.promise;
     };
-    
+
+    this.rescoreJob = function(jobId) {
+        return $http({
+            method: 'POST',
+            url: '/pls/jobs/' + jobId +'/restart'
+        });
+    };
+
     function getCompletedStepTimes(job, runningStep, completedSteps) {
         var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null, "create_global_model": null, "create_global_target_market": null, "score_training_set": null };
         var currStepIndex = 0;
-        if (runningStep != "load_data" && completedSteps.indexOf("load_data") > -1) {
+        if (runningStep !== "load_data" && completedSteps.indexOf("load_data") > -1) {
             currStepIndex += numStepsInGroup.load_data;
             completedTimes.load_data = job.steps[currStepIndex - 1].endTimestamp;
         }
-        if (runningStep != "match_data" && completedSteps.indexOf("match_data") > -1) {
+        if (runningStep !== "match_data" && completedSteps.indexOf("match_data") > -1) {
             currStepIndex += numStepsInGroup.match_data;
             completedTimes.match_data = job.steps[currStepIndex - 1].endTimestamp;
         }
-        if (runningStep != "generate_insights" && completedSteps.indexOf("generate_insights") > -1) {
+        if (runningStep !== "generate_insights" && completedSteps.indexOf("generate_insights") > -1) {
             currStepIndex += numStepsInGroup.generate_insights;
             completedTimes.generate_insights = job.steps[currStepIndex - 1].endTimestamp;
         }
-        if (runningStep != "create_global_model" && completedSteps.indexOf("create_global_model") > -1) {
+        if (runningStep !== "create_global_model" && completedSteps.indexOf("create_global_model") > -1) {
             currStepIndex += numStepsInGroup.create_global_model;
             completedTimes.create_global_model = job.steps[currStepIndex - 1].endTimestamp;
         }
-        if (runningStep != "create_global_target_market" && completedSteps.indexOf("create_global_target_market") > -1) {
+        if (runningStep !== "create_global_target_market" && completedSteps.indexOf("create_global_target_market") > -1) {
             currStepIndex += numStepsInGroup.create_global_target_market;
             completedTimes.create_global_target_market = job.steps[currStepIndex - 1].endTimestamp;
         }
-        if (runningStep != "score_training_set" && completedSteps.indexOf("score_training_set") > -1) {
+        if (runningStep !== "score_training_set" && completedSteps.indexOf("score_training_set") > -1) {
             currStepIndex += numStepsInGroup.score_training_set;
             completedTimes.score_training_set = job.steps[currStepIndex - 1].endTimestamp;
         }
@@ -402,7 +409,7 @@ angular
         if (job.steps) {
             for (var i = 0; i < job.steps.length; i++) {
                 var stepRunning = getDictionaryValue(job, i);
-                if (stepRunning && (job.steps[i].stepStatus == "Failed" || job.steps[i].stepStatus == "Cancelled")) {
+                if (stepRunning && (job.steps[i].stepStatus === "Failed" || job.steps[i].stepStatus === "Cancelled")) {
                     return stepRunning;
                 }
             }
@@ -411,17 +418,17 @@ angular
     }
 
     function getStepRunning(job) {
-        if (job.jobStatus != "Running") {
+        if (job.jobStatus !== "Running") {
             //return null;
         }
 
-        if (!job.steps || job.jobType == "modelAndEmailWorkflow") {
+        if (!job.steps || job.jobType === "modelAndEmailWorkflow") {
             return;
         }
         for (var i = 0; i < job.steps.length; i++) {
             var stepRunning = getDictionaryValue(job, i);
 
-            if (stepRunning && job.steps[i].stepStatus == "Running") {
+            if (stepRunning && job.steps[i].stepStatus === "Running") {
                 return stepRunning;
             }
         }
@@ -445,10 +452,10 @@ angular
 
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
-            if (job.steps[i].stepStatus == "Completed") {
+            if (job.steps[i].stepStatus === "Completed") {
                 var stepCompleted = getDictionaryValue(job, i);
 
-                if ((stepCompleted == "generate_insights" || stepCompleted == "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
+                if ((stepCompleted === "generate_insights" || stepCompleted === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     numStepsInGroup.score_training_set += 1;
                     continue;
                 }

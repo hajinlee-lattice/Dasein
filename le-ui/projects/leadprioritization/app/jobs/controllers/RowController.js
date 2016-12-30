@@ -17,7 +17,7 @@ angular
             admin: '=',
             auth: '='
         },
-        controller: function ($http, $scope, $rootScope, $state, $location, JobsStore, JobsService, CancelJobModal, BrowserStorageUtility) {
+        controller: function($scope, JobsStore, JobsService, CancelJobModal, BrowserStorageUtility) {
             var job = $scope.job;
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
@@ -45,10 +45,10 @@ angular
                 default: $scope.job.displayName = "Create Model";
             }
 
-            if ($scope.job.displayName == "Bulk Scoring") {
+            if ($scope.job.displayName === "Bulk Scoring") {
                 $scope.isScoringJob = true;
             }
-            $scope.jobFailed = $scope.job.status == 'Failed';
+            $scope.jobFailed = $scope.job.status === 'Failed';
             $scope.stepsCompletedTimes;
 
             var periodicQueryId;
@@ -70,19 +70,17 @@ angular
             });
 
             $scope.downloadErrorLogClick = function($event){
-
                 JobsService.downloadErrorLog();
-
             };
 
             if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {
-                $scope.jobStepsRunningStates = { 
-                    load_data: false, match_data: false, generate_insights: false, 
+                $scope.jobStepsRunningStates = {
+                    load_data: false, match_data: false, generate_insights: false,
                     create_global_model: false, create_global_target_market: false,
                     score_training_set: false
                 };
-                $scope.jobStepsCompletedStates = { 
-                    load_data: false, match_data: false, generate_insights: false, 
+                $scope.jobStepsCompletedStates = {
+                    load_data: false, match_data: false, generate_insights: false,
                     create_global_model: false, create_global_target_market: false,
                     score_training_set: false
                 };
@@ -92,10 +90,10 @@ angular
                 $scope.stepsCompletedTimes = $scope.statuses[job.id].completedTimes;
                 $scope.stepFailed = $scope.statuses[job.id].stepFailed;
             }
-            if ($scope.job.status == "Running") {
+            if ($scope.job.status === "Running") {
                 $scope.jobRunning = true;
                 periodicQueryJobStatus($scope.job.id);
-            } else if ($scope.job.status == "Completed") {
+            } else if ($scope.job.status === "Completed") {
                 $scope.jobCompleted = true;
             } else if ($scope.stepFailed) {
                 $scope.jobStepsRunningStates[$scope.stepFailed] = false;
@@ -104,7 +102,7 @@ angular
                     delete $scope.stepsCompletedTimes[$scope.stepFailed];
                 }
             }
-            
+
             $scope.expandJobStatus = function() {
                 $scope.jobRowExpanded = true;
                 $scope.expanded[job.id] = true;
@@ -117,77 +115,12 @@ angular
             // Use this in JobStatusRow.html
             // <a href="javascript:void(0)" data-ng-click="rescoreFailedJob({jobId: job.id})" ng-show="job.status == 'Failed'"><i class="fa fa-refresh"></i>Restart</a>
             $scope.rescoreFailedJob = function() {
-                $http({
-                    method: 'POST',
-                    url: '/pls/jobs/' + job.id +'/restart'
-                }).then(
-                    function onSuccess(response) {
-                        var jobId = $scope.job.id;
-                        JobsStore.getJob(jobId);
-                    }, function onError(response) {
-                        console.log("error");
-                    }
-                );
-            };
-
-            /* $scope.downloadSourceClicked = function() {
-                var downloadUrl = '/files/datafiles/sourcefilecsv/';
-                downloadUrl += job.applicationId;
-                downloadUrl += '?fileName=' + job.source;
-                downloadUrl += '&Authorization=' + $scope.auth;
-                $http({
-                    method: 'GET',
-                    url: downloadUrl,
-                    headers: {
-                        'ErrorDisplayMethod': 'modal|home.models'
-                    }
-                }).then(
-                    function onSuccess(response) {
-                        if (response.status == 200) {
-                            var blob = new Blob([ response.data ], { type: "application/csv" });
-                            saveAs(blob, job.source);
-                        }
-                    }
-                );
-            } 
-            */
-            /*
-            $scope.clickDownloadErrorReport = function($event) {
-
-                console.log(reports);
-
-                reports.forEach(function(item) {
-                    if (item.purpose == "IMPORT_DATA_SUMMARY") {
-                        JobReport = item;
-                    }
+                JobsService.rescoreJob(job.id).then(function(response) {
+                    var jobId = $scope.job.id;
+                    JobsStore.getJob(jobId);
                 });
-  
-                if (JobReport) {
-                    JobReport.name = JobReport.name.substr(0, JobReport.name.indexOf('.csv') + 4);
-                    
-                    $scope.report = JobReport;
-                    $scope.data.total_records = data.imported_records + data.ignored_records;
-                    $scope.errorlog = '/pls/fileuploads/' + JobReport.name + '/import/errors';
-
-                    $scope.showProgress = true;
-                }
-
-                JobsService.getErrorLog(JobReport, $scope.job.jobType).then(function(result) {
-                    var blob = new Blob([ result ], { type: "application/csv" }),
-                        date = new Date(),
-                        year = date.getFullYear(),
-                        month = (1 + date.getMonth()).toString(),
-                        month = month.length > 1 ? month : '0' + month,
-                        day = date.getDate().toString(),
-                        day = day.length > 1 ? day : '0' + day,
-                        filename = 'import_errors.' + year + month + day + '.csv';
-                    
-                    saveAs(blob, filename);
-                    $scope.showProgress = false;
-
-                }, function(reason) {});
             };
-            */
+
             $scope.clickGetScoringResults = function($event) {
 
                 $scope.showProgress = true;
@@ -201,16 +134,16 @@ angular
                         day = date.getDate().toString(),
                         day = day.length > 1 ? day : '0' + day,
                         filename = 'score.' + $scope.job.id + '.' + year + month + day + '.csv';
-                
+
                     saveAs(blob, filename);
                     $scope.showProgress = false;
 
-                }, function(reason) {});
+                });
             };
 
             function isCompleted() {
                 for (var step in $scope.jobStepsCompletedStates) {
-                    if (! $scope.jobStepsCompletedStates[step]) {
+                    if (!$scope.jobStepsCompletedStates[step]) {
                         return false;
                     }
                 }
@@ -220,7 +153,7 @@ angular
             if ($scope.jobRowExpanded) {
                 $scope.expandJobStatus();
             }
-            
+
             $scope.unexpandJobStatus = function() {
                 $scope.jobRowExpanded = false;
                 $scope.expanded[job.id] = false;
@@ -245,8 +178,8 @@ angular
                     $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                     $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
                 }
-                
-                if (jobStatus.jobStatus == "Running") {
+
+                if (jobStatus.jobStatus === "Running") {
                     $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
                     $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
 
@@ -261,9 +194,10 @@ angular
                         $scope.jobStepsCompletedStates['score_training_set'] = false;
                     }
                 }
-                
-                if ($scope.jobType.toLowerCase() == "importmatchandscoreworkflow" || $scope.jobType.toLowerCase() == "importandrtsbulkscoreworkflow"
-                        || $scope.jobType.toLowerCase() == "importmatchandmodelworkflow") {
+
+                if ($scope.jobType.toLowerCase() === "importmatchandscoreworkflow" ||
+                    $scope.jobType.toLowerCase() === "importandrtsbulkscoreworkflow" ||
+                    $scope.jobType.toLowerCase() === "importmatchandmodelworkflow") {
                     if (jobStatus.applicationId != null && jobStatus.source != null) {
                         $scope.showFileName = true;
                     }
@@ -271,7 +205,9 @@ angular
                 $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                 var stepFailed = jobStatus.stepFailed;
-                if ((stepFailed == "generate_insights" || stepFailed == "create_global_target_market") && $scope.jobStepsCompletedStates["score_training_set"]) {
+                if ((stepFailed === "generate_insights" ||
+                    stepFailed === "create_global_target_market") &&
+                    $scope.jobStepsCompletedStates["score_training_set"]) {
                     stepFailed = "score_training_set";
                 }
                 if (stepFailed) {
@@ -286,10 +222,10 @@ angular
 
                 saveJobStatusInParentScope();
 
-                if (jobStatus.jobStatus == "Completed") {
+                if (jobStatus.jobStatus === "Completed") {
                     $scope.jobRunning = false;
                     $scope.jobCompleted = true;
-                } else if (jobStatus.jobStatus == "Failed" || jobStatus.jobStatus == "Cancelled") {
+                } else if (jobStatus.jobStatus === "Failed" || jobStatus.jobStatus === "Cancelled") {
                     $scope.jobRunning = false;
                     for (var jobState in $scope.jobStepsRunningStates) {
                         $scope.jobStepsRunningStates[jobState] = false;
@@ -325,19 +261,18 @@ angular
 
             function periodicQueryJobStatus(jobId) {
                 periodicQueryId = setInterval(function() {
-                        queryJobStatusAndSetStatesVariables(jobId);
-                    }, TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS);
+                    queryJobStatusAndSetStatesVariables(jobId);
+                }, TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS);
             }
 
             function queryJobStatusAndSetStatesVariables(jobId) {
-
                 JobsStore.getJob(jobId).then(function(response) {
                     var jobStatus = response.jobStatus;
-                    if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
+                    if (jobStatus === "Completed" || jobStatus === "Failed" || jobStatus === "Cancelled") {
                         cancelPeriodJobStatusQuery();
                     }
-                    if (jobStatus == "Completed") {
-                        $rootScope.$broadcast("JobCompleted", response);
+                    if (jobStatus === "Completed") {
+                        $scope.$emit("JobCompleted", response);
                     }
                     updateStatesBasedOnJobStatus(response);
                 });

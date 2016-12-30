@@ -13,10 +13,11 @@ angular
             redirectTo: 'jobs.status'
         })
         .state('home.model.jobs', {
-            url: '/jobs/:{jobCreationSuccess}',
+            url: '/jobs',
             params: {
                 pageIcon: 'ico-scoring',
-                pageTitle: ''
+                pageTitle: '',
+                jobCreationSuccess: null
             },
             views: {
                 "summary@": {
@@ -48,10 +49,11 @@ angular
             }
         })
         .state('home.jobs.status', {
-            url: '/status/:{jobCreationSuccess}',
+            url: '/status',
             params: {
                 pageIcon: 'ico-cog',
-                pageTitle: 'Jobs'
+                pageTitle: 'Jobs',
+                jobCreationSuccess: null
             },
             views: {
                 "summary@": {
