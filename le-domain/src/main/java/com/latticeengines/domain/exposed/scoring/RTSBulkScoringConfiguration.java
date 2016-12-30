@@ -22,6 +22,8 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private List<String> modelGuids = new ArrayList<>();
 
+    private String modelType;
+
     private String importErrorPath;
 
     @JsonProperty("model_guids")
@@ -94,8 +96,19 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
         this.importErrorPath = importErrorPath;
     }
 
+    @JsonProperty("model_type")
+    public void setModelType(String modelType) {
+        this.modelType = modelType;
+    }
+
+    @JsonProperty("model_type")
+    public String getModelType() {
+        return this.modelType;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }
