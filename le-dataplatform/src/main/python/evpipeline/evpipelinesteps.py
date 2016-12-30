@@ -178,8 +178,8 @@ class ImputationStep(PipelineStep):
                 print 'Zero imputed column:' + column
                 continue
             if column in dret['max']:
-                if column in columnsMax:
-                    outputFrame[column] = outputFrame[column].fillna(columnsMax[column])
+                if column in self.columnsMax:
+                    outputFrame[column] = outputFrame[column].fillna(self.columnsMax[column])
                 else:
                     outputFrame[column] = outputFrame[column].fillna(0)
                 print 'Max imputed column:' + column
