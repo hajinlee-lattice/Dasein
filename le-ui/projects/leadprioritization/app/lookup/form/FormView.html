@@ -40,6 +40,7 @@
                         <input 
                             type="text" 
                             class="form-control required" 
+                            ng-class="{'lookup-required': vm.requiredMissingField.Website}"
                             name="Website"
                             ng-model="vm.request.record.Domain"
                             ng-change="vm.request.record.Website = vm.request.record.Domain"
@@ -192,7 +193,8 @@
                         <button 
                             type="button" 
                             ng-click="vm.next()"
-                            class="button blue-button block-button">
+                            class="button blue-button block-button"
+                            ng-disabled="!vm.validate()">
                           {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_NEXT') }}
                         </button>
                     </div>
