@@ -43,8 +43,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private static final Log log = LogFactory.getLog(EnrichmentServiceImpl.class);
     private static final String DUMMY_KEY = "TopNAttrTree";
 
-    @Value("${pls.enrichment.dummydata}")
-    private boolean useDummyData;
+    private boolean useDummyData = false;
 
     private LoadingCache<String, TopNAttributeTree> topAttrsCache;
 
@@ -120,7 +119,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     private TopNAttributes selectTopN(TopNAttributes attributes, int max) {
         Map<String, List<TopNAttributes.TopAttribute>> topAttrs = new HashMap<>();
-        for (Map.Entry<String, List<TopNAttributes.TopAttribute>> entry: attributes.getTopAttributes().entrySet()) {
+        for (Map.Entry<String, List<TopNAttributes.TopAttribute>> entry : attributes.getTopAttributes().entrySet()) {
             List<TopNAttributes.TopAttribute> attrs = new ArrayList<>();
             String subCategory = entry.getKey();
             for (TopNAttributes.TopAttribute attr : entry.getValue()) {
@@ -146,7 +145,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
         AccountMasterFactQuery query = new AccountMasterFactQuery();
         query.setCategoryQry(getCategoryTopQuery());
         query.setLocationQry(getLocationTopQuery());
-        query.setIndustryQry(getLocationTopQuery());
+        query.setIndustryQry(getIndustryTopQuery());
         query.setNumEmpRangeQry(getNumEmpRangeTopQuery());
         query.setRevRangeQry(getRevRangeTopoQuery());
         query.setNumLocRangeQry(getNumLocRangeTopQuery());
@@ -163,6 +162,12 @@ public class EnrichmentServiceImpl implements EnrichmentService {
         return getTopQuery(DataCloudConstants.ACCOUNT_MASTER, //
                 AccountMasterFact.DIM_LOCATION, //
                 DataCloudConstants.ATTR_COUNTRY);
+    }
+
+    private DimensionalQuery getIndustryTopQuery() {
+        return getTopQuery(DataCloudConstants.ACCOUNT_MASTER, //
+                AccountMasterFact.DIM_INDUSTRY, //
+                DataCloudConstants.ATTR_INDUSTRY);
     }
 
     private DimensionalQuery getNumEmpRangeTopQuery() {
@@ -258,15 +263,15 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     }
 
     private void updateTopNList(LeadEnrichmentAttribute attr, int max, List<TopNAttributes.TopAttribute> topNList,
-                                AttributeStatsDetails rowBasedStatistics) {
+            AttributeStatsDetails rowBasedStatistics) {
         if (topNList.size() >= max) {
             return;
         } else {
-            TopNAttributes.TopAttribute topAttr = new TopNAttributes.TopAttribute(attr.getFieldName(), rowBasedStatistics.getNonNullCount());
+            TopNAttributes.TopAttribute topAttr = new TopNAttributes.TopAttribute(attr.getFieldName(),
+                    rowBasedStatistics.getNonNullCount());
             topNList.add(topAttr);
         }
     }
-
 
     private TopNAttributeTree constructDummyTree() {
         TopNAttributeTree tree = new TopNAttributeTree();

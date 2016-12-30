@@ -143,6 +143,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         AccountMasterCube cube;
         try {
             cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(), AccountMasterCube.class);
+            expandEncodedAttributes(cube);
             cube = filterAttributes(cube, null, null);
         } catch (IOException e) {
             throw new RuntimeException(
