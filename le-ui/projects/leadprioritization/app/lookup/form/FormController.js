@@ -5,26 +5,12 @@ angular
 .controller('LookupFormController', function(
     $state, LookupStore, ResourceUtility, FeatureFlagService
 ) {
-
-    var validFormStates = [
-        ['Website'],
-        ['CompanyName', 'City', 'State', 'Country']
-    ];
-
     var vm = this;
 
     angular.extend(vm, {
         request: LookupStore.get('request'),
         params: LookupStore.get('params'),
-        ResourceUtility: ResourceUtility,
-        requiredMissingField: {
-            Website: true,
-            CompanyName: true,
-            City: true,
-            State: true,
-            Country: true
-        },
-        formIsValid: false
+        ResourceUtility: ResourceUtility
     });
 
     FeatureFlagService.GetAllFlags().then(function(result) {
@@ -50,36 +36,34 @@ angular
 
     vm.validate = function() {
 
-        vm.requiredMissingField = {};
-
-        for (var i = 0; i < validFormStates.length; i++) {
-            var state = validFormStates[i];
-            var valid = true;
-            var dirty = false;
-            var stateMissingField = {};
-
-            for (var j = 0; j < state.length; j++) {
-                var field = state[j];
-
-                if (!vm.request.record[field]) {
-                    vm.requiredMissingField[field] = true;
-                    stateMissingField[field] = true;
-                    valid = false;
-                } else {
-                    dirty = true;
-                }
-            }
-
-            if (valid) {
-                return true;
-            }
-
-            if (dirty) {
-                vm.requiredMissingField = stateMissingField;
-                return false;
-            }
+        if (vm.request.record.Website) {
+            vm.requiredMissingField = {};
+            return true;
         }
 
+        if (vm.request.record.CompanyName ||
+            vm.request.record.City ||
+            vm.request.record.State ||
+            vm.request.record.Country) {
+            vm.requiredMissingField = {
+                CompanyName: !vm.request.record.CompanyName,
+                City: !vm.request.record.City,
+                State: !vm.request.record.State,
+                Country: !vm.request.record.Country
+            };
+
+            return _.reduce(vm.requiredMissingField, function (valid, value, field) {
+                return valid && !value;
+            }, true);
+        }
+
+        vm.requiredMissingField = {
+            Website: true,
+            CompanyName: true,
+            City: true,
+            State: true,
+            Country: true
+        };
         return false;
     }
 });
