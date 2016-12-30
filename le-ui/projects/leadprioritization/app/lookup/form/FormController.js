@@ -3,7 +3,7 @@ angular
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('LookupFormController', function(
-    $state, LookupStore, Models, ResourceUtility, FeatureFlagService
+    $state, LookupStore, ResourceUtility, FeatureFlagService
 ) {
     var vm = this;
 
@@ -11,7 +11,8 @@ angular
         request: LookupStore.get('request'),
         params: LookupStore.get('params'),
         ResourceUtility: ResourceUtility,
-        models: Models
+        requiredMissingField: {},
+        formIsValid: false
     });
 
     FeatureFlagService.GetAllFlags().then(function(result) {
@@ -26,6 +27,10 @@ angular
     }
 
     vm.next = function() {
+        if (!vm.validate()) {
+            return;
+        }
+
         var timestamp = new Date().getTime();
 
         LookupStore.add('timestamp', timestamp);
@@ -37,30 +42,28 @@ angular
 
     vm.validate = function() {
         var validFormStates = [
-            ['CompanyName', 'City', 'State', 'Country'],
-            ['Website']
+            ['Website'],
+            ['CompanyName', 'City', 'State', 'Country']
         ];
 
-        for (var i = 0; i < validFormStates.length; i++) {
-            var state = validFormStates[i];
-            var valid = true;
+        vm.formIsValid = false;
 
-            for (var j = 0; j < state.length; j++) {
-                var key = state[j];
-                if (!vm.request.record[key]) {
-                    valid = false;
-                    dirty = true;
-                    break;
+        if (vm.request.record.Website) {
+            vm.formIsValid = true;
+        } else if (vm.request.record.CompanyName ||
+            vm.request.record.City ||
+            vm.request.record.State || 
+            vm.request.record.Zip) {
+            vm.requiredMissingField = {};
+
+            validFormStates[1].forEach(function(field)  {
+                if (!vm.request.record[field]) {
+                    vm.requiredMissingField[field] = true;
+                    vm.formIsValid = false;
                 }
-            }
-
-            if (valid) {
-                return true;
-            } else if (dirty) {
-                // hightlight required fields
-            }
+            });
         }
 
-        return false;
+        return vm.formIsValid || Object.keys(vm.requiredMissingField) === 0;
     }
 });

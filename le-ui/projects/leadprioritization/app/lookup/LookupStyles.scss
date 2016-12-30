@@ -106,3 +106,10 @@
             user-select: none; /* Non-prefixed version, currently
                                   not supported by any browser */
 }
+
+.form-group input.form-control.lookup-required {
+    border-left-width: 5px;
+    border-left-color: #D22027;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+}
