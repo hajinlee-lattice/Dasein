@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -101,6 +102,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean isEnableDebug = false;
 
+    private boolean enableScoreValidation = false;
+
     private Map<String, Long> idToInternalIdMap = new HashMap<>();
 
     @Override
@@ -126,6 +129,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
         Map<String, Boolean> leadEnrichmentInternalAttributeFlagMap = null;
         isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
+        enableScoreValidation = rtsBulkScoringConfig.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
         boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
                 rtsBulkScoringConfig.getCustomerSpace(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
@@ -439,8 +443,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     throw new LedpException(LedpCode.LEDP_20036);
                 }
                 Double score = tuple.getScore();
-                if (score != null && (score > 99 || score < 5)) {
-                    throw new LedpException(LedpCode.LEDP_20037);
+                if (enableScoreValidation) {
+                    validateScore(score);
                 }
 
                 builder.set(ScoringDaemonService.MODEL_ID, modelId);
@@ -477,6 +481,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 GenericData.Record record = builder.build();
                 dataFileWriter.append(record);
             }
+        }
+    }
+
+    private void validateScore(Double score) {
+        if (score != null && (score > 99 || score < 5)) {
+            throw new LedpException(LedpCode.LEDP_20037);
         }
     }
 

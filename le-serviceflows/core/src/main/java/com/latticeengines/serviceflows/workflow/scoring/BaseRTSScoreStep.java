@@ -109,6 +109,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         scoringConfig.setEnableLeadEnrichment(configuration.getEnableLeadEnrichment());
         scoringConfig.setEnableDebug(configuration.getEnableDebug());
         scoringConfig.setModelGuids(Arrays.asList(new String[] { modelId }));
+        scoringConfig.setModelType(configuration.getModelType());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
                 configuration.getCustomerSpace());
         String tableName = String.format("RTSBulkScoreResult_%s_%d", modelId.replaceAll("-", "_"),

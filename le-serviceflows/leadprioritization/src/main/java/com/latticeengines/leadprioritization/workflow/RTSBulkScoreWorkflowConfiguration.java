@@ -36,11 +36,11 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
-        
+
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace, "rtsBulkScoreWorkflow");
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
-            
+
             match.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
@@ -62,7 +62,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
-            
+
             return this;
         }
 
@@ -106,7 +106,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             configuration.setInputProperties(inputProperties);
             return this;
         }
-        
+
         public Builder matchType(MatchCommandType matchCommandType) {
             match.setMatchCommandType(matchCommandType);
             return this;
@@ -126,25 +126,25 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setCustomizedColumnSelection(customizedColumnSelection);
             return this;
         }
-        
+
         public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;
         }
-        
+
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);
             return this;
         }
-        
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.setDataCloudVersion(dataCloudVersion);
             matchResult.setDataCloudVersion(dataCloudVersion);
             return this;
         }
-        
+
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             match.setDbUrl(matchClientDocument.getUrl());
             match.setDbUser(matchClientDocument.getUsername());
@@ -152,7 +152,7 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setMatchClient(matchClientDocument.getMatchClient().name());
             return this;
         }
-        
+
         public RTSBulkScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -171,6 +171,11 @@ public class RTSBulkScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder enableDebug(boolean enableDebug) {
             score.setEnableDebug(enableDebug);
+            return this;
+        }
+
+        public Builder modelType(String modelType) {
+            score.setModelType(modelType);
             return this;
         }
     }

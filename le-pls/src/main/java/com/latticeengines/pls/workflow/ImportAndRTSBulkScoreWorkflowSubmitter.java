@@ -100,7 +100,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelSummary.getModelType());
+        String modelType = modelSummary.getModelType();
+        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         String sourceFileDisplayName = sourceFile.getDisplayName() != null ? sourceFile.getDisplayName() : "unnamed";
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         return new ImportAndRTSBulkScoreWorkflowConfiguration.Builder() //
@@ -111,6 +112,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort)//
                 .reportNamePrefix(sourceFile.getName() + "_Report") //
                 .modelId(modelId) //
+                .modelType(modelType) //
                 .inputTableName(sourceFile.getTableName()) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename(

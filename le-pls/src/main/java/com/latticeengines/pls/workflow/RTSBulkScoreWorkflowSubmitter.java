@@ -77,7 +77,8 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
-        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelSummary.getModelType());
+        String modelType = modelSummary.getModelType();
+        skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         log.info("Data Cloud Version=" + dataCloudVersion);
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
@@ -86,6 +87,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .internalResourcePort(internalResourceHostPort) //
                 .modelId(modelId) //
+                .modelType(modelType) //
                 .inputTableName(tableToScore) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"

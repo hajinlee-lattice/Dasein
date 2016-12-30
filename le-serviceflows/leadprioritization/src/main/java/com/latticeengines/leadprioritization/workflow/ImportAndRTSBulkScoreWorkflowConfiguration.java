@@ -155,5 +155,10 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends WorkflowConfigur
             return this;
         }
 
+        public Builder modelType(String modelType) {
+            rtsBulkScoreWorkflowConfigurationBuilder.modelType(modelType);
+            return this;
+        }
+
     }
 }
