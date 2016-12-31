@@ -128,6 +128,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         rtsBulkScoringConfig.setTargetResultDir(targetDir);
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
         rtsBulkScoringConfig.setEnableDebug(false);
+        rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
         rtsBulkScoringConfig.setInternalResourceHostPort(plsApiHostPort);
         ApplicationId appId = scoringService.submitScoreWorkflow(rtsBulkScoringConfig);
         assertNotNull(appId);
