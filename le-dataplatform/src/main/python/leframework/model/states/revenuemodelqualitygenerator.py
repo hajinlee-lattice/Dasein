@@ -47,6 +47,7 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
             if mediator.revenueColumn != None:
 
                 valueSpent = list(mediator.data[mediator.revenueColumn] )
+                valueSpent = [0 if np.isnan(x) else x for x in valueSpent]
                 valueRanking = list(mediator.data[mediator.schema["reserved"]["predictedrevenue"]])
                 
                 expectedValueRanking=[valueRanking[i] * eventRanking[i] for i in range(len(valueRanking))]
@@ -95,6 +96,8 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
         indR = self.sortedInd(ranking)
         indV = self.sortedInd(valSpent)
         totalSpent = float(sum(valSpent))
+        if totalSpent == 0:
+            return (0.0 , 0.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0,0.0)
         # cumulative sum of percentage of total value spent ordered by ranking
         valTotal = np.cumsum([valSpent[i] / totalSpent for i in indR])
         auc = np.mean(valTotal)
