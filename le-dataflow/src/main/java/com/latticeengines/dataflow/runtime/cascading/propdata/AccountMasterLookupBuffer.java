@@ -99,7 +99,6 @@ public class AccountMasterLookupBuffer extends BaseOperation implements Buffer {
                     domain = arguments.getString(domainField);
                     latticeId = arguments.getLong(latticeIdField);
                 }
-                break;
             }
         }
         result.set(domainLoc, domain);
