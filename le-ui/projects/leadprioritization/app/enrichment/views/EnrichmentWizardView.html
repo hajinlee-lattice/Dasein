@@ -220,7 +220,7 @@
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"> </div>
                     </div>       
-                    <h2 ng-show="vm.enrichments_loaded noselect">{{vm.label.no_results}}</h2>
+                    <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
