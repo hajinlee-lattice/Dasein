@@ -13,18 +13,18 @@
         <com.typesafe.akka-artifact-version>2.10</com.typesafe.akka-artifact-version>
         <org.scala-lang-version>2.10.6</org.scala-lang-version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
-        <le.domain.version>3.1.0-SNAPSHOT</le.domain.version>
-        <le.auth.version>3.1.0-SNAPSHOT</le.auth.version>
-        <le.security.version>3.1.0-SNAPSHOT</le.security.version>
-        <le.testfwk.version>3.1.0-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>3.1.0-SNAPSHOT</le.remote.version>
-        <le.monitor.version>3.1.0-SNAPSHOT</le.monitor.version>
+        <le.domain.version>3.2.0-SNAPSHOT</le.domain.version>
+        <le.auth.version>3.2.0-SNAPSHOT</le.auth.version>
+        <le.security.version>3.2.0-SNAPSHOT</le.security.version>
+        <le.testfwk.version>3.2.0-SNAPSHOT</le.testfwk.version>
+        <le.remote.version>3.2.0-SNAPSHOT</le.remote.version>
+        <le.monitor.version>3.2.0-SNAPSHOT</le.monitor.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>3.1.0-SNAPSHOT</version>
+        <version>3.2.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
