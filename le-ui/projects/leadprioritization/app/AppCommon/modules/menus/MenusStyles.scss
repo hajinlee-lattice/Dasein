@@ -3,7 +3,9 @@
     height: 3.1em;
     
     .ng-search.open-absolute .form-control {
-        left: 2em;
+        left: 36px;
+        border-bottom-left-radius: 0;
+        border-top-left-radius: 0;
     }
 
     .number-of-items {
