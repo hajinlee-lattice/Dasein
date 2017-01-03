@@ -170,7 +170,7 @@ angular
                         $scope.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
                         $scope.Uploaded = Model.ModelDetails.Uploaded;
 
-                        $scope.canRemodel = (Model.ModelDetails.ConflictWithOptionalRules === true) && !$scope.IsPmml && !$scope.Uploaded;
+                        $scope.canRemodel = !$scope.IsPmml && !$scope.Uploaded;
 
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
