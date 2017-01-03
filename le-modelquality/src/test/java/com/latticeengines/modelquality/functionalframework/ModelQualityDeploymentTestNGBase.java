@@ -185,6 +185,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         if (pipelineStepAlreadyExists == null) {
             pipelineService.createLatestProductionPipeline();
         }
+        pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
+        if (pipelineStepAlreadyExists != null) {
+            System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
+            pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+        }
 
         String pipelineStr = FileUtils.readFileToString(new File( //
                 ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
@@ -266,6 +271,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         pipelineEntityMgr.delete(pipeline1);
         System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline2.getName()));
         pipelineEntityMgr.delete(pipeline2);
+        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
+        if (pipelineStepAlreadyExists != null) {
+            System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
+            pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+        }
         System.out.println(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
         samplingEntityMgr.delete(sampling);
         System.out.println(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
