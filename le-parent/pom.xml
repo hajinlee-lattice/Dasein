@@ -24,7 +24,7 @@
         <nexusrepourl/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <compiler.version>1.7</compiler.version>
+        <compiler.version>1.8</compiler.version>
 
         <maven.jar.version>2.3.2</maven.jar.version>
         <maven.surefire.version>2.12.3</maven.surefire.version>
