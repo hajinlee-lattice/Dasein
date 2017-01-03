@@ -168,9 +168,11 @@ div.panel-body .columns {
 
     &.open-absolute .form-control,
     .form-control {
-        width: 115px;
+        width: 116px;
         left: inherit;
-        right: 2em;
+        right: 36px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
     }
 }
 
