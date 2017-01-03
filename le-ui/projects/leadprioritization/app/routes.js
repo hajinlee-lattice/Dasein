@@ -458,7 +458,7 @@ angular
             }
         })
         .state('home.campaigns.models', {
-            url: '/models',
+            url: '/models/{campaignId}',
             params: {
                 pageTitle: 'Campaigns',
                 pageIcon: 'ico-model'
@@ -468,6 +468,8 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "main@": {
+                    controller: 'CampaignModelsController',
+                    controllerAs: 'vm',
                     templateUrl: 'app/campaigns/views/CampaignModelsView.html'
                 }
             }

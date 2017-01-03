@@ -12,7 +12,7 @@
                 
                 <li 
                     ng-click="tileClick($event)" 
-                    ui-sref="home.campaigns.models"
+                    ui-sref="home.campaigns.models({campaignId:1234})"
                     ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
                 >
                     <div class="tile-header">

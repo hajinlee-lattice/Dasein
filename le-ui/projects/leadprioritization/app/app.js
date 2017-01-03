@@ -16,6 +16,7 @@ var mainApp = angular.module('mainApp', [
     'lp.marketo',
     'lp.apiconsole',
     'lp.campaigns.list',
+    'lp.campaigns.models',
     'lp.models.list',
     'lp.models.review',
     'lp.create.import',
