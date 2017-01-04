@@ -6,7 +6,7 @@ class PipelineStepTest(TrainingTestBase):
 
     def testPipelineStep(self):
 
-        jsonFile = './imputationstep_alt.json'
+        jsonFile = './addtitleattributesstep_pipelinetest.json'
         config = {}
         with open(jsonFile) as configfile:
             config = json.loads(configfile.read())
@@ -20,8 +20,9 @@ class PipelineStepTest(TrainingTestBase):
             del sys.modules['launcher']
         from launcher import Launcher
 
-        pipelinelauncher = Launcher("pipelineStepTest_metadata.json")
-        parser = pipelinelauncher.getParser()
-        schema = parser.getSchema()
-        schema['pipeline_driver'] = 'temppipeline.json'
-        pipelinelauncher.execute(writeToHdfs=False, validateEnv=False, postProcessClf=False)
+        for metadataJson in ['pipelineStepTest_metadata.json', 'pipelineStepTest2_metadata.json']:
+            pipelinelauncher = Launcher(metadataJson)
+            parser = pipelinelauncher.getParser()
+            schema = parser.getSchema()
+            schema['pipeline_driver'] = 'temppipeline.json'
+            pipelinelauncher.execute(writeToHdfs=False, validateEnv=False, postProcessClf=False)
