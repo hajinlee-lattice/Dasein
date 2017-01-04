@@ -211,7 +211,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             stringBuffer.append(modifyStringForCSV(attribute.getDisplayName()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getCategory()) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getDescription()) + ",");
-            stringBuffer.append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldType())) + ",");
+            stringBuffer.append(modifyStringForCSV(getDataTypeDisplay(attribute.getFieldJavaType())) + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsSelected() ? "On" : "Off") + ",");
             stringBuffer.append(modifyStringForCSV(attribute.getIsPremium() ? "Yes" : "No"));
             stringBuffer.append("\r\n");
@@ -231,11 +231,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         String displayName;
 
         switch (dataType.toUpperCase()) {
-        case "NVARCHAR(3)":
-            displayName = "Text (3)";
+        case "BOOLEAN":
+            displayName = "Boolean";
             break;
+        case "DOUBLE":
+        case "INTEGER":
+        case "LONG":
+            displayName = "Number";
+            break;
+        case "STRING":
         default:
-            displayName = "Text (3)";
+            displayName = "Text";
             break;
         }
 
