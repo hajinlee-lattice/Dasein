@@ -1167,7 +1167,7 @@ angular
                     controller: function(LookupResponse, LookupStore) {
                         if (LookupResponse.enrichmentAttributeValues) {
                             this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
-                            this.ldc_name = LookupResponse.enrichmentAttributeValues.LDC_Name;
+                            this.ldc_name = LookupResponse.companyInfo.LDC_Name;
                         } else {
                             this.count = 0;
                             this.ldc_name = '';
@@ -1293,7 +1293,7 @@ angular
                             EnrichmentStore.setMetadata('toggle.show.selected', bool);
                             EnrichmentStore.setMetadata('current', 1);
                         }
-                    },
+                    }
                     //templateUrl: 'app/navigation/summary/EnrichmentTabs.html'
                 },
                 "main@": {
