@@ -142,8 +142,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     } catch (Exception e) {
                         LOG.warn(e);
                         rowError = true;
-                        errorMap.put(String.valueOf(lineNum), String.format(
-                                "%s, try to remove single quote \' or double quote \"  in the row and try again", e.getMessage()).toString());
+                        errorMap.put(String.valueOf(lineNum),
+                                String.format(
+                                        "%s, try to remove single quote \' or double quote \"  in the row and try again",
+                                        e.getMessage()).toString());
                         handleError(context, lineNum);
                     }
                 }
@@ -194,6 +196,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 try {
                     csvFieldValue = String.valueOf(csvRecord.get(attr.getDisplayName()));
                 } catch (Exception e) { // This catch is for the row error
+                    rowError = true;
                     LOG.warn(e);
                 }
                 List<InputValidator> validators = attr.getValidators();
