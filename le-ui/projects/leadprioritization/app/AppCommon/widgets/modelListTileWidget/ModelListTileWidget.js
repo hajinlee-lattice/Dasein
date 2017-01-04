@@ -35,6 +35,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
 
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
+            $scope.menuFlag = !!$scope.data.ConflictWithOptionalRules;
 
             //TODO:pierce Field names subject to change
             $scope.isActive = data.Status === "Active";

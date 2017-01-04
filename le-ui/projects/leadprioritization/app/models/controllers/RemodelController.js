@@ -8,8 +8,7 @@ angular.module('mainApp.models.remodel', [
 ])
 .controller('RemodelController', function($scope, $filter, $state, MetadataService, RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal, RemodelingModal, ResourceUtility) {
 
-    if (Model.ModelDetails.ConflictWithOptionalRules !== true ||
-        Model.ModelType === 'PmmlModel' ||
+    if (Model.ModelType === 'PmmlModel' ||
         Model.ModelDetails.Uploaded === true) {
         backToModel();
         return;

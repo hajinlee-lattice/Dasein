@@ -11,7 +11,7 @@
                     type="button"
                     ng-click="customMenuClick($event)" 
                     ng-class="{ 'open': showCustomMenu }">
-                <span class="fa fa-ellipsis-v" ng-class="{ 'yellow-flag': canRemodel && !showCustomMenu, 'fa-rotate-180': showCustomMenu }"></span>
+                <span class="fa fa-ellipsis-v" ng-class="{ 'yellow-flag': menuFlag && !showCustomMenu, 'fa-rotate-180': showCustomMenu }"></span>
             </button>
             <ul class="model-menu" ng-if="showCustomMenu">
                 <li 
