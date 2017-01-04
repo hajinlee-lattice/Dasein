@@ -435,22 +435,22 @@ angular
                 pageTitle: 'Campaigns',
                 pageIcon: 'ico-campaign'
             },
-            resolve: {
-                CampaignList: function($q, CampaignStore) {
-                    var deferred = $q.defer();
-
-                    CampaignStore.getCampaigns(true).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "main@": {
+                    resolve: {
+                        Campaigns: function($q, CampaignService) {
+                            var deferred = $q.defer();
+
+                            CampaignService.GetCampaigns().then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
                     controller: 'CampaignListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/campaigns/views/CampaignListView.html'

@@ -1,44 +1,31 @@
-angular.module('lp.campaigns.list', [
+angular.module('lp.campaigns', [
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.widgets.CampaignListTileWidget',
-    'mainApp.campaigns.modals.CreateCampaignModal'
+    'mainApp.campaigns.modals.DeleteCampaignModal'
 ])
-.controller('CampaignListController', function (
-    ResourceUtility, CampaignList, CampaignStore, CreateCampaignModal
-) {
+.controller('CreateCampaignController', ['$scope', '$state', '$stateParams', 'BrowserStorageUtility', 'ResourceUtility', 'CampaignService',
+    function($scope, $state, $stateParams, BrowserStorageUtility, ResourceUtility, CampaignService){
+
     var vm = this;
 
-    vm.createClicked = false;
+    angular.extend(vm, {
+        campaignName: '',
+        campaignDescription: '',
+        saveInProgress: false,
+        addCampaignErrorMessage: "",
+        showAddCampaignError: false
+    });
+    
+}])
+.controller('CampaignListController', ['Campaigns', 'CampaignService', 'DeleteCampaignModal', 'ResourceUtility', function(Campaigns, CampaignService, DeleteCampaignModal, ResourceUtility) {
+    var vm = this;
 
     angular.extend(vm, {
         ResourceUtility: ResourceUtility,
-        campaigns: CampaignList || []
-    },{  
-        init: function() {
-            CampaignStore.getCampaigns();
-        }
-
+        campaigns: Campaigns
     });
 
-    vm.createCampaignClick = function ($event) {
-        if ($event != null) {
-            $event.stopPropagation();
-        }
-        vm.createClicked = true;
 
-
-
-    };
-    vm.createCampaignCancelClick = function ($event) {
-        if ($event != null) {
-            $event.stopPropagation();
-        }
-        vm.createClicked = false;
-    };
-
-
-
-    // This needs to be moved over to CampaignTileListWidget.js When ready
     vm.showCustomMenu = false;
     vm.customMenuClick = function ($event) {
         if ($event != null) {
@@ -63,12 +50,45 @@ angular.module('lp.campaigns.list', [
             });
         }
     };
+
+    /* Navigate to Campaign Detail page */
     vm.tileClick = function ($event) {
         $event.preventDefault();
     };
 
 
+    vm.showCreateCampaignClicked = function($event) {
+        vm.showCreateCampaignForm = true;
+    };
+    vm.createCampaignClicked = function() {
+        
+        vm.saveInProgress = true;
 
+        var campaign = {
+            campaignName: vm.campaignName,
+            campaignDescription: vm.campaignDescription
+        };
 
-    vm.init();
-});
+        CampaignService.CreateCampaign(campaign).then(function(result){
+
+            if (result != null && result.success === true) {
+                $state.go('home.campaigns', {}, { reload: true });
+            } else {
+                vm.saveInProgress = false;
+                vm.addCampaignErrorMessage = result;
+                vm.showAddCampaignError = true;
+            }
+
+        });
+
+    };
+
+    vm.cancelCreateCampaignClicked = function(){
+        vm.showCreateCampaignForm = false;     
+    };
+
+    vm.deleteCampaignClicked = function(campaignId) {
+        DeleteCampaignModal.show(campaignId);
+    }
+
+}]);

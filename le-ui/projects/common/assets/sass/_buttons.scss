@@ -193,6 +193,20 @@ a.button, .button a:link, .button a:focus, .button a:visited {
       line-height: 125px;
     }
   }
+  &.disabled {
+    border-color: #dfdfdf;
+    color: #d0d0d0;
+    &:hover {
+      cursor: default;
+      color: #d0d0d0;
+      border-color: #dfdfdf;
+      border-style: dashed;
+      -webkit-box-shadow: none;
+      -moz-box-shadow:    none;
+      box-shadow:         none;
+      background: none;
+    }
+  }
 	@include media(">medium") {
 		display: inline-block;
 		padding: 9px 15px;

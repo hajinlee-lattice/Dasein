@@ -9,14 +9,16 @@
                     ng-repeat="campaign in campaigns"
                     data="campaign">
                 </li> -->
-                
-                <li 
+
+
+                <li
+                    ng-repeat="campaign in vm.campaigns"
                     ng-click="tileClick($event)" 
                     ui-sref="home.campaigns.models({campaignId:1234})"
                     ng-mouseleave="showCustomMenu ? customMenuClick($event) : null"
                 >
                     <div class="tile-header">
-                        <h2>NA Tech Segment Campaign 2016</h2>
+                        <h2 title="{{campaign.name}}">{{campaign.name | limitTo: 36 }}{{campaign.name.length > 36 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button 
                                     type="button"
@@ -25,12 +27,19 @@
                                 <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': showCustomMenu }"></span>
                             </button>
                             <ul class="model-menu" ng-if="showCustomMenu">
-                                <li></li>
+                                <li data-ng-click="campaignNameEditClick($event)">
+                                    <a href="javascript:void(0)" data-title="Enter Model Name">Rename</a>
+                                    <i class="fa fa-edit"></i>
+                                </li>
+                                <li data-ng-click="deleteCampaignClick($event)">
+                                    <a href="javascript:void(0)">Delete</a>
+                                    <i class="fa fa-trash"></i>
+                                </li>
                             </ul>
                         </div>
                     </div>
                     <div class="tile-body">
-                        <p>Targets the tech industry during the critical buying period during the main trade of the year.</p>
+                        <p title="{{campaign.name}}">{{campaign.name | limitTo: 36 }}{{campaign.name.length > 240 ? '&hellip;' : ''}}</p>
                     </div>
                     <div class="meta-data">
                         <dl class="stats">
@@ -47,14 +56,17 @@
                         </dl>
                     </div>
                 </li>
+                
+                
 
-                <li class="create-tile" ng-if="vm.createClicked">
+                <li class="create-tile" ng-if="vm.showCreateCampaignForm">
                     <div class="form-group">
                         <label>Name
                         <input 
                             autofocus
                             type="text" 
-                            name="" 
+                            id="campaignName" 
+                            name="campaignName"
                             data-ng-model="vm.campaignName"
                             class="form-control" />
                             </label>
@@ -63,6 +75,8 @@
                         <label>Description</label>
                         <textarea 
                             class="form-control"
+                            id="campaignDesc" 
+                            name="campaignDesc"
                             data-ng-model="vm.campaignDescription"
                         ></textarea>
                     </div>  
@@ -70,21 +84,31 @@
                         <button 
                             type="button" 
                             class="button white-button pull-left" 
-                            ng-click="vm.createCampaignCancelClick($event)">
+                            ng-click="vm.cancelCreateCampaignClicked($event)">
                             Cancel</button>
                         <button 
                             type="button" 
                             class="button orange-button pull-right" 
-                            ng-click="vm.createCampaignClick($event)">
+                            ng-click="vm.createCampaignClicked($event)">
                             Create</button>
                     </div>
                 </li>
 
-                <li class="no-style" ng-if="!vm.createClicked">
+                <li class="no-style" ng-if="!vm.showCreateCampaignForm">
                     <button 
                         type="button" 
                         class="button new-tile-button"
-                        ng-click="vm.createCampaignClick($event)">
+                        ng-click="vm.showCreateCampaignClicked($event)">
+                        <span>&#43;</span>
+                        Create Campaign
+                    </button>
+                </li>
+
+                <li class="no-style" ng-if="vm.showCreateCampaignForm">
+                    <button 
+                        type="button" 
+                        class="button new-tile-button disabled"
+                        ng-click="vm.showCreateCampaignClicked($event)">
                         <span>&#43;</span>
                         Create Campaign
                     </button>
