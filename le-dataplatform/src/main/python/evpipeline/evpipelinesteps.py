@@ -174,16 +174,20 @@ class ImputationStep(PipelineStep):
                 print 'Not imputed column:' + column
                 continue
             if column in dret['zeroValues']:
+                self.imputationValues[column] = 0
                 outputFrame[column] = outputFrame[column].fillna(0)
                 print 'Zero imputed column:' + column
                 continue
             if column in dret['max']:
                 if column in self.columnsMax:
+                    self.imputationValues[column] = self.columnsMax[column]
                     outputFrame[column] = outputFrame[column].fillna(self.columnsMax[column])
                 else:
+                    self.imputationValues[column] = 0
                     outputFrame[column] = outputFrame[column].fillna(0)
                 print 'Max imputed column:' + column
                 continue
+            self.imputationValues[column] = 0
             outputFrame[column] = outputFrame[column].fillna(0)
             print 'Zero imputed column (rarely):' + column
         return outputFrame
