@@ -23,6 +23,21 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
     @Value("${quartz.test.functional.testdesturl}")
     private String testDestUrl;
 
+    @Value("${quartz.test.functional.testjob.primary.url:}")
+    private String testJobPrimaryUrl;
+
+    @Value("${quartz.test.functional.testjob.secondary.url:}")
+    private String testJobSecondaryUrl;
+
+    @Value("${quartz.test.functional.testjob.query.api:}")
+    private String testJobQueryApi;
+
+    @Value("${quartz.test.functional.testjob.check.bean.url:}")
+    private String testJobCheckBeanUrl;
+
+    @Value("${quartz.test.functional.testjob.cron:}")
+    private String testJobCronTrigger;
+
     @Autowired
     private QuartzSchedulerProxy quartzSchedulerProxy;
 
@@ -36,14 +51,13 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
     public void addJob() {
         quartzSchedulerProxy.deleteJob("groupTestNG", "testNGJob");
         JobConfig jobTest = new JobConfig();
-        jobTest.setCronTrigger("0/5 * * * * ?");
         jobTest.setJobName("testNGJob");
-        jobTest.setCronTrigger("0/5 * * * * ?");
-        jobTest.setDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
-        jobTest.setSecondaryDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setCronTrigger(testJobCronTrigger);
+        jobTest.setDestUrl(testJobPrimaryUrl);
+        jobTest.setSecondaryDestUrl(testJobSecondaryUrl);
         jobTest.setJobTimeout(30);
-        jobTest.setQueryApi("http://localhost:8899/quartz/quartzjob/checkactivejob");
-        jobTest.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobTest.setQueryApi(testJobQueryApi);
+        jobTest.setCheckJobBeanUrl(testJobCheckBeanUrl);
         jobTest.setJobArguments("{" +
                 "  \"jobType\": \"testQuartzJob\"," +
                 "  \"printMsg\": \"Hello World\"," + "}");
@@ -72,14 +86,13 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", expectedExceptions = Exception.class, enabled = false)
     public void addWrongDestUrlJob() {
         JobConfig jobTest = new JobConfig();
-        jobTest.setCronTrigger("0/5 * * * * ?");
         jobTest.setJobName("testNGWrongDestUrlJob");
-        jobTest.setCronTrigger("0/5 * * * * ?");
-        jobTest.setDestUrl("//localhost:8899/quartz/quartzjob/triggerjob");
-        jobTest.setSecondaryDestUrl("/localhost:8899/quartz/quartzjob/triggerjob");
+        jobTest.setCronTrigger(testJobCronTrigger);
+        jobTest.setDestUrl("//localhost:8080/quartz/quartzjob/triggerjob");
+        jobTest.setSecondaryDestUrl("/localhost:8080/quartz/quartzjob/triggerjob");
         jobTest.setJobTimeout(30);
-        jobTest.setQueryApi("//localhost:8899/quartz/quartzjob/checkactivejob");
-        jobTest.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobTest.setQueryApi("//localhost:8080/quartz/quartzjob/checkactivejob");
+        jobTest.setCheckJobBeanUrl(testJobCheckBeanUrl);
         jobTest.setJobArguments("{" +
                 "  \"jobType\": \"testQuartzJob\"," +
                 "  \"printMsg\": \"Hello World\"," + "}");

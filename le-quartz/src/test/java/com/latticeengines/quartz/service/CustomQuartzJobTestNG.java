@@ -9,6 +9,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -34,18 +35,33 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private ApplicationContext appContext;
 
+    @Value("${quartz.test.functional.testjob.primary.url:}")
+    private String testJobPrimaryUrl;
+
+    @Value("${quartz.test.functional.testjob.secondary.url:}")
+    private String testJobSecondaryUrl;
+
+    @Value("${quartz.test.functional.testjob.query.api:}")
+    private String testJobQueryApi;
+
+    @Value("${quartz.test.functional.testjob.check.bean.url:}")
+    private String testJobCheckBeanUrl;
+
+    @Value("${quartz.test.functional.testjob.cron:}")
+    private String testJobCronTrigger;
+
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void addJob() {
         schedulerEntityMgr.deleteJob(JOB_GROUP, JOB_NAME);
         JobConfig jobConfig = new JobConfig();
         jobConfig.setJobName(JOB_NAME);
-        jobConfig.setCronTrigger("0/5 * * * * ?");
-        jobConfig.setDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
-        jobConfig.setSecondaryDestUrl("http://localhost:8899/quartz/quartzjob/triggerjob");
+        jobConfig.setCronTrigger(testJobCronTrigger);
+        jobConfig.setDestUrl(testJobPrimaryUrl);
+        jobConfig.setSecondaryDestUrl(testJobSecondaryUrl);
         jobConfig.setJobTimeout(30);
-        jobConfig.setQueryApi("http://localhost:8899/quartz/quartzjob/checkactivejob");
-        jobConfig.setCheckJobBeanUrl("http://localhost:8899/quartz/quartzjob/checkjobbean");
+        jobConfig.setQueryApi(testJobQueryApi);
+        jobConfig.setCheckJobBeanUrl(testJobCheckBeanUrl);
         jobConfig.setJobArguments("{" +
                 "  \"jobType\": \"testQuartzJob\"," +
                 "  \"printMsg\": \"Hello World\"," + "}");

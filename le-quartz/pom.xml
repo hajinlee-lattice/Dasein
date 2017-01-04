@@ -184,7 +184,7 @@
                                 <contextPath>/</contextPath>
                             </webApp>
                             <httpConnector>
-                                <port>8899</port>
+                                <port>8080</port>
                             </httpConnector>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
