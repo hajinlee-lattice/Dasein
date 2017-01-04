@@ -21,23 +21,28 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
 
             self.logger.info("Calculating EventScores in ModelQualityGenerator")
             event = list(mediator.data[schema["target"]])
-            periodID=list(mediator.data['Period_ID'])
-            periodMapping=self.groupedValueIndicies(periodID)
+            
+#             periodID=list(mediator.data['Period_ID'])
+#             periodMapping=self.groupedValueIndicies(periodID)
+
             mediator.modelquality = {}
 
             # eventRanking is "predictedEvent"
             eventRanking = list(mediator.data[schema["reserved"]["score"]])
             eventScores = self.calculateEventScore(event, eventRanking)
             self.modelquality["eventScores"] = {"allPeriods":eventScores}
-            for k in periodMapping.keys():
-                ind=periodMapping[k]
-                periodName="Period_"+str(k)
-                newEvent=[event[i] for i in ind]
-                newRanking=[eventRanking[i] for i in ind]
-                #eventScores=self.calculateEventScore(event.iloc[ind], eventRanking.iloc[ind])
-                eventScores=self.calculateEventScore(newEvent,newRanking)
-                self.modelquality["eventScores"][periodName]=eventScores
-            
+
+
+#             for k in periodMapping.keys():
+#                 ind=periodMapping[k]
+#                 periodName="Period_"+str(k)
+#                 newEvent=[event[i] for i in ind]
+#                 newRanking=[eventRanking[i] for i in ind]
+#                 #eventScores=self.calculateEventScore(event.iloc[ind], eventRanking.iloc[ind])
+#                 eventScores=self.calculateEventScore(newEvent,newRanking)
+#                 self.modelquality["eventScores"][periodName]=eventScores
+
+
             mediator.modelquality = self.modelquality
             self.logger.info("Finished calculating EventScores in ModelQualityGenerator")
 
@@ -62,19 +67,20 @@ class RevenueModelQualityGenerator(State, JsonGenBase):
                 predictedValueValueScores=self.calculateValueScore(valueSpent, valueRanking,eventRanking,valueRanking,expectedValueRanking)
                 self.modelquality["predictedValueValueScores"] =  {"allPeriods":predictedValueValueScores}
                 self.logger.info("Finished Calculating PredictedValueValueScores in ModelQualityGenerator")
-                for k in periodMapping.keys():
-                    ind=periodMapping[k]
-                    periodName="Period_"+str(k)
-                    valueSpent_Period=[valueSpent[i] for i in ind]
-                    expectedValueRanking_Period=[expectedValueRanking[i] for i in ind]
-                    valueRanking_Period=[valueRanking[i] for i in ind]
-                    eventRanking_Period=[eventRanking[i] for i in ind]
-                    expectedValueScores = self.calculateValueScore(valueSpent_Period, expectedValueRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
-                    propensityValueScores=self.calculateValueScore(valueSpent_Period, eventRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
-                    predictedValueValueScores=self.calculateValueScore(valueSpent_Period, valueRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
-                    self.modelquality["expectedValueScores"][periodName] =expectedValueScores
-                    self.modelquality["propensityValueScores"][periodName]=propensityValueScores
-                    self.modelquality["predictedValueValueScores"][periodName] = predictedValueValueScores
+
+#                 for k in periodMapping.keys():
+#                     ind=periodMapping[k]
+#                     periodName="Period_"+str(k)
+#                     valueSpent_Period=[valueSpent[i] for i in ind]
+#                     expectedValueRanking_Period=[expectedValueRanking[i] for i in ind]
+#                     valueRanking_Period=[valueRanking[i] for i in ind]
+#                     eventRanking_Period=[eventRanking[i] for i in ind]
+#                     expectedValueScores = self.calculateValueScore(valueSpent_Period, expectedValueRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
+#                     propensityValueScores=self.calculateValueScore(valueSpent_Period, eventRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
+#                     predictedValueValueScores=self.calculateValueScore(valueSpent_Period, valueRanking_Period,eventRanking_Period,valueRanking_Period,expectedValueRanking_Period)
+#                     self.modelquality["expectedValueScores"][periodName] =expectedValueScores
+#                     self.modelquality["propensityValueScores"][periodName]=propensityValueScores
+#                     self.modelquality["predictedValueValueScores"][periodName] = predictedValueValueScores
 
 
             mediator.modelquality = self.modelquality
