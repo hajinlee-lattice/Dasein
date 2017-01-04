@@ -82,16 +82,17 @@ public class ImportConfiguration extends BasePayloadConfiguration {
 
     public static ImportConfiguration createForCamelRouteConfiguration(
             CamelRouteConfiguration camelRouteConfiguration) {
-        ImportConfiguration importConfiguration = new ImportConfiguration();
-        importConfiguration.setImportType(ImportType.CamelRoute);
-        importConfiguration.setCamelRouteConfiguration(camelRouteConfiguration);
-        return importConfiguration;
+        return createForImportType(camelRouteConfiguration, ImportType.CamelRoute);
     }
 
     public static ImportConfiguration createForAmazonS3Configuration(
             CamelRouteConfiguration camelRouteConfiguration) {
+        return createForImportType(camelRouteConfiguration, ImportType.AmazonS3);
+    }
+    
+    private static ImportConfiguration createForImportType(CamelRouteConfiguration camelRouteConfiguration, ImportType importType) {
         ImportConfiguration importConfiguration = new ImportConfiguration();
-        importConfiguration.setImportType(ImportType.AmazonS3);
+        importConfiguration.setImportType(importType);
         importConfiguration.setCamelRouteConfiguration(camelRouteConfiguration);
         return importConfiguration;
     }
