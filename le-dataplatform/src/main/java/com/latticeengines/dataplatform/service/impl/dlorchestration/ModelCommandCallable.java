@@ -151,9 +151,11 @@ public class ModelCommandCallable implements Callable<Long> {
                     + modelCommand.getPid()); // Need this line to associate
                                               // modelCommandId with threadId in
                                               // log4j output.
+            long startTime = System.currentTimeMillis();
             executeWorkflow();
-            log.info("End scheduled work on " + ModelCommandLogServiceImpl.MODELCOMMAND_ID_LOG_PREFIX + ":"
-                    + modelCommand.getPid());
+            long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
+            log.info(String.format("End scheduled work on %s:%d. modelDownloadDuration=%d seconds",
+                    ModelCommandLogServiceImpl.MODELCOMMAND_ID_LOG_PREFIX, modelCommand.getPid(), totalSeconds));
         } catch (LedpException e) {
             result = FAIL;
             modelCommandLogService.logLedpException(modelCommand, e);
