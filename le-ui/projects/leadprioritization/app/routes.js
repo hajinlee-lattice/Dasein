@@ -233,6 +233,20 @@ angular
                 }
             }
         })
+        .state('home.model.ratings', {
+            url: '/ratings',
+            params: {
+                pageIcon: 'ico-ratings',
+                pageTitle: ''
+            },
+            views: {
+                "main@": {
+                    controller: 'ModelRatingsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/views/ModelRatingsView.html'
+                }
+            }
+        })
         .state('home.model.leads', {
             url: '/leads',
             params: {

@@ -19,6 +19,7 @@ var mainApp = angular.module('mainApp', [
     'lp.campaigns.models',
     'lp.models.list',
     'lp.models.review',
+    'lp.models.ratings',
     'lp.create.import',
     'lp.enrichment.leadenrichment',
     'lp.enrichmentwizard.leadenrichment',
