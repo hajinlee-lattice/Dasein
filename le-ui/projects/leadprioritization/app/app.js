@@ -20,6 +20,7 @@ var mainApp = angular.module('mainApp', [
     'lp.models.list',
     'lp.models.review',
     'lp.create.import',
+    'lp.enrichment.leadenrichment',
     'lp.enrichmentwizard.leadenrichment',
     'lp.lookup.form',
     'lp.sfdc.credentials',
