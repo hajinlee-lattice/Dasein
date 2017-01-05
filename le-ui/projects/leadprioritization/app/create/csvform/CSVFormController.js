@@ -98,10 +98,14 @@ angular
             }
         }
     }
-    
+
     vm.fileSelect = function(fileName) {
         setTimeout(function() {
             vm.uploaded = false;
+
+            var timestamp = new Date().getTime(),
+                artifactName = vm.artifactName = vm.stripExt(vm.sanitize(fileName)),
+                moduleName = vm.moduleName = artifactName + '_' + timestamp;
 
             if (vm.modelDisplayName) {
                 return;
@@ -130,19 +134,16 @@ angular
                 vm.showNameDefault = true;
             }
 
-            $('#modelDisplayName').focus();
-            
+            var modelDisplayNameEl = $('#modelDisplayName');
+            modelDisplayNameEl.focus();
+
             setTimeout(function() {
-                $('#modelDisplayName').select();
+                modelDisplayNameEl.select();
             }, 1);
 
-            $('#modelDisplayName')
+            modelDisplayNameEl
                 .parent('div.form-group')
                 .removeClass('is-pristine');
-
-            var timestamp = new Date().getTime();
-                artifactName = vm.artifactName = vm.stripExt(vm.sanitize(fileName)),
-                moduleName = vm.moduleName = artifactName + '_' + timestamp;
         }, 25);
     }
 
