@@ -28,9 +28,9 @@ angular
         'importMatchAndModelWorkflow': {
             'importData':                           'load_data',
             'createEventTableReport':               'load_data',
-            'dedupEventTable':                      'load_data',
             'createPrematchEventTableReport':       'generate_insights',
             'validatePrematchEventTable':           'generate_insights',
+            'dedupEventTable':                      'generate_insights',
             'matchDataCloud':                       'generate_insights',
             'processMatchResult':                   'generate_insights',
             'addStandardAttributes':                'create_global_target_market',
