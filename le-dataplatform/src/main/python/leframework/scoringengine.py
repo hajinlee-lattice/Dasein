@@ -88,4 +88,4 @@ def writeToFile(w, rowId, scoreList):
     w.write(rowId + "," + ",".join(scoreList) + "\n")
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    main(sys.argv)
