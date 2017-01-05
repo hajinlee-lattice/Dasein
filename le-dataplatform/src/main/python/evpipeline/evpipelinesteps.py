@@ -160,7 +160,7 @@ class ImputationStep(PipelineStep):
     
     def __computeImputationValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
-        if len(self.columns) <= 0 or not calculateImputationValues:
+        if len(self.columns) <= 0:
             return dataFrame
         imputedColumns = list(self.columns.keys())
         
@@ -169,7 +169,7 @@ class ImputationStep(PipelineStep):
             if column not in dataFrame:
                 continue
             if column in nullValues and nullValues[column] == 0:
-                 continue
+                continue
             if column in dret['noImputation']:
                 print 'Not imputed column:' + column
                 continue
