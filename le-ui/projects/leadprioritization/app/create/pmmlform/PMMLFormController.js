@@ -35,8 +35,16 @@ angular
     vm.pmmlSelect = function(fileName) {
         vm.fileName = vm.pmmlFileName = fileName;
 
+        var fileName = vm.sanitize(fileName),
+            timestamp = new Date().getTime(),
+            artifactName = vm.artifactName = vm.stripExt(fileName),
+            moduleName = vm.moduleName = artifactName + '_' + timestamp;
+
+        vm.pmmlUploaded = false;
+        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
+
         if (vm.modelDisplayName) {
-            return;
+            return vm.pmmlParams;
         }
 
         var date = new Date(),
@@ -59,24 +67,17 @@ angular
             vm.showNameDefault = true;
         }
 
-        $('#modelDisplayName').focus();
-        
+        var modelDisplayNameEl = $('#modelDisplayName')
+        modelDisplayNameEl.focus();
+
         setTimeout(function() {
-            $('#modelDisplayName').select();
+            modelDisplayNameEl.select();
         }, 1);
 
-        $('#modelDisplayName')
+        modelDisplayNameEl
             .parent('div.form-group')
             .removeClass('is-pristine');
 
-        var fileName = vm.sanitize(fileName),
-            timestamp = new Date().getTime(),
-            artifactName = vm.artifactName = vm.stripExt(fileName),
-            moduleName = vm.moduleName = artifactName + '_' + timestamp;
-
-        vm.pmmlUploaded = false;
-        vm.pmmlParams.url = vm.endpoint + moduleName + '/pmmlfiles?artifactName=' + artifactName;
-        
         return vm.pmmlParams;
     }
 
