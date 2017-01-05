@@ -227,7 +227,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
     private boolean withinRange(BucketRange range, //
             double value) {
-        return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
+        return (range.lower == null || value >= range.lower) && (range.upper == null || value <= range.upper);
     }
 
     private void checkNullFields(List<String> nullFields) {
