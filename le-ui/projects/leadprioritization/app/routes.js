@@ -1,6 +1,6 @@
 angular
 .module('mainApp')
-.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
+.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility, LookupStore) {
     $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
@@ -19,8 +19,15 @@ angular
         ServiceErrorUtility.hideBanner();
     });
 
-    $rootScope.$on('$stateChangeSuccess', function(evt, toState, params) {
+    $rootScope.$on('$stateChangeSuccess', function(evt, toState, params, fromState, fromParams) {
+        var from = fromState.name;
+        var to = toState.name;
 
+        if ((from.indexOf('home.lookup') > -1 || from.indexOf('home.data-cloud') > -1) &&
+            !(to.indexOf('home.lookup') > -1 || to.indexOf('home.data-cloud') > -1)) {
+
+            LookupStore.reset();
+        }
     });
 
     $rootScope.$on('$stateChangeError', function(evt, toState, params) {

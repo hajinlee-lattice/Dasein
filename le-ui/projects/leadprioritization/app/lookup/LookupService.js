@@ -28,15 +28,29 @@ angular
         return this[type];
     }
 
+    this.reset = function () {
+        this.timestamp = 0;
+        this.params = {
+            shouldSkipLoadingEnrichmentMetadata: true,
+            enforceFuzzyMatch: false
+        };
+        this.request = {
+            modelId: '',
+            performEnrichment: true,
+            record: { }
+        };
+        this.response = {};
+    }
+
     this.syntaxHighlight = function(json) {
         json = json ? json : '';
-        
+
         if (typeof json != 'string') {
             json = JSON.stringify(json, undefined, 4);
         }
 
         json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
+
         return $sce.trustAsHtml(json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
             var cls = 'number';
 
