@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
@@ -62,23 +61,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
 
         MetadataResolver resolver = getMetadataResolver(sourceFile, null);
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), parameters);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
         return resolver.getFieldMappingsDocumentBestEffort(table);
     }
 
-    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation,
-            ModelingParameters parameters) {
-        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
-        if (parameters != null) {
-            if (parameters.getExcludePropDataColumns()) {
-                if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-                    table.removeAttribute(InterfaceName.Website.name());
-                } else if (schemaInterpretation == SchemaInterpretation.SalesforceLead) {
-                    table.removeAttribute(InterfaceName.Email.name());
-                }
-            }
-        }
-        return table;
+    private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
+        return SchemaRepository.instance().getSchema(schemaInterpretation);
     }
 
     @Override
@@ -92,7 +80,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             throw new RuntimeException(
                     String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
-        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation(), null);
+        Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
         resolver.calculateBasedOnFieldMappingDocument(table);
 
         String customerSpace = MultiTenantContext.getTenant().getId().toString();
@@ -168,9 +156,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .getSchema(SchemaInterpretation.SalesforceAccount).getAttributes();
         List<LatticeSchemaField> latticeAccountSchemaFields = new ArrayList<>();
         for (Attribute accountAttribute : accountAttributes) {
-            if (excludeLatticeDataAttributes && (accountAttribute.getName().equals("Website"))) {
-                continue;
-            }
             latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }
         schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceAccount,
@@ -180,9 +165,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .getSchema(SchemaInterpretation.SalesforceLead).getAttributes();
         List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
         for (Attribute leadAttribute : leadAttributes) {
-            if (excludeLatticeDataAttributes && (leadAttribute.getName().equals("Email"))) {
-                continue;
-            }
             latticeLeadSchemaFields.add(
                     getLatticeFieldFromTableAttribute(leadAttribute));
         }
