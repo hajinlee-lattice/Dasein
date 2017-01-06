@@ -32,7 +32,6 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -101,13 +100,11 @@ public class ProcessorContext {
     private Boolean returnUnmatched;
     private Boolean excludeUnmatchedWithPublicDomain;
     private Boolean publicDomainAsNormalDomain;
-    private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
     private boolean useProxy = false;
     private String decisionGraph;
 
     private BlockDivider divider;
     private String blockRootDir;
-    private Integer groupSize;
     private Integer numThreads;
 
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
@@ -117,34 +114,6 @@ public class ProcessorContext {
     private DataCloudProcessor dataCloudProcessor;
 
     private boolean fuzzyMatchEnabled;
-
-    public Integer getSqlThreadPool() {
-        return sqlThreadPool;
-    }
-
-    public Integer getSqlGroupSize() {
-        return sqlGroupSize;
-    }
-
-    public String getFuzzyMatchGraph() {
-        return fuzzyMatchGraph;
-    }
-
-    public String getDefaultGraph() {
-        return defaultGraph;
-    }
-
-    public int getFuzzyThreadPool() {
-        return fuzzyThreadPool;
-    }
-
-    public int getFuzzyGroupSize() {
-        return fuzzyGroupSize;
-    }
-
-    public static Long getTimeOutPer10k() {
-        return TIME_OUT_PER_10K;
-    }
 
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
@@ -178,10 +147,6 @@ public class ProcessorContext {
         return rootOperationUid;
     }
 
-    public String getAvroPath() {
-        return avroPath;
-    }
-
     public String getOutputAvro() {
         return outputAvro;
     }
@@ -204,10 +169,6 @@ public class ProcessorContext {
 
     public Schema getOutputSchema() {
         return outputSchema;
-    }
-
-    public Schema getInputSchema() {
-        return inputSchema;
     }
 
     public MatchInput getMatchInput() {
@@ -238,14 +199,6 @@ public class ProcessorContext {
         return publicDomainAsNormalDomain;
     }
 
-    public Map<String, AccountMasterColumn> getAccountMasterColumnMap() {
-        return accountMasterColumnMap;
-    }
-
-    public void setAccountMasterColumnMap(Map<String, AccountMasterColumn> accountMasterColumnMap) {
-        this.accountMasterColumnMap = accountMasterColumnMap;
-    }
-
     public boolean isUseProxy() {
         return useProxy;
     }
@@ -262,14 +215,6 @@ public class ProcessorContext {
         return divider;
     }
 
-    public String getBlockRootDir() {
-        return blockRootDir;
-    }
-
-    public Integer getGroupSize() {
-        return groupSize;
-    }
-
     public Integer getNumThreads() {
         return numThreads;
     }
@@ -280,10 +225,6 @@ public class ProcessorContext {
 
     public boolean isFuzzyMatchEnabled() {
         return fuzzyMatchEnabled;
-    }
-
-    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
-        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
     }
 
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
@@ -344,7 +285,7 @@ public class ProcessorContext {
             log.info("Using real-time match proxy at " + matchProxy.getHostport());
         }
 
-        groupSize = jobConfiguration.getGroupSize();
+        Integer groupSize = jobConfiguration.getGroupSize();
         numThreads = jobConfiguration.getThreadPoolSize();
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
             groupSize = fuzzyGroupSize;
