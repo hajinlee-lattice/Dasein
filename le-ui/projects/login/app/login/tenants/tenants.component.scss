@@ -163,7 +163,7 @@ div.panel-body .columns {
 
 .ng-search {
     a.button {
-
+        float: right;
     }
 
     &.open-absolute .form-control,
@@ -173,6 +173,7 @@ div.panel-body .columns {
         right: 36px;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
+        border-right-color: #fff;
     }
 }
 

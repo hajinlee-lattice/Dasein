@@ -316,6 +316,8 @@ input[type="search"] {
   border-style: solid;
   border-radius: 6px;
   display: inline-block;
+  vertical-align: middle;
+  
   .form-control {
     display: inline-block;
     border: none;
@@ -335,17 +337,15 @@ input[type="search"] {
     border-width: 0;
     position: relative;
     padding: 0.75em 1em;
+    float: left;
   }
   &.open-absolute {
     position: relative;
     .form-control {
-      position: absolute;
-      top: -1px;
-      bottom: -1px;
-      left: -250px; 
-      border: 1px solid #d0d0d0;
-      z-index: 10;
-      height: calc(100% + 2px); // fixes ff and ie, doesn't break chrome
+      //bottom: -1px;
+      //left: -250px; 
+      //z-index: 10;
+      //height: calc(100% + 2px); // fixes ff and ie, doesn't break chrome
     }
   }
 }
