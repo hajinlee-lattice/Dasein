@@ -1188,13 +1188,10 @@ angular
                     controller: function(LookupResponse, LookupStore) {
                         LookupStore.add('count', 0);//Object.keys(LookupResponse.enrichmentAttributeValues).length;
                         
-                        if (LookupResponse.enrichmentAttributeValues) {
-                            this.store = LookupStore;
-                            this.ldc_name = LookupResponse.companyInfo.LDC_Name;
-                        } else {
-                            this.count = 0;
-                            this.ldc_name = '';
-                        }
+                        this.store = LookupStore;
+                        this.ldc_name = LookupResponse.companyInfo
+                            ? LookupResponse.companyInfo.LDC_Name
+                            : '';
 
                         this.elapsedTime = LookupStore.get('elapsedTime');
                     },

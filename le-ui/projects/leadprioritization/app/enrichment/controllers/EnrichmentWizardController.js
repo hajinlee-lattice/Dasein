@@ -182,14 +182,10 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrentIndex++;
 
         if (result != null && result.status === 200) {
-            var j = 0;
             if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
                     if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
                         data.push(result.data[i]);
-                    } else {
-                        j++;
-                        console.log(i, result.data[i].FieldNameInTarget)
                     }
                 }
             } else {
@@ -199,8 +195,9 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.enrichments_loaded = true;
             vm.enrichmentsStored = vm.enrichments.concat(result.data);
             vm.enrichments = vm.enrichments.concat(data);
+
+            // Updates the Acct Lookup Attributes tab count
             if (vm.lookupMode) {
-                console.log(j, vm.lookupFiltered, vm.enrichments.length);
                 LookupStore.add('count', vm.enrichments.length);
             }
 

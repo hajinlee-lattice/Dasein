@@ -3,18 +3,20 @@ angular
 .service('LookupStore', function($sce, FeatureFlagService) {
     var LookupStore = this;
 
-    this.count = 0;
-    this.timestamp = 0;
-    this.params = { 
-        shouldSkipLoadingEnrichmentMetadata: true,
-        enforceFuzzyMatch: true
-    };
-    this.response = {};
-    this.request = {
-        modelId: '',
-        performEnrichment: true,
-        record: { }
-    };
+    this.reset = function () {
+        this.count = 0;
+        this.timestamp = 0;
+        this.params = { 
+            shouldSkipLoadingEnrichmentMetadata: true,
+            enforceFuzzyMatch: true
+        };
+        this.response = {};
+        this.request = {
+            modelId: '',
+            performEnrichment: true,
+            record: { }
+        };
+    }
 
     this.setParam = function(property, value) {
         this.params[property] = value;
@@ -26,20 +28,6 @@ angular
 
     this.get = function(type) {
         return this[type];
-    }
-
-    this.reset = function () {
-        this.timestamp = 0;
-        this.params = {
-            shouldSkipLoadingEnrichmentMetadata: true,
-            enforceFuzzyMatch: false
-        };
-        this.request = {
-            modelId: '',
-            performEnrichment: true,
-            record: { }
-        };
-        this.response = {};
     }
 
     this.syntaxHighlight = function(json) {
@@ -69,6 +57,8 @@ angular
             return '<span class="' + cls + '">' + match + '</span>';
         }));
     }
+
+    this.reset();
 })
 .service('LookupService', function($q, $http, LookupStore) {
     this.submit = function() {
