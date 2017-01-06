@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -102,7 +101,6 @@ public class ProcessorContext {
     private Boolean returnUnmatched;
     private Boolean excludeUnmatchedWithPublicDomain;
     private Boolean publicDomainAsNormalDomain;
-    private ConcurrentSkipListSet<String> fieldsWithNoMetadata = new ConcurrentSkipListSet<>();
     private Map<String, AccountMasterColumn> accountMasterColumnMap = null;
     private boolean useProxy = false;
     private String decisionGraph;
@@ -238,10 +236,6 @@ public class ProcessorContext {
 
     public Boolean getPublicDomainAsNormalDomain() {
         return publicDomainAsNormalDomain;
-    }
-
-    public ConcurrentSkipListSet<String> getFieldsWithNoMetadata() {
-        return fieldsWithNoMetadata;
     }
 
     public Map<String, AccountMasterColumn> getAccountMasterColumnMap() {

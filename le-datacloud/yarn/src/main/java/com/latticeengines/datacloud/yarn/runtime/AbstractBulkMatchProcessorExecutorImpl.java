@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -23,14 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
-import com.latticeengines.datacloud.match.service.impl.MatchConstants;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -63,10 +59,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     protected MatchProxy matchProxy;
-
-    @Autowired
-    @Qualifier("accountMasterColumnService")
-    private MetadataColumnService<AccountMasterColumn> columnService;
 
     @Autowired
     private MetricService metricService;
@@ -152,13 +144,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 if (value instanceof Timestamp) {
                     value = ((Timestamp) value).getTime();
                 }
-                if (MatchUtils.isValidForAccountMasterBasedMatch(processorContext.getDataCloudVersion())) {
-                    value = matchDeclaredType(processorContext, value, fields.get(i).name());
-                } else if (fields.get(i).name().equalsIgnoreCase(MatchConstants.LID_FIELD) && value != null
-                        && !(value instanceof String)) {
-                    // for id only match using RTS cache
-                    value = String.valueOf(value);
-                }
+                Schema.Type type = AvroUtils.getType(fields.get(i));
+                value = convertToClaimedType(type, value, fields.get(i).name());
                 builder.set(fields.get(i), value);
             }
             records.add(builder.build());
@@ -172,51 +159,37 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro());
     }
 
-    private Object matchDeclaredType(ProcessorContext processorContext, Object value, String columnId) {
-        if (value == null || processorContext.getFieldsWithNoMetadata().contains(columnId)) {
-            return value;
-        }
-
-        if (processorContext.getAccountMasterColumnMap() == null) {
-            loadAccountMasterColumnMap(processorContext);
-        }
-
-        AccountMasterColumn metadataColumn = processorContext.getAccountMasterColumnMap().get(columnId);
-        if (metadataColumn == null) {
-            processorContext.getFieldsWithNoMetadata().add(columnId);
-            return value;
-        }
-        String javaClass = metadataColumn.getJavaClass();
-        try {
-            if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
-                return String.valueOf(value);
+    private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {
+        if (value != null) {
+            String javaClass = AvroUtils.getJavaType(avroType).getSimpleName();
+            try {
+                value = convertByJavaClass(value, javaClass);
+            } catch (Exception e) {
+                log.warn("Failed to parse value " + value + " of attribute " + columnName + " to " + javaClass
+                        + ". Using null instead", e);
+                return null;
             }
-            if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
-                return Integer.valueOf(String.valueOf(value));
-            }
-            if (LONG.equalsIgnoreCase(javaClass) && !(value instanceof Long)) {
-                return Long.valueOf(String.valueOf(value));
-            }
-            if (FLOAT.equalsIgnoreCase(javaClass) && !(value instanceof Float)) {
-                return Float.valueOf(String.valueOf(value));
-            }
-            if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
-                return Double.valueOf(String.valueOf(value));
-            }
-        } catch (Exception e) {
-            log.warn("Failed to parse value " + value + " of attribute " + columnId + " to " + javaClass
-                    + ". Using null instead");
-            return null;
         }
         return value;
     }
 
-    private void loadAccountMasterColumnMap(ProcessorContext processorContext) {
-        processorContext.setAccountMasterColumnMap(new HashMap<String, AccountMasterColumn>());
-        List<AccountMasterColumn> amColumns = columnService.scan(processorContext.getDataCloudVersion());
-        for (AccountMasterColumn column : amColumns) {
-            processorContext.getAccountMasterColumnMap().put(column.getColumnId(), column);
+    private static Object convertByJavaClass(Object value, String javaClass) {
+        if (STRING.equalsIgnoreCase(javaClass) && !(value instanceof String)) {
+            return String.valueOf(value);
         }
+        if (INTEGER.equalsIgnoreCase(javaClass) && !(value instanceof Integer)) {
+            return Integer.valueOf(String.valueOf(value));
+        }
+        if (LONG.equalsIgnoreCase(javaClass) && !(value instanceof Long)) {
+            return Long.valueOf(String.valueOf(value));
+        }
+        if (FLOAT.equalsIgnoreCase(javaClass) && !(value instanceof Float)) {
+            return Float.valueOf(String.valueOf(value));
+        }
+        if (DOUBLE.equalsIgnoreCase(javaClass) && !(value instanceof Double)) {
+            return Double.valueOf(String.valueOf(value));
+        }
+        return value;
     }
 
     @MatchStep
