@@ -278,7 +278,7 @@ angular.module('lp.enrichment.leadenrichment')
         var deferred = $q.defer(),
         opts = opts || {};
         opts.category = opts.category || 'firmographics';
-        opts.limit = opts.limit || 5;
+        opts.limit = opts.limit || 6;
         opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',

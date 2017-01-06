@@ -15,7 +15,7 @@ angular
 
     FeatureFlagService.GetAllFlags().then(function(result) {
         var flags = FeatureFlagService.Flags();
-        LookupStore.setParam('enforceFuzzyMatch', FeatureFlagService.FlagIsEnabled(flags.ENABLE_FUZZY_MATCH));
+        //LookupStore.setParam('enforceFuzzyMatch', FeatureFlagService.FlagIsEnabled(flags.ENABLE_FUZZY_MATCH));
         vm.params = LookupStore.get('params');
         vm.EnableFuzzyMatch = vm.params.enforceFuzzyMatch;
     });

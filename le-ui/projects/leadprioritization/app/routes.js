@@ -1179,8 +1179,10 @@ angular
             views: {
                 "summary@": {
                     controller: function(LookupResponse, LookupStore) {
+                        LookupStore.add('count', 0);//Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                        
                         if (LookupResponse.enrichmentAttributeValues) {
-                            this.count = Object.keys(LookupResponse.enrichmentAttributeValues).length;
+                            this.store = LookupStore;
                             this.ldc_name = LookupResponse.companyInfo.LDC_Name;
                         } else {
                             this.count = 0;

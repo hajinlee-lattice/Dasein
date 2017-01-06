@@ -106,6 +106,7 @@
                         | limitTo: vm.pagesize 
                         track by $index" 
                     class="subcategory"
+                    ng-init="count = vm.subcategoryCount(vm.category, subcategory)"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
                     <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
@@ -117,7 +118,7 @@
                             <div class="category-label">{{subcategory}}</div>
                         </h2>
                         <span class="count noselect-children">
-                            <strong ng-if="vm.enrichments_completed">{{ vm.subcategoryCount(vm.category, subcategory)|number }}</strong>
+                            <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
                         <div class="attributes-container" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory]">
@@ -134,7 +135,7 @@
                                     <div class="column data" ng-if="vm.lookupMode">{{ vm.lookupFiltered[attribute.Attribute] }}</div>
                                 </li>
                             </ul>
-                            <div class="attributes-more noselect" ng-if="vm.topAttributes[vm.category].SubCategories[subcategory].length > 5">More</div>
+                            <div class="attributes-more noselect" ng-if="count > 5">More</div>
                        </div>
                     </div>
                 </li>

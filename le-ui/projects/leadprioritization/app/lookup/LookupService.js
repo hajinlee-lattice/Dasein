@@ -3,10 +3,11 @@ angular
 .service('LookupStore', function($sce, FeatureFlagService) {
     var LookupStore = this;
 
+    this.count = 0;
     this.timestamp = 0;
     this.params = { 
         shouldSkipLoadingEnrichmentMetadata: true,
-        enforceFuzzyMatch: false
+        enforceFuzzyMatch: true
     };
     this.response = {};
     this.request = {
