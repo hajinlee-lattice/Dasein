@@ -112,7 +112,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private ModelingParameters parameters;
 
-    @BeforeClass(groups = "deployment.lp")
+    @BeforeClass(groups = { "deployment.lp", "precheckin" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
         Map<String, Boolean> featureFlagMap = new HashMap<String, Boolean>();
@@ -141,7 +141,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "deployment.lp", enabled = true)
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true)
     public void uploadFile() {
         log.info("uploading file for modeling...");
         if (schemaInterpretation == null) {
@@ -178,7 +178,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         log.info("Resolving metadata for modeling ...");
         parameters = new ModelingParameters();
@@ -222,7 +222,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 getRestAPIHostPort(), sourceFile.getName()), mappings, Void.class);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
         modelName = parameters.getName();
         model(parameters);
@@ -266,7 +266,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(reports.size(), 2);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
+    @Test(groups = { "deployment.lp",
+            "precheckin" }, dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
     public void retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
         originalModelSummary = getModelSummary(modelName);
@@ -313,6 +314,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
     }
 
+    @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
+    public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException {
+        compareRtsScoreWithModeling(originalModelSummary, 843);
+    }
+
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
         log.info("Retrieving the error file ...");
@@ -343,7 +349,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "copyModel", timeOut = 1200000, enabled = true)
     public void retrieveModelSummaryForCopiedModel() throws InterruptedException, IOException {
-        log.info("Retriving the copied model summary ...");
+        log.info("Retrieving the copied model summary ...");
         tenantToAttach = testBed.getTestTenants().get(1);
         testBed.switchToSuperAdmin(tenantToAttach);
         copiedModelSummary = getModelSummary(modelName);
@@ -374,10 +380,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 }
             }
         }
-        activateModelSummary(copiedModelSummary.getId());
-        scoreCompareService.analyzeScores(tenantToAttach.getId(), RESOURCE_BASE + "/" + fileName,
-                copiedModelSummary.getId(), 687);
 
+        compareRtsScoreWithModeling(copiedModelSummary, 687);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForCopiedModel" })
@@ -467,9 +471,17 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
         }));
 
-        activateModelSummary(clonedModelSummary.getId());
-        scoreCompareService.analyzeScores(tenantToAttach.getId(), RESOURCE_BASE + "/" + fileName,
-                clonedModelSummary.getId(), 843);
+        compareRtsScoreWithModeling(clonedModelSummary, 843);
+    }
+
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForClonedModel" })
+    public void replaceModel() {
+
+    }
+
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "replaceModel", timeOut = 120000)
+    public void retrieveModelSummaryForReplacedModel() throws InterruptedException, IOException {
+
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
@@ -636,6 +648,27 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring) throws IOException {
+        activateModelSummary(modelSummary.getId());
+
+        Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantToAttach.getId(),
+                RESOURCE_BASE + "/" + fileName, modelSummary.getId(), countsForScoring);
+        checkExpectedDifferentCount(diffRecords);
+    }
+
+    private void checkExpectedDifferentCount(Map<String, ComparedRecord> diffRecords) {
+        log.info(String.format("diffRecords.size() is %d.", diffRecords.size()));
+        String expectedDiffCountStr = System.getProperty("DIFFCOUNT");
+
+        if (expectedDiffCountStr != null) {
+            int expectedDiffCount = Integer.valueOf(expectedDiffCountStr);
+            log.info("Checking if expected diff count is equal to " + expectedDiffCountStr);
+            assertEquals(diffRecords.size(), expectedDiffCount);
+        } else {
+            log.info("Property DIFFCOUNT not set.");
         }
     }
 
