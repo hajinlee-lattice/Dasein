@@ -81,4 +81,35 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Test(groups = "functional")
+    public void testRTSNoMatch() throws Exception {
+        String fileName = "BulkMatchInput_NoMatch.avro";
+        cleanupAvroDir(avroDir);
+        uploadDataCsv(avroDir, fileName);
+
+        String avroPath = avroDir + "/" + fileName;
+        String latestDataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
+
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
+        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
+
+        DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
+        jobConfiguration.setHdfsPodId(podId);
+        jobConfiguration.setName("DataCloudMatchBlock");
+        jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
+        jobConfiguration.setAvroPath(avroPath);
+        jobConfiguration.setPredefinedSelection(Predefined.RTS);
+        jobConfiguration.setDataCloudVersion(latestDataCloudVersion);
+        jobConfiguration.setKeyMap(keyMap);
+        jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
+        jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
+        jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
+        jobConfiguration.setThreadPoolSize(4);
+        jobConfiguration.setGroupSize(10);
+
+        ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
 }

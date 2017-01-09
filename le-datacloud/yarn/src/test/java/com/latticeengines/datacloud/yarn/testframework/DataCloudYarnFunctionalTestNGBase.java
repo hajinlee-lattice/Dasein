@@ -58,9 +58,9 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
     protected void uploadDataCsv(String avroDir, String fileName) {
         try {
             URL url = Thread.currentThread().getContextClassLoader()
-                    .getResource("matchinput/BulkMatchInput.csv");
+                    .getResource("matchinput/" + fileName.replace(".avro", ".csv"));
             if (url == null) {
-                throw new RuntimeException("Cannot find resource BulkMatchInput.csv");
+                throw new RuntimeException("Cannot find resource " + fileName);
             }
             CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
             List<List<Object>> data = new ArrayList<>();
@@ -71,7 +71,7 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
                     fieldNames.addAll(IteratorUtils.toList(record.iterator()));
                 } else if (record.size() > 0 ){
                     List<Object> row = new ArrayList<>();
-                    row.add((int) record.getRecordNumber());
+                    row.add(record.getRecordNumber());
                     for (String field: record) {
                         if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
                             row.add(null);
@@ -94,7 +94,7 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\",\"fields\":["
-                + "{\"name\":\"" + fieldNames.get(0) + "\",\"type\":[\"int\",\"null\"]},"
+                + "{\"name\":\"" + fieldNames.get(0) + "\",\"type\":[\"long\",\"null\"]},"
                 + "{\"name\":\"" + fieldNames.get(1) + "\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"" + fieldNames.get(2) + "\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"" + fieldNames.get(3) + "\",\"type\":[\"string\",\"null\"]},"
