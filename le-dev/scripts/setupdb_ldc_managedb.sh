@@ -5,6 +5,8 @@ function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != 
 UNAME=`uname`
 threshold_version=5.6
 
+source $WSHOME/le-dev/scripts/setupdb_parameters.sh
+
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
     sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_ldc_managedb_mysql5innodb.sql
@@ -14,8 +16,14 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_ldc_managedb_mysql5innodb.sql
 fi
 
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn.csv
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv
+
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv
 
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv
