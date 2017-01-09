@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -39,6 +40,9 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
+    @Value("${datacloud.match.latest.data.cloud.major.version}")
+    private String latestMajorVersion;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         switchHdfsPod(podId);
@@ -53,7 +57,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         uploadDataCsv(avroDir, fileName);
 
         String avroPath = avroDir + "/" + fileName;
-        String latestDataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+        String latestDataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
@@ -64,7 +68,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
         jobConfiguration.setAvroPath(avroPath);
         jobConfiguration.setPredefinedSelection(Predefined.RTS);
-        jobConfiguration.setDataCloudVersion("2.0.0");
+        jobConfiguration.setDataCloudVersion(latestDataCloudVersion);
         jobConfiguration.setKeyMap(keyMap);
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
