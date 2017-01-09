@@ -28,6 +28,9 @@ public class TransformationStepReport {
     @JsonProperty("TargetRecords")
     private long targetRecords;
 
+    @JsonProperty("ElapsedTime")
+    private long elapsedTime;
+
     public String getTransformer() {
         return transformer;
     }
@@ -99,5 +102,13 @@ public class TransformationStepReport {
 
     public void setExecuted(boolean executed) {
         this.executed = executed;
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(long elapsedTime) {
+        this.elapsedTime = elapsedTime;
     }
 }

@@ -41,4 +41,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="pipelineTransformationReportDao" class="com.latticeengines.datacloud.etl.transformation.dao.impl.PipelineTransformationReportDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>
