@@ -66,7 +66,7 @@
             EnableInternalEnrichmentAttributes = False
             EnableLatticeMarketoCredentialPage = False
             EnablePocTransform = False
-            EnableDataEncryption = False
+            EnableDataEncryption = True
             EnableCampaignUI = False
             Quota = True
             TargetMarket = True
@@ -75,6 +75,7 @@
             UseMarketoSettings = True
             UseSalesforceSetting = True
             ValidateCredsUsingEai = True
+            LatticeInsights = True
           /properties.json
             description = u'A PD solution for LocalTest'
             displayName = u'LocalTest Tenant'

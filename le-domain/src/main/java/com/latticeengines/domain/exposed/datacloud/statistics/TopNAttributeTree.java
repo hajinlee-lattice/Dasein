@@ -29,11 +29,4 @@ public class TopNAttributeTree {
         }
     }
 
-    private HashMap<String, TopNAttributes> getCategories() {
-        return categories;
-    }
-
-    private void setCategories(HashMap<String, TopNAttributes> categories) {
-        this.categories = categories;
-    }
 }

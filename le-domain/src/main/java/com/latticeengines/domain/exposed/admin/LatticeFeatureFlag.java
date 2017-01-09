@@ -24,7 +24,8 @@ public enum LatticeFeatureFlag {
     ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES("EnableInternalEnrichmentAttributes",
             "Enable Internal Enrichment Attributes"), //
     ENABLE_DATA_PROFILING_V2("EnableDataProfilingV2", "Enable Data Profiling Version 2"), //
-    ENABLE_FUZZY_MATCH("EnableFuzzyMatch", "Enable Fuzzy Match");
+    ENABLE_FUZZY_MATCH("EnableFuzzyMatch", "Enable Fuzzy Match"), //
+    LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights");
 
     private String name;
     private String documentation;
