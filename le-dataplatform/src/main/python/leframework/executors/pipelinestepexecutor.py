@@ -60,6 +60,13 @@ class PipelineStepExecutor(Executor):
         training = params["training"] = step.transform(params["training"], configMetadata, False)
         test = params["test"] = step.transform(params["test"], configMetadata, True)
 
+        logger.info('VALIDATION: Column Metadata added by PipelineStep: {}'.format(str(step.getProperty("ADDEDCOLUMNS"))))
+        logger.info('VALIDATION: Columns removed by PipelineStep: {}'.format(str(step.getProperty("REMOVEDCOLUMNS"))))
+        logger.info('VALIDATION: Columns in DataFrame after PipelineStep:\n{}'.format(str(training.columns.values)))
+        if step.getProperty("ADDEDCOLUMNS") is not None:
+            addedcolumns = [c['ColumnName'] for c in step.getProperty("ADDEDCOLUMNS")]
+            logger.info('VALIDATION: Values for added columns:\n{}'.format(str(training[addedcolumns])))
+
         logger.info('VALIDATION: getInputColumns()\n{}'.format(str(step.getInputColumns())))
         logger.info('VALIDATION: getOutputColumns()\n{}'.format(str(step.getOutputColumns())))
         logger.info('VALIDATION: getRTSMainModule()\n{}'.format(str(step.getRTSMainModule())))
