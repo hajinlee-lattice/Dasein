@@ -66,7 +66,7 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
                 if (StringUtils.isNotEmpty(res.getDuns())) {
                     res.setDuns(null);
                 }
-                traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.%s", //
+                traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.", //
                         getClass().getSimpleName(), //
                         (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
             }
