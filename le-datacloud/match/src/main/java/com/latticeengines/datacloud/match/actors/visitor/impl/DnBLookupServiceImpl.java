@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
+import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
@@ -29,6 +31,7 @@ import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -56,6 +59,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     private DnBCacheService dnbCacheService;
 
     @Autowired
+    private AccountLookupService accountLookupService;
+
+    @Autowired
     private DnBMatchResultValidator dnbMatchResultValidator;
 
     private final Queue<DnBMatchContext> comingContexts = new ConcurrentLinkedQueue<>();
@@ -76,15 +82,22 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             Long startTime = System.currentTimeMillis();
             DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
             if (whiteCache != null) {
-                context.copyResultFromWhiteCache(whiteCache);
-                dnbMatchResultValidator.validate(context);
-                context.setDuration(System.currentTimeMillis() - startTime);
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format(
-                            "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                if (isValidDuns(whiteCache.getDuns(), request.getMatchTravelerContext().getDataCloudVersion())) {
+                    context.copyResultFromWhiteCache(whiteCache);
+                    dnbMatchResultValidator.validate(context);
+                    context.setDuration(System.currentTimeMillis() - startTime);
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format(
+                                "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                                context.getLookupRequestId(), context.getDnbCode().getMessage(),
+                                context.getDuration()));
+                    }
+                    return context;
+                } else {
+                    log.info("Remove invalid white cache: Id= " + whiteCache.getId() + " DUNS="
+                            + whiteCache.getDuns());
+                    dnbCacheService.removeWhiteCache(whiteCache);
                 }
-                return context;
             }
             DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
             if (blackCache != null) {
@@ -110,11 +123,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
         if (!isBatchMode()) {
-            DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId,
-                    (DataSourceLookupRequest) request);
+            DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId, request);
             sendResponse(lookupRequestId, result, returnAddress);
         } else {
-            acceptBulkLookup(lookupRequestId, (DataSourceLookupRequest) request, returnAddress);
+            acceptBulkLookup(lookupRequestId, request, returnAddress);
         }
     }
 
@@ -128,16 +140,22 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             Long startTime = System.currentTimeMillis();
             DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
             if (whiteCache != null) {
-                context.copyResultFromWhiteCache(whiteCache);
-                dnbMatchResultValidator.validate(context);
-                context.setDuration(System.currentTimeMillis() - startTime);
-                sendResponse(lookupRequestId, context, returnAddress);
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format(
-                            "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                if (isValidDuns(whiteCache.getDuns(), request.getMatchTravelerContext().getDataCloudVersion())) {
+                    context.copyResultFromWhiteCache(whiteCache);
+                    dnbMatchResultValidator.validate(context);
+                    context.setDuration(System.currentTimeMillis() - startTime);
+                    sendResponse(lookupRequestId, context, returnAddress);
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format(
+                                "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                                context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                    }
+                    return;
+                } else {
+                    log.info("Remove invalid white cache: Id= " + whiteCache.getId() + " DUNS="
+                            + whiteCache.getDuns());
+                    dnbCacheService.removeWhiteCache(whiteCache);
                 }
-                return;
             }
             DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
             if (blackCache != null) {
@@ -212,8 +230,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 submittedReqs.add(batchContext);
                                 break;
                             case UNSUBMITTED:
-                                // Too many requests are waiting for results. This request is not submitted.
-                                // Put it back to unsubmittedReqs list. Maintain the same order in the unsubmittedReqs
+                                // Too many requests are waiting for results.
+                                // This request is not submitted.
+                                // Put it back to unsubmittedReqs list. Maintain
+                                // the same order in the unsubmittedReqs
                                 unsubmittedReqs.add(unsubmittedReqs.size() - num, batchContext);
                                 break;
                             default:
@@ -300,6 +320,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             dnBMatchHistories.add(new DnBMatchHistory(context));
         }
         writeDnBMatchHistory(dnBMatchHistories);
+    }
+
+    private boolean isValidDuns(String duns, String dataCloudVersion) {
+        AccountLookupRequest lookupRequest = new AccountLookupRequest(dataCloudVersion);
+        lookupRequest.addLookupPair(null, duns);
+        List<String> ids = accountLookupService.batchLookupIds(lookupRequest);
+        return (ids != null && ids.size() == 1 && StringUtils.isNotEmpty(ids.get(0)));
     }
 
     private void writeDnBMatchHistory(List<DnBMatchHistory> metrics) {

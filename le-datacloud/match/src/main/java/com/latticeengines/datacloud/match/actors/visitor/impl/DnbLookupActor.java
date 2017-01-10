@@ -27,7 +27,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorT
 public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     private static final Log log = LogFactory.getLog(DnbLookupActor.class);
 
-    public static TimerRegistrationHelper timerRegistrationHelper = new TimerRegistrationHelper(DnbLookupActor.class);
+    private static TimerRegistrationHelper timerRegistrationHelper = new TimerRegistrationHelper(DnbLookupActor.class);
 
     @Value("${datacloud.dnb.dispatcher.timer.frequency:30}")
     private int dispatcherTimerFrequency;
@@ -40,6 +40,10 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
 
     @Value("${datacloud.dnb.fetcher.timer.frequency.unit:SECONDS}")
     private TimeUnit fetcherTimerFrequencyUnit;
+
+    @Autowired
+    @Qualifier("dnBLookupService")
+    private DataSourceLookupServiceBase dnBLookupService;
 
     @PostConstruct
     public void postConstruct() {
@@ -63,10 +67,6 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
                 requests);
     }
 
-    @Autowired
-    @Qualifier("dnBLookupService")
-    private DataSourceLookupServiceBase dnBLookupService;
-
     @Override
     protected DataSourceLookupService getDataSourceLookupService() {
         return dnBLookupService;
@@ -85,13 +85,7 @@ public class DnbLookupActor extends DataSourceWrapperActorTemplate {
     }
 
     private Runnable createLookupRunnable(final BulkLookupStrategy strategy) {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                dnBLookupService.bulkLookup(strategy);
-            }
-        };
-        return task;
+        return () -> dnBLookupService.bulkLookup(strategy);
     }
 
     @Override

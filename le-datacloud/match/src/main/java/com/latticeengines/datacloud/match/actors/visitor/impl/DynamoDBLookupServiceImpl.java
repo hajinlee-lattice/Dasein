@@ -111,15 +111,6 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
             return;
         }
 
-//        if (isBatchMode()) {
-//            if (log.isDebugEnabled()) {
-//                log.debug("In batch mode, skip bucketing.");
-//            }
-//            String result = lookupFromService(lookupRequestId, request);
-//            sendResponse(lookupRequestId, result, returnAddress);
-//            return;
-//        }
-
         if (!fetchersInitiated.get()) {
             initExecutors();
         }
@@ -159,7 +150,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                             lookupReqWithVersion.put(dataCloudVersion, new AccountLookupRequest(dataCloudVersion));
                         }
                         if (!reqIdsWithVersion.containsKey(dataCloudVersion)) {
-                            reqIdsWithVersion.put(dataCloudVersion, new ArrayList<String>());
+                            reqIdsWithVersion.put(dataCloudVersion, new ArrayList<>());
                         }
                         lookupReqWithVersion.get(dataCloudVersion).addLookupPair(matchKeyTuple.getDomain(),
                                 matchKeyTuple.getDuns());

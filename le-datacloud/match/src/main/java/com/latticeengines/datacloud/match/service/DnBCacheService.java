@@ -23,6 +23,8 @@ public interface DnBCacheService {
 
     List<DnBWhiteCache> batchAddWhiteCache(List<DnBMatchContext> contexts);
 
+    void removeWhiteCache(DnBWhiteCache cache);
+
     // Black Cache
     DnBBlackCacheEntityMgr getBlackCacheMgr();
 

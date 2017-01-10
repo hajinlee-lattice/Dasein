@@ -95,6 +95,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBWhiteCache addWhiteCache(DnBMatchContext context) {
         DnBWhiteCache cache = initWhiteCacheEntity(context, false);
         getWhiteCacheMgr().create(cache);
+        log.info("Added Id=" + cache.getId() + " to white cache.");
         return cache;
     }
 
@@ -104,9 +105,16 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         for(DnBMatchContext context : contexts) {
             DnBWhiteCache cache = initWhiteCacheEntity(context, false);
             caches.add(cache);
+            log.info("Added Id=" + cache.getId() + " to white cache.");
         }
         getWhiteCacheMgr().batchCreate(caches);
         return caches;
+    }
+
+    @Override
+    public void removeWhiteCache(DnBWhiteCache cache) {
+        getWhiteCacheMgr().delete(cache);
+        log.info("Removed Id=" + cache.getId() + " from white cache.");
     }
 
     @Override
@@ -198,6 +206,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     public DnBBlackCache addBlackCache(DnBMatchContext context) {
         DnBBlackCache cache = initBlackCacheEntity(context);
         getBlackCacheMgr().create(cache);
+        log.info("Added Id=" + cache.getId() + " to black cache.");
         return cache;
     }
 
@@ -207,6 +216,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         for (DnBMatchContext context : contexts) {
             DnBBlackCache cache = initBlackCacheEntity(context);
             caches.add(cache);
+            log.info("Added Id=" + cache.getId() + " to black cache.");
         }
         getBlackCacheMgr().batchCreate(caches);
         return caches;
