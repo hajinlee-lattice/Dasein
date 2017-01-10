@@ -17,7 +17,6 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
     public boolean validate(DnBMatchContext res) {
         if (discardConfidenceCode(res.getConfidenceCode()) && discardMatchGrade(res.getMatchGrade())) {
-            res.setDuns(null);
             res.setDnbCode(DnBReturnCode.DISCARD);
             return false;
         }
@@ -35,10 +34,9 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
         if (StringUtils.isEmpty(matchGrade.getRawCode()) || matchGrade.getRawCode().length() < 5) {
             return true;
         }
-        // Name: 0, City: 3, State: 4
-        if (matchGrade.getRawCode().charAt(0) == 'A'
-                && (matchGrade.getRawCode().charAt(3) == 'A' || matchGrade.getRawCode().charAt(3) == 'Z')
-                && (matchGrade.getRawCode().charAt(4) == 'A' || matchGrade.getRawCode().charAt(4) == 'Z')) {
+        if ("A".equals(matchGrade.getNameCode()) //
+                && ("A".equals(matchGrade.getCityCode()) || "Z".equals(matchGrade.getCityCode())) //
+                && ("A".equals(matchGrade.getStateCode()) || "Z".equals(matchGrade.getStateCode()))) {
             return false;
         }
         return true;

@@ -26,6 +26,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Boolean hitBlackCache = false;
 
+    private String cacheId;
+
     private String lookupRequestId;
 
     private String serviceBatchId;
@@ -44,6 +46,7 @@ public class DnBMatchContext implements Fact, Dimension {
         confidenceCode = result.getConfidenceCode();
         matchGrade = result.getMatchGrade();
         lookupRequestId = result.getLookupRequestId();
+        cacheId = result.cacheId;
     }
 
     public void copyResultFromWhiteCache(DnBWhiteCache whiteCache) {
@@ -51,12 +54,14 @@ public class DnBMatchContext implements Fact, Dimension {
         dnbCode = DnBReturnCode.OK;
         confidenceCode = whiteCache.getConfidenceCode();
         matchGrade = whiteCache.getMatchGrade();
+        cacheId = whiteCache.getId();
         hitWhiteCache = true;
     }
 
     public void copyResultFromBlackCache(DnBBlackCache blackCache) {
         duns = null;
         dnbCode = DnBReturnCode.UNMATCH;
+        cacheId = blackCache.getId();
         confidenceCode = null;
         matchGrade = null;
         hitBlackCache = true;
@@ -133,6 +138,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setDnbCode(DnBReturnCode dnbCode) {
         this.dnbCode = dnbCode;
+    }
+
+    public String getCacheId() {
+        return cacheId;
+    }
+
+    public void setCacheId(String cacheId) {
+        this.cacheId = cacheId;
     }
 
     @MetricField(name = "HitWhiteCache", fieldType = MetricField.FieldType.BOOLEAN)

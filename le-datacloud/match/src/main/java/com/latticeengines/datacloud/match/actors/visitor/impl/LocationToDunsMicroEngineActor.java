@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Scope;
@@ -20,8 +21,8 @@ import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
     private static final Log log = LogFactory.getLog(LocationToDunsMicroEngineActor.class);
 
-    private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache. Did not go to remote DnB API.";
-    private static final String HIT_BLACK_CACHE = "Fast failed by black cache. Did not go to remote DnB API.";
+    private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache using Id=%s. Did not go to remote DnB API.";
+    private static final String HIT_BLACK_CACHE = "Fast failed by black cache with Id=%s. Did not go to remote DnB API.";
     private static final String HIT_NO_CACHE = "Did not hit either white or black cache. Went to remote DnB API.";
 
     @PostConstruct
@@ -55,21 +56,21 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
             MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
             DnBMatchContext res = (DnBMatchContext) response.getResult();
-            traveler.debug(res.getHitWhiteCache() ? HIT_WHITE_CACHE
-                    : (res.getHitBlackCache() ? HIT_BLACK_CACHE : HIT_NO_CACHE));
-            String suffix = String.format("ConfidenceCode = %s, MatchGrade = %s.",
+            traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
+                    : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
+            traveler.debug(String.format("Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s.",
+                    res.getDuns(), getClass().getSimpleName(),
                     (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
-                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()));
-            if (res.getDuns() != null) {
-                traveler.debug(
-                        String.format("Found DUNS=%s at %s. %s", res.getDuns(), getClass().getSimpleName(), suffix));
+                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode())));
+            if (res.getDnbCode() != DnBReturnCode.OK) {
+                if (StringUtils.isNotEmpty(res.getDuns())) {
+                    res.setDuns(null);
+                }
+                traveler.debug(String.format("Encountered an issue with DUNS lookup at %s: %s.%s", //
+                        getClass().getSimpleName(), //
+                        (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
             }
             matchKeyTuple.setDuns(res.getDuns());
-            if (res.getDnbCode() != DnBReturnCode.OK) {
-                traveler.debug(String.format("%s encountered an issue with DUNS lookup: %s. %s", //
-                        getClass().getSimpleName(), //
-                        (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage()), suffix));
-            }
             traveler.getDnBMatchContexts().add(res);
             response.setResult(null);
         }
