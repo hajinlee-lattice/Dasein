@@ -185,6 +185,16 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 url.append(context.getInputNameLocation().getState());
                 url.append("&");
             }
+            if (StringUtils.isNotEmpty(context.getInputNameLocation().getZipcode())) {
+                url.append("FullPostalCode=");
+                url.append(context.getInputNameLocation().getZipcode());
+                url.append("&");
+            }
+            if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
+                url.append("TelecommunicationNumber=");
+                url.append(context.getInputNameLocation().getPhoneNumber());
+                url.append("&");
+            }
             url.append(
                     "cleansematch=true&ConfidenceLowerLevelThresholdValue=1&ExclusionCriteria-n=Exclude Unreachable&IncludeCleansedAndStandardizedInformationIndicator=true");
             return url.toString();

@@ -287,12 +287,30 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     String cleanCity = com.latticeengines.common.exposed.util.StringUtils
                             .getStandardString(originalCity);
 
+                    String originalZipCode = null;
+                    if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
+                        for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
+                            originalZipCode = (String) inputRecord.get(pos);
+                        }
+                    }
+                    String cleanZipCode = originalZipCode;
+
+                    String originalPhoneNumber = null;
+                    if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
+                        for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
+                            originalPhoneNumber = (String) inputRecord.get(pos);
+                        }
+                    }
+                    String cleanPhoneNumber = originalPhoneNumber;
+
                     NameLocation nameLocation = new NameLocation();
                     nameLocation.setName(cleanName);
                     nameLocation.setState(cleanState);
                     nameLocation.setCountry(cleanCountry);
                     nameLocation.setCountryCode(countryCode);
                     nameLocation.setCity(cleanCity);
+                    nameLocation.setZipcode(cleanZipCode);
+                    nameLocation.setPhoneNumber(cleanPhoneNumber);
 
                     record.setParsedNameLocation(nameLocation);
                     nameLocationSet.add(nameLocation);
