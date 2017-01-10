@@ -21,7 +21,9 @@ class TestBase(TestCase):
         # Creates symbolic links from data directory to current directory
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir, f)
-            if os.path.isfile(fPath) and not os.path.exists(f):
+            if os.path.isfile(f):
+                os.remove(f)
+            if os.path.isfile(fPath):
                 os.symlink(fPath, f)
 
     @classmethod

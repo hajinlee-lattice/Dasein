@@ -1,4 +1,4 @@
-from configurablepipelinetransformsfromfile.assignconversionratetoallcategoricalvalues import AssignConversionRateToAllCategoricalValues
+from assignconversionratetoallcategoricalvalues import AssignConversionRateToAllCategoricalValues
 import numpy as np
 import pandas as pd
 from trainingtestbase import TrainingTestBase

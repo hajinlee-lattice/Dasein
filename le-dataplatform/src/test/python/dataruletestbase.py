@@ -11,19 +11,6 @@ class DataRuleTestBase(TrainingTestBase):
     def setUp(self):
         super(DataRuleTestBase, self).setUp()
 
-        basePath = "../../" if os.path.exists("../../main/python/rulefwk.py") else "../../../"
-
-        os.symlink(basePath + "main/python/rulefwk.py", "./rulefwk.py")
-        os.symlink(basePath + "main/python/datarules/rulepipeline.json", "rulepipeline.json")
-        if os.path.exists(os.path.join(os.getcwd() , "./datarulestest/testrulepipeline.json")):
-            if not os.path.exists("testrulepipeline.json"):
-                os.symlink(os.path.join(os.getcwd() , "./datarulestest/testrulepipeline.json"), "testrulepipeline.json")
-        for filename in glob.glob(os.path.join(basePath + "/main/python/datarules", "*.py")):
-            shutil.copy(filename, self.pipelinefwkdir)
-        for filename in glob.glob(os.path.join(basePath + "/test/python/datarulestest", "*.py")):
-            shutil.copy(filename, self.pipelinefwkdir)
-
-
     def tearDown(self):
         super(DataRuleTestBase, self).tearDown()
 

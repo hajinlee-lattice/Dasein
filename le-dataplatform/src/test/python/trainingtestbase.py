@@ -10,6 +10,9 @@ import sys
 import uuid
 import zipfile
 
+## This will setup the test environment as if it were running in Hadoop
+import simulatehadoop
+
 from leframework import scoringengine as se
 from leframework.argumentparser import ArgumentParser
 import numpy as np
@@ -21,95 +24,11 @@ from testbase import removeFiles
 class TrainingTestBase(TestBase):
 
     def setUp(self):
-        # These properties won't really be used since these are just unit tests.
-        # Functional and end-to-end tests should be done from java
-        os.environ["CONTAINER_ID"] = "container_1425511391553_3644_01_000001"
-        os.environ["SHDP_HD_FSWEB"] = "http://localhost:50070"
-        os.environ["DEBUG"] = "true"
-        # Simulate what happens in yarn when it copies the framework code over
-        # before running the python script
-        self.fwkdir = "./leframework.tar.gz"
-        self.pipelinefwkdir = "./lepipeline.tar.gz"
-        self.evpipelinefwkdir = "./evpipeline.tar.gz"
-        self.swlibdir = "./le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.jar"
-        fwkdir = self.fwkdir
-        pipelinefwkdir = self.pipelinefwkdir
-        evpipelinefwkdir = self.evpipelinefwkdir
-        swlibdir = self.swlibdir
-
-        if os.path.exists(fwkdir):
-            shutil.rmtree(fwkdir)
-        if os.path.exists(pipelinefwkdir):
-            shutil.rmtree(pipelinefwkdir)
-        if os.path.exists(evpipelinefwkdir):
-            shutil.rmtree(evpipelinefwkdir)
-        if os.path.exists(swlibdir):
-            shutil.rmtree(swlibdir)
-
-        os.makedirs(fwkdir + "/leframework")
-        os.makedirs(pipelinefwkdir)
-        os.makedirs(evpipelinefwkdir)
-        os.makedirs(swlibdir)
-
-        enginedir = "/leframework/scoringengine.py"
-
-        basePath = "../../" if os.path.exists("../../main/python/rulefwk.py") else "../../../"
-
-        os.symlink(basePath + "/main/python/pipelinefwk.py", "./pipelinefwk.py")
-        os.symlink(basePath + "/main/python/pipeline/pipeline.py", "pipeline.py")
-        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
-        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json", "pmmlpipeline.json")
-        os.symlink(basePath + "/main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
-        os.symlink(basePath + "/main/python/evpipeline/evpipeline.py", "evpipeline.py")
-        os.symlink(basePath + "/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
-
-        shutil.copy(basePath + "/main/python" + enginedir, fwkdir + enginedir)
-
-        for filename in glob.glob(os.path.join(basePath + "/main/python/pipeline", "*.py")):
-            shutil.copy(filename, pipelinefwkdir)
-
-        for filename in glob.glob(os.path.join(basePath + "/main/python/evpipeline", "*.py")):
-            shutil.copy(filename, evpipelinefwkdir)
-        shutil.copy(basePath + "/main/python/pipeline/encoder.py", evpipelinefwkdir)
-
-        for filename in glob.glob(os.path.join(basePath + "/main/python/configurablepipelinetransformsfromfile", "*")):
-            if filename.find("/pipelinenullconversionrate.json") >= 0:
-                continue
-            shutil.copy(filename, pipelinefwkdir)
-            shutil.copy(filename, evpipelinefwkdir)
-
-        sys.path.append(pipelinefwkdir)
-        sys.path.append(evpipelinefwkdir)
-
-        # Symbolic links will be cleaned up by testBase
-        scriptDir = basePath + "/main/python/algorithm/"
-        for f in os.listdir(scriptDir):
-            fPath = os.path.join(scriptDir, f)
-            if os.path.isfile(fPath) and not os.path.exists(f):
-                os.symlink(fPath, f)
-
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
 
-        self.__unzipSoftwareLibJar()
-
-    def __unzipSoftwareLibJar(self):
-        zipFilePath = "data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip" if \
-            os.path.exists("data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip") \
-            else "../data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip"
-        with zipfile.ZipFile(zipFilePath) as z:
-            z.extractall(self.swlibdir)
-
     def tearDown(self):
-        if os.path.exists(self.fwkdir):
-            shutil.rmtree(self.fwkdir)
-        if os.path.exists(self.pipelinefwkdir):
-            shutil.rmtree(self.pipelinefwkdir)
-        if os.path.exists(self.evpipelinefwkdir):
-            shutil.rmtree(self.evpipelinefwkdir)
-        if os.path.exists(self.swlibdir):
-            shutil.rmtree(self.swlibdir)
         removeFiles(".")
         removeFiles("./results")
 

@@ -7,8 +7,8 @@ from random import random
 from sklearn.ensemble import RandomForestClassifier
 import sys
 
-from leframework import scoringengine as se
 from trainingtestbase import TrainingTestBase
+from leframework import scoringengine as se
 
 
 class TrainingTest(TrainingTestBase):

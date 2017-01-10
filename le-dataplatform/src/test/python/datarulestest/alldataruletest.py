@@ -5,11 +5,12 @@
 
 import logging
 
+import simulatehadoop
 from dataruleeventtable import DataRuleEventTable
-from datarules.distinctvaluecount import DistinctValueCount
-from datarules.valuepercentage import ValuePercentage
-from datarules.nulllift import NullLift
-from datarules.futureinfo import FutureInfo
+from distinctvaluecount import DistinctValueCount
+from valuepercentage import ValuePercentage
+from nulllift import NullLift
+from futureinfo import FutureInfo
 from testbase import TestBase
 
 class AllDataRuleTest(TestBase):

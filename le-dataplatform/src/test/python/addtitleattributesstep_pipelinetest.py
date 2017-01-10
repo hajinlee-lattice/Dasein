@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from itertools import izip
 
+import simulatehadoop
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
 from pipelinefwk import create_column

@@ -2,7 +2,7 @@ from trainingtestbase import TrainingTestBase
 import numpy as np
 import pandas as pd
 
-from configurablepipelinetransformsfromfile.cleancategoricalcolumn import CleanCategoricalColumn
+from cleancategoricalcolumn import CleanCategoricalColumn
 
 class CleanCategoricalColumnTransformTest(TrainingTestBase):
 

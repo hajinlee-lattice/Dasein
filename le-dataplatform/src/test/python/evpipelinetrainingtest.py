@@ -12,13 +12,12 @@ from trainingtestbase import TrainingTestBase
 
 
 class EVPipelineTrainingTest(TrainingTestBase):
-    
+
     def setUp(self):
         super(EVPipelineTrainingTest, self).setUp()
-    
+
     def tearDown(self):
         super(EVPipelineTrainingTest, self).tearDown()
-        shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
 
     def testExecuteLearning(self):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -27,7 +26,7 @@ class EVPipelineTrainingTest(TrainingTestBase):
         from evpipelinesteps import EVModelStep
         from launcher import Launcher
 
-        
+
         traininglauncher = Launcher("modeldriver-evpipeline.json")
         traininglauncher.execute(False)
 
@@ -46,16 +45,14 @@ class EVPipelineTrainingTest(TrainingTestBase):
             os.rename(fileName, "./results/" + entry["Key"])
 
         self.createCSVFromModel("modeldriver-evpipeline.json", "./results/scoreinputfile.txt")
-        
+
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-#         os.environ["PYTHONPATH"] = ''
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         _, stderr = popen.communicate()
         self.assertEquals(len(stderr), 0, str(stderr))
-        
+
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
         self.assertEquals(len(tokens), 3)
-

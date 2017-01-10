@@ -1,5 +1,5 @@
-from pipeline.pipeline import getObjectFromJSON
 from trainingtestbase import TrainingTestBase
+from pipeline import getObjectFromJSON
 
 class PipelineTest(TrainingTestBase):
 
