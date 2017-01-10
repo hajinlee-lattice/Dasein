@@ -9,7 +9,7 @@
         "b":"https://10.51.51.112:8081"
     },
     "influxEndpoint":"http://10.51.1.204:8086/query",
-    "hdfsHostPortList":["http://10.51.11.51:50070"],
+    "hdfsHostPortList":["http://10.51.11.51:50070","http://10.51.11.50:50070"],
     "hdfsBasePath":"/Pods/Production/Services/ModelQuality/datasets",
     "verify":"False"
 }
