@@ -47,6 +47,16 @@ module.exports = [{
         '/lp/assets/images': '/assets/images'
     }
 },{
+    path: '/projects/insights',
+    pages: {
+        '/insights/': 'assets/index.html',
+        '/insights/index': 'assets/index.html'
+    },
+    folders: {
+        '/insights/app': '/app',
+        '/insights/assets': '/assets'
+    }
+},{  
     path: '/projects/demo',
     folders: {
         '/demo/js': '/js'

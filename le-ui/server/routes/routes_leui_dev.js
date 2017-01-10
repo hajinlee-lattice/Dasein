@@ -58,6 +58,16 @@ module.exports = [{
         '/lp/lib': '/lib'
     }
 },{
+    path: '/projects/insights',
+    pages: {
+        '/insights/': 'index.html',
+        '/insights/index': 'index.html'
+    },
+    folders: {
+        '/insights/app': '/app',
+        '/insights/assets': '/assets'
+    }
+},{    
     path: '/projects/lp2',
     pages: {
         '/lp2/': 'index.html',
