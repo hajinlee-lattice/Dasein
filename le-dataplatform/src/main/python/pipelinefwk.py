@@ -4,6 +4,8 @@ import sys
 import pandas as pd
 import numpy as np
 
+from precisionutil import PrecisionUtil
+
 def get_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
@@ -29,16 +31,29 @@ class Pipeline(object):
         return self.pipelineSteps
 
     def predict(self, dataFrame, configMetadata, test):
-        transformed = dataFrame.apply(lambda x: x.round(8) if type(x) is float else x)
+        transformed = dataFrame
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             try:
                 transformed = step.transform(transformed, configMetadata, test)
+                modifiedCols = [c[0]['name'] for c in step.getOutputColumns() if c[0]['name'] in transformed.columns.values]
+                if len(modifiedCols) > 0:
+                    transformed[modifiedCols] = transformed[modifiedCols].apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
             except Exception as e:
                 logger.exception("Caught Exception while applying Transform. Stack trace below" + str(e))
 
+        if 'ADDEDCOLUMNS' in self.mediator and self.mediator["ADDEDCOLUMNS"] is not None:
+            logger.info('Columns added by Pipeline: {}'.format(str([c['ColumnName'] for c in self.mediator["ADDEDCOLUMNS"]])))
+        else:
+            logger.info('No columns added by Pipeline')
+        if 'REMOVEDCOLUMNS' in self.mediator and self.mediator["REMOVEDCOLUMNS"] is not None:
+            logger.info('Columns removed by Pipeline: {}'.format(str(self.mediator["REMOVEDCOLUMNS"])))
+        else:
+            logger.info('No columns removed by Pipeline')
+        logger.info('Columns in DataFrame after Pipeline: {}'.format(str([c for c in transformed.columns.values])))
+
         return transformed
-    
+
     def getMediator(self):
         return self.mediator
 

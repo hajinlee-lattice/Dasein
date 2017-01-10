@@ -51,11 +51,19 @@ class ModelGenerator(State, JsonGenBase):
         pipelineFwkPkl = self.__getSerializedFile(self.__compressFile("pipelinefwk.py"))
         pipelineBinaryPkl = self.__getSerializedFile(filename)
         pipelinePkl = self.__getSerializedFile(self.__compressFile(self.mediator.schema["python_pipeline_script"]))
-        model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": self.mediator.schema["python_pipeline_script"] }, 
+        precisionUtil = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/leframework/util/precisionutil.py"))
+        model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": self.mediator.schema["python_pipeline_script"] },
                                            { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" },
-                                           { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" }]
+                                           { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" },
+                                           { "Value": precisionUtil, "Key": "precisionutil.py"}]
 
-        (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
+        try:
+            (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
+        except:
+            self.logger.error('Problem with Pipeline Lib: {}'.format(self.mediator.schema["python_pipeline_lib"]))
+            self.logger.error('LS .: {}'.format(str(os.listdir('.'))))
+            self.logger.error('LS {0}: {1}'.format(self.mediator.schema["python_pipeline_lib"], str(os.listdir('.'))))
+            exit(1)
 
         filenames = sorted(filenames)
         for filename in filenames:
