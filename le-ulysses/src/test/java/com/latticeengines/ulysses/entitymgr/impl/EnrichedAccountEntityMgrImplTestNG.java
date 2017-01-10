@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -13,11 +14,11 @@ import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
 
 public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
 
+    @Autowired
     private EnrichedAccountEntityMgr enrichedAccountEntityMgr;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        enrichedAccountEntityMgr = new EnrichedAccountEntityMgrImpl(messageService, dataService);
         super.createTable(enrichedAccountEntityMgr.getRepository(), enrichedAccountEntityMgr.getRecordType());
     }
 
@@ -32,7 +33,7 @@ public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
         record.setId("12345");
         record.setLatticeAccountId("12345");
         record.setTenantId("A.A.Production");
-        record.setSourceAccountId("asdfghj");
+        record.setSourceId("asdfghj");
         record.setAttribute("ExternalId", "abcde");
         enrichedAccountEntityMgr.create(record);
     }
@@ -43,7 +44,7 @@ public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
         assertEquals(record.getId(), "12345");
         assertEquals(record.getLatticeAccountId(), "12345");
         assertEquals(record.getTenantId(), "A.A.Production");
-        assertEquals(record.getSourceAccountId(), "asdfghj");
+        assertEquals(record.getSourceId(), "asdfghj");
         assertEquals(record.getAttributes().get("ExternalId"), "abcde");
     }
 

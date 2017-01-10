@@ -27,25 +27,19 @@ public class DynamoServiceImpl implements DynamoService {
     private static final Log log = LogFactory.getLog(DynamoServiceImpl.class);
 
     private AmazonDynamoDBClient client;
-    private AmazonDynamoDBClient remoteClient;
-    private AmazonDynamoDBClient localClient;
 
     private DynamoDB dynamoDB;
-    private DynamoDB remoteDynamoDb;
-    private DynamoDB localDynamoDb;
 
     @Autowired
-    public DynamoServiceImpl(BasicAWSCredentials awsCredentials,
-                             @Value("${aws.dynamo.endpoint:}") String endpoint) {
+    public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint:}") String endpoint) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
-        remoteClient = new AmazonDynamoDBClient(awsCredentials);
-        remoteDynamoDb = new DynamoDB(remoteClient);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            localClient = new AmazonDynamoDBClient(awsCredentials).withEndpoint(endpoint);
-            localDynamoDb = new DynamoDB(localClient);
+            client = new AmazonDynamoDBClient(awsCredentials).withEndpoint(endpoint);
+        } else {
+            client = new AmazonDynamoDBClient(awsCredentials);
         }
-        switchToRemote();
+        dynamoDB = new DynamoDB(client);
     }
 
     public DynamoServiceImpl(AmazonDynamoDBClient client) {
@@ -59,57 +53,35 @@ public class DynamoServiceImpl implements DynamoService {
     }
 
     @Override
-    public void switchToLocal() {
-        if (localClient == null) {
-            throw new RuntimeException("Local dynamo client has not been initialized.");
-        }
-        log.info("Switching dynamo service to local mode.");
-        client = localClient;
-        dynamoDB = localDynamoDb;
-    }
-
-    @Override
-    public void switchToRemote() {
-        log.info("Switching dynamo service to remote mode.");
-        client = remoteClient;
-        dynamoDB = remoteDynamoDb;
-    }
-
-    @Override
     public DynamoDB getDynamoDB() {
         return dynamoDB;
     }
 
     @Override
     public Table createTable(String tableName, long readCapacityUnits, long writeCapacityUnits,
-                            String partitionKeyName, String partitionKeyType,
-                            String sortKeyName, String sortKeyType) {
+            String partitionKeyName, String partitionKeyType, String sortKeyName, String sortKeyType) {
         ArrayList<KeySchemaElement> keySchema = new ArrayList<>();
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
 
-        keySchema.add(new KeySchemaElement()
-                .withAttributeName(partitionKeyName)
-                .withKeyType(KeyType.HASH)); //Partition key
-        attributeDefinitions.add(new AttributeDefinition()
-                .withAttributeName(partitionKeyName)
-                .withAttributeType(partitionKeyType));
+        keySchema.add(new KeySchemaElement().withAttributeName(partitionKeyName).withKeyType(KeyType.HASH)); // Partition
+                                                                                                             // key
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName(partitionKeyName).withAttributeType(
+                partitionKeyType));
 
         if (sortKeyName != null) {
-            keySchema.add(new KeySchemaElement()
-                    .withAttributeName(sortKeyName)
-                    .withKeyType(KeyType.RANGE)); //Sort key
-            attributeDefinitions.add(new AttributeDefinition()
-                    .withAttributeName(sortKeyName)
-                    .withAttributeType(sortKeyType));
+            keySchema.add(new KeySchemaElement().withAttributeName(sortKeyName).withKeyType(KeyType.RANGE)); // Sort
+                                                                                                             // key
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(
+                    sortKeyType));
         }
 
         CreateTableRequest request = new CreateTableRequest()
                 .withTableName(tableName)
                 .withKeySchema(keySchema)
                 .withAttributeDefinitions(attributeDefinitions)
-                .withProvisionedThroughput( new ProvisionedThroughput()
-                        .withReadCapacityUnits(readCapacityUnits)
-                        .withWriteCapacityUnits(writeCapacityUnits));
+                .withProvisionedThroughput(
+                        new ProvisionedThroughput().withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(
+                                writeCapacityUnits));
 
         try {
             log.info("Creating table " + tableName);
@@ -141,5 +113,3 @@ public class DynamoServiceImpl implements DynamoService {
         }
     }
 }
-
-

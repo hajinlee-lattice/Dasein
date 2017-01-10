@@ -56,6 +56,18 @@
                   undeployOldVersions="true"/>
         </Engine>
     </Service>
+    
+    <Service name="Ulysses">
+        <Connector port="8075" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Engine name="UlyssesEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="false" autoDeploy="true"
+                  undeployOldVersions="true"/>
+        </Engine>
+    </Service>
 
     <Service name="PlayMaker">
         <Connector port="8071" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>

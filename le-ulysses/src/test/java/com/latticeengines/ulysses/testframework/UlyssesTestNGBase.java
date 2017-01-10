@@ -1,7 +1,5 @@
 package com.latticeengines.ulysses.testframework;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,14 +39,5 @@ public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests {
         String tableName = DynamoDataStoreImpl.buildTableName(repository, recordType);
         dynamoService.deleteTable(tableName);
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
-    }
-
-    protected void tearDown() {
-        dynamoService.switchToRemote();
-    }
-
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-        dynamoService.switchToLocal();
     }
 }

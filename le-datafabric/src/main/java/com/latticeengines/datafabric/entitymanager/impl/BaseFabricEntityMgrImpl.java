@@ -51,7 +51,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     @Autowired
     private FabricDataService dataService;
 
-    @Value("${datafabric.disabled:false}")
     private boolean disabled;
 
     private String store;

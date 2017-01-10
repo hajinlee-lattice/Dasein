@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.ulysses;
 
+import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -55,6 +56,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
 
     @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
+    @Nullable
     private String description;
 
     @JsonProperty("campaign_type")
@@ -90,7 +92,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
 
     @JsonProperty("campaign_id")
     @Column(name = "CAMPAIGN_ID", nullable = false)
-    @AvroIgnore
+    @DynamoHashKey(name = "Id")
     private String campaignId;
 
     public Campaign() {
@@ -188,7 +190,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }

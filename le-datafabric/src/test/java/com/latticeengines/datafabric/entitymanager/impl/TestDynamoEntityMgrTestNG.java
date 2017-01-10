@@ -40,7 +40,6 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
 
     @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
-        dynamoService.switchToLocal();
 
         repo = leEnv + "_" + leStack + "_testRepo";
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
@@ -59,7 +58,6 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
     @AfterClass(groups = "dynamo")
     public void teardown() throws Exception {
         dynamoService.deleteTable(tableName);
-        dynamoService.switchToRemote();
     }
 
     @Test(groups = "dynamo")

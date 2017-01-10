@@ -32,7 +32,9 @@ public class EnrichedAccount implements HasId<String> {
 
     @JsonProperty
     @DynamoAttribute
-    private String sourceAccountId;
+    private String sourceId;
+
+    // TODO Add LastModified
 
     @JsonProperty
     @DynamoAttribute
@@ -64,12 +66,12 @@ public class EnrichedAccount implements HasId<String> {
         this.tenantId = tenantId;
     }
 
-    public String getSourceAccountId() {
-        return sourceAccountId;
+    public String getSourceId() {
+        return sourceId;
     }
 
-    public void setSourceAccountId(String sourceAccountId) {
-        this.sourceAccountId = sourceAccountId;
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
     }
 
     public void setAttribute(String key, String value) {
