@@ -20,6 +20,10 @@ import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
     private static final Log log = LogFactory.getLog(LocationToDunsMicroEngineActor.class);
 
+    private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache. Did not go to remote DnB API.";
+    private static final String HIT_BLACK_CACHE = "Fast failed by black cache. Did not go to remote DnB API.";
+    private static final String HIT_NO_CACHE = "Did not hit either white or black cache. Went to remote DnB API.";
+
     @PostConstruct
     public void postConstruct() {
         log.info("Started actor: " + self());
@@ -51,20 +55,20 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
             MatchKeyTuple matchKeyTuple = traveler.getMatchKeyTuple();
             DnBMatchContext res = (DnBMatchContext) response.getResult();
+            traveler.debug(res.getHitWhiteCache() ? HIT_WHITE_CACHE
+                    : (res.getHitBlackCache() ? HIT_BLACK_CACHE : HIT_NO_CACHE));
+            String suffix = String.format("ConfidenceCode = %s, MatchGrade = %s.",
+                    (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
+                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()));
             if (res.getDuns() != null) {
                 traveler.debug(
-                        String.format("Found DUNS=%s at %s. Hit cache? %s", res.getDuns(), getClass().getSimpleName(),
-                                res.getHitWhiteCache() ? "white" : (res.getHitBlackCache() ? "black" : "no")));
+                        String.format("Found DUNS=%s at %s. %s", res.getDuns(), getClass().getSimpleName(), suffix));
             }
             matchKeyTuple.setDuns(res.getDuns());
             if (res.getDnbCode() != DnBReturnCode.OK) {
-                traveler.debug(String.format(
-                        "%s encountered issue with DnB for traveler %s: %s, ConfidenceCode = %s, MatchGrade = %s. Hit cache? %s",
-                        getClass().getSimpleName(), traveler.toString(),
-                        (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage()),
-                        (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
-                        (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()), 
-                        res.getHitWhiteCache() ? "white" : (res.getHitBlackCache() ? "black" : "no")));
+                traveler.debug(String.format("%s encountered an issue with DUNS lookup: %s. %s", //
+                        getClass().getSimpleName(), //
+                        (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage()), suffix));
             }
             traveler.getDnBMatchContexts().add(res);
             response.setResult(null);

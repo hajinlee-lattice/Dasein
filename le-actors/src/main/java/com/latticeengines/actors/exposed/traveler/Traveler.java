@@ -173,7 +173,7 @@ public abstract class Traveler {
     public void start() {
         stopWatch = new StopWatch();
         stopWatch.start();
-        debug("Started the journey.");
+        debug("Started the journey. TravelerId=" + getTravelerId());
     }
 
     public void finish() {
