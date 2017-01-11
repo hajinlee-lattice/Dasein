@@ -32,8 +32,6 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     private DnBRealTimeLookupService dnBRealTimeLookupService;
 
     private final static int THREAD_NUM = 20;
-    
-
 
     @Test(groups = "functional", dataProvider = "entityInputData", enabled = true)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,
@@ -49,7 +47,9 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
         Assert.assertEquals(res.getDnbCode(), dnbCode);
-        Assert.assertEquals(res.getDuns(), duns);
+        if (duns != null) {
+            Assert.assertEquals(res.getDuns(), duns);
+        }
         Assert.assertEquals(res.getConfidenceCode(), ConfidenceCode);
         Assert.assertEquals(res.getMatchGrade(), matchGrade);
         Assert.assertNotNull(res.getDuration());
