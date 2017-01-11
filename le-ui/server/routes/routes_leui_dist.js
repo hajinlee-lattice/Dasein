@@ -53,8 +53,7 @@ module.exports = [{
         '/insights/index': 'assets/index.html'
     },
     folders: {
-        '/insights/app': '/app',
-        '/insights/assets': '/assets'
+        '/insights': '/assets'
     }
 },{  
     path: '/projects/demo',
