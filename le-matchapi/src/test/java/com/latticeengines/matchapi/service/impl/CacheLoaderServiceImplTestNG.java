@@ -41,36 +41,28 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
     private DnBCacheService dnbCacheService;
 
     @Test(groups = "deployment", enabled = true)
-    public void startLoad() {
+    public void startLoadWithDuns() {
         try {
             HdfsPodContext.changeHdfsPodId(podId);
             uploadTestAVro(avroDir, AM_CACHE_FILE);
             CacheLoaderConfig config = new CacheLoaderConfig();
             config.setDirPath(avroDir);
-            Map<String, String> fieldMap = new HashMap<>();
-
-            fieldMap.put("Name", "name");
-            fieldMap.put("Country", "countryCode");
-            fieldMap.put("State", "state");
-            fieldMap.put("City", "city");
-            fieldMap.put("PhoneNumber", "phoneNumber");
-            fieldMap.put("ZipCode", "zipcode");
-            config.setFieldMap(fieldMap);
+            getFieldMap(config);
             config.setDunsField("DUNS");
             config.setConfidenceCode(6);
             config.setMatchGrade("AAA");
             long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
 
             Assert.assertEquals(count, 83);
-            assertCachePositive();
-            assertCacheNegative();
+            assertCachePositiveWithDuns();
+            assertCacheNegativeWithDuns();
         } catch (Exception ex) {
             log.error("Exception!", ex);
             Assert.fail("Test failed! due to=" + ex.getMessage());
         }
     }
 
-    private void assertCacheNegative() {
+    private void assertCacheNegativeWithDuns() {
         DnBMatchContext context = new DnBMatchContext();
         NameLocation nameLocation = new NameLocation();
         nameLocation.setName("Miaochafong");
@@ -82,7 +74,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     }
 
-    private void assertCachePositive() {
+    private void assertCachePositiveWithDuns() {
 
         DnBMatchContext context = new DnBMatchContext();
         NameLocation nameLocation = new NameLocation();
@@ -100,6 +92,62 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         Assert.assertEquals(whiteCache.getDuns(), "039891115");
         Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(6));
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AAA");
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void startLoadWithoutDuns() {
+        try {
+            HdfsPodContext.changeHdfsPodId(podId);
+            uploadTestAVro(avroDir, AM_CACHE_FILE);
+            CacheLoaderConfig config = new CacheLoaderConfig();
+            config.setDirPath(avroDir);
+            getFieldMap(config);
+
+            config.setDunsField("DUNS");
+            config.setCallMatch(true);
+            // config.setBatchMode(true);
+            long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
+
+            Assert.assertEquals(count, 17);
+            assertCachePositiveWithoutDuns();
+
+        } catch (Exception ex) {
+            log.error("Exception!", ex);
+            Assert.fail("Test failed! due to=" + ex.getMessage());
+        }
+    }
+
+    private void assertCachePositiveWithoutDuns() {
+
+        DnBMatchContext context = new DnBMatchContext();
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName("ANGELES GROCERY");
+        nameLocation.setCity("JERSEY CITY");
+        nameLocation.setState("NEW JERSEY");
+        nameLocation.setCountryCode("US");
+        nameLocation.setZipcode(null);
+        nameLocation.setPhoneNumber(null);
+        context.setInputNameLocation(nameLocation);
+        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+
+        Assert.assertTrue(whiteCache != null);
+        Assert.assertEquals(whiteCache.getDuns(), "149259751");
+
+        Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(7));
+        Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AZZAAZZZFBA");
+    }
+
+    private void getFieldMap(CacheLoaderConfig config) {
+        Map<String, String> fieldMap = new HashMap<>();
+
+        fieldMap.put("Name", "name");
+        fieldMap.put("Country", "countryCode");
+        fieldMap.put("State", "state");
+        fieldMap.put("City", "city");
+        fieldMap.put("PhoneNumber", "phoneNumber");
+        fieldMap.put("ZipCode", "zipcode");
+        config.setFieldMap(fieldMap);
     }
 
     private void uploadTestAVro(String avroDir, String fileName) {

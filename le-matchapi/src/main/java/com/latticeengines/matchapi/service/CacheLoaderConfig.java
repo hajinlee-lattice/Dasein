@@ -20,6 +20,10 @@ public class CacheLoaderConfig {
     private Integer confidenceCode;
     @JsonProperty("matchGrade")
     private String matchGrade;
+    
+    private boolean isCallMatch;
+    private boolean isBatchMode;
+    private String dataCloudVersion;
 
     public String getVersion() {
         return version;
@@ -76,12 +80,41 @@ public class CacheLoaderConfig {
     public void setMatchGrade(String matchGrade) {
         this.matchGrade = matchGrade;
     }
+    
+    
+
+    public boolean isCallMatch() {
+        return isCallMatch;
+    }
+
+    public void setCallMatch(boolean isCallMatch) {
+        this.isCallMatch = isCallMatch;
+    }
+    
+    
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
+
+
+    public boolean isBatchMode() {
+        return isBatchMode;
+    }
+
+    public void setBatchMode(boolean isBatchMode) {
+        this.isBatchMode = isBatchMode;
+    }
 
     @Override
     public String toString() {
         return "CacheLoaderConfig [sourceName=" + sourceName + ", version=" + version + ", dirPath=" + dirPath
                 + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + ", confidenceCode=" + confidenceCode
-                + ", matchGrade=" + matchGrade + "]";
+                + ", matchGrade=" + matchGrade + ", isCallMatch=" + isCallMatch + ", dataCloudVersion="
+                + dataCloudVersion + "]";
     }
 
 }
