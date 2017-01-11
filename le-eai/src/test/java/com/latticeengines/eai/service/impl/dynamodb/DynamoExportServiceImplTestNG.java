@@ -101,11 +101,13 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
+        dynamoService.switchToLocal();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
     }
 
     @AfterClass(groups = "aws")
     public void cleanup() throws IOException {
+        dynamoService.switchToRemote();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
     }
 
@@ -264,7 +266,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList((Object) Long.valueOf(String.valueOf(i)), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
+            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
             data.add(tuple);
         }
 
