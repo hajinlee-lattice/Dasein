@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.common.exposed.util.PhoneNumberUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -301,7 +302,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                             originalPhoneNumber = (String) inputRecord.get(pos);
                         }
                     }
-                    String cleanPhoneNumber = originalPhoneNumber;
+                    String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(originalPhoneNumber, countryCode);
 
                     NameLocation nameLocation = new NameLocation();
                     nameLocation.setName(cleanName);

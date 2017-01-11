@@ -12,6 +12,9 @@ public class PhoneNumberUtils {
 
     public static String getStandardPhoneNumber(String phoneNumber, String countryCode) {
         phoneNumber = StringUtils.getStandardString(phoneNumber);
+        if (org.apache.commons.lang.StringUtils.isEmpty(phoneNumber)) {
+            return null;
+        }
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
             PhoneNumber standardPhoneNumber = phoneUtil.parse(phoneNumber, countryCode);
