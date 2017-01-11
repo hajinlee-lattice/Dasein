@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ulysses.Campaign;
 import com.latticeengines.domain.exposed.ulysses.Insight;
+import com.latticeengines.domain.exposed.ulysses.InsightAttribute;
 import com.latticeengines.domain.exposed.ulysses.InsightSection;
 import com.latticeengines.domain.exposed.ulysses.InsightSourceType;
 import com.latticeengines.ulysses.entitymgr.CampaignEntityMgr;
@@ -34,7 +35,11 @@ public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
         s1.setHeadline("Headline text");
         s1.setTip("Tip text");
         s1.setDescription("Description text");
-        s1.setAttributes((Arrays.asList(new String[] { "A", "B" })));
+        InsightAttribute attribute = new InsightAttribute();
+        attribute.setName("foo");
+        attribute.setDescription("bar");
+        attribute.setId("foo");
+        s1.addAttribute(attribute);
         s1.setInsightSourceType(InsightSourceType.BOTH);
 
         Insight i1 = new Insight();

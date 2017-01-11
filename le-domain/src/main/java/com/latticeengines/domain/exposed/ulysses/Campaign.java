@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.ulysses;
 
-import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +29,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
+import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -41,7 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
+public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant, HasInsights {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -172,6 +173,16 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String> {
 
     public void setInsights(List<Insight> insights) {
         this.insights = insights;
+    }
+
+    @Override
+    public List<InsightAttribute> getInsightModifiers() {
+        return null;
+    }
+
+    @Override
+    public void setInsightModifiers(List<InsightAttribute> insights) {
+
     }
 
     @Override
