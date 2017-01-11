@@ -58,6 +58,10 @@ public class ScoringApiConsoleResource {
                     required = false) //
             @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true") //
             Boolean enforceFuzzyMatch, //
+            @ApiParam(value = "For fuzzy match, should skip DnB cache", //
+                    required = false) //
+            @RequestParam(value = "skipDnBCache", required = false, defaultValue = "false") //
+            Boolean skipDnBCache, //
             @RequestBody ScoreRequest scoreRequest) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
@@ -67,8 +71,11 @@ public class ScoringApiConsoleResource {
         if (enforceFuzzyMatch == null) {
             enforceFuzzyMatch = true;
         }
+        if (skipDnBCache == null) {
+            skipDnBCache = false;
+        }
         DebugScoreResponse resp = internalScoringApiProxy.scoreAndEnrichRecordApiConsole(scoreRequest, tenant.getId(),
-                true, enforceFuzzyMatch);
+                true, enforceFuzzyMatch, skipDnBCache);
 
         Map<String, Object> enrichValueMap = resp.getEnrichmentAttributeValues();
         Map<String, Object> nonNullEnrichValueMap = new HashMap<>();

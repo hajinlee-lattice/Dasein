@@ -12,7 +12,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.CacheBuilder;
@@ -97,7 +96,11 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     @Override
     public TopNAttributes getTopAttrs(Category category, int max) {
-        return selectTopN(getTopAttrTree().get(category), max);
+        TopNAttributeTree topAttrsTree = getTopAttrTree();
+        TopNAttributes topAttrsForCategory = //
+                topAttrsTree == null ? //
+                        null : topAttrsTree.get(category);
+        return selectTopN(topAttrsForCategory, max);
     }
 
     private TopNAttributeTree getTopAttrTree() {

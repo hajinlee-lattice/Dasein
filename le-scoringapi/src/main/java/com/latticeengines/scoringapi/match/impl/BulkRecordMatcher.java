@@ -71,7 +71,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             String requestId, boolean isDebugMode, //
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment, //
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, boolean skipDnBCache) {
         throw new NotImplementedException();
     }
 
@@ -267,7 +267,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
                         modelSummary, null, false, currentDataCloudVersion, //
-                        performFetchOnlyForMatching, requestId, isDebugMode, false);
+                        performFetchOnlyForMatching, requestId, isDebugMode, false, false);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
             }
@@ -287,7 +287,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
                     true, currentDataCloudVersionForEnrichment, //
-                    performFetchOnlyForMatching, requestId, isDebugMode, false);
+                    performFetchOnlyForMatching, requestId, isDebugMode, false, false);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, recordModelTuple, matchAMEnrichmentInput);
         } else {
@@ -296,7 +296,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode, false);
+                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode, false, false);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null

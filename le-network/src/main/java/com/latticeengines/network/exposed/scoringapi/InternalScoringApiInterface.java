@@ -36,5 +36,5 @@ public interface InternalScoringApiInterface {
             String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 
     DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
-            boolean enrichInternalAttributes, boolean enforceFuzzyMatch);
+            boolean enrichInternalAttributes, boolean enforceFuzzyMatch, boolean skipDnBCache);
 }

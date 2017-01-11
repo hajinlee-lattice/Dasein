@@ -161,21 +161,21 @@ public abstract class BaseScoring extends CommonBase {
 
     protected DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, ScoreRequest scoreRequest,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId,
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, boolean skipDnBCache) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
-                false, requestId, true, enforceFuzzyMatch);
+                false, requestId, true, enforceFuzzyMatch, skipDnBCache);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             String requestId) {
         return scoreRecord(request, scoreRequest, isDebug, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, false, false);
+                performFetchOnlyForMatching, requestId, false, false, false);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
-            String requestId, boolean isCalledViaApiConsole, boolean enforceFuzzyMatch) {
+            String requestId, boolean isCalledViaApiConsole, boolean enforceFuzzyMatch, boolean skipDnBCache) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
@@ -185,7 +185,7 @@ public abstract class BaseScoring extends CommonBase {
 
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug,
                     enrichInternalAttributes, performFetchOnlyForMatching, requestId, isCalledViaApiConsole,
-                    enforceFuzzyMatch);
+                    enforceFuzzyMatch, skipDnBCache);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings()));

@@ -43,7 +43,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean shouldReturnAllEnrichment) {
         return matchAndJoin(space, interpreted, fieldSchemas, record, modelSummary, forEnrichment,
                 enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebugMode, matchLogs,
-                matchErrorLogs, shouldReturnAllEnrichment, false);
+                matchErrorLogs, shouldReturnAllEnrichment, false, false);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
             String requestId, boolean isDebugMode, //
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment, //
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, boolean skipDnBCache) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 
@@ -119,7 +119,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                             currentDataCloudVersionForEnrichment, performFetchOnlyForMatching, //
                             requestId, isDebugMode, //
                             matchLogs, matchErrorLogs, //
-                            enforceFuzzyMatch);
+                            enforceFuzzyMatch, skipDnBCache);
 
             result.putAll(enrichmentResult);
 
@@ -130,7 +130,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                     record, modelSummary, forEnrichment, //
                     selectedLeadEnrichmentAttributes, (modelSummary == null), currentDataCloudVersion, //
                     performFetchOnlyForMatching, requestId, isDebugMode, //
-                    matchLogs, matchErrorLogs, enforceFuzzyMatch);
+                    matchLogs, matchErrorLogs, enforceFuzzyMatch, skipDnBCache);
         }
     }
 
@@ -162,7 +162,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                 record, modelSummary, forEnrichment, selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, //
                 performFetchOnlyForMatching, requestId, isDebugMode, matchLogs, //
-                matchErrorLogs, false);
+                matchErrorLogs, false, false);
     }
 
     private Map<String, Map<String, Object>> buildAndExecuteMatch(//
@@ -174,12 +174,12 @@ public class SingleRecordMatcher extends AbstractMatcher {
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode, //
             List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, boolean skipDnBCache) {
         MatchInput matchInput = buildMatchInput(space, interpreted, //
                 record, modelSummary, //
                 selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, //
-                performFetchOnlyForMatching, requestId, isDebugMode, enforceFuzzyMatch);
+                performFetchOnlyForMatching, requestId, isDebugMode, enforceFuzzyMatch, skipDnBCache);
 
         MatchOutput matchOutput = callMatch(matchInput);
 

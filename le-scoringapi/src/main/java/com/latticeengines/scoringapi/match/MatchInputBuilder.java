@@ -42,7 +42,7 @@ public interface MatchInputBuilder {
             String overrideDataCloudVersion, //
             boolean performFetchOnlyForMatching, //
             String requestId, boolean isDebugMode, //
-            boolean enforceFuzzyMatch);
+            boolean enforceFuzzyMatch, boolean skipDnBCache);
 
     BulkMatchInput buildMatchInput(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //

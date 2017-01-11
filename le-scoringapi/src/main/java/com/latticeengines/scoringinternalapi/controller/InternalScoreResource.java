@@ -163,11 +163,15 @@ public class InternalScoreResource extends BaseScoring {
             @ApiParam(value = "Should enforce fuzzy match", //
                     required = false) //
             @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true") //
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, //
+            @ApiParam(value = "For fuzzy match, should skip DnB cache", //
+                    required = false) //
+            @RequestParam(value = "skipDnBCache", required = false, defaultValue = "false") //
+            boolean skipDnBCache) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         return scoreAndEnrichRecordApiConsole(request, scoreRequest, customerSpace, enrichInternalAttributes, requestId,
-                enforceFuzzyMatch);
+                enforceFuzzyMatch, skipDnBCache);
     }
 
 }

@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,8 @@ public class EnrichmentResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request,
+    public void getLeadEnrichmentAttributes(HttpServletRequest request, //
+            HttpServletResponse response, //
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false) //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
@@ -144,6 +146,18 @@ public class EnrichmentResource {
             Integer offset, //
             @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
             @RequestParam(value = "max", required = false) //
+            Integer max) {
+        List<LeadEnrichmentAttribute> result = getLeadEnrichmentAttributes(request, attributeDisplayNameFilter,
+                category, subcategory, onlySelectedAttributes, offset, max);
+        writeToGzipStream(response, result);
+    }
+
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request,
+            String attributeDisplayNameFilter, //
+            String category, //
+            String subcategory, //
+            Boolean onlySelectedAttributes, //
+            Integer offset, //
             Integer max) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
@@ -343,6 +357,28 @@ public class EnrichmentResource {
         }
 
         return topNAttr;
+    }
+
+    @RequestMapping(value = AM_STATS_PATH + "/topn/all", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get top N attributes per subcategory for each category")
+    public Map<String, TopNAttributes> getAllTopNAttributes(HttpServletRequest request, //
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
+            Boolean loadEnrichmentMetadata, //
+            @ApiParam(value = "max", defaultValue = "5") //
+            @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
+        List<String> categories = getLeadEnrichmentCategories(request);
+        Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
+
+        for (String categoryName : categories) {
+            TopNAttributes topNAttrs = getTopNAttributes(request, loadEnrichmentMetadata, categoryName, max);
+            allTopNAttributes.put(categoryName, topNAttrs);
+        }
+
+        return allTopNAttributes;
     }
 
     // ------------End for statistics---------------------//

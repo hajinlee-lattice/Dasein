@@ -187,10 +187,12 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
-            boolean enrichInternalAttributes, boolean enforceFuzzyMatch) {
+            boolean enrichInternalAttributes, boolean enforceFuzzyMatch, boolean skipDnBCache) {
         String url = constructUrl(
-                "/record/apiconsole/debug?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}&enforceFuzzyMatch={enforceFuzzyMatch}",
-                tenantIdentifier, enrichInternalAttributes, enforceFuzzyMatch);
+                "/record/apiconsole/debug?tenantIdentifier={tenantIdentifier}"
+                + "&enrichInternalAttributes={enrichInternalAttributes}"
+                + "&enforceFuzzyMatch={enforceFuzzyMatch}&skipDnBCache={skipDnBCache}",
+                tenantIdentifier, enrichInternalAttributes, enforceFuzzyMatch, skipDnBCache);
         return post("scoreProbabilityRecordApiConsole", url, scoreRequest, DebugScoreResponse.class);
     }
 

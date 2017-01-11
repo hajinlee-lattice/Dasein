@@ -38,7 +38,7 @@ public interface Matcher {
             String requestId, boolean isDebugMode, //
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment, //
-            boolean enforceFuzzyMatch);
+            boolean enforceFuzzyMatch, boolean skipDnBCache);
 
     Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(CustomerSpace space, //
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //

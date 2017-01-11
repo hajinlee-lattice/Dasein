@@ -279,8 +279,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Map<String, FieldSchema> mergedFields = mergeFields(eventTableDataComposition, dataScienceDataComposition);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir, modelJsonType);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
-        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType).getScoreDerivation(
-                hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
+        ScoreDerivation scoreDerivation = getModelJsonTypeHandler(modelJsonType)
+                .getScoreDerivation(hdfsScoreArtifactBaseDir, modelJsonType, localPathToPersist);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
@@ -343,10 +343,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (folders.size() == 1) {
                 appId = folders.get(0).substring(folders.get(0).lastIndexOf("/") + 1);
             } else {
-                throw new LedpException(LedpCode.LEDP_31007, new String[] { modelSummary.getId(),
-                        JsonUtils.serialize(folders) });
+                throw new LedpException(LedpCode.LEDP_31007,
+                        new String[] { modelSummary.getId(), JsonUtils.serialize(folders) });
             }
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_31000, new String[] { hdfsScoreArtifactAppIdDir });
         }
         log.info("Found appId foldername by discovery:" + appId);
@@ -371,6 +372,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     });
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_31018, new String[] { hdfsScoreArtifactBaseDir });
         }
 
@@ -378,6 +380,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 content = HdfsUtils.getHdfsFileContents(yarnConfiguration, scoredTxtHdfsPath.get(0));
             } catch (IOException e) {
+                log.error(e.getMessage(), e);
                 throw new LedpException(LedpCode.LEDP_31000, new String[] { scoredTxtHdfsPath.get(0) });
             }
         } else if (scoredTxtHdfsPath.size() == 0) {
@@ -406,12 +409,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     });
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
 
         if (dataExportHdfsPath.size() == 1) {
             try {
                 content = HdfsUtils.getHdfsFileContents(yarnConfiguration, dataExportHdfsPath.get(0));
             } catch (IOException e) {
+                log.error(e.getMessage(), e);
                 throw new LedpException(LedpCode.LEDP_31000, new String[] { dataExportHdfsPath.get(0) });
             }
         }
@@ -455,6 +460,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             String type = node.textValue();
             modelJsonType = type.substring(0, type.indexOf(DELIM));
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_31000, e, new String[] { globPath });
         }
         return modelJsonType;
@@ -477,6 +483,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     });
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_31001, new String[] { hdfsScoreArtifactBaseDir });
         }
 
@@ -497,12 +504,13 @@ public class ModelRetrieverImpl implements ModelRetriever {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
                 if (!StringUtils.isBlank(localPathToPersist)) {
-                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
-                            + MODEL_JSON);
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0),
+                            localPathToPersist + MODEL_JSON);
                 }
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
-                        localModelJsonCacheDir });
+                log.error(e.getMessage(), e);
+                throw new LedpException(LedpCode.LEDP_31002,
+                        new String[] { modelJsonHdfsPath.get(0), localModelJsonCacheDir });
             }
         } else if (modelJsonHdfsPath.size() == 0) {
             throw new LedpException(LedpCode.LEDP_31003, new String[] { hdfsScoreArtifactBaseDir });
@@ -522,8 +530,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, //
             String modelId) {
-        return scoreArtifactCache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace,
-                modelId));
+        return scoreArtifactCache
+                .getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(customerSpace, modelId));
     }
 
     private void instantiateCache() {
@@ -551,7 +559,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String determineIdFieldName(Map<String, //
-            FieldSchema> fieldSchemas) {
+    FieldSchema> fieldSchemas) {
         // find ID field
         String idFieldName = null;
         for (String fieldName : fieldSchemas.keySet()) {
@@ -630,9 +638,11 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
                     Fields fields = null;
                     if (ModelSummaryStatus.DELETED.equals(status)) {
-                        // if the model is deleted then there is no point in making
+                        // if the model is deleted then there is no point in
+                        // making
                         // costly operation of loading filed details we return
-                        // deleted entries only to inform caller that model has been
+                        // deleted entries only to inform caller that model has
+                        // been
                         // deleted. Deleted models are not used for any other
                         // purpose
                         fields = new Fields(model.getModelId(), new ArrayList<Field>());
@@ -642,7 +652,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     modelDetail = new ModelDetail(model, status, fields,
                             BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp)));
                 } catch (Exception e) {
-                    //skip the bad model
+                    // skip the bad model
                     log.error(String.format("Error converting model summary to model detail for model summary: %s",
                             modelSummary.getId()));
                     continue;

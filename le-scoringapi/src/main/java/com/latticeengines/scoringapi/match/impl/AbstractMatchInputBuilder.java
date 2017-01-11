@@ -60,7 +60,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean isDebugMode) {
         return buildMatchInput(space, interpreted, record, modelSummary, selectedLeadEnrichmentAttributes,
                 skipPredefinedSelection, overrideDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode,
-                false);
+                false, false);
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean performFetchOnlyForMatching, //
             String requestId, //
             boolean isDebugMode, //
-            boolean enforceFuzzyMatch) {
+            boolean enforceFuzzyMatch, boolean skipDnBCache) {
         MatchInput matchInput = new MatchInput();
 
         setMatchKeyMap(interpreted, record, matchInput);
@@ -105,6 +105,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         if (enforceFuzzyMatch) {
             matchInput.setFuzzyMatchEnabled(true);
             matchInput.setDecisionGraph(fuzzyMatchGraph);
+            if (skipDnBCache) {
+                matchInput.setUseDnBCache(false);
+            }
         }
 
         return matchInput;
