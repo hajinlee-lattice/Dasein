@@ -33,7 +33,6 @@ import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
@@ -55,7 +54,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
-import com.snowflake.client.jdbc.internal.apache.commons.lang3.StringUtils;
 
 public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
@@ -101,13 +99,11 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
-        dynamoService.switchToLocal();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
     }
 
     @AfterClass(groups = "aws")
     public void cleanup() throws IOException {
-        dynamoService.switchToRemote();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
     }
 
@@ -185,6 +181,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Extract extract = new Extract();
         extract.setPath(sourceFilePath);
         table.setExtracts(Collections.singletonList(extract));
+        fileExportConfig.setExportInputPath(sourceDir);
 
         fileExportConfig.setTable(table);
         fileExportConfig.setExportTargetPath(targetDir);
@@ -194,15 +191,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(DynamoExportJob.CONFIG_REPOSITORY, repo);
         props.put(DynamoExportJob.CONFIG_RECORD_TYPE, recordType);
         props.put(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME, entityClz.getName());
-
-        if (StringUtils.isEmpty(endpoint)) {
-            props.put(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
-                    CipherUtils.encrypt(accessKey.replace("\n", "")));
-            props.put(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
-                    CipherUtils.encrypt(secretKey.replace("\n", "")));
-        } else {
-            props.put(DynamoExportJob.CONFIG_ENDPOINT, endpoint);
-        }
+        props.put(DynamoExportJob.CONFIG_ENDPOINT, endpoint);
 
         fileExportConfig.setProperties(props);
         exportService.exportDataFromHdfs(fileExportConfig, ctx);

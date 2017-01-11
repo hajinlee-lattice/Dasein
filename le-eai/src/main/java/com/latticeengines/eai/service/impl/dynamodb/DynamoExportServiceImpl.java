@@ -77,7 +77,8 @@ public class DynamoExportServiceImpl extends ExportService {
         context.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
                 exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED));
 
-        log.info(String.format("Exporting data for table %s", table));
+        log.info(String.format("Exporting data for table %s at input path %s", table,
+                context.getProperty(ExportProperty.INPUT_FILE_PATH, String.class)));
         Properties props = getProperties(context, table);
 
         ApplicationId appId = jobService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
