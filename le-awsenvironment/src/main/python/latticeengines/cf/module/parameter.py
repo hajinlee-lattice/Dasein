@@ -61,7 +61,8 @@ class InstanceTypeParameter(Parameter):
         "c4.xlarge",
         "c4.2xlarge",
         "r3.large",
-        "r3.xlarge"
+        "r3.xlarge",
+        "r4.large"
     )
     def __init__(self, name, description, default="t2.medium"):
         assert default in InstanceTypeParameter.ALLOWED_INSTANCE_TYPES
