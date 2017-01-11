@@ -40,4 +40,11 @@ public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests {
         dynamoService.deleteTable(tableName);
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
     }
+
+    protected void createCompositeTable(String repository, String recordType) {
+        String tableName = DynamoDataStoreImpl.buildTableName(repository, recordType);
+        dynamoService.deleteTable(tableName);
+        dynamoService.createTable(tableName, 10, 10, "parentKey", ScalarAttributeType.S.name(), "entityId",
+                ScalarAttributeType.S.name());
+    }
 }

@@ -1,14 +1,17 @@
 package com.latticeengines.ulysses.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertNotNull;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.Campaign;
 import com.latticeengines.domain.exposed.ulysses.Insight;
 import com.latticeengines.domain.exposed.ulysses.InsightAttribute;
@@ -26,7 +29,7 @@ public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        super.createTable(campaignEntityMgr.getRepository(), campaignEntityMgr.getRecordType());
+        super.createCompositeTable(campaignEntityMgr.getRepository(), campaignEntityMgr.getRecordType());
     }
 
     @Test(groups = "functional")
@@ -51,6 +54,10 @@ public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
         campaign.setName("Campaign1");
         campaign.setInsights(Arrays.asList(new Insight[] { i1 }));
 
+        Tenant tenant = new Tenant();
+        tenant.setId("CampaignEntityMgrImplTestNG.CampaignEntityMgrImplTestNG.Production");
+        campaign.setTenant(tenant);
+
         campaignEntityMgr.create(campaign);
     }
 
@@ -73,6 +80,8 @@ public class CampaignEntityMgrImplTestNG extends UlyssesTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "create" })
-    public void findAttributesByKey() {
+    public void findByTenantId() {
+        List<Campaign> campaigns = campaignEntityMgr.findChildren(campaign.getParentId(), "Campaign");
+        assertNotEquals(campaigns.size(), 0);
     }
 }

@@ -28,8 +28,8 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
-import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -42,7 +42,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant, HasInsights {
+public class Campaign extends CompositeFabricEntity implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant,
+        HasInsights {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,15 +92,8 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, Ha
     @AvroIgnore
     private Tenant tenant;
 
-    @JsonProperty("campaign_id")
-    @Column(name = "CAMPAIGN_ID", nullable = false)
-    @DynamoHashKey(name = "Id")
-    private String campaignId;
-
     public Campaign() {
-        if (campaignId == null) {
-            campaignId = UUID.randomUUID().toString();
-        }
+        setEntityId(UUID.randomUUID().toString());
     }
 
     @Override
@@ -159,6 +153,7 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, Ha
     public void setTenant(Tenant tenant) {
         if (tenant != null) {
             setTenantId(tenant.getPid());
+            setId(tenant.getId(), "Campaign", getEntityId());
             this.tenant = tenant;
         }
     }
@@ -182,20 +177,18 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, Ha
 
     @Override
     public void setInsightModifiers(List<InsightAttribute> insights) {
-
     }
 
+    @JsonProperty("campaign_id")
+    @Column(name = "CAMPAIGN_ID", nullable = false)
     @Override
-    public String getId() {
-        if (campaignType == CampaignType.PROFILE) {
-            return tenant.getId() + "|PROFILE";
-        }
-        return campaignId;
+    public String getEntityId() {
+        return super.getEntityId();
     }
 
     @Override
     public void setId(String id) {
-        this.campaignId = id;
+        super.setEntityId(id);
     }
 
     public String getDescription() {
@@ -205,5 +198,4 @@ public class Campaign implements HasPid, HasName, HasTenantId, HasId<String>, Ha
     public void setDescription(String description) {
         this.description = description;
     }
-
 }
