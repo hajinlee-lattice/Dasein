@@ -81,9 +81,10 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocation.setName("R. W. Notary");
         nameLocation.setCity("Alta Loma");
         nameLocation.setState("California");
-        nameLocation.setCountryCode("USA");
+        nameLocation.setCountry("USA");
         nameLocation.setZipcode("917374428");
         nameLocation.setPhoneNumber(null);
+        ((AvroCacheLoaderServiceImpl) cacheLoaderService).normalizeNameLocation(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
@@ -121,12 +122,13 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
         DnBMatchContext context = new DnBMatchContext();
         NameLocation nameLocation = new NameLocation();
-        nameLocation.setName("ANGELES GROCERY");
-        nameLocation.setCity("JERSEY CITY");
-        nameLocation.setState("NEW JERSEY");
-        nameLocation.setCountryCode("US");
+        nameLocation.setName("Angeles Grocery");
+        nameLocation.setCity("Jersey City");
+        nameLocation.setState("New Jersey");
+        nameLocation.setCountry("USA");
         nameLocation.setZipcode(null);
         nameLocation.setPhoneNumber(null);
+        ((AvroCacheLoaderServiceImpl) cacheLoaderService).normalizeNameLocation(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);

@@ -32,7 +32,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.common.exposed.util.PhoneNumberUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
@@ -84,19 +87,23 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     protected MatchExecutor matchExecutor;
 
     @Autowired
+    private CountryCodeService countryCodeService;
+
+    @Autowired
     private MatchActorSystem matchActorSystem;
 
     private ApplicationContext applicationContext;
     private ExecutorService executor;
 
     protected abstract Iterator<E> iterator(String dirPath);
+
     protected abstract Object getFieldValue(E record, String dunsField);
-    
+
     // Map from source fields to NameLocation fields
     protected static Map<String, String> defaultFieldMap = new HashMap<>();
     static {
         defaultFieldMap.put("LDC_Name", "name");
-        defaultFieldMap.put("LDC_Country", "countryCode");
+        defaultFieldMap.put("LDC_Country", "country");
         defaultFieldMap.put("LDC_State", "state");
         defaultFieldMap.put("LDC_City", "city");
         defaultFieldMap.put("LDC_ZipCode", "zipcode");
@@ -286,11 +293,11 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         return dunsField;
     }
 
-    private void createNameLocation(DnBMatchContext matchContext, E record, CacheLoaderConfig config,
-            String dunsStr) {
+    private void createNameLocation(DnBMatchContext matchContext, E record, CacheLoaderConfig config, String dunsStr) {
 
         NameLocation nameLocation = new NameLocation();
         setFieldValues(record, nameLocation, config);
+        normalizeNameLocation(nameLocation);
         matchContext.setInputNameLocation(nameLocation);
 
         matchContext.setDuns(dunsStr);
@@ -307,7 +314,27 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
     }
 
-    protected void setFieldValues(E record, NameLocation nameLocation, CacheLoaderConfig config) {
+    protected void normalizeNameLocation(NameLocation nameLocation) {
+
+        String cleanName = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getName());
+        String cleanCountry = LocationUtils.getStandardCountry(nameLocation.getCountry());
+        String countryCode = countryCodeService.getCountryCode(cleanCountry);
+        String cleanState = LocationUtils.getStandardState(cleanCountry, nameLocation.getState());
+        String cleanCity = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getCity());
+        String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
+
+        nameLocation.setName(cleanName);
+        nameLocation.setState(cleanState);
+        nameLocation.setCountry(cleanCountry);
+        nameLocation.setCountryCode(countryCode);
+        nameLocation.setCity(cleanCity);
+
+        // nameLocation.setZipcode(cleanZipCode);
+        nameLocation.setPhoneNumber(cleanPhoneNumber);
+
+    }
+
+    private void setFieldValues(E record, NameLocation nameLocation, CacheLoaderConfig config) {
         Map<String, String> fieldMap = config.getFieldMap();
         if (fieldMap == null || fieldMap.size() == 0) {
             fieldMap = defaultFieldMap;
