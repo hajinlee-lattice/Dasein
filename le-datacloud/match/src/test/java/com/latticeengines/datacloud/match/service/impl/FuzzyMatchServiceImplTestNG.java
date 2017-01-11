@@ -27,9 +27,9 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     private static final String VALID_DUNS = "085576973";
     private static final String VALID_DOMAIN = "shell.com";
-    private static final String EXPECTED_ID_DOMAIN_DUNS = "106254812";
-    private static final String EXPECTED_ID_DOMAIN = "106254812";
-    private static final String EXPECTED_ID_DUNS = "106254812";
+    private static final String EXPECTED_ID_DOMAIN_DUNS = "99285028";
+    private static final String EXPECTED_ID_DOMAIN = "98478640";
+    private static final String EXPECTED_ID_DUNS = "99285028";
 
     @Autowired
     private FuzzyMatchService service;

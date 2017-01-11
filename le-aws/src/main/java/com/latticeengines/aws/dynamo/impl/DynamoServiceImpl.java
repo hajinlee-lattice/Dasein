@@ -27,15 +27,17 @@ public class DynamoServiceImpl implements DynamoService {
     private static final Log log = LogFactory.getLog(DynamoServiceImpl.class);
 
     private AmazonDynamoDBClient client;
+    private AmazonDynamoDBClient remoteClient;
 
     private DynamoDB dynamoDB;
 
     @Autowired
-    public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint:}") String endpoint) {
+    public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
+        remoteClient = new AmazonDynamoDBClient(awsCredentials);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            client = new AmazonDynamoDBClient(awsCredentials).withEndpoint(endpoint);
+            client = new AmazonDynamoDBClient().withEndpoint(endpoint);
         } else {
             client = new AmazonDynamoDBClient(awsCredentials);
         }
@@ -50,6 +52,11 @@ public class DynamoServiceImpl implements DynamoService {
     @Override
     public AmazonDynamoDBClient getClient() {
         return client;
+    }
+
+    @Override
+    public AmazonDynamoDBClient getRemoteClient() {
+        return remoteClient;
     }
 
     @Override

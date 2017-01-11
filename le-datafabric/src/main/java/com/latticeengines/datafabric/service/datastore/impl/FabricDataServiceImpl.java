@@ -22,6 +22,7 @@ public class FabricDataServiceImpl implements FabricDataService {
 
     @Autowired
     DynamoDataServiceProvider dynamoService;
+
     @Autowired
     RedisDataServiceProvider redisService;
 

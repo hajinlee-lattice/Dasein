@@ -11,8 +11,14 @@ public class DnBWhiteCacheEntityMgrImpl extends BaseFabricEntityMgrImpl<DnBWhite
         implements DnBWhiteCacheEntityMgr {
     public DnBWhiteCacheEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService,
             String version) {
-        super(new BaseFabricEntityMgrImpl.Builder().messageService(messageService).dataService(dataService) //
-                .recordType("DnBWhiteCache" + version).topic("DnBWhiteCacheLookup") //
-                .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository("DataCloud"));
+        super(new BaseFabricEntityMgrImpl.Builder() //
+                .messageService(messageService) //
+                .dataService(dataService) //
+                .recordType("DnBWhiteCache" + version) //
+                .topic("DnBWhiteCacheLookup") //
+                .scope(TopicScope.ENVIRONMENT_PRIVATE) //
+                .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
+                .enforceRemoteDynamo(true) //
+                .repository("DataCloud"));
     }
 }

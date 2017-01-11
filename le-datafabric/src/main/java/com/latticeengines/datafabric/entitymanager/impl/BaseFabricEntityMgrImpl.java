@@ -19,13 +19,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
+import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
 import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
@@ -34,16 +34,19 @@ import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerI
 import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
+import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
-import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
 
     private static final Log log = LogFactory.getLog(BaseFabricEntityMgrImpl.class);
+
+    public static final String STORE_REDIS = "REDIS";
+    public static final String STORE_DYNAMO = "DYNAMO";
 
     @Autowired
     private FabricMessageService messageService;
@@ -75,6 +78,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     protected DynamoIndex tableIndex;
 
+    private boolean enforceRemoteDynamo;
+
     public BaseFabricEntityMgrImpl(Builder builder) {
         this.store = builder.store;
         this.repository = builder.repository;
@@ -83,6 +88,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.topic = builder.topic;
         this.scope = builder.scope;
         this.disabled = false;
+
+        this.enforceRemoteDynamo = builder.enforceRemoteDynamo;
 
         if (builder.messageService != null) {
             this.messageService = builder.messageService;
@@ -127,6 +134,9 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (store != null) {
             try {
                 dataStore = dataService.constructDataStore(store, repository, recordType, schema);
+                if (STORE_DYNAMO.endsWith(store)) {
+                    ((DynamoDataStoreImpl) dataStore).useRemoteDynamo(enforceRemoteDynamo);
+                }
             } catch (Exception e) {
                 log.error("Failed to create data store " + store);
                 disabled = true;
@@ -358,6 +368,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         private TopicScope scope = TopicScope.PRIVATE;
 
+        private boolean enforceRemoteDynamo = false;
+
         public Builder store(String store) {
             this.store = store;
             return this;
@@ -390,6 +402,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         public Builder dataService(FabricDataService dataService) {
             this.dataService = dataService;
+            return this;
+        }
+
+        public Builder enforceRemoteDynamo(boolean enforce) {
+            this.enforceRemoteDynamo = enforce;
             return this;
         }
     }

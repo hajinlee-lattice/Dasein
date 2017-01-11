@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
@@ -45,6 +46,9 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
     @Autowired
     private MatchActorSystem actorSystem;
 
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
+
     @Test(groups = {"functional", "dnb"})
     public void testDnBActorNonBatchMode() throws Exception {
         actorSystem.setBatchMode(false);
@@ -58,6 +62,7 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         msg.setInputData(matchKeyTuple);
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
+        matchTravelerContext.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         msg.setMatchTravelerContext(matchTravelerContext);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, false);

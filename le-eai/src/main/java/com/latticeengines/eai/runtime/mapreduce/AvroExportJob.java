@@ -86,8 +86,8 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             if (filename == null) {
                 throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
             }
-            Path path = new Path(filename);
-            Schema schema = AvroUtils.getSchema(config, path);
+            log.info("Extracting schema from glob: " + filename);
+            Schema schema = AvroUtils.getSchemaFromGlob(config, filename);
             AvroJob.setInputKeySchema(mrJob, schema);
 
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());

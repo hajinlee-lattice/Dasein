@@ -42,7 +42,6 @@ import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -211,7 +210,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList((Object) Long.valueOf(String.valueOf(i)), String.valueOf(i) + "@lattice-engines.com",
+            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)), String.valueOf(i) + "@lattice-engines.com",
                     "123456789");
             data.add(tuple);
         }
@@ -282,19 +281,21 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private class TestLatticeAccountEntityMgrImpl extends BaseFabricEntityMgrImpl<LatticeAccount> {
         TestLatticeAccountEntityMgrImpl() {
-            super(new BaseFabricEntityMgrImpl.Builder().messageService(null)
+            super(new BaseFabricEntityMgrImpl.Builder() //
                     .dataService(fabricDataService) //
-                    .recordType(LATTICE_ACCOUNT).topic(null) //
-                    .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
+                    .recordType(LATTICE_ACCOUNT) //
+                    .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
+                    .repository(repo));
         }
     }
 
     private class TestAccountLookupEntityMgrImpl extends BaseFabricEntityMgrImpl<AccountLookupEntry> {
         TestAccountLookupEntityMgrImpl() {
-            super(new BaseFabricEntityMgrImpl.Builder().messageService(null)
+            super(new BaseFabricEntityMgrImpl.Builder() //
                     .dataService(fabricDataService) //
-                    .recordType(ACCOUNT_LOOKUP_ENTRY).topic(null) //
-                    .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
+                    .recordType(ACCOUNT_LOOKUP_ENTRY) //
+                    .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
+                    .repository(repo));
         }
     }
 
