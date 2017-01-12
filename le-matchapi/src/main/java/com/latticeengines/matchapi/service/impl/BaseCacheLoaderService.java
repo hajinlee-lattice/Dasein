@@ -160,6 +160,9 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         processFutures(futures, 0, counter, startTime);
 
         resportResult(dirPath, startTime, counter);
+        
+        matchActorSystem.setBatchMode(false);
+        
         return counter.longValue();
     }
 
