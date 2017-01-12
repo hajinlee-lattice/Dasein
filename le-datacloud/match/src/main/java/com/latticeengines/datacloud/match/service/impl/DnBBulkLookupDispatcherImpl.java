@@ -173,6 +173,8 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getName(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCity(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getState(), ""),
-                StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCountryCode(), ""));
+                StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getZipcode(), ""),
+                StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCountryCode(), ""),
+                StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getPhoneNumber(), ""));
     }
 }

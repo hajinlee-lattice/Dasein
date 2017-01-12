@@ -191,7 +191,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 url.append("&");
             }
             if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
-                url.append("TelecommunicationNumber=");
+                url.append("TelephoneNumber=");
                 url.append(context.getInputNameLocation().getPhoneNumber());
                 url.append("&");
             }

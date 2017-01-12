@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,16 +26,21 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
         return confidenceCode != null && confidenceCode < confidenceCodeThreshold;
     }
 
+    // There are 2 kinds of DnBMatchGrade: length = 7 and length = 11
+    // DnBMatchGrade with length = 7 does not involve zipcode
     private boolean discardMatchGrade(DnBMatchGrade matchGrade) {
         if (matchGrade == null) {
             return false;
         }
-        if (StringUtils.isEmpty(matchGrade.getRawCode()) || matchGrade.getRawCode().length() < 5) {
-            return true;
-        }
-        if ("A".equals(matchGrade.getNameCode()) //
-                && ("A".equals(matchGrade.getCityCode()) || "Z".equals(matchGrade.getCityCode())) //
-                && ("A".equals(matchGrade.getStateCode()) || "Z".equals(matchGrade.getStateCode()))) {
+        if ((matchGrade.getNameCode() != null && "A".equals(matchGrade.getNameCode())) //
+                && (matchGrade.getCityCode() != null
+                        && ("A".equals(matchGrade.getCityCode()) || "Z".equals(matchGrade.getCityCode()))) //
+                && (matchGrade.getStateCode() != null
+                        && ("A".equals(matchGrade.getStateCode()) || "Z".equals(matchGrade.getStateCode()))) //
+                && (matchGrade.getPhoneCode() != null
+                        && ("A".equals(matchGrade.getPhoneCode()) || "Z".equals(matchGrade.getPhoneCode()))) //
+                && (matchGrade.getZipCodeCode() == null || "A".equals(matchGrade.getZipCodeCode())
+                        || "Z".equals(matchGrade.getZipCodeCode()))) {
             return false;
         }
         return true;

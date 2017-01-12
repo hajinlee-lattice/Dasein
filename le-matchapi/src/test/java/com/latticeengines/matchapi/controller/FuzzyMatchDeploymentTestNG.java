@@ -49,8 +49,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     // For realtime match: the first element is expected matched company name
     private static final Object[][] nameLocation = {
-            { "Benchmark Blinds", "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "United States" },
-            { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", "America" } };
+            { "Benchmark Blinds", "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "United States", "4809857961", "85233" },
+            { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", "America", "6502530000", "94043" } };
 
     // For realtime match: the first element is expected matched company name
     private static final Object[][] nameLocationIncomplete = { 
@@ -82,6 +82,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String SCENARIO_WITHOUT_STATE_CITY = "WithoutStateCity";
     private static final String SCENARIO_INCOMPLETELOCATION = "IncompleteLocation";
     private static final String SCENARIO_BULKMATCH_LOADTEST = "BulkMatchLoadTest";
+    private static final String SCENARIO_NAME_PHONE = "NamePhone";
+    private static final String SCENARIO_NAME_ZIPCODE = "NameZipCode";
 
     private static final String VALIDLOCATION_FILENAME = "BulkFuzzyMatchInput_ValidLocation.avro";
     private static final String VALIDLOCATION_INVALIDDOMAIN_FILENAME = "BulkFuzzyMatchInput_ValidLocation_InvalidDomain.avro";
@@ -92,6 +94,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String WITHOUT_STATECITY_FILENAME = "BulkFuzzyMatchInput_WithoutStateCity.avro";
     private static final String INCOMPLETELOCATION_FILENAME = "BulkFuzzyMatchInput_IncompleteLocation.avro";
     private static final String BULKMATCH_LOADTEST_FILENAME = "BulkFuzzyMatchInput_LoadTest.avro";
+    private static final String NAME_PHONE_FILENAME = "BulkFuzzyMatchInput_NamePhone.avro";
+    private static final String NAME_ZIPCODE_FILENAME = "BulkFuzzyMatchInput_NameZipCode.avro";
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -103,7 +107,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     public void testRealtimeMatchWithCache() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
-                SCENARIO_INCOMPLETELOCATION };
+                SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
         for (String scenario : scenarios) {
             MatchInput input = prepareRealtimeMatchInput(scenario, true);
             MatchOutput output = matchProxy.matchRealTime(input);
@@ -115,7 +119,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     public void testRealtimeMatchWithoutCache() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
-                SCENARIO_INCOMPLETELOCATION };
+                SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
         for (String scenario : scenarios) {
             MatchInput input = prepareRealtimeMatchInput(scenario, false);
             MatchOutput output = matchProxy.matchRealTime(input);
@@ -126,7 +130,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Test(groups = "deployment", enabled = true)
     public void testBulkMatchWithCache() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_INCOMPLETELOCATION };
+                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_INCOMPLETELOCATION,
+                SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
         for (String scenario : scenarios) {
             MatchInput input = prepareBulkMatchInput(scenario, true);
             MatchCommand command = matchProxy.matchBulk(input, podId);
@@ -214,6 +219,10 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             fields = Arrays.asList("Name", "State", "Country");
         } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_STATE_CITY)) {
             fields = Arrays.asList("Name", "Country");
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_PHONE)) {
+            fields = Arrays.asList("Name", "PhoneNumber");
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_ZIPCODE)) {
+            fields = Arrays.asList("Name", "Zipcode");
         } else {
             throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
         }
@@ -289,6 +298,20 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 d.add(loc[4]);
                 data.add(d);
             }
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_PHONE)) {
+            for (Object[] loc : nameLocation) {
+                List<Object> d = new ArrayList<Object>();
+                d.add(loc[1]);
+                d.add(loc[5]);
+                data.add(d);
+            }
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_ZIPCODE)) {
+            for (Object[] loc : nameLocation) {
+                List<Object> d = new ArrayList<Object>();
+                d.add(loc[1]);
+                d.add(loc[6]);
+                data.add(d);
+            }
         } else {
             throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
         }
@@ -302,7 +325,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         if (scenario != null
                 && (scenario.equals(SCENARIO_VALIDLOCATION) || scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN))
                 || scenario.equals(SCENARIO_WITHOUT_COUNTRY) || scenario.equals(SCENARIO_WITHOUT_STATE)
-                || scenario.equals(SCENARIO_WITHOUT_STATE_CITY)) {
+                || scenario.equals(SCENARIO_WITHOUT_STATE_CITY) || scenario.equals(SCENARIO_NAME_PHONE)
+                || scenario.equals(SCENARIO_NAME_ZIPCODE)) {
             Assert.assertEquals(output.getResult().size(), 2);
             for (int i = 0; i < output.getResult().size(); i++) {
                 OutputRecord outputRecord = output.getResult().get(i);
@@ -373,6 +397,10 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             uploadTestAVro(fullAvroDir, INCOMPLETELOCATION_FILENAME);
         } else if (scenario != null && scenario.equals(SCENARIO_BULKMATCH_LOADTEST)) {
             uploadTestAVro(fullAvroDir, BULKMATCH_LOADTEST_FILENAME);
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_PHONE)) {
+            uploadTestAVro(fullAvroDir, NAME_PHONE_FILENAME);
+        } else if (scenario != null && scenario.equals(SCENARIO_NAME_ZIPCODE)) {
+            uploadTestAVro(fullAvroDir, NAME_ZIPCODE_FILENAME);
         } else {
             throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
         }
@@ -401,7 +429,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             if (scenario != null
                     && (scenario.equals(SCENARIO_VALIDLOCATION) || scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN)
                             || scenario.equals(SCENARIO_WITHOUT_COUNTRY) || scenario.equals(SCENARIO_WITHOUT_STATE)
-                            || scenario.equals(SCENARIO_WITHOUT_STATE_CITY))) {
+                            || scenario.equals(SCENARIO_WITHOUT_STATE_CITY) || scenario.equals(SCENARIO_NAME_PHONE)
+                            || scenario.equals(SCENARIO_NAME_ZIPCODE))) {
                 Assert.assertEquals(ldcName, expectedName);
             } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_NAME)) {
                 Assert.assertNull(ldcName);
