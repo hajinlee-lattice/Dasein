@@ -36,34 +36,16 @@ angular
 
     vm.validate = function() {
 
-        if (vm.request.record.Website) {
+        if (vm.request.record.Website || vm.request.record.CompanyName) {
             vm.requiredMissingField = {};
             return true;
         }
 
-        if (vm.request.record.CompanyName ||
-            vm.request.record.City ||
-            vm.request.record.State ||
-            vm.request.record.Country) {
-            vm.requiredMissingField = {
-                CompanyName: !vm.request.record.CompanyName,
-                City: !vm.request.record.City,
-                State: !vm.request.record.State,
-                Country: !vm.request.record.Country
-            };
-
-            return _.reduce(vm.requiredMissingField, function (valid, value, field) {
-                return valid && !value;
-            }, true);
-        }
-
         vm.requiredMissingField = {
             Website: true,
-            CompanyName: true,
-            City: true,
-            State: true,
-            Country: true
+            CompanyName: true
         };
+
         return false;
     }
 });
