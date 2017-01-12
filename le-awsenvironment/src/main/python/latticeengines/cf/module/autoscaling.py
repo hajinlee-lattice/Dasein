@@ -78,6 +78,20 @@ class AutoScalingGroup(Resource):
             self.attach_tgrp(tgrp)
         return self
 
+    def hook_notifications_to_sns_topic(self, sns_topic_arn):
+        self._template["Properties"]["NotificationConfigurations"] = {
+            "NotificationTypes" : [
+                "autoscaling:EC2_INSTANCE_LAUNCH",
+                "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                "autoscaling:EC2_INSTANCE_TERMINATE",
+                "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+                "autoscaling:TEST_NOTIFICATION"
+            ],
+            "TopicARN" : sns_topic_arn
+        }
+        if isinstance(sns_topic_arn, Parameter):
+            self._template["Properties"]["NotificationConfigurations"]["TopicARN"] = sns_topic_arn.ref()
+
 
 class LaunchConfiguration(Resource):
     def __init__(self, logicalId, instance_type_ref="InstanceType"):

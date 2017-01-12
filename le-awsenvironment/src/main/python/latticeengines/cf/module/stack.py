@@ -125,12 +125,12 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, use_asgroup=True, instances=1, efs=None, ips=()):
+    def __init__(self, description, use_asgroup=True, instances=1, efs=None, ips=(), sns_topic=None):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
 
         if use_asgroup:
-            self._ecscluster, self._asgroup = self._construct(efs)
+            self._ecscluster, self._asgroup = self._construct(efs, sns_topic)
         else:
             self._asgroup = None
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
@@ -190,13 +190,13 @@ class ECSStack(Stack):
         self.add_resources(ec2s)
         return ec2s
 
-    def _construct(self, efs):
+    def _construct(self, efs, sns_topic):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        asgroup = self._create_asgroup(ecscluster, efs)
+        asgroup = self._create_asgroup(ecscluster, efs, sns_topic)
         return ecscluster, asgroup
 
-    def _create_asgroup(self, ecscluster, efs):
+    def _create_asgroup(self, ecscluster, efs, sns_topic):
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(PARAM_ECS_INSTANCE_PROFILE_ARN)
         launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs))
@@ -205,6 +205,9 @@ class ECSStack(Stack):
         asgroup.add_pool(launchconfig)
         asgroup.attach_tgrp(PARAM_TARGET_GROUP)
         asgroup.add_tag("Name", { "Ref" : "AWS::StackName" }, True)
+
+        if sns_topic is not None:
+            asgroup.hook_notifications_to_sns_topic(sns_topic)
 
         scale_up_policy = SimpleScalingPolicy("ScaleUp", asgroup, 2).cooldown(300)
         scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, 2).cooldown(300)
