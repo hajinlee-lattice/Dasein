@@ -19,7 +19,6 @@ public class DimensionAttributeProxy extends BaseRestApiProxy implements Dimensi
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public List<CategoricalDimension> getAllDimensions() {
         String url = constructUrl("/dimensions");
         List<?> dimensions = get("getAllDimensions", url, List.class);
@@ -27,7 +26,6 @@ public class DimensionAttributeProxy extends BaseRestApiProxy implements Dimensi
     }
 
     @Override
-    @SuppressWarnings({ "unchecked" })
     public List<CategoricalAttribute> getAllAttributes(Long rootId) {
         String url = constructUrl("/attributes?rootId={rootId}", rootId);
         List<?> attributes = get("getAllAttributes", url, List.class);
