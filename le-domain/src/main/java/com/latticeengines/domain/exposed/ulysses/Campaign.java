@@ -42,8 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class Campaign extends CompositeFabricEntity implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant,
-        HasInsights {
+public class Campaign extends CompositeFabricEntity implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -168,15 +167,6 @@ public class Campaign extends CompositeFabricEntity implements HasPid, HasName, 
 
     public void setInsights(List<Insight> insights) {
         this.insights = insights;
-    }
-
-    @Override
-    public List<InsightAttribute> getInsightModifiers() {
-        return null;
-    }
-
-    @Override
-    public void setInsightModifiers(List<InsightAttribute> insights) {
     }
 
     @JsonProperty("campaign_id")

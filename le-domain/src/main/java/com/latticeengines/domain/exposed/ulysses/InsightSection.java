@@ -2,11 +2,11 @@ package com.latticeengines.domain.exposed.ulysses;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
+import java.util.UUID;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class InsightSection implements HasId<String> {
@@ -24,7 +24,7 @@ public class InsightSection implements HasId<String> {
     private String tip;
 
     @JsonProperty("attributes")
-    private List<InsightAttribute> attributes = new ArrayList<>();
+    private List<String> attributes = new ArrayList<>();
 
     @JsonProperty("insight_source_type")
     private InsightSourceType insightSourceType;
@@ -65,11 +65,11 @@ public class InsightSection implements HasId<String> {
         this.insightSourceType = insightSourceType;
     }
 
-    public List<InsightAttribute> getAttributes() {
+    public List<String> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<InsightAttribute> attributes) {
+    public void setAttributes(List<String> attributes) {
         this.attributes = attributes;
     }
 
@@ -81,9 +81,5 @@ public class InsightSection implements HasId<String> {
     @Override
     public void setId(String id) {
         this.id = id;
-    }
-
-    public void addAttribute(InsightAttribute attribute) {
-        attributes.add(attribute);
     }
 }

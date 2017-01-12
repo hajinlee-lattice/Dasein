@@ -111,12 +111,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         Campaign profile = campaignEntityMgr.findByKey(customerSpace.toString() + "|PROFILE");
         InsightSection section = profile.getInsights().get(0).getInsightSections().get(0);
-//
-//        for (String amColumnId : section.getAttributes()) {
-//            AccountMasterColumn column = new AccountMasterColumn();
-//            column.setAmColumnId(amColumnId);
-//            columns.add(column);
-//        }
+
+        for (String amColumnId : section.getAttributes()) {
+            AccountMasterColumn column = new AccountMasterColumn();
+            column.setAmColumnId(amColumnId);
+            columns.add(column);
+        }
 
         selection.createAccountMasterColumnSelection(columns);
 
