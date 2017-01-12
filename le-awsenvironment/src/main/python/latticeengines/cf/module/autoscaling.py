@@ -137,7 +137,7 @@ class ScalingPolicy(Resource):
         }
 
     def cooldown(self, cooldown):
-        self._template["Cooldown"] = cooldown
+        self._template["Properties"]["Cooldown"] = cooldown
         return self
 
 class SimpleScalingPolicy(ScalingPolicy):
