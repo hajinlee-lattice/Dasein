@@ -126,6 +126,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         } catch (Exception ex) {
             log.error("Failed to load cache!", ex);
             throw new RuntimeException(ex);
+        } finally {
+            matchActorSystem.setBatchMode(false);
         }
     }
 
@@ -160,9 +162,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         processFutures(futures, 0, counter, startTime);
 
         resportResult(dirPath, startTime, counter);
-        
-        matchActorSystem.setBatchMode(false);
-        
+
         return counter.longValue();
     }
 
