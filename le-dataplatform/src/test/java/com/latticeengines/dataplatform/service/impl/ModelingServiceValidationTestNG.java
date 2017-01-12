@@ -49,7 +49,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
 
     private JdbcTemplate jdbcTemplate;
 
-    @BeforeClass(groups = { "functional.platform", "functional.production" })
+    @BeforeClass(groups = { "sqoop", "functional.production" })
     public void setup() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(Integer.parseInt(dataSourcePort)).db(dataSourceDB).dbType(dataSourceDBType)
@@ -76,7 +76,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         dbMetadataService.dropTable(jdbcTemplate, table);
     }
 
-    @Test(groups = "functional.platform")
+    @Test(groups = "sqoop")
     public void validateLoadWithInvalidCustomerName() {
         config.setCustomer("{Dell}");
         LedpException ex = null;
@@ -89,7 +89,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         Assert.assertEquals(ex.getCode(), LedpCode.LEDP_10007);
     }
 
-    @Test(groups = "functional.platform", dataProvider = "validateColumnNames")
+    @Test(groups = "sqoop", dataProvider = "validateColumnNames")
     public void validateLoadWithInvalidColumnNames(String columnName) {
         config.setCustomer("Dell");
         createTable(config.getTable(), columnName);
@@ -105,7 +105,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         dropTable(config.getTable());
     }
 
-    @Test(groups = "functional.platform")
+    @Test(groups = "sqoop")
     public void validateCreateSamples() {
         validateSamplingConfigCustomerField();
         validateSamplingConfigTableField();
@@ -152,7 +152,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         Assert.assertEquals(ex.getCode(), LedpCode.LEDP_15012);
     }
 
-    @Test(groups = "functional.platform")
+    @Test(groups = "sqoop")
     public void validateProfileData() {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setTable("{Dell}");
@@ -166,7 +166,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
         Assert.assertEquals(ex.getCode(), LedpCode.LEDP_10007);
     }
 
-    @Test(groups = "functional.platform")
+    @Test(groups = "sqoop")
     public void validateSubmitModel() {
         Model model = new Model();
         model.setCustomer("{Dell}");

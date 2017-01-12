@@ -52,8 +52,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     private static final String AVRO = "avro";
     private static final String SAMPLENAME_PREFIX = "s";
 
-    static enum DataSetType {
-        DEPIVOTED, STANDARD;
+    enum DataSetType {
+        DEPIVOTED, STANDARD
     }
 
     @Autowired

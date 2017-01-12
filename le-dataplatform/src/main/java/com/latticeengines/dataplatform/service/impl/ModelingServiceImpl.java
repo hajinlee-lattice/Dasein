@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -104,9 +105,6 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private SqoopProxy sqoopProxy;
-    
-    @Autowired
-    private SqoopJobService sqoopJobService;
 
     @Resource(name = "parallelDispatchService")
     private DispatchService dispatchService;
@@ -152,7 +150,8 @@ public class ModelingServiceImpl implements ModelingService {
             builder.setColumnsToInclude(Arrays
                     .asList(columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()).split(",")));
         }
-        return sqoopJobService.importData(builder.build());
+        String appId = sqoopProxy.importData(builder.build()).getApplicationIds().get(0);
+        return ConverterUtils.toApplicationId(appId);
 
     }
 
@@ -170,7 +169,8 @@ public class ModelingServiceImpl implements ModelingService {
                 .setDbCreds(config.getCreds()) //
                 .setCustomer(config.getCustomer())//
                 .build();
-        return sqoopJobService.exportData(exporter);
+        String appId = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
+        return ConverterUtils.toApplicationId(appId);
     }
 
     @Override

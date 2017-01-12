@@ -70,7 +70,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         return m;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         String customer = getCustomer();
@@ -90,7 +90,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
     }
 
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void loadData() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -98,7 +98,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "loadData" })
+    @Test(groups = "sqoop", dependsOnMethods = { "loadData" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setRandomSeed(123456L);
@@ -119,7 +119,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "createSamples" })
+    @Test(groups = "sqoop", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -134,7 +134,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "profile" })
+    @Test(groups = "sqoop", dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);

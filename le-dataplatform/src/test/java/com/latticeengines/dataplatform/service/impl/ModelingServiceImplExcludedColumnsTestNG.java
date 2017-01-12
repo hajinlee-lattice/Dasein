@@ -47,7 +47,7 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
 
     private LoadConfiguration loadConfig = new LoadConfiguration();
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "sqoop" })
     public void setup() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("10.41.1.250") //
@@ -63,7 +63,7 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
         loadConfig.setCustomer("ModelingServiceImplExcludedColumnsTestNG");
     }
 
-    @BeforeMethod(groups = { "functional" })
+    @BeforeMethod(groups = { "sqoop" })
     public void beforeMethod() throws Exception {
         dataPath = custmoderBaseDir + "/ModelingServiceImplExcludedColumnsTestNG/data/Play_11_TrainingSample_WithRevenue_2";
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -87,9 +87,9 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
         return AvroUtils.getSchema(yarnConfiguration, new Path(files.get(0)));
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "sqoop" })
     public void loadDataWithDefaultConfigs() throws Exception {
-        loadConfig.setProperties(new HashMap<String, String>());
+        loadConfig.setProperties(new HashMap<>());
         ApplicationId appId = modelingService.loadData(loadConfig);
         Schema schema = waitForStatusAndGetSchema(appId);
         List<Field> avroFields = schema.getFields();
@@ -103,7 +103,7 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
 
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "sqoop" })
     public void loadDataWithNoExcludedColumns() throws Exception {
         Map<String, String> properties = new HashMap<>();
         properties.put(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.name(), "false");

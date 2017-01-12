@@ -83,11 +83,11 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return false;
     }
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "sqoop")
     public void beforeMethod() {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         String customer = getCustomer();
@@ -108,7 +108,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         model = createModel(modelDef);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "sqoop")
     public void tearDown() throws Exception {
         httpServer.stop();
     }
@@ -163,14 +163,14 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
-    @Test(groups = "functional", enabled = false, expectedExceptions = LedpException.class)
+    @Test(groups = "sqoop", enabled = false, expectedExceptions = LedpException.class)
     public void loadBadTableInput() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         loadConfig.setTable("SomeBogusTableName");
         modelingService.loadData(loadConfig);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
         httpServer = new StandaloneHttpServer();
         httpServer.init();
@@ -185,7 +185,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
+    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -194,7 +194,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "load" })
+    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setRandomSeed(123456L);
@@ -219,7 +219,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "createSamples" })
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -234,7 +234,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
+    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "profileData" })
     public void reviewData() throws Exception {
         ModelReviewConfiguration config = new ModelReviewConfiguration();
         config.setCustomer(model.getCustomer());
@@ -248,7 +248,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "reviewData" })
+    @Test(groups = "sqoop", enabled = true, dependsOnMethods = { "reviewData" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
