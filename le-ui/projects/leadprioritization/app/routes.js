@@ -247,6 +247,10 @@ angular
                 pageTitle: ''
             },
             views: {
+                    resolve: {
+                        ModelData: function($q) {
+                        }
+                    },
                 "main@": {
                     controller: 'ModelRatingsController',
                     controllerAs: 'vm',
@@ -1134,17 +1138,6 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Lattice Data Cloud'
             },
-            resolve: {
-                Models: function($q, ModelStore) {
-                    var deferred = $q.defer();
-
-                    ModelStore.getModels().then(function(data) {
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
-                }
-            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/RootView.html'
@@ -1176,6 +1169,7 @@ angular
                         var old = LookupStore.get('timestamp');
 
                         LookupStore.add('elapsedTime', current - old);
+                        LookupStore.add('response', data);
 
                         deferred.resolve(data);
                     });

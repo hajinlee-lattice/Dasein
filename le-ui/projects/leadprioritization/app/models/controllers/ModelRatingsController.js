@@ -2,15 +2,16 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('ModelRatingsController', function ($stateParams,
-    ResourceUtility) {
+    ResourceUtility, ModelStore) {
 
     var vm = this;
     angular.extend(vm, {
         modelId: $stateParams.modelId,
-        tenantName: $stateParams.tenantName
+        tenantName: $stateParams.tenantName,
+        data: ModelStore.data
     });
 
-    console.log($stateParams.modelId, vm.modelId);
+    console.log(vm.data);
     vm.init = function() {
 
     }

@@ -37,6 +37,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         },
         lookupMode: EnrichmentAccountLookup !== null,
         lookupFiltered: EnrichmentAccountLookup,
+        LookupResponse: LookupStore.response,
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
         enabledManualSave: false,
         enrichments_loaded: false,
@@ -67,6 +68,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         queryText: '',
         blah: {}
     });
+
     vm.orders = {
         attribute: 'DisplayName',
         subcategory: 'toString()',
@@ -616,6 +618,33 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             vm.category = category;
 
             vm.filterEmptySubcategories();
+        }
+    }
+
+    // use to test 
+    //vm.LookupResponse.companyInfo = {"LE_COUNTRY":"USA","HEADQUARTER_PARENT_STATE_PROVINCE":"California","HEADQUARTER_PARENT_DnB_COUNTY_CODE":"684","HEADQUARTER_PARENT_DnB_COUNTRY_CODE":"805","DOMESTIC_ULTIMATE_STATE_PROV_ABR":"CA","GLOBAL_ULTIMATE_BUSINESS_NAME":"Lattice Engines, Inc.","REGISTERED_ADDRESS_INDICATOR":"N","GLOBAL_ULTIMATE_COUNTRY_NAME":"USA","DOMESTIC_ULTIMATE_CITY_NAME":"San Mateo","SALES_VOLUME_LOCAL_CURRENCY":39095607,"HEADQUARTER_PARENT_COUNTRY_NAME":"USA","LE_SIC_CODE":"73790200","LDC_Name":"Lattice Engines, Inc.","OUT_OF_BUSINESS_INDICATOR":"0","PRINCIPALS_INCLUDED_INDICATOR":"Y","IMPORT_EXPORT_AGENT_CODE":"G","LDC_Country":"USA","CLUSTER_TPS":"021","GLOBAL_ULTIMATE_DUNS_NUMBER":"028675958","DOMESTIC_ULTIMATE_STATE_PROVINCE":"California","PROPENSITY_TO_HAVE_A_LEASE_ACCOUNT":"01","PREMIUM_MARKETING_PRESCREEN":"5","GLOBAL_ULTIMATE_DnB_CITY_CODE":"007247","HEADQUARTER_PARENT_BUSINESS_NAME":"Lattice Engines, Inc.","DnB_COUNTY_CODE":"684","DnB_CONTINENT_CODE":"6","EMPLOYEES_HERE":85,"TRIPLE_PLAY_SEGMENT":"3","GLOBAL_ULTIMATE_INDICATOR":"Y","GLOBAL_ULTIMATE_POSTAL_CODE":"944044059","PROPENSITY_TO_HAVE_A_LINE_OF_CRE":"01","GLOBAL_ULTIMATE_DnB_CONTINENT_CODE":"6","DnB_STATE_PROVINCE_CODE":"009","LINE_OF_BUSINESS":"Computer related services, nec, nsk","CREDIT_CARD_RESPONSE_R":"09","DOMESTIC_ULTIMATE_DnB_COUNTRY_CODE":"805","EMPLOYEES_HERE_RELIABILITY_CODE":"2","LDC_ZipCode":"944044059","HEADQUARTER_PARENT_STATE_PROV_ABR":"CA","DIAS_CODE":"010017663","YEAR_STARTED":"2010","CHIEF_EXECUTIVE_OFFICER_TITLE":"Chief Executive Officer","LE_EMPLOYEE_RANGE":"101-200","GLOBAL_ULTIMATE_STATE_PROVINCE_NAME":"California","LE_NUMBER_OF_LOCATIONS":5,"LDC_Domain":"lattice-engines.com","DOMESTIC_ULTIMATE_DUNS_NUMBER":"028675958","SUBSIDIARY_INDICATOR":"0","LE_REVENUE_RANGE":"11-50M","HEADQUARTER_PARENT_POSTAL_CODE":"944044059","LDC_Street":"1820 Gateway Dr Ste 200","CLUSTER_CRS":"312","US_1987_SIC_1":"7379","EMPLOYEES_TOTAL":120,"LE_IS_PRIMARY_LOCATION":"Y","TELEPHONE_NUMBER":"8774600010","LAST_UPDATE_DATE":"20160929","HIERARCHY_CODE":"01","RECORD_SOURCE_CODE":"DWB","STATE_PROVINCE_ABBR":"CA","COMPOSITE_RISK_SCORE":"6","HEADQUARTER_PARENT_DUNS_NUMBER":"028675958","GLOBAL_ULTIMATE_CITY_NAME":"San Mateo","LOCAL_ACTIVITY_TYPE_CODE":"000","HEADQUARTER_PARENT_DnB_CITY_CODE":"007247","LE_PRIMARY_DUNS":"028675958","DnB_CITY_CODE":"007247","LE_INDUSTRY":"Computer Related Services, Nec","NUMBER_OF_FAMILY_MEMBERS":5,"GLOBAL_ULTIMATE_STREET_ADDRESS":"1820 Gateway Dr Ste 200","LEASE_BALANCE_RANKING_1_TO_10":"01","LDC_DUNS":"028675958","LDC_State":"California","DOMESTIC_ULTIMATE_STREET_ADDRESS":"1820 Gateway Dr Ste 200","HEADQUARTER_PARENT_STREET_ADDRESS":"1820 Gateway Dr Ste 200","TOTAL_CREDIT_BALANCE_RANKING_CR":"01","GLOBAL_ULTIMATE_DnB_COUNTRY_CODE":"805","HEADQUARTER_PARENT_DnB_CONTINENT":"6","GLOBAL_ULTIMATE_DnB_COUNTY_CODE":"684","EMPLOYEES_TOTAL_RELIABILITY_CODE":"0","SALES_VOLUME_US_DOLLARS":39095607,"SALES_VOLUME_RELIABILITY_CODE":"2","CURRENCY_CODE":"0020","CHIEF_EXECUTIVE_OFFICER_NAME":"Shashi Upadhyay","LDC_City":"San Mateo","DOMESTIC_ULTIMATE_DnB_CITY_CODE":"007247","DOMESTIC_ULTIMATE_POSTAL_CODE":"944044059","LEGAL_STATUS_CODE":"003","DnB_COUNTRY_CODE":"805","COUNTRY_ACCESS_CODE":"0001","LE_COMPANY_PHONE":"8774600010","HEADQUARTER_PARENT_CITY_NAME":"San Mateo","GLOBAL_ULTIMATE_STATE_PROV_ABR":"CA","STATUS_CODE":"1","FULL_REPORT_DATE":"20160929","LE_NAICS_CODE":"541512","DOMESTIC_ULTIMATE_BUSINESS_NAME":"Lattice Engines, Inc.","CABLE_TELEX_NUMBER":"20NMNNANP","LE_IS_PRIMARY_DOMAIN":"Y"};
+
+    vm.companyInfoFormatted = function (type, value) {
+        var value = value || '';
+        switch (type) {
+            case 'address':
+                var address = [];
+                address.push(vm.LookupResponse.companyInfo.LDC_Street);
+                address.push(vm.LookupResponse.companyInfo.LDC_City + ',');
+                address.push(vm.LookupResponse.companyInfo.LDC_State);
+                address.push(vm.LookupResponse.companyInfo.LDC_ZipCode.substr(0,4) + ',');
+                address.push(vm.LookupResponse.companyInfo.LE_COUNTRY);
+                return address.join(' ');
+            break;
+            case 'phone':
+                var phone = vm.LookupResponse.companyInfo.LE_COMPANY_PHONE;
+                return phone.replace(/\D+/g, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            break;
+            case 'range':
+                var range = value;
+                range = range.replace('-',' - ');
+                return range;
+            break;
         }
     }
 

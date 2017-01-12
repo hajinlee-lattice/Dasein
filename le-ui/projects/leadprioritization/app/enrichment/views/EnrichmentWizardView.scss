@@ -234,6 +234,67 @@
                 }
             }
         } 
+        .company {
+            .box-inner {
+                text-align: left;
+                border-top-width: 1px;
+                border-radius: 4px;
+                &.company-info {
+                    h2, h3 {
+                        font-size: 100%;
+                        font-weight: normal;
+                        text-transform: none;
+                        text-align: left;
+                    }
+                    h2 {
+                        font-size: 20px;
+                    }
+                    .details {
+                        font-size: 12px;
+                        h3 {
+                            font-weight: bold;
+                        }
+                        & > div {
+                            margin-bottom: 10px;
+                            border-top: 1px solid rgba(0,0,0,.05);
+                            padding-top: 5px;
+                            &:last-child {
+                                margin-bottom: 0;
+                            }
+                        }
+                        & > ul {
+                            & > li {
+                                @include flex-container;
+                                vertical-align: middle;
+                                padding: 2px 5px;
+                                font-weight: bold;
+                                &:nth-child(odd) {
+                                    border-top: 1px solid rgba(0,0,0,.05);
+                                    background: rgba(0,0,0,.05);
+                                }
+                                h3 {
+                                    @include flex-item(1 1 auto);
+                                }
+                            }
+                        }
+                        .sales-employees {
+                            @include flex-container;
+                            padding-top: 0;
+                            & > div {
+                                @include flex-item(1 1 auto);
+                                width: 50%;
+                                border-right: 1px solid rgba(0,0,0,.05);
+                                padding: 0 10px;
+                                padding-top: 2px;
+                                &:last-child {
+                                    border-right: none;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     } 
 
     .subcategories {

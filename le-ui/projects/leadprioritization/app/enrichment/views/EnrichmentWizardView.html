@@ -70,6 +70,40 @@
         </div>
 
         <ul class="categories" ng-class="{'has-category': vm.category}">
+            <li ng-if="!vm.category && vm.lookupMode" class="category company">
+                <div class="box-inner company-info round-box">
+                    <ul class="info">
+                        <li><h2>{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
+                        <li>
+                            {{vm.companyInfoFormatted('address')}}
+                        </li>
+                        <li><a href="tel:+1{{vm.LookupResponse.companyInfo.LE_COMPANY_PHONE}}">{{vm.companyInfoFormatted('phone')}}</a></li>
+                        <li><a href="http://{{vm.LookupResponse.companyInfo.LDC_Domain}}">{{vm.LookupResponse.companyInfo.LDC_Domain}}</a></li>
+                    </ul>
+                    <div class="details">
+                        <ul>
+                            <li><h3>Duns Number</h3> {{vm.LookupResponse.companyInfo.LDC_DUNS}}</li>
+                            <li><h3>Locations</h3> {{vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS}}</li>
+                            <li><h3>Primary Location</h3> {{vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION}}</li>
+                        </ul>
+                        <div class="industry">
+                            <h3>Industry</h3>
+                            {{vm.LookupResponse.companyInfo.LE_INDUSTRY}}
+                        </div>
+                        <div class="sales-employees">
+                            <div class="sales">
+                                <h3>Annual Sales</h3>
+                                {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_REVENUE_RANGE)}}
+                            </div>
+                            <div class="employees"> 
+                                <h3>Empolyees</h3>
+                                {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </li>
             <li ng-repeat="category in vm.categories" class="category" 
                 ng-class="{active: vm.category == category}" 
                 ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
