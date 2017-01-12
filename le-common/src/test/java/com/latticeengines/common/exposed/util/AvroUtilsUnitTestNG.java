@@ -42,7 +42,6 @@ public class AvroUtilsUnitTestNG {
         assertEquals("abc,abc,xyz", uuids);
     }
 
-    @SuppressWarnings("deprecation")
     @Test(groups = "unit", dataProvider = "avscFileProvider", enabled = true)
     public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
         URL url = ClassLoader.getSystemResource(
