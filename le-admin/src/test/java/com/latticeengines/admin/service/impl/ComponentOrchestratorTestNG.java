@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,6 +67,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
 
         orchestrator = new ComponentOrchestrator(Arrays.asList((LatticeComponent) component1, component2, component3,
                 component4, component5, component6));
+
     }
 
     @AfterMethod(groups = "functional")
@@ -154,6 +156,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void orchestrationWithDependencies() throws Exception {
+        TestContractId = "LE_" + UUID.randomUUID().toString();
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
@@ -169,8 +172,8 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         }
 
         ProductAndExternalAdminInfo prodAndExternalAminInfo = super.generateLPAandEmptyExternalAdminInfo();
-        orchestrator.orchestrateForInstall(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, properties,
-                prodAndExternalAminInfo);
+        orchestrator.orchestrateForInstall(TestContractId, TestTenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                properties, prodAndExternalAminInfo);
 
         ExecutorService executorService = Executors.newFixedThreadPool(orchestrator.components.size());
         Map<String, Future<BootstrapState>> states = new HashMap<>();
@@ -183,8 +186,8 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
                     int numOfRetries = 30;
                     BootstrapState state;
                     do {
-                        state = batonService
-                                .getTenantServiceBootstrapState(TestContractId, TestTenantId, componentName);
+                        state = batonService.getTenantServiceBootstrapState(TestContractId, TestTenantId,
+                                componentName);
                         numOfRetries--;
                         try {
                             Thread.sleep(200L);
