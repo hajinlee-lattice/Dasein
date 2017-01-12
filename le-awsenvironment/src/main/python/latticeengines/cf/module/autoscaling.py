@@ -136,12 +136,23 @@ class ScalingPolicy(Resource):
             }
         }
 
+    def cooldown(self, cooldown):
+        self._template["Cooldwn"] = cooldown
+        return self
+
 class SimpleScalingPolicy(ScalingPolicy):
     def __init__(self, logicalId, asgroup, incremental):
         assert isinstance(incremental, int)
         ScalingPolicy.__init__(self, logicalId, asgroup)
         self._template["Properties"]["AdjustmentType"] = "ChangeInCapacity"
         self._template["Properties"]["ScalingAdjustment"] = str(incremental)
+
+class ExactScalingPolicy(ScalingPolicy):
+    def __init__(self, logicalId, asgroup, size):
+        assert isinstance(size, int)
+        ScalingPolicy.__init__(self, logicalId, asgroup)
+        self._template["Properties"]["AdjustmentType"] = "ExactCapacity"
+        self._template["Properties"]["ScalingAdjustment"] = str(size)
 
 class PercentScalingPolicy(ScalingPolicy):
     def __init__(self, logicalId, asgroup, incremental):

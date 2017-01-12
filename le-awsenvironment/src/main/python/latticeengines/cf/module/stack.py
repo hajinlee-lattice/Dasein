@@ -7,7 +7,7 @@ import tempfile
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .autoscaling import AutoScalingGroup, LaunchConfiguration
+from .autoscaling import AutoScalingGroup, LaunchConfiguration, SimpleScalingPolicy, ExactScalingPolicy
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
@@ -206,7 +206,10 @@ class ECSStack(Stack):
         asgroup.attach_tgrp(PARAM_TARGET_GROUP)
         asgroup.add_tag("Name", { "Ref" : "AWS::StackName" }, True)
 
-        self.add_resources([asgroup, launchconfig])
+        scale_up_policy = SimpleScalingPolicy("ScaleUp", asgroup.ref(), 2).cooldown(300)
+        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup.ref(), 2).cooldown(300)
+
+        self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
         return asgroup
 
     @staticmethod
