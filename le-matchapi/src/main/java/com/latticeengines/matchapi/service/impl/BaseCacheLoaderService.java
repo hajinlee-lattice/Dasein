@@ -419,7 +419,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchInput.setSkipKeyResolution(true);
             matchInput.setUseDnBCache(false);
 
-            matchInput.setFuzzyMatchEnabled(true);
+            matchInput.setUseRemoteDnB(true);
 
             return matchInput;
         }

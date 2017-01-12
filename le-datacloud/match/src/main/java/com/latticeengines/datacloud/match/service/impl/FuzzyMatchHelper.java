@@ -52,9 +52,6 @@ public class FuzzyMatchHelper implements DbHelper {
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
-    @Value("${datacloud.match.fuzzymatch.decision.graph}")
-    private String fuzzyMatchGraph;
-
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
@@ -86,14 +83,16 @@ public class FuzzyMatchHelper implements DbHelper {
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
             try {
-                String decisionGraph = setDecisionGraph(context);
+                String decisionGraph = parseDecisionGraph(context);
+                boolean useRemoteDnB = shouldUseRemoteDnB(context);
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache());
+                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache(),
+                            useRemoteDnB);
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
                             context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
-                            context.getInput().getLogLevel(), context.isUseDnBCache());
+                            context.getInput().getLogLevel(), context.isUseDnBCache(), useRemoteDnB);
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {
@@ -102,18 +101,25 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
-    private String setDecisionGraph(MatchContext context) {
+    private String parseDecisionGraph(MatchContext context) {
         String decisionGraph = context.getInput().getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph) && context.getInput() != null
                 && context.getInput().getTenant() != null) {
-            CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
-            if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
-                decisionGraph = fuzzyMatchGraph;
-            } else {
-                decisionGraph = defaultGraph;
-            }
+            decisionGraph = defaultGraph;
         }
         return decisionGraph;
+    }
+
+    private boolean shouldUseRemoteDnB(MatchContext context) {
+        Boolean useRemoteDnB = context.getUseRemoteDnB();
+        if (useRemoteDnB != null) {
+            return useRemoteDnB;
+        }
+        if (context.getInput() != null && context.getInput().getTenant() != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(context.getInput().getTenant().getId());
+            return zkConfigurationService.fuzzyMatchEnabled(customerSpace);
+        }
+        return false;
     }
 
     @Override

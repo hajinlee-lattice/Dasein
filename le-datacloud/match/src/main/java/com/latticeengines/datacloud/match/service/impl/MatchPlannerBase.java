@@ -26,7 +26,6 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -57,9 +56,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private NameLocationService nameLocationService;
 
-    @Value("${datacloud.match.fuzzymatch.decision.graph}")
-    private String fuzzyMatchGraph;
-
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
@@ -75,12 +71,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     void setDecisionGraph(MatchInput input) {
         String decisionGraph = input.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
-            CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
-            if (zkConfigurationService.fuzzyMatchEnabled(customerSpace)) {
-                decisionGraph = fuzzyMatchGraph;
-            } else {
-                decisionGraph = defaultGraph;
-            }
+            decisionGraph = defaultGraph;
             input.setDecisionGraph(decisionGraph);
             log.info("Did not specify decision graph, use the default one: " + decisionGraph);
         }

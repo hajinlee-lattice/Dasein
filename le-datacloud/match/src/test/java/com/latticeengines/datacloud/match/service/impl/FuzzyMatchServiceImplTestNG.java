@@ -56,7 +56,8 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             matchRecord.setParsedDomain(VALID_DOMAIN);
 
             service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
-                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "Trilogy", Level.DEBUG, true);
+                    dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "Trilogy", Level.DEBUG, true,
+                    false);
 
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
@@ -89,7 +90,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             List<OutputRecord> matchRecords = prepareData(numRequests);
             service.callMatch(matchRecords, UUID.randomUUID().toString(),
                     dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH,
-                    Level.DEBUG, true);
+                    Level.DEBUG, true, false);
 
             boolean hasError = false;
             for (OutputRecord result : matchRecords) {
@@ -123,8 +124,7 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
 
     @DataProvider(name = "actorTestData")
     public Object[][] provideActorTestData() {
-        return new Object[][] {
-                { 1000, true }, // 1000 match in batch mode
+        return new Object[][] { { 1000, true }, // 1000 match in batch mode
                 { 100, false }, // 100 match in realtime mode
         };
     }

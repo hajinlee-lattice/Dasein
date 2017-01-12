@@ -26,6 +26,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private Double totalTravelTime;
     private Boolean isBatchMode = false;
 
+    // runtime flags
+    private boolean useRemoteDnB = false;
     private boolean useDnBCache = true;
 
     public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
@@ -131,6 +133,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setUseDnBCache(boolean useDnBCache) {
         this.useDnBCache = useDnBCache;
+    }
+
+    public boolean isUseRemoteDnB() {
+        return useRemoteDnB;
+    }
+
+    public void setUseRemoteDnB(boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
 
     @Override

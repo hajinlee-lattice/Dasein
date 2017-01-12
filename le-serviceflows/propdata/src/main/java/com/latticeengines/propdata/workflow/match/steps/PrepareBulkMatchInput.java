@@ -178,7 +178,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             jobConfiguration.setThreadPoolSize(getConfiguration().getRealTimeThreadPoolSize());
         }
         jobConfiguration.setUseDnBCache(getConfiguration().getUseDnBCache());
-        jobConfiguration.setFuzzyMatchEnabled(getConfiguration().isFuzzyMatchEnabled());
+        jobConfiguration.setUseRemoteDnB(getConfiguration().isUseRemoteDnB());
         return jobConfiguration;
     }
 

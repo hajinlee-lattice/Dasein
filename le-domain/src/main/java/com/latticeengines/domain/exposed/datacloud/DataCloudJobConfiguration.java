@@ -60,8 +60,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private Boolean useRealTimeProxy = Boolean.FALSE;
     @JsonProperty("use_dnb_cache")
     private boolean useDnBCache = true;
-    @JsonProperty("fuzzy_match_enabled")
-    private boolean fuzzyMatchEnabled;
+    @JsonProperty("use_remote_dnb")
+    private Boolean useRemoteDnB;
 
 
     public String getHdfsPodId() {
@@ -249,12 +249,12 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.useDnBCache = useDnBCache;
     }
 
-    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
-        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    public void setUseRemoteDnB(Boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
     
-    public boolean isFuzzyMatchEnabled() {
-        return fuzzyMatchEnabled;
+    public Boolean getUseRemoteDnB() {
+        return useRemoteDnB;
     }
 
     @Override

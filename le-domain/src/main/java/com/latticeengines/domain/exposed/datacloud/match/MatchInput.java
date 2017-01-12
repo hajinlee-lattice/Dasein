@@ -71,7 +71,7 @@ public class MatchInput implements Fact, Dimension {
     // if not provided, first check DnB cache before going to DnB api
     private boolean useDnBCache = true;
 
-    private boolean fuzzyMatchEnabled;
+    private Boolean useRemoteDnB;
 
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
@@ -384,13 +384,13 @@ public class MatchInput implements Fact, Dimension {
     }
 
     @JsonProperty("FuzzyMatchEnabled")
-    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
-        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    public void setUseRemoteDnB(Boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
 
     @JsonProperty("FuzzyMatchEnabled")
-    public boolean isFuzzyMatchEnabled() {
-        return fuzzyMatchEnabled;
+    public Boolean getUseRemoteDnB() {
+        return useRemoteDnB;
     }
 
     @Override

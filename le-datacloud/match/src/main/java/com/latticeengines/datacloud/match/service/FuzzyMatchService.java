@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 public interface FuzzyMatchService {
 
     <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid, String dataCloudVersion,
-            String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception;
+            String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB) throws Exception;
 
     <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception;
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB) throws Exception;
 
     <T extends OutputRecord> void fetchIdResult(List<T> matchRecords, Level logLevel, List<Future<Object>> matchFutures)
             throws Exception;

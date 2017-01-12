@@ -69,7 +69,7 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
 
     private boolean useDnBCache = true;
 
-    private boolean fuzzyMatchEnabled;
+    private Boolean useRemoteDnB;
 
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
@@ -295,13 +295,13 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     }
 
     @JsonProperty("fuzzy_match_enabled")
-    public boolean isFuzzyMatchEnabled() {
-        return fuzzyMatchEnabled;
+    public Boolean isUseRemoteDnB() {
+        return useRemoteDnB;
     }
 
     @JsonProperty("fuzzy_match_enabled")
-    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
-        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    public void setUseRemoteDnB(Boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
 
     

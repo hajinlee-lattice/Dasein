@@ -13,12 +13,6 @@ import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
@@ -30,6 +24,12 @@ import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
@@ -43,20 +43,23 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception {
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB)
+            throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache);
+                decisionGraph, logLevel, useDnBCache, useRemoteDnB);
 
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
 
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) throws Exception {
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB)
+            throws Exception {
         logLevel = setLogLevel(logLevel);
-        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache);
+        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
+                useRemoteDnB);
     }
 
     @Override
@@ -92,7 +95,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
-            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache) {
+            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
+            boolean useRemoteDnB) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
@@ -109,6 +113,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     travelContext.setDecisionGraph(decisionGraph);
                 }
                 travelContext.setUseDnBCache(useDnBCache);
+                travelContext.setUseRemoteDnB(useRemoteDnB);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
             }
         }

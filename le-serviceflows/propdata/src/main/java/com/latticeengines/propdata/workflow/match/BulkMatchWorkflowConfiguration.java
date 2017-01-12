@@ -51,7 +51,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setRealTimeProxyUrl(matchInput.getRealTimeProxyUrl());
             prepareConfig.setRealTimeThreadPoolSize(matchInput.getRealTimeThreadPoolSize());
             prepareConfig.setUseDnBCache(matchInput.getUseDnBCache());
-            prepareConfig.setFuzzyMatchEnabled(matchInput.isFuzzyMatchEnabled());
+            prepareConfig.setUseRemoteDnB(matchInput.getUseRemoteDnB());
 
             return this;
         }

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import scala.concurrent.Future;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
@@ -18,6 +16,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+
+import scala.concurrent.Future;
 
 public class MatchContext implements Fact, Dimension {
 
@@ -47,7 +47,7 @@ public class MatchContext implements Fact, Dimension {
 
     @JsonIgnore
     private List<Future<Object>> futuresResult;
-    private boolean fuzzyMatchEnabled;
+    private Boolean useRemoteDnB;
 
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
@@ -197,12 +197,12 @@ public class MatchContext implements Fact, Dimension {
         this.useDnBCache = useDnBCache;
     }
 
-    public void setFuzzyMatchEnabled(boolean fuzzyMatchEnabled) {
-        this.fuzzyMatchEnabled = fuzzyMatchEnabled;
+    public void setUseRemoteDnB(Boolean useRemoteDnB) {
+        this.useRemoteDnB = useRemoteDnB;
     }
     
-    public boolean isFuzzyMatchEnabled() {
-        return fuzzyMatchEnabled;
+    public Boolean getUseRemoteDnB() {
+        return useRemoteDnB;
     }
 
     @JsonIgnore

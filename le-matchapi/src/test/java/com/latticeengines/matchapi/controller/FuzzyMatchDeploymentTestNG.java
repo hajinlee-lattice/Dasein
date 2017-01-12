@@ -341,7 +341,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setDataCloudVersion("2.0.1");
         input.setBulkOnly(false);
         input.setUseDnBCache(useDnBCache);
-        input.setFuzzyMatchEnabled(true);
+        input.setUseRemoteDnB(true);
         input.setCustomSelection(prepareColumnSelection());
         input.setFields(prepareFields(scenario));
         input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));

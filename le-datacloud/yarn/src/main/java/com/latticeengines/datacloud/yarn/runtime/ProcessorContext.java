@@ -67,17 +67,14 @@ public class ProcessorContext {
     @Value("${datacloud.match.bulk.group.size}")
     private Integer sqlGroupSize;
 
-    @Value("${datacloud.match.fuzzymatch.decision.graph}")
-    private String fuzzyMatchGraph;
-
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
     @Value("${datacloud.yarn.actors.num.threads}")
-    private int fuzzyThreadPool;
+    private int actorsThreadPool;
 
     @Value("${datacloud.yarn.actors.group.size}")
-    private int fuzzyGroupSize;
+    private int actorsGroupSize;
 
     private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
 
@@ -113,7 +110,7 @@ public class ProcessorContext {
 
     private DataCloudProcessor dataCloudProcessor;
 
-    private boolean fuzzyMatchEnabled;
+    private boolean useRemoteDnB;
 
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
@@ -223,8 +220,8 @@ public class ProcessorContext {
         return timeOut;
     }
 
-    public boolean isFuzzyMatchEnabled() {
-        return fuzzyMatchEnabled;
+    public boolean isUseRemoteDnB() {
+        return useRemoteDnB;
     }
 
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
@@ -255,15 +252,15 @@ public class ProcessorContext {
         customizedSelection = jobConfiguration.getCustomizedSelection();
 
         decisionGraph = jobConfiguration.getDecisionGraph();
-        fuzzyMatchEnabled = zkConfigurationService.fuzzyMatchEnabled(space) || jobConfiguration.isFuzzyMatchEnabled();
-        fuzzyMatchEnabled = fuzzyMatchEnabled && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
-        log.info("Fuzzy match enabled ? " + fuzzyMatchEnabled);
+        if (jobConfiguration.getUseRemoteDnB() != null) {
+            useRemoteDnB = jobConfiguration.getUseRemoteDnB();
+        } else {
+            useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
+        }
+        useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+        log.info("Use remote DnB ? " + useRemoteDnB);
         if (StringUtils.isEmpty(decisionGraph)) {
-            if (fuzzyMatchEnabled) {
-                decisionGraph = fuzzyMatchGraph;
-            } else {
-                decisionGraph = defaultGraph;
-            }
+            decisionGraph = defaultGraph;
             log.info("Overwrite decision graph be default value " + decisionGraph);
         }
         log.info("Use decision graph " + decisionGraph);
@@ -271,7 +268,7 @@ public class ProcessorContext {
         keyMap = jobConfiguration.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
-        if (fuzzyMatchEnabled) {
+        if (useRemoteDnB) {
             timeOut = timeOut * 2;
         }
         log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
@@ -288,9 +285,9 @@ public class ProcessorContext {
         Integer groupSize = jobConfiguration.getGroupSize();
         numThreads = jobConfiguration.getThreadPoolSize();
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
-            groupSize = fuzzyGroupSize;
-            numThreads = fuzzyThreadPool;
-            if (fuzzyMatchEnabled) {
+            groupSize = actorsGroupSize;
+            numThreads = actorsThreadPool;
+            if (useRemoteDnB) {
                 groupSize = 10_000;
             }
         } else {

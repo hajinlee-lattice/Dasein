@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
@@ -78,11 +79,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        if (request.getMatchTravelerContext().isUseDnBCache()) {
+        MatchTraveler traveler = request.getMatchTravelerContext();
+        if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
             if (whiteCache != null) {
-                if (isValidDuns(whiteCache.getDuns(), request.getMatchTravelerContext().getDataCloudVersion())) {
+                if (isValidDuns(whiteCache.getDuns(), traveler.getDataCloudVersion())) {
                     context.copyResultFromWhiteCache(whiteCache);
                     dnbMatchResultValidator.validate(context);
                     context.setDuration(System.currentTimeMillis() - startTime);
@@ -111,11 +113,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 return context;
             }
         }
-        context = dnbRealTimeLookupService.realtimeEntityLookup(context);
-        dnbCacheService.addCache(context);
-        List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
-        dnBMatchHistories.add(new DnBMatchHistory(context));
-        writeDnBMatchHistory(dnBMatchHistories);
+        if (traveler.isUseRemoteDnB()) {
+            context = dnbRealTimeLookupService.realtimeEntityLookup(context);
+            dnbCacheService.addCache(context);
+            List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
+            dnBMatchHistories.add(new DnBMatchHistory(context));
+            writeDnBMatchHistory(dnBMatchHistories);
+        }
         return context;
     }
 
@@ -136,11 +140,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLookupRequestId(lookupRequestId);
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
-        if (request.getMatchTravelerContext().isUseDnBCache()) {
+        MatchTraveler traveler = request.getMatchTravelerContext();
+        if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
             if (whiteCache != null) {
-                if (isValidDuns(whiteCache.getDuns(), request.getMatchTravelerContext().getDataCloudVersion())) {
+                if (isValidDuns(whiteCache.getDuns(), traveler.getDataCloudVersion())) {
                     context.copyResultFromWhiteCache(whiteCache);
                     dnbMatchResultValidator.validate(context);
                     context.setDuration(System.currentTimeMillis() - startTime);
@@ -171,11 +176,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         }
 
-        saveReq(lookupRequestId, returnAddress, request);
-        comingContexts.offer(context);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Accepted request " + context.getLookupRequestId());
+        if (traveler.isUseRemoteDnB()) {
+            saveReq(lookupRequestId, returnAddress, request);
+            comingContexts.offer(context);
+            if (log.isDebugEnabled()) {
+                log.debug("Accepted request " + context.getLookupRequestId());
+            }
+        } else {
+            Long startTime = System.currentTimeMillis();
+            context.setDuration(System.currentTimeMillis() - startTime);
+            sendResponse(lookupRequestId, context, returnAddress);
         }
     }
 
