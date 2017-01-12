@@ -206,8 +206,8 @@ class ECSStack(Stack):
         asgroup.attach_tgrp(PARAM_TARGET_GROUP)
         asgroup.add_tag("Name", { "Ref" : "AWS::StackName" }, True)
 
-        scale_up_policy = SimpleScalingPolicy("ScaleUp", asgroup.ref(), 2).cooldown(300)
-        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup.ref(), 2).cooldown(300)
+        scale_up_policy = SimpleScalingPolicy("ScaleUp", asgroup, 2).cooldown(300)
+        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, 2).cooldown(300)
 
         self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
         return asgroup
