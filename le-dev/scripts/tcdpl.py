@@ -69,8 +69,7 @@ def deployApp(app, modules):
         raise IOError("Cannot find war file for app " + app)
 
     webappName = 'oauth' if (app == 'oauth2') else app
-    webappName = 'ulysses' if (app == 'job') else webappName
-    webappWar = 'ROOT.war' if (app != 'job') else 'job.war'
+    webappWar = 'ROOT.war'
     webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName)
 
     if not os.path.isdir(webappDir):

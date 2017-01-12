@@ -144,4 +144,16 @@
         </Engine>
     </Service>
 
+    <Service name="Job">
+        <Connector port="8077" protocol="HTTP/1.1" executor="tomcatThreadPool" connectionTimeout="20000"/>
+        <Engine name="JobEngine" defaultHost="localhost">
+            <Realm className="org.apache.catalina.realm.LockOutRealm">
+                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+                       resourceName="UserDatabase"/>
+            </Realm>
+            <Host name="localhost" appBase="webapps/job" unpackWARs="false" autoDeploy="true"
+                  undeployOldVersions="true"/>
+        </Engine>
+    </Service>
+
 </Server>
