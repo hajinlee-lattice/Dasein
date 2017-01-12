@@ -95,6 +95,9 @@ class AwsEnvironment:
     def ssl_certificate_arn(self):
         return self._props['ssl.certificate.arn']
 
+    def scaling_sns_topic_arn(self):
+        return self._props['scaling.sns.topic.arn']
+
     def consul_server(self):
         return self._props['consul.server']
 
