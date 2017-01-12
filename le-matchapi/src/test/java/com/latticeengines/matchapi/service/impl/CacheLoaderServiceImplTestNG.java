@@ -17,6 +17,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
+import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.matchapi.service.CacheLoaderConfig;
 import com.latticeengines.matchapi.service.CacheLoaderService;
@@ -39,6 +40,9 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     @Autowired
     private DnBCacheService dnbCacheService;
+
+    @Autowired
+    private NameLocationService nameLocationService;
 
     @Test(groups = "deployment", enabled = true)
     public void startLoadWithDuns() {
@@ -84,7 +88,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocation.setCountry("USA");
         nameLocation.setZipcode("917374428");
         nameLocation.setPhoneNumber(null);
-        ((AvroCacheLoaderServiceImpl) cacheLoaderService).normalizeNameLocation(nameLocation);
+        nameLocationService.normalize(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
@@ -128,7 +132,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocation.setCountry("USA");
         nameLocation.setZipcode(null);
         nameLocation.setPhoneNumber(null);
-        ((AvroCacheLoaderServiceImpl) cacheLoaderService).normalizeNameLocation(nameLocation);
+        nameLocationService.normalize(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);

@@ -32,10 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.common.exposed.util.PhoneNumberUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
@@ -45,6 +42,7 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -87,7 +85,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     protected MatchExecutor matchExecutor;
 
     @Autowired
-    private CountryCodeService countryCodeService;
+    private NameLocationService nameLocationService;
 
     @Autowired
     private MatchActorSystem matchActorSystem;
@@ -297,7 +295,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
 
         NameLocation nameLocation = new NameLocation();
         setFieldValues(record, nameLocation, config);
-        normalizeNameLocation(nameLocation);
+        nameLocationService.normalize(nameLocation);
         matchContext.setInputNameLocation(nameLocation);
 
         matchContext.setDuns(dunsStr);
@@ -312,26 +310,6 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchContext.setMatchGrade(defaultMatchGrade);
         }
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
-    }
-
-    protected void normalizeNameLocation(NameLocation nameLocation) {
-
-        String cleanName = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getName());
-        String cleanCountry = LocationUtils.getStandardCountry(nameLocation.getCountry());
-        String countryCode = countryCodeService.getCountryCode(cleanCountry);
-        String cleanState = LocationUtils.getStandardState(cleanCountry, nameLocation.getState());
-        String cleanCity = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getCity());
-        String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
-
-        nameLocation.setName(cleanName);
-        nameLocation.setState(cleanState);
-        nameLocation.setCountry(cleanCountry);
-        nameLocation.setCountryCode(countryCode);
-        nameLocation.setCity(cleanCity);
-
-        // nameLocation.setZipcode(cleanZipCode);
-        nameLocation.setPhoneNumber(cleanPhoneNumber);
-
     }
 
     private void setFieldValues(E record, NameLocation nameLocation, CacheLoaderConfig config) {

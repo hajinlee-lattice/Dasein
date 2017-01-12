@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.common.exposed.util.PhoneNumberUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -25,6 +24,7 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -53,6 +53,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
+    
+    @Autowired
+    private NameLocationService nameLocationService;
 
     @Value("${datacloud.match.fuzzymatch.decision.graph}")
     private String fuzzyMatchGraph;
@@ -254,8 +257,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     originalName = (String) inputRecord.get(namePos);
                 }
                 if (StringUtils.isNotEmpty(originalName)) {
-                    String cleanName = com.latticeengines.common.exposed.util.StringUtils
-                            .getStandardString(originalName);
 
                     String originalCountry = null;
                     if (keyPositionMap.containsKey(MatchKey.Country)) {
@@ -267,9 +268,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     if (StringUtils.isEmpty(originalCountry)) {
                         originalCountry = LocationUtils.USA;
                     }
-                    String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
-                    String countryCode = countryCodeService.getCountryCode(cleanCountry);
-
                     String originalState = null;
                     if (keyPositionMap.containsKey(MatchKey.State)) {
                         List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
@@ -277,42 +275,34 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                             originalState = (String) inputRecord.get(statePos);
                         }
                     }
-                    String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
-
                     String originalCity = null;
                     if (keyPositionMap.containsKey(MatchKey.City)) {
                         for (Integer cityPos : keyPositionMap.get(MatchKey.City)) {
                             originalCity = (String) inputRecord.get(cityPos);
                         }
                     }
-                    String cleanCity = com.latticeengines.common.exposed.util.StringUtils
-                            .getStandardString(originalCity);
-
                     String originalZipCode = null;
                     if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
                         for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
                             originalZipCode = (String) inputRecord.get(pos);
                         }
                     }
-                    String cleanZipCode = originalZipCode;
-
                     String originalPhoneNumber = null;
                     if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
                         for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
                             originalPhoneNumber = (String) inputRecord.get(pos);
                         }
                     }
-                    String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(originalPhoneNumber, countryCode);
-
+                    
                     NameLocation nameLocation = new NameLocation();
-                    nameLocation.setName(cleanName);
-                    nameLocation.setState(cleanState);
-                    nameLocation.setCountry(cleanCountry);
-                    nameLocation.setCountryCode(countryCode);
-                    nameLocation.setCity(cleanCity);
-                    nameLocation.setZipcode(cleanZipCode);
-                    nameLocation.setPhoneNumber(cleanPhoneNumber);
+                    nameLocation.setName(originalName);
+                    nameLocation.setState(originalState);
+                    nameLocation.setCountry(originalCountry);
+                    nameLocation.setCity(originalCity);
+                    nameLocation.setZipcode(originalZipCode);
+                    nameLocation.setPhoneNumber(originalPhoneNumber);
 
+                    nameLocationService.normalize(nameLocation);
                     record.setParsedNameLocation(nameLocation);
                     nameLocationSet.add(nameLocation);
                 }
