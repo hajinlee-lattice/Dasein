@@ -42,7 +42,6 @@ public class FuzzyMatchHistory extends BaseMeasurement<MatchTraveler, MatchTrave
         return RetentionPolicyImpl.ONE_MONTH;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<MetricStore> getMetricStores() {
         return Arrays.<MetricStore>asList(MetricStoreImpl.INFLUX_DB, MetricStoreImpl.SPLUNK_LOG);

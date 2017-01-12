@@ -19,7 +19,6 @@ public class AccountMasterColumnDaoImpl extends BaseDaoWithAssignedSessionFactor
         return AccountMasterColumn.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void deleteByIdByDataCloudVersion(String amColumnId, String dataCloudVersion) {
         Session session = getSessionFactory().getCurrentSession();

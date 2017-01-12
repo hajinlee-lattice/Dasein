@@ -37,7 +37,6 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
         return log;
     }
 
-    @SuppressWarnings("unchecked")
     protected Class<? extends TransformerConfig> getConfigurationClass() {
         return TransformerConfig.class;
     }

@@ -30,7 +30,6 @@ public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEn
         return attributeDao.findAllByField("parentId", parentId);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public CategoricalAttribute getRootAttribute(String source, String dimension) {

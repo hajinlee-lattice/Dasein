@@ -263,7 +263,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         log.info("Loaded " + newCodeBookLookup.size() + " columns in bit code lookup for version " + version);
     }
 
-    @SuppressWarnings("unchecked")
     private void loadCaches() {
         ConcurrentMap<String, ConcurrentMap<String, BitCodeBook>> codeBookMapBak = completeCodeBookCache;
         ConcurrentMap<String, ConcurrentMap<String, String>> codeBookLookupBak = codeBookLookup;
