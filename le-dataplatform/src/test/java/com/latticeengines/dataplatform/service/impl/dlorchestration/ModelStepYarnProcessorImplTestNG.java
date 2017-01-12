@@ -37,7 +37,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         return false;
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs("Nutanix");
         cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
@@ -62,7 +62,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void testExecuteYarnStepsFeatureThreshold() throws Exception {
         cleanUpHdfs("Nutanix");
         cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
