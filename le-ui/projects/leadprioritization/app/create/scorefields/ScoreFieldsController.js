@@ -16,11 +16,10 @@ angular
             'Email': true,
             'CompanyName': true
         },
-        FileHeaders: FileHeaders.slice(),
         standardFieldMappings: {},
         additionalFieldMappings: {},
-        FormValidated: true,
         initialized: false,
+        FormValidated: true,
         NextClicked: false,
         ignoredFieldLabel: '-- Unmapped Field --'
     });
@@ -81,7 +80,7 @@ angular
             }
         }
 
-        vm.FileHeaders.forEach(function(userField, index) {
+        FileHeaders.forEach(function(userField, index) {
             if (!mappedSet[userField]) {
                 vm.AvailableFields.push(userField);
             }
