@@ -10,10 +10,10 @@
                 <hr />
 
                 <div class="section-body with-padding">
-                    <div class="form-group" ng-if="vm.EnableFuzzyMatch">
+                    <div class="form-group">
                         <div class="toggle-check">
                             <label>
-                                <input 
+                                <input
                                     type="checkbox"
                                     name="enforceFuzzyMatch"
                                     ng-checked="vm.params.enforceFuzzyMatch"
@@ -32,14 +32,14 @@
                                     </div>
                                 </span>
                             </label>
-                        </div>          
+                        </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_WEBSITE') }}</label>
-                        <input 
-                            type="text" 
-                            class="form-control required" 
+                        <input
+                            type="text"
+                            class="form-control required"
                             ng-class="{'lookup-required': vm.requiredMissingField.Website}"
                             name="Website"
                             ng-model="vm.request.record.Domain"
@@ -50,49 +50,49 @@
                     <!--div class="row">
                         <div class="columns six form-group">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_DUNSNUMBER') }}</label>
-                            <input 
-                                type="text" 
-                                class="form-control required" 
+                            <input
+                                type="text"
+                                class="form-control required"
                                 name="DUNS"
                                 ng-model="vm.request.record.DUNS"
                                 placeholder="" />
                         </div>
-                        
+
                         <div class="columns six offset-six form-group align-right">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_LATTICEID') }}</label>
-                            <input 
-                                type="text" 
-                                class="form-control required" 
+                            <input
+                                type="text"
+                                class="form-control required"
                                 name="Id"
                                 ng-model="vm.request.record.Id"
                                 placeholder="" />
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_EMAIL') }}</label>
-                        <input 
-                            type="text" 
-                            class="form-control required" 
+                        <input
+                            type="text"
+                            class="form-control required"
                             name="Email"
                             ng-model="vm.request.record.Email"
                             placeholder="Ex: anything@domain.com" />
                     </div-->
-                    
+
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_COMPANYNAME') }}</label>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             class="form-control required"
                             ng-class="{'lookup-required': vm.requiredMissingField.CompanyName}"
                             name="CompanyName"
                             ng-model="vm.request.record.CompanyName"
                             placeholder="" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CITY') }}</label>
-                        <input 
+                        <input
                             type="text"
                             class="form-control"
                             ng-class="{'lookup-required': vm.requiredMissingField.City}"
@@ -104,20 +104,20 @@
                     <div class="row">
                         <div class="columns six form-group">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_STATE') }}</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 class="form-control"
                                 ng-class="{'lookup-required': vm.requiredMissingField.State}"
                                 name="State"
                                 ng-model="vm.request.record.State"
                                 placeholder="" />
                         </div>
-                        
+
                         <div class="columns six offset-six form-group align-right">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_ZIP') }}</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                class="form-control"
                                 name="Zip"
                                 ng-model="vm.request.record.Zip"
                                 placeholder="Ex: 12345" />
@@ -127,7 +127,7 @@
                     <div class="row">
                         <div class="columns six form-group">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_COUNTRY') }}</label>
-                            <input 
+                            <input
                                 type="text"
                                 class="form-control"
                                 ng-class="{'lookup-required': vm.requiredMissingField.Country}"
@@ -135,12 +135,12 @@
                                 ng-model="vm.request.record.Country"
                                 placeholder="" />
                         </div>
-                        
+
                         <div class="columns six offset-six form-group align-right">
                             <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_PHONE') }}</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
+                            <input
+                                type="text"
+                                class="form-control"
                                 name="PhoneNumber"
                                 ng-model="vm.request.record.PhoneNumber"
                                 placeholder="Ex: 999-555-1234" />
@@ -180,18 +180,18 @@
                 </div-->
 
                 <hr />
-                
+
                 <div class="section-actions container row form-actions">
                     <div class="pull-left">
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="button white-button block-button"
                             ui-sref="home.data-cloud">
                           {{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CANCEL') }}</button>
                     </div>
                     <div class="pull-right">
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             ng-click="vm.next()"
                             class="button blue-button block-button"
                             ng-disabled="!vm.validate()">

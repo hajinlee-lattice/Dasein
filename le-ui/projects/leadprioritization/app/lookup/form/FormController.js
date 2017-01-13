@@ -13,13 +13,6 @@ angular
         ResourceUtility: ResourceUtility
     });
 
-    FeatureFlagService.GetAllFlags().then(function(result) {
-        var flags = FeatureFlagService.Flags();
-        //LookupStore.setParam('enforceFuzzyMatch', FeatureFlagService.FlagIsEnabled(flags.ENABLE_FUZZY_MATCH));
-        vm.params = LookupStore.get('params');
-        vm.EnableFuzzyMatch = vm.params.enforceFuzzyMatch;
-    });
-
     vm.cancel = function() {
         $state.go('home.enrichments');
     }
@@ -30,7 +23,7 @@ angular
         LookupStore.add('timestamp', timestamp);
         LookupStore.add('request', vm.request);
         LookupStore.add('params', vm.params);
-        
+
         $state.go('home.lookup.tabs');
     }
 
