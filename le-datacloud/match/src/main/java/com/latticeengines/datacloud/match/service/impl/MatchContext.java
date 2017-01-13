@@ -41,6 +41,7 @@ public class MatchContext implements Fact, Dimension {
     private Map<String, String> latticeIdToLookupIdMap;
 
     private boolean useDnBCache;
+    private boolean logDnBBulkResult;
 
     @JsonIgnore
     private String contextId;
@@ -203,6 +204,14 @@ public class MatchContext implements Fact, Dimension {
     
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
+    }
+
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     @JsonIgnore

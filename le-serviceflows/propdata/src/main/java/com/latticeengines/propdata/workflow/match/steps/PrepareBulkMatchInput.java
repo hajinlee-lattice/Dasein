@@ -179,6 +179,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         }
         jobConfiguration.setUseDnBCache(getConfiguration().getUseDnBCache());
         jobConfiguration.setUseRemoteDnB(getConfiguration().isUseRemoteDnB());
+        jobConfiguration.setLogDnBBulkResult(getConfiguration().getLogDnBBulkResult());
         return jobConfiguration;
     }
 

@@ -70,8 +70,12 @@ public class MatchInput implements Fact, Dimension {
 
     // if not provided, first check DnB cache before going to DnB api
     private boolean useDnBCache = true;
-
+    // Flag useRemoteDnB decides whether go to DnB api.
+    // Purpose of this flag: If feature of using fuzzy match is turned off, DnB
+    // cache is used to do exact location lookup, but DnB api is not called
     private Boolean useRemoteDnB;
+    // Flag logDnBBulkResult decides whether DnB bulk match result is logged
+    private boolean logDnBBulkResult = false;
 
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
@@ -391,6 +395,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("FuzzyMatchEnabled")
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
+    }
+
+    @JsonProperty("LogDnBBulkResult")
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    @JsonProperty("LogDnBBulkResult")
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     @Override

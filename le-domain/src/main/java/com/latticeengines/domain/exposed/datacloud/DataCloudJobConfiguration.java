@@ -62,6 +62,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private boolean useDnBCache = true;
     @JsonProperty("use_remote_dnb")
     private Boolean useRemoteDnB;
+    @JsonProperty("log_dnb_bulk_Result")
+    private boolean logDnBBulkResult = false;
 
 
     public String getHdfsPodId() {
@@ -255,6 +257,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
+    }
+
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     @Override

@@ -43,23 +43,25 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB)
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
+            boolean logDnBBulkResult)
             throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache, useRemoteDnB);
+                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult);
 
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
 
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
-            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB)
+            String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
+            boolean logDnBBulkResult)
             throws Exception {
         logLevel = setLogLevel(logLevel);
         return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
-                useRemoteDnB);
+                useRemoteDnB, logDnBBulkResult);
     }
 
     @Override
@@ -96,7 +98,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
             String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
-            boolean useRemoteDnB) {
+            boolean useRemoteDnB, boolean logDnBBulkResult) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
@@ -114,6 +116,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 }
                 travelContext.setUseDnBCache(useDnBCache);
                 travelContext.setUseRemoteDnB(useRemoteDnB);
+                travelContext.setLogDnBBulkResult(logDnBBulkResult);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
             }
         }

@@ -33,12 +33,9 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
             return false;
         }
         if ((matchGrade.getNameCode() != null && "A".equals(matchGrade.getNameCode())) //
-                && (matchGrade.getCityCode() != null
-                        && ("A".equals(matchGrade.getCityCode()) || "Z".equals(matchGrade.getCityCode()))) //
-                && (matchGrade.getStateCode() != null
-                        && ("A".equals(matchGrade.getStateCode()) || "Z".equals(matchGrade.getStateCode()))) //
-                && (matchGrade.getPhoneCode() != null
-                        && ("A".equals(matchGrade.getPhoneCode()) || "Z".equals(matchGrade.getPhoneCode()))) //
+                && ("A".equals(matchGrade.getCityCode()) || "Z".equals(matchGrade.getCityCode())) //
+                && ("A".equals(matchGrade.getStateCode()) || "Z".equals(matchGrade.getStateCode())) //
+                && ("A".equals(matchGrade.getPhoneCode()) || "Z".equals(matchGrade.getPhoneCode())) //
                 && (matchGrade.getZipCodeCode() == null || "A".equals(matchGrade.getZipCodeCode())
                         || "Z".equals(matchGrade.getZipCodeCode()))) {
             return false;

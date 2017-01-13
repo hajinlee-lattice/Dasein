@@ -418,8 +418,8 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchInput.setDataCloudVersion(getDataCloudVersion(config));
             matchInput.setSkipKeyResolution(true);
             matchInput.setUseDnBCache(false);
-
             matchInput.setUseRemoteDnB(true);
+            matchInput.setLogDnBBulkResult(false);
 
             return matchInput;
         }

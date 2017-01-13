@@ -16,6 +16,8 @@ public class DnBBatchMatchContext {
 
     private Long duration;
 
+    private boolean logDnBBulkResult;
+
     public DnBBatchMatchContext() {
         contexts = new HashMap<String, DnBMatchContext>();
     }
@@ -59,4 +61,13 @@ public class DnBBatchMatchContext {
     public void setDuration(Long duration) {
         this.duration = duration;
     }
+
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
+    }
+
 }

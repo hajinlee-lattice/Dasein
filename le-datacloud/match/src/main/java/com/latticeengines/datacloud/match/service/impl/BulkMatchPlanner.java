@@ -36,6 +36,7 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
         context = sketchExecutionPlan(context, skipExecutionPlanning);
         context.setUseDnBCache(input.getUseDnBCache());
         context.setUseRemoteDnB(input.getUseRemoteDnB());
+        context.setLogDnBBulkResult(input.getLogDnBBulkResult());
         return context;
     }
 }

@@ -88,11 +88,12 @@ public class FuzzyMatchHelper implements DbHelper {
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
                             dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache(),
-                            useRemoteDnB);
+                            useRemoteDnB, context.getLogDnBBulkResult());
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
                             context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
-                            context.getInput().getLogLevel(), context.isUseDnBCache(), useRemoteDnB);
+                            context.getInput().getLogLevel(), context.isUseDnBCache(), useRemoteDnB,
+                            context.getLogDnBBulkResult());
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {

@@ -141,6 +141,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
         MatchTraveler traveler = request.getMatchTravelerContext();
+        context.setLogDnBBulkResult(traveler.getLogDnBBulkResult());
         if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
@@ -154,6 +155,15 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                         log.debug(String.format(
                                 "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
                                 context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                    } else if (context.getLogDnBBulkResult()) {
+                        log.info(String.format(
+                                "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
+                                context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
+                                context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                                context.getInputNameLocation().getZipcode(),
+                                context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
+                                context.getConfidenceCode(), context.getMatchGrade().getRawCode()));
                     }
                     return;
                 } else {
@@ -171,6 +181,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                     log.debug(String.format(
                             "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
                             context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                } else if (context.getLogDnBBulkResult()) {
+                    log.info(String.format(
+                            "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                    + "ZipCode = %s, PhoneNumber = %s",
+                            context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
+                            context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                            context.getInputNameLocation().getZipcode(),
+                            context.getInputNameLocation().getPhoneNumber()));
                 }
                 return;
             }
@@ -201,6 +219,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                             if (unsubmittedReqs.isEmpty() || unsubmittedReqs.get(unsubmittedReqs.size() - 1)
                                     .getContexts().size() == maximumBatchSize) {
                                 DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
+                                batchContext.setLogDnBBulkResult(context.getLogDnBBulkResult());
                                 unsubmittedReqs.add(batchContext);
                             }
                             unsubmittedReqs.get(unsubmittedReqs.size() - 1).getContexts()

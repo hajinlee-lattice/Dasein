@@ -52,6 +52,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setRealTimeThreadPoolSize(matchInput.getRealTimeThreadPoolSize());
             prepareConfig.setUseDnBCache(matchInput.getUseDnBCache());
             prepareConfig.setUseRemoteDnB(matchInput.getUseRemoteDnB());
+            prepareConfig.setLogDnBBulkResult(matchInput.getLogDnBBulkResult());
 
             return this;
         }

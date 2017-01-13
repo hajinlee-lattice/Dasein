@@ -155,6 +155,10 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             String encodedStr = (String) retrieveXmlValueFromResponse(contentObjectXpath, response);
             byte[] decodeResults = Base64Utils.decodeBase64(encodedStr);
             String decodedStr = new String(decodeResults);
+            if (batchContext.getLogDnBBulkResult()) {
+                log.info(String.format("Match result for serviceBatchId = %s:\n%s", batchContext.getServiceBatchId(),
+                        decodedStr));
+            }
             List<String> resultsList = Arrays.asList(decodedStr.split("\n"));
             for (String result : resultsList) {
                 DnBMatchContext normalizedResult = normalizeOneRecord(result, batchContext.getServiceBatchId());

@@ -71,6 +71,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
 
     private Boolean useRemoteDnB;
 
+    private boolean logDnBBulkResult = false;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -304,6 +306,15 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.useRemoteDnB = useRemoteDnB;
     }
 
+    @JsonProperty("log_dnb_bulk_result")
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    @JsonProperty("log_dnb_bulk_result")
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
+    }
     
 }
 

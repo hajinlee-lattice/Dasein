@@ -36,6 +36,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private Long duration;
 
+    private boolean logDnBBulkResult;
+
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
     }
@@ -207,6 +209,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setServiceBatchId(String serviceBatchId) {
         this.serviceBatchId = serviceBatchId;
+    }
+
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     public enum DnBMatchStrategy {

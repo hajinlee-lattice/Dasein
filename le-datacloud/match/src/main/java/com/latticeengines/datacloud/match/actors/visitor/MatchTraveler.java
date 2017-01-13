@@ -29,6 +29,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     // runtime flags
     private boolean useRemoteDnB = false;
     private boolean useDnBCache = true;
+    private boolean logDnBBulkResult = false;
 
     public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
         super(rootOperationUid);
@@ -141,6 +142,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     public void setUseRemoteDnB(boolean useRemoteDnB) {
         this.useRemoteDnB = useRemoteDnB;
+    }
+
+    public boolean getLogDnBBulkResult() {
+        return logDnBBulkResult;
+    }
+
+    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
+        this.logDnBBulkResult = logDnBBulkResult;
     }
 
     @Override
