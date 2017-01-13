@@ -15,7 +15,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "serial" })
 public class AccountMasterStatsGroupingFunction extends BaseOperation implements Buffer {
     private static final Log log = LogFactory.getLog(AccountMasterStatsGroupingFunction.class);
 

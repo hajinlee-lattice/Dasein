@@ -48,7 +48,6 @@ public class DimensionExpandFunction extends BaseOperation implements Function {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry group = functionCall.getArguments();
