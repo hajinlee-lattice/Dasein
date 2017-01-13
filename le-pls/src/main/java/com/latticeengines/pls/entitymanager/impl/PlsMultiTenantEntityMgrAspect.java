@@ -158,4 +158,9 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
+    @Before("execution(* com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr.find*(..))")
+    public void findBucketMetadatasForModelId(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
 }

@@ -226,6 +226,8 @@ public enum LedpCode {
     LEDP_18122("Found reserved column name {0} in csv headers in csv file {1}."), //
     LEDP_18123("Cannot attach tenant because the authorization info is null."), //
     LEDP_18124("Model summary with id {0} has been deleted from tenant: {1}"), //
+    LEDP_18125("Error retrieving pivot score chart data for model: {0}"), //
+    LEDP_18126("Error retrieving bucket metadata for model: {0}"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

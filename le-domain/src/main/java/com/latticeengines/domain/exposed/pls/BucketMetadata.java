@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -10,17 +12,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Table(name = "BUCKET_METADATA")
 @Entity
-public class BucketMetadata implements HasPid, HasId<String> {
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class BucketMetadata implements HasPid, HasTenant, HasTenantId {
 
     private Long pid;
-    private String id;
     private ModelSummary modelSummary;
     private BucketName bucketName;
     private int leftBoundScore;
@@ -28,6 +36,8 @@ public class BucketMetadata implements HasPid, HasId<String> {
     private int numLeads;
     private double lift;
     private long creationTimestamp;
+    private Tenant tenant;
+    private Long tenantId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,21 +55,10 @@ public class BucketMetadata implements HasPid, HasId<String> {
         this.pid = pid;
     }
 
-    @Override
-    @JsonProperty("id")
-    @Column(name = "ID", unique = true, nullable = false)
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
     @ManyToOne
     @JoinColumn(name = "MODEL_SUMMARY_ID", nullable = false)
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public ModelSummary getModelSummary() {
         return this.modelSummary;
     }
@@ -127,6 +126,38 @@ public class BucketMetadata implements HasPid, HasId<String> {
 
     public void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+    }
+
+    @Override
+    @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    @Override
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
 }

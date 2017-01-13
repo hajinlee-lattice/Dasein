@@ -23,7 +23,8 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         if (modelAvgProbability == null) {
             throw new RuntimeException("ModelAvgProbability is null!");
         }
-        configuration.setDataFlowParams(new PivotScoreAndEventParameters(scoreTableName, modelAvgProbability));
+        configuration.setDataFlowParams(
+                new PivotScoreAndEventParameters(scoreTableName, modelAvgProbability));
         configuration.setTargetTableName(scoreTableName + "_pivot");
     }
 
@@ -32,11 +33,15 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
+        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH,
+                eventTable.getExtracts().get(0).getPath());
 
         putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
-        String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+        String scoreOutputPath = getOutputValue(
+                WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         String pivotOutputPath = StringUtils.replace(scoreOutputPath, "_scored_", "_pivoted_");
         putStringValueInContext(EXPORT_OUTPUT_PATH, pivotOutputPath);
-        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
+        saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH,
+                pivotOutputPath);
     }
 }

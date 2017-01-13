@@ -10,6 +10,7 @@ public class WorkflowContextConstants {
         public static final String YARN_LOG_LINK_PATH = "YARN_LOG_LINK_PATH";
         public static final String POST_MATCH_EVENT_TABLE_EXPORT_PATH = "POST_MATCH_EVENT_TABLE_EXPORT_PATH";
         public static final String PIVOT_SCORE_EVENT_EXPORT_PATH = "PIVOT_SCORE_EVENT_EXPORT_PATH";
+        public static final String PIVOT_SCORE_AVRO_PATH = "PIVOT_SCORE_AVRO_PATH";
         public static final String ENRICHMENT_FOR_INTERNAL_ATTRIBUTES_ATTEMPTED = "ENRICHMENT_FOR_INTERNAL_ATTRIBUTES_ATTEMPTED";
         public static final String INTERNAL_ENRICHMENT_ATTRIBUTES_LIST = "INTERNAL_ENRICHMENT_ATTRIBUTES_LIST";
     }

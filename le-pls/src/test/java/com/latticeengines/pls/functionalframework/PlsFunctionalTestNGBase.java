@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
@@ -48,6 +50,9 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
+
+    @Autowired
+    private BucketMetadataEntityMgr bucketMetadataEntityMgr;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")
     private String hostPort;
@@ -279,6 +284,13 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
                 .findAllProspectDiscoveryOptions();
         for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
             this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
+        }
+    }
+
+    protected void cleanupBucketMetadataDB() {
+        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr.findAll();
+        for (BucketMetadata bucketMetadata : bucketMetadatas) {
+            bucketMetadataEntityMgr.delete(bucketMetadata);
         }
     }
 
