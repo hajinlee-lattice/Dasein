@@ -70,7 +70,7 @@
         </div>
 
         <ul class="categories" ng-class="{'has-category': vm.category}">
-            <li ng-if="!vm.category && vm.lookupMode" class="category company">
+            <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo" class="category company">
                 <div class="box-inner company-info round-box">
                     <ul class="info">
                         <li><h2>{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
