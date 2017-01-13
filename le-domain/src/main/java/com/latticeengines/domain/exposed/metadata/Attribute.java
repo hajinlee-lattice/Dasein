@@ -445,7 +445,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    @SuppressWarnings("unchecked")
     public boolean getIsCoveredByOptionalRule() {
         if (properties.containsKey("IsCoveredByOptionalRule")) {
             return (Boolean) properties.get("IsCoveredByOptionalRule");
@@ -461,7 +460,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    @SuppressWarnings("unchecked")
     public boolean getIsCoveredByMandatoryRule() {
         if (properties.containsKey("IsCoveredByMandatoryRule")) {
             return (Boolean) properties.get("IsCoveredByMandatoryRule");

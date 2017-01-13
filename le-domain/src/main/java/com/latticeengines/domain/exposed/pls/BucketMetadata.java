@@ -9,15 +9,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-// @Table(name = "BUCKET_METADATA", uniqueConstraints = {
-        // @UniqueConstraint(columnNames = { "ID", "MODEL_SUMMARY_ID" }) })
 @Table(name = "BUCKET_METADATA")
 @Entity
 public class BucketMetadata implements HasPid, HasId<String> {
