@@ -37,7 +37,7 @@
 									{{ field.userField }}
 								</option>
 								<option value="{{ AvailableField }}"
-										ng-repeat="(AvailableField, _) in vm.AvailableFields"
+										ng-repeat="AvailableField in vm.AvailableFields"
 										ng-if="AvailableField !== field.userField">
 									{{ AvailableField }}
 								</option>
@@ -132,7 +132,7 @@
 									{{ field.userField }}
 								</option>
 								<option value="{{ AvailableField }}"
-										ng-repeat="(AvailableField, _) in vm.AvailableFields"
+										ng-repeat="AvailableField in vm.AvailableFields"
 										ng-if="AvailableField !== field.userField">
 									{{ AvailableField }}
 								</option>

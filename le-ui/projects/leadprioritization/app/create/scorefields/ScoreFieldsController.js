@@ -17,7 +17,6 @@ angular
             'CompanyName': true
         },
         FileHeaders: FileHeaders.slice(),
-        fieldMappingsMap: {},
         standardFieldMappings: {},
         additionalFieldMappings: {},
         FormValidated: true,
@@ -28,14 +27,15 @@ angular
 
     vm.init = function() {
         vm.initialized = true;
+        var fieldMappingsMap = {};
 
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
-            vm.fieldMappingsMap[fieldMapping.userField] = fieldMapping;
+            fieldMappingsMap[fieldMapping.userField] = fieldMapping;
         });
 
         vm.standardFieldsList.forEach(function(field) {
-            if (vm.fieldMappingsMap[field]) {
-                vm.standardFieldMappings[field] = vm.fieldMappingsMap[field];
+            if (fieldMappingsMap[field]) {
+                vm.standardFieldMappings[field] = fieldMappingsMap[field];
             } else {
                 vm.standardFieldMappings[field] = {
                     fieldType: null,
@@ -48,7 +48,7 @@ angular
 
         FieldDocument.fieldMappings.forEach(function (fieldMapping) {
             if (!vm.standardFieldMappings[fieldMapping.userField]) {
-                vm.additionalFieldMappings[fieldMapping.userField] = vm.fieldMappingsMap[fieldMapping.userField];
+                vm.additionalFieldMappings[fieldMapping.userField] = fieldMappingsMap[fieldMapping.userField];
             }
         });
 
@@ -58,7 +58,7 @@ angular
     }
 
     vm.refreshFields = function(current) {
-        vm.AvailableFields = {};
+        vm.AvailableFields = [];
         var mappedSet = {};
 
         for (var standardField in vm.standardFieldMappings) {
@@ -83,7 +83,7 @@ angular
 
         vm.FileHeaders.forEach(function(userField, index) {
             if (!mappedSet[userField]) {
-                vm.AvailableFields[userField] = true;
+                vm.AvailableFields.push(userField);
             }
         });
     }
