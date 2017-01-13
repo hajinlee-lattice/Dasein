@@ -29,6 +29,7 @@
         <le.quartzclient.version>3.2.0-SNAPSHOT</le.quartzclient.version>
         <le.encryption.version>3.2.0-SNAPSHOT</le.encryption.version>
         <le.hadoop.version>3.2.0-SNAPSHOT</le.hadoop.version>
+        <le.app.version>3.2.0-SNAPSHOT</le.app.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
@@ -533,6 +534,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-app</artifactId>
+            <version>${le.app.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
             <version>${le.workflow.version}</version>
             <scope>runtime</scope>
@@ -582,7 +589,6 @@
             <version>${javax.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
 </project>

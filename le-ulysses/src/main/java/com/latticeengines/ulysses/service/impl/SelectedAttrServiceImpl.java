@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.ulysses.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,10 +30,10 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr;
-import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.ulysses.entitymgr.SelectedAttrEntityMgr;
+import com.latticeengines.ulysses.service.SelectedAttrService;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {

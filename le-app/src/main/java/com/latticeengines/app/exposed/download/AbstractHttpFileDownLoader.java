@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.download;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +15,6 @@ import org.springframework.util.FileCopyUtils;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.pls.service.HttpFileDownLoader;
 
 public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 

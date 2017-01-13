@@ -45,7 +45,7 @@ public class CompanyProfileResource {
         CustomerSpace space = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         Map<MatchKey, String> attributes = getAccountAttributes(request);
         log.info(String.format("Retrieving company profile for %s, attributes = [%s]", space, attributes));
-        return null;
+        return new CompanyProfile();
     }
 
     private Map<MatchKey, String> getAccountAttributes(HttpServletRequest request) {

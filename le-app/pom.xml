@@ -1,16 +1,14 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-baton</artifactId>
+    <artifactId>le-app</artifactId>
     <packaging>jar</packaging>
     <name>le-${component-name}</name>
 
     <properties>
-        <component-name>baton</component-name>
-        <le.domain.version>3.2.0-SNAPSHOT</le.domain.version>
-        <le.camille.version>3.2.0-SNAPSHOT</le.camille.version>
+        <component-name>app</component-name>
     </properties>
 
     <parent>
@@ -23,8 +21,9 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
+            <artifactId>le-common</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
@@ -66,43 +65,26 @@
                     <groupId>org.python</groupId>
                     <artifactId>jython-standalone</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>net.sourceforge.argparse4j</groupId>
-            <artifactId>argparse4j</artifactId>
-            <version>0.4.4</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
-
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
-
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.fasterxml.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.2</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
+
 </project>

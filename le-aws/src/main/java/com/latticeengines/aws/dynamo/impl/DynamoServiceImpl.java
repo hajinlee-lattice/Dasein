@@ -37,7 +37,7 @@ public class DynamoServiceImpl implements DynamoService {
         remoteClient = new AmazonDynamoDBClient(awsCredentials);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            client = new AmazonDynamoDBClient().withEndpoint(endpoint);
+            client = new AmazonDynamoDBClient(awsCredentials).withEndpoint(endpoint);
         } else {
             client = new AmazonDynamoDBClient(awsCredentials);
         }

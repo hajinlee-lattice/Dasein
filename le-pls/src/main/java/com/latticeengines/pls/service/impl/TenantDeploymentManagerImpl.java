@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.JobStatus;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
@@ -138,8 +139,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                     break;
                 }
                 if (isNullOrEmpty(field.getCategory()) && "Internal".equals(field.getTags())
-                        && !"None".equals(field.getApprovedUsage())
-                        && !"Model".equals(field.getApprovedUsage())) {
+                        && !"None".equals(field.getApprovedUsage()) && !"Model".equals(field.getApprovedUsage())) {
                     missingMetadata = true;
                     break;
                 }
@@ -179,8 +179,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
     @Override
     public LaunchJobsResult getRunningJobs(String tenantId, TenantDeploymentStep step) {
-        try
-        {
+        try {
             LaunchJobsResult jobs = null;
             Map<String, LaunchJobsResult> jobsMap = getBufferedJobsMap(step);
             synchronized (jobsMap) {
@@ -190,8 +189,8 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             if (jobs == null) {
                 TenantDeployment deployment = tenantDeploymentService.getTenantDeployment(tenantId);
                 if (deployment != null && deployment.getStep() == step) {
-                    if (deployment.getStatus() == TenantDeploymentStatus.NEW ||
-                            deployment.getStatus() == TenantDeploymentStatus.IN_PROGRESS) {
+                    if (deployment.getStatus() == TenantDeploymentStatus.NEW
+                            || deployment.getStatus() == TenantDeploymentStatus.IN_PROGRESS) {
                         deployment.setStatus(TenantDeploymentStatus.FAIL);
                         deployment.setMessage("Buffered jobs were not found in memory when status is IN_PROGRESS.");
                         tenantDeploymentService.updateTenantDeployment(deployment);
@@ -202,42 +201,39 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                 jobs.setLaunchStatus(JobStatus.SUCCESS);
             }
             return jobs;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18058, e, new String[] { step.toString(), e.getMessage() });
         }
     }
 
     @Override
     public String getStepSuccessTime(String tenantId, TenantDeploymentStep step) {
-        try
-        {
+        try {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String group = getGroupName(step);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             return dataLoaderService.getLoadGroupLastSuccessTime(space.getTenantId(), group, dlUrl);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18059, e, new String[] { step.toString(), e.getMessage() });
         }
     }
 
     @Override
     public LaunchJobsResult getCompleteJobs(String tenantId, TenantDeploymentStep step) {
-        try
-        {
+        try {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String group = getGroupName(step);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             long launchId = dataLoaderService.getLastFailedLaunchId(space.getTenantId(), group, dlUrl);
             return dataLoaderService.getLaunchJobs(launchId, dlUrl, false);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18060, e, new String[] { step.toString(), e.getMessage() });
         }
     }
 
     @Override
     public String runQuery(String tenantId, TenantDeploymentStep step) {
-        try
-        {
+        try {
             String query;
             if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
                 query = profileSummaryQuery;
@@ -250,20 +246,19 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             return dataLoaderService.runQuery(space.getTenantId(), query, dlUrl);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18061, e, new String[] { e.getMessage() });
         }
     }
 
     @Override
     public QueryStatusResult getQueryStatus(String tenantId, String queryHandle) {
-        try
-        {
+        try {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             QueryStatusResult result = dataLoaderService.getQueryStatus(space.getTenantId(), queryHandle, dlUrl);
             return result;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18061, e, new String[] { e.getMessage() });
         }
     }
@@ -271,8 +266,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
     @Override
     public void downloadQueryDataFile(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String tenantId, String queryHandle, String fileName) {
-        try
-        {
+        try {
             CustomerSpace space = CustomerSpace.parse(tenantId);
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
 
@@ -290,7 +284,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
             DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName, stringBuilder.toString());
             downloader.downloadFile(request, response);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18062, e, new String[] { e.getMessage() });
         }
     }
@@ -394,11 +388,13 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                                 emailService.sendPlsValidateMetadataErrorEmail(user, appPublicUrl);
                             }
                         }
-                    } catch (Exception e) { }
+                    } catch (Exception e) {
+                    }
                 }
             });
             executorService.shutdown();
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 
     private class ProgressCallback implements DlCallback {
@@ -413,7 +409,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         @Override
         public void callback(Object result) {
             synchronized (jobsMap) {
-                jobsMap.put(tenantId, (LaunchJobsResult)result);
+                jobsMap.put(tenantId, (LaunchJobsResult) result);
             }
         }
     }
@@ -430,14 +426,13 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
         @Override
         public void callback(Object result) {
             TenantDeployment deployment = null;
-            try
-            {
+            try {
                 deployment = tenantDeploymentService.getTenantDeployment(tenantId);
                 if (result instanceof Exception) {
-                    Exception ex = (Exception)result;
+                    Exception ex = (Exception) result;
                     handleError(deployment, ex.getMessage());
                 } else {
-                    LaunchJobsResult jobsResult = (LaunchJobsResult)result;
+                    LaunchJobsResult jobsResult = (LaunchJobsResult) result;
                     if (jobsResult.getLaunchStatus() == JobStatus.SUCCESS) {
                         if (deployment.getStep() == TenantDeploymentStep.ENRICH_DATA) {
                             deployment.setStatus(TenantDeploymentStatus.SUCCESS);
@@ -445,7 +440,8 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
                             try {
                                 validateMetadata(tenantId, deployment);
-                            } catch (Exception e) { }
+                            } catch (Exception e) {
+                            }
                         } else {
                             handleSuccess(deployment);
                         }
@@ -468,9 +464,12 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                     if (deployment != null) {
                         handleError(deployment, ex.getMessage());
                     }
-                } catch (Exception e) { }
+                } catch (Exception e) {
+                }
 
-                log.warn(String.format("Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.", tenantId));
+                log.warn(String.format(
+                        "Executing completed callback encountered an exception in tenant deployment. Tenant id: %d.",
+                        tenantId));
             }
         }
 

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;

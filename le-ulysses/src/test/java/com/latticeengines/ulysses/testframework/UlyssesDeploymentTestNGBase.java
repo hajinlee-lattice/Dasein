@@ -1,29 +1,35 @@
 package com.latticeengines.ulysses.testframework;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
+import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
 public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     private static final Log log = LogFactory.getLog(UlyssesDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
-
-    public abstract CustomerSpace getCustomerSpace();
 
     @Value("${common.test.oauth.url}")
     protected String authHostPort;
@@ -35,6 +41,10 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     protected String ulyssesHostPort;
 
     @Autowired
+    @Qualifier("deploymentTestBed")
+    protected GlobalAuthDeploymentTestBed deploymentTestBed;
+
+    @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     @Autowired
@@ -44,17 +54,19 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
 
     protected OAuthUser oAuthUser;
 
-    protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-    private String customerSpace;
-
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
-        oAuthUser = getOAuthUser(getCustomerSpace().toString());
+        Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        oAuthUser = getOAuthUser(tenant.getId());
 
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(), oAuthUser.getPassword(),
                 CLIENT_ID_LP);
         OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
         log.info("Access Token: " + accessToken.getValue());
+    }
+
+    protected RestTemplate getGlobalAuthRestTemplate() {
+        return deploymentTestBed.getRestTemplate();
     }
 
     protected OAuthUser getOAuthUser(String userId) {
@@ -78,4 +90,34 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         user.setPasswordExpiration(oAuthUserEntityMgr.getPasswordExpiration(userId));
     }
 
+    protected Tenant setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws IOException {
+        turnOffSslChecking();
+        deploymentTestBed.bootstrapForProduct(product);
+        deploymentTestBed.switchToSuperAdmin();
+        return deploymentTestBed.getMainTestTenant();
+    }
+
+    protected static void turnOffSslChecking() {
+        try {
+            final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+            } };
+            final SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

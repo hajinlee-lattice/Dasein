@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.download;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;

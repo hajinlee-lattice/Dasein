@@ -20,6 +20,7 @@
         <module>le-snowflakedb</module>
         <module>le-transform</module>
         <module>le-common</module>
+        <module>le-app</module>
         <module>le-testframework</module>
         <module>le-network</module>
         <module>le-microservice</module>
