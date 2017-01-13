@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,6 +94,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         }
 
         matchInput.setUseDnBCache(processorContext.getJobConfiguration().getUseDnBCache());
+        matchInput.setMatchDebugEnabled(processorContext.getJobConfiguration().isMatchDebugEnabled());
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
         matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getLogDnBBulkResult());
 
@@ -135,7 +138,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
             List<Object> allValues = new ArrayList<>(outputRecord.getInput());
             allValues.addAll(outputRecord.getOutput());
-
+            if (processorContext.isMatchDebugEnabled()) {
+                addDebugValues(processorContext, allValues, outputRecord);
+            }
             GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
             List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
             for (int i = 0; i < fields.size(); i++) {
@@ -159,6 +164,14 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(), records);
         }
         log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro());
+    }
+
+    private void addDebugValues(ProcessorContext processorContext, List<Object> allValues, OutputRecord outputRecord) {
+        if (CollectionUtils.isNotEmpty(outputRecord.getDebugValues())) {
+            allValues.addAll(outputRecord.getDebugValues());
+        } else {
+            allValues.addAll(Arrays.asList("", "", "", ""));
+        }
     }
 
     private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -13,23 +14,24 @@ import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
+import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
@@ -44,12 +46,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult)
+            boolean logDnBBulkResult, boolean matchDebugEnabled)
             throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult);
+                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
 
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
@@ -57,11 +59,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult)
+            boolean logDnBBulkResult, boolean matchDebugEnabled)
             throws Exception {
         logLevel = setLogLevel(logLevel);
         return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
-                useRemoteDnB, logDnBBulkResult);
+                useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
     }
 
     @Override
@@ -79,14 +81,37 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 String result = (String) traveler.getResult();
                 matchRecord.setLatticeAccountId(result);
+                setDebugValues(traveler, matchRecord);
                 traveler.setBatchMode(actorSystem.isBatchMode());
                 fuzzyMatchHistories.add(new FuzzyMatchHistory(traveler));
+
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
             }
         }
 
         writeFuzzyMatchHistory(fuzzyMatchHistories);
+    }
+
+    private void setDebugValues(MatchTraveler traveler, InternalOutputRecord matchRecord) {
+        if (traveler.isMatchDebugEnabled()) {
+            List<String> debugValues = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
+                DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
+                if (matchContext != null) {
+                    String value = matchContext.getDuns() != null ? matchContext.getDuns() : "";
+                    debugValues.add(value);
+                    value = matchContext.getConfidenceCode() != null ? matchContext.getConfidenceCode() + "" : "";
+                    debugValues.add(value);
+                    value = matchContext.getMatchGrade() != null && matchContext.getMatchGrade().getRawCode() != null ? matchContext
+                            .getMatchGrade().getRawCode() : "";
+                    debugValues.add(value);
+                    value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
+                    debugValues.add(value);
+                    matchRecord.setDebugValues(debugValues);
+                }
+            }
+        }
     }
 
     private Level setLogLevel(Level logLevel) {
@@ -98,7 +123,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
             String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
-            boolean useRemoteDnB, boolean logDnBBulkResult) {
+            boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
@@ -117,6 +142,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 travelContext.setUseDnBCache(useDnBCache);
                 travelContext.setUseRemoteDnB(useRemoteDnB);
                 travelContext.setLogDnBBulkResult(logDnBBulkResult);
+                travelContext.setMatchDebugEnabled(matchDebugEnabled);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
             }
         }

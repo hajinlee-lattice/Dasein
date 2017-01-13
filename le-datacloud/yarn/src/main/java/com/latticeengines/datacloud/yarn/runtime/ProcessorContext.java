@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.yarn.runtime;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,6 +112,8 @@ public class ProcessorContext {
     private DataCloudProcessor dataCloudProcessor;
 
     private boolean useRemoteDnB;
+
+    private boolean matchDebugEnabled;
 
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
@@ -224,6 +227,10 @@ public class ProcessorContext {
         return useRemoteDnB;
     }
 
+    public boolean isMatchDebugEnabled() {
+        return matchDebugEnabled;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -306,7 +313,23 @@ public class ProcessorContext {
         inputSchema = jobConfiguration.getInputAvroSchema();
         outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
                 jobConfiguration.getDataCloudVersion());
+
+        matchDebugEnabled = jobConfiguration.isMatchDebugEnabled();
+        log.info("Match Debug Enabled=" + matchDebugEnabled);;
+        if (matchDebugEnabled) {
+            outputSchema = appendDebugSchema(outputSchema);
+        }
         cleanup();
+    }
+
+    private Schema appendDebugSchema(Schema schema) {
+        Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
+        fieldMap.put("Matched_DUNS", String.class);
+        fieldMap.put("Matched_Confidence_Code", String.class);
+        fieldMap.put("Matched_Match_Grade", String.class);
+        fieldMap.put("Matched_Cache_Hit", String.class);
+        Schema debugSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
+        return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
     }
 
     private void cleanup() throws IOException {

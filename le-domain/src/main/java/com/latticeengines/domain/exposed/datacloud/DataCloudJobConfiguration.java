@@ -64,6 +64,8 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private Boolean useRemoteDnB;
     @JsonProperty("log_dnb_bulk_Result")
     private boolean logDnBBulkResult = false;
+    @JsonProperty("match_debug_enabled")
+    private boolean matchDebugEnabled;
 
 
     public String getHdfsPodId() {
@@ -258,6 +260,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     public Boolean getUseRemoteDnB() {
         return useRemoteDnB;
     }
+    
+    public boolean isMatchDebugEnabled() {
+        return matchDebugEnabled;
+    }
+
+    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
+        this.matchDebugEnabled = matchDebugEnabled;
+    }
 
     public boolean getLogDnBBulkResult() {
         return logDnBBulkResult;
@@ -266,7 +276,7 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
     }
-
+    
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

@@ -39,6 +39,9 @@ public class OutputRecord {
     @JsonProperty("ErrorMessages")
     private List<String> errorMessages;
 
+    @JsonProperty("DebugValues")
+    private List<String> debugValues;
+
     public Integer getRowNumber() {
         return rowNumber;
     }
@@ -126,11 +129,20 @@ public class OutputRecord {
         this.errorMessages.add(errorMessage);
     }
 
+    public List<String> getDebugValues() {
+        return debugValues;
+    }
+
+    public void setDebugValues(List<String> debugValues) {
+        this.debugValues = debugValues;
+    }
+
     public void log(String log) {
         if (this.matchLogs == null) {
             matchLogs = new ArrayList<>();
         }
         matchLogs.add(log);
     }
+
 
 }

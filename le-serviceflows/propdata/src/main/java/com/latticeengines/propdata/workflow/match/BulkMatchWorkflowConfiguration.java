@@ -53,6 +53,7 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setUseDnBCache(matchInput.getUseDnBCache());
             prepareConfig.setUseRemoteDnB(matchInput.getUseRemoteDnB());
             prepareConfig.setLogDnBBulkResult(matchInput.getLogDnBBulkResult());
+            prepareConfig.setMatchDebugEnabled(matchInput.isMatchDebugEnabled());
 
             return this;
         }

@@ -25,6 +25,8 @@ public class InternalOutputRecord extends OutputRecord {
     private LatticeAccount latticeAccount;
     private String originalContextId;
 
+    private List<String> debugValues;
+
     public String getParsedDomain() {
         return parsedDomain;
     }
@@ -135,5 +137,13 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setOriginalContextId(String originalContextId) {
         this.originalContextId = originalContextId;
+    }
+
+    public List<String> getDebugValues() {
+        return debugValues;
+    }
+
+    public void setDebugValues(List<String> debugValues) {
+        this.debugValues = debugValues;
     }
 }

@@ -194,6 +194,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
+            outputRecord.setDebugValues(internalRecord.getDebugValues());
             outputRecords.add(outputRecord);
         }
 

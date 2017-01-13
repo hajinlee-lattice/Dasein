@@ -73,6 +73,8 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
 
     private boolean logDnBBulkResult = false;
 
+    private boolean matchDebugEnabled;
+
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
         return inputAvroDir;
@@ -315,6 +317,17 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
     }
+    
+    @JsonProperty("match_debug_enabled")
+    public boolean isMatchDebugEnabled() {
+        return matchDebugEnabled;
+    }
+
+    @JsonProperty("match_debug_enabled")
+    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
+        this.matchDebugEnabled = matchDebugEnabled;
+    }
+
     
 }
 

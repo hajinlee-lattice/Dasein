@@ -77,6 +77,9 @@ public class MatchInput implements Fact, Dimension {
     // Flag logDnBBulkResult decides whether DnB bulk match result is logged
     private boolean logDnBBulkResult = false;
 
+    // Flag to add DnB columns match output file
+    private boolean matchDebugEnabled;
+
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public Boolean getExcludeUnmatchedWithPublicDomain() {
         return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
@@ -405,6 +408,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("LogDnBBulkResult")
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
+    }
+
+    @JsonProperty("MatchDebugEnable")
+    public boolean isMatchDebugEnabled() {
+        return matchDebugEnabled;
+    }
+
+    @JsonProperty("MatchDebugEnable")
+    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
+        this.matchDebugEnabled = matchDebugEnabled;
     }
 
     @Override

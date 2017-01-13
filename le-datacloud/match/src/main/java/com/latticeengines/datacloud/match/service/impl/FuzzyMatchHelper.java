@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Future;
+
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -31,8 +33,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;
-
-import scala.concurrent.Future;
 
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
@@ -88,12 +88,12 @@ public class FuzzyMatchHelper implements DbHelper {
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
                             dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache(),
-                            useRemoteDnB, context.getLogDnBBulkResult());
+                            useRemoteDnB, context.getLogDnBBulkResult(), context.isMatchDebugEnabled());
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
                             context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
                             context.getInput().getLogLevel(), context.isUseDnBCache(), useRemoteDnB,
-                            context.getLogDnBBulkResult());
+                            context.getLogDnBBulkResult(), context.isMatchDebugEnabled());
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {

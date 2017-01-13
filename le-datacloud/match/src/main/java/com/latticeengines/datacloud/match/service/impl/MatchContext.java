@@ -49,6 +49,7 @@ public class MatchContext implements Fact, Dimension {
     @JsonIgnore
     private List<Future<Object>> futuresResult;
     private Boolean useRemoteDnB;
+    private boolean matchDebugEnabled;
 
     @MetricFieldGroup(excludes = { "InputRows" })
     @MetricTagGroup(excludes = { "MatchEngine" })
@@ -212,6 +213,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
+    }
+
+    public boolean isMatchDebugEnabled() {
+        return matchDebugEnabled;
+    }
+
+    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
+        this.matchDebugEnabled = matchDebugEnabled;
     }
 
     @JsonIgnore
