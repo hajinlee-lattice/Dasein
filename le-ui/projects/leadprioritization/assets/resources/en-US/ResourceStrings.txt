@@ -589,6 +589,7 @@ MODEL_IMPORT_CSV_BUTTON_CANCEL=Cancel
 MODEL_IMPORT_CSV_BUTTON_NEXT=Next
 MODEL_IMPORT_CSV_BUTTON_UPLOAD_FILE=Upload File
 MODEL_COLUMNS_MUST_MAP_LABEL=Please map your fields to these required fields
+MODEL_COLUMNS_MAP_FIELDS_LABEL=Map fields below to match leads with Lattice Data Cloud. Mapping as many as possible will allow for a better match.
 MODEL_COLUMNS_CSV_LABEL_DISPLAYING=Total: {0} Fields
 MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE=Fields in Uploaded File
 MODEL_COLUMNS_CSV_LABEL_TYPE=Map to Lattice Fields

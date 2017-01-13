@@ -34,7 +34,7 @@ section.container.setup-import {
         text-transform: none;
     }
     label {
-        color: #000;   
+        color: #000;
         span {
             color: #999;
             &.tooltip-label {
@@ -54,7 +54,7 @@ section.container.setup-import {
             pointer-events: none;
             color: #ccc !important;
             border-color: #ccc !important;
-            
+
             span.more-info {
                 display: none;
             }
@@ -80,7 +80,7 @@ section.container.setup-import {
         font-size: 1em;
         margin-right: .8em;
         margin-top: 0.2em;
-        input[type="radio"] { 
+        input[type="radio"] {
             margin-top: 0.5em;
             margin-right: 0.5em;
             margin-left: 1.5em;
@@ -90,7 +90,7 @@ section.container.setup-import {
             margin-top: 0.5em;
         }
     }
-    div.progress { 
+    div.progress {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -104,7 +104,7 @@ section.container.setup-import {
         &.compressing {
             transition: all 333ms linear;
             background: #dfdfdf;
-        } 
+        }
         &.uploading {
             background-color: #aaea6c;
         }
@@ -230,7 +230,7 @@ section.container.custom-fields {
             width: 150px;
             height: 95px;
         }
-        &:after {    
+        &:after {
             background-image: url("/lp/assets/images/bkg-field-mapping-lattice.png");
             background-position: top right;
             background-repeat: no-repeat;
@@ -278,7 +278,7 @@ section.container.custom-fields {
         td.field_mapping_label {
             border-right: #b0b0b0 solid 1px;
             padding-right: 1em;
-            
+
             label {
                 width: 180px;
                 word-wrap: break-word;
@@ -294,7 +294,7 @@ section.container.custom-fields {
             padding: 0.3em 0.5em .3em 0.5em;
             margin: 0;
             vertical-align: middle;
-                
+
             &:last-child {
                 .custom-select {
                     width: 100px;
@@ -357,6 +357,11 @@ section.container.custom-fields {
         margin: 0 1em;
         i.orange-text {
             font-weight: bold;
+        }
+    }
+    .section-validation {
+        ul.help-block {
+            margin: 0 1em;
         }
     }
     div.error-message {
@@ -424,7 +429,7 @@ Create Model: Validate Import View
     }
 }
 .uploaded-leads, .excluded-leads, .used-leads {
-    padding-top: 125px;  
+    padding-top: 125px;
     background-repeat: no-repeat;
 }
 .uploaded-leads {
@@ -522,7 +527,7 @@ Media Queries
                 width: 212px;
                 height: 122px;
             }
-            &:after {    
+            &:after {
                 background-size: 230px 105px;
                 top: 25px;
                 width: 230px;
@@ -540,7 +545,7 @@ Media Queries
                 height: 148px;
                 top: 0;
             }
-            &:after {    
+            &:after {
                 background-size: 271px 121px;
                 top: 8px;
                 width: 271px;
@@ -559,10 +564,10 @@ Media Queries
     padding: 0;
     padding-bottom: 0;
     margin-bottom: 1em;
-    
+
     &.disabled {
         background: #f1f1f1;
-        
+
         h4 {
             color: #bbb;
         }
@@ -578,19 +583,23 @@ Media Queries
         border: 0;
         border-top: 1px solid #d0d0d0;
         margin: 1em 0;
-        padding: 0; 
+        padding: 0;
     }
 
     .section-header {
         padding: 1.2em 2em 0em;
-        
+
         h4 {
             font-size: 18pt;
             font-weight: bold;
             color: #666;
-            
+
             span {
                 font-weight: normal;
+            }
+
+            &.silent {
+                color: #bbbbbb;
             }
         }
 
@@ -606,7 +615,7 @@ Media Queries
         border: none;
         padding: 0;
         margin: 1em 2em 1.2em;
-        
+
         .section-actions-tertiary {
             margin-right: 0.75em;
         }
@@ -614,7 +623,7 @@ Media Queries
 
     .section-body {
         margin-bottom: 0;
-        
+
         .row .columns.align-right {
             float: right;
             clear: none;
@@ -623,18 +632,18 @@ Media Queries
 
         table {
             margin-bottom: 0;
-            
+
             tr {
                 td {
-                    width: auto;
+                    width: 50%;
                 }
             }
         }
-        
+
         &.with-padding {
             margin: 0em 2em;
         }
-        
+
         tr {
             border-bottom: 1px solid #e9e9e9;
 
@@ -644,14 +653,17 @@ Media Queries
 
             td {
                 border-right: 1px solid #e9e9e9;
-                
+
                 &.field-mapping-inputs {
                     padding: 0.5em;
+                    select {
+                        width: auto;
+                    }
                 }
 
                 &:last-child {
                     border-right: none;
-                } 
+                }
             }
         }
 
@@ -670,7 +682,7 @@ Media Queries
                 &:nth-child(odd) {
                     background: #f9f9f9;
                 }
-                
+
                 td {
                     &.field_mapping_label label {
                         width: auto;

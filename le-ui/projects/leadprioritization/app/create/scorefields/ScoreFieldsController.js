@@ -1,7 +1,7 @@
 angular
 .module('lp.create.import')
 .controller('ScoreFieldsController', function(
-    $scope, $state, $stateParams, $timeout, $rootScope, $anchorScroll, ResourceUtility, 
+    $scope, $state, $stateParams, $timeout, $rootScope, $anchorScroll, ResourceUtility,
     ScoreLeadEnrichmentModal, ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal
 ) {
     var vm = this;
@@ -10,10 +10,16 @@ angular
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
         csvFileName: $stateParams.csvFileName,
-        ignoredFields: FieldDocument.ignoredFields,
-        fieldMappings: FieldDocument.fieldMappings,
-        requiredFields: FieldDocument.requiredFields,
-        FileHeaders: [],
+        standardFieldsList: ['Id', 'Email', 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
+        requiredFieldsMissing: {
+            'Id': true,
+            'Email': true,
+            'CompanyName': true
+        },
+        FileHeaders: FileHeaders.slice(),
+        fieldMappingsMap: {},
+        standardFieldMappings: {},
+        additionalFieldMappings: {},
         FormValidated: true,
         initialized: false,
         NextClicked: false,
@@ -22,65 +28,81 @@ angular
 
     vm.init = function() {
         vm.initialized = true;
-        
-        FileHeaders.forEach(function(field, index) {
-            vm.FileHeaders.push(field);
+
+        FieldDocument.fieldMappings.forEach(function(fieldMapping) {
+            vm.fieldMappingsMap[fieldMapping.userField] = fieldMapping;
         });
 
-        vm.refreshLatticeFields();
+        vm.standardFieldsList.forEach(function(field) {
+            if (vm.fieldMappingsMap[field]) {
+                vm.standardFieldMappings[field] = vm.fieldMappingsMap[field];
+            } else {
+                vm.standardFieldMappings[field] = {
+                    fieldType: null,
+                    mappedField: field,
+                    mappedToLatticeField: true,
+                    userField: vm.ignoredFieldLabel
+                };
+            }
+        });
+
+        FieldDocument.fieldMappings.forEach(function (fieldMapping) {
+            if (!vm.standardFieldMappings[fieldMapping.userField]) {
+                vm.additionalFieldMappings[fieldMapping.userField] = vm.fieldMappingsMap[fieldMapping.userField];
+            }
+        });
+
+        vm.refreshFields();
 
         vm.validateForm();
     }
 
-    vm.refreshLatticeFields = function(current) {
-        vm.FieldMap = {};
-        vm.UserMap = {};
-        vm.FileFields = [];
-        vm.ModelFields = [];
-        vm.AvailableFields = [];
+    vm.refreshFields = function(current) {
+        vm.AvailableFields = {};
+        var mappedSet = {};
 
-        vm.fieldMappings.forEach(function(mapping, index) {
-            if (current) {
-                if (mapping.mappedField != current.mappedField && mapping.userField == current.userField) {
+        for (var standardField in vm.standardFieldMappings) {
+            var mapping = vm.standardFieldMappings[standardField];
+
+            if (mapping.userField && mapping.userField !== vm.ignoredFieldLabel) {
+                mappedSet[mapping.userField] = true;
+            }
+        }
+
+        if (current) {
+            for (var additionalField in vm.additionalFieldMappings) {
+                var mapping = vm.additionalFieldMappings[additionalField];
+                if ((mapping.mappedField !== current.mappedField &&
+                    mapping.userField === current.userField) ||
+                    mappedSet[mapping.userField]) {
                     mapping.userField = vm.ignoredFieldLabel;
                 }
-            }
 
-            if (mapping.userField && mapping.userField != vm.ignoredFieldLabel) {
-                vm.UserMap[mapping.userField] = mapping;
-                vm.FileFields.push(mapping.userField);
-            } else {
-                mapping.userField = vm.ignoredFieldLabel;
             }
+        }
 
-            if (mapping.mappedField) {
-                vm.FieldMap[mapping.mappedField] = mapping;
-                vm.ModelFields.push(mapping.mappedField);
-            }
-        });
-        
-        vm.FileHeaders.forEach(function(field, index) {
-            var mapping = vm.UserMap[field];
-            
-            if (!mapping || !isIn(mapping.mappedField, vm.requiredFields)) {
-                vm.AvailableFields.push(field);
+        vm.FileHeaders.forEach(function(userField, index) {
+            if (!mappedSet[userField]) {
+                vm.AvailableFields[userField] = true;
             }
         });
     }
 
-    var isIn = function(item, array) {
-        return array.indexOf(item) > -1;
-    }
-
-    vm.changeLatticeField = function(mapping, field) {
-        vm.refreshLatticeFields(mapping);
+    vm.changeField = function(mapping) {
+        vm.refreshFields(mapping);
 
         $timeout(function() {
             vm.validateForm();
         }, 100);
-    }
+    };
 
-    vm.clickReset = function($event) {
+    vm.clickRemap = function () {
+        $anchorScroll();
+
+        vm.NextClicked = false;
+    };
+
+    vm.clickCancel = function($event) {
         if ($event != null) {
             $event.stopPropagation();
         }
@@ -89,27 +111,47 @@ angular
     };
 
     vm.clickNext = function() {
+        vm.NextClicked = true;
+    };
+
+    vm.clickNextScore = function() {
         $anchorScroll();
 
         ShowSpinner('Saving Field Mappings...');
 
-        FieldDocument.fieldMappings = vm.fieldMappings.filter(function(field) { return field.userField != vm.ignoredFieldLabel });
-        
+        FieldDocument.fieldMappings = _.chain(angular.extend({}, vm.standardFieldsMapping, vm.additionalFieldMappings))
+            .pick(function (item) {
+                return item.userField !== vm.ignoredFieldLabel;
+            }).values().value();
+
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
             ShowSpinner('Preparing Scoring Job...');
             ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.jobs');
         });
-    }
+    };
 
     vm.validateForm = function() {
         vm.FormValidated = true;
 
-        vm.fieldMappings.forEach(function(fieldMapping, index) {
-            if (isIn(fieldMapping.mappedField, vm.requiredFields) && (!fieldMapping.userField || fieldMapping.userField == vm.ignoredFieldLabel)) {
-                vm.FormValidated = false;
+        for (var field in vm.requiredFieldsMissing) {
+            var fieldMapping = vm.standardFieldMappings[field];
+            if (!fieldMapping || fieldMapping.userField === vm.ignoredFieldLabel) {
+                vm.requiredFieldsMissing[field] = true;
+            } else {
+                vm.requiredFieldsMissing[field] = false;
             }
-        });
-    }
+        }
+
+        if (!vm.requiredFieldsMissing['Email']) {
+            vm.requiredFieldsMissing['CompanyName'] = false;
+        } else if (!vm.requiredFieldsMissing['CompanyName']) {
+            vm.requiredFieldsMissing['Email'] = false;
+        }
+
+        for (var field in vm.requiredFieldsMissing) {
+             vm.FormValidated = vm.FormValidated && !vm.requiredFieldsMissing[field];
+        }
+    };
 
     vm.init();
 });
