@@ -112,6 +112,8 @@ public class ProcessorContext {
     private DataCloudProcessor dataCloudProcessor;
 
     private boolean useRemoteDnB;
+    
+    private boolean isAsync;
 
     private boolean matchDebugEnabled;
 
@@ -230,6 +232,10 @@ public class ProcessorContext {
     public boolean isMatchDebugEnabled() {
         return matchDebugEnabled;
     }
+    
+    public boolean isAsync() {
+        return isAsync;
+    }
 
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
@@ -261,11 +267,10 @@ public class ProcessorContext {
         decisionGraph = jobConfiguration.getDecisionGraph();
         if (jobConfiguration.getUseRemoteDnB() != null) {
             useRemoteDnB = jobConfiguration.getUseRemoteDnB();
-        } else {
-            useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
-        }
-        useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
-        log.info("Use remote DnB ? " + useRemoteDnB);
+        } 
+        boolean fuzzyMatchEnabled = zkConfigurationService.fuzzyMatchEnabled(space);
+        isAsync = fuzzyMatchEnabled && useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+        log.info("Use remote DnB ? " + useRemoteDnB + " Async ?" + isAsync);
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
             log.info("Overwrite decision graph be default value " + decisionGraph);
@@ -275,7 +280,7 @@ public class ProcessorContext {
         keyMap = jobConfiguration.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
-        if (useRemoteDnB) {
+        if (isAsync) {
             timeOut = timeOut * 2;
         }
         log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
@@ -294,7 +299,7 @@ public class ProcessorContext {
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
-            if (useRemoteDnB) {
+            if (isAsync) {
                 groupSize = 10_000;
             }
         } else {

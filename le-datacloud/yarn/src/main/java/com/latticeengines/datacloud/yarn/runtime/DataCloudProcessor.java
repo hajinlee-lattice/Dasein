@@ -60,7 +60,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             matchActorSystem.setBatchMode(true);
 
             initialProcessorContext.initialize(this, jobConfiguration);
-            if (initialProcessorContext.isUseRemoteDnB()) {
+            if (initialProcessorContext.isAsync()) {
                 bulkMatchProcessorAsyncExecutor.execute(initialProcessorContext);
                 bulkMatchProcessorAsyncExecutor.finalize(initialProcessorContext);
 
