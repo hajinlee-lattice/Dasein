@@ -188,6 +188,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setFields(prepareFields(scenario));
         input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));
         input.setData(prepareRealtimeData(scenario));
+        input.setUseRemoteDnB(true);
         return input;
     }
 
@@ -370,6 +371,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setFields(prepareFields(scenario));
         input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));
         input.setInputBuffer(prepareBulkData(scenario));
+        input.setUseRemoteDnB(true);
         return input;
     }
 
