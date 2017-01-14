@@ -14,6 +14,7 @@ angular.module('lp.enrichment.leadenrichment')
             current: 1,
             toggle: {
                 show: {
+                    nulls: false,
                     selected: false,
                     premium: false,
                     internal: false
@@ -176,6 +177,25 @@ angular.module('lp.enrichment.leadenrichment')
         return deferred.promise;
     }
 
+    this.getAllTopAttributes = function(opts) {
+        var deferred = $q.defer(),
+        opts = opts || {};
+        opts.max = opts.max || 5;
+
+        if (this.topAttributes) {
+            deferred.resolve(this.topAttributes);
+        } else {
+            var vm = this;
+            
+            EnrichmentService.getAllTopAttributes(opts).then(function(response) {
+                vm.topAttributes = data = response.data;
+                deferred.resolve(vm.topAttributes);
+            });
+        }
+
+        return deferred.promise;
+    }
+
     this.setTopAttributes = function(items, category) {
         this.topAttributes = this.topAttributes || [];
         this.topAttributes[category] = items;
@@ -285,6 +305,25 @@ angular.module('lp.enrichment.leadenrichment')
             url: '/pls/enrichment/stats/topn',
             params: {
                 category: opts.category,
+                limit: opts.limit,
+                loadEnrichmentMetadata: opts.loadEnrichmentMetadata
+            }
+        }).then(function(response) {
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
+    this.getAllTopAttributes = function(opts) {
+        var deferred = $q.defer(),
+        opts = opts || {};
+        opts.category = opts.category || 'firmographics';
+        opts.limit = opts.limit || 6;
+        opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
+        $http({
+            method: 'get',
+            url: '/pls/enrichment/stats/topn/all',
+            params: {
                 limit: opts.limit,
                 loadEnrichmentMetadata: opts.loadEnrichmentMetadata
             }

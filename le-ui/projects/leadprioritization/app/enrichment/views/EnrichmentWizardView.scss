@@ -13,6 +13,7 @@
         margin-right: 14px;
         input[type="radio"], input[type="checkbox"] {
             margin: 0;
+            vertical-align: middle;
         }
         .select-more {
             border-radius: 6px;
@@ -22,6 +23,8 @@
             margin-right: 10px;
             label {
                 width: auto;
+                vertical-align: middle;
+                padding: 1px 5px;
             }
             &:last-child {
                 margin-right: 0;
@@ -44,7 +47,7 @@
             }
             &.filter {
                 li {
-                    padding: 5px;
+                    padding: 0 7px;
                 }
             }
             &.download {
@@ -124,7 +127,7 @@
                         margin-top: 25px;
                         font-size: 20px;
                         .category-label {
-                            height: 45px;
+                            max-height: 45px;
                         }
                     }
                     .count {
@@ -165,7 +168,7 @@
                 &.active {
                     & > span {
                         position: relative;
-                        z-index: 20;
+                        z-index: 1;
                     }
                     position: relative;
                     &:before {
@@ -179,7 +182,7 @@
                         width: 20px;
                         background: inherit;
                         transform: rotate(45deg);
-                        z-index: -10;
+                        z-index: -1;
                     }
                     &:after {
                         content: '';
@@ -196,7 +199,7 @@
                         border-right-width: 1px;
                         border-right-style: solid;
                         border-color: inherit;
-                        z-index: 10;
+                        z-index: 0;
                     }
                 }
                 h2 {
@@ -370,6 +373,9 @@
             @include flex-item(0 0 auto);
             width: $box-width;
             padding: 14px 14px 0 0;
+            &.box-value-no {
+                opacity: .5;
+            }
             .box-inner {
                 position: relative;
                 text-align: center;
@@ -562,9 +568,19 @@
                     &.label {
                         @include text-ellipsis();
                         margin-right: 5px;
+                        max-width: 80%;
                     }
                     &.data {
                         @include flex-item(0 1 auto);
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        text-align: right;
+                        min-width: 20%;
+                        
+                        &.data-value-yes {
+                            color: #70bf4a;
+                            font-weight: bold;
+                        }
                     }
                 }
             }
@@ -583,7 +599,7 @@
 
     .dropdown-container {
         position: relative;
-        z-index: 100;
+        z-index: 1;
         h2.active {
             background: #1a1a1a;
             border-radius: 5px 5px 0 0;

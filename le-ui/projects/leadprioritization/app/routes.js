@@ -1245,11 +1245,10 @@ angular
 
                             return deferred.promise;
                         },
-                        EnrichmentCategories: function($q, EnrichmentStore) {
-                            return false;
+                        EnrichmentTopAttributes: function($q, EnrichmentStore) {
                             var deferred = $q.defer();
 
-                            EnrichmentStore.getCategories().then(function(result) {
+                            EnrichmentStore.getAllTopAttributes().then(function(result) {
                                 deferred.resolve(result);
                             });
 
@@ -1321,11 +1320,10 @@ angular
 
                             return deferred.promise;
                         },
-                        EnrichmentCategories: function($q, EnrichmentStore) {
-                            return false;
+                        EnrichmentTopAttributes: function($q, EnrichmentStore) {
                             var deferred = $q.defer();
 
-                            EnrichmentStore.getCategories().then(function(result) {
+                            EnrichmentStore.getAllTopAttributes().then(function(result) {
                                 deferred.resolve(result);
                             });
 

@@ -2,17 +2,17 @@
 angular.module('lp.enrichmentwizard.leadenrichment', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('EnrichmentWizardController', function($scope, $filter, $timeout, $interval, $window, $document, $q,
-    BrowserStorageUtility, FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCount, EnrichmentCategories, 
-    EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore){
-
+.controller('EnrichmentWizardController', function(
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, BrowserStorageUtility, 
+    FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCount, EnrichmentTopAttributes, 
+    EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
+){
     var vm = this,
         across = 4, // how many across in grid view
-        approximate_pagesize = 25,
+        approximate_pagesize = 37,
         pagesize = Math.round(approximate_pagesize / across) * across,
-        enrichment_chunk_size = 5000;
-
-    var flags = FeatureFlagService.Flags();
+        enrichment_chunk_size = 5000,
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         label: {
@@ -35,17 +35,43 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             changed_alert: 'No changes will be saved until you press the \'Save\' button.',
             disabled_alert: 'You have disabled an attribute.'
         },
+        orders: {
+            attributeLookupMode: [ 'DisplayName', '-Value' ],
+            attribute: 'DisplayName',
+            subcategory: 'toString()',
+            category: 'toString()'
+        },
+        download_button: {
+            class: 'orange-button select-label',
+            icon: 'fa fa-download',
+            iconclass: 'white-button select-more',
+            iconrotate: false,
+            tooltip: 'Download Enrichments'
+        },
+        sortPrefix: '+',
+        view: 'list',
+        queryText: '',
+        category: '',
         lookupMode: EnrichmentAccountLookup !== null,
         lookupFiltered: EnrichmentAccountLookup,
         LookupResponse: LookupStore.response,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
+        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
-        enrichmentsObj: {},
+        tmpEnrichmentObj: {},
+        enrichmentsObj: {}, // by Category
+        enrichmentsMap: {}, // by FieldName, value is enrichments[] index
         enrichments: [],
         subcategoriesList: [],
+        status_alert: {},
+        _subcategories: [],
+        subcategories: [],
+        categories: [],
+        topAttributes: [],
+        selected_categories: {},
         categoryOption: null,
         metadata: EnrichmentStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -56,35 +82,113 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         pagesize: pagesize,
         across: across,
         initialized: false,
-        status_alert: {},
-        enrichments: [],
-        _subcategories: [],
-        subcategories: [],
-        categories: [],
-        selected_categories: {},
         enable_category_dropdown: false,
-        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
-        enable_grid: true,
-        view: 'list',
-        queryText: '',
-        blah: {}
+        enable_grid: true
     });
 
-    vm.orders = {
-        attribute: 'DisplayName',
-        subcategory: 'toString()',
-        category: 'toString()'
+    vm.download_button.items = [{ 
+            href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
+            label: vm.label.button_download,
+            icon: 'fa fa-file-o' 
+        },{
+            href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
+            label: vm.label.button_download_selected,
+            icon: 'fa fa-file-o' 
+        }
+    ];
+
+    vm.init = function() {
+        $scope.$watchGroup([
+                'vm.metadata.toggle.show.nulls', 
+                'vm.metadata.toggle.show.selected', 
+                'vm.metadata.toggle.show.premium', 
+                'vm.metadata.toggle.hide.premium', 
+                'vm.metadata.toggle.show.internal'
+            ], function(newValues, oldValues, scope) {
+            vm.filterEmptySubcategories();
+        });
+
+        $scope.$watch('vm.queryText', function(newvalue, oldvalue){
+            vm.queryInProgress = true;
+
+            if (vm.queryTimeout) {
+                $timeout.cancel(vm.queryTimeout);
+            }
+
+            // debounce timeout to speed things up
+            vm.queryTimeout = $timeout(function() {
+                if(!vm.category && newvalue) {
+                    vm.category = vm.categories[0];
+                }
+
+                vm.query = vm.queryText;
+                
+                vm.filterEmptySubcategories();
+
+                vm.queryInProgress = false;
+            }, 333);
+        });
+
+        var download_buttons = angular.element('.dropdown-container > h2');
+        download_buttons.click(function(e){
+            var button = angular.element(this),
+                toggle_on = !button.hasClass('active');
+
+            download_buttons.removeClass('active');
+            download_buttons.siblings('ul.dropdown').removeClass('open');
+
+            if(toggle_on) {
+                button.addClass('active');
+                button.siblings('ul.dropdown').addClass('open');
+            }
+
+            e.stopPropagation();
+
+        });
+
+        angular.element(document).click(function(event) {
+            var target = angular.element(event.target),
+            el = angular.element('.dropdown-container ul.dropdown'),
+            has_parent = target.parents().is('.dropdown-container'),
+            is_visible = el.is(':visible');
+            if(!has_parent) {
+                el.removeClass('open');
+                el.siblings('.button.active').removeClass('active');
+            }
+        });
+
+        if (vm.lookupMode && vm.LookupResponse.errorCode) {
+            $state.go('home.lookup.form');
+        }
+
+        getEnrichmentCategories();
+        getEnrichmentData();
+
+        vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
+        vm.generalSelectLimit = 100;
+        vm.statusMessageBox = angular.element('.status-alert');
     }
-    vm.sortPrefix = '+';
 
     vm.sortOrder = function() {
         var sortPrefix = vm.sortPrefix.replace('+','');
-        if(!vm.category) {
+        
+        if (!vm.category) {
             return sortPrefix + vm.orders.category;
-        } else if(vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
+        } else if (vm.subcategories[vm.category] && vm.subcategories[vm.category].length && !vm.subcategory) {
             return sortPrefix + vm.orders.subcategory;
         } else {
-            return sortPrefix + vm.orders.attribute;
+            if (vm.lookupMode && vm.category == 'Technology Profile' || vm.category == 'Website Profile') {
+                var sortArr = vm.orders.attributeLookupMode,
+                    retArr = [];
+
+                sortArr.forEach(function(item, index) {
+                    retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
+                });
+
+                return retArr;
+            } else {
+                return sortPrefix + vm.orders.attribute;
+            }
         }
     }
 
@@ -98,51 +202,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return result;
     }
 
-    vm.download_button = {
-        //label: 'Download',
-        //labelIcon: 'fa-download',
-        class: 'orange-button select-label',
-        icon: 'fa fa-download',
-        iconclass: 'white-button select-more',
-        iconrotate: false,
-        tooltip: 'Download Enrichments'
-    };
-
-    vm.download_button.items = [{ 
-        href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
-        label: vm.label.button_download,
-        icon: 'fa fa-file-o' 
-    },{
-        href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
-        label: vm.label.button_download_selected,
-        icon: 'fa fa-file-o' 
-    }];
-
-    var stopGetEnrichments = false;
-    $scope.$on('$destroy', function () {
-        // lets load all enrichments anyway incase they go to Account Lookup tool -jlazarus
-        //stopGetEnrichments = true; // if you leave the page mid-chunking of enrichments this will stop the promise
-        angular.element($window).unbind("scroll", scrolled);
-        angular.element($window).unbind("resize", resized);
-    });
-
-    var fakeIncrement = false;
-    if(fakeIncrement) {
-        vm.placeholderTotal;
-        var numbersNumber = 0;
-        var numbersInterval = $interval(function(){
-            var query = angular.element('.subheader .query .ng-search input'),
-                filteredTotal = parseInt(query.attr('data-filteredTotal'));
-
-            if(numbersNumber < enrichment_chunk_size && filteredTotal >= 1000) {
-                numbersNumber = numbersNumber+1*10;
-            }
-            vm.placeholderTotal = filteredTotal + numbersNumber;
-        }, enrichment_chunk_size / 1000);
-    }
-
     var stopNumbersInterval = function(){
-        if(numbersInterval) {
+        if (numbersInterval) {
             $interval.cancel(numbersInterval);
             vm.placeholderTotal = null;
         }
@@ -163,15 +224,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrent = concurrent;
         vm.concurrentIndex = 0;
 
-        $timeout(function() {
-            if (EnrichmentStore.enrichments) {
-                vm.xhrResult(EnrichmentStore.enrichments, true);
-            } else {
-                for (var j=0; j<iterations; j++) {
-                    EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
-                }
+        if (EnrichmentStore.enrichments) {
+            vm.xhrResult(EnrichmentStore.enrichments, true);
+        } else {
+            for (var j=0; j<iterations; j++) {
+                EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
             }
-        }, 500);
+        }
     }
 
     vm.xhrResult = function(result, cached) {
@@ -187,7 +246,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         if (result != null && result.status === 200) {
             if (vm.lookupFiltered !== null) {
                 for (var i=0, data=[]; i<result.data.length; i++) {
-                    if (vm.lookupFiltered[result.data[i].FieldNameInTarget]) {
+                    if (vm.lookupFiltered[result.data[i].FieldName]) {
                         data.push(result.data[i]);
                     }
                 }
@@ -197,7 +256,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
             vm.enrichments_loaded = true;
             vm.enrichmentsStored = vm.enrichments.concat(result.data);
-            vm.enrichments = vm.enrichments.concat(data);
 
             // Updates the Acct Lookup Attributes tab count
             if (vm.lookupMode) {
@@ -211,20 +269,22 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
                     vm.enrichmentsObj[item.Category] = [];
                 }
 
+                vm.enrichmentsMap[item.FieldName] = vm.enrichments.length;
                 vm.enrichmentsObj[item.Category].push(item);
+                vm.enrichments.push(item);
             }
 
             numbersNumber = 0;
-
             _store = result; // just a copy of the correct data strucuture and properties for later
+
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
                 EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                 vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
-                
-                $timeout(function() {
-                    vm.enrichments_completed = true;
-                }, 500);
+                vm.enrichments_completed = true;
+                vm.generateTree(true);
+            } else {
+                vm.generateTree();
             }
         }
 
@@ -233,57 +293,127 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
     }
 
-   vm.filterLookupFiltered = function(item, type) {
-        if(type === 'PERCENTAGE') {
-            var percentage = Math.round(item * 100) + '%';
-            return percentage;
-        }
-        return item;
-   }
+    vm.generateTree = function(isComplete) {
+        var obj = vm.tmpEnrichmentObj;
 
-    vm.topAttributes = [];
+        vm.enrichments.forEach(function(item, index) {
+            var category = item.Category;
+            var subcategory = item.Subcategory;
+
+            if (!obj[category]) {
+                obj[category] = {};
+            }
+
+            if (!obj[category][subcategory]) {
+                obj[category][subcategory] = [];
+            }
+
+            if (vm.lookupMode && vm.lookupFiltered[item.FieldName]) {
+                item.AttributeValue = vm.lookupFiltered[item.FieldName];
+            }
+
+            obj[category][subcategory].push(index);
+        });
+
+        if (isComplete) {
+            // update categories with the real ones from Enrichments data
+            vm.categories = Object.keys(obj).sort();
+
+            vm.categories.forEach(function(category, item) {
+                getEnrichmentSubcategories(category, Object.keys(obj[category]));
+            });
+
+            $timeout(function() {
+                getTopAttributes();
+            },1);
+        }
+    }
+
+    vm.filterLookupFiltered = function(item, type) {
+        if (type === 'PERCENTAGE' && item != undefined) {
+            var percentage = Math.round(item * 100);
+            
+            return percentage !== NaN ? percentage + '%' : '';
+        }
+
+        return item;
+    }
+
     var getTopAttributes = function(opts) {
         var opts = opts || {},
             category = opts.category;
 
-        EnrichmentStore.getTopAttributes(opts).then(function(result) {
-            vm.topAttributes[category] = result.data;
+        Object.keys(EnrichmentTopAttributes).forEach(function(catKey) {
+            var category = data[catKey]['SubCategories'];
+
+            Object.keys(category).forEach(function(subcategory) {
+                var items = category[subcategory];
+                
+                items.forEach(function(item) {
+                    var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
+//console.log(catKey, subcategory, item.Attribute, vm.enrichmentsMap[item.Attribute])
+                    if (enrichment && enrichment.DisplayName) {
+                        var displayName = enrichment.DisplayName;
+                        item.DisplayName = displayName;
+                    }
+                });
+            });
         });
+//console.log(vm.enrichments, vm.enrichmentsMap);
+
+        vm.topAttributes = EnrichmentTopAttributes;
     }
 
     var getEnrichmentCategories = function() {
-        EnrichmentStore.getCategories().then(function(result) {
-            vm.categories = result.data;
-            _.each(vm.categories, function(value, key){
-                getEnrichmentSubcategories(value);
-                getTopAttributes({category: value, loadEnrichmentMetadata: true});
-                if (!vm.enrichmentsObj[value]) {
-                    vm.enrichmentsObj[value] = [];
-                }
-            });
-            vm.enable_category_dropdown = true;
-        });
+        vm.categories = Object.keys(EnrichmentTopAttributes).sort();
+        vm.enable_category_dropdown = true;
     }
 
     var subcategoriesExclude = [];
-    var getEnrichmentSubcategories = function(category) {
-        if(category) {
-            EnrichmentStore.getSubcategories(category).then(function(result) {
-                if(result.data.length > 1){
-                    var subcategories = result.data;
-                    vm._subcategories[category] = subcategories;
-                    vm.subcategories[category] = subcategories;
-                    if(subcategories.length <= 1) {
-                        subcategoriesExclude.push(category);
-                    }
-                }
-            });
+    var getEnrichmentSubcategories = function(category, subcategories) {
+        vm._subcategories[category] = subcategories;
+        vm.subcategories[category] = subcategories;
+
+        if (subcategories.length <= 1) {
+            subcategoriesExclude.push(category);
         }
+    }
+
+    vm.getTileTableItems = function(category, subcategory) {
+        var items = [];
+
+        if (vm.topAttributes[category]) {
+            items = vm.topAttributes[category].SubCategories[(subcategory || 'Other')];
+        }
+
+        if (vm.lookupMode || (!items || items.length == 0)) {
+            items = vm.enrichmentsObj[category];
+
+            if (subcategory) {
+                items = items.filter(function(item) {
+                    var isSubcategory = item.Subcategory == subcategory;
+                    var attrValue = vm.lookupFiltered[item.FieldName];
+
+                    if (vm.lookupMode && attrValue && isSubcategory) {
+                        item.Value = attrValue;
+                        if (!vm.metadata.toggle.show.nulls && attrValue != 'Yes') {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+
+                    return isSubcategory; 
+                });
+            }
+        }
+//console.log(category, subcategory, items);
+        return items;
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
-        if(case_insensitive) {
+        if (case_insensitive) {
             var haystack = haystack.toLowerCase(),
             needle = needle.toLowerCase();
         }
@@ -292,23 +422,26 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
     }
 
     vm.searchFields = function(enrichment){
-        if(vm.query) {
-            if(textSearch(enrichment.DisplayName, vm.query)) {
+        if (vm.query) {
+            if (textSearch(enrichment.DisplayName, vm.query)) {
                 return true;
-            } else if(textSearch(enrichment.Description, vm.query)) {
+            } else if (textSearch(enrichment.Description, vm.query)) {
                 return true;
             } else {
                 return false;
             }
         }
+
         return true;
     }
 
     vm.inCategory = function(enrichment){
-        if(enrichment.DisplayName && !(_.size(vm.selected_categories))) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
+        if (enrichment.DisplayName && !(_.size(vm.selected_categories))) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
             return true;
         }
+
         var selected = (typeof vm.selected_categories[enrichment.Category] === 'object');
+
         return selected;
     };
 
@@ -317,11 +450,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             subcategories = (category && category['subcategories'] ? category['subcategories'] : []),
             subcategory = enrichment.Subcategory;
 
-        if(enrichment.DisplayName && !subcategories.length) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
+        if (enrichment.DisplayName && !subcategories.length) { // for case where this is used as a | filter in the enrichments ngRepeat on initial state
             return true;
         }
 
-        if(!subcategories.length) {
+        if (!subcategories.length) {
             return false;
         }
 
@@ -351,7 +484,8 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
 
         vm.generalSelectedTotal = selectedTotal.length;
-        if(vm.generalSelectedTotal > vm.generalSelectLimit) {
+
+        if (vm.generalSelectedTotal > vm.generalSelectLimit) {
             vm.generalSelectedTotal = vm.generalSelectLimit;
             enrichment.IsSelected = false;
             enrichment.IsDirty = false;
@@ -374,11 +508,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             }
         }
 
-        if(vm.userSelectedCount < 1) {
+        if (vm.userSelectedCount < 1) {
             vm.selectDisabled = 1;
         }
 
-        if(!vm.enabledManualSave) {
+        if (!vm.enabledManualSave) {
             vm.saveSelected();
         }
     }
@@ -432,6 +566,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             selectedAttributes: selected,
             deselectedAttributes: deselected
         }
+
         vm.saveDisabled = 1;
         vm.hasSaved = 0;
 
@@ -461,60 +596,20 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return fieldTypes[fieldType] || fieldTypes.default;
     }
 
-    vm.categoriesDropdown = function($event){
-        vm.show_categories = !vm.show_categories;
-
-        var parent_selector = '.dropdown-categories',
-            parent = angular.element(parent_selector);
-
-        if(!vm.show_categoires) {
-            parent.find('.show-subcategory').removeClass('show-subcategory');
+    vm.enrichmentsFilter = function() {
+        var filter = {
+            'IsSelected': (!vm.metadata.toggle.show.selected ? '' : true), 
+            'IsPremium': (!vm.metadata.toggle.show.premium ? '' : true) || (!vm.metadata.toggle.hide.premium ? '' : false),
+            'IsInternal': (!vm.metadata.toggle.show.internal ? '' : true),
+            'Category': vm.category,
+            'Subcategory': vm.subcategory
+        };
+        
+        if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
+            filter.Value = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
         }
 
-        if($event && $event.target) {
-            var sub_targets = parent.find('.subcategory-toggle'),
-                categories = parent.find('ul').first();
-
-            categories.css({minWidth: parent.width(), top: parent.height() - 1});
-
-            sub_targets.each(function(key, value){
-                var target = angular.element(value),
-                    subcategories = target.parent().siblings('ul');
-
-                if(subcategories.length) {
-                    target.unbind('click');
-                    var open_subcategory = function(){
-                        var add = true,
-                            subcategories_width = subcategories.outerWidth(),
-                            subcategories_top = parent.find('h4').first().outerHeight();
-
-                        if(subcategories.hasClass('show-subcategory')) {
-                            add = false;
-                        }
-                        parent.find('.show-subcategory, .subcategory-toggle').removeClass('show-subcategory');
-                        if(add) {
-                            subcategories.siblings('.category').find('.subcategory-toggle').addClass('show-subcategory');
-                            subcategories.addClass('show-subcategory').css({left: -(subcategories_width), top: -(subcategories_top)});
-                        } 
-                    }
-                    target.on('click', function(){
-                        open_subcategory();
-                    });
-                }
-            });
-
-            var click = function($event){
-                var clicked = angular.element($event.target),
-                inside = clicked.closest(parent).length;
-                if(!inside) {
-                    parent.find('.show-subcategory').removeClass('show-subcategory');
-                    $scope.vm.show_categories = false;
-                    $scope.$digest();
-                    $document.unbind('click', click);
-                }
-            }
-            $document.bind('click', click);
-        }
+        return filter;
     }
 
     var subcategoryRenamer = function(string, replacement){
@@ -534,6 +629,16 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         return path + icon;
     }
 
+    vm.subcategoryFilter = function(subcategory) {
+        if(!vm.enrichments_completed) {
+            return true;
+        }
+        var category = vm.category,
+            count = vm.subcategoryCount(category, subcategory);
+
+        return (count ? true : false);
+    }
+
     vm.subcategoryCount = function(category, subcategory) {
         var filtered = vm.enrichmentsObj[category];
 
@@ -546,6 +651,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category) 
                 || (item.Subcategory != subcategory)
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
@@ -557,24 +663,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
 
         return result.length;
-    }
-
-    vm.subcategoryFilter = function(subcategory) {
-        if(!vm.enrichments_completed) {
-            return true;
-        }
-        var category = vm.category,
-            count = vm.subcategoryCount(category, subcategory);
-
-        return (count ? true : false);
-    }
-
-    vm.categoryIcon = function(category){
-        var path = '/assets/images/enrichments/',
-            category = subcategoryRenamer(category, '-'),
-            icon = 'ico-attr-' + category + '.png';
-
-        return path + icon;
     }
 
     vm.categoryCount = function(category) {
@@ -588,6 +676,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             var item = filtered[i];
             if (item && vm.searchFields(item)) {
                 if ((item.Category != category)
+                || (vm.lookupMode && !vm.metadata.toggle.show.nulls && item.AttributeValue != "Yes" && vm.isYesNoCategory(category)) 
                 || (vm.metadata.toggle.show.selected && !item.IsSelected) 
                 || (vm.metadata.toggle.show.premium && !item.IsPremium) 
                 || (vm.metadata.toggle.hide.premium && item.IsPremium) 
@@ -599,6 +688,14 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
 
         return result.length;
+    }
+
+    vm.categoryIcon = function(category){
+        var path = '/assets/images/enrichments/',
+            category = subcategoryRenamer(category, '-'),
+            icon = 'ico-attr-' + category + '.png';
+
+        return path + icon;
     }
 
     vm.categoryClick = function(category) {
@@ -622,14 +719,16 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
     }
 
-    // use to test 
-    //vm.LookupResponse.companyInfo = {"LE_COUNTRY":"USA","HEADQUARTER_PARENT_STATE_PROVINCE":"California","HEADQUARTER_PARENT_DnB_COUNTY_CODE":"684","HEADQUARTER_PARENT_DnB_COUNTRY_CODE":"805","DOMESTIC_ULTIMATE_STATE_PROV_ABR":"CA","GLOBAL_ULTIMATE_BUSINESS_NAME":"Lattice Engines, Inc.","REGISTERED_ADDRESS_INDICATOR":"N","GLOBAL_ULTIMATE_COUNTRY_NAME":"USA","DOMESTIC_ULTIMATE_CITY_NAME":"San Mateo","SALES_VOLUME_LOCAL_CURRENCY":39095607,"HEADQUARTER_PARENT_COUNTRY_NAME":"USA","LE_SIC_CODE":"73790200","LDC_Name":"Lattice Engines, Inc.","OUT_OF_BUSINESS_INDICATOR":"0","PRINCIPALS_INCLUDED_INDICATOR":"Y","IMPORT_EXPORT_AGENT_CODE":"G","LDC_Country":"USA","CLUSTER_TPS":"021","GLOBAL_ULTIMATE_DUNS_NUMBER":"028675958","DOMESTIC_ULTIMATE_STATE_PROVINCE":"California","PROPENSITY_TO_HAVE_A_LEASE_ACCOUNT":"01","PREMIUM_MARKETING_PRESCREEN":"5","GLOBAL_ULTIMATE_DnB_CITY_CODE":"007247","HEADQUARTER_PARENT_BUSINESS_NAME":"Lattice Engines, Inc.","DnB_COUNTY_CODE":"684","DnB_CONTINENT_CODE":"6","EMPLOYEES_HERE":85,"TRIPLE_PLAY_SEGMENT":"3","GLOBAL_ULTIMATE_INDICATOR":"Y","GLOBAL_ULTIMATE_POSTAL_CODE":"944044059","PROPENSITY_TO_HAVE_A_LINE_OF_CRE":"01","GLOBAL_ULTIMATE_DnB_CONTINENT_CODE":"6","DnB_STATE_PROVINCE_CODE":"009","LINE_OF_BUSINESS":"Computer related services, nec, nsk","CREDIT_CARD_RESPONSE_R":"09","DOMESTIC_ULTIMATE_DnB_COUNTRY_CODE":"805","EMPLOYEES_HERE_RELIABILITY_CODE":"2","LDC_ZipCode":"944044059","HEADQUARTER_PARENT_STATE_PROV_ABR":"CA","DIAS_CODE":"010017663","YEAR_STARTED":"2010","CHIEF_EXECUTIVE_OFFICER_TITLE":"Chief Executive Officer","LE_EMPLOYEE_RANGE":"101-200","GLOBAL_ULTIMATE_STATE_PROVINCE_NAME":"California","LE_NUMBER_OF_LOCATIONS":5,"LDC_Domain":"lattice-engines.com","DOMESTIC_ULTIMATE_DUNS_NUMBER":"028675958","SUBSIDIARY_INDICATOR":"0","LE_REVENUE_RANGE":"11-50M","HEADQUARTER_PARENT_POSTAL_CODE":"944044059","LDC_Street":"1820 Gateway Dr Ste 200","CLUSTER_CRS":"312","US_1987_SIC_1":"7379","EMPLOYEES_TOTAL":120,"LE_IS_PRIMARY_LOCATION":"Y","TELEPHONE_NUMBER":"8774600010","LAST_UPDATE_DATE":"20160929","HIERARCHY_CODE":"01","RECORD_SOURCE_CODE":"DWB","STATE_PROVINCE_ABBR":"CA","COMPOSITE_RISK_SCORE":"6","HEADQUARTER_PARENT_DUNS_NUMBER":"028675958","GLOBAL_ULTIMATE_CITY_NAME":"San Mateo","LOCAL_ACTIVITY_TYPE_CODE":"000","HEADQUARTER_PARENT_DnB_CITY_CODE":"007247","LE_PRIMARY_DUNS":"028675958","DnB_CITY_CODE":"007247","LE_INDUSTRY":"Computer Related Services, Nec","NUMBER_OF_FAMILY_MEMBERS":5,"GLOBAL_ULTIMATE_STREET_ADDRESS":"1820 Gateway Dr Ste 200","LEASE_BALANCE_RANKING_1_TO_10":"01","LDC_DUNS":"028675958","LDC_State":"California","DOMESTIC_ULTIMATE_STREET_ADDRESS":"1820 Gateway Dr Ste 200","HEADQUARTER_PARENT_STREET_ADDRESS":"1820 Gateway Dr Ste 200","TOTAL_CREDIT_BALANCE_RANKING_CR":"01","GLOBAL_ULTIMATE_DnB_COUNTRY_CODE":"805","HEADQUARTER_PARENT_DnB_CONTINENT":"6","GLOBAL_ULTIMATE_DnB_COUNTY_CODE":"684","EMPLOYEES_TOTAL_RELIABILITY_CODE":"0","SALES_VOLUME_US_DOLLARS":39095607,"SALES_VOLUME_RELIABILITY_CODE":"2","CURRENCY_CODE":"0020","CHIEF_EXECUTIVE_OFFICER_NAME":"Shashi Upadhyay","LDC_City":"San Mateo","DOMESTIC_ULTIMATE_DnB_CITY_CODE":"007247","DOMESTIC_ULTIMATE_POSTAL_CODE":"944044059","LEGAL_STATUS_CODE":"003","DnB_COUNTRY_CODE":"805","COUNTRY_ACCESS_CODE":"0001","LE_COMPANY_PHONE":"8774600010","HEADQUARTER_PARENT_CITY_NAME":"San Mateo","GLOBAL_ULTIMATE_STATE_PROV_ABR":"CA","STATUS_CODE":"1","FULL_REPORT_DATE":"20160929","LE_NAICS_CODE":"541512","DOMESTIC_ULTIMATE_BUSINESS_NAME":"Lattice Engines, Inc.","CABLE_TELEX_NUMBER":"20NMNNANP","LE_IS_PRIMARY_DOMAIN":"Y"};
     vm.companyInfoFormatted = function (type, value) {
+        if (!vm.LookupResponse.companyInfo) {
+            return false;
+        }
         if(!vm.LookupResponse || !vm.LookupResponse.companyInfo){
             return false;
         }
         var value = value || '',
             info = vm.LookupResponse.companyInfo;
+        
         switch (type) {
             case 'address':
                 var address = [];
@@ -666,84 +765,10 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         }
     }
 
-    var _scrolled = function() {
-        var el = document.querySelector('.subheader-container');
-            if(el) {
-            var $el = angular.element(el),
-                watched_el = document.querySelector('#mainContentView'),
-                $watched_el = angular.element(watched_el),
-                top = watched_el.getBoundingClientRect().top,
-                enrichments_list = document.querySelector('.filters-enrichments');
-
-                if(top < 0) {
-                    $el.addClass('fixed');
-                    $el.css({width:enrichments_list.offsetWidth});
-                } else {
-                    $el.removeClass('fixed');
-                    $el.css({width:'auto'});
-                }
-            }
-        }
-
-    var _resized = function(event, wait) {
-        var wait = wait || 0;
-        $timeout(function(){
-            var container = document.querySelector('.subheader-container');
-            if(container) {
-                var height = container.offsetHeight,
-                    enrichments_list = document.querySelector('.enrichments'),
-                    subheader = angular.element('.subheader-container');
-
-                if(subheader.hasClass('fixed')) {
-                    subheader.css({width:enrichments_list.offsetWidth});
-                } else {
-                    subheader.css({width:'auto'});
-                }
-
-                if(height > 70) {
-                    angular.element(container).addClass('wrapped');
-                } else {
-                    angular.element(container).removeClass('wrapped');
-                }
-            }
-        }, wait);
+    vm.isYesNoCategory = function(category) {
+        var list = ['Website Profile','Technology Profile'];
+        return list.indexOf(category) >= 0;
     }
-
-    var scrolled = _.throttle(_scrolled, 120);
-    var resized = _.throttle(_resized, 120);
-    $scope.$on('sidebar:toggle', function(event) {
-        _resized(event, 100);
-    });
-
-    $scope.$watchGroup([
-            'vm.metadata.toggle.show.selected', 
-            'vm.metadata.toggle.show.premium', 
-            'vm.metadata.toggle.hide.premium', 
-            'vm.metadata.toggle.show.internal'
-        ], function(newValues, oldValues, scope) {
-        vm.filterEmptySubcategories();
-    });
-
-    $scope.$watch('vm.queryText', function(newvalue, oldvalue){
-        vm.queryInProgress = true;
-
-        if (vm.queryTimeout) {
-            $timeout.cancel(vm.queryTimeout);
-        }
-
-        // debounce timeout to speed things up
-        vm.queryTimeout = $timeout(function() {
-            if(!vm.category && newvalue) {
-                vm.category = vm.categories[0];
-            }
-
-            vm.query = vm.queryText;
-            
-            vm.filterEmptySubcategories();
-
-            vm.queryInProgress = false;
-        }, 333);
-    });
 
     var addUniqueToArray = function(array, item) {
         if (array && item && !array.includes(item)) {
@@ -788,55 +813,6 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             return (total / number) * 100;
         }
         return 0;
-    }
-
-    var download_buttons = angular.element('.dropdown-container > h2');
-    download_buttons.click(function(e){
-        var button = angular.element(this),
-            toggle_on = !button.hasClass('active');
-
-        download_buttons.removeClass('active');
-        download_buttons.siblings('ul.dropdown').removeClass('open');
-
-        if(toggle_on) {
-            button.addClass('active');
-            button.siblings('ul.dropdown').addClass('open');
-        }
-
-        e.stopPropagation();
-
-    });
-
-    angular.element(document).click(function(event) {
-        var target = angular.element(event.target),
-        el = angular.element('.dropdown-container ul.dropdown'),
-        has_parent = target.parents().is('.dropdown-container'),
-        is_visible = el.is(':visible');
-        if(!has_parent) {
-            el.removeClass('open');
-            el.siblings('.button.active').removeClass('active');
-        }
-    });
-
-    var c = 0;
-    var debugCounter = function(){
-        c++;
-        console.log('debugCounter: ', c);
-    }
-
-    vm.init = function() {
-        _resized();
-
-        getEnrichmentData();
-
-        getEnrichmentCategories();
-
-        vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
-        vm.generalSelectLimit = 100;
-        vm.statusMessageBox = angular.element('.status-alert');
-
-        angular.element($window).bind("scroll", scrolled);
-        angular.element($window).bind("resize", resized);
     }
 
     vm.init();
