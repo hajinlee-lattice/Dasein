@@ -129,9 +129,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     @Test(groups = "deployment", enabled = true)
     public void testBulkMatchWithCache() {
-        String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_INCOMPLETELOCATION,
-                SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
+        String[] scenarios = { SCENARIO_VALIDLOCATION};
         for (String scenario : scenarios) {
             MatchInput input = prepareBulkMatchInput(scenario, true);
             MatchCommand command = matchProxy.matchBulk(input, podId);
@@ -371,7 +369,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setFields(prepareFields(scenario));
         input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));
         input.setInputBuffer(prepareBulkData(scenario));
-        input.setUseRemoteDnB(true);
+        input.setMatchDebugEnabled(true);
         return input;
     }
 
