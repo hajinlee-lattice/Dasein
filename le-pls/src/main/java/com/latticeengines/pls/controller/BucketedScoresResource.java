@@ -100,7 +100,6 @@ public class BucketedScoresResource {
         A_BUCKET_METADATA.setRightBoundScore(90);
         A_BUCKET_METADATA.setNumLeads(1623);
         A_BUCKET_METADATA.setLift(3.0);
-        A_BUCKET_METADATA.setId("1");
         A_BUCKET_METADATA.setCreationTimestamp(1484559900000l);
 
         B_BUCKET_METADATA.setBucketName(BucketName.B);
@@ -108,7 +107,6 @@ public class BucketedScoresResource {
         B_BUCKET_METADATA.setRightBoundScore(81);
         B_BUCKET_METADATA.setNumLeads(456);
         B_BUCKET_METADATA.setLift(2.3);
-        B_BUCKET_METADATA.setId("1");
         B_BUCKET_METADATA.setCreationTimestamp(1484559900000l);
 
         C_BUCKET_METADATA.setBucketName(BucketName.C);
@@ -116,7 +114,6 @@ public class BucketedScoresResource {
         C_BUCKET_METADATA.setRightBoundScore(60);
         C_BUCKET_METADATA.setNumLeads(666);
         C_BUCKET_METADATA.setLift(1.3);
-        C_BUCKET_METADATA.setId("1");
         C_BUCKET_METADATA.setCreationTimestamp(1484559900000l);
 
         D_BUCKET_METADATA.setBucketName(BucketName.D);
@@ -124,7 +121,6 @@ public class BucketedScoresResource {
         D_BUCKET_METADATA.setRightBoundScore(5);
         D_BUCKET_METADATA.setNumLeads(1416);
         D_BUCKET_METADATA.setLift(0.5);
-        D_BUCKET_METADATA.setId("1");
         D_BUCKET_METADATA.setCreationTimestamp(1484559900000l);
 
         return ResponseDocument.successResponse(Arrays.asList(A_BUCKET_METADATA, B_BUCKET_METADATA,
