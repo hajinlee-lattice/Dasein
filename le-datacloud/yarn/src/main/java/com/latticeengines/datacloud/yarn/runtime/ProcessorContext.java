@@ -269,7 +269,8 @@ public class ProcessorContext {
             useRemoteDnB = jobConfiguration.getUseRemoteDnB();
         } 
         boolean fuzzyMatchEnabled = zkConfigurationService.fuzzyMatchEnabled(space);
-        isAsync = fuzzyMatchEnabled && useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+        isAsync = (fuzzyMatchEnabled || useRemoteDnB) && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+        
         log.info("Use remote DnB ? " + useRemoteDnB + " Async ?" + isAsync);
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
