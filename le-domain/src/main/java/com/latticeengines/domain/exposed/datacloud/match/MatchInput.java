@@ -73,7 +73,7 @@ public class MatchInput implements Fact, Dimension {
     // Flag useRemoteDnB decides whether go to DnB api.
     // Purpose of this flag: If feature of using fuzzy match is turned off, DnB
     // cache is used to do exact location lookup, but DnB api is not called
-    private Boolean useRemoteDnB = Boolean.TRUE;
+    private Boolean useRemoteDnB;
     // Flag logDnBBulkResult decides whether DnB bulk match result is logged
     private boolean logDnBBulkResult = false;
 
