@@ -32,7 +32,7 @@ ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
 
 class CreateServiceThread (threading.Thread):
-    def __init__(self, environment, stackname, app, instances, ecr, ip, profile, region):
+    def __init__(self, environment, stackname, app, instances, ecr, ip, profile, tag, region):
         threading.Thread.__init__(self)
         self.threadID = "%s-%s" % (stackname, app)
         self.environment = environment
@@ -42,10 +42,11 @@ class CreateServiceThread (threading.Thread):
         self.instances = instances
         self.ip = ip
         self.profile = profile
+        self.tag = tag
         self.region = region
 
     def run(self):
-        container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, region=self.region)
+        container = tomcat_container(self.environment, self.stackname, self.ecr, self.app, self.ip, self.profile, tag=self.tag, region=self.region)
         ledp = ECSVolume("ledp", "/etc/ledp")
         efsip = ECSVolume("efsip", "/etc/efsip.txt")
         internalAddr = ECSVolume("intAddr", "/etc/internaladdr.txt")
@@ -203,9 +204,9 @@ def provision(environment, stackname, tag):
     write_to_stack(consul, environment, stackname, HAPROXY_KEY, ip)
 
 def bootstrap_cli(args):
-    bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances)
+    bootstrap(args.environment, args.stackname, args.apps, args.profile, args.instances, args.tag)
 
-def bootstrap(environment, stackname, apps, profile, instances, region="us-east-1"):
+def bootstrap(environment, stackname, apps, profile, instances, tag,region="us-east-1"):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -221,16 +222,16 @@ def bootstrap(environment, stackname, apps, profile, instances, region="us-east-
         alloc = ALLOCATION[app]
         num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
         num_tasks = instances if instances < num_tasks else num_tasks
-        thread = CreateServiceThread(environment, stackname, app, num_tasks, ecr_url, ip, profile, region)
+        thread = CreateServiceThread(environment, stackname, app, num_tasks, ecr_url, ip, profile, tag, region)
         thread.start()
         threads.append(thread)
 
     for thread in threads:
         thread.join(120)
 
-def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, region="us-east-1"):
+def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag, region):
     alloc = ALLOCATION[app]
-    container = Container("tomcat", "%s/latticeengines/%s" % (ecr_url, app))
+    container = Container("tomcat", "%s/latticeengines/%s:%s" % (ecr_url, app, tag))
     container.mem_mb(alloc["mem"])
     if "cpu" in alloc:
         container.cpu(alloc["cpu"])
