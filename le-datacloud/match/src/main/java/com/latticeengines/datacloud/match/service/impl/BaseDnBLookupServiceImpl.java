@@ -84,7 +84,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     @SuppressWarnings("unchecked")
     protected DnBReturnCode parseErrorBody(String body) {
         try {
-            List<String> code = (List<String>) retrieveJsonValueFromResponse(resultIdJsonPath, body);
+            List<String> code = (List<String>) retrieveJsonValueFromResponse(resultIdJsonPath, body, true);
             String dnBErrorCode = code.get(0);
             switch (dnBErrorCode) {
             case "SC001":
@@ -117,11 +117,15 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
     }
 
-    protected Object retrieveJsonValueFromResponse(String jsonPath, String body) {
+    protected Object retrieveJsonValueFromResponse(String jsonPath, String body, boolean raiseException) {
         try {
             return JsonPath.parse(body).read(jsonPath);
         } catch (Exception e) {
-            return null;
+            if (raiseException) {
+                throw e;
+            } else {
+                return null;
+            }
         }
 
     }

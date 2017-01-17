@@ -115,23 +115,26 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     protected void parseResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         switch (apiType) {
         case REALTIME_ENTITY:
-            context.setDuns((String) retrieveJsonValueFromResponse(entityDunsJsonPath, response));
-            context.setConfidenceCode((Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response));
-            context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response));
+            context.setDuns((String) retrieveJsonValueFromResponse(entityDunsJsonPath, response, false));
+            context.setConfidenceCode(
+                    (Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response, false));
+            context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response, false));
             NameLocation matchedNameLocation = new NameLocation();
-            matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response));
-            matchedNameLocation.setStreet((String) retrieveJsonValueFromResponse(entityStreetJsonPath, response));
-            matchedNameLocation.setCity((String) retrieveJsonValueFromResponse(entityCityJsonPath, response));
-            matchedNameLocation.setState((String) retrieveJsonValueFromResponse(entityStateJsonPath, response));
+            matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response, false));
             matchedNameLocation
-                    .setCountryCode((String) retrieveJsonValueFromResponse(entityCountryCodeJsonPath, response));
-            matchedNameLocation.setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response));
+                    .setStreet((String) retrieveJsonValueFromResponse(entityStreetJsonPath, response, false));
+            matchedNameLocation.setCity((String) retrieveJsonValueFromResponse(entityCityJsonPath, response, false));
+            matchedNameLocation.setState((String) retrieveJsonValueFromResponse(entityStateJsonPath, response, false));
             matchedNameLocation
-                    .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response));
+                    .setCountryCode((String) retrieveJsonValueFromResponse(entityCountryCodeJsonPath, response, false));
+            matchedNameLocation
+                    .setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response, false));
+            matchedNameLocation
+                    .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response, false));
             context.setMatchedNameLocation(matchedNameLocation);
             break;
         case REALTIME_EMAIL:
-            context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response));
+            context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false));
             break;
         default:
             throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
