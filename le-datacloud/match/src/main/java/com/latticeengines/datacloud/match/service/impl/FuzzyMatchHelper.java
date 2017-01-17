@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -29,10 +27,11 @@ import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;
+
+import scala.concurrent.Future;
 
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
@@ -206,22 +205,21 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion) {
         MatchContext mergedContext = new MatchContext();
-        MatchInput dummyInput = new MatchInput();
-        dummyInput.setDataCloudVersion(dataCloudVersion);
-        dummyInput.setTenant(matchContextList.get(0).getInput().getTenant());
-        mergedContext.setInput(dummyInput);
-
-        List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
-        for (MatchContext matchContext : matchContextList) {
-            String contextId = UUID.randomUUID().toString();
-            matchContext.setContextId(contextId);
-            for (InternalOutputRecord record : matchContext.getInternalResults()) {
-                record.setOriginalContextId(contextId);
-                internalOutputRecords.add(record);
+        mergedContext.setInput(matchContextList.get(0).getInput());
+        String contextId = UUID.randomUUID().toString();
+        matchContextList.get(0).setContextId(contextId);
+        if (matchContextList.size() > 1) {
+            List<InternalOutputRecord> internalOutputRecords = new ArrayList<>(mergedContext.getInternalResults());
+            for (int i = 1; i < matchContextList.size(); i++) {
+                MatchContext matchContext = matchContextList.get(i);
+                contextId = UUID.randomUUID().toString();
+                matchContext.setContextId(contextId);
+                for (InternalOutputRecord record : matchContext.getInternalResults()) {
+                    record.setOriginalContextId(contextId);
+                    internalOutputRecords.add(record);
+                }
             }
         }
-        mergedContext.setInternalResults(internalOutputRecords);
-
         return mergedContext;
     }
 
