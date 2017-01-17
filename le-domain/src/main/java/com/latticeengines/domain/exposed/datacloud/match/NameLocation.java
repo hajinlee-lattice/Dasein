@@ -27,6 +27,9 @@ public class NameLocation implements Fact {
     @JsonProperty("City")
     private String city;
 
+    @JsonProperty("Street")
+    private String street;
+
     @JsonProperty("Zipcode")
     private String zipcode;
 
@@ -76,6 +79,14 @@ public class NameLocation implements Fact {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
     }
 
     @MetricField(name = "Zipcode")

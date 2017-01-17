@@ -16,6 +16,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private String duns;
 
+    private NameLocation matchedNameLocation;
+
     private Integer confidenceCode;
 
     private DnBMatchGrade matchGrade;
@@ -49,6 +51,7 @@ public class DnBMatchContext implements Fact, Dimension {
         matchGrade = result.getMatchGrade();
         lookupRequestId = result.getLookupRequestId();
         cacheId = result.cacheId;
+        matchedNameLocation = result.getMatchedNameLocation();
     }
 
     public void copyResultFromWhiteCache(DnBWhiteCache whiteCache) {
@@ -105,6 +108,14 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setDuns(String duns) {
         this.duns = duns;
+    }
+
+    public NameLocation getMatchedNameLocation() {
+        return matchedNameLocation;
+    }
+
+    public void setMatchedNameLocation(NameLocation matchedNameLocation) {
+        this.matchedNameLocation = matchedNameLocation;
     }
 
     @MetricField(name = "DnBConfidenceCode", fieldType = MetricField.FieldType.INTEGER)
