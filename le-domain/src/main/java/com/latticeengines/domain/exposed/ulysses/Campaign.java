@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "ULYSSES_CAMPAIGN", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Campaign extends CompositeFabricEntity implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant {
@@ -92,7 +92,7 @@ public class Campaign extends CompositeFabricEntity implements HasPid, HasName, 
     private Tenant tenant;
 
     public Campaign() {
-        setEntityId(UUID.randomUUID().toString());
+        setId(UUID.randomUUID().toString());
     }
 
     @Override
