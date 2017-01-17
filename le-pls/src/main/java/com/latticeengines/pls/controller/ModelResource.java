@@ -115,6 +115,12 @@ public class ModelResource {
     @PreAuthorize("hasRole('Edit_PLS_Refine_Clone')")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
+        if (!NameValidationUtils.validateModelName(modelName)) {
+            String message = String.format(
+                    "Not qualified modelName %s contains unsupported characters.", modelName);
+            log.error(message);
+            throw new RuntimeException(message);
+        }
         log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s",
                 parameters.toString(), parameters.getDeduplicationType()));
         Table clone = modelMetadataService.cloneTrainingTable(parameters.getSourceModelSummaryId());

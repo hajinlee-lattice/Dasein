@@ -3,10 +3,11 @@ angular.module('mainApp.models.remodel', [
     'mainApp.models.modals.BasicConfirmation',
     'mainApp.models.modals.RemodelingModal',
     'mainApp.setup.services.MetadataService',
+    'mainApp.appCommon.utilities.StringUtility',
     'lp.models.remodel',
     'lp.jobs'
 ])
-.controller('RemodelController', function($scope, $filter, $state, MetadataService, RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal, RemodelingModal, ResourceUtility) {
+.controller('RemodelController', function($scope, $filter, $state, MetadataService, RemodelTooltipService, RemodelStore, Model, DataRules, Attributes, BasicConfirmationModal, RemodelingModal, ResourceUtility, StringUtility) {
 
     if (Model.ModelType === 'PmmlModel' ||
         Model.ModelDetails.Uploaded === true) {
@@ -89,12 +90,14 @@ angular.module('mainApp.models.remodel', [
     };
 
     vm.remodel = function() {
+        var modelNameFormatted = StringUtility.SubstituteAllSpecialCharsWithDashes(vm.newModelName);
+
         var copy_text = " (copy)",
             dedupType = Model.EventTableProvenance.Is_One_Lead_Per_Domain === 'true' ? 'ONELEADPERDOMAIN' : 'MULTIPLELEADSPERDOMAIN',
             includePersonalEmailDomains = Model.EventTableProvenance.Exclude_Public_Domains === "false",
             useLatticeAttributes = Model.EventTableProvenance.Exclude_Propdata_Columns === "false",
             enableTransformations = (Model.EventTableProvenance.Transformation_Group_Name || Model.ModelDetails.TransformationGroupName === "none") ? false : true,
-            modelName = vm.newModelName,
+            modelName = modelNameFormatted,
             modelDisplayName = vm.newModelName,
             originalModelSummaryId = Model.ModelDetails.ModelID,
             fields = vm.attributes.map(function(attribute) {
