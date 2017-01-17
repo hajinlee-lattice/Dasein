@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -46,8 +47,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled)
-            throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled) throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
@@ -59,11 +59,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled)
-            throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled) throws Exception {
         logLevel = setLogLevel(logLevel);
-        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
-                useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
+        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel,
+                useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
     }
 
     @Override
@@ -108,9 +107,37 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     debugValues.add(value);
                     value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
                     debugValues.add(value);
+                    addNameLocationValues(debugValues, matchContext);
                     matchRecord.setDebugValues(debugValues);
                 }
             }
+        }
+    }
+
+    private void addNameLocationValues(List<String> debugValues, DnBMatchContext matchContext) {
+        log.info("NameLocation value="
+                + (matchContext.getMatchedNameLocation() == null ? "null" : matchContext.getMatchedNameLocation()
+                        .toString()));
+        debugValues.add(getFieldValue(matchContext, "name"));
+        debugValues.add(getFieldValue(matchContext, "street"));
+        debugValues.add(getFieldValue(matchContext, "city"));
+        debugValues.add(getFieldValue(matchContext, "state"));
+        debugValues.add(getFieldValue(matchContext, "countryCode"));
+        debugValues.add(getFieldValue(matchContext, "zipcode"));
+        debugValues.add(getFieldValue(matchContext, "phoneNumber"));
+    }
+
+    private String getFieldValue(DnBMatchContext matchContext, String field) {
+        if (matchContext.getMatchedNameLocation() == null) {
+            return "";
+        }
+        try {
+            Object value = BeanUtils.getProperty(matchContext.getMatchedNameLocation(), field);
+            String valueStr = value != null ? value.toString() : "";
+            return valueStr;
+        } catch (Exception ex) {
+            log.warn("Failed to get the value for field=" + field);
+            return "";
         }
     }
 
@@ -122,8 +149,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
-            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
-            boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled) {
+            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel,
+            boolean useDnBCache, boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {

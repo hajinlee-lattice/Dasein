@@ -324,10 +324,17 @@ public class ProcessorContext {
 
     private Schema appendDebugSchema(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
-        fieldMap.put("Matched_DUNS", String.class);
-        fieldMap.put("Matched_Confidence_Code", String.class);
-        fieldMap.put("Matched_Match_Grade", String.class);
-        fieldMap.put("Matched_Cache_Hit", String.class);
+        fieldMap.put("__Matched_DUNS__", String.class);
+        fieldMap.put("__Matched_Confidence_Code__", String.class);
+        fieldMap.put("__Matched_Match_Grade__", String.class);
+        fieldMap.put("__Matched_Cache_Hit__", String.class);
+        fieldMap.put("__Matched_Name__", String.class);
+        fieldMap.put("__Matched_Address__", String.class);
+        fieldMap.put("__Matched_City__", String.class);
+        fieldMap.put("__Matched_State__", String.class);
+        fieldMap.put("__Matched_Country_Code__", String.class);
+        fieldMap.put("__Matched_Zipcode__", String.class);
+        fieldMap.put("__Matched_Phone__", String.class);
         Schema debugSchema = AvroUtils.constructSchema(schema.getName(), fieldMap);
         return (Schema) AvroUtils.combineSchemas(schema, debugSchema)[0];
     }
