@@ -33,7 +33,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     private final static int THREAD_NUM = 20;
 
-    @Test(groups = "functional", dataProvider = "entityInputData", enabled = true)
+    @Test(groups = "dnb", dataProvider = "entityInputData", enabled = true, priority = 1)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,
             DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade) {
         MatchKeyTuple input = new MatchKeyTuple();
@@ -60,7 +60,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "dnb", enabled = false)
     public void loadTestRealTimeLookupService() {
 
         List<String> messageList = new ArrayList<>();
@@ -103,7 +103,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertTrue(flag);
     }
 
-    @Test(groups = "functional", dataProvider = "emailInputData", enabled = true)
+    @Test(groups = "dnb", dataProvider = "emailInputData", enabled = true, priority = 2)
     public void testRealTimeEmailLookupService(String email, DnBReturnCode dnbCode, String duns) {
         DnBMatchContext context = new DnBMatchContext();
         context.setInputEmail(email);
@@ -112,6 +112,47 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertEquals(res.getDuns(), duns);
         Assert.assertNotNull(res.getDuration());
         log.info(String.format("Match duration: %d", res.getDuration()));
+    }
+
+    @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", enabled = true, priority = 3)
+    public void testRealTimeEntityLookupMatchedNameLocation(String inputName, String inputCountryCode,
+            DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade, String matchedName,
+            String matchedStreet, String matchedCity, String matchedState, String matchedCountryCode,
+            String matchedZipCode, String matchedPhoneNumber) {
+        MatchKeyTuple input = new MatchKeyTuple();
+        input.setCountryCode(inputCountryCode);
+        input.setName(inputName);
+        DnBMatchContext context = new DnBMatchContext();
+        context.setInputNameLocation(input);
+        context.setLookupRequestId(UUID.randomUUID().toString());
+
+        DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
+        Assert.assertEquals(res.getDnbCode(), dnbCode);
+        if (duns != null) {
+            Assert.assertEquals(res.getDuns(), duns);
+        }
+        Assert.assertEquals(res.getConfidenceCode(), ConfidenceCode);
+        Assert.assertEquals(res.getMatchGrade(), matchGrade);
+        Assert.assertNotNull(res.getDuration());
+        Assert.assertEquals(res.getMatchedNameLocation().getName(), matchedName);
+        Assert.assertEquals(res.getMatchedNameLocation().getStreet(), matchedStreet);
+        Assert.assertEquals(res.getMatchedNameLocation().getCity(), matchedCity);
+        Assert.assertEquals(res.getMatchedNameLocation().getState(), matchedState);
+        Assert.assertEquals(res.getMatchedNameLocation().getCountryCode(), matchedCountryCode);
+        Assert.assertEquals(res.getMatchedNameLocation().getZipcode(), matchedZipCode);
+        Assert.assertEquals(res.getMatchedNameLocation().getPhoneNumber(), matchedPhoneNumber);
+
+        log.info(String.format("Match duration: %d", res.getDuration()));
+        log.info(String.format(
+                "Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s",
+                res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
+                res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
+                res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
+                res.getMatchedNameLocation().getPhoneNumber()));
+        if (res.getMatchGrade() != null) {
+            log.info(res.getMatchGrade().getRawCode());
+        }
+
     }
 
     @DataProvider(name = "entityInputData")
@@ -132,5 +173,12 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     public static Object[][] getEmailInputData() {
         return new Object[][] { { "CRISTIANA_MAURICIO@DEACONESS.COM", DnBReturnCode.UNMATCH, null },
                 { "JREMLEY@GOOGLE.COM", DnBReturnCode.OK, "060902413" } };
+    }
+
+    @DataProvider(name = "entityInputDataTestMatchedNameLocation")
+    public static Object[][] getEntityInputDataTestMatchedNameLocation() {
+        return new Object[][] { { "GOOGLE", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
+                "GOOGLE INC.", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" }
+        };
     }
 }

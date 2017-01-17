@@ -118,7 +118,12 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     }
 
     protected Object retrieveJsonValueFromResponse(String jsonPath, String body) {
-        return JsonPath.parse(body).read(jsonPath);
+        try {
+            return JsonPath.parse(body).read(jsonPath);
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
     protected Object retrieveXmlValueFromResponse(String path, String response) {

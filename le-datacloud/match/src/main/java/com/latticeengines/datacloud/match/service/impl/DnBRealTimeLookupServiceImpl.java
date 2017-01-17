@@ -16,6 +16,7 @@ import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -41,6 +42,27 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
 
     @Value("${datacloud.dnb.realtime.duns.jsonpath}")
     private String entityDunsJsonPath;
+
+    @Value("${datacloud.dnb.realtime.name.jsonpath}")
+    private String entityNameJsonPath;
+
+    @Value("${datacloud.dnb.realtime.street.jsonpath}")
+    private String entityStreetJsonPath;
+
+    @Value("${datacloud.dnb.realtime.city.jsonpath}")
+    private String entityCityJsonPath;
+
+    @Value("${datacloud.dnb.realtime.state.jsonpath}")
+    private String entityStateJsonPath;
+
+    @Value("${datacloud.dnb.realtime.countrycode.jsonpath}")
+    private String entityCountryCodeJsonPath;
+
+    @Value("${datacloud.dnb.realtime.zipcode.jsonpath}")
+    private String entityZipCodeJsonPath;
+
+    @Value("${datacloud.dnb.realtime.phonenumber.jsonpath}")
+    private String entityPhoneNumberJsonPath;
 
     @Value("${datacloud.dnb.realtime.confidencecode.jsonpath}")
     private String entityConfidenceCodeJsonPath;
@@ -96,6 +118,17 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             context.setDuns((String) retrieveJsonValueFromResponse(entityDunsJsonPath, response));
             context.setConfidenceCode((Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response));
             context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response));
+            NameLocation matchedNameLocation = new NameLocation();
+            matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response));
+            matchedNameLocation.setStreet((String) retrieveJsonValueFromResponse(entityStreetJsonPath, response));
+            matchedNameLocation.setCity((String) retrieveJsonValueFromResponse(entityCityJsonPath, response));
+            matchedNameLocation.setState((String) retrieveJsonValueFromResponse(entityStateJsonPath, response));
+            matchedNameLocation
+                    .setCountryCode((String) retrieveJsonValueFromResponse(entityCountryCodeJsonPath, response));
+            matchedNameLocation.setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response));
+            matchedNameLocation
+                    .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response));
+            context.setMatchedNameLocation(matchedNameLocation);
             break;
         case REALTIME_EMAIL:
             context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response));
