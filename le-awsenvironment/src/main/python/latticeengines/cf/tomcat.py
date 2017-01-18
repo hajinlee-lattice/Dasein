@@ -48,10 +48,10 @@ def create_template(profile, fixed_instances=False, num_instances=1):
     stack.add_params(profile_vars.values())
     task = tomcat_task(profile_vars)
     stack.add_resource(task)
-    service = stack.add_service("tomcat", task)
+    service, tgt = stack.add_service("tomcat", task)
     if not fixed_instances:
-        stack.percent_autoscale(service, "ScaleUp", 100, lb=0)
-        stack.exact_autoscale(service, "ScaleBack", num_instances, ub=100)
+        stack.percent_autoscale(tgt, "ScaleUp", 100, lb=0)
+        stack.exact_autoscale(tgt, "ScaleBack", num_instances, ub=100)
     return stack
 
 def tomcat_task(profile_vars):

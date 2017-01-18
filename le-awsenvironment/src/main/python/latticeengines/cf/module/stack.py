@@ -7,7 +7,7 @@ import tempfile
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy, PercentAASScalingPolicy, ExactAASScalingPolicy
+from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy, PercentAASScalingPolicy, ExactAASScalingPolicy, ScalableTarget
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
@@ -136,9 +136,11 @@ class ECSStack(Stack):
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
 
     def add_service(self, service_name, task, capacity=None):
-        service = self.create_service(service_name, task, capacity=capacity)
+        service, tgt = self.create_service(service_name, task, capacity=capacity)
         self.add_resource(service)
-        return service
+        if tgt is not None:
+            self.add_resource(tgt)
+        return service, tgt
 
     def create_service(self, service_name, task, capacity=None):
         if capacity is None:
@@ -147,21 +149,23 @@ class ECSStack(Stack):
         service = ECSService(service_name, self._ecscluster, task, capacity) \
             .set_min_max_percent(50, 200)
 
+        scalable_tgt = None
         if self._asgroup is not None:
             service.depends_on(self._asgroup)
+            scalable_tgt = ScalableTarget(service.logical_id() + "ScalableTgt", service, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         else:
             for ec2 in self._ec2s:
                 service.depends_on(ec2)
 
-        return service
+        return service, scalable_tgt
 
-    def exact_autoscale(self, service, policy_name, incremental, lb=None, ub=None):
-        policy = ExactAASScalingPolicy(service.logical_id() + policy_name, policy_name, service, incremental, lb=lb, ub=ub)
+    def exact_autoscale(self, target, policy_name, incremental, lb=None, ub=None):
+        policy = ExactAASScalingPolicy(target.logical_id() + policy_name, policy_name, target, incremental, lb=lb, ub=ub)
         self.add_resource(policy)
         return policy
 
-    def percent_autoscale(self, service, policy_name, percent, lb=None, ub=None):
-        policy = PercentAASScalingPolicy(service.logical_id() + policy_name, policy_name, service, percent, lb=lb, ub=ub)
+    def percent_autoscale(self, target, policy_name, percent, lb=None, ub=None):
+        policy = PercentAASScalingPolicy(target.logical_id() + policy_name, policy_name, target, percent, lb=lb, ub=ub)
         self.add_resource(policy)
         return policy
 
