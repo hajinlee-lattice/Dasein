@@ -136,7 +136,9 @@ class ECSStack(Stack):
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
 
     def add_service(self, service_name, task, capacity=None):
-        self.add_resource(self.create_service(service_name, task, capacity=capacity))
+        service = self.create_service(service_name, task, capacity=capacity)
+        self.add_resource(service)
+        return service
 
     def create_service(self, service_name, task, capacity=None):
         if capacity is None:
