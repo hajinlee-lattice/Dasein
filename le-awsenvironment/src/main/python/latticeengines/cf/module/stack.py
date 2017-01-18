@@ -135,14 +135,14 @@ class ECSStack(Stack):
             self._asgroup = None
             self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
 
-    def add_service(self, service_name, task, capacity=None):
-        service, tgt = self.create_service(service_name, task, capacity=capacity)
+    def add_service(self, service_name, task, capacity=None, asrolearn=None):
+        service, tgt = self.create_service(service_name, task, capacity=capacity, asrolearn=asrolearn)
         self.add_resource(service)
         if tgt is not None:
             self.add_resource(tgt)
         return service, tgt
 
-    def create_service(self, service_name, task, capacity=None):
+    def create_service(self, service_name, task, capacity=None, asrolearn=None):
         if capacity is None:
             capacity = PARAM_CAPACITY
 
@@ -152,7 +152,7 @@ class ECSStack(Stack):
         scalable_tgt = None
         if self._asgroup is not None:
             service.depends_on(self._asgroup)
-            scalable_tgt = ScalableTarget(service.logical_id() + "ScalableTgt", service, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
+            scalable_tgt = ScalableTarget(service.logical_id() + "ScalableTgt", service, PARAM_CAPACITY, PARAM_MAX_CAPACITY, autoscalearn=asrolearn)
         else:
             for ec2 in self._ec2s:
                 service.depends_on(ec2)

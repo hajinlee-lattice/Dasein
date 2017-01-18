@@ -86,6 +86,9 @@ class AwsEnvironment:
     def ecs_instance_profile_name(self):
         return self._props['ecs.instance.profile.name']
 
+    def ecs_autoscale_role_arn(self):
+        return "arn:aws:iam::%s:role/%s" % (self.aws_account_id(), self._props['ecs.autoscaling.role'])
+
     def efs_sg(self):
         return self._props['efs.sg']
 

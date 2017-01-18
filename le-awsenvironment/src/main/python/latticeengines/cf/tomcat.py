@@ -20,6 +20,7 @@ PARAM_MEM=Parameter("Memory", "Allocated memory for the container")
 PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
 PARAM_EFS = Parameter("Efs", "EFS Id")
 PARAM_SNS_TOPIC_ARN = ArnParameter("SNSTopicArn", "SNS Topic Arn")
+PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -43,12 +44,12 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
 
 def create_template(profile, fixed_instances=False, num_instances=1):
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS, PARAM_SNS_TOPIC_ARN])
+    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS, PARAM_SNS_TOPIC_ARN, PARAM_ECS_SCALE_ROLE_ARN])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = tomcat_task(profile_vars)
     stack.add_resource(task)
-    service, tgt = stack.add_service("tomcat", task)
+    service, tgt = stack.add_service("tomcat", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     if not fixed_instances:
         stack.percent_autoscale(tgt, "ScaleUp", 100, lb=0)
         stack.exact_autoscale(tgt, "ScaleBack", num_instances, ub=100)
@@ -115,6 +116,7 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
 
     extra_params.append(PARAM_EFS.config(config.lpi_efs_id()))
     extra_params.append(PARAM_SNS_TOPIC_ARN.config(config.scaling_sns_topic_arn()))
+    extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
 
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 

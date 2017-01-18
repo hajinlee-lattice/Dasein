@@ -187,7 +187,7 @@ class PercentScalingPolicy(ScalingPolicy):
 
 
 class ScalableTarget(Resource):
-    def __init__(self, logicalId, resource, mincap, maxcap):
+    def __init__(self, logicalId, resource, mincap, maxcap, autoscalearn):
         Resource.__init__(self, logicalId)
         self._template = {
             "Type" : "AWS::ApplicationAutoScaling::ScalableTarget",
@@ -195,7 +195,7 @@ class ScalableTarget(Resource):
                 "MaxCapacity" : maxcap.ref() if isinstance(maxcap, Parameter) else maxcap,
                 "MinCapacity" : mincap.ref() if isinstance(mincap, Parameter) else mincap,
                 "ResourceId" : resource.ref() if isinstance(resource, Resource) or isinstance(resource, Parameter) else resource,
-                "RoleARN" : {"Fn::GetAtt" : ["ApplicationAutoScalingRole", "Arn"] },
+                "RoleARN" : autoscalearn.ref(),
                 "ScalableDimension" : "ecs:service:DesiredCount",
                 "ServiceNamespace" : "ecs"
             }
@@ -231,7 +231,7 @@ class SimpleAASScalingPolicy(AASScalingPolicy):
         if lb is not None:
             step["MetricIntervalLowerBound"] = lb
         elif ub is not None:
-            step["MetricIntervalUpperBound"] = lb
+            step["MetricIntervalUpperBound"] = ub
         else:
             raise Exception("Must specify either lower bound or upper bound")
         self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
@@ -247,7 +247,7 @@ class ExactAASScalingPolicy(AASScalingPolicy):
         if lb is not None:
             step["MetricIntervalLowerBound"] = lb
         elif ub is not None:
-            step["MetricIntervalUpperBound"] = lb
+            step["MetricIntervalUpperBound"] = ub
         else:
             raise Exception("Must specify either lower bound or upper bound")
         self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
@@ -262,7 +262,7 @@ class PercentAASScalingPolicy(AASScalingPolicy):
         if lb is not None:
             step["MetricIntervalLowerBound"] = lb
         elif ub is not None:
-            step["MetricIntervalUpperBound"] = lb
+            step["MetricIntervalUpperBound"] = ub
         else:
             raise Exception("Must specify either lower bound or upper bound")
         self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
