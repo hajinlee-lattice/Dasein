@@ -66,13 +66,29 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
                     result.getMatchedNameLocation().getCity(), result.getMatchedNameLocation().getState(),
                     result.getMatchedNameLocation().getCountryCode(), result.getMatchedNameLocation().getZipcode(),
                     result.getMatchedNameLocation().getPhoneNumber()));
+            Assert.assertEquals(result.getMatchedNameLocation().getName(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][7]);
+            Assert.assertEquals(result.getMatchedNameLocation().getStreet(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][8]);
+            Assert.assertEquals(result.getMatchedNameLocation().getCity(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][9]);
+            Assert.assertEquals(result.getMatchedNameLocation().getState(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][10]);
+            Assert.assertEquals(result.getMatchedNameLocation().getCountryCode(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][11]);
+            Assert.assertEquals(result.getMatchedNameLocation().getZipcode(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][12]);
+            Assert.assertEquals(result.getMatchedNameLocation().getPhoneNumber(),
+                    getEntityInputData()[Integer.valueOf(lookupRequestId)][13]);
         }
     }
 
     public static Object[][] getEntityInputData() {
         return new Object[][] {
-                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ") },
-                { "GOOGLE GERMANY", "HAMBURG", null, "DE", "330465266", 7, new DnBMatchGrade("AZZAZZZZZFZ") }
+                { "AMAZON INC", "CHICAGO", "ILLINOIS", "US", "013919572", 7, new DnBMatchGrade("AZZAAZZZFFZ"),
+                        "AMAZON INC", "232 E OHIO ST FL 3", "CHICAGO", "IL", "US", "606113217", "(312) 642-5400" },
+                { "GOOGLE GERMANY", "HAMBURG", null, "DE", "330465266", 7, new DnBMatchGrade("AZZAZZZZZFZ"),
+                        "Google Germany GmbH", "ABC-Str. 19", "Hamburg", "DE", "DE", "20354", "040808179000" }
                 };
     }
 
