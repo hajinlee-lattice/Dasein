@@ -34,11 +34,8 @@ def hookecs(args):
 
 def hookecs_internal(cluster, service):
     cluster_name = find_cluster_name(cluster)
-    print cluster_name
     service_name = find_service_name(cluster, service)
-    print service_name
     policies = get_all_ecs_policies(cluster_name, service_name)
-    print policies
 
     alarms = get_alarms(cluster)
     for policy in policies:
@@ -86,13 +83,16 @@ def put_alarm_actions(alarm, policy_arn):
     global CW_CLIENT
     if CW_CLIENT is None:
         CW_CLIENT = boto3.client('cloudwatch')
+    actions =alarm["AlarmActions"]
+    actions.append(policy_arn)
     CW_CLIENT.put_metric_alarm(
         AlarmName=alarm["AlarmName"],
         ActionsEnabled=True,
-        AlarmActions=[policy_arn],
+        AlarmActions=actions,
         MetricName=alarm["MetricName"],
         Namespace=alarm["Namespace"],
         Statistic=alarm["Statistic"],
+        Dimensions=alarm["Dimensions"],
         Period=alarm["Period"],
         EvaluationPeriods=alarm["EvaluationPeriods"],
         Threshold=alarm["Threshold"],
