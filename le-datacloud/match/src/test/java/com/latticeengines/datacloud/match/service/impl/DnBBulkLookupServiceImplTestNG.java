@@ -60,6 +60,12 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
             Assert.assertEquals((int) result.getConfidenceCode(),
                     getEntityInputData()[Integer.valueOf(lookupRequestId)][5]);
             Assert.assertEquals(result.getMatchGrade(), getEntityInputData()[Integer.valueOf(lookupRequestId)][6]);
+            log.info(String.format(
+                    "Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s",
+                    result.getMatchedNameLocation().getName(), result.getMatchedNameLocation().getStreet(),
+                    result.getMatchedNameLocation().getCity(), result.getMatchedNameLocation().getState(),
+                    result.getMatchedNameLocation().getCountryCode(), result.getMatchedNameLocation().getZipcode(),
+                    result.getMatchedNameLocation().getPhoneNumber()));
         }
     }
 

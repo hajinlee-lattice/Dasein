@@ -24,6 +24,7 @@ import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -200,20 +201,52 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             record = record.substring(1, record.length() - 1);
             String[] values = record.split("\",\"");
 
-            String lookupRequestId = values[1];
-            output.setLookupRequestId(lookupRequestId);
-            String duns = values[25];
-            if (!StringUtils.isNumeric(values[48])) {
+            if (values.length < 50) {
                 output.setDnbCode(DnBReturnCode.DISCARD);
                 return output;
             }
-            int confidenceCode = Integer.parseInt(values[48]);
-            String matchGrade = values[49];
+            if (!StringUtils.isNumeric(StringUtils.strip(values[48]))) {
+                output.setDnbCode(DnBReturnCode.DISCARD);
+                return output;
+            }
+            int confidenceCode = Integer.parseInt(StringUtils.strip(values[48]));
+            String matchGrade = StringUtils.strip(values[49]);
+            if (StringUtils.isEmpty(matchGrade)) {
+                output.setDnbCode(DnBReturnCode.DISCARD);
+                return output;
+            }
+            String lookupRequestId = StringUtils.strip(values[1]);
+            output.setLookupRequestId(lookupRequestId);
+            String duns = StringUtils.strip(values[25]);
+            duns = StringUtils.isNotEmpty(duns) ? duns : null;
+            String name = StringUtils.strip(values[26]);
+            name = StringUtils.isNotEmpty(name) ? name : null;
+            String street = StringUtils.strip(values[29]);
+            street = StringUtils.isNotEmpty(street) ? street : null;
+            String city = StringUtils.strip(values[31]);
+            city = StringUtils.isNotEmpty(city) ? city : null;
+            String state = StringUtils.strip(values[36]);
+            state = StringUtils.isNotEmpty(state) ? state : null;
+            String countryCode = StringUtils.strip(values[32]);
+            countryCode = StringUtils.isNotEmpty(countryCode) ? countryCode : null;
+            String zipCode = StringUtils.strip(values[33]);
+            zipCode = StringUtils.isNotEmpty(zipCode) ? zipCode : null;
+            String phoneNumber = StringUtils.strip(values[38]);
+            phoneNumber = StringUtils.isNotEmpty(phoneNumber) ? phoneNumber : null;
 
             output.setDuns(duns);
             output.setConfidenceCode(confidenceCode);
             output.setMatchGrade(matchGrade);
             output.setDnbCode(DnBReturnCode.OK);
+            NameLocation matchedNameLocation = new NameLocation();
+            matchedNameLocation.setName(name);
+            matchedNameLocation.setStreet(street);
+            matchedNameLocation.setCity(city);
+            matchedNameLocation.setState(state);
+            matchedNameLocation.setCountryCode(countryCode);
+            matchedNameLocation.setZipcode(zipCode);
+            matchedNameLocation.setPhoneNumber(phoneNumber);
+            output.setMatchedNameLocation(matchedNameLocation);
             dnbMatchResultValidator.validate(output);
         } catch (Exception e) {
             log.warn(String.format("Fail to extract duns from match result of DnB bulk match request %s: %s",
