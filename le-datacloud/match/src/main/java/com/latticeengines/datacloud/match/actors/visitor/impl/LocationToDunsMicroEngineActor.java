@@ -58,10 +58,15 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
             DnBMatchContext res = (DnBMatchContext) response.getResult();
             traveler.debug(res.getHitWhiteCache() ? String.format(HIT_WHITE_CACHE, res.getCacheId())
                     : (res.getHitBlackCache() ? String.format(HIT_BLACK_CACHE, res.getCacheId()) : HIT_NO_CACHE));
-            traveler.debug(String.format("Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s.",
+            traveler.debug(String.format(
+                    "Found DUNS=%s at %s. ConfidenceCode = %s, MatchGrade = %s. Matched Name = %s, Street = %s, City = %s, State = %s, CountryCode = %s, ZipCode = %s, PhoneNumber = %s",
                     res.getDuns(), getClass().getSimpleName(),
                     (res.getConfidenceCode() == null ? "null" : res.getConfidenceCode().toString()),
-                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode())));
+                    (res.getMatchGrade() == null ? "null" : res.getMatchGrade().getRawCode()),
+                    res.getMatchedNameLocation().getName(), res.getMatchedNameLocation().getStreet(),
+                    res.getMatchedNameLocation().getCity(), res.getMatchedNameLocation().getState(),
+                    res.getMatchedNameLocation().getCountryCode(), res.getMatchedNameLocation().getZipcode(),
+                    res.getMatchedNameLocation().getPhoneNumber()));
             if (res.getDnbCode() != DnBReturnCode.OK) {
                 if (StringUtils.isNotEmpty(res.getDuns())) {
                     res.setDuns(null);

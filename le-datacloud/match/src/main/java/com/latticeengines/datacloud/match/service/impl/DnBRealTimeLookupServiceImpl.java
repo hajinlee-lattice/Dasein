@@ -119,7 +119,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             context.setConfidenceCode(
                     (Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response, false));
             context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response, false));
-            NameLocation matchedNameLocation = new NameLocation();
+            NameLocation matchedNameLocation = context.getMatchedNameLocation();
             matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response, false));
             matchedNameLocation
                     .setStreet((String) retrieveJsonValueFromResponse(entityStreetJsonPath, response, false));
@@ -131,7 +131,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                     .setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response, false));
             matchedNameLocation
                     .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response, false));
-            context.setMatchedNameLocation(matchedNameLocation);
             break;
         case REALTIME_EMAIL:
             context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false));

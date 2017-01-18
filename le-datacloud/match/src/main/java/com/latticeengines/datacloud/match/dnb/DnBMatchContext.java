@@ -42,6 +42,7 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
+        matchedNameLocation = new NameLocation();
     }
 
     public void copyMatchResult(DnBMatchContext result) {
@@ -60,6 +61,7 @@ public class DnBMatchContext implements Fact, Dimension {
         confidenceCode = whiteCache.getConfidenceCode();
         matchGrade = whiteCache.getMatchGrade();
         cacheId = whiteCache.getId();
+        matchedNameLocation = whiteCache.getMatchedNameLocation();
         hitWhiteCache = true;
     }
 
@@ -82,7 +84,6 @@ public class DnBMatchContext implements Fact, Dimension {
     }
 
     public void setInputNameLocation(MatchKeyTuple matchKeyTuple) {
-        inputNameLocation = new NameLocation();
         inputNameLocation.setName(matchKeyTuple.getName());
         inputNameLocation.setCountry(matchKeyTuple.getCountry());
         inputNameLocation.setCountryCode(matchKeyTuple.getCountryCode());

@@ -149,7 +149,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBWhiteCache(context.getInputNameLocation());
             } else {
                 return new DnBWhiteCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade());
+                        context.getMatchGrade(), context.getMatchedNameLocation());
             }
         case EMAIL:
             if (lookup) {
@@ -163,7 +163,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 return new DnBWhiteCache(context.getInputNameLocation());
             } else {
                 return new DnBWhiteCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade());
+                        context.getMatchGrade(), context.getMatchedNameLocation());
             }
         default:
             throw new UnsupportedOperationException("DnBWhiteCache.CacheType " + context.getMatchStrategy().name()
