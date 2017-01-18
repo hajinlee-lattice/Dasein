@@ -51,8 +51,8 @@ def create_template(profile, fixed_instances=False, num_instances=1):
     stack.add_resource(task)
     service, tgt = stack.add_service("tomcat", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     if not fixed_instances:
-        stack.percent_autoscale(tgt, "ScaleUp", 100, lb=0)
-        stack.exact_autoscale(tgt, "ScaleBack", num_instances, ub=100)
+        stack.percent_autoscale(tgt, "ScaleUp", 100, lb=0, ub=100)
+        stack.exact_autoscale(tgt, "ScaleBack", num_instances, lb=-10, ub=0)
     return stack
 
 def tomcat_task(profile_vars):

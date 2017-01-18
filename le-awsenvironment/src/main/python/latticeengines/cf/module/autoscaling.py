@@ -242,10 +242,8 @@ class SimpleAASScalingPolicy(AASScalingPolicy):
         }
         if lb is not None:
             step["MetricIntervalLowerBound"] = lb
-        elif ub is not None:
+        if ub is not None:
             step["MetricIntervalUpperBound"] = ub
-        else:
-            raise Exception("Must specify either lower bound or upper bound")
         self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
 
 
@@ -258,10 +256,8 @@ class ExactAASScalingPolicy(AASScalingPolicy):
         }
         if lb is not None:
             step["MetricIntervalLowerBound"] = lb
-        elif ub is not None:
+        if ub is not None:
             step["MetricIntervalUpperBound"] = ub
-        else:
-            raise Exception("Must specify either lower bound or upper bound")
         self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
 
 class PercentAASScalingPolicy(AASScalingPolicy):
