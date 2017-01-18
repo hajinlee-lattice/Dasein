@@ -36,6 +36,23 @@ def find_service(cluster, service):
 
     raise Exception("Cannot find the ecs service named " + service)
 
+def find_service_name(cluster, service):
+    cluster_arn = find_cluster(cluster)
+    response = ECS_CLIENT.list_services(cluster=cluster_arn)
+    for s in response['serviceArns']:
+        service_name = s.split(':')[5].replace('service/', '')
+        service_original_name = service_name
+        if (service_name != service) and (cluster in service_name):
+            random_token = service_name.split('-')[-1]
+            service_name = service_name.replace(cluster + '-', '').replace('-' + random_token, '')
+        if service_name == service:
+            print "Found ecs service " + s
+            return service_original_name
+
+    sys.stdout.flush()
+
+    raise Exception("Cannot find the ecs service named " + service)
+
 def find_cluster(cluster):
     response = ECS_CLIENT.list_clusters()
 
@@ -53,6 +70,18 @@ def find_cluster(cluster):
 
     raise Exception("Cannot find the ecs cluster named " + cluster)
 
+def find_cluster_name(cluster):
+    response = ECS_CLIENT.list_clusters()
+
+    for c in response['clusterArns']:
+        cluster_name = c.split(':')[5].replace('cluster/', '')
+        cluster_shortname = cluster_name.split('-ecscluster-')[0]
+        if cluster_shortname == cluster:
+            return cluster_name
+
+    sys.stdout.flush()
+
+    raise Exception("Cannot find the ecs cluster named " + cluster)
 
 def find_cluster_random_token(cluster):
     response = ECS_CLIENT.list_clusters()
