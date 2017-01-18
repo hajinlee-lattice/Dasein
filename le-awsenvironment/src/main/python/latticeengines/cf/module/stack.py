@@ -7,7 +7,7 @@ import tempfile
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .autoscaling import AutoScalingGroup, LaunchConfiguration, SimpleScalingPolicy, ExactScalingPolicy
+from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
@@ -209,8 +209,8 @@ class ECSStack(Stack):
         if sns_topic is not None:
             asgroup.hook_notifications_to_sns_topic(sns_topic)
 
-        scale_up_policy = SimpleScalingPolicy("ScaleUp", asgroup, 2).cooldown(300)
-        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, 2).cooldown(300)
+        scale_up_policy = PercentScalingPolicy("ScaleUp", asgroup, 100).cooldown(300)
+        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, PARAM_CAPACITY).cooldown(300)
 
         self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
         return asgroup

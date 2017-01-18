@@ -160,21 +160,27 @@ class ScalingPolicy(Resource):
 
 class SimpleScalingPolicy(ScalingPolicy):
     def __init__(self, logicalId, asgroup, incremental):
-        assert isinstance(incremental, int)
         ScalingPolicy.__init__(self, logicalId, asgroup)
         self._template["Properties"]["AdjustmentType"] = "ChangeInCapacity"
-        self._template["Properties"]["ScalingAdjustment"] = str(incremental)
+        if isinstance(incremental, Parameter):
+            self._template["Properties"]["ScalingAdjustment"] = incremental.ref()
+        else:
+            self._template["Properties"]["ScalingAdjustment"] = str(incremental)
 
 class ExactScalingPolicy(ScalingPolicy):
     def __init__(self, logicalId, asgroup, size):
-        assert isinstance(size, int)
         ScalingPolicy.__init__(self, logicalId, asgroup)
         self._template["Properties"]["AdjustmentType"] = "ExactCapacity"
-        self._template["Properties"]["ScalingAdjustment"] = str(size)
+        if isinstance(size, Parameter):
+            self._template["Properties"]["ScalingAdjustment"] = size.ref()
+        else:
+            self._template["Properties"]["ScalingAdjustment"] = str(size)
 
 class PercentScalingPolicy(ScalingPolicy):
-    def __init__(self, logicalId, asgroup, incremental):
-        assert isinstance(incremental, int)
+    def __init__(self, logicalId, asgroup, percent):
         ScalingPolicy.__init__(self, logicalId, asgroup)
         self._template["Properties"]["AdjustmentType"] = "PercentChangeInCapacity"
-        self._template["Properties"]["ScalingAdjustment"] = str(incremental)
+        if isinstance(percent, Parameter):
+            self._template["Properties"]["ScalingAdjustment"] = percent.ref()
+        else:
+            self._template["Properties"]["ScalingAdjustment"] = str(percent)
