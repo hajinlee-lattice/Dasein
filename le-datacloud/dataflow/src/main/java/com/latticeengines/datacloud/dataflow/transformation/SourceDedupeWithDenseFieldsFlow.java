@@ -66,7 +66,7 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
 
     @Override
     public String getTransformerName() {
-        return "sourceDedupeWithDenseFields";
+        return "sourceDedupeWithDenseFieldsTransformer";
 
     }
 }

@@ -6,16 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerConfig {
 
-    @JsonProperty("DedupeField")
-    private String dedupeField;
 
-    public String getDedupeField() {
-        return dedupeField;
-    }
-
-    public void setDedupeField(String dedupeField) {
-        this.dedupeField = dedupeField;
-    }
     @JsonProperty("DedupeFields")
     private List<String> dedupeFields;
 

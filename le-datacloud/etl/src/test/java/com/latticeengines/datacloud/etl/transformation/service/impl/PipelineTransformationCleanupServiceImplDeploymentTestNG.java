@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFieldEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -103,25 +104,42 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
-        step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("bulkMatchTransformer");
         step.setConfiguration(getMatchConfig());
         steps.add(step);
 
-        // step = new TransformationStepConfig();
-        // step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
+        step = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<Integer>();
+        inputSteps.add(0);
+        step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
-        // step.setTransformer("sourceDedupeWithDenseFields");
-        // step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
-        // //
+        step.setTransformer("sourceFieldEnrichmentTransformer");
+        step.setConfiguration(getEnrichmentConfig());
+        steps.add(step);
+
+        step = new TransformationStepConfig();
+        inputSteps = new ArrayList<Integer>();
+        inputSteps.add(1);
+        step.setInputSteps(inputSteps);
+        step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
+        step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
+        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
         // step.setConfiguration("{\"DedupeFields\": [\"Domain\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
-        // steps.add(step);
+        steps.add(step);
 
         request.setSteps(steps);
         PipelineTransformationConfiguration configuration = pipelineTransformationService
                 .createTransformationConfiguration(request);
 
         return configuration;
+    }
+
+    private String getEnrichmentConfig() {
+        SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
+        config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
+        config.setToFields(Arrays.asList("DUNS", "City"));
+        config.setDebug(false);
+        return JsonUtils.serialize(config);
     }
 
     private String getMatchConfig() {
@@ -137,10 +155,11 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(true);
-        matchInput.setUseDnBCache(false);
+        matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(true);
+
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }
@@ -155,8 +174,8 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         keyMap.put(MatchKey.Country, Arrays.asList("Country"));
         keyMap.put(MatchKey.State, Arrays.asList("State"));
         keyMap.put(MatchKey.City, Arrays.asList("City"));
-//        keyMap.put(MatchKey.Zipcode, Arrays.asList("Zipcode"));
-//        keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
+        // keyMap.put(MatchKey.Zipcode, Arrays.asList("Zipcode"));
+        // keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
         return keyMap;
     }
 
@@ -177,6 +196,6 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
             rowNum++;
         }
         log.info("Total result records " + rowNum);
-        Assert.assertEquals(rowNum, 6);
+        Assert.assertEquals(rowNum, 2);
     }
 }
