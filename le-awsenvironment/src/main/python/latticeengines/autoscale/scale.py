@@ -83,8 +83,9 @@ def put_alarm_actions(alarm, policy_arn):
     global CW_CLIENT
     if CW_CLIENT is None:
         CW_CLIENT = boto3.client('cloudwatch')
-    actions =alarm["AlarmActions"]
-    actions.append(policy_arn)
+    actions = alarm["AlarmActions"]
+    if policy_arn not in actions:
+        actions.append(policy_arn)
     CW_CLIENT.put_metric_alarm(
         AlarmName=alarm["AlarmName"],
         ActionsEnabled=True,
