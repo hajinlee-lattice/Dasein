@@ -1,3 +1,4 @@
+from .ecs import ECSCluster, ECSService
 from .elb import ElasticLoadBalancer
 from .iam import InstanceProfile
 from .parameter import Parameter, ArnParameter
@@ -187,19 +188,30 @@ class PercentScalingPolicy(ScalingPolicy):
 
 
 class ScalableTarget(Resource):
-    def __init__(self, logicalId, resource, mincap, maxcap, autoscalearn):
+    def __init__(self, logicalId, resourceId, mincap, maxcap, autoscalearn):
         Resource.__init__(self, logicalId)
         self._template = {
             "Type" : "AWS::ApplicationAutoScaling::ScalableTarget",
             "Properties" : {
                 "MaxCapacity" : maxcap.ref() if isinstance(maxcap, Parameter) else maxcap,
                 "MinCapacity" : mincap.ref() if isinstance(mincap, Parameter) else mincap,
-                "ResourceId" : resource.ref() if isinstance(resource, Resource) or isinstance(resource, Parameter) else resource,
+                "ResourceId" : resourceId.ref() if isinstance(resourceId, Parameter) else resourceId,
                 "RoleARN" : autoscalearn.ref(),
                 "ScalableDimension" : "ecs:service:DesiredCount",
                 "ServiceNamespace" : "ecs"
             }
         }
+
+class ECSServiceScalableTarget(ScalableTarget):
+    def __init__(self, logicalId, ecscluster, ecsservice, mincap, maxcap, autoscalearn):
+        ScalableTarget.__init__(self, logicalId, "", mincap, maxcap, autoscalearn)
+        resource_id = self.construct_resource_id(ecscluster, ecsservice)
+        self._template["Properties"]["ResourceId"] = resource_id
+
+    def construct_resource_id(self, ecscluster, ecsservice):
+        assert isinstance(ecscluster, ECSCluster)
+        assert isinstance(ecsservice, ECSService)
+        return {"Fn::Join": ["/", ["service", ecscluster.ref(), {"Fn::GetAttr": ecsservice.logical_id()}]]}
 
 class AASScalingPolicy(Resource):
     def __init__(self, logicalId, name, target):

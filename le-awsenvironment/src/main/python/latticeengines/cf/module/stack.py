@@ -7,7 +7,7 @@ import tempfile
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy, PercentAASScalingPolicy, ExactAASScalingPolicy, ScalableTarget
+from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy, PercentAASScalingPolicy, ExactAASScalingPolicy, ECSServiceScalableTarget
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
@@ -152,7 +152,7 @@ class ECSStack(Stack):
         scalable_tgt = None
         if self._asgroup is not None:
             service.depends_on(self._asgroup)
-            scalable_tgt = ScalableTarget(service.logical_id() + "ScalableTgt", service, PARAM_CAPACITY, PARAM_MAX_CAPACITY, autoscalearn=asrolearn)
+            scalable_tgt = ECSServiceScalableTarget(service.logical_id() + "ScalableTgt", self._ecscluster, service, PARAM_CAPACITY, PARAM_MAX_CAPACITY, autoscalearn=asrolearn)
         else:
             for ec2 in self._ec2s:
                 service.depends_on(ec2)
