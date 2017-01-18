@@ -1,5 +1,5 @@
 angular
-.module('lp.lookup.form')
+.module('common.datacloud.lookup')
 .service('LookupStore', function($sce, FeatureFlagService) {
     var LookupStore = this;
 

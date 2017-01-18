@@ -1,6 +1,6 @@
-angular.module('lp.enrichment.leadenrichment')
-.service('EnrichmentStore', function($q, EnrichmentService){
-    var EnrichmentStore = this;
+angular.module('common.datacloud')
+.service('DataCloudStore', function($q, DataCloudService){
+    var DataCloudStore = this;
 
     this.init = function() {
         this.enrichments = null;
@@ -66,8 +66,8 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.premiumSelectMaximum) {
             deferred.resolve(this.premiumSelectMaximum);
         } else {
-            EnrichmentService.getPremiumSelectMaximum().then(function(response){
-                EnrichmentStore.setPremiumSelectMaximum(response);
+            DataCloudService.getPremiumSelectMaximum().then(function(response){
+                DataCloudStore.setPremiumSelectMaximum(response);
                 deferred.resolve(response);
             });
         }
@@ -83,8 +83,8 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.categories) {
             deferred.resolve(this.categories);
         } else {
-            EnrichmentService.getCategories().then(function(response){
-                EnrichmentStore.setCategories(response);
+            DataCloudService.getCategories().then(function(response){
+                DataCloudStore.setCategories(response);
                 deferred.resolve(response);
             });
         }
@@ -100,8 +100,8 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.subcategories[category]) {
             deferred.resolve(this.subcategories[category]);
         } else {
-            EnrichmentService.getSubcategories(category).then(function(response){
-                EnrichmentStore.setSubcategories(category, response);
+            DataCloudService.getSubcategories(category).then(function(response){
+                DataCloudStore.setSubcategories(category, response);
                 deferred.resolve(response);
             });
         }
@@ -117,8 +117,8 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.enrichments) {
             deferred.resolve(this.enrichments);
         } else {
-            EnrichmentService.getEnrichments(opts).then(function(response){
-            //EnrichmentStore.setEnrichments(response);
+            DataCloudService.getEnrichments(opts).then(function(response){
+            //DataCloudStore.setEnrichments(response);
             deferred.resolve(response);
         });
         }
@@ -134,7 +134,7 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.count) {
             deferred.resolve(this.count);
         } else {
-            EnrichmentService.getCount().then(function(response){
+            DataCloudService.getCount().then(function(response){
                 deferred.resolve(response);
             });
         }
@@ -146,7 +146,7 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.selectedCount) {
             deferred.resolve(this.selectedCount);
         } else {
-            EnrichmentService.getSelectedCount().then(function(response){
+            DataCloudService.getSelectedCount().then(function(response){
                 deferred.resolve(response);
             });
         }
@@ -161,7 +161,7 @@ angular.module('lp.enrichment.leadenrichment')
         if (this.topAttributes) {
             deferred.resolve(this.topAttributes[opts.category]);
         } else {
-            EnrichmentService.getTopAttributes(opts).then(function(response) {
+            DataCloudService.getTopAttributes(opts).then(function(response) {
                 for(var i in response.data.SubCategories) {
                     var items = response.data.SubCategories[i];
                     for(var j in items) {
@@ -170,7 +170,7 @@ angular.module('lp.enrichment.leadenrichment')
                         item.DisplayName = (attribute ? attribute.DisplayName : null);
                     }
                 }
-                EnrichmentStore.setTopAttributes(response, opts.category);
+                DataCloudStore.setTopAttributes(response, opts.category);
                 deferred.resolve(response);
             });
         }
@@ -187,7 +187,7 @@ angular.module('lp.enrichment.leadenrichment')
         } else {
             var vm = this;
             
-            EnrichmentService.getAllTopAttributes(opts).then(function(response) {
+            DataCloudService.getAllTopAttributes(opts).then(function(response) {
                 vm.topAttributes = data = response.data;
                 deferred.resolve(vm.topAttributes);
             });
@@ -201,7 +201,7 @@ angular.module('lp.enrichment.leadenrichment')
         this.topAttributes[category] = items;
     }
 })
-.service('EnrichmentService', function($q, $http){
+.service('DataCloudService', function($q, $http){
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
         $http({

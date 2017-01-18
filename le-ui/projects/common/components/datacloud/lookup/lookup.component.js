@@ -1,8 +1,8 @@
 angular
-.module('lp.lookup.form', [
+.module('common.datacloud.lookup', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.controller('LookupFormController', function(
+.controller('LookupController', function(
     $state, LookupStore, ResourceUtility, FeatureFlagService
 ) {
     var vm = this;
@@ -14,7 +14,7 @@ angular
     });
 
     vm.cancel = function() {
-        $state.go('home.enrichments');
+        $state.go('home.datacloud.datacloud');
     }
 
     vm.next = function() {
@@ -24,7 +24,7 @@ angular
         LookupStore.add('request', vm.request);
         LookupStore.add('params', vm.params);
 
-        $state.go('home.lookup.tabs');
+        $state.go('home.datacloud.lookup.tabs');
     }
 
     vm.validate = function() {

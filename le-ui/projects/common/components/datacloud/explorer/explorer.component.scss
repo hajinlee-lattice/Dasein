@@ -472,7 +472,7 @@
                                  padding-right: 20px;
                             }
                             &:after {
-                                @include font-awesome-inline("\f00d");
+                                //@include font-awesome-inline("\f00d");
                                 position: absolute;
                                 top: 0;
                                 bottom: 0;
@@ -488,7 +488,7 @@
                                     padding-left: 20px;
                                 }
                                 &:after {
-                                    @include font-awesome-inline("\f00c");
+                                    //@include font-awesome-inline("\f00c");
                                     left: 0;
                                     right: auto;
                                     color: #6fbe4a;
@@ -845,7 +845,7 @@
             position: relative;
             width: 70px;
             &:after {
-                @include font-awesome-inline("\f071");
+                //@include font-awesome-inline("\f071");
                 position: absolute;
                 top: 50%;
                 left: 0;
@@ -875,7 +875,7 @@
             .icon {
                 background: rgb(111,190,74);
                 &:after {
-                    @include font-awesome-inline("\f00c");
+                    //@include font-awesome-inline("\f00c");
                 }
             }
         }

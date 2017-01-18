@@ -1,15 +1,15 @@
 <div class="container lookup-summary">
     <div class="row">
         <div class="columns twelve">
-            <div class="lookup-back" ui-sref="home.lookup.form"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div>
+            <div class="lookup-back" ui-sref="home.datacloud.lookup.form"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div>
             <ul class="lookup-tabs noselect">
-                <li ui-sref="home.lookup.tabs.attr" ui-sref-active-eq="active">
+                <li ui-sref="home.datacloud.lookup.tabs.attr" ui-sref-active-eq="active">
                     Attributes <span ng-if="vm.store.count > 0">( {{ vm.store.count | number }} )</span>
                 </li>
                 <!--li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
                     API Response
                 </li-->
-                <li ui-sref="home.lookup.tabs.matching" ui-sref-active-eq="active">
+                <li ui-sref="home.datacloud.lookup.tabs.matching" ui-sref-active-eq="active">
                     Matching Logic
                 </li>
             </ul>

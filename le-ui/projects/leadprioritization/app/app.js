@@ -9,8 +9,10 @@ var mainApp = angular.module('mainApp', [
     'angulartics', 
     'angulartics.mixpanel',
 
-    //'lp.header',
     'common.modules',
+    'common.datacloud',
+    
+    //'lp.header',
     'pd.navigation',
     'lp.jobs',
     'lp.marketo',
@@ -21,9 +23,6 @@ var mainApp = angular.module('mainApp', [
     'lp.models.review',
     'lp.models.ratings',
     'lp.create.import',
-    'lp.enrichment.leadenrichment',
-    'lp.enrichmentwizard.leadenrichment',
-    'lp.lookup.form',
     'lp.sfdc.credentials',
     'lp.managefields',
     'lp.marketo.enrichment'

@@ -3,7 +3,8 @@ module.exports = function(grunt) {
 		pkg: grunt.file.readJSON('package.json'),
 		dir: {
 			assets: './assets',
-			app: './app',
+            app: './app',
+			components: './components',
 			bower: './lib/bower',
 			dist: './assets'
 		},
@@ -19,7 +20,10 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			js: {
-				files: '<%= dir.app %>/**/*.js',
+				files: [
+                    '<%= dir.app %>/**/*.js', 
+                    '<%= dir.components %>/**/*.js'
+                ],
 				tasks: [
 					'concat:production',
 					'uglify:production',
@@ -28,7 +32,7 @@ module.exports = function(grunt) {
 			},
 			css: {
 				files: '<%= dir.assets %>/sass/*.scss',
-				tasks: ['sass:dist']
+				tasks: [ 'sass:dist' ]
 			}
 		},
         ngAnnotate: {
@@ -75,13 +79,17 @@ module.exports = function(grunt) {
 			},
 			production: {
 				src: [
-					'<%= dir.app %>/**/*.js'
+                    '<%= dir.app %>/**/*.js',
+					'<%= dir.components %>/**/*.js'
 				],
 				dest: '<%= dir.assets %>/lattice.min.js'
 			}
 		},
         concurrent: {
-            sentry: ['watch:js','watch:css']
+            sentry: [
+                'watch:js',
+                'watch:css'
+            ]
         }
 	});
 

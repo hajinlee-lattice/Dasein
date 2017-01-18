@@ -1,10 +1,10 @@
 // grid view multple of 12 (24), dynamic across
-angular.module('lp.enrichmentwizard.leadenrichment', [
+angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('EnrichmentWizardController', function(
+.controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, BrowserStorageUtility, 
-    FeatureFlagService, EnrichmentStore, EnrichmentService, EnrichmentCount, EnrichmentTopAttributes, 
+    FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, EnrichmentTopAttributes, 
     EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
@@ -73,7 +73,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         topAttributes: [],
         selected_categories: {},
         categoryOption: null,
-        metadata: EnrichmentStore.metadata,
+        metadata: DataCloudStore.metadata,
         authToken: BrowserStorageUtility.getTokenDocument(),
         userSelectedCount: 0,
         selectDisabled: 1,
@@ -158,7 +158,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         });
 
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
-            $state.go('home.lookup.form');
+            $state.go('home.datacloud.lookup.form');
         }
 
         getEnrichmentCategories();
@@ -224,11 +224,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         vm.concurrent = concurrent;
         vm.concurrentIndex = 0;
 
-        if (EnrichmentStore.enrichments) {
-            vm.xhrResult(EnrichmentStore.enrichments, true);
+        if (DataCloudStore.enrichments) {
+            vm.xhrResult(DataCloudStore.enrichments, true);
         } else {
             for (var j=0; j<iterations; j++) {
-                EnrichmentStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
+                DataCloudStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
             }
         }
     }
@@ -238,7 +238,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
         if (cached) {
             vm.enrichmentsObj = {};
-            EnrichmentStore.init();
+            DataCloudStore.init();
         }
 
         vm.concurrentIndex++;
@@ -275,11 +275,11 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
             }
 
             numbersNumber = 0;
-            _store = result; // just a copy of the correct data strucuture and properties for later
+            _store = result; // just a copy of the correct data structure and properties for later
 
             if (cached || vm.enrichments.length >= vm.count || vm.concurrentIndex >= vm.concurrent) {
                 _store.data = vm.enrichmentsStored; // so object looks like what a typical set/get in the store wants with status, config, etc
-                EnrichmentStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
+                DataCloudStore.setEnrichments(_store); // we do the store here because we only want to store it when we finish loading all the attributes
                 vm.hasSaved = vm.filter(vm.enrichments, 'IsDirty', true).length;
                 vm.enrichments_completed = true;
                 vm.generateTree(true);
@@ -316,16 +316,13 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
         });
 
         if (isComplete) {
-            // update categories with the real ones from Enrichments data
-            vm.categories = Object.keys(obj).sort();
-
             vm.categories.forEach(function(category, item) {
-                getEnrichmentSubcategories(category, Object.keys(obj[category]));
+                if (obj[category]) {
+                    getEnrichmentSubcategories(category, Object.keys(obj[category]));
+                }
             });
 
-            $timeout(function() {
-                getTopAttributes();
-            },1);
+            getTopAttributes();
         }
     }
 
@@ -572,7 +569,7 @@ angular.module('lp.enrichmentwizard.leadenrichment', [
 
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
-        EnrichmentService.setEnrichments(data).then(function(result){
+        DataCloudService.setEnrichments(data).then(function(result){
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
             vm.saveDisabled = 1;
             if(selectedObj.length > 0 || deselectedObj.length > 0) {

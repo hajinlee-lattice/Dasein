@@ -1,11 +1,10 @@
 <div class="enrichment-wizard-container container">
         <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
             <div class="icon"></div>
-            <div class="message" ng-bind-html="vm.status_alert.message">
-            </div>
+            <div class="message" ng-bind-html="vm.status_alert.message"></div>
             <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
         </div>
-        <div class="enrichments-loading-bar" ng-if="!vm.enrichments_completed && false"><div style="width: {{vm.percentage(vm.count, vm.enrichments.length)}}%;"></div></div>
+
         <div class="filters-container">
             <ul class="filters" >
                 <li class="query">
@@ -18,6 +17,7 @@
                         <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
+
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
                     <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
@@ -30,31 +30,35 @@
                         <li ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
                     </ul>
                 </li>
+
                 <li class="sort" ng-disabled="!vm.category">
                     <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
                         <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
                     </a>
                 </li>
+
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
+
                 <li class="info noselect-children" ng-if="!vm.lookupMode">
                     <div ng-if="vm.enrichments_completed || 1">
                         Enrichment: {{vm.generalSelectedTotal||0}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal||0}} of {{vm.premiumSelectLimit}} premium 
-                       <span class="more-info">&#105;
-                           <div class="tooltip_">
-                               <div class="cover">
-                                   <p>
-                                       Up to {{vm.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.premiumSelectLimit}} may be premium.
-                                   </p>
-                                   <p>
-                                       When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
-                                   </p>
-                               </div>
-                           </div>
-                       </span>
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Up to {{vm.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.premiumSelectLimit}} may be premium.
+                                    </p>
+                                    <p>
+                                        When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
                     </div>
                 </li>
+
                 <li class="download test dropdown-container" ng-show="!vm.lookupMode">
                     <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
                         <i class="fa fa-download"></i>
@@ -64,8 +68,9 @@
                     </ul>
                     <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
                 </li>
+
                 <li class="account-lookup" ng-if="!vm.lookupMode">
-                    <button class="button white-button" ui-sref="home.lookup">Account Lookup</button>
+                    <button class="button white-button" ui-sref="home.datacloud.lookup">Account Lookup</button>
                 </li>
             </ul>
         </div>
@@ -77,33 +82,35 @@
                 </div>       
             </li>
         </ul>
-        <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
 
+        <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
             <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo" class="category company">
                 <div class="box-inner company-info round-box">
                     <ul class="info">
                         <li><h2>{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
-                        <li>
-                            {{vm.companyInfoFormatted('address')}}
-                        </li>
+                        <li>{{vm.companyInfoFormatted('address')}}</li>
                         <li><a href="tel:+1{{vm.LookupResponse.companyInfo.LE_COMPANY_PHONE}}">{{vm.companyInfoFormatted('phone')}}</a></li>
                         <li><a href="http://{{vm.LookupResponse.companyInfo.LDC_Domain}}">{{vm.LookupResponse.companyInfo.LDC_Domain}}</a></li>
                     </ul>
+
                     <div class="details">
                         <ul>
                             <li><h3>Duns Number</h3> {{vm.LookupResponse.companyInfo.LDC_DUNS}}</li>
                             <li><h3>Locations</h3> {{vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS}}</li>
                             <li><h3>Primary Location</h3> {{vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION}}</li>
                         </ul>
+
                         <div class="industry">
                             <h3>Industry</h3>
                             {{vm.LookupResponse.companyInfo.LE_INDUSTRY}}
                         </div>
+
                         <div class="sales-employees">
                             <div class="sales">
                                 <h3>Annual Sales</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_REVENUE_RANGE)}}
                             </div>
+
                             <div class="employees"> 
                                 <h3>Empolyees</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
@@ -117,6 +124,7 @@
                 ng-if="count = vm.categoryCount(category)"
                 ng-class="{active: vm.category == category}" 
                 ng-click="vm.categoryClick(category); vm.metadata.current = 1;">
+                
                 <div class="box-inner noselect-children background {{vm.categoryClass(category)}} border-top color round-box active-glow" ng-class="{active: vm.category == category}">
                     <span>
                         <h2 title="{{category}}">
@@ -125,16 +133,19 @@
                             </div>
                             <div class="category-label">{{category}}</div>
                         </h2>
+
                         <span class="count">
                             <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
+
                         <div class="attributes-container" ng-if="!vm.category" ng-show="subcategories = vm.getTileTableItems(category)">
                             <ul class="attributes noselect-children">
                                 <li class="header">
                                     <div class="column label">{{ vm.lookupMode ? 'Attributes' : 'Top 5 attributes' }}</div>
                                     <div class="column data">{{ vm.lookupMode ? 'Values' : 'Records' }}</div>
                                 </li>
+
                                 <li ng-repeat="attribute in subcategories | orderBy: [ '-Value' ] | limitTo: 5">
                                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                                     <div class="column data">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}</div>
@@ -155,6 +166,7 @@
                     </pd-pagination-controls>
                 </div>
             </div>
+
             <ul class="subcategories">
                 <li ng-repeat="subcategory in (subcategoriesList = vm.subcategories[vm.category])
                         | orderBy: vm.sortOrder()
@@ -165,44 +177,54 @@
                     ng-if="count = vm.subcategoryCount(vm.category, subcategory)"
                     ng-class="{active: vm.subcategory == subcategory}" 
                     ng-click="(vm.subcategory == subcategory ? vm.subcategory = '' : vm.subcategory = subcategory); vm.metadata.current = 1;">
+                    
                     <div    class="box-inner {{vm.categoryClass(vm.category)}} background color border-top round-box"
                             ng-class="{active: vm.subcategory == subcategory}">
+                        
                         <h2 class="noselect-children">
                             <div class="category-icon">
                                 <img ng-src="{{vm.subcategoryIcon(vm.category, subcategory)}}" />
                             </div>
                             <div class="category-label">{{subcategory}}</div>
                         </h2>
+
                         <span class="count noselect-children">
                             <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
                             <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
                         </span>
+
                         <div class="attributes-container">
                             <ul class="attributes noselect-children">
                                 <li class="header">
                                     <div class="column label">{{ vm.lookupMode ? 'Attributes' : 'Top 5 attributes' }}</div>
                                     <div class="column data">{{ vm.lookupMode ? 'Values' : 'Records' }}</div>
                                 </li>
+
                                 <li ng-repeat="attribute in (vm.subCategoryAttributes = vm.getTileTableItems(vm.category, subcategory)) | orderBy: [ '-Value' ] | limitTo: 5">
                                     <div class="column label" title="{{attribute.DisplayName}}">
                                         {{ attribute.DisplayName }}
                                     </div>
+
                                     <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }}">
                                         {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}{{ attribute.NonNullCount|number }}
                                     </div>
                                 </li>
                             </ul>
+
                             <div class="attributes-more noselect" ng-if="vm.subCategoryAttributes.length > 5">More</div>
                         </div>
                     </div>
                 </li>
+
                 <li class="load-status" ng-show="!subcategoriesList.length">
                     <div ng-show="!vm.enrichments_loaded">
                         <div class="loader"></div>
-                    </div>       
+                    </div>
+
                     <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
+
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
@@ -217,6 +239,7 @@
             <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1;">Back</span> | {{vm.subcategory}}
             </div>
+
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
@@ -225,6 +248,7 @@
                     </pd-pagination-controls>
                 </div>
             </div>
+
             <ul class="enrichments {{vm.view}}" data-across="{{vm.across}}">
                 <li class="box" 
                     ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category] 
@@ -236,6 +260,7 @@
                         track by enrichment.FieldNameInTarget"
                     ng-if="!vm.lookupMode || vm.lookupFiltered[enrichment.FieldName]"
                     ng-class="{'active': enrichment.IsSelected}">
+                    
                     <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
                          ng-class="{'active': enrichment.IsSelected}">
                         <div class="header">
@@ -247,16 +272,20 @@
                                 <div class="category-icon">
                                     <img ng-src="{{vm.categoryIcon(enrichment.Category)}}" class="ico noselect" />
                                 </div>
+
                                 <strong>{{enrichment.DisplayName}}</strong>
                             </h2>
                         </div>
+
                         <p class="description" title="{{enrichment.Description}}">
                             <strong ng-if="vm.lookupFiltered[enrichment.FieldName]" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
                             <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
                         </p>
+
                         <span class="lesser-description" ng-if="vm.lookupMode">
                             {{ enrichment.Description }}
                         </span>
+
                         <div class="controls" ng-if="!vm.lookupMode">
                             <div class="toggle">
                                 <button class="button" 
@@ -275,6 +304,7 @@
                     <h2 ng-show="vm.enrichments_loaded">{{vm.label.no_results}}</h2>
                 </li>
             </ul>
+
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 
@@ -284,5 +314,4 @@
                 </div>
             </div>
         </div>
-
 </div>
