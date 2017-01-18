@@ -7,7 +7,7 @@ import tempfile
 import time
 from boto3.s3.transfer import S3Transfer
 
-from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy
+from .autoscaling import AutoScalingGroup, LaunchConfiguration, PercentScalingPolicy, ExactScalingPolicy, PercentAASScalingPolicy, ExactAASScalingPolicy
 from .condition import Condition
 from .ec2 import EC2Instance, ECSInstance, ecs_metadata
 from .ecs import ECSCluster, ECSService
@@ -128,7 +128,7 @@ class ECSStack(Stack):
     def __init__(self, description, use_asgroup=True, instances=1, efs=None, ips=(), sns_topic=None):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
-
+        self.instances = instances
         if use_asgroup:
             self._ecscluster, self._asgroup = self._construct(efs, sns_topic)
         else:
@@ -152,6 +152,16 @@ class ECSStack(Stack):
                 service.depends_on(ec2)
 
         return service
+
+    def exact_autoscale(self, service, policy_name, incremental, lb=None, ub=None):
+        policy = ExactAASScalingPolicy(service.logical_id() + policy_name, policy_name, service, incremental, lb=lb, ub=ub)
+        self.add_resource(policy)
+        return policy
+
+    def percent_autoscale(self, service, policy_name, percent, lb=None, ub=None):
+        policy = PercentAASScalingPolicy(service.logical_id() + policy_name, policy_name, service, percent, lb=lb, ub=ub)
+        self.add_resource(policy)
+        return policy
 
     def get_ec2s(self):
         return self._ec2s

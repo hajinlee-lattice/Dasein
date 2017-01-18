@@ -184,3 +184,85 @@ class PercentScalingPolicy(ScalingPolicy):
             self._template["Properties"]["ScalingAdjustment"] = percent.ref()
         else:
             self._template["Properties"]["ScalingAdjustment"] = str(percent)
+
+
+class ScalableTarget(Resource):
+    def __init__(self, logicalId, resource, mincap, maxcap):
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::ApplicationAutoScaling::ScalableTarget",
+            "Properties" : {
+                "MaxCapacity" : maxcap.ref() if isinstance(maxcap, Parameter) else maxcap,
+                "MinCapacity" : mincap.ref() if isinstance(mincap, Parameter) else mincap,
+                "ResourceId" : resource.ref() if isinstance(resource, Resource) or isinstance(resource, Parameter) else resource,
+                "RoleARN" : {"Fn::GetAtt" : ["ApplicationAutoScalingRole", "Arn"] },
+                "ScalableDimension" : "ecs:service:DesiredCount",
+                "ServiceNamespace" : "ecs"
+            }
+        }
+
+class AASScalingPolicy(Resource):
+    def __init__(self, logicalId, name, target):
+        assert isinstance(target, ScalableTarget)
+        Resource.__init__(self, logicalId)
+        self._template = {
+            "Type" : "AWS::ApplicationAutoScaling::ScalingPolicy",
+            "Properties" : {
+                "PolicyName" : name,
+                "PolicyType" : "StepScaling",
+                "ScalingTargetId" : target.ref(),
+                "StepScalingPolicyConfiguration" : {
+                    "StepAdjustments" : [ ]
+                }
+            }
+        }
+
+    def cooldown(self, cooldown):
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["Cooldown"] = cooldown
+        return self
+
+class SimpleAASScalingPolicy(AASScalingPolicy):
+    def __init__(self, logicalId, name, target, incremental, lb=None, ub=None):
+        AASScalingPolicy.__init__(self, logicalId, name, target)
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["AdjustmentType"] = "ChangeInCapacity"
+        step = {
+            "ScalingAdjustment" : incremental.ref() if isinstance(incremental, Parameter) else str(incremental)
+        }
+        if lb is not None:
+            step["MetricIntervalLowerBound"] = lb
+        elif ub is not None:
+            step["MetricIntervalUpperBound"] = lb
+        else:
+            raise Exception("Must specify either lower bound or upper bound")
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
+
+
+class ExactAASScalingPolicy(AASScalingPolicy):
+    def __init__(self, logicalId, name, target, size, lb=None, ub=None):
+        AASScalingPolicy.__init__(self, logicalId, name, target)
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["AdjustmentType"] = "ExactCapacity"
+        step = {
+            "ScalingAdjustment" : size.ref() if isinstance(size, Parameter) else str(size)
+        }
+        if lb is not None:
+            step["MetricIntervalLowerBound"] = lb
+        elif ub is not None:
+            step["MetricIntervalUpperBound"] = lb
+        else:
+            raise Exception("Must specify either lower bound or upper bound")
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
+
+class PercentAASScalingPolicy(AASScalingPolicy):
+    def __init__(self, logicalId, name, target, percent, lb=None, ub=None):
+        AASScalingPolicy.__init__(self, logicalId, name, target)
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["AdjustmentType"] = "PercentChangeInCapacity"
+        step = {
+            "ScalingAdjustment" : percent.ref() if isinstance(percent, Parameter) else str(percent)
+        }
+        if lb is not None:
+            step["MetricIntervalLowerBound"] = lb
+        elif ub is not None:
+            step["MetricIntervalUpperBound"] = lb
+        else:
+            raise Exception("Must specify either lower bound or upper bound")
+        self._template["Properties"]["StepScalingPolicyConfiguration"]["StepAdjustments"].append(step)
