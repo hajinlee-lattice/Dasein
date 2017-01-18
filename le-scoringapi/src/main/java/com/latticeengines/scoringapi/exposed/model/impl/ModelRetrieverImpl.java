@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
@@ -230,6 +231,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         Field field = new Field(fieldName, fieldSchema.type, displayName);
 
+        // Mark Fuzzylogic fields as primary fields to enforce model field
+        // mapping
+        FieldInterpretation keyField = null;
+        try {
+            keyField = FieldInterpretation.valueOf(fieldName);
+            if (FieldInterpretationCollections.PrimaryMatchingFields.contains(keyField)) {
+                field.setPrimaryField(true);
+            }
+        } catch (Exception e) {
+            // Ignore. As this field doesn't belong to FieldInterpretation enum.
+        }
         fieldList.add(field);
     }
 

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -31,6 +32,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.Field;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
 import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
@@ -358,6 +361,13 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             if (modelName.startsWith(modelNamePrefix)) {
                 String displayName = field.getDisplayName();
                 Assert.assertNotNull(displayName);
+            }
+            try {
+                FieldInterpretation fi = FieldInterpretation.valueOf(field.getFieldName());
+                Assert.assertEquals(field.isPrimaryField(),
+                        FieldInterpretationCollections.PrimaryMatchingFields.contains(fi));
+            } catch (Exception e) {
+                // Ignore. As it is not a Mapped to FieldInterpretation
             }
         }
     }
