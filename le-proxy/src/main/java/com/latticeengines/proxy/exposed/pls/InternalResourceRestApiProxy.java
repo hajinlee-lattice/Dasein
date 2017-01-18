@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -283,6 +284,18 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             return JsonUtils.convertList(subCategoriesObjList, String.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
+        }
+    }
+
+    public List<BucketMetadata> getUpToDateABCDBuckets(String modelId, CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/abcdbuckets/uptodate/modelid", modelId);
+            url += "?tenantId=" + customerSpace.toString();
+            List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Remote call failure for the model %s of tenant %s", modelId,
+                    customerSpace.toString()), e);
         }
     }
 

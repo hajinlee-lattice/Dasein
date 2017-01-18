@@ -42,7 +42,6 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     private static final BucketMetadata BUCKET_METADATA_D_1 = new BucketMetadata();
     private static final BucketMetadata BUCKET_METADATA_E_1 = new BucketMetadata();
 
-    private static final Integer NUM_TOTAL_LEADS = 93893;
     private static final Double LIFT_1 = 3.4;
     private static final Double LIFT_2 = 2.4;
     private static final Double LIFT_3 = 1.2;
@@ -53,7 +52,6 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     private static final int NUM_LEADS_BUCKET_3 = 25206;
     private static final int NUM_LEADS_BUCKET_4 = 25565;
     private static final int NUM_LEADS_BUCKET_5 = 10000;
-    private static final ModelSummary MODEL_SUMMARY = new ModelSummary();
     private static final String MODEL_ID = "BUCKET_SCORES_MODEL_SUMMARY";
     private ModelSummary modelSummary = new ModelSummary();
     private Tenant tenant = new Tenant();
@@ -166,17 +164,47 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void createGroupOfBucketMetadataForModel_assertCreated() throws Exception {
-        bucketedScoreService.createBucketMetadatas(MODEL_ID, Arrays.asList(BUCKET_METADATA_A,
-                BUCKET_METADATA_B, BUCKET_METADATA_C, BUCKET_METADATA_D));
+        bucketedScoreService.createBucketMetadatas(MODEL_ID,
+                Arrays.asList(BUCKET_METADATA_A, BUCKET_METADATA_B, BUCKET_METADATA_C, BUCKET_METADATA_D));
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
                 .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
+        Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
+        testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(timestamp));
+    }
 
+    @Test(groups = { "functional" }, dependsOnMethods = "createGroupOfBucketMetadataForModel_assertCreated")
+    public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
+        bucketedScoreService.createBucketMetadatas(MODEL_ID, Arrays.asList(BUCKET_METADATA_A_1, BUCKET_METADATA_B_1,
+                BUCKET_METADATA_C_1, BUCKET_METADATA_D_1, BUCKET_METADATA_E_1));
+
+        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
+                .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
+        assertEquals(creationTimeToBucketMetadatas.keySet().size(), 2);
+        Long earlierTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0],
+                laterTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[1];
+        Long placeHolderTimestamp;
+        if (earlierTimestamp > laterTimestamp) {
+            placeHolderTimestamp = earlierTimestamp;
+            earlierTimestamp = laterTimestamp;
+            laterTimestamp = placeHolderTimestamp;
+        }
+
+        testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(earlierTimestamp));
+        testSecondGroupBucketMetadata(creationTimeToBucketMetadatas.get(laterTimestamp));
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = "createAnotherGroupsOfBucketMetadata_assertCreated")
+    public void testGetUpToDateModelBucketMetadata() throws Exception {
+        List<BucketMetadata> bucketMetadatas = bucketedScoreService.getUpToDateModelBucketMetadata(MODEL_ID);
+        testSecondGroupBucketMetadata(bucketMetadatas);
+    }
+
+    private void testFirstGroupBucketMetadata(List<BucketMetadata> bucketMetadataList) {
+        assertEquals(bucketMetadataList.size(), 4);
         Set<BucketName> bucketNames = new HashSet<>(
                 Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
-        assertEquals(creationTimeToBucketMetadatas.keySet().size(), 1);
-        Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
-        for (BucketMetadata bucketMetadata : creationTimeToBucketMetadatas.get(timestamp)) {
+        for (BucketMetadata bucketMetadata : bucketMetadataList) {
             switch (bucketMetadata.getBucketName()) {
             case A:
                 bucketNames.remove(bucketMetadata.getBucketName());
@@ -211,111 +239,53 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
                 break;
             }
         }
-
         assertTrue(bucketNames.isEmpty());
     }
 
-    @Test(groups = {
-            "functional" }, dependsOnMethods = "createGroupOfBucketMetadataForModel_assertCreated")
-    public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
-        bucketedScoreService.createBucketMetadatas(MODEL_ID, Arrays.asList(BUCKET_METADATA_A_1,
-                BUCKET_METADATA_B_1, BUCKET_METADATA_C_1, BUCKET_METADATA_D_1, BUCKET_METADATA_E_1));
-
-        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
-        assertEquals(creationTimeToBucketMetadatas.keySet().size(), 2);
-        Long earlierTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0],
-                laterTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[1];
-        Long placeHolderTimestamp;
-        if (earlierTimestamp > laterTimestamp) {
-            placeHolderTimestamp = earlierTimestamp;
-            earlierTimestamp = laterTimestamp; laterTimestamp = placeHolderTimestamp;
-        }
-
-        assertEquals(creationTimeToBucketMetadatas.get(earlierTimestamp).size(), 4);
-        assertEquals(creationTimeToBucketMetadatas.get(laterTimestamp).size(), 5);
-
+    private void testSecondGroupBucketMetadata(List<BucketMetadata> bucketMetadataList) {
+        assertEquals(bucketMetadataList.size(), 5);
         Set<BucketName> bucketNames = new HashSet<>(
-                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
-        for (BucketMetadata bucketMetadata : creationTimeToBucketMetadatas.get(earlierTimestamp)) {
-            switch (bucketMetadata.getBucketName()) {
-                case A:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_1);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 99);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 95);
-                    assertEquals(bucketMetadata.getLift(), LIFT_1);
-                    break;
-                case B:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_2);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 95);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 85);
-                    assertEquals(bucketMetadata.getLift(), LIFT_2);
-                    break;
-                case C:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_3);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 85);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 50);
-                    assertEquals(bucketMetadata.getLift(), LIFT_3);
-                    break;
-                case D:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_4);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 50);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 5);
-                    assertEquals(bucketMetadata.getLift(), LIFT_4);
-                    break;
-                default:
-                    assertTrue(false);
-                    break;
-            }
-        }
-        assertTrue(bucketNames.isEmpty());
-
-        bucketNames = new HashSet<>(
                 Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D, BucketName.E));
-        for (BucketMetadata bucketMetadata : creationTimeToBucketMetadatas.get(laterTimestamp)) {
+        for (BucketMetadata bucketMetadata : bucketMetadataList) {
             switch (bucketMetadata.getBucketName()) {
-                case A:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_1);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 99);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 95);
-                    assertEquals(bucketMetadata.getLift(), LIFT_1);
-                    break;
-                case B:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_2);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 95);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 85);
-                    assertEquals(bucketMetadata.getLift(), LIFT_2);
-                    break;
-                case C:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_3);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 85);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 50);
-                    assertEquals(bucketMetadata.getLift(), LIFT_3);
-                    break;
-                case D:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_4);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 50);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 30);
-                    assertEquals(bucketMetadata.getLift(), LIFT_4);
-                    break;
-                case E:
-                    bucketNames.remove(bucketMetadata.getBucketName());
-                    assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_5);
-                    assertEquals(bucketMetadata.getLeftBoundScore(), 30);
-                    assertEquals(bucketMetadata.getRightBoundScore(), 5);
-                    assertEquals(bucketMetadata.getLift(), LIFT_5);
-                    break;
-                default:
-                    assertTrue(false);
-                    break;
+            case A:
+                bucketNames.remove(bucketMetadata.getBucketName());
+                assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_1);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 99);
+                assertEquals(bucketMetadata.getRightBoundScore(), 95);
+                assertEquals(bucketMetadata.getLift(), LIFT_1);
+                break;
+            case B:
+                bucketNames.remove(bucketMetadata.getBucketName());
+                assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_2);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 95);
+                assertEquals(bucketMetadata.getRightBoundScore(), 85);
+                assertEquals(bucketMetadata.getLift(), LIFT_2);
+                break;
+            case C:
+                bucketNames.remove(bucketMetadata.getBucketName());
+                assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_3);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 85);
+                assertEquals(bucketMetadata.getRightBoundScore(), 50);
+                assertEquals(bucketMetadata.getLift(), LIFT_3);
+                break;
+            case D:
+                bucketNames.remove(bucketMetadata.getBucketName());
+                assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_4);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 50);
+                assertEquals(bucketMetadata.getRightBoundScore(), 30);
+                assertEquals(bucketMetadata.getLift(), LIFT_4);
+                break;
+            case E:
+                bucketNames.remove(bucketMetadata.getBucketName());
+                assertEquals(bucketMetadata.getNumLeads(), NUM_LEADS_BUCKET_5);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 30);
+                assertEquals(bucketMetadata.getRightBoundScore(), 5);
+                assertEquals(bucketMetadata.getLift(), LIFT_5);
+                break;
+            default:
+                assertTrue(false);
+                break;
             }
         }
         assertTrue(bucketNames.isEmpty());

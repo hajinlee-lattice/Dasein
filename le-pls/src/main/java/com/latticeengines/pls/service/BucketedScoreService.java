@@ -14,4 +14,6 @@ public interface BucketedScoreService {
 
     void createBucketMetadatas(String modelId, List<BucketMetadata> bucketMetadatas);
 
+    List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId);
+
 }

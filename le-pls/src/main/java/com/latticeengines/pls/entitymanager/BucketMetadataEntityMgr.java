@@ -9,4 +9,6 @@ public interface BucketMetadataEntityMgr extends BaseEntityMgr<BucketMetadata> {
 
     List<BucketMetadata> findBucketMetadatasForModelId(String modelId);
 
+    List<BucketMetadata> findUpToDateBucketMetadatasForModelId(String modelId);
+
 }

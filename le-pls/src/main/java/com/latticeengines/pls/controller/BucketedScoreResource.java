@@ -29,8 +29,7 @@ public class BucketedScoreResource {
     @RequestMapping(value = "/summary/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get bucketed scores for specific model")
-    public BucketedScoreSummary getBuckedScoresSummary(@PathVariable String modelId)
-            throws Exception {
+    public BucketedScoreSummary getBuckedScoresSummary(@PathVariable String modelId) throws Exception {
         return bucketedScoreService.getBucketedScoreSummaryForModelId(modelId);
     }
 
@@ -39,6 +38,13 @@ public class BucketedScoreResource {
     @ApiOperation(value = "Get ABCD Buckets history info for the model")
     public Map<Long, List<BucketMetadata>> getABCDBuckets(@PathVariable String modelId) {
         return bucketedScoreService.getModelBucketMetadataGroupedByCreationTimes(modelId);
+    }
+
+    @RequestMapping(value = "/abcdbuckets/uptodate/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
+    public List<BucketMetadata> getUpToDateABCDBuckets(@PathVariable String modelId) {
+        return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
     }
 
     @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")

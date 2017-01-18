@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -57,6 +58,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -76,13 +78,13 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
-import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -93,7 +95,6 @@ import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.workflow.exposed.service.ReportService;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
@@ -168,7 +169,7 @@ public class InternalResource extends InternalResourceBase {
     private VersionManager versionManager;
 
     @Autowired
-    private InternalScoringApiProxy internalScoringApiProxy;
+    private BucketedScoreService bucketedScoreService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -787,6 +788,16 @@ public class InternalResource extends InternalResourceBase {
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
         response.put("SvnRevision", versionManager.getCurrentSvnRevision());
         return response;
+    }
+
+    @RequestMapping(value = "/abcdbuckets/uptodate/modelid/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
+    public List<BucketMetadata> getUpToDateABCDBuckets(@PathVariable String modelId,
+            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
     }
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
