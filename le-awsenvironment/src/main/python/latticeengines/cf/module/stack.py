@@ -159,13 +159,15 @@ class ECSStack(Stack):
 
         return service, scalable_tgt
 
-    def exact_autoscale(self, target, policy_name, incremental, lb=None, ub=None):
+    def exact_autoscale(self, target, policy_name, incremental, cooldown, lb=None, ub=None):
         policy = ExactAASScalingPolicy(target.logical_id() + policy_name, policy_name, target, incremental, lb=lb, ub=ub)
+        policy.cooldown(cooldown)
         self.add_resource(policy)
         return policy
 
-    def percent_autoscale(self, target, policy_name, percent, lb=None, ub=None):
+    def percent_autoscale(self, target, policy_name, percent, cooldown, lb=None, ub=None):
         policy = PercentAASScalingPolicy(target.logical_id() + policy_name, policy_name, target, percent, lb=lb, ub=ub)
+        policy.cooldown(cooldown)
         self.add_resource(policy)
         return policy
 
@@ -225,8 +227,8 @@ class ECSStack(Stack):
         if sns_topic is not None:
             asgroup.hook_notifications_to_sns_topic(sns_topic)
 
-        scale_up_policy = PercentScalingPolicy("ScaleUp", asgroup, 100).cooldown(300)
-        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, PARAM_CAPACITY).cooldown(300)
+        scale_up_policy = PercentScalingPolicy("ScaleUp", asgroup, 100).cooldown(600)
+        scale_back_policy = ExactScalingPolicy("ScaleBack", asgroup, PARAM_CAPACITY).cooldown(600)
 
         self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
         return asgroup
