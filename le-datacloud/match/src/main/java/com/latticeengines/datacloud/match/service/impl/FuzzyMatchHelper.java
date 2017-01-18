@@ -206,20 +206,16 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion) {
         MatchContext mergedContext = new MatchContext();
         mergedContext.setInput(matchContextList.get(0).getInput());
-        String contextId = UUID.randomUUID().toString();
-        matchContextList.get(0).setContextId(contextId);
-        if (matchContextList.size() > 1) {
-            List<InternalOutputRecord> internalOutputRecords = new ArrayList<>(mergedContext.getInternalResults());
-            for (int i = 1; i < matchContextList.size(); i++) {
-                MatchContext matchContext = matchContextList.get(i);
-                contextId = UUID.randomUUID().toString();
-                matchContext.setContextId(contextId);
-                for (InternalOutputRecord record : matchContext.getInternalResults()) {
-                    record.setOriginalContextId(contextId);
-                    internalOutputRecords.add(record);
-                }
+        List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
+        for (MatchContext matchContext: matchContextList) {
+            String contextId = UUID.randomUUID().toString();
+            matchContext.setContextId(contextId);
+            for (InternalOutputRecord record : matchContext.getInternalResults()) {
+                record.setOriginalContextId(contextId);
+                internalOutputRecords.add(record);
             }
         }
+        mergedContext.setInternalResults(internalOutputRecords);
         return mergedContext;
     }
 
@@ -228,7 +224,7 @@ public class FuzzyMatchHelper implements DbHelper {
         Map<String, MatchContext> rootUidContextMap = new HashMap<>();
         for (MatchContext context : matchContextList) {
             rootUidContextMap.put(context.getContextId(), context);
-            context.setInternalResults(new ArrayList<InternalOutputRecord>());
+            context.setInternalResults(new ArrayList<>());
         }
         for (InternalOutputRecord internalOutputRecord : mergedContext.getInternalResults()) {
             MatchContext originalContext = rootUidContextMap.get(internalOutputRecord.getOriginalContextId());

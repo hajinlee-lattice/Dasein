@@ -34,7 +34,9 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     public MatchOutput match(MatchInput input) {
         MatchContext matchContext = prepareMatchContext(input, null);
         matchContext = matchExecutor.execute(matchContext);
-        return matchContext.getOutput();
+        MatchOutput matchOutput = matchContext.getOutput();
+        matchOutput.setMetadata(null);
+        return matchOutput;
     }
 
     @MatchStep(threshold = 0L)
@@ -83,7 +85,9 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
         bulkMatchOutput.setRequestId(input.getRequestId());
         List<MatchOutput> outputList = new ArrayList<>(matchContexts.size());
         for (MatchContext matchContext : matchContexts) {
-            outputList.add(matchContext.getOutput());
+            MatchOutput matchOutput = matchContext.getOutput();
+            matchOutput.setMetadata(null);
+            outputList.add(matchOutput);
         }
         bulkMatchOutput.setOutputList(outputList);
         return bulkMatchOutput;
