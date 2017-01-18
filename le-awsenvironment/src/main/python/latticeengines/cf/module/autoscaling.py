@@ -211,7 +211,7 @@ class ECSServiceScalableTarget(ScalableTarget):
     def construct_resource_id(self, ecscluster, ecsservice):
         assert isinstance(ecscluster, ECSCluster)
         assert isinstance(ecsservice, ECSService)
-        return {"Fn::Join": ["/", ["service", ecscluster.ref(), {"Fn::GetAttr": ecsservice.logical_id()}]]}
+        return {"Fn::Join": ["/", ["service", ecscluster.ref(), {"Fn::GetAtt": ecsservice.logical_id()}]]}
 
 class AASScalingPolicy(Resource):
     def __init__(self, logicalId, name, target):
