@@ -11,7 +11,7 @@ import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
 import com.latticeengines.ulysses.entitymgr.impl.EnrichedAccountEntityMgrImpl;
 import com.latticeengines.ulysses.service.EnrichedAccountService;
 
-@Component("scoreAndEnrichmentService")
+@Component("enrichedAccountService")
 public class EnrichedAccountServiceImpl implements EnrichedAccountService {
 
     @Autowired
@@ -19,9 +19,9 @@ public class EnrichedAccountServiceImpl implements EnrichedAccountService {
 
     @Autowired
     private FabricDataService dataService;
-    
+
     private EnrichedAccountEntityMgr scoreAndEnrichmentEntityMgr;
-    
+
     public EnrichedAccountServiceImpl() {
     }
 

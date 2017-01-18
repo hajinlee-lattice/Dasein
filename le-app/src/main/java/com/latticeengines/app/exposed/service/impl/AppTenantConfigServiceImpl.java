@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -6,19 +6,19 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.AppTenantConfigService;
+import com.latticeengines.app.exposed.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.ulysses.service.TenantConfigService;
-import com.latticeengines.ulysses.util.ValidateEnrichAttributesUtils;
 
-@Component("tenantConfigService")
-public class TenantConfigServiceImpl implements TenantConfigService {
+@Component("appTenantConfigService")
+public class AppTenantConfigServiceImpl implements AppTenantConfigService {
     public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
-    private static final Log log = LogFactory.getLog(TenantConfigServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AppTenantConfigServiceImpl.class);
     public static final String PLS = "PLS";
 
     @Override
@@ -30,7 +30,8 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
             contractPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PLS);
-            maxPremiumLeadEnrichmentAttributes = camille.get(contractPath).getData();
+            Path path = contractPath.append(ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE);
+            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
         } catch (KeeperException.NoNodeException ex) {
             log.error("Will replace maxPremiumLeadEnrichmentAttributes with the default value since there is none for the tenant: "
                     + tenantId);

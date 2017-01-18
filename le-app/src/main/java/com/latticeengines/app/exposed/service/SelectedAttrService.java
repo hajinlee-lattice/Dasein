@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.service;
+package com.latticeengines.app.exposed.service;
 
 import java.util.List;
 import java.util.Map;

@@ -4,17 +4,17 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datanucleus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttributes;
-import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
-import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
-import com.latticeengines.domain.exposed.datafabric.DynamoRangeKey;
 import com.latticeengines.domain.exposed.datafabric.DynamoBucketKey;
+import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
+import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
+import com.latticeengines.domain.exposed.datafabric.DynamoRangeKey;
 import com.latticeengines.domain.exposed.datafabric.DynamoStampKey;
-import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.TimeSeriesFabricEntity;
 
 public class DynamoUtil {

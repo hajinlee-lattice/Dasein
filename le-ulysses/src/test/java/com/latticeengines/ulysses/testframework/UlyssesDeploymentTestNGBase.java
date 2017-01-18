@@ -50,7 +50,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
-    protected OAuth2RestTemplate oAuth2RestTemplate;
+    private OAuth2RestTemplate oAuth2RestTemplate;
 
     protected OAuthUser oAuthUser;
 
@@ -61,7 +61,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
 
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(), oAuthUser.getPassword(),
                 CLIENT_ID_LP);
-        OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(getOAuth2RestTemplate());
         log.info("Access Token: " + accessToken.getValue());
     }
 
@@ -119,5 +119,9 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public OAuth2RestTemplate getOAuth2RestTemplate() {
+        return oAuth2RestTemplate;
     }
 }

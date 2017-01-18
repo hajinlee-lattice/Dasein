@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.dao;
+package com.latticeengines.app.exposed.dao;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;

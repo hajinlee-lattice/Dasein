@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +32,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.ulysses.entitymgr.SelectedAttrEntityMgr;
-import com.latticeengines.ulysses.service.SelectedAttrService;
+import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
@@ -56,7 +56,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private TenantConfigServiceImpl tenantConfigService;
+    private AppTenantConfigServiceImpl appTenantConfigService;
 
     @Override
     public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
@@ -175,7 +175,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant) {
         Map<String, Integer> limitationMap = new HashMap<>();
-        int premiumAttributesLimitation = tenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        int premiumAttributesLimitation = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
     }

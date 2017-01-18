@@ -1,5 +1,7 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
+import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +35,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.MarketoMatchField;
-import com.latticeengines.pls.service.EnrichmentService;
-import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 
 @Component("enrichmentService")

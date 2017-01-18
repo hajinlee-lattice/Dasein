@@ -19,6 +19,7 @@
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:liaison-context.xml"/>
     <import resource="classpath:workflow-context.xml"/>
+    <import resource="classpath:app-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.pls">
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig"/>
@@ -207,6 +208,14 @@
 
     <security:http use-expressions="true"
                    pattern="/pls/campaigns/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
+                   pattern="/pls/attributes/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

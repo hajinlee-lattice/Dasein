@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.app.exposed.entitymanager.impl;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
-import com.latticeengines.pls.dao.SelectedAttrDao;
-import com.latticeengines.pls.entitymanager.SelectedAttrEntityMgr;
+import com.latticeengines.app.exposed.dao.SelectedAttrDao;
+import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 
 @Component("enrichmentAttrEntityMgr")
 public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {

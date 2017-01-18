@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,8 +40,8 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.latticeengines.ulysses.service.EnrichmentService;
-import com.latticeengines.ulysses.service.SelectedAttrService;
+import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
@@ -51,7 +50,6 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "enrichment", description = "REST resource for configuring enrichment")
 @RestController
 @RequestMapping(value = "/enrichment")
-@PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class EnrichmentResource {
 
     public static final String LEAD_ENRICH_PATH = "/lead";

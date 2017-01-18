@@ -12,14 +12,7 @@ public class CompanyProfileResourceDeploymentTestNG extends UlyssesDeploymentTes
     @Test(groups = "deployment")
     public void testGetCompanyProfileUsingOAuth() {
         String url = ulyssesHostPort + "/ulysses/companyprofiles/?Email=someuser@google.com";
-        CompanyProfile profile = oAuth2RestTemplate.getForObject(url, CompanyProfile.class);
-        assertNotNull(profile);
-    }
-
-    @Test(groups = "deployment", enabled = false)
-    public void testGetCompanyProfileUsingGlobalAuth() {
-        String url = ulyssesHostPort + "/ulysses/companyprofiles/?Email=someuser@google.com";
-        CompanyProfile profile = getGlobalAuthRestTemplate().getForObject(url, CompanyProfile.class);
+        CompanyProfile profile = getOAuth2RestTemplate().getForObject(url, CompanyProfile.class);
         assertNotNull(profile);
     }
 }

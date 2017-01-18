@@ -150,10 +150,10 @@ public class Campaign extends CompositeFabricEntity implements HasPid, HasName, 
     }
 
     public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
         if (tenant != null) {
             setTenantId(tenant.getPid());
             setId(tenant.getId(), "Campaign", getEntityId());
-            this.tenant = tenant;
         }
     }
 

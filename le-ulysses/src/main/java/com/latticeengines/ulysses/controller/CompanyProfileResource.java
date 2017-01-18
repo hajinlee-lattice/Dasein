@@ -25,7 +25,7 @@ import com.latticeengines.ulysses.service.CompanyProfileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "companyprofile", description = "REST resource for company profiles")
+@Api(value = "companyprofiles", description = "REST resource for company profiles")
 @RestController
 @RequestMapping("/companyprofiles/")
 public class CompanyProfileResource {

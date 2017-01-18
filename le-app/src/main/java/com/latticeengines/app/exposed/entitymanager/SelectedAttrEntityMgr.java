@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.app.exposed.entitymanager;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public interface SelectedAttrEntityMgr {
     List<SelectedAttribute> findAll();
 
     List<SelectedAttribute> upsert(List<SelectedAttribute> newAttrList, //
-            List<SelectedAttribute> dropAttrList);
+                                   List<SelectedAttribute> dropAttrList);
 
     List<SelectedAttribute> add(List<SelectedAttribute> newAttrList);
 

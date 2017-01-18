@@ -540,6 +540,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-app</artifactId>
+            <version>${le.app.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-workflow</artifactId>
             <version>${le.workflow.version}</version>
             <scope>runtime</scope>

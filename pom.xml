@@ -66,5 +66,6 @@
         <module>le-saml</module>
         <module>le-actors</module>
         <module>le-sqoop</module>
+        <module>le-ulysses</module>
     </modules>
 </project>

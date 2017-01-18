@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.util;
+package com.latticeengines.app.exposed.util;
 
 public class ValidateEnrichAttributesUtils {
 

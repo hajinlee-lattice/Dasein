@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
-import com.latticeengines.pls.service.SelectedAttrService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -51,22 +51,22 @@ public class ScoringApiConsoleResource {
     @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
     public DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, //
             @ApiParam(value = "Should load enrichment attribute metadata", //
-                    required = false) //
-            @RequestParam(value = "shouldSkipLoadingEnrichmentMetadata", required = false, defaultValue = "false") //
+            required = false)//
+            @RequestParam(value = "shouldSkipLoadingEnrichmentMetadata", required = false, defaultValue = "false")//
             Boolean shouldSkipLoadingEnrichmentMetadata, //
             @ApiParam(value = "Should enforce fuzzy match", //
-                    required = false) //
-            @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true") //
+            required = false)//
+            @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true")//
             Boolean enforceFuzzyMatch, //
             @ApiParam(value = "For fuzzy match, should skip DnB cache", //
-                    required = false) //
-            @RequestParam(value = "skipDnBCache", required = false, defaultValue = "false") //
+            required = false)//
+            @RequestParam(value = "skipDnBCache", required = false, defaultValue = "false")//
             Boolean skipDnBCache, //
             @RequestBody ScoreRequest scoreRequest) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
-                CustomerSpace.parse(tenant.getId()),
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient
+                .isEnabled(CustomerSpace.parse(tenant.getId()),
+                        LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
 
         if (enforceFuzzyMatch == null) {
             enforceFuzzyMatch = true;
@@ -99,7 +99,7 @@ public class ScoringApiConsoleResource {
             }
 
             needEnrichmentMetadataLoading = //
-                    needEnrichmentMetadataLoading && !shouldSkipLoadingEnrichmentMetadata;
+            needEnrichmentMetadataLoading && !shouldSkipLoadingEnrichmentMetadata;
 
             List<LeadEnrichmentAttribute> fullEnrichmentMetadataList = selectedAttrService.getAttributes(tenant, null,
                     null, null, null, null, null, true);
