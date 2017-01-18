@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "ULYSSES_CAMPAIGN", //
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Campaign extends CompositeFabricEntity implements HasPid, HasName, HasTenantId, HasId<String>, HasTenant {
@@ -54,6 +54,11 @@ public class Campaign extends CompositeFabricEntity implements HasPid, HasName, 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @JsonProperty("campaign_id")
+    @Column(name = "CAMPAIGN_ID", nullable = false)
+    @AvroIgnore
+    private String id;
 
     @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
@@ -169,23 +174,22 @@ public class Campaign extends CompositeFabricEntity implements HasPid, HasName, 
         this.insights = insights;
     }
 
-    @JsonProperty("campaign_id")
-    @Column(name = "CAMPAIGN_ID", nullable = false)
-    @Override
-    public String getEntityId() {
-        return super.getEntityId();
-    }
-
-    @Override
-    public void setId(String id) {
-        super.setEntityId(id);
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+        super.setId(id);
     }
 }
