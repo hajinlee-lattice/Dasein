@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-public class PipelineTransformationCleanupServiceImplTestNG extends
+public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
     private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeedCleaned";
@@ -63,7 +63,7 @@ public class PipelineTransformationCleanupServiceImplTestNG extends
     String targetSourceName = "MatchResult";
     String targetVersion;
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testTransformation() throws IOException {
 
         uploadBaseAvro(baseSource, "LatticeCacheSeed_parsed", "2017-01-09_19-12-43_UTC");
