@@ -755,23 +755,11 @@ public class InternalResource extends InternalResourceBase {
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
-                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl,
-                                        tenantName, modelName, true, emailInfo.getExtraInfoList());
-                            } else {
-                                emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl,
-                                        tenantName, modelName, false, emailInfo.getExtraInfoList());
-                            }
+                            emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
+                                    modelName, true, emailInfo.getExtraInfoList());
                         } else {
-                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
-                                        modelName, true, emailInfo.getExtraInfoList());
-                            } else {
-                                emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
-                                        modelName, false, emailInfo.getExtraInfoList());
-                            }
+                            emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
+                                    modelName, true, emailInfo.getExtraInfoList());
                         }
                     }
                 }
