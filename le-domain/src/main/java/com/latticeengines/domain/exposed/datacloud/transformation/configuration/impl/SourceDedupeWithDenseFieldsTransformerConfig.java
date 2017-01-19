@@ -13,6 +13,9 @@ public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerCon
     @JsonProperty("DenseFields")
     private List<String> denseFields;
 
+    @JsonProperty("SortFields")
+    private List<String> sortFields;
+    
     public List<String> getDedupeFields() {
         return dedupeFields;
     }
@@ -28,4 +31,13 @@ public class SourceDedupeWithDenseFieldsTransformerConfig extends TransformerCon
     public void setDenseFields(List<String> denseFields) {
         this.denseFields = denseFields;
     }
+
+    public List<String> getSortFields() {
+        return sortFields;
+    }
+
+    public void setSortFields(List<String> sortFields) {
+        this.sortFields = sortFields;
+    }
+    
 }

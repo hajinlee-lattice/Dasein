@@ -33,8 +33,13 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
 
         List<String> dedupeFields = config.getDedupeFields();
         List<String> denseFields = config.getDenseFields();
+        List<String> sortFields = config.getSortFields();
         if (CollectionUtils.isEmpty(denseFields)) {
             throw new RuntimeException("Missing required fields for dedupe!");
+        }
+        if (CollectionUtils.isEmpty(sortFields)) {
+            sortFields = new ArrayList<>();
+            sortFields.add(DENSE_FIELDS_COUNT);
         }
         source = source.apply(new DenseFieldsCountFunction(denseFields, DENSE_FIELDS_COUNT),
                 new FieldList(denseFields), new FieldMetadata(DENSE_FIELDS_COUNT, Integer.class));
@@ -47,7 +52,7 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
             newDedupeFieldNames.add(newDedupeField);
         }
 
-        source = source.groupByAndLimit(new FieldList(newDedupeFieldNames), new FieldList(DENSE_FIELDS_COUNT), 1, true,
+        source = source.groupByAndLimit(new FieldList(newDedupeFieldNames), new FieldList(sortFields), 1, true,
                 true);
         source = source.retain(new FieldList(origFieldNames));
 

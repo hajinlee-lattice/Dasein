@@ -123,7 +123,7 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         step.setInputSteps(inputSteps);
         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
-        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
+        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"City\"]}");
         // step.setConfiguration("{\"DedupeFields\": [\"Domain\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
         steps.add(step);
 
