@@ -252,13 +252,8 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
 
     # TODO: change to https
     protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
-    params["AWS_PLS_ADDRESS"] = "%s://%s" % (protocol, ip)
-    params["AWS_ADMIN_ADDRESS"] = "%s://%s" % (protocol, ip)
-    params["AWS_MICROSERVICE_ADDRESS"] = "%s://%s" % (protocol, ip)
-    params["AWS_SCORINGAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
-    params["AWS_MATCHAPI_ADDRESS"] = "%s://%s" % (protocol, ip)
-    params["AWS_OAUTH_ADDRESS"] = "%s://%s/oauth2" % (protocol, ip)
-    params["AWS_PLAYMAKER_ADDRESS"] = "%s://%s/api" % (protocol, ip)
+    params["AWS_PRIVATE_LB"] = "%s://%s" % (protocol, ip)
+    params["AWS_PUBLIC_LB"] = "%s://%s" % (protocol, ip)
     params["AWS_SQOOP_ADDRESS"] = config.sqoop_server()
 
     params["LE_STACK"] = stackname
