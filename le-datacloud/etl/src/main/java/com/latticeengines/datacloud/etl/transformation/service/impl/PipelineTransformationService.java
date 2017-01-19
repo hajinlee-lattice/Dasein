@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +17,16 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
-import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
-import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
+import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformationReportByStep;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
 /**
  * This transformation service allows parameterizing the source and target, pipelining the tranformation process.
@@ -205,7 +206,7 @@ public class PipelineTransformationService
                     if (inputBaseVersions == null) {
                          sourceVersion = sourceVersions.get(source);
                          if (sourceVersion == null) {
-                             sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSources[i]);
+                             sourceVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
                          }
                     } else {
                          sourceVersion = inputBaseVersions.get(i);

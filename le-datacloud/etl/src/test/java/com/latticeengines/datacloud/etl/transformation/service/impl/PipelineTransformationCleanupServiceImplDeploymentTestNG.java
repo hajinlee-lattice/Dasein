@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.LatticeCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFieldEnrichmentTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFirmoGraphEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -47,7 +49,10 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
     PipelineSource source;
 
     @Autowired
-    LatticeCacheSeed baseSource;
+    LatticeCacheSeed baseLatticeCacheSource;
+
+    @Autowired
+    DnBCacheSeed baseDnbCacheSource;
 
     @Autowired
     SourceService sourceService;
@@ -67,7 +72,8 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
     @Test(groups = "deployment")
     public void testTransformation() throws IOException {
 
-        uploadBaseAvro(baseSource, "LatticeCacheSeed_parsed", "2017-01-09_19-12-43_UTC");
+        uploadBaseAvro(baseLatticeCacheSource, "LatticeCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        uploadBaseAvro(baseDnbCacheSource, "DnBCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
         String targetSourcePath = hdfsPathBuilder.podDir().append(LATTICE_CACHE_SEED_CLEANED).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
 
@@ -90,7 +96,7 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseLatticeCacheSource, baseSourceVersion).toString();
     }
 
     @Override
@@ -114,17 +120,27 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceFieldEnrichmentTransformer");
-        step.setConfiguration(getEnrichmentConfig());
+        step.setConfiguration(getFieldsEnrichmentConfig());
         steps.add(step);
 
         step = new TransformationStepConfig();
         inputSteps = new ArrayList<Integer>();
         inputSteps.add(1);
         step.setInputSteps(inputSteps);
-        step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
+//         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
-        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"City\"]}");
-        // step.setConfiguration("{\"DedupeFields\": [\"Domain\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
+        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
+//        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"City\"]}");
+        steps.add(step);
+
+        step = new TransformationStepConfig();
+        step.setBaseSources(Arrays.asList("DnBCacheSeed"));
+        inputSteps = new ArrayList<Integer>();
+        inputSteps.add(2);
+        step.setInputSteps(inputSteps);
+        step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
+        step.setTransformer("sourceFirmoGraphEnrichmentTransformer");
+        step.setConfiguration(getFirmoGraphEnrichmentConfig());
         steps.add(step);
 
         request.setSteps(steps);
@@ -134,11 +150,23 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
         return configuration;
     }
 
-    private String getEnrichmentConfig() {
+    private String getFirmoGraphEnrichmentConfig() {
+        SourceFirmoGraphEnrichmentTransformerConfig config = new SourceFirmoGraphEnrichmentTransformerConfig();
+        config.setLeftMatchField("DUNS");
+        config.setRightMatchField("DUNS_NUMBER");
+        config.setEnrichingFields(Arrays.asList("BUSINESS_NAME", "STREET_ADDRESS", "CITY_NAME", "STATE_PROVINCE_NAME",
+                "COUNTRY_NAME", "LE_INDUSTRY", "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE"));
+        config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State",
+                "Country", "Industry", "Revenue_Range", "Employee_Range"));
+        config.setSortFields(Arrays.asList("Revenue_Range"));
+        return JsonUtils.serialize(config);
+    }
+
+    private String getFieldsEnrichmentConfig() {
         SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
         config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
         config.setToFields(Arrays.asList("DUNS", "City"));
-        config.setDebug(false);
+        config.setDebug(true);
         return JsonUtils.serialize(config);
     }
 
@@ -196,6 +224,6 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
             rowNum++;
         }
         log.info("Total result records " + rowNum);
-        Assert.assertEquals(rowNum, 2);
+        Assert.assertEquals(rowNum, 3);
     }
 }
