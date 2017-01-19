@@ -4,6 +4,7 @@ module.exports = [{
     path: '/projects/common',
     folders: {
         '/app': '/app',
+        '/components': '/components',
         '/lib': '/lib',
         '/assets': '/assets',
         '/common/assets': '/assets',

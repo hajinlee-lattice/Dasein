@@ -135,7 +135,8 @@ module.exports = function (grunt) {
             qa: {
                 NODE_APPS: 'leui,leadmin',
                 NODE_ENV: 'qa',
-                API_URL: 'https://testapp.lattice-engines.com',
+                //API_URL: 'https://testapp.lattice-engines.com',
+                API_URL: 'https://bodcdevsvipb13.lattice.local:8081',
                 //API_URL: 'https://bodcdevsvipb13.lattice.local', // for b
                 API_ADMIN_URL: 'https://admin-qa.lattice.local:8085',
                 API_CON_URL: 'https://testapi.lattice-engines.com',
