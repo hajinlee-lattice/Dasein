@@ -93,10 +93,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             matchInput.setSkipKeyResolution(true);
         }
 
-        matchInput.setUseDnBCache(processorContext.getJobConfiguration().getUseDnBCache());
-        matchInput.setMatchDebugEnabled(processorContext.getJobConfiguration().isMatchDebugEnabled());
+        matchInput.setUseDnBCache(processorContext.getJobConfiguration().getMatchInput().getUseDnBCache());
+        matchInput.setMatchDebugEnabled(processorContext.getJobConfiguration().getMatchInput().isMatchDebugEnabled());
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
-        matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getLogDnBBulkResult());
+        matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().getLogDnBBulkResult());
 
         return matchInput;
     }
@@ -210,7 +210,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @MatchStep
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
         finalizeMatchOutput(processorContext);
-        generateOutputMetric(processorContext.getMatchInput(), processorContext.getBlockOutput());
+        generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
         Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvro());
         log.info("There are in total " + count + " records in the avro " + processorContext.getOutputAvro());
         if (processorContext.getReturnUnmatched()) {

@@ -47,21 +47,6 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
-    public BulkMatchWorkflowSubmitter returnUnmatched(Boolean returnUnmatched) {
-        builder = builder.returnUnmatched(returnUnmatched);
-        return this;
-    }
-
-    public BulkMatchWorkflowSubmitter excludeUnmatchedPublicDomain(Boolean exclude) {
-        builder = builder.excludeUnmatchedPublicDomain(exclude);
-        return this;
-    }
-
-    public BulkMatchWorkflowSubmitter publicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
-        builder = builder.publicDomainAsNormalDomain(publicDomainAsNormalDomain);
-        return this;
-    }
-
     public BulkMatchWorkflowSubmitter inputProperties() {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "bulkMatchWorkflow");

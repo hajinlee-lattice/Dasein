@@ -35,9 +35,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         while (processorContext.getDivider().hasNextGroup()) {
             MatchInput input = constructMatchInputFromData(processorContext);
             // cache an input to generate output metric
-            if (processorContext.getMatchInput() == null) {
+            if (processorContext.getGroupMatchInput() == null) {
                 MatchInput matchInput = JsonUtils.deserialize(JsonUtils.serialize(input), MatchInput.class);
-                processorContext.setMatchInput(matchInput);
+                processorContext.setGroupMatchInput(matchInput);
             }
 
             log.info("a block " + block + " of " + input.getData().size() + " records to Async match.");

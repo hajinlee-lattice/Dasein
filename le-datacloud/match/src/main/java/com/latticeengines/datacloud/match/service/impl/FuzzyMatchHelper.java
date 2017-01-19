@@ -86,13 +86,14 @@ public class FuzzyMatchHelper implements DbHelper {
                 boolean useRemoteDnB = shouldUseRemoteDnB(context);
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput().getRootOperationUid(),
-                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(), context.isUseDnBCache(),
-                            useRemoteDnB, context.getLogDnBBulkResult(), context.isMatchDebugEnabled());
+                            dataCloudVersion, decisionGraph, context.getInput().getLogLevel(),
+                            context.getInput().getUseDnBCache(), useRemoteDnB, context.getInput().getLogDnBBulkResult(),
+                            context.getInput().isMatchDebugEnabled());
                 } else {
                     List<Future<Object>> futures = fuzzyMatchService.callMatchAsync(context.getInternalResults(),
                             context.getInput().getRootOperationUid(), dataCloudVersion, decisionGraph,
-                            context.getInput().getLogLevel(), context.isUseDnBCache(), useRemoteDnB,
-                            context.getLogDnBBulkResult(), context.isMatchDebugEnabled());
+                            context.getInput().getLogLevel(), context.getInput().getUseDnBCache(), useRemoteDnB,
+                            context.getInput().getLogDnBBulkResult(), context.getInput().isMatchDebugEnabled());
                     context.setFuturesResult(futures);
                 }
             } catch (Exception e) {
@@ -111,7 +112,7 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private boolean shouldUseRemoteDnB(MatchContext context) {
-        Boolean useRemoteDnB = context.getUseRemoteDnB();
+        Boolean useRemoteDnB = context.getInput().getUseRemoteDnB();
         if (useRemoteDnB != null) {
             return useRemoteDnB;
         }
@@ -206,8 +207,9 @@ public class FuzzyMatchHelper implements DbHelper {
     public MatchContext mergeContexts(List<MatchContext> matchContextList, String dataCloudVersion) {
         MatchContext mergedContext = new MatchContext();
         mergedContext.setInput(matchContextList.get(0).getInput());
+        mergedContext.setUseDnBCache(mergedContext.getInput().getUseDnBCache());
         List<InternalOutputRecord> internalOutputRecords = new ArrayList<>();
-        for (MatchContext matchContext: matchContextList) {
+        for (MatchContext matchContext : matchContextList) {
             String contextId = UUID.randomUUID().toString();
             matchContext.setContextId(contextId);
             for (InternalOutputRecord record : matchContext.getInternalResults()) {
@@ -245,7 +247,7 @@ public class FuzzyMatchHelper implements DbHelper {
         Map<String, Pair<BitCodeBook, List<String>>> parameters = columnSelectionService
                 .getDecodeParameters(columnSelection, dataCloudVersion);
         Map<String, Object> queryResult = new HashMap<>();
-        Map<String, Object> amAttributes = (account == null) ? new HashMap<String, Object>() : account.getAttributes();
+        Map<String, Object> amAttributes = (account == null) ? new HashMap<>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
 
         Set<String> attrMask = new HashSet<>();

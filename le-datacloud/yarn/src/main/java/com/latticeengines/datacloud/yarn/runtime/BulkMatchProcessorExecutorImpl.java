@@ -37,9 +37,9 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
                 // create new input object for each record
                 MatchInput input = constructMatchInputFromData(processorContext);
                 // cache an input to generate output metric
-                if (processorContext.getMatchInput() == null) {
+                if (processorContext.getGroupMatchInput() == null) {
                     MatchInput matchInput = JsonUtils.deserialize(JsonUtils.serialize(input), MatchInput.class);
-                    processorContext.setMatchInput(matchInput);
+                    processorContext.setGroupMatchInput(matchInput);
                 }
                 Future<MatchContext> future;
                 if (processorContext.isUseProxy()) {

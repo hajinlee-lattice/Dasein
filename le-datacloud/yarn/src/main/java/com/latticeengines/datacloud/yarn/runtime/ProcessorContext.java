@@ -92,7 +92,7 @@ public class ProcessorContext {
     private Date receivedAt;
     private Schema outputSchema;
     private Schema inputSchema;
-    private MatchInput matchInput;
+    private MatchInput groupMatchInput;
     private String podId;
     private String dataCloudVersion;
     private Boolean returnUnmatched;
@@ -171,12 +171,12 @@ public class ProcessorContext {
         return outputSchema;
     }
 
-    public MatchInput getMatchInput() {
-        return matchInput;
+    public MatchInput getGroupMatchInput() {
+        return groupMatchInput;
     }
 
-    public void setMatchInput(MatchInput matchInput) {
-        this.matchInput = matchInput;
+    public void setGroupMatchInput(MatchInput groupMatchInput) {
+        this.groupMatchInput = groupMatchInput;
     }
 
     public String getPodId() {
@@ -235,14 +235,14 @@ public class ProcessorContext {
             throws Exception {
         this.jobConfiguration = jobConfiguration;
         this.dataCloudProcessor = dataCloudProcessor;
-        dataCloudVersion = jobConfiguration.getDataCloudVersion();
+        dataCloudVersion = jobConfiguration.getMatchInput().getDataCloudVersion();
 
         receivedAt = new Date();
 
         podId = jobConfiguration.getHdfsPodId();
         returnUnmatched = true;
-        excludeUnmatchedWithPublicDomain = jobConfiguration.getExcludeUnmatchedPublicDomain();
-        publicDomainAsNormalDomain = jobConfiguration.getPublicDomainAsNormalDomain();
+        excludeUnmatchedWithPublicDomain = jobConfiguration.getMatchInput().getExcludeUnmatchedWithPublicDomain();
+        publicDomainAsNormalDomain = jobConfiguration.getMatchInput().getPublicDomainAsNormalDomain();
         HdfsPodContext.changeHdfsPodId(podId);
         log.info("Use PodId=" + podId);
 
@@ -255,12 +255,12 @@ public class ProcessorContext {
 
         CustomerSpace space = jobConfiguration.getCustomerSpace();
         tenant = new Tenant(space.toString());
-        predefinedSelection = jobConfiguration.getPredefinedSelection();
-        customizedSelection = jobConfiguration.getCustomizedSelection();
+        predefinedSelection = jobConfiguration.getMatchInput().getPredefinedSelection();
+        customizedSelection = jobConfiguration.getMatchInput().getCustomSelection();
 
-        decisionGraph = jobConfiguration.getDecisionGraph();
-        if (jobConfiguration.getUseRemoteDnB() != null) {
-            useRemoteDnB = jobConfiguration.getUseRemoteDnB();
+        decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
+        if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
+            useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
         } else {
             useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
         }
@@ -272,7 +272,7 @@ public class ProcessorContext {
         }
         log.info("Use decision graph " + decisionGraph);
 
-        keyMap = jobConfiguration.getKeyMap();
+        keyMap = jobConfiguration.getMatchInput().getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
         if (useRemoteDnB) {
@@ -280,7 +280,7 @@ public class ProcessorContext {
         }
         log.info(String.format("Set timeout to be %.2f minutes for %d records", (timeOut / 60000.0), blockSize));
 
-        useProxy = Boolean.TRUE.equals(jobConfiguration.getUseRealTimeProxy());
+        useProxy = Boolean.TRUE.equals(jobConfiguration.getMatchInput().getUseRealTimeProxy());
         if (useProxy) {
             String overwritingProxyUrl = jobConfiguration.getRealTimeProxyUrl();
             if (StringUtils.isNotEmpty(overwritingProxyUrl)) {
@@ -312,9 +312,9 @@ public class ProcessorContext {
                 + " and a thread pool of size " + numThreads);
         inputSchema = jobConfiguration.getInputAvroSchema();
         outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
-                jobConfiguration.getDataCloudVersion());
+                jobConfiguration.getMatchInput().getDataCloudVersion());
 
-        matchDebugEnabled = jobConfiguration.isMatchDebugEnabled();
+        matchDebugEnabled = jobConfiguration.getMatchInput().isMatchDebugEnabled();
         log.info("Match Debug Enabled=" + matchDebugEnabled);;
         if (matchDebugEnabled) {
             outputSchema = appendDebugSchema(outputSchema);

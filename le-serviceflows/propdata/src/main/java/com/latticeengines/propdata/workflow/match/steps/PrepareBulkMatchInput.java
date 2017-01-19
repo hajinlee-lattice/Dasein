@@ -64,7 +64,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer[] determineBlockSizes(Long count) {
-        if (MatchUtils.isValidForAccountMasterBasedMatch(generateJobConfiguration().getDataCloudVersion())) {
+        if (MatchUtils.isValidForAccountMasterBasedMatch(getConfiguration().getMatchInput().getDataCloudVersion())) {
             return new Integer[] { count.intValue() };
         } else {
             return divideIntoNumBlocks(count, determineNumBlocks(count));
@@ -161,26 +161,15 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     private DataCloudJobConfiguration generateJobConfiguration() {
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(getConfiguration().getHdfsPodId());
+        jobConfiguration.setMatchInput(getConfiguration().getMatchInput());
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(getConfiguration().getCustomerSpace());
-        jobConfiguration.setPredefinedSelection(getConfiguration().getPredefinedSelection());
-        jobConfiguration.setDataCloudVersion(getConfiguration().getDataCloudVersion());
-        jobConfiguration.setCustomizedSelection(getConfiguration().getCustomizedSelection());
-        jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
         jobConfiguration.setYarnQueue(getConfiguration().getYarnQueue());
-        jobConfiguration.setDecisionGraph(getConfiguration().getDecisionGraph());
-        jobConfiguration.setExcludeUnmatchedPublicDomain(getConfiguration().getExcludeUnmatchedPublicDomain());
-        jobConfiguration.setPublicDomainAsNormalDomain(getConfiguration().getPublicDomainAsNormalDomain());
-        if (Boolean.TRUE.equals(getConfiguration().getUseRealTimeProxy())) {
-            jobConfiguration.setUseRealTimeProxy(getConfiguration().getUseRealTimeProxy());
+        if (Boolean.TRUE.equals(getConfiguration().getMatchInput().getUseRealTimeProxy())) {
             jobConfiguration.setRealTimeProxyUrl(getConfiguration().getRealTimeProxyUrl());
             jobConfiguration.setThreadPoolSize(getConfiguration().getRealTimeThreadPoolSize());
         }
-        jobConfiguration.setUseDnBCache(getConfiguration().getUseDnBCache());
-        jobConfiguration.setUseRemoteDnB(getConfiguration().isUseRemoteDnB());
-        jobConfiguration.setLogDnBBulkResult(getConfiguration().getLogDnBBulkResult());
-        jobConfiguration.setMatchDebugEnabled(getConfiguration().isMatchDebugEnabled());
         return jobConfiguration;
     }
 

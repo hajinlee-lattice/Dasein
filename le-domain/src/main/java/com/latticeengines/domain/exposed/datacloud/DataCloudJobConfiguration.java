@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
@@ -13,9 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 public class DataCloudJobConfiguration extends BasePayloadConfiguration {
 
@@ -29,12 +25,10 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private Integer threadPoolSize;
     @JsonProperty("avro_path")
     private String avroPath;
-    @JsonProperty("predefined_selection")
-    private Predefined predefinedSelection;
-    @JsonProperty("customized_selection")
-    private ColumnSelection customizedSelection;
-    @JsonProperty("key_map")
-    private Map<MatchKey, List<String>> keyMap;
+
+    @JsonProperty("match_input")
+    private MatchInput matchInput;
+
     @JsonProperty("root_operation_uid")
     private String rootOperationUid;
     @JsonProperty("block_operation_uid")
@@ -43,29 +37,10 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
     private String appName;
     @JsonProperty("yarn_queue")
     private String yarnQueue;
-    @JsonProperty("decision_graph")
-    private String decisionGraph;
-    @JsonProperty("data_cloud_version")
-    private String dataCloudVersion;
     @JsonProperty("realtime_proxy_url")
     private String realTimeProxyUrl;
 
     private Schema inputAvroSchema;
-
-    @JsonProperty("exclude_unmatched_public_domain")
-    private Boolean excludeUnmatchedPublicDomain = Boolean.FALSE;
-    @JsonProperty("public_domain_as_normal_domain")
-    private Boolean publicDomainAsNormalDomain = Boolean.FALSE;
-    @JsonProperty("use_realtime_proxy")
-    private Boolean useRealTimeProxy = Boolean.FALSE;
-    @JsonProperty("use_dnb_cache")
-    private boolean useDnBCache = true;
-    @JsonProperty("use_remote_dnb")
-    private Boolean useRemoteDnB;
-    @JsonProperty("log_dnb_bulk_Result")
-    private boolean logDnBBulkResult = false;
-    @JsonProperty("match_debug_enabled")
-    private boolean matchDebugEnabled;
 
 
     public String getHdfsPodId() {
@@ -108,6 +83,14 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.avroPath = avroPath;
     }
 
+    public MatchInput getMatchInput() {
+        return matchInput;
+    }
+
+    public void setMatchInput(MatchInput matchInput) {
+        this.matchInput = matchInput;
+    }
+
     @JsonProperty("input_avro_schema")
     private JsonNode getInputAvroSchemaAsJson() {
         try {
@@ -141,38 +124,6 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.inputAvroSchema = inputAvroSchema;
     }
 
-    public Predefined getPredefinedSelection() {
-        return predefinedSelection;
-    }
-
-    public void setPredefinedSelection(Predefined predefinedSelection) {
-        this.predefinedSelection = predefinedSelection;
-    }
-    
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
-    }
-
-    public void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
-    }
-
-    public ColumnSelection getCustomizedSelection() {
-        return customizedSelection;
-    }
-
-    public void setCustomizedSelection(ColumnSelection customizedSelection) {
-        this.customizedSelection = customizedSelection;
-    }
-
-    public Map<MatchKey, List<String>> getKeyMap() {
-        return keyMap;
-    }
-
-    public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
-        this.keyMap = keyMap;
-    }
-
     public String getRootOperationUid() {
         return rootOperationUid;
     }
@@ -197,36 +148,12 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.appName = appName;
     }
 
-    public Boolean getExcludeUnmatchedPublicDomain() {
-        return excludeUnmatchedPublicDomain;
-    }
-
-    public void setExcludeUnmatchedPublicDomain(Boolean excludeUnmatchedPublicDomain) {
-        this.excludeUnmatchedPublicDomain = excludeUnmatchedPublicDomain;
-    }
-
-    public Boolean getPublicDomainAsNormalDomain() {
-        return publicDomainAsNormalDomain;
-    }
-
-    public void setPublicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
-        this.publicDomainAsNormalDomain = publicDomainAsNormalDomain;
-    }
-
     public String getYarnQueue() {
         return yarnQueue;
     }
 
     public void setYarnQueue(String yarnQueue) {
         this.yarnQueue = yarnQueue;
-    }
-
-    public String getDecisionGraph() {
-        return decisionGraph;
-    }
-
-    public void setDecisionGraph(String decisionGraph) {
-        this.decisionGraph = decisionGraph;
     }
 
     public String getRealTimeProxyUrl() {
@@ -237,46 +164,6 @@ public class DataCloudJobConfiguration extends BasePayloadConfiguration {
         this.realTimeProxyUrl = realTimeProxyUrl;
     }
 
-    public Boolean getUseRealTimeProxy() {
-        return useRealTimeProxy;
-    }
-
-    public void setUseRealTimeProxy(Boolean useRealTimeProxy) {
-        this.useRealTimeProxy = useRealTimeProxy;
-    }
-
-    public boolean getUseDnBCache() {
-        return useDnBCache;
-    }
-
-    public void setUseDnBCache(boolean useDnBCache) {
-        this.useDnBCache = useDnBCache;
-    }
-
-    public void setUseRemoteDnB(Boolean useRemoteDnB) {
-        this.useRemoteDnB = useRemoteDnB;
-    }
-    
-    public Boolean getUseRemoteDnB() {
-        return useRemoteDnB;
-    }
-    
-    public boolean isMatchDebugEnabled() {
-        return matchDebugEnabled;
-    }
-
-    public void setMatchDebugEnabled(boolean matchDebugEnabled) {
-        this.matchDebugEnabled = matchDebugEnabled;
-    }
-
-    public boolean getLogDnBBulkResult() {
-        return logDnBBulkResult;
-    }
-
-    public void setLogDnBBulkResult(boolean logDnBBulkResult) {
-        this.logDnBBulkResult = logDnBBulkResult;
-    }
-    
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

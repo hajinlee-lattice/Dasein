@@ -34,27 +34,16 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
             prepareConfig.setCustomerSpace(customerSpace);
             parallelExecConfig.setCustomerSpace(customerSpace);
-            prepareConfig.setKeyMap(matchInput.getKeyMap());
+            prepareConfig.setMatchInput(matchInput);
             InputBuffer inputBuffer = matchInput.getInputBuffer();
             if (inputBuffer instanceof AvroInputBuffer) {
                 AvroInputBuffer avroInputBuffer = (AvroInputBuffer) inputBuffer;
                 prepareConfig.setInputAvroDir(avroInputBuffer.getAvroDir());
                 prepareConfig.setInputAvroSchema(avroInputBuffer.getSchema());
             }
-            prepareConfig.setPredefinedSelection(matchInput.getPredefinedSelection());
-            prepareConfig.setPredefinedSelectionVersion(matchInput.getPredefinedVersion());
-            prepareConfig.setDataCloudVersion(matchInput.getDataCloudVersion());
-            prepareConfig.setCustomizedSelection(matchInput.getCustomSelection());
             prepareConfig.setYarnQueue(matchInput.getYarnQueue());
-            prepareConfig.setDecisionGraph(matchInput.getDecisionGraph());
-            prepareConfig.setUseRealTimeProxy(matchInput.getUseRealTimeProxy());
             prepareConfig.setRealTimeProxyUrl(matchInput.getRealTimeProxyUrl());
             prepareConfig.setRealTimeThreadPoolSize(matchInput.getRealTimeThreadPoolSize());
-            prepareConfig.setUseDnBCache(matchInput.getUseDnBCache());
-            prepareConfig.setUseRemoteDnB(matchInput.getUseRemoteDnB());
-            prepareConfig.setLogDnBBulkResult(matchInput.getLogDnBBulkResult());
-            prepareConfig.setMatchDebugEnabled(matchInput.isMatchDebugEnabled());
-
             return this;
         }
 
@@ -65,21 +54,6 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder microserviceHostPort(String hostPort) {
             parallelExecConfig.setMicroServiceHostPort(hostPort);
-            return this;
-        }
-
-        public Builder returnUnmatched(Boolean returnUnmatched) {
-            prepareConfig.setReturnUnmatched(returnUnmatched);
-            return this;
-        }
-
-        public Builder excludeUnmatchedPublicDomain(Boolean exlude) {
-            prepareConfig.setExcludeUnmatchedPublicDomain(exlude);
-            return this;
-        }
-
-        public Builder publicDomainAsNormalDomain(Boolean publicDomainAsNormalDomain) {
-            prepareConfig.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
 

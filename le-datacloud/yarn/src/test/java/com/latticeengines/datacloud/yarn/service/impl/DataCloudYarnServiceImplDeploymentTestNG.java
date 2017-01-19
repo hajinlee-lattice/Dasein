@@ -22,9 +22,11 @@ import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component
 public class DataCloudYarnServiceImplDeploymentTestNG extends DataCloudYarnFunctionalTestNGBase {
@@ -58,19 +60,23 @@ public class DataCloudYarnServiceImplDeploymentTestNG extends DataCloudYarnFunct
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroPath));
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
 
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant("DCTest"));
+        matchInput.setPredefinedSelection(Predefined.RTS);
+        matchInput.setDataCloudVersion(latestDataCloudVersion);
+        matchInput.setKeyMap(keyMap);
+        matchInput.setUseRealTimeProxy(true);
+
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
         jobConfiguration.setName("DataCloudMatchBlock");
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("DCTest"));
         jobConfiguration.setAvroPath(avroPath);
-        jobConfiguration.setPredefinedSelection(Predefined.RTS);
-        jobConfiguration.setDataCloudVersion(latestDataCloudVersion);
-        jobConfiguration.setKeyMap(keyMap);
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
-        jobConfiguration.setUseRealTimeProxy(true);
         jobConfiguration.setThreadPoolSize(16);
+        jobConfiguration.setMatchInput(matchInput);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);

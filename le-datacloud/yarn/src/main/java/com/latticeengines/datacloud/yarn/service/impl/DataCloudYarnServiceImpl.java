@@ -91,7 +91,7 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         Properties containerProperties = new Properties();
         containerProperties.put(DataCloudProperty.DATACLOUD_CONFIG, jobConfiguration.toString());
 
-        if (MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getDataCloudVersion())) {
+        if (MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion())) {
             appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(yarnContainerMemoryActors));
             appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(yarnContainerVCoresActors));
             containerProperties.put(ContainerProperty.MEMORY.name(), String.valueOf(yarnContainerMemoryActors));

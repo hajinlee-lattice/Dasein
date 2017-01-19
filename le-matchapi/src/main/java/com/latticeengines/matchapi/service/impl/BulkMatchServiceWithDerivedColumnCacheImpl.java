@@ -89,14 +89,11 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         ApplicationId appId = submitter //
                 .matchInput(input) //
-                .returnUnmatched(true) //
                 .hdfsPodId(hdfsPodId) //
                 .rootOperationUid(rootOperationUid) //
                 .workflowProxy(workflowProxy) //
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
-                .excludeUnmatchedPublicDomain(input.getExcludeUnmatchedWithPublicDomain()) //
-                .publicDomainAsNormalDomain(input.getPublicDomainAsNormalDomain()) //
                 .submit();
         return matchCommandService.start(input, appId, rootOperationUid);
     }
