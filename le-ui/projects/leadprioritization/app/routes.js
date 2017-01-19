@@ -247,14 +247,36 @@ angular
                 pageTitle: ''
             },
             views: {
-                    resolve: {
-                        ModelData: function($q) {
-                        }
-                    },
+                resolve: {
+                    ModelData: function($q) {
+                    }
+                },
+                "summary@": {
+                    controller: '',
+                    template: ''
+                },
                 "main@": {
                     controller: 'ModelRatingsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsView.html'
+                }
+            }
+        })
+        .state('home.model.ratings.history', {
+            url: '/history',
+            params: {
+                pageIcon: 'ico-ratings',
+                pageTitle: ''
+            },
+            views: {
+                "summary@": {
+                    controller: '',
+                    template: ''
+                },
+                "main@": {
+                    controller: 'ModelRatingsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/models/views/ModelRatingsHistoryView.html'
                 }
             }
         })

@@ -1,2 +1,149 @@
-#ModelRatingsView {
+.model-ratings {
+	hr {
+		margin-top: 30px;
+		border: solid 1px #e8e4e4;
+	}
+	h3 {
+		margin: 30px 0 20px;
+		font-family: ProximaNova;
+		font-size: 20px;
+		font-weight: 500;
+		text-align: center;
+		color: #222222;
+	}
 }
+
+.chart-header {
+	position: relative;
+	.list-data {
+		font-size: 18px;
+		font-weight: normal;
+		color: #222222;
+		strong {
+			font-weight: bold;
+		}
+	}
+}
+
+.bucket-tiles {
+	display: 					flex;
+	-webkit-flex-direction: 	row;
+    flex-direction: 			row;
+    -webkit-flex-wrap: 			nowrap;
+    flex-wrap: 					nowrap;
+    -webkit-justify-content: 	center;
+    justify-content: 			center;
+    -webkit-align-items: 		stretch;
+    align-items: 				stretch;
+    -webkit-align-content: 		stretch;
+    align-content:				stretch;
+    li {
+    	display: inline-block;
+	    -webkit-order:			0;
+	    		order:			0;
+	    -webkit-flex-grow:		0;
+	    		flex-grow: 		0;
+	    -webkit-flex-shrink:	1;
+	    		flex-shrink:	1;
+	    -webkit-flex-basis:		auto;
+	    		flex-basis:		auto;
+	    -webkit-align-self:		auto;
+	    		align-self:		auto;
+
+	   	width: 14%;
+	   	padding: 6px 18px;
+    	margin: 10px;
+	   	background-color: #ffffff;
+			border: solid 1px #e8e8e8;
+			text-align: center;
+    	&:nth-child(1){
+    		.bucket-label{
+    			background-color: #70bb56;
+    		}
+    	}
+    	&:nth-child(2){
+    		.bucket-label{
+    			background-color: #ffb93d;
+    		}
+    	}
+    	&:nth-child(3){
+    		.bucket-label{
+    			background-color: #f56c35;
+    		}
+    	}
+    	&:nth-child(4){
+    		.bucket-label{
+    			background-color: #d62b30;
+    		}
+    	}
+    	&:nth-child(5){
+    		.bucket-label{
+    			background-color: #494949;
+    		}
+    	}
+    }
+
+    .bucket-label {
+    	display: inline-block;
+    	margin-bottom: 8px;
+    	padding: 4px 10px;
+    	color: #fff;
+    	font-size: 12px;
+    	font-weight: bold;
+    	border-radius: 50%;
+    }
+    dt, dd {
+    	display: block;
+    	text-align: center;
+    }
+    dt {
+    	float: none;
+    	clear: none;
+    	width: auto;
+		font-size: 10px;
+		font-weight: normal;
+		color: #9b9b9b;
+    }
+    dd {
+    	margin: 0 0 4px 0;
+    	padding: 0;
+		font-size: 20px;
+		line-height: 20px;
+		font-weight: normal;
+		color: #222222;
+    }
+   	dd.lift {
+		font-size: 24px;
+		font-weight: bold;
+		color: #222222;
+    }
+
+    &.working-buckets {
+    	li {
+    		padding: 12px 18px;
+    	}
+    	.bucket-label {
+	    	padding: 5px 13px 3px;
+	    	font-size: 18px;
+	    }
+	    dt {
+			font-size: 14px;
+	    }
+	    dd {
+			font-size: 28px;
+			line-height: 28px;
+	    }
+	   	dd.lift {
+			font-size: 30px;
+	    }	
+    }
+}
+
+.history-list {
+    li {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: solid 1px #eeecec;
+    }
+}
+

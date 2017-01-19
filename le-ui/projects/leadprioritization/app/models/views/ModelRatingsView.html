@@ -1,3 +1,139 @@
 <section id="ModelRatingsView" class="model-ratings container">
-    #Model ratings (buckets) for {{vm.modelId}}
+
+    <div class="row">
+        <div class="twelve columns">
+            <div class="header">
+                <ul class="tabs_">
+                    <li class="active" ui-sref="home.model.ratings">Rating Setup</li>
+                    <li ui-sref="home.model.ratings.history">History</li>
+                </ul>
+            </div>
+
+            <div class="chart-header">
+                <div class="list-data pull-left">All Leads: <strong>93,893</strong></div>
+                <div class="actions pull-right">
+                	<button 
+                		type="button" 
+                		class="button orange-button disabled"
+                		data-ng-click="vm.publishConfiguration"
+                		ng-disabled="vm.chartNotUpdated"
+                	>Publish Configuration</button>
+                </div>
+            </div><!-- End .chart-header -->
+
+            <div class="chart">
+
+            </div>
+
+            <ul class="bucket-tiles working-buckets">
+            	<li>
+            		<div class="bucket-label">A</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">B</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">C</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">D</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            </ul><!-- End .bucket-tiles -->
+
+            <hr/>
+
+            <h3>Currently published configuration</h3>
+            <ul class="bucket-tiles published">
+            	<li>
+            		<div class="bucket-label">A</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">B</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">C</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">D</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            	<li>
+            		<div class="bucket-label">E</div>
+            		<dl>
+            			<dt>Lift</dt>
+            			<dd class="lift">3.4x</dd>
+            			<dt>Leads %</dt>
+            			<dd>30%</dd>
+            			<dt>Leads</dt>
+            			<dd>28,345</dd>
+            		</dl>
+            	</li>
+            </ul><!-- End .bucket-tiles -->
+            
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
+
 </section>

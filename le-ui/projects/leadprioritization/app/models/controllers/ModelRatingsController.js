@@ -8,7 +8,8 @@ angular.module('lp.models.ratings', [
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
-        data: ModelStore.data
+        data: ModelStore.data,
+        chartNotUpdated: false
     });
 
     console.log(vm.data);

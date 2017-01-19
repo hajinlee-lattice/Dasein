@@ -103,17 +103,17 @@ Model List
     .model{
         display: inline-block;
         width: 50%;
-        > div {
-        	margin: 0 .3em;
+        & > div {
+        	margin: 0 0.3em;
         	position: relative;
         }
 		&:nth-child(2n+1) {
-			> div {
+			& > div {
 				margin-left: 0;
 			}
 		}
 		&:nth-child(2n) {
-			> div {
+			& > div {
 				margin-right: 0;
 			}
 		}
@@ -123,17 +123,17 @@ Model List
     .model{
         display: inline-block;
         width: 33.333333%;
-        > div {
-        	margin: 0 .4em;
+        & > div {
+        	margin: 0 0.4em;
         	position: relative;
         }
 		&:nth-child(3n+1) {
-			> div {
+			& > div {
 				margin-left: 0;
 			}
 		}
 		&:nth-child(3n) {
-			> div {
+			& > div {
 				margin-right: 0;
 			}
 		}
@@ -143,17 +143,17 @@ Model List
     .model{
         display: inline-block;
         width: 25%;
-        > div {
-        	margin: 0 .5em;
+        & > div {
+         	margin: 0 0.5em;
         	position: relative;
         }
 		&:nth-child(4n+1) {
-			> div {
+			& > div {
 				margin-left: 0;
 			}
 		}
 		&:nth-child(4n) {
-			> div {
+			& > div {
 				margin-right: 0;
 			}
 		}
