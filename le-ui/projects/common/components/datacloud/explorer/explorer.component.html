@@ -95,23 +95,23 @@
 
                     <div class="details">
                         <ul>
-                            <li><h3>Duns Number</h3> {{vm.LookupResponse.companyInfo.LDC_DUNS}}</li>
-                            <li><h3>Locations</h3> {{vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS}}</li>
-                            <li><h3>Primary Location</h3> {{vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION}}</li>
+                            <li ng-if="vm.LookupResponse.companyInfo.LDC_DUNS"><h3>Duns Number</h3> {{vm.LookupResponse.companyInfo.LDC_DUNS}}</li>
+                            <li ng-if="vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS"><h3>Locations</h3> {{vm.LookupResponse.companyInfo.LE_NUMBER_OF_LOCATIONS}}</li>
+                            <li ng-if="vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION"><h3>Primary Location</h3> {{vm.LookupResponse.companyInfo.LE_IS_PRIMARY_LOCATION}}</li>
                         </ul>
 
-                        <div class="industry">
+                        <div class="industry" ng-if="vm.LookupResponse.companyInfo.LE_INDUSTRY">
                             <h3>Industry</h3>
                             {{vm.LookupResponse.companyInfo.LE_INDUSTRY}}
                         </div>
 
                         <div class="sales-employees">
-                            <div class="sales">
+                            <div class="sales" ng-if="vm.LookupResponse.companyInfo.LE_REVENUE_RANGE">
                                 <h3>Annual Sales</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_REVENUE_RANGE)}}
                             </div>
 
-                            <div class="employees"> 
+                            <div class="employees" ng-if="vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE"> 
                                 <h3>Empolyees</h3>
                                 {{vm.companyInfoFormatted('range', vm.LookupResponse.companyInfo.LE_EMPLOYEE_RANGE)}}
                             </div>
