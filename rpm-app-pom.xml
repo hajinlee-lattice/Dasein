@@ -22,6 +22,7 @@
         <module>le-admin/pom-admin-rpm.xml</module>
         <module>le-microservice/pom-microservice-rpm.xml</module>
         <module>le-scoringapi/pom-scoringapi-rpm.xml</module>
+        <module>le-ulysses/pom-ulysses-rpm.xml</module>
         <module>le-common</module>
     </modules>
 </project>
