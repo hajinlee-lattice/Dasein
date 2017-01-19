@@ -856,18 +856,20 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {
-        ModelSummaryProvenance provenance = scoringArtifacts.getModelSummary().getModelSummaryConfiguration();
         boolean shouldSkipMatching = false;
-        for (ModelSummaryProvenanceProperty property : scoringArtifacts.getModelSummary()
-                .getModelSummaryProvenanceProperties()) {
-            if (property.getOption().equals(ProvenancePropertyName.ExcludePropdataColumns.name())) {
-                shouldSkipMatching = provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns);
-                break;
+        if (scoringArtifacts != null) {
+            ModelSummaryProvenance provenance = scoringArtifacts.getModelSummary().getModelSummaryConfiguration();
+            for (ModelSummaryProvenanceProperty property : scoringArtifacts.getModelSummary()
+                    .getModelSummaryProvenanceProperties()) {
+                if (property.getOption().equals(ProvenancePropertyName.ExcludePropdataColumns.name())) {
+                    shouldSkipMatching = provenance.getBoolean(ProvenancePropertyName.ExcludePropdataColumns);
+                    break;
+                }
             }
-        }
-        boolean isPmmlModel = ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType());
+            boolean isPmmlModel = ModelJsonTypeHandler.PMML_MODEL.equals(scoringArtifacts.getModelJsonType());
 
-        shouldSkipMatching = shouldSkipMatching || isPmmlModel;
+            shouldSkipMatching = shouldSkipMatching || isPmmlModel;
+        }
         return shouldSkipMatching;
     }
 }
