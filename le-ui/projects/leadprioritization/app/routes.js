@@ -750,6 +750,33 @@ angular
                         $scope.id = $stateParams.id;
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '&credentialId=' + $scope.id + '"></iframe>');
+
+                        changeIframeHeight();
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
+                        }
+
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
@@ -777,6 +804,32 @@ angular
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.creds_url + '"></iframe>');
+
+                        changeIframeHeight();
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
+                        }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
@@ -804,6 +857,32 @@ angular
                     controller: function(urls) { 
                         $('#sureshot_iframe_container')
                             .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+
+                        changeIframeHeight();
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
+                        }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }   
@@ -879,6 +958,32 @@ angular
                         if(urls && urls.creds_url) {
                             $('#sureshot_iframe_container')
                                 .html('<iframe src="' + urls.creds_url + '"></iframe>');
+
+                            changeIframeHeight();
+                        }
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
                         }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
@@ -910,6 +1015,32 @@ angular
                         if(urls && urls.scoring_settings_url) {
                             $('#sureshot_iframe_container')
                                 .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
+                            
+                            changeIframeHeight();
+                        }
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
                         }
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
@@ -940,10 +1071,8 @@ angular
                     controller: function(urls) {
                         if(urls && urls.enrichment_settings_url) {
                             $('#sureshot_iframe_container')
-                                .html('<iframe src="' + urls.enrichment_settings_url + '" class="eloqua-enrichment-iframe"></iframe>');
-
+                                .html('<iframe src="' + urls.enrichment_settings_url + '"></iframe>');
                             changeIframeHeight();
-
                         }
 
                         function changeIframeHeight(){
@@ -963,7 +1092,7 @@ angular
 
                                 if ( !isNaN( h ) && h > 0 && h !== if_height ) {
                                     if_height = h;
-                                    console.log('height=' + h);
+                                    
                                     $("#sureshot_iframe_container iframe").height(h); 
                                 }
                                 return true;
