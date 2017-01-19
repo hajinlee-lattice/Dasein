@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
@@ -43,27 +43,27 @@ public class CompanyProfileResource {
     @ApiOperation(value = "Retrieve a company profile")
     public CompanyProfile getCompanyProfile(HttpServletRequest request) {
         CustomerSpace space = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        Map<MatchKey, String> attributes = getAccountAttributes(request);
+        Map<FieldInterpretation, String> attributes = getAccountAttributes(request);
         log.info(String.format("Retrieving company profile for %s, attributes = [%s]", space, attributes));
-        return new CompanyProfile();
+        return companyProfileService.getProfile(space, attributes);
     }
 
-    private Map<MatchKey, String> getAccountAttributes(HttpServletRequest request) {
+    private Map<FieldInterpretation, String> getAccountAttributes(HttpServletRequest request) {
         Enumeration<String> parameterNames = request.getParameterNames();
-        Map<MatchKey, String> matchParameters = new HashMap<>();
+        Map<FieldInterpretation, String> parameters = new HashMap<>();
 
         while (parameterNames.hasMoreElements()) {
             String parameterName = parameterNames.nextElement();
-            MatchKey matchKey = getMatchKey(parameterName);
-            matchParameters.put(matchKey, request.getParameter(parameterName));
+            FieldInterpretation field = getFieldInterpretation(parameterName);
+            parameters.put(field, request.getParameter(parameterName));
         }
-        return matchParameters;
+        return parameters;
     }
 
-    private MatchKey getMatchKey(String parameterName) {
+    private FieldInterpretation getFieldInterpretation(String parameterName) {
         try {
-            MatchKey key = Enum.valueOf(MatchKey.class, parameterName);
-            return key;
+            FieldInterpretation field = Enum.valueOf(FieldInterpretation.class, parameterName);
+            return field;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36001, new String[] { parameterName });
         }
