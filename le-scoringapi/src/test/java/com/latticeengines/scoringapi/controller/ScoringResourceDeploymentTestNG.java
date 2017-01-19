@@ -34,6 +34,8 @@ import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
+    private static final int SAFETY_RANGE = 1;
+
     @Test(groups = "deployment", enabled = true)
     public void getModels() {
         List<Model> models = getModelList();
@@ -212,13 +214,16 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             DebugRecordScoreResponse result = om.readValue(om.writeValueAsString(res), DebugRecordScoreResponse.class);
             Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
                     new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
-            Assert.assertEquals(result.getScores().get(0).getScore().intValue(), expectedScores.get(idx).intValue());
-            Assert.assertEquals(new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue(),
+            assertScoreIsWithinAcceptableRange(result.getScores().get(0).getScore().intValue(),
                     expectedScores.get(idx).intValue());
             matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
                     result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
             idx++;
         }
+    }
+
+    private void assertScoreIsWithinAcceptableRange(int score, int expectedScore) {
+        Assert.assertTrue(Math.abs(score - expectedScore) <= SAFETY_RANGE);
     }
 
     private void matchTransformedRecord(Map<String, Object> singleRecordScoreTransformedRecord,
