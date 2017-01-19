@@ -32,7 +32,7 @@ def hookgroup_internal(app, stack):
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
 def hookecs(args):
-    hookecs_internal(args.cluster, args.service)
+    hookecs_internal(args.app, args.stack)
 
 def hookecs_internal(app, stack):
     cluster = "%s-lpi-%s" % (app, stack)
