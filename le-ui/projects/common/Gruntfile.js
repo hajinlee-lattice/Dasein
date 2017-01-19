@@ -31,7 +31,10 @@ module.exports = function(grunt) {
 				]
 			},
 			css: {
-				files: '<%= dir.assets %>/sass/*.scss',
+				files: [
+                    '<%= dir.assets %>/sass/*.scss',
+                    '<%= dir.components %>/**/*.scss'
+                ],
 				tasks: [ 'sass:dist' ]
 			}
 		},

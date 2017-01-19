@@ -15,6 +15,7 @@ module.exports = function (grunt) {
             login: './projects/login',
             ng2: './projects/ng2',
             assets: 'assets',
+            components: 'components',
             app: 'app'
         },
 
@@ -248,7 +249,10 @@ module.exports = function (grunt) {
 
         watch: {
             common: {
-                files: '<%= dir.common %>/<%= dir.assets %>/sass/*.scss',
+                files: [
+                    '<%= dir.common %>/<%= dir.assets %>/sass/*.scss',
+                    '<%= dir.common %>/<%= dir.components %>/**/*.scss'
+                ],
                 tasks: ['sass:common']
             },
             login: {
@@ -277,7 +281,7 @@ module.exports = function (grunt) {
                 tasks: [ 'sass:common', 'sass:login', 'sass:lp' ]
             },
             watch: {
-                tasks: [ 'watch:common', 'watch:login', 'watch:lp', 'run:ng2' ],
+                tasks: [ 'watch:common', 'watch:login', 'watch:lp'/*, 'run:ng2'*/ ],
                 options: {
                     logConcurrentOutput: true
                 }

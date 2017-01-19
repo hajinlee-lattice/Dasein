@@ -243,6 +243,7 @@
                 border-top-width: 1px;
                 border-radius: 4px;
                 &.company-info {
+                    font-size: 11px;
                     h2, h3 {
                         font-size: 100%;
                         font-weight: normal;
@@ -251,6 +252,9 @@
                     }
                     h2 {
                         font-size: 20px;
+                    }
+                    .info {
+                        margin-bottom: 10px;
                     }
                     .details {
                         font-size: 12px;
@@ -288,7 +292,10 @@
                                 width: 50%;
                                 border-right: 1px solid rgba(0,0,0,.05);
                                 padding: 0 10px;
-                                padding-top: 2px;
+                                padding-top: 5px;
+                                &:first-child {
+                                    padding-left: 0;
+                                }
                                 &:last-child {
                                     border-right: none;
                                 }
