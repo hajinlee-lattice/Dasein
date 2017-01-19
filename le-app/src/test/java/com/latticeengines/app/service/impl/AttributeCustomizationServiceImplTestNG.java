@@ -1,6 +1,6 @@
 package com.latticeengines.app.service.impl;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
@@ -10,10 +10,11 @@ import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationEntity
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.attribute.AttributeCustomization;
-import com.latticeengines.domain.exposed.attribute.AttributeUseCase;
-import com.latticeengines.domain.exposed.attribute.CompanyProfileAttributeFlags;
+import com.latticeengines.domain.exposed.pls.AttributeFlags;
+import com.latticeengines.domain.exposed.pls.AttributeUseCase;
+import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class AttributeCustomizationServiceImplTestNG extends AppTestNGBase {
@@ -24,26 +25,36 @@ public class AttributeCustomizationServiceImplTestNG extends AppTestNGBase {
     @Autowired
     private AttributeCustomizationEntityMgr attributeCustomizationEntityMgr;
 
+    @Autowired
+    private TenantService tenantService;
+    private CompanyProfileAttributeFlags saved;
+
     @BeforeClass(groups = "functional")
     private void setUp() {
-        createCompositeTable(attributeCustomizationEntityMgr.getRepository(),
-                attributeCustomizationEntityMgr.getRecordType());
-        Tenant tenant = new Tenant();
-        tenant.setId(CustomerSpace.parse("AttributeCustomizationServiceImplTestNG").toString());
+        Tenant tenant = tenantService.findByTenantId(CUSTOMER_SPACE.toString());
+
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
+        tenant = new Tenant();
+        tenant.setId(CUSTOMER_SPACE.toString());
+        tenant.setName(CUSTOMER_SPACE.toString());
+
+        globalAuthFunctionalTestBed.createTenant(tenant);
         MultiTenantContext.setTenant(tenant);
     }
 
     @Test(groups = "functional")
     public void save() {
-        CompanyProfileAttributeFlags flags = new CompanyProfileAttributeFlags();
-        flags.setHidden(true);
-        flags.setHighlighted(false);
-        attributeCustomizationService.save("TestAttribute", AttributeUseCase.CompanyProfile, flags);
+        saved = new CompanyProfileAttributeFlags();
+        saved.setHidden(true);
+        saved.setHighlighted(false);
+        attributeCustomizationService.save("TestAttribute", AttributeUseCase.CompanyProfile, saved);
     }
 
     @Test(groups = "functional", dependsOnMethods = "save")
     public void retrieve() {
-        AttributeCustomization customization = attributeCustomizationService.retrieve("TestAttribute");
-        assertNotNull(customization);
+        AttributeFlags flags = attributeCustomizationService.retrieve("TestAttribute", AttributeUseCase.CompanyProfile);
+        assertEquals(flags, saved);
     }
 }

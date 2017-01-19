@@ -124,4 +124,9 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     public OAuth2RestTemplate getOAuth2RestTemplate() {
         return oAuth2RestTemplate;
     }
+
+    public String getRestAPIHostPort() {
+        return ulyssesHostPort;
+    }
+
 }

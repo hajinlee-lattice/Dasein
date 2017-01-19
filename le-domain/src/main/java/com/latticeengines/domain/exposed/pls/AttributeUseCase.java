@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.attribute;
+package com.latticeengines.domain.exposed.pls;
 
 public enum AttributeUseCase {
     CompanyProfile, //

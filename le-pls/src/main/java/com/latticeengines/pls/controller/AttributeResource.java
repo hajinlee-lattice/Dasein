@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.domain.exposed.attribute.AttributeFlags;
-import com.latticeengines.domain.exposed.attribute.AttributeUseCase;
+import com.latticeengines.domain.exposed.pls.AttributeFlags;
+import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,7 +35,7 @@ public class AttributeResource {
     @ResponseBody
     @ApiOperation(value = "Get attribute flags")
     public AttributeFlags getAttributeFlags(@PathVariable String name, @PathVariable AttributeUseCase useCase) {
-        return attributeCustomizationService.getFlags(name, useCase);
+        return attributeCustomizationService.retrieve(name, useCase);
     }
 
 }

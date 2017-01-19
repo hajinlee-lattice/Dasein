@@ -18,6 +18,7 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:app-context.xml"/>
+    <import resource="classpath:camille-runtime-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.ulysses"/>
 

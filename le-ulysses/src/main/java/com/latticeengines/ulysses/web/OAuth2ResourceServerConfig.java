@@ -43,9 +43,15 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         // define URL patterns to enable OAuth2 security
 
         // @formatter:off
-        http.requestMatchers().antMatchers("/companyprofiles/**", "/api-docs/**", "/swagger/**").and()
-                .authorizeRequests().antMatchers("/companyprofiles/**")
-                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");
+        http.requestMatchers()
+                .antMatchers("/ulysses/**", "/v2/api-docs", "/swagger-ui.html", "/webjars/**", "/**/favicon.ico",
+                        "/swagger-resources", "/configuration/**")
+                .and()
+                .authorizeRequests()
+                .antMatchers("/ulysses/**")
+                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
+                .antMatchers("/v2/api-docs", "/swagger-ui.html", "/webjars/**", "/**/favicon.ico",
+                        "/swagger-resources", "/configuration/**").permitAll();
         // @formatter:on
     }
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.attribute;
+package com.latticeengines.domain.exposed.pls;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 

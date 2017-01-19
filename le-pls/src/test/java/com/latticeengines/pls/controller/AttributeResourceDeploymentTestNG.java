@@ -11,7 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.attribute.CompanyProfileAttributeFlags;
+import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {

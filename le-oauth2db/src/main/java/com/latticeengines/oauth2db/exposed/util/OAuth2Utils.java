@@ -28,6 +28,7 @@ import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 
 public class OAuth2Utils {
@@ -95,6 +96,14 @@ public class OAuth2Utils {
 
     public static CustomerSpace getCustomerSpace(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
         return CustomerSpace.parse(getTenantName(request, oAuthUserEntityMgr));
+    }
+
+    public static Tenant getTenant(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        CustomerSpace space = getCustomerSpace(request, oAuthUserEntityMgr);
+        Tenant tenant = new Tenant();
+        tenant.setId(space.toString());
+        tenant.setName(space.toString());
+        return tenant;
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,

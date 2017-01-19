@@ -1,0 +1,131 @@
+package com.latticeengines.domain.exposed.pls;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
+import com.latticeengines.domain.exposed.security.Tenant;
+
+@Entity
+@Access(AccessType.FIELD)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Table(name = "ATTRIBUTE_CUSTOMIZATION", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID",
+        "ATTRIBUTE_NAME", "USE_CASE" }) })
+@Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
+public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTenantId {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @JsonProperty("attribute_name")
+    @Column(name = "ATTRIBUTE_NAME", nullable = false, length = 100)
+    private String attributeName;
+
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private Tenant tenant;
+
+    @JsonIgnore
+    @Column(name = "TENANT_PID", nullable = false)
+    private Long tenantId;
+
+    @JsonProperty("use_case")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "USE_CASE", nullable = false)
+    private AttributeUseCase useCase;
+
+    @JsonIgnore
+    @Column(name = "FLAGS", nullable = false, length = 2048)
+    private String flagsString;
+
+    @Override
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @JsonProperty("flags")
+    public AttributeFlags getFlags() {
+        return JsonUtils.deserialize(flagsString, AttributeFlags.class);
+    }
+
+    @JsonProperty("flags")
+    public void setFlags(AttributeFlags flags) {
+        this.flagsString = JsonUtils.serialize(flags);
+    }
+
+    @Override
+    public String getName() {
+        return attributeName;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.attributeName = name;
+    }
+
+    @Override
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+        if (tenant != null) {
+            setTenantId(tenant.getPid());
+        }
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public AttributeUseCase getUseCase() {
+        return useCase;
+    }
+
+    public void setUseCase(AttributeUseCase useCase) {
+        this.useCase = useCase;
+    }
+}

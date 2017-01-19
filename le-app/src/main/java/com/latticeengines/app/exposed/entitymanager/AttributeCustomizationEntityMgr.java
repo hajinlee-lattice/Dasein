@@ -1,8 +1,13 @@
 package com.latticeengines.app.exposed.entitymanager;
 
-import com.latticeengines.datafabric.entitymanager.CompositeFabricEntityMgr;
-import com.latticeengines.domain.exposed.attribute.AttributeCustomization;
+import java.util.List;
 
-public interface AttributeCustomizationEntityMgr extends CompositeFabricEntityMgr<AttributeCustomization> {
-    AttributeCustomization find(String attributeName);
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.domain.exposed.pls.AttributeCustomization;
+import com.latticeengines.domain.exposed.pls.AttributeUseCase;
+
+public interface AttributeCustomizationEntityMgr extends BaseEntityMgr<AttributeCustomization> {
+    AttributeCustomization find(String attributeName, AttributeUseCase useCase);
+
+    List<AttributeCustomization> find(String attributeName);
 }

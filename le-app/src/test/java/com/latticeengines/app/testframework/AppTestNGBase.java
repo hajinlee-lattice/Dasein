@@ -12,11 +12,15 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-app-context.xml" })
 public class AppTestNGBase extends AbstractTestNGSpringContextTests {
+
+    @Autowired
+    protected GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
 
     @Autowired
     protected DynamoService dynamoService;

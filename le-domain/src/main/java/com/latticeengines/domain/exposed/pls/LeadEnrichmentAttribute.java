@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -48,6 +50,9 @@ public class LeadEnrichmentAttribute {
 
     @JsonProperty("FundamentalType")
     private FundamentalType fundamentalType;
+
+    @JsonProperty("AttributeFlagsMap")
+    private Map<AttributeUseCase, AttributeFlags> attributeFlagsMap;
 
     public String getDisplayName() {
         return displayName;
@@ -161,4 +166,11 @@ public class LeadEnrichmentAttribute {
         this.fundamentalType = fundamentalType;
     }
 
+    public Map<AttributeUseCase, AttributeFlags> getAttributeFlagsMap() {
+        return attributeFlagsMap;
+    }
+
+    public void setAttributeFlagsMap(Map<AttributeUseCase, AttributeFlags> attributeFlagsMap) {
+        this.attributeFlagsMap = attributeFlagsMap;
+    }
 }

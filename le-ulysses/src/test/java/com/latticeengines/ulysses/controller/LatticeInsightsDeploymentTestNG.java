@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.ulysses.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -26,9 +26,9 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
-public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class LatticeInsightsDeploymentTestNG extends UlyssesDeploymentTestNGBase {
 
     private static final String SEARCH_DISPLAY_NAME_STR1 = "as AkamaI edge";
     private static final String SEARCH_DISPLAY_NAME_STR2 = " ADP";
@@ -50,13 +50,12 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentCategories() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/categories";
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/categories";
 
-        List<String> categoryStrList = restTemplate.getForObject(url, List.class);
+        List<String> categoryStrList = getOAuth2RestTemplate().getForObject(url, List.class);
         assertNotNull(categoryStrList);
 
         Assert.assertEquals(categoryStrList.size(), expectedCategoryStrSet.size());
@@ -72,12 +71,11 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentSubcategories() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/subcategories?category="
+    public void testGetLeadEnrichmentSubcategories() throws IOException {
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/subcategories?category="
                 + Category.TECHNOLOGY_PROFILE.toString();
 
-        List<String> subcategoryListRaw = restTemplate.getForObject(url, List.class);
+        List<String> subcategoryListRaw = getOAuth2RestTemplate().getForObject(url, List.class);
         assertNotNull(subcategoryListRaw);
 
         List<String> subcategoryStrList = JsonUtils.convertList(subcategoryListRaw, String.class);
@@ -88,8 +86,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         System.out.println(subcategoryStrList.get(0));
     }
 
-    private Set<String> getExpectedCategorySet() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    private Set<String> getExpectedCategorySet() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -106,8 +103,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", enabled = true)
-    public void testGetLeadEnrichmentAttributesBeforeSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesBeforeSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -126,23 +122,22 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitationBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountBeforeSave() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), 0);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountBeforeSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedpremiumattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), 0);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCountBeforeSave" })
-    public void testSaveLeadEnrichmentAttributes() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributes() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -151,9 +146,9 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(deselectCount, 0);
         assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
 
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead";
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
 
-        restTemplate.put(url, attributesOperationMap);
+        getOAuth2RestTemplate().put(url, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
         assertEquals(enrichmentList.size(), MAX_SELECT + MAX_PREMIUM_SELECT);
@@ -167,17 +162,16 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributes" })
-    public void testSaveLeadEnrichmentAttributesFailure() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributesFailure() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
         String duplicateFieldName = attributesOperationMap.getSelectedAttributes().get(0);
         attributesOperationMap.getDeselectedAttributes().add(duplicateFieldName);
 
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead";
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
 
         try {
-            restTemplate.put(url, attributesOperationMap);
+            getOAuth2RestTemplate().put(url, attributesOperationMap);
             assertFalse("Expected exception", true);
         } catch (Exception ex) {
             assertTrue(ex.getMessage().contains(duplicateFieldName));
@@ -189,10 +183,10 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                 attributesOperationMap.getSelectedAttributes().size() - 1);
         attributesOperationMap.getSelectedAttributes().add(duplicateFieldName);
 
-        url = getRestAPIHostPort() + "/pls/enrichment/lead";
+        url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
 
         try {
-            restTemplate.put(url, attributesOperationMap);
+            getOAuth2RestTemplate().put(url, attributesOperationMap);
             assertFalse("Expected exception", true);
         } catch (Exception ex) {
             assertTrue(ex.getMessage().contains(duplicateFieldName));
@@ -205,10 +199,10 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                 + "FAIL";
         attributesOperationMap.getSelectedAttributes().add(badFieldName);
 
-        url = getRestAPIHostPort() + "/pls/enrichment/lead";
+        url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
 
         try {
-            restTemplate.put(url, attributesOperationMap);
+            getOAuth2RestTemplate().put(url, attributesOperationMap);
             assertFalse("Expected exception", true);
         } catch (Exception ex) {
             assertTrue(ex.getMessage().contains(badFieldName));
@@ -218,8 +212,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesFailure" })
-    public void testGetLeadEnrichmentAttributes() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributes() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -273,23 +266,22 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitation" })
     public void testGetLeadEnrichmentSelectedAttributeCount() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), MAX_SELECT + MAX_PREMIUM_SELECT);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCount" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCount() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedpremiumattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributePremiumCount" })
-    public void testSaveLeadEnrichmentAttributesForSecondSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testSaveLeadEnrichmentAttributesForSecondSave() throws IOException {
 
         LeadEnrichmentAttributesOperationMap attributesOperationMap = pickFewForSelectionFromAllEnrichmentList();
 
@@ -299,11 +291,11 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         assertEquals(attributesOperationMap.getSelectedAttributes().size(), MAX_PREMIUM_SELECT + MAX_SELECT);
         assertEquals(attributesOperationMap.getDeselectedAttributes().size(), MAX_DESELECT);
 
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead";
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
 
         ObjectMapper om = new ObjectMapper();
         System.out.println("attributesOperationMap = " + om.writeValueAsString(attributesOperationMap));
-        restTemplate.put(url, attributesOperationMap);
+        getOAuth2RestTemplate().put(url, attributesOperationMap);
 
         List<LeadEnrichmentAttribute> enrichmentList = getLeadEnrichmentAttributeList(true);
         assertEquals(enrichmentList.size(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
@@ -317,8 +309,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testSaveLeadEnrichmentAttributesForSecondSave" })
-    public void testGetLeadEnrichmentAttributesAfterSecondSave() throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
@@ -337,23 +328,22 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentPremiumAttributesLimitationAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), 2 * (MAX_SELECT + MAX_PREMIUM_SELECT) - MAX_DESELECT);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentSelectedAttributePremiumCountAfterSecondSave() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/selectedpremiumattributes/count";
-        Integer count = restTemplate.getForObject(url, Integer.class);
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/selectedpremiumattributes/count";
+        Integer count = getOAuth2RestTemplate().getForObject(url, Integer.class);
         assertNotNull(count);
         assertEquals(count.intValue(), 3);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
-    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws JsonParseException,
-            JsonMappingException, JsonProcessingException, IOException {
+    public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
                 SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE, false);
         assertNotNull(combinedAttributeList);
@@ -433,8 +423,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
     }
 
-    private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList() throws JsonParseException,
-            JsonMappingException, JsonProcessingException, IOException {
+    private LeadEnrichmentAttributesOperationMap pickFewForSelectionFromAllEnrichmentList() throws IOException {
 
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false);
 
@@ -476,21 +465,19 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         return attributesOperationMap;
     }
 
-    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr)
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr) throws IOException {
         return getLeadEnrichmentAttributeList(onlySelectedAttr, false);
     }
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
-            boolean considerInternalAttributes) throws JsonParseException, JsonMappingException,
-            JsonProcessingException, IOException {
+            boolean considerInternalAttributes) throws IOException {
         return getLeadEnrichmentAttributeList(onlySelectedAttr, null, null, considerInternalAttributes);
     }
 
     private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributeList(boolean onlySelectedAttr,
             String attributeDisplayNameFilter, Category category, boolean considerInternalAttributes)
-            throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead";
+            throws IOException {
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights";
         if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
                 || considerInternalAttributes) {
             url += "?";
@@ -514,7 +501,7 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
         System.out.println("Using URL: " + url);
 
-        List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
+        List<?> combinedAttributeObjList = getOAuth2RestTemplate().getForObject(url, List.class);
         assertNotNull(combinedAttributeObjList);
 
         List<LeadEnrichmentAttribute> combinedAttributeList = new ArrayList<>();
@@ -554,9 +541,9 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
     }
 
     private void checkLimitation() {
-        String url = getRestAPIHostPort() + "/pls/enrichment/lead/premiumattributeslimitation";
+        String url = getRestAPIHostPort() + "/ulysses/latticeinsights/insights/premiumattributeslimitation";
         @SuppressWarnings("unchecked")
-        Map<String, Integer> countMap = restTemplate.getForObject(url, Map.class);
+        Map<String, Integer> countMap = getOAuth2RestTemplate().getForObject(url, Map.class);
         assertNotNull(countMap);
         assertFalse(countMap.isEmpty());
 
@@ -574,5 +561,4 @@ public class EnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
 
         assertTrue(foundHGDataSourceInfo);
     }
-
 }

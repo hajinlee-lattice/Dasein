@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.attribute;
+package com.latticeengines.domain.exposed.pls;
 
 public class EnrichmentAttributeFlags extends AttributeFlags {
     private boolean selected;
