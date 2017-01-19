@@ -13,12 +13,15 @@ public class LocationUtils {
 
     private static Map<String, String> countrySynonMap;
     private static Map<String, String> usStateSynonMap;
-    private static Map<String, String> usStateAbbrMap;
+    private static Map<String, String> usStateAbbrToFullNameMap;
+    private static Map<String, String> usStateFullNameToAbbrMap;
     private static Map<String, String> usRegionMap;
     private static Map<String, String> caStateSynonMap;
-    private static Map<String, String> caStateAbbrMap;
+    private static Map<String, String> caStateAbbrToFullNameMap;
+    private static Map<String, String> caStateFullNameToAbbrMap;
 
     public static final String USA = "USA";
+    public static final String CANADA = "CANADA";
 
     static {
         Object[][] countrySynonData = new Object[][]{ //
@@ -378,24 +381,31 @@ public class LocationUtils {
                 { "Pacific", new String[] { "Alaska", "California", "Hawaii", "Oregon", "Washington" } } //
         };
 
-        countrySynonMap = dataToMap(countrySynonData);
-        usStateSynonMap = dataToMap(usStateSynonData);
-        usStateAbbrMap = dataToMap(usStateAbbrData);
-        usRegionMap = dataToMap(usRegionData);
-        caStateSynonMap = dataToMap(caStateSynonData);
-        caStateAbbrMap = dataToMap(caStateAbbrData);
+        countrySynonMap = dataToMap(countrySynonData, false);
+        usStateSynonMap = dataToMap(usStateSynonData, false);
+        usStateAbbrToFullNameMap = dataToMap(usStateAbbrData, false);
+        usStateFullNameToAbbrMap = dataToMap(usStateAbbrData, true);
+        usRegionMap = dataToMap(usRegionData, false);
+        caStateSynonMap = dataToMap(caStateSynonData, false);
+        caStateAbbrToFullNameMap = dataToMap(caStateAbbrData, false);
+        caStateFullNameToAbbrMap = dataToMap(caStateAbbrData, true);
     }
 
-    private static Map<String, String> dataToMap(Object[][] data) {
+    private static Map<String, String> dataToMap(Object[][] data, boolean reverse) {
         Map<String, String> toReturn = new HashMap<>();
         for (Object[] entry: data) {
             if (entry[1] instanceof String[]) {
                 String value = (String) entry[0];
                 for (String key : (String[]) entry[1]) {
-                    toReturn.put(key.toUpperCase(), value);
+                    toReturn.put(key.toUpperCase(), value.toUpperCase());
                 }
             } else {
-                toReturn.put((String) entry[0], (String) entry[1]);
+                if (reverse) {
+                    toReturn.put(((String) entry[1]).toUpperCase(), ((String) entry[0]).toUpperCase());
+                } else {
+                    toReturn.put(((String) entry[0]).toUpperCase(), ((String) entry[1]).toUpperCase());
+                }
+
             }
         }
         return toReturn;
@@ -455,21 +465,33 @@ public class LocationUtils {
         if (USA.equalsIgnoreCase(standardCountry)) {
             Map<String, String> stateLookUp = usStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
-            if (usStateAbbrMap.containsKey(guess)) {
-                return com.latticeengines.common.exposed.util.StringUtils.getStandardString(usStateAbbrMap.get(guess));
+            if (usStateAbbrToFullNameMap.containsKey(guess)) {
+                return com.latticeengines.common.exposed.util.StringUtils
+                        .getStandardString(usStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
             }
-        } else if ("Canada".equalsIgnoreCase(standardCountry)) {
+        } else if (CANADA.equalsIgnoreCase(standardCountry)) {
             Map<String, String> stateLookUp = caStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
-            if (caStateAbbrMap.containsKey(guess)) {
-                return com.latticeengines.common.exposed.util.StringUtils.getStandardString(caStateAbbrMap.get(guess));
+            if (caStateAbbrToFullNameMap.containsKey(guess)) {
+                return com.latticeengines.common.exposed.util.StringUtils
+                        .getStandardString(caStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
             }
         } else {
             return com.latticeengines.common.exposed.util.StringUtils.getStandardString(state);
+        }
+    }
+
+    public static String getStardardStateCode(String standardCountry, String standardState) {
+        if (USA.equalsIgnoreCase(standardCountry) && usStateFullNameToAbbrMap.containsKey(standardState)) {
+            return usStateFullNameToAbbrMap.get(standardState);
+        } else if (CANADA.equalsIgnoreCase(standardCountry) && caStateFullNameToAbbrMap.containsKey(standardState)) {
+            return caStateFullNameToAbbrMap.get(standardState);
+        } else {
+            return standardState;
         }
     }
 

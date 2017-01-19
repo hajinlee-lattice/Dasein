@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.dnb.DnBAPIType;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
@@ -217,7 +218,8 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             }
             if (!StringUtils.isEmpty(context.getInputNameLocation().getState())) {
                 url.append("TerritoryName=");
-                url.append(context.getInputNameLocation().getState());
+                url.append(LocationUtils.getStardardStateCode(context.getInputNameLocation().getCountry(),
+                        context.getInputNameLocation().getState()));
                 url.append("&");
             }
             if (StringUtils.isNotEmpty(context.getInputNameLocation().getZipcode())) {

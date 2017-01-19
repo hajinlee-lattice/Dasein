@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.dnb.DnBAPIType;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBKeyType;
@@ -174,7 +175,10 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         return String.format(recordFormat, transactionId,
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getName(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCity(), ""),
-                StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getState(), ""),
+                StringUtils.defaultIfEmpty(
+                        LocationUtils.getStardardStateCode(matchContext.getInputNameLocation().getCountry(),
+                                matchContext.getInputNameLocation().getState()),
+                        ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getZipcode(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCountryCode(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getPhoneNumber(), ""));

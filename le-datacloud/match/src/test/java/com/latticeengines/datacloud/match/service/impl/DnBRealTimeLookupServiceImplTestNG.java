@@ -35,9 +35,10 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     @Test(groups = "dnb", dataProvider = "entityInputData", enabled = true, priority = 1)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,
-            DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade) {
+            String countryCode, DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade) {
         MatchKeyTuple input = new MatchKeyTuple();
-        input.setCountryCode(country);
+        input.setCountry(country);
+        input.setCountryCode(countryCode);
         input.setName(name);
         input.setState(state);
         input.setCity(city);
@@ -71,6 +72,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
             cs.submit(new Callable<DnBMatchContext>() {
                 public DnBMatchContext call() throws Exception {
                     MatchKeyTuple input = new MatchKeyTuple();
+                    input.setCountry("USA");
                     input.setCountryCode("US");
                     input.setName("Gorman Manufacturing");
                     input.setState("CA");
@@ -115,11 +117,12 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     }
 
     @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", enabled = true, priority = 3)
-    public void testRealTimeEntityLookupMatchedNameLocation(String inputName, String inputCountryCode,
-            DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade, String matchedName,
-            String matchedStreet, String matchedCity, String matchedState, String matchedCountryCode,
-            String matchedZipCode, String matchedPhoneNumber) {
+    public void testRealTimeEntityLookupMatchedNameLocation(String inputName, String inputCountry,
+            String inputCountryCode, DnBReturnCode dnbCode, String duns, Integer ConfidenceCode,
+            DnBMatchGrade matchGrade, String matchedName, String matchedStreet, String matchedCity, String matchedState,
+            String matchedCountryCode, String matchedZipCode, String matchedPhoneNumber) {
         MatchKeyTuple input = new MatchKeyTuple();
+        input.setCountry(inputCountry);
         input.setCountryCode(inputCountryCode);
         input.setName(inputName);
         DnBMatchContext context = new DnBMatchContext();
@@ -158,14 +161,16 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     @DataProvider(name = "entityInputData")
     public static Object[][] getEntityInputData() {
         return new Object[][] {
-                { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "US", DnBReturnCode.OK, "038796548", 8,
+                { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "USA", "US", DnBReturnCode.OK, "038796548", 8,
                         new DnBMatchGrade("AZZAAZZZFAB") },
-                { "DÉSIRÉE DAUDE", null, null, "DE", DnBReturnCode.DISCARD, null, 4, new DnBMatchGrade("BZZZZZZZZZZ") },
-                { "ABCDEFG", "NEW YORK", "WASHINTON", "US", DnBReturnCode.UNMATCH, null, null, null },
-                { "GORMAN MANUFACTURING", null, null, "US", DnBReturnCode.OK, "804735132", 6,
+                { "DÉSIRÉE DAUDE", null, null, "GERMANY", "DE", DnBReturnCode.DISCARD, null, 4,
+                        new DnBMatchGrade("BZZZZZZZZZZ") },
+                { "ABCDEFG", "NEW YORK", "WASHINTON", "USA", "US", DnBReturnCode.UNMATCH, null, null, null },
+                { "GORMAN MANUFACTURING", null, null, "USA", "US", DnBReturnCode.OK, "804735132", 6,
                         new DnBMatchGrade("AZZZZZZZFZZ") },
-                { "GOOGLE", null, "CA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZAZZZFFZ") },
-                { "GOOGLE GERMANY", "HAMBURG", null, "DE", DnBReturnCode.OK, "330465266", 7,
+                { "GOOGLE", null, "CA", "USA", "US", DnBReturnCode.OK, "060902413", 6,
+                        new DnBMatchGrade("AZZZAZZZFFZ") },
+                { "GOOGLE GERMANY", "HAMBURG", null, "GERMANY", "DE", DnBReturnCode.OK, "330465266", 7,
                         new DnBMatchGrade("AZZAZZZZZFZ") } };
     }
 
@@ -177,7 +182,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     @DataProvider(name = "entityInputDataTestMatchedNameLocation")
     public static Object[][] getEntityInputDataTestMatchedNameLocation() {
-        return new Object[][] { { "GOOGLE", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
+        return new Object[][] {
+                { "GOOGLE", "USA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
                 "GOOGLE INC.", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" }
         };
     }
