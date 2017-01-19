@@ -12,27 +12,30 @@ def main():
     args.func(args)
 
 def hookgroup(args):
-    hookgroup_internal(args.group)
+    hookgroup_internal(args.app, args.stack)
 
-def hookgroup_internal(group):
+def hookgroup_internal(app, stack):
+    group = "%s-lpi-%s" % (app, stack)
     group_name = find_full_group_name(group)
     policies = get_all_policies(group_name)
     alarms = get_alarms(group)
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
-            alarm = alarms[group + '-high-latency']
+            alarm = alarms['scoringapi-lpi-%s-high-latency' % stack]
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms[group + '-low-latency']
+            alarm = alarms['matchapi-lpi-%s-low-latency' % stack]
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
 def hookecs(args):
     hookecs_internal(args.cluster, args.service)
 
-def hookecs_internal(cluster, service):
+def hookecs_internal(app, stack):
+    cluster = "%s-lpi-%s" % (app, stack)
+    service = "tomcat"
     cluster_name = find_cluster_name(cluster)
     service_name = find_service_name(cluster, service)
     policies = get_all_ecs_policies(cluster_name, service_name)
@@ -41,11 +44,11 @@ def hookecs_internal(cluster, service):
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
-            alarm = alarms[cluster + '-high-latency']
+            alarm = alarms['scoringapi-lpi-%s-high-latency' % stack]
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms[cluster + '-low-latency']
+            alarm = alarms['matchapi-lpi-%s-low-latency' % stack]
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
@@ -116,12 +119,13 @@ def parse_args():
     commands = parser.add_subparsers(help="commands")
 
     subparser = commands.add_parser("hook-asgroup", description="Hook a scaling policy with an alarm")
-    subparser.add_argument('-g', dest='group', type=str, required=True, help='name of the auto scaling group (prefix).')
+    subparser.add_argument('-a', dest='app', type=str, required=True, help='application')
+    subparser.add_argument('-s', dest='stack', type=str, required=True, help='stack')
     subparser.set_defaults(func=hookgroup)
 
     subparser = commands.add_parser("hook-ecs", description="Hook a scaling policy with an alarm")
-    subparser.add_argument('-c', dest='cluster', type=str, required=True, help='name of ecs cluster. (prefix)')
-    subparser.add_argument('-s', dest='service', type=str, required=True, help='name of ecs service. (prefix)')
+    subparser.add_argument('-a', dest='app', type=str, required=True, help='application')
+    subparser.add_argument('-s', dest='stack', type=str, required=True, help='stack')
     subparser.set_defaults(func=hookecs)
 
     args = parser.parse_args()
