@@ -940,8 +940,36 @@ angular
                     controller: function(urls) {
                         if(urls && urls.enrichment_settings_url) {
                             $('#sureshot_iframe_container')
-                                .html('<iframe src="' + urls.enrichment_settings_url + '"></iframe>');
+                                .html('<iframe src="' + urls.enrichment_settings_url + '" class="eloqua-enrichment-iframe"></iframe>');
+
+                            changeIframeHeight();
+
                         }
+
+                        function changeIframeHeight(){
+                            var if_height;
+
+                            window.addEventListener("message", function (event){
+                                // verify the origin is sureshot, if not just return
+                                var origin = event.origin || event.originalEvent.origin;
+                                //if (origin != "{sureshot_iframe_origin}")
+                                //return false;
+
+                                if (!event.data.contentHeight) { 
+                                    return;
+                                }
+                                
+                                var h = event.data.contentHeight;
+
+                                if ( !isNaN( h ) && h > 0 && h !== if_height ) {
+                                    if_height = h;
+                                    console.log('height=' + h);
+                                    $("#sureshot_iframe_container iframe").height(h); 
+                                }
+                                return true;
+                            }, false);
+                        }
+
                     },
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
