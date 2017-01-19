@@ -257,6 +257,34 @@ section.container.custom-fields {
     }
     table {
         min-width: 670px;
+        &.field-mapping-standard {
+            th:first-child {
+                width: 47%;
+            }
+            th:nth-child(2) {
+                width: 17%;
+            }
+            th:last-child {
+                width: 36%;
+            }
+        }
+        &.field-mapping-additional {
+            th:first-child {
+                width: 30%;
+            }
+            th:nth-child(2) {
+                width: 20%;
+            }
+            th:nth-child(3) {
+                width: 30%;
+            }
+            th:last-child {
+                width: 20%
+            }
+            tr td.field-mapping-inputs select{
+                width: 100%;
+            }
+        }
     }
     thead {
         border-bottom: #333 solid 1px;
@@ -674,6 +702,20 @@ Media Queries
                 td {
                     &.field-mapping-label label {
                         width: auto;
+                    }
+                }
+            }
+        }
+    }
+}
+.score-file {
+    .columns.box-outline {
+        table.section-body {
+            &.field-mapping-standard,
+            &.field-mapping-additional {
+                tr {
+                    th, td {
+                        width: 50%;
                     }
                 }
             }
