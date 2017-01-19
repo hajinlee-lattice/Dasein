@@ -353,6 +353,9 @@ section.container.custom-fields {
     }
     .field-mapping-form {
         margin-bottom: 1em;
+        .columns {
+            min-width: 672px;
+        }
     }
     .field-mapping-validation {
         margin: 0 1em;
@@ -374,11 +377,6 @@ section.container.custom-fields {
         color: white;
         font-size: 1.2em;
         padding: 0.5em;
-    }
-    form[name="fieldMappingForm"] {
-        .columns {
-            min-width: 672px;
-        }
     }
 }
 
