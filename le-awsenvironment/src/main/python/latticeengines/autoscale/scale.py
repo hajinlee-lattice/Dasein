@@ -18,16 +18,15 @@ def hookgroup_internal(app, stack):
     group = "%s-lpi-%s" % (app, stack)
     group_name = find_full_group_name(group)
     policies = get_all_policies(group_name)
-    alarms = get_alarms('scoringapi-lpi-%s' % stack)
-    alarms.update(get_alarms('matchapi-lpi-%s' % stack))
+    alarms = get_alarms(group)
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
-            alarm = alarms['scoringapi-lpi-%s-high-latency' % stack]
+            alarm = alarms[group + '-high-latency']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms['matchapi-lpi-%s-low-latency' % stack]
+            alarm = alarms[group + '-few-requests']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
@@ -41,16 +40,15 @@ def hookecs_internal(app, stack):
     service_name = find_service_name(cluster, service)
     policies = get_all_ecs_policies(cluster_name, service_name)
 
-    alarms = get_alarms('scoringapi-lpi-%s' % stack)
-    alarms.update(get_alarms('matchapi-lpi-%s' % stack))
+    alarms = get_alarms(cluster)
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
-            alarm = alarms['scoringapi-lpi-%s-high-latency' % stack]
+            alarm = alarms[cluster + '-high-latency']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
         elif 'ScaleBack' in policy_name:
-            alarm = alarms['matchapi-lpi-%s-low-latency' % stack]
+            alarm = alarms[cluster + '-few-requests']
             put_alarm_actions(alarm, policy['PolicyARN'])
             print "hook up policy %s with alarm %s" % (policy_name, alarm["AlarmName"])
 
