@@ -19,7 +19,7 @@ def hookgroup_internal(app, stack):
     group_name = find_full_group_name(group)
     policies = get_all_policies(group_name)
     alarms = get_alarms('scoringapi-lpi-%s' % stack)
-    alarms += get_alarms('matchapi-lpi-%s' % stack)
+    alarms.update(get_alarms('matchapi-lpi-%s' % stack))
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
@@ -42,7 +42,7 @@ def hookecs_internal(app, stack):
     policies = get_all_ecs_policies(cluster_name, service_name)
 
     alarms = get_alarms('scoringapi-lpi-%s' % stack)
-    alarms += get_alarms('matchapi-lpi-%s' % stack)
+    alarms.update(get_alarms('matchapi-lpi-%s' % stack))
     for policy in policies:
         policy_name = policy['PolicyName']
         if 'ScaleUp' in policy_name:
