@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ClassName")
 @JsonSubTypes({ @JsonSubTypes.Type(value = SftpConfiguration.class, name = "SftpConfiguration"),
-                @JsonSubTypes.Type(value = SqlToTextConfiguration.class, name = "SqlToTextConfiguration")
+        @JsonSubTypes.Type(value = SqlToTextConfiguration.class, name = "SqlToTextConfiguration"),
+        @JsonSubTypes.Type(value = ApiConfiguration.class, name = "ApiConfiguration")
               })
 public abstract class ProviderConfiguration {
     private String className;
     protected Integer concurrentNum;
+    protected boolean uncompressAfterIngestion;
+    protected Integer checkVersion;
 
     public ProviderConfiguration() {
         setClassName(getClass().getSimpleName());
@@ -35,4 +38,25 @@ public abstract class ProviderConfiguration {
     public void setConcurrentNum(Integer concurrentNum) {
         this.concurrentNum = concurrentNum;
     }
+
+    @JsonProperty("UncompressAfterIngestion")
+    public boolean isUncompressAfterIngestion() {
+        return uncompressAfterIngestion;
+    }
+
+    @JsonProperty("UncompressAfterIngestion")
+    public void setUncompressAfterIngestion(boolean uncompressAfterIngestion) {
+        this.uncompressAfterIngestion = uncompressAfterIngestion;
+    }
+
+    @JsonProperty("CheckVersion")
+    public Integer getCheckVersion() {
+        return checkVersion;
+    }
+
+    @JsonProperty("CheckVersion")
+    public void setCheckVersion(Integer checkVersion) {
+        this.checkVersion = checkVersion;
+    }
+
 }

@@ -9,7 +9,6 @@ public class SftpConfiguration extends ProviderConfiguration {
     protected String sftpUserName;
     protected String sftpPasswordEncrypted;
     protected String sftpDir;
-    protected Integer checkVersion;
     protected FileCheckStrategy checkStrategy;
     protected String fileExtension;
     protected String fileNamePrefix;
@@ -64,16 +63,6 @@ public class SftpConfiguration extends ProviderConfiguration {
     @JsonProperty("SftpDir")
     public void setSftpDir(String sftpDir) {
         this.sftpDir = sftpDir;
-    }
-
-    @JsonProperty("CheckVersion")
-    public Integer getCheckVersion() {
-        return checkVersion;
-    }
-
-    @JsonProperty("CheckVersion")
-    public void setCheckVersion(Integer checkVersion) {
-        this.checkVersion = checkVersion;
     }
 
     @JsonProperty("CheckStrategy")

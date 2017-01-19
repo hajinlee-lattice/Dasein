@@ -1,13 +1,18 @@
 package com.latticeengines.propdata.workflow.engine.steps;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -26,6 +31,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -63,6 +69,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(6);
 
     private static final String sqoopPrefix = "part-m-";
+    private static final String UNCOMPRESSED = "Uncompressed";
 
     @Override
     public void execute() {
@@ -77,12 +84,15 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             progress.setIngestion(ingestion);
             initializeYarnClient();
             switch (progress.getIngestion().getIngestionType()) {
-                case SFTP:
-                    ingestionFromSftp();
-                    break;
-                case SQL_TO_CSVGZ:
-                    ingestionBySqoop();
-                    break;
+            case SFTP:
+                ingestFromSftp();
+                break;
+            case SQL_TO_CSVGZ:
+                ingestBySqoop();
+                break;
+            case API:
+                ingestByApi();
+                break;
             default:
                 break;
             }
@@ -99,7 +109,38 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         }
     }
 
-    private void ingestionFromSftp() throws Exception {
+    private void ingestByApi() throws Exception {
+        try {
+            Path ingestionDir = new Path(progress.getDestination()).getParent();
+            if (HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())) {
+                HdfsUtils.rmdir(yarnConfiguration, ingestionDir.toString());
+            }
+            ApiConfiguration apiConfig = (ApiConfiguration) progress.getIngestion().getProviderConfiguration();
+            URL url = new URL(apiConfig.getFileUrl());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.connect();
+            InputStream connStream = conn.getInputStream();
+            FileSystem hdfs = FileSystem.get(yarnConfiguration);
+            FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()));
+            IOUtils.copy(connStream, outStream);
+            outStream.close();
+            connStream.close();
+            conn.disconnect();
+            if (apiConfig.isUncompressAfterIngestion()) {
+                Path uncompressDir = new Path(ingestionDir, UNCOMPRESSED);
+                HdfsUtils.mkdir(yarnConfiguration, uncompressDir.toString());
+                HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, progress.getDestination(),
+                        uncompressDir.toString());
+            }
+            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FINISHED).commit(true);
+        } catch (Exception e) {
+            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
+            log.error(String.format("Ingestion failed of exception %s. Progress: %s", e.getMessage(),
+                    progress.toString()));
+        }
+    }
+
+    private void ingestFromSftp() throws Exception {
         String destFile = progress.getDestination();
         Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
                 "TMP_" + UUID.randomUUID().toString());
@@ -132,7 +173,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         }
     }
 
-    private void ingestionBySqoop() throws Exception {
+    private void ingestBySqoop() throws Exception {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         SqlToTextConfiguration sqlToTextConfig = (SqlToTextConfiguration) progress.getIngestion()
                 .getProviderConfiguration();
@@ -242,6 +283,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             HdfsUtils.rmdir(yarnConfiguration, uncompressedFilePath.toString());
         }
     }
+
 
     private void failByException(Exception e) {
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)

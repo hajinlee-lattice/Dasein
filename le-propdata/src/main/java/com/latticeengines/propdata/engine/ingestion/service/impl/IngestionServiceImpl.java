@@ -26,25 +26,27 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionNewProgressValidator;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
+import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -75,6 +77,9 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private IngestionApiProviderService apiProviderService;
 
     @Override
     public List<IngestionProgress> scan(String hdfsPod) {
@@ -157,15 +162,25 @@ public class IngestionServiceImpl implements IngestionService {
     public void checkCompleteIngestions() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
         for (Ingestion ingestion : ingestions) {
-            if (ingestion.getProviderConfiguration() instanceof SftpConfiguration) {
-                SftpConfiguration sftpConfig = (SftpConfiguration) ingestion
-                        .getProviderConfiguration();
+            switch (ingestion.getIngestionType()) {
+            case SFTP:
+                SftpConfiguration sftpConfig = (SftpConfiguration) ingestion.getProviderConfiguration();
                 List<String> mostRecentVersions = ingestionVersionService
-                        .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(),
-                                sftpConfig.getCheckVersion());
+                        .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(), sftpConfig.getCheckVersion());
                 for (String version : mostRecentVersions) {
                     checkCompleteVersionFromSftp(ingestion.getIngestionName(), version, sftpConfig);
                 }
+                break;
+            case API:
+                ApiConfiguration apiConfig = (ApiConfiguration) ingestion.getProviderConfiguration();
+                mostRecentVersions = ingestionVersionService.getMostRecentVersionsFromHdfs(ingestion.getIngestionName(),
+                        apiConfig.getCheckVersion());
+                for (String version : mostRecentVersions) {
+                    checkCompleteVersionFromApi(ingestion.getIngestionName(), version, apiConfig);
+                }
+                break;
+            default:
+                break;
             }
         }
     }
@@ -181,7 +196,8 @@ public class IngestionServiceImpl implements IngestionService {
                 return;
             }
         } catch (IOException e1) {
-            throw new RuntimeException("Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS");
+            throw new RuntimeException(
+                    "Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
         }
 
         String fileNamePattern = ingestionVersionService.getFileNamePattern(version,
@@ -189,7 +205,7 @@ public class IngestionServiceImpl implements IngestionService {
                 sftpConfig.getFileExtension(), sftpConfig.getFileTimestamp());
         List<String> sftpFiles = SftpUtils.getFileNames(sftpConfig, fileNamePattern);
 
-        List<String> hdfsFiles = getHdfsFileNames(hdfsDir.toString(),
+        List<String> hdfsFiles = getHdfsFileNamesByExtension(hdfsDir.toString(),
                 sftpConfig.getFileExtension());
         if (sftpFiles.size() > hdfsFiles.size()) {
             return;
@@ -202,15 +218,38 @@ public class IngestionServiceImpl implements IngestionService {
         }
 
         try {
-            if (!HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
-                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-            }
+            HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS");
+            throw new RuntimeException(
+                    "Failed to create " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
         }
     }
 
-    private List<String> getHdfsFileNames(String hdfsDir, final String fileExtension) {
+    @SuppressWarnings("static-access")
+    private void checkCompleteVersionFromApi(String ingestionName, String version, ApiConfiguration apiConfig) {
+        com.latticeengines.domain.exposed.camille.Path hdfsDir = hdfsPathBuilder.constructIngestionDir(ingestionName,
+                version);
+        Path success = new Path(hdfsDir.toString(), hdfsPathBuilder.SUCCESS_FILE);
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
+                return;
+            }
+        } catch (IOException e1) {
+            throw new RuntimeException(
+                    "Failed to check " + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+        }
+        Path file = new Path(hdfsDir.toString(), apiConfig.getFileName());
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, file.toString())) {
+                HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
+            }
+        } catch (IOException e1) {
+            throw new RuntimeException("Failed to check " + file.toString() + " in HDFS or create "
+                    + hdfsPathBuilder.SUCCESS_FILE + " in HDFS dir " + hdfsDir.toString());
+        }
+    }
+
+    private List<String> getHdfsFileNamesByExtension(String hdfsDir, final String fileExtension) {
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
             @Override
             public boolean accept(String filename) {
@@ -274,16 +313,33 @@ public class IngestionServiceImpl implements IngestionService {
 
     @Override
     public List<String> getMissingFiles(Ingestion ingestion) {
-        List<String> targetFiles = getTargetFiles(ingestion);
-        List<String> existingFiles = getExistingFiles(ingestion);
-        Set<String> existingFilesSet = new HashSet<String>(existingFiles);
         List<String> result = new ArrayList<String>();
-        for (String targetFile : targetFiles) {
-            if (!existingFilesSet.contains(targetFile)) {
-                result.add(targetFile);
-                log.info("Found missing file to download: " + targetFile);
+        switch (ingestion.getIngestionType()) {
+        case SFTP:
+            List<String> targetFiles = getTargetFiles(ingestion);
+            List<String> existingFiles = getExistingFiles(ingestion);
+            Set<String> existingFilesSet = new HashSet<String>(existingFiles);
+            for (String targetFile : targetFiles) {
+                if (!existingFilesSet.contains(targetFile)) {
+                    result.add(targetFile);
+                    log.info("Found missing file to download: " + targetFile);
+                }
             }
+            break;
+        case API:
+            ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
+            String targetVersion = apiProviderService.getTargetVersion(apiConfiguration);
+            List<String> existingVersions = ingestionVersionService
+                    .getMostRecentVersionsFromHdfs(ingestion.getIngestionName(), 1);
+            Set<String> existingVersionsSet = new HashSet<String>(existingVersions);
+            if (!existingVersionsSet.contains(targetVersion)) {
+                result.add(apiConfiguration.getFileName());
+            }
+            break;
+        default:
+            throw new RuntimeException("Ingestion type " + ingestion.getIngestionType() + " is not supported");
         }
+
         return result;
     }
 

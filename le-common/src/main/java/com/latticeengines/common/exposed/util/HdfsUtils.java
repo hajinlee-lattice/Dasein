@@ -15,10 +15,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.crypto.key.KeyProvider;
 import org.apache.hadoop.crypto.key.KeyProviderFactory;
@@ -36,6 +40,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
+
+    private static final Log log = LogFactory.getLog(HdfsUtils.class);
 
     public interface HdfsFileFormat {
         public static final String AVRO_FILE = ".*.avro";
@@ -161,6 +167,28 @@ public class HdfsUtils {
             try (InputStream is = new GZIPInputStream(fs.open(inputFilePath))) {
                 OutputStream os = fs.create(outputFilePath, true);
                 org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration);
+            }
+        }
+    }
+
+    public static final void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile,
+            String uncompressedDir) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            Path inputFile = new Path(compressedFile);
+            Path outputFolder = new Path(uncompressedDir);
+            try (ZipInputStream is = new ZipInputStream(fs.open(inputFile))) {
+                ZipEntry entry = is.getNextEntry();
+                while (entry != null) {
+                    if (entry.isDirectory()) {
+                        entry = is.getNextEntry();
+                        continue;
+                    }
+                    Path outputFile = new Path(outputFolder, entry.getName());
+                    OutputStream os = fs.create(outputFile, true);
+                    org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration, false);
+                    os.close();
+                    entry = is.getNextEntry();
+                }
             }
         }
     }

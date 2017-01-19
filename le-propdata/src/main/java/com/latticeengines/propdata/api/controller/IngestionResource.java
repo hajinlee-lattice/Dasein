@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.network.exposed.propdata.IngestionInterface;
 import com.latticeengines.propdata.engine.ingestion.service.IngestionService;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -76,7 +76,7 @@ public class IngestionResource extends InternalResourceBase implements Ingestion
     }
 
     private void checkIngestionRequest(String ingestionName, IngestionRequest ingestionRequest) {
-        if (StringUtils.isEmpty(ingestionRequest.getFileName())) {
+        if (!"OrbIntelligence".equals(ingestionName) && StringUtils.isEmpty(ingestionRequest.getFileName())) {
             throw new IllegalArgumentException("Please provide file name in ingestion request");
         }
         if (StringUtils.isEmpty(ingestionRequest.getSubmitter())) {

@@ -215,7 +215,7 @@ public class Ingestion implements HasPid, Serializable {
     }
 
     public enum IngestionType {
-        SFTP, SQL_TO_CSVGZ;
+        SFTP, SQL_TO_CSVGZ, API;
     }
 
     public enum IngestionCriteria {

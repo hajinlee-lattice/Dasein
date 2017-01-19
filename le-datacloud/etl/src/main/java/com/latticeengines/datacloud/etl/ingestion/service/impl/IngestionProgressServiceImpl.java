@@ -11,16 +11,19 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
-import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
+import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressUpdater;
+import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SqlToTextConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
@@ -32,11 +35,16 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 @Component("ingestionProgressService")
 public class IngestionProgressServiceImpl implements IngestionProgressService {
 
+    private static final Log log = LogFactory.getLog(IngestionProgressServiceImpl.class);
+
     @Autowired
-    IngestionProgressEntityMgr ingestionProgressEntityMgr;
+    private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private IngestionApiProviderService apiProviderService;
 
     @Override
     public List<IngestionProgress> getProgressesByField(Map<String, Object> fields) {
@@ -69,18 +77,20 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     @Override
     public String constructSource(Ingestion ingestion, String fileName) {
         switch (ingestion.getIngestionType()) {
-            case SFTP:
-            SftpConfiguration sftpConfiguration = (SftpConfiguration) ingestion
-                    .getProviderConfiguration();
+        case SFTP:
+            SftpConfiguration sftpConfiguration = (SftpConfiguration) ingestion.getProviderConfiguration();
             Path fileSource = new Path(sftpConfiguration.getSftpDir(), fileName);
             return fileSource.toString();
-            case SQL_TO_CSVGZ:
-                SqlToTextConfiguration sqlToTextConfiguration = (SqlToTextConfiguration) ingestion
-                        .getProviderConfiguration();
-                return sqlToTextConfiguration.getDbTable();
-            default:
-                throw new UnsupportedOperationException(
-                        "Ingestion type " + ingestion.getIngestionType() + " is not supported.");
+        case SQL_TO_CSVGZ:
+            SqlToTextConfiguration sqlToTextConfiguration = (SqlToTextConfiguration) ingestion
+                    .getProviderConfiguration();
+            return sqlToTextConfiguration.getDbTable();
+        case API:
+            ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
+            return apiConfiguration.getFileUrl();
+        default:
+            throw new UnsupportedOperationException(
+                    "Ingestion type " + ingestion.getIngestionType() + " is not supported.");
         }
     }
 
@@ -90,30 +100,35 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
                 .constructIngestionDir(ingestion.getIngestionName());
         String fileVersion = null;
         switch (ingestion.getIngestionType()) {
-            case SFTP:
-                SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
-                String timestampPattern = config.getFileTimestamp().replace("d", "\\d")
-                        .replace("y", "\\d").replace("M", "\\d");
-                Log.info("TimestampPattern: " + timestampPattern);
-                Pattern pattern = Pattern.compile(timestampPattern);
-                Matcher matcher = pattern.matcher(fileName);
-                if (matcher.find()) {
-                    String timestampStr = matcher.group();
-                    DateFormat df = new SimpleDateFormat(config.getFileTimestamp());
-                    TimeZone timezone = TimeZone.getTimeZone("UTC");
-                    df.setTimeZone(timezone);
-                    try {
-                        fileVersion = HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
-                    } catch (ParseException e) {
-                        throw new RuntimeException("Failed to parse timestamp " + timestampStr);
-                    }
-                } else {
-                    throw new RuntimeException("Failed to parse filename " + fileName);
+        case SFTP:
+            SftpConfiguration config = (SftpConfiguration) ingestion.getProviderConfiguration();
+            String timestampPattern = config.getFileTimestamp().replace("d", "\\d").replace("y", "\\d").replace("M",
+                    "\\d");
+            log.info("TimestampPattern : " + timestampPattern);
+            Pattern pattern = Pattern.compile(timestampPattern);
+            Matcher matcher = pattern.matcher(fileName);
+            if (matcher.find()) {
+                String timestampStr = matcher.group();
+                DateFormat df = new SimpleDateFormat(config.getFileTimestamp());
+                TimeZone timezone = TimeZone.getTimeZone("UTC");
+                df.setTimeZone(timezone);
+                try {
+                    fileVersion = HdfsPathBuilder.dateFormat.format(df.parse(timestampStr));
+                } catch (ParseException e) {
+                    throw new RuntimeException("Failed to parse timestamp " + timestampStr);
                 }
-                break;
-            default:
-                fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
-                break;
+            } else {
+                throw new RuntimeException("Failed to parse filename " + fileName);
+                    }
+            break;
+        case API:
+            ApiConfiguration apiConfiguration = (ApiConfiguration) ingestion.getProviderConfiguration();
+            fileVersion = apiProviderService.getTargetVersion(apiConfiguration);
+            fileName = apiConfiguration.getFileName();
+            break;
+        default:
+            fileVersion = HdfsPathBuilder.dateFormat.format(new Date());
+            break;
         }
         fileDest = fileDest.append(fileVersion).append(fileName);
         return fileDest.toString();
