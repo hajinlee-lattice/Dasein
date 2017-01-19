@@ -13,10 +13,10 @@ import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
 public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Value("${playmaker.test.api.hostport}")
+    @Value("${common.test.playmaker.url}")
     protected String apiHostPort;
 
-    @Value("${playmaker.test.auth.hostport}")
+    @Value("${common.test.oauth.url}")
     protected String authHostPort;
 
     protected PlaymakerTenant tenant;
