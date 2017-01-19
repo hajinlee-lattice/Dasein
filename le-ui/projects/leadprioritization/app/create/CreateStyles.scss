@@ -284,7 +284,8 @@ section.container.custom-fields {
                 padding: 0;
                 margin: 0;
 
-                &.required {
+                &.required,
+                &.strong {
                     font-weight: bold;
                 }
             }
