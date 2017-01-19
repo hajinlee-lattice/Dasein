@@ -66,7 +66,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
-        prepareFortune1000SmallInputData();
+        // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME);
+        prepareFortune1000InputData(FORTUNE1000_FILENAME);
         // Submit to DnB bulk match
         DnBBatchMatchContext batchContext = prepareBulkMatchInput();
         batchContext = dnBBulkLookupDispatcher.sendRequest(batchContext);
@@ -80,7 +81,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         compareResults();
     }
 
-    @Test(groups = "dnb", enabled = true, dependsOnMethods = { "testConsistency" })
+    @Test(groups = "dnb", enabled = false, dependsOnMethods = { "testConsistency" })
     public void testLargeBulkMatch() {
         prepareFortune1000LargeInputData();
         // Submit to DnB bulk match
@@ -125,14 +126,18 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     }
 
     private void compareResults() {
+        int inconsistentResults = 0;
         Assert.assertEquals(contextsRealtime.size(), contextsBulk.size());
         for (String lookupRequestId : contextsRealtime.keySet()) {
             DnBMatchContext contextFromRealtime = contextsRealtime.get(lookupRequestId);
             DnBMatchContext contextFromBatch = contextsBulk.get(lookupRequestId);
             Assert.assertNotNull(contextFromRealtime);
             Assert.assertNotNull(contextFromBatch);
-            compareResult(contextFromRealtime, contextFromBatch);
+            if (!compareResult(contextFromRealtime, contextFromBatch)) {
+                inconsistentResults++;
+            }
         }
+        Assert.assertEquals(inconsistentResults, 0);
     }
 
     private void verifyBulkMatchResult(DnBBatchMatchContext batchContext) {
@@ -147,7 +152,24 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         log.info(String.format("%d rows out of %d got matched", rowMatched, batchContext.getContexts().size()));
     }
 
-    private void compareResult(DnBMatchContext contextFromRealtime, DnBMatchContext contextFromBatch) {
+    private boolean compareResult(DnBMatchContext contextFromRealtime, DnBMatchContext contextFromBatch) {
+        if (contextFromRealtime.getDnbCode().equals(DnBReturnCode.OK)
+                && contextFromBatch.getDnbCode().equals(DnBReturnCode.OK)
+                && contextFromRealtime.getDuns().equals(contextFromBatch.getDuns())
+                && contextFromRealtime.getConfidenceCode().equals(contextFromBatch.getConfidenceCode())
+                && contextFromRealtime.getMatchGrade().equals(contextFromBatch.getMatchGrade())) {
+            return true;
+        }
+        if (contextFromRealtime.getDnbCode().equals(DnBReturnCode.DISCARD)
+                && contextFromBatch.getDnbCode().equals(DnBReturnCode.DISCARD)
+                && contextFromRealtime.getConfidenceCode().equals(contextFromBatch.getConfidenceCode())
+                && contextFromRealtime.getMatchGrade().equals(contextFromBatch.getMatchGrade())) {
+            return true;
+        }
+        if (contextFromRealtime.getDnbCode().equals(DnBReturnCode.UNMATCH)
+                && contextFromBatch.getDnbCode().equals(DnBReturnCode.UNMATCH)) {
+            return true;
+        }
         log.info("-------------------------------------");
         log.info(String.format("Name: %s, CountryCode: %s, State: %s, City: %s",
                 contextFromBatch.getInputNameLocation().getName(),
@@ -163,12 +185,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         log.info(String.format("MatchGrade: %s(realtime) %s(bulk)",
                 contextFromRealtime.getMatchGrade() == null ? "null" : contextFromRealtime.getMatchGrade().getRawCode(),
                 contextFromBatch.getMatchGrade() == null ? "null" : contextFromBatch.getMatchGrade().getRawCode()));
-        /*
-        Assert.assertEquals(contextFromRealtime.getDuns(), contextFromBatch.getDuns());
-        Assert.assertEquals(contextFromRealtime.getDnbCode(), contextFromBatch.getDnbCode());
-        Assert.assertEquals(contextFromRealtime.getConfidenceCode(), contextFromBatch.getConfidenceCode());
-        Assert.assertEquals(contextFromRealtime.getMatchGrade(), contextFromBatch.getMatchGrade());
-        */
+        return false;
     }
 
     private DnBBatchMatchContext prepareBulkMatchInput() {
@@ -177,11 +194,11 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         return batchContext;
     }
 
-    private void prepareFortune1000SmallInputData() {
+    private void prepareFortune1000InputData(String fileName) {
         try {
             contextsRealtime = new HashMap<String, DnBMatchContext>();
             contextsBulk = new HashMap<String, DnBMatchContext>();
-            InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + FORTUNE1000_SMALL_FILENAME);
+            InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + fileName);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
             CSVParser csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
