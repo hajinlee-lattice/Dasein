@@ -1,7 +1,7 @@
 FROM latticeengines/centos
 
 # install sass
-RUN yum install -y install rubygems \
+RUN yum install -y install xz rubygems \
     && gem install sass
 
 # gpg keys listed at https://github.com/nodejs/node
