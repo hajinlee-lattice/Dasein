@@ -24,7 +24,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:ulysses-servlet-context.xml
+            classpath:test-ulysses-servlet-context.xml
         </param-value>
     </context-param>
 

@@ -48,6 +48,7 @@ public class CompanyProfileResource {
         return companyProfileService.getProfile(space, attributes);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<FieldInterpretation, String> getAccountAttributes(HttpServletRequest request) {
         Enumeration<String> parameterNames = request.getParameterNames();
         Map<FieldInterpretation, String> parameters = new HashMap<>();

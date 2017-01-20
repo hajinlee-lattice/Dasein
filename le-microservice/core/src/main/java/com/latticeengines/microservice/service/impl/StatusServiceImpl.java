@@ -34,10 +34,10 @@ public class StatusServiceImpl implements StatusService {
 
     private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
 
-    @Value("${microservice.modules:modeling,eai,metadata,scoring,workflowapi,dataflowapi,propdata,modelquality}")
+    @Value("${microservice.modules}")
     protected String microservicesStr;
 
-    @Value("${microservice.apps:microservice}")
+    @Value("${microservice.apps}")
     protected String initApps;
 
     @Value("${microservice.rest.endpoint.hostport}")
@@ -64,6 +64,9 @@ public class StatusServiceImpl implements StatusService {
     @Value("${microservice.microservice.health.url}")
     private String microserviceHealthUrl;
 
+    @Value("${microservice.ulysses.health.url}")
+    private String ulyssesHealthUrl;
+
     private RestTemplate restTemplate = getRestTemplate();
 
     private static Set<String> monitoredApps = new ConcurrentSkipListSet<>();
@@ -77,6 +80,7 @@ public class StatusServiceImpl implements StatusService {
         healthUrls.put("scoringapi", scoringapiHealthUrl);
         healthUrls.put("matchapi", matchapiHealthUrl);
         healthUrls.put("microservice", microserviceHealthUrl);
+        healthUrls.put("ulysses", ulyssesHealthUrl);
 
         if (StringUtils.isNotEmpty(initApps)) {
             Collections.addAll(monitoredApps, initApps.split(","));

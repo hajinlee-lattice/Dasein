@@ -74,13 +74,16 @@
                             <systemProperties>
                                 <systemProperty>
                                     <name>log4j.configuration</name>
-                                    <value>file:///${project.basedir}/src/main/resources/log4j.properties</value>
+                                    <value>file:///${project.basedir}/src/test/resources/log4j.properties</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>com.latticeengines.registerBootstrappers</name>
                                     <value>true</value>
                                 </systemProperty>
                             </systemProperties>
+                            <useTestClasspath>true</useTestClasspath>
+                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
                         </configuration>
                         <dependencies>
                             <dependency>
@@ -92,11 +95,6 @@
                                 <groupId>org.ow2.asm</groupId>
                                 <artifactId>asm-commons</artifactId>
                                 <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>com.sun.mail</groupId>
-                                <artifactId>javax.mail</artifactId>
-                                <version>1.5.4</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -229,5 +227,57 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${javax.servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>${javax.jsp.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>apache-log4j-extras</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox.swagger.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox.swagger.version}</version>
+        </dependency>
+
     </dependencies>
 </project>
