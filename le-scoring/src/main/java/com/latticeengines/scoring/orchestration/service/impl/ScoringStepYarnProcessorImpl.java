@@ -1,7 +1,6 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.sql.Timestamp;
-//import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -11,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
@@ -42,18 +43,16 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
+
+//import java.util.Arrays;
 
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImpl.class);
 
-//    @Autowired
-//    private SqoopProxy sqoopProxy;
-    
     @Autowired
-    private SqoopJobService sqoopJobService;
+    private SqoopProxy sqoopProxy;
 
     @Autowired
     private DbMetadataService dbMetadataService;
@@ -147,7 +146,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 .setCustomer(tenant)//
                 .setSplitColumn(PID)//
                 .build();//
-        return sqoopJobService.importData(importer);
+        String appIdStr = sqoopProxy.importData(importer).getApplicationIds().get(0);
+        ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
+        return appId;
     }
 
     private ApplicationId score(ScoringCommand scoringCommand) {
@@ -171,7 +172,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 .setDbCreds(scoringCreds) //
                 .setCustomer(tenant)//
                 .build();
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        String appIdStr = sqoopProxy.exportData(exporter).getApplicationIds().get(0);
+        ApplicationId appId = ConverterUtils.toApplicationId(appIdStr);
 
         saveStateBeforeFinishStep(scoringCommand, targetTable);
         return appId;

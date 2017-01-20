@@ -107,11 +107,11 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "sqoop")
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -127,7 +127,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void modelScoreAndCompare() throws Exception {
         prepareDataForModeling();
         model();

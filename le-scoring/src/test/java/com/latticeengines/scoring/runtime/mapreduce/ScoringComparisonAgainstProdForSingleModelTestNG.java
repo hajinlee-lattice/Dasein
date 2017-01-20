@@ -81,11 +81,11 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
     private static final String scoreResTable = "scoreResultTable";
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "sqoop")
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
@@ -298,7 +298,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         return recordsAreSame;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void loadAndScore() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));

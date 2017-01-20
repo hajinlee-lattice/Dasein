@@ -17,10 +17,11 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.springframework.util.CollectionUtils;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -62,7 +63,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
 
     private String scorePath;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
@@ -119,7 +120,7 @@ public class ScoringWithDuplicateLeadsTestNG extends ScoringFunctionalTestNGBase
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "sqoop", enabled = true)
     public void loadAndScore() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 100, new Timestamp(System.currentTimeMillis()));

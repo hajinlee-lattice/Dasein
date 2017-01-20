@@ -2,15 +2,16 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.sql.Timestamp;
 
-import org.springframework.util.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.CollectionUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
@@ -40,11 +41,11 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "sqoop")
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         // need to change the inputLeadsTable name to match the status in real
         // environments.
@@ -56,7 +57,7 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "sqoop", enabled = false)
     public void loadAndScore() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 7727482, new Timestamp(System.currentTimeMillis()));
