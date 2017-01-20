@@ -49,24 +49,6 @@
                                 <copy file="${project.basedir}/../le-datafabric/target/le-datafabric-connect-${project.version}-shaded.jar"
                                       tofile="${project.basedir}/${kafka.connect.docker.context}/plugin/le-datafabric-connect-${project.version}-shaded.jar"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
-                                      tofile="${project.basedir}/${matchapi.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
-                                      tofile="${project.basedir}/${oauth2.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
-                                      tofile="${project.basedir}/${playmaker.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-scoringapi/target/le-scoringapi-${project.version}.war"
-                                      tofile="${project.basedir}/${scoringapi.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-pls/target/le-pls-${project.version}.war"
-                                      tofile="${project.basedir}/${pls.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-admin/target/le-admin-${project.version}.war"
-                                      tofile="${project.basedir}/${admin.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/devcluster_aws/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/devcluster_aws/latticeengines.properties"
                                       overwrite="true" />
@@ -89,9 +71,29 @@
                                       tofile="${project.basedir}/${express.docker.context}/le-ui.tar.gz"
                                       overwrite="true" />
 
+                                <!-- special wars -->
+                                <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
+                                      tofile="${project.basedir}/${oauth2.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
+                                      tofile="${project.basedir}/${playmaker.docker.context}/webapps/ROOT.war"
+                                      overwrite="true" />
+
                                 <!-- microservices -->
-                                <copy file="${project.basedir}/../le-microservice/core/target/le-microservice-${project.version}.war"
-                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/ROOT.war"
+                                <copy file="${project.basedir}/../le-matchapi/target/le-matchapi-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/matchapi.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-scoringapi/target/le-scoringapi-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/scoringapi.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-ulysses/target/le-ulysses-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/ulysses.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-pls/target/le-pls-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/pls.war"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-admin/target/le-admin-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/admin.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/eai/target/le-eai-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/eai.war"

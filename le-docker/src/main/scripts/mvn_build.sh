@@ -1,4 +1,4 @@
 #!/bin/bash
 
-pushd tomcat; bash mvn_build.sh; popd
-pushd nodejs; bash mvn_build.sh; popd
+pushd tomcat; bash build.sh; popd
+pushd nodejs; bash build.sh; popd
