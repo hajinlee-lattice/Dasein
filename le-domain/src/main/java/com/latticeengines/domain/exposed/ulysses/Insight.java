@@ -2,9 +2,7 @@ package com.latticeengines.domain.exposed.ulysses;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.UUID;
-import org.apache.avro.Schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;

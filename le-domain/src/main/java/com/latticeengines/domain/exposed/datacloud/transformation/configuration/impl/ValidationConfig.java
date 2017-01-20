@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ValidationConfig {

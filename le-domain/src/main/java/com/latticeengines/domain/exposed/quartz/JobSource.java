@@ -1,8 +1,5 @@
 package com.latticeengines.domain.exposed.quartz;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "QUARTZ_JOB_SOURCE")

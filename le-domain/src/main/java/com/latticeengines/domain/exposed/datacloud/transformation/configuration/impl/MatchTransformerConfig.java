@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 public class MatchTransformerConfig extends TransformerConfig {

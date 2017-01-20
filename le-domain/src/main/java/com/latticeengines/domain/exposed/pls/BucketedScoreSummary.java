@@ -2,9 +2,6 @@ package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BucketedScoreSummary {
 
     private int totalNumLeads;
