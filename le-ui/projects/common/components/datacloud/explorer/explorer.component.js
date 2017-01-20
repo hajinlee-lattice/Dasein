@@ -180,7 +180,7 @@ angular.module('common.datacloud.explorer', [
             if (vm.lookupMode && vm.category == 'Technology Profile' || vm.category == 'Website Profile') {
                 var sortArr = vm.orders.attributeLookupMode,
                     retArr = [];
-console.log(sortPrefix, sortArr);
+
                 sortArr.forEach(function(item, index) {
                     retArr[index] = (item == 'DisplayName' ? sortPrefix : '') + item;
                 });
