@@ -38,9 +38,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Table(name = "ATTRIBUTE_CUSTOMIZATION", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE" }) })
-@org.hibernate.annotations.Table( //
-appliesTo = "ATTRIBUTE_CUSTOMIZATION", //
-indexes = { @Index(name = "IX_TENANT_ATTRIBUTE_USECASE", columnNames = { "FK_TENANT_ID", "ATTRIBUTE_NAME", "USE_CASE" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTenantId {
     @Id
@@ -49,24 +46,27 @@ public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTe
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("attribute_name")
-    @Column(name = "ATTRIBUTE_NAME", nullable = false, length = 100)
-    private String attributeName;
-
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
+    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private Tenant tenant;
 
-    @JsonIgnore
-    @Column(name = "TENANT_PID", nullable = false)
-    private Long tenantId;
+    @JsonProperty("attribute_name")
+    @Column(name = "ATTRIBUTE_NAME", nullable = false, length = 100)
+    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
+    private String attributeName;
 
     @JsonProperty("use_case")
     @Enumerated(EnumType.STRING)
     @Column(name = "USE_CASE", nullable = false)
+    @Index(name = "IX_TENANT_ATTRIBUTENAME_USECASE")
     private AttributeUseCase useCase;
+
+    @JsonIgnore
+    @Column(name = "TENANT_PID", nullable = false)
+    private Long tenantId;
 
     @JsonIgnore
     @Column(name = "FLAGS", nullable = false, length = 2048)
