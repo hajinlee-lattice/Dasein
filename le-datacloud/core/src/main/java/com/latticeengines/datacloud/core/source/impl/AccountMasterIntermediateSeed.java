@@ -3,23 +3,24 @@ package com.latticeengines.datacloud.core.source.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.core.source.impl.AccountMasterIntermediateSeed;
-
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
 import com.latticeengines.datacloud.core.source.Source;
 
-@Component("accountMasterSeed")
-public class AccountMasterSeed implements DerivedSource {
+@Component("accountMasterIntermediateSeed")
+public class AccountMasterIntermediateSeed implements DerivedSource {
 
     private static final long serialVersionUID = -3119903346347156027L;
 
     @Autowired
-    AccountMasterIntermediateSeed accountMasterIntermediateSeed;
+    LatticeCacheSeed latticeCacheSeed;
+
+    @Autowired
+    DnBCacheSeed dnBCacheSeed;
 
     @Override
     public Source[] getBaseSources() {
-        return new Source[] { accountMasterIntermediateSeed };
+        return new Source[] { dnBCacheSeed, latticeCacheSeed };
     }
 
     @Override
@@ -29,7 +30,7 @@ public class AccountMasterSeed implements DerivedSource {
 
     @Override
     public String getSourceName() {
-        return "AccountMasterSeed";
+        return "AccountMasterIntermediateSeed";
     }
 
     @Override
