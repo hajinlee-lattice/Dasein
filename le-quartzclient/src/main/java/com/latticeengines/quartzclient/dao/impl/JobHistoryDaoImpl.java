@@ -1,17 +1,18 @@
 package com.latticeengines.quartzclient.dao.impl;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.quartz.JobHistory;
-import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
-import com.latticeengines.quartzclient.dao.JobHistoryDao;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
+import com.latticeengines.domain.exposed.quartz.JobHistory;
+import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
+import com.latticeengines.quartzclient.dao.JobHistoryDao;
 
 @Component("jobHistoryDao")
 public class JobHistoryDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<JobHistory> implements JobHistoryDao {

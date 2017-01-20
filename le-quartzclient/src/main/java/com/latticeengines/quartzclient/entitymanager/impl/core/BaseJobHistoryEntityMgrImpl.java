@@ -2,14 +2,14 @@ package com.latticeengines.quartzclient.entitymanager.impl.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.quartzclient.dao.JobHistoryDao;
 import com.latticeengines.quartzclient.entitymanager.core.BaseJobHistoryEntityMgr;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component("baseJobHistoryEntityMgr")
 public class BaseJobHistoryEntityMgrImpl extends BaseEntityMgrImpl<JobHistory> implements

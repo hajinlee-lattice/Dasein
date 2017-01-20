@@ -2,7 +2,6 @@ package com.latticeengines.quartzclient.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.quartzclient.service.QuartzJobService;
 

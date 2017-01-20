@@ -1,13 +1,14 @@
 package com.latticeengines.quartzclient.dao.impl;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.quartz.JobSource;
-import com.latticeengines.quartzclient.dao.JobSourceDao;
+import java.util.List;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
+import com.latticeengines.domain.exposed.quartz.JobSource;
+import com.latticeengines.quartzclient.dao.JobSourceDao;
 
 @Component("jobSourceDao")
 public class JobSourceDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<JobSource> implements JobSourceDao {
