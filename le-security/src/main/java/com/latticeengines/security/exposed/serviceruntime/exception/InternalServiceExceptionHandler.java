@@ -1,7 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -11,13 +10,10 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
-import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public abstract class InternalServiceExceptionHandler extends BaseExceptionHandler {
-
-    @Autowired
-    private AlertService alertService;
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -43,6 +39,15 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(Exception e) {
+        String stackTrace = ExceptionUtils.getFullStackTrace(e);
+        logError(stackTrace);
+        triggerCriticalAlert(e);
+        return getModelAndView(e, stackTrace);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ModelAndView handleException(LoginException e) {
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
         logError(stackTrace);
         triggerCriticalAlert(e);

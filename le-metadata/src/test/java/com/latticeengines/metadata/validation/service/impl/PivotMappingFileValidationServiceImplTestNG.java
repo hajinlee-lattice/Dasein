@@ -1,9 +1,11 @@
 package com.latticeengines.metadata.validation.service.impl;
 
-import java.io.IOException;
-import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -26,7 +28,7 @@ public class PivotMappingFileValidationServiceImplTestNG extends MetadataFunctio
                     .validate(hdfsPath + "/pivot.csv");
             assertTrue(false);
         } catch (Exception e) {
-            assertEquals(e.getCause().getMessage(),
+            assertEquals(e.getMessage(),
                     "Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType] from the file");
         }
 
@@ -48,7 +50,7 @@ public class PivotMappingFileValidationServiceImplTestNG extends MetadataFunctio
                     .validate(hdfsPath + "/PMML-large-file.csv");
             assertTrue(false);
         } catch (Exception e) {
-            assertEquals(e.getCause().getMessage(), "Found unsupported character in \" LeadSource\" in Pivot Mapping File.");
+            assertEquals(e.getMessage(), "Found unsupported character in \" LeadSource\" in Pivot Mapping File.");
         }
     }
 }

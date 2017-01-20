@@ -77,6 +77,5 @@ public class SourceFileServiceImpl implements SourceFileService {
         file.setState(originalSourceFile.getState());
         file.setTableName(tableName);
         sourceFileEntityMgr.create(file, targetTenant);
-
     }
 }

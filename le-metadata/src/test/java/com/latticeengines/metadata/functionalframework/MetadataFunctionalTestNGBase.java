@@ -95,9 +95,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     public void setup() {
         tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(CUSTOMERSPACE1));
+                CustomerSpace.parse(CUSTOMERSPACE1), "x.y.z");
         tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(CUSTOMERSPACE2));
+                CustomerSpace.parse(CUSTOMERSPACE2), "x.y.z");
 
         if (hiveEnabled) {
             dropAllHiveTables();
@@ -212,6 +212,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         Table table = MetadataConverter.getTable(yarnConfiguration, path, "Id", "CreatedDate");
         table.setName(tableName);
         table.setTenant(tenant);
+        table.setNamespace("x.y.z");
         Attribute attribute = table.getAttributes().get(3);
         attribute.setSourceLogicalDataType("Integer");
         attribute.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
@@ -222,7 +223,8 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
         attribute.setDataSource("[DerivedColumns]");
         attribute.addValidator(new RequiredIfOtherFieldIsEmpty("Test"));
-
+        
+        table.setTags(Arrays.asList(new String[] { "TAG1", "TAG2" }));
         return table;
     }
 }

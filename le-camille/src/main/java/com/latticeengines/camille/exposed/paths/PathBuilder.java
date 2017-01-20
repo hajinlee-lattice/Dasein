@@ -2,6 +2,8 @@ package com.latticeengines.camille.exposed.paths;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -63,7 +65,19 @@ public final class PathBuilder {
     }
 
     public static Path buildDataTablePath(String podId, CustomerSpace space) {
-        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
+        return buildDataTablePath(podId, space, "");
+    }
+
+    public static Path buildDataTablePath(String podId, CustomerSpace space, String namespace) {
+        Path path = buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
+        
+        if (!StringUtils.isEmpty(namespace)) {
+            String[] namespaceTokens = namespace.split("\\.");
+            for (String namespaceToken : namespaceTokens) {
+                path = path.append(namespaceToken);
+            }
+        }
+        return path;
     }
 
     public static Path buildDataFilePath(String podId, CustomerSpace space) {

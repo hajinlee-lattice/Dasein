@@ -35,14 +35,13 @@ import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
-import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
 
-    private static final Logger log = Logger.getLogger(MetadataServiceImpl.class);
+    private static final Logger log = Logger.getLogger(TableEntityMgrImpl.class);
 
     @Value("${metadata.hive.enabled:false}")
     private boolean hiveEnabled;
@@ -70,7 +69,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-
+    
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -105,10 +104,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 dataRuleDao.create(dataRule);
             }
         }
-
+        
         if (hiveEnabled) {
             hiveTableDao.create(entity);
-        }
+        }        
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -158,7 +157,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         if (clone.getExtracts().size() > 0) {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                    MultiTenantContext.getCustomerSpace());
+                    MultiTenantContext.getCustomerSpace(), existing.getNamespace());
 
             Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, clone));
             Path destPath = tablesPath.append(clone.getName());
@@ -195,7 +194,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         });
 
         if (copy.getExtracts().size() > 0) {
-            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace);
+            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), targetCustomerSpace, existing.getNamespace());
 
             Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, copy));
             Path destPath = tablesPath.append(copy.getName());

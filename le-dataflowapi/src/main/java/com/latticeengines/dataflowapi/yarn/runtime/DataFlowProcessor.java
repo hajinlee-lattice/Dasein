@@ -108,10 +108,14 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
 
         ctx.setProperty(DataFlowProperty.SOURCETABLES, sourceTables);
         String targetPath = dataFlowConfig.getTargetPath();
+        String namespace = dataFlowConfig.getNamespace();
         if (StringUtils.isBlank(targetPath)) {
             Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                    dataFlowConfig.getCustomerSpace());
+                    dataFlowConfig.getCustomerSpace(), namespace);
             targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
+        } else if (!StringUtils.isBlank(namespace)) {
+            String namespacePath = StringUtils.join(namespace.split("\\."), "/");
+            targetPath += "/" + namespacePath;
         }
 
         log.info(String.format("Target path is %s", targetPath));

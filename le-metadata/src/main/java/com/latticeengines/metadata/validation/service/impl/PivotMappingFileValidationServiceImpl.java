@@ -51,8 +51,6 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
                     validateSourceColumn(parser.iterator());
                 }
             }
-        } catch (LedpException le) {
-            throw new RuntimeException(le);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
             throw new LedpException(LedpCode.LEDP_10008);

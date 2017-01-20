@@ -33,6 +33,11 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     }
 
+    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.TableTagEntityMgrImpl.*(..))")
+    public void allTableTagMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ArtifactEntityMgrImpl.*(..))")
     public void allArtifactMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);

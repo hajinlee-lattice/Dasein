@@ -32,6 +32,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = Logger.getLogger(TableResourceTestNG.class);
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
@@ -55,6 +56,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         Table received = restTemplate.getForObject(url, Table.class, new HashMap<>());
         assertNotNull(received);
         assertEquals(received.getName(), table.getName());
+        assertEquals(received.getNamespace(), table.getNamespace());
     }
 
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "createTableWithResource" })
@@ -240,8 +242,9 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @DataProvider(name = "urlTypes")
     public Object[][] getUrlTypes() {
-        return new Object[][] { { "tables" }, //
-                { "importtables" } //
+        return new Object[][] { //
+            { "tables" }, //
+            { "importtables" } //
         };
     }
 }

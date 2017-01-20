@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -31,6 +33,14 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
+    }
+    
+    @AfterClass(groups = "functional")
+    public void tearDown() {
+        metadataService.deleteTable(CustomerSpace.parse(CUSTOMERSPACE2), TABLE2);
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CUSTOMERSPACE2));
+        Table t = tableEntityMgr.findByName(TABLE2);
+        assertNull(t);
     }
 
     @Test(groups = "functional")
@@ -106,6 +116,11 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(3).getFundamentalType(), "numeric");
         assertEquals(attrs.get(3).getStatisticalType(), "ratio");
         assertEquals(attrs.get(3).getDataSource().get(0), "DerivedColumns");
+    }
+    
+    @Test(groups = "functional")
+    public void createTags() {
+        
     }
 
     @DataProvider(name = "tableProvider")

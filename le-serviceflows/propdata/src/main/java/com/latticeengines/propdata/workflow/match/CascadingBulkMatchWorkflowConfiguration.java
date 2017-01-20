@@ -16,87 +16,87 @@ public class CascadingBulkMatchWorkflowConfiguration extends WorkflowConfigurati
     public static class Builder {
 
         private CascadingBulkMatchWorkflowConfiguration configuration = new CascadingBulkMatchWorkflowConfiguration();
-        private CascadingBulkMatchStepConfiguration stepConfigiguraton = new CascadingBulkMatchStepConfiguration();
+        private CascadingBulkMatchStepConfiguration stepConfiguration = new CascadingBulkMatchStepConfiguration();
         private CustomerSpace customerSpace;
 
         public Builder rootOperationUid(String rootUid) {
-            stepConfigiguraton.setRootOperationUid(rootUid);
+            stepConfiguration.setRootOperationUid(rootUid);
             return this;
         }
 
         public Builder hdfsPodId(String hdfsPodId) {
-            stepConfigiguraton.setHdfsPodId(hdfsPodId);
+            stepConfiguration.setHdfsPodId(hdfsPodId);
             return this;
         }
 
         public Builder matchInput(MatchInput matchInput) {
             customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
-            stepConfigiguraton.setCustomerSpace(customerSpace);
-            stepConfigiguraton.setYarnQueue(matchInput.getYarnQueue());
+            stepConfiguration.setCustomerSpace(customerSpace);
+            stepConfiguration.setYarnQueue(matchInput.getYarnQueue());
             return this;
         }
 
         public Builder inputProperties() {
             Map<String, String> inputProperties = new HashMap<>();
             inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "cascadingBulkMatchWorkflow");
-            stepConfigiguraton.setInputProperties(inputProperties);
+            stepConfiguration.setInputProperties(inputProperties);
             return this;
         }
 
         public Builder dataflowParameter(CascadingBulkMatchDataflowParameters dataflowParameters) {
-            stepConfigiguraton.setDataFlowParams(dataflowParameters);
+            stepConfiguration.setDataFlowParams(dataflowParameters);
             return this;
         }
 
         public Builder targetPath(String outputDir) {
-            stepConfigiguraton.setTargetPath(outputDir);
+            stepConfiguration.setTargetPath(outputDir);
             return this;
         }
 
         public Builder partitions(Integer partitions) {
-            stepConfigiguraton.setPartitions(partitions);
+            stepConfiguration.setPartitions(partitions);
             return this;
         }
 
         public Builder jobProperties(Properties jobProperties) {
-            stepConfigiguraton.setJobProperties(jobProperties);
+            stepConfiguration.setJobProperties(jobProperties);
             return this;
         }
 
         public Builder engine(String engine) {
-            stepConfigiguraton.setEngine(engine);
+            stepConfiguration.setEngine(engine);
             return this;
         }
 
         public Builder dataflowExtraSources(Map<String, String> dataflowExtaSources) {
-            stepConfigiguraton.setExtraSources(dataflowExtaSources);
+            stepConfiguration.setExtraSources(dataflowExtaSources);
             return this;
         }
 
         public Builder targetTableName(String targetTableName) {
-            stepConfigiguraton.setTargetTableName(targetTableName);
+            stepConfiguration.setTargetTableName(targetTableName);
             return this;
         }
 
         public Builder queue(String queue) {
-            stepConfigiguraton.setQueue(queue);
+            stepConfiguration.setQueue(queue);
             return this;
         }
 
         public Builder setBeanName(String string) {
-            stepConfigiguraton.setBeanName("cascadingBulkMatchDataflow");
+            stepConfiguration.setBeanName("cascadingBulkMatchDataflow");
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            stepConfigiguraton.setMicroServiceHostPort(microServiceHostPort);
+            stepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public CascadingBulkMatchWorkflowConfiguration build() {
             configuration.setContainerConfiguration("cascadingBulkMatchWorkflow", customerSpace,
                     "CascadingBulkMatchWorkflow");
-            configuration.add(stepConfigiguraton);
+            configuration.add(stepConfiguration);
             return configuration;
         }
 
