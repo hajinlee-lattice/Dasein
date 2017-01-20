@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
 
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
