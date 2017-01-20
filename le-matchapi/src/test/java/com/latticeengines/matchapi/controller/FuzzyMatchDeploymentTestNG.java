@@ -2,8 +2,10 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -16,11 +18,13 @@ import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
@@ -53,18 +57,15 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", "America", "6502530000", "94043" } };
 
     // For realtime match: the first element is expected matched company name
-    private static final Object[][] nameLocationIncomplete = { 
-            { null, "", "MOUNTAIN VIEW", "CA", "America" },
+    private static final Object[][] nameLocationIncomplete = { { null, "", "MOUNTAIN VIEW", "CA", "America" },
             { null, null, "MOUNTAIN VIEW", "CA", "America" },
             { null, " +     * = # ", "MOUNTAIN VIEW", "CA", "America" },
-            { "Google Inc.", "GOOGLE", "", "CA", "America" }, 
-            { "Google Inc.", "GOOGLE", null, "CA", "America" },
+            { "Google Inc.", "GOOGLE", "", "CA", "America" }, { "Google Inc.", "GOOGLE", null, "CA", "America" },
             { "Google Inc.", "GOOGLE", " +     * = # ", "CA", "America" },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "", "America" },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", null, "America" },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", " +     * = # ", "America" },
-            { "Google Inc.", "GOOGLE", "", "", "America" }, 
-            { "Google Inc.", "GOOGLE", null, null, "America" },
+            { "Google Inc.", "GOOGLE", "", "", "America" }, { "Google Inc.", "GOOGLE", null, null, "America" },
             { "Google Inc.", "GOOGLE", " +     * = # ", " +     * = # ", "America" },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", "" },
             { "Google Inc.", "GOOGLE", "MOUNTAIN VIEW", "CA", null },
@@ -103,16 +104,26 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Test(groups = "deployment", enabled = true)
-    public void testRealtimeMatchWithCache() {
+    @Autowired
+    private DataCloudVersionEntityMgr versionEntityMgr;
+
+    @Test(groups = "deployment", dataProvider = "realtimeScenarios", enabled = true)
+    public void testRealtimeMatchWithCache(String scenario) {
+        MatchInput input = prepareRealtimeMatchInput(scenario, true);
+        MatchOutput output = matchProxy.matchRealTime(input);
+        validateRealtimeMatchResult(scenario, output);
+    }
+
+    @DataProvider(name = "realtimeScenarios")
+    private Iterator<Object[]> realtimeScenarios() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
                 SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
                 SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
+        List<Object[]> objs = new ArrayList<>();
         for (String scenario : scenarios) {
-            MatchInput input = prepareRealtimeMatchInput(scenario, true);
-            MatchOutput output = matchProxy.matchRealTime(input);
-            validateRealtimeMatchResult(scenario, output);
+            objs.add(new Object[] { scenario });
         }
+        return objs.iterator();
     }
 
     @Test(groups = "dnb", enabled = true)
@@ -127,31 +138,38 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testBulkMatchWithCache() {
+    @Test(groups = "deployment", dataProvider = "bulkCatchScenarios", enabled = true)
+    public void testBulkMatchWithCache(String scenario) {
+        MatchInput input = prepareBulkMatchInput(scenario, true);
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
+        MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
+        Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
+        Assert.assertEquals(finalStatus.getProgress(), 1f);
+        Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
+        Assert.assertEquals(finalStatus.getResultLocation(),
+                hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+
+        validateBulkMatchResult(scenario, finalStatus.getResultLocation());
+    }
+
+    @DataProvider(name = "bulkCatchScenarios")
+    private Iterator<Object[]> bulkCatchScenarios() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_INCOMPLETELOCATION,
+                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_INCOMPLETELOCATION,
                 SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
+        List<Object[]> objs = new ArrayList<>();
         for (String scenario : scenarios) {
-            MatchInput input = prepareBulkMatchInput(scenario, true);
-            MatchCommand command = matchProxy.matchBulk(input, podId);
-            ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
-            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
-            Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-
-            MatchCommand finalStatus = matchProxy.bulkMatchStatus(command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getApplicationId(), appId.toString());
-            Assert.assertEquals(finalStatus.getRootOperationUid(), command.getRootOperationUid());
-            Assert.assertEquals(finalStatus.getProgress(), 1f);
-            Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
-            Assert.assertEquals(finalStatus.getResultLocation(),
-                    hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
-
-            validateBulkMatchResult(scenario, finalStatus.getResultLocation());
+            objs.add(new Object[] { scenario });
         }
+        return objs.iterator();
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -179,7 +197,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private MatchInput prepareRealtimeMatchInput(String scenario, boolean useDnBCache) {
         MatchInput input = new MatchInput();
-        input.setDataCloudVersion("2.0.1");
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setDecisionGraph("DragonClaw");
         input.setLogLevel(Level.DEBUG);
         input.setTenant(new Tenant("PD_Test"));
@@ -323,27 +341,28 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         log.info(String.format("Test scenario: %s", scenario));
         Assert.assertNotNull(output);
 
-        if (scenario != null
-                && (scenario.equals(SCENARIO_VALIDLOCATION) || scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN))
-                || scenario.equals(SCENARIO_WITHOUT_COUNTRY) || scenario.equals(SCENARIO_WITHOUT_STATE)
-                || scenario.equals(SCENARIO_WITHOUT_STATE_CITY) || scenario.equals(SCENARIO_NAME_PHONE)
-                || scenario.equals(SCENARIO_NAME_ZIPCODE)) {
+        Set<String> bothRowCanMatch = new HashSet<>(Arrays.asList(SCENARIO_VALIDLOCATION, //
+                SCENARIO_VALIDLOCATION_INVALIDDOMAIN, //
+                SCENARIO_WITHOUT_COUNTRY, //
+                SCENARIO_WITHOUT_STATE, //
+                SCENARIO_WITHOUT_CITY, //
+                SCENARIO_WITHOUT_STATE_CITY, //
+                SCENARIO_NAME_PHONE, //
+                SCENARIO_NAME_ZIPCODE));
+
+        if (bothRowCanMatch.contains(scenario)) {
             Assert.assertEquals(output.getResult().size(), 2);
             for (int i = 0; i < output.getResult().size(); i++) {
                 OutputRecord outputRecord = output.getResult().get(i);
                 Assert.assertEquals(outputRecord.getOutput().get(1), nameLocation[i][0]);
             }
-        } else if (scenario != null && (scenario.equals(SCENARIO_WITHOUT_NAME))) {
+        } else if (SCENARIO_WITHOUT_NAME.equals(scenario)) {
             Assert.assertEquals(output.getResult().size(), 2);
             for (int i = 0; i < output.getResult().size(); i++) {
                 OutputRecord outputRecord = output.getResult().get(i);
                 Assert.assertNull(outputRecord.getOutput().get(1));
             }
-        } else if (scenario != null && (scenario.equals(SCENARIO_WITHOUT_CITY))) {
-            Assert.assertEquals(output.getResult().size(), 2);
-            Assert.assertNull(output.getResult().get(0).getOutput().get(1));
-            Assert.assertEquals(output.getResult().get(1).getOutput().get(1), nameLocation[1][0]);
-        } else if (scenario != null && (scenario.equals(SCENARIO_INCOMPLETELOCATION))) {
+        } else if (SCENARIO_INCOMPLETELOCATION.equals(scenario)) {
             Assert.assertEquals(output.getResult().size(), 15);
             for (int i = 0; i < output.getResult().size(); i++) {
                 OutputRecord outputRecord = output.getResult().get(i);
@@ -354,7 +373,6 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         }
     }
 
-
     private MatchInput prepareBulkMatchInput(String scenario, boolean useDnBCache) {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
@@ -363,7 +381,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setFetchOnly(false);
         input.setSkipKeyResolution(true);
         input.setDecisionGraph("DragonClaw");
-        input.setDataCloudVersion("2.0.1");
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         input.setBulkOnly(false);
         input.setUseDnBCache(useDnBCache);
         input.setUseRemoteDnB(true);
@@ -381,30 +399,42 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         String fullAvroDir = new Path(avroDir, scenario).toString();
         cleanupAvroDir(fullAvroDir);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
-        if (scenario != null && scenario.equals(SCENARIO_VALIDLOCATION)) {
-            uploadTestAVro(fullAvroDir, VALIDLOCATION_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN)) {
-            uploadTestAVro(fullAvroDir, VALIDLOCATION_INVALIDDOMAIN_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_NAME)) {
-            uploadTestAVro(fullAvroDir, WITHOUT_NAME_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_COUNTRY)) {
-            uploadTestAVro(fullAvroDir, WITHOUT_COUNTRY_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_STATE)) {
-            uploadTestAVro(fullAvroDir, WITHOUT_STATE_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_CITY)) {
-            uploadTestAVro(fullAvroDir, WITHOUT_CITY_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_STATE_CITY)) {
-            uploadTestAVro(fullAvroDir, WITHOUT_STATECITY_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_INCOMPLETELOCATION)) {
-            uploadTestAVro(fullAvroDir, INCOMPLETELOCATION_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_BULKMATCH_LOADTEST)) {
-            uploadTestAVro(fullAvroDir, BULKMATCH_LOADTEST_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_NAME_PHONE)) {
-            uploadTestAVro(fullAvroDir, NAME_PHONE_FILENAME);
-        } else if (scenario != null && scenario.equals(SCENARIO_NAME_ZIPCODE)) {
-            uploadTestAVro(fullAvroDir, NAME_ZIPCODE_FILENAME);
-        } else {
-            throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
+        switch (scenario) {
+            case SCENARIO_VALIDLOCATION:
+                uploadTestAVro(fullAvroDir, VALIDLOCATION_FILENAME);
+                break;
+            case SCENARIO_VALIDLOCATION_INVALIDDOMAIN:
+                uploadTestAVro(fullAvroDir, VALIDLOCATION_INVALIDDOMAIN_FILENAME);
+                break;
+            case SCENARIO_WITHOUT_NAME:
+                uploadTestAVro(fullAvroDir, WITHOUT_NAME_FILENAME);
+                break;
+            case SCENARIO_WITHOUT_COUNTRY:
+                uploadTestAVro(fullAvroDir, WITHOUT_COUNTRY_FILENAME);
+                break;
+            case SCENARIO_WITHOUT_STATE:
+                uploadTestAVro(fullAvroDir, WITHOUT_STATE_FILENAME);
+                break;
+            case SCENARIO_WITHOUT_CITY:
+                uploadTestAVro(fullAvroDir, WITHOUT_CITY_FILENAME);
+                break;
+            case SCENARIO_WITHOUT_STATE_CITY:
+                uploadTestAVro(fullAvroDir, WITHOUT_STATECITY_FILENAME);
+                break;
+            case SCENARIO_INCOMPLETELOCATION:
+                uploadTestAVro(fullAvroDir, INCOMPLETELOCATION_FILENAME);
+                break;
+            case SCENARIO_BULKMATCH_LOADTEST:
+                uploadTestAVro(fullAvroDir, BULKMATCH_LOADTEST_FILENAME);
+                break;
+            case SCENARIO_NAME_PHONE:
+                uploadTestAVro(fullAvroDir, NAME_PHONE_FILENAME);
+                break;
+            case SCENARIO_NAME_ZIPCODE:
+                uploadTestAVro(fullAvroDir, NAME_ZIPCODE_FILENAME);
+                break;
+            default:
+                throw new UnsupportedOperationException(String.format("Scenario [%s] is not supported", scenario));
         }
         inputBuffer.setAvroDir(fullAvroDir);
         return inputBuffer;
@@ -428,17 +458,18 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             String ldcName = record.get("LDC_Name") == null ? null : record.get("LDC_Name").toString();
             String expectedName = record.get("ExpectedName") == null ? null : record.get("ExpectedName").toString();
             log.info(String.format("Expected name: %s; Actual name: %s", expectedName, ldcName));
-            if (scenario != null
-                    && (scenario.equals(SCENARIO_VALIDLOCATION) || scenario.equals(SCENARIO_VALIDLOCATION_INVALIDDOMAIN)
-                            || scenario.equals(SCENARIO_WITHOUT_COUNTRY) || scenario.equals(SCENARIO_WITHOUT_STATE)
-                            || scenario.equals(SCENARIO_WITHOUT_STATE_CITY) || scenario.equals(SCENARIO_NAME_PHONE)
-                            || scenario.equals(SCENARIO_NAME_ZIPCODE))) {
-                Assert.assertEquals(ldcName, expectedName);
+            if (scenario != null && Arrays.asList(SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN,
+                    SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_STATE_CITY, SCENARIO_NAME_PHONE,
+                    SCENARIO_NAME_ZIPCODE).contains(scenario)) {
+                Assert.assertEquals(ldcName, expectedName,
+                        String.format("Expected name: %s; Actual name: %s", expectedName, ldcName));
             } else if (scenario != null && scenario.equals(SCENARIO_WITHOUT_NAME)) {
                 Assert.assertNull(ldcName);
-            } else if (scenario != null
-                    && (scenario.equals(SCENARIO_WITHOUT_CITY) || scenario.equals(SCENARIO_INCOMPLETELOCATION))) {
-                Assert.assertTrue((ldcName == null && expectedName == null) || expectedName.equals(ldcName));
+            } else if (SCENARIO_WITHOUT_CITY.equals(scenario) || SCENARIO_INCOMPLETELOCATION.equals(scenario)) {
+                Assert.assertTrue(
+                        (ldcName == null && expectedName == null)
+                                || (expectedName != null && expectedName.equals(ldcName)),
+                        String.format("Expected name: %s; Actual name: %s", expectedName, ldcName));
             } else {
                 throw new UnsupportedOperationException(String.format("%s scenario is not supported", scenario));
             }
