@@ -17,7 +17,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private CompanyProfileAttributeFlags flags;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }

@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -35,8 +36,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Access(AccessType.FIELD)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "ATTRIBUTE_CUSTOMIZATION", uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID",
-        "ATTRIBUTE_NAME", "USE_CASE" }) })
+@Table(name = "ATTRIBUTE_CUSTOMIZATION", //
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_PID", "ATTRIBUTE_NAME", "USE_CASE" }) })
+@org.hibernate.annotations.Table( //
+appliesTo = "ATTRIBUTE_CUSTOMIZATION", //
+indexes = { @Index(name = "IX_TENANT_ATTRIBUTE_USECASE", columnNames = { "FK_TENANT_ID", "ATTRIBUTE_NAME", "USE_CASE" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class AttributeCustomization implements HasPid, HasName, HasTenant, HasTenantId {
     @Id
