@@ -9,8 +9,8 @@ import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterMo
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.leadprioritization.workflow.steps.PivotScoreAndEvent;
-import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.leadprioritization.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
+import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;

@@ -1,13 +1,13 @@
 package com.latticeengines.scoringapi.entitymanager;
 
+import java.util.List;
+
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-
-import java.util.List;
 
 public interface ScoreHistoryEntityMgr extends BaseFabricEntityMgr<ScoreRecordHistory> {
 

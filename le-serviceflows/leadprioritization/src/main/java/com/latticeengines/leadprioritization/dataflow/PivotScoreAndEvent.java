@@ -2,6 +2,7 @@ package com.latticeengines.leadprioritization.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;

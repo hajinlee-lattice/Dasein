@@ -1,6 +1,7 @@
 package com.latticeengines.leadprioritization.dataflow;
 
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;

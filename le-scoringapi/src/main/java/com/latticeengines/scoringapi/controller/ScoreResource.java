@@ -1,8 +1,5 @@
 package com.latticeengines.scoringapi.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.text.ParseException;
 import java.util.List;
 
@@ -15,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import springfox.documentation.annotations.ApiIgnore;
 
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -31,6 +26,10 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 import com.wordnik.swagger.annotations.ApiParam;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
