@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfi
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("publishConfigurationParser")
 public class PublishConfigurationParserImpl implements PublishConfigurationParser {

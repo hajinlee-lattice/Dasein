@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer;
 
 import java.util.List;
+
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 

@@ -2,17 +2,14 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;

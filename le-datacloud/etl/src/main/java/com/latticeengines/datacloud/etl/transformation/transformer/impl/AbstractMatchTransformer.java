@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransformerConfig> {
 

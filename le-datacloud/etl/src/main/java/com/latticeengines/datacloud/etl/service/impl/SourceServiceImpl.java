@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 
 @Component("sourceService")

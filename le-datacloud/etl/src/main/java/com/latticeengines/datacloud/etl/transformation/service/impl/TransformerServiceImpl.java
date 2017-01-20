@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableDataflowTransformer;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableDataflowTransformer;
 
 @Component("transformerService")
 public class TransformerServiceImpl implements TransformerService {
