@@ -18,8 +18,8 @@ import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityM
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
-import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
+import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;

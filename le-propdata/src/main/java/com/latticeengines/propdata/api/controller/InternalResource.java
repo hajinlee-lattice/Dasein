@@ -1,10 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.util.Collections;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
