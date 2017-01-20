@@ -8,7 +8,7 @@
 				<h5>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_MAP_FIELDS_LABEL')}}</h5>
 			</div>
 			<hr />
-			<table class="section-body unstyled">
+			<table class="section-body unstyled field-mapping-standard">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
@@ -44,7 +44,7 @@
 							</select>
 						</td>
 						<td class="field-mapping-label">
-							<label >
+							<label class="strong">
 								{{ standardField }}
 							</label>
 						</td>
@@ -100,7 +100,7 @@
 			</div>
 			<span ng-if="!vm.NextClicked" style="display:block;margin-top:1em;"></span>
 			<hr ng-if="vm.NextClicked" />
-			<table class="section-body unstyled" ng-if="vm.NextClicked">
+			<table class="section-body unstyled field-mapping-additional" ng-if="vm.NextClicked">
 				<thead ng-if="vm.initialized">
 					<tr>
 						<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELD_NAME')}}</th>

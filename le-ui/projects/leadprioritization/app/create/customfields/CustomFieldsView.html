@@ -9,7 +9,7 @@
 
 				<hr />
 
-				<table class="section-body unstyled">
+				<table class="section-body unstyled field-mapping-standard">
 					<thead ng-if="vm.initialized">
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
@@ -45,7 +45,7 @@
 							</td>
 
 							<td class="field-mapping-label">
-								<label for="fieldType_{{ ::field }}">{{ ::field }}</label>
+								<label class="strong" for="fieldType_{{ ::field }}">{{ ::field }}</label>
 							</td>
 
 							<td class="field-mapping-type">
@@ -107,7 +107,7 @@
 				<span ng-if="!vm.NextClicked" style="display:block;margin-top:1em;"></span>
 				<hr ng-if="vm.NextClicked" />
 
-				<table class="section-body unstyled" ng-if="vm.NextClicked">
+				<table class="section-body unstyled field-mapping-additional" ng-if="vm.NextClicked">
 					<thead ng-if="vm.initialized">
 						<tr>
 							<th>{{::vm.ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDS_IN_FILE')}}</th>
@@ -118,7 +118,7 @@
 					</thead>
 
 					<tbody>
-						<tr ng-repeat="fieldMapping in vm.fieldMappings | filter:filterStandardList">
+						<tr ng-repeat="fieldMapping in vm.fieldMappings | filter:vm.filterStandardList">
 							<td class="field_mapping_label">
 								<label for="fieldType_{{ ::fieldMapping.userField }}">{{ ::fieldMapping.userField }}</label>
 							</td>

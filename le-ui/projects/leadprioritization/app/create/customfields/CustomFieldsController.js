@@ -138,15 +138,6 @@ angular
         $timeout(vm.validateForm, 0);
     };
 
-    $scope.filterStandardList = function(input) {
-        for (var stdField in vm.standardFieldMappings) {
-            if (vm.standardFieldMappings[stdField].userField === input.userField) {
-                return false;
-            }
-        }
-        return true;
-    };
-
     vm.resetClicked = function($event) {
         if ($event != null) {
             $event.stopPropagation();
@@ -315,6 +306,15 @@ angular
                 }
             });
         }
+    };
+
+    vm.filterStandardList = function(input) {
+        for (var stdField in vm.standardFieldMappings) {
+            if (vm.standardFieldMappings[stdField].userField === input.userField) {
+                return false;
+            }
+        }
+        return true;
     };
 
     vm.init();
