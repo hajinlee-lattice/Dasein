@@ -8,104 +8,119 @@ import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 
 public class DataFlowConfiguration extends BasePayloadConfiguration {
 
-    private String dataFlowBeanName;
-    private List<DataFlowSource> dataSources;
-    private DataFlowParameters dataFlowParameters;
-    private String targetTableName;
-    private String targetPath;
-    private Integer partitions;
-    private Properties jobProperties;
-    private String engine;
-    private String queue;
-
     @JsonProperty("bean_name")
+    private String dataFlowBeanName;
+    
+    @JsonProperty("sources")
+    private List<DataFlowSource> dataSources;
+    
+    @JsonProperty("data_flow_parameters")
+    private DataFlowParameters dataFlowParameters;
+    
+    @JsonProperty("target_table_name")
+    private String targetTableName;
+    
+    @JsonProperty("target_path")
+    private String targetPath;
+    
+    @JsonProperty("partitions")
+    private Integer partitions;
+    
+    @JsonProperty("job_properties")
+    private Properties jobProperties;
+    
+    @JsonProperty("engine")
+    private String engine;
+    
+    @JsonProperty("queue")
+    private String queue;
+    
+    @JsonProperty("namespace")
+    private String namespace;
+
+    
     public String getDataFlowBeanName() {
         return dataFlowBeanName;
     }
 
-    @JsonProperty("bean_name")
     public void setDataFlowBeanName(String dataFlowBeanName) {
         this.dataFlowBeanName = dataFlowBeanName;
     }
 
-    @JsonProperty("sources")
     public List<DataFlowSource> getDataSources() {
         return dataSources;
     }
 
-    @JsonProperty("sources")
     public void setDataSources(List<DataFlowSource> dataSources) {
         this.dataSources = dataSources;
     }
 
-    @JsonProperty("data_flow_parameters")
     public DataFlowParameters getDataFlowParameters() {
         return dataFlowParameters;
     }
 
-    @JsonProperty("data_flow_parameters")
+    
     public void setDataFlowParameters(DataFlowParameters dataFlowParameters) {
         this.dataFlowParameters = dataFlowParameters;
     }
 
-    @JsonProperty("target_table_name")
     public String getTargetTableName() {
         return targetTableName;
     }
 
-    @JsonProperty("target_table_name")
     public void setTargetTableName(String targetTableName) {
         this.targetTableName = targetTableName;
     }
 
-    @JsonProperty("target_path")
     public String getTargetPath() {
         return this.targetPath;
     }
 
-    @JsonProperty("target_path")
     public void setTargetPath(String targetPath) {
         this.targetPath = targetPath;
     }
 
-    @JsonProperty("partitions")
+    
     public Integer getPartitions() {
         return partitions;
     }
 
-    @JsonProperty("partitions")
     public void setPartitions(Integer partitions) {
         this.partitions = partitions;
     }
 
-    @JsonProperty("job_properties")
     public Properties getJobProperties() {
         return jobProperties;
     }
 
-    @JsonProperty("job_properties")
     public void setJobProperties(Properties jobProperties) {
         this.jobProperties = jobProperties;
     }
 
-    @JsonProperty("engine")
+    
     public String getEngine() {
         return this.engine;
     }
 
-    @JsonProperty("engine")
     public void setEngine(String engine) {
         this.engine = engine;
     }
 
-    @JsonProperty("queue")
+    
     public void setQueue(String queue) {
         this.queue = queue;
     }
 
-    @JsonProperty("queue")
     public String getQueue() {
         return queue;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
 }

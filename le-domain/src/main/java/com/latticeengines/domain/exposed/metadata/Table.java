@@ -10,12 +10,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -66,30 +69,95 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "METADATA_TABLE", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Filters({ //
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
-        @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
+    @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+    @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
+@EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     private static final Log log = LogFactory.getLog(Table.class);
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
+
+    @Column(name = "NAME", unique = false, nullable = false)
+    @JsonProperty("name")
     private String name;
+    
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    @JsonProperty("display_name")
     private String displayName;
+
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("attributes")
     private List<Attribute> attributes = new ArrayList<>();
+
+    @JsonIgnore
+    @Transient
     private Schema schema;
+    
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
+
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
+    
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("extracts")
     private List<Extract> extracts = new ArrayList<>();
+    
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @JsonProperty("primary_key")
     private PrimaryKey primaryKey;
+
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @JsonProperty("last_modified_key")
     private LastModifiedKey lastModifiedKey;
+
+    @Transient
+    @JsonIgnore
     private TableType tableType;
+    
+    @Column(name = "TYPE", nullable = false)
+    @JsonIgnore
     private Integer tableTypeCode;
+    
+    @Column(name = "INTERPRETATION")
+    @JsonProperty("interpretation")
     private String interpretation;
+
+    @Column(name = "MARKED_FOR_PURGE", nullable = false)
+    @JsonProperty("marked_for_purge")
     private boolean markedForPurge;
+
+    @JsonProperty("data_rules")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataRule> dataRules = new ArrayList<>();
+    
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "table")
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<TableTag> tableTags = new ArrayList<>();
+    
+    @JsonProperty("namespace")
+    @Column(name = "NAMESPACE", nullable = true)
+    private String namespace;
 
     public Table() {
+    }
+
+    @PostConstruct
+    public void postConstruct() {
         setTableTypeCode(TableType.DATATABLE.getCode());
     }
 
@@ -97,11 +165,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         setTableTypeCode(tableType.getCode());
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    @Basic(optional = false)
-    @Column(name = "PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return pid;
@@ -113,26 +176,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.pid = pid;
     }
 
-    @Column(name = "NAME", unique = false, nullable = false)
     @Override
-    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
     @Override
-    @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
     }
 
-    @Column(name = "DISPLAY_NAME", nullable = false)
-    @JsonProperty("display_name")
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonProperty("display_name")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -158,14 +215,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         });
     }
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("attributes")
     public List<Attribute> getAttributes() {
         return attributes;
     }
 
-    @JsonProperty("attributes")
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
     }
@@ -262,13 +315,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     /**
      * Uses SchemaInterpretation enumeration
      */
-    @Column(name = "INTERPRETATION")
-    @JsonProperty("interpretation")
     public String getInterpretation() {
         return interpretation;
     }
 
-    @JsonProperty("interpretation")
     public void setInterpretation(String interpretation) {
         this.interpretation = interpretation;
     }
@@ -284,8 +334,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return map;
     }
 
-    @JsonIgnore
-    @Transient
+    
     public Schema getSchema() {
         return schema;
     }
@@ -312,8 +361,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @Override
-    @JsonIgnore
-    @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
         return tenantId;
     }
@@ -331,20 +378,13 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-
     }
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return tenant;
     }
 
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("extracts")
     public List<Extract> getExtracts() {
         return extracts;
     }
@@ -360,13 +400,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         this.extracts = extracts;
     }
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
-    @JsonProperty("primary_key")
     public PrimaryKey getPrimaryKey() {
         return primaryKey;
     }
 
-    @JsonProperty("primary_key")
     public void setPrimaryKey(PrimaryKey primaryKey) {
         this.primaryKey = primaryKey;
         if (primaryKey != null) {
@@ -374,8 +411,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
     }
 
-    @Column(name = "MARKED_FOR_PURGE", nullable = false)
-    @JsonProperty("marked_for_purge")
     public boolean isMarkedForPurge() {
         return markedForPurge;
     }
@@ -406,13 +441,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return map;
     }
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
-    @JsonProperty("last_modified_key")
     public LastModifiedKey getLastModifiedKey() {
         return lastModifiedKey;
     }
 
-    @JsonProperty("last_modified_key")
     public void setLastModifiedKey(LastModifiedKey lastModifiedKey) {
         this.lastModifiedKey = lastModifiedKey;
         if (lastModifiedKey != null) {
@@ -588,46 +620,34 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return fieldSchema;
     }
 
-    @Transient
-    @JsonIgnore
     public TableType getTableType() {
         return tableType;
     }
 
-    @Transient
-    @JsonIgnore
     public void setTableType(TableType tableType) {
         this.tableType = tableType;
-        this.tableTypeCode = tableType.getCode();
+        
+        if (tableType != null) {
+            this.tableTypeCode = tableType.getCode();
+        }
+        
     }
 
-    @Column(name = "TYPE", nullable = false)
-    @JsonIgnore
     public Integer getTableTypeCode() {
         return tableTypeCode;
     }
 
-    @JsonIgnore
     public void setTableTypeCode(Integer tableTypeCode) {
         this.tableTypeCode = tableTypeCode;
         setTableType(TableType.getTableTypeByCode(tableTypeCode));
     }
 
-    @JsonProperty("data_rules")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "table")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     public List<DataRule> getDataRules() {
         return dataRules;
     }
 
-    @JsonProperty("data_rules")
     public void setDataRules(List<DataRule> dataRules) {
         this.dataRules = dataRules;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 
     @Transient
@@ -656,10 +676,45 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return parentDir;
     }
 
-    @JsonProperty("extracts_directory")
     @Deprecated
     public void setExtractsDirectory(String s) {
         // pass
     }
 
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+    
+    @JsonProperty("tags")
+    public void setTags(List<String> tags) {
+        Set<String> tagSet = tableTags.stream().map(x -> x.getName()).collect(Collectors.toSet());
+        
+        for (String tag : tags) {
+            if (!tagSet.contains(tag)) {
+                TableTag tableTag = new TableTag();
+                tableTag.setName(tag);
+                tableTag.setTable(this);
+                tableTags.add(tableTag);
+            }
+        }
+    }
+
+    @JsonProperty("tags")
+    public List<String> getTags() {
+        return tableTags.stream().map(x -> x.getName()).collect(Collectors.toList());
+    }
+    
+    @JsonIgnore
+    public List<TableTag> getTableTags() {
+        return tableTags;
+    }
+    
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }
