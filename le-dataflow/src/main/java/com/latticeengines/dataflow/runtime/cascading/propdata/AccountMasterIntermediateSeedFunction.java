@@ -11,7 +11,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterSeedFunction extends BaseOperation implements Function {
+public class AccountMasterIntermediateSeedFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 704139437526099546L;
 
@@ -20,8 +20,8 @@ public class AccountMasterSeedFunction extends BaseOperation implements Function
     private String leColumn;
     private Map<String, Object> setDnBColumnValues;
 
-    public AccountMasterSeedFunction(String outputColumn, String dnbColumn, String leColumn, boolean takeAllFromDnB,
-            Map<String, Object> setDnBColumnValues) {
+    public AccountMasterIntermediateSeedFunction(String outputColumn, String dnbColumn, String leColumn,
+            boolean takeAllFromDnB, Map<String, Object> setDnBColumnValues) {
         super(new Fields(outputColumn));
         this.leColumn = leColumn;
         this.dnbColumn = dnbColumn;

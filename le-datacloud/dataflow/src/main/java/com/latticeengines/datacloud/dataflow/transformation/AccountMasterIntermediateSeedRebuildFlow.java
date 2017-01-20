@@ -18,23 +18,23 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterSeedFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterIntermediateSeedFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterIntermediateSeedParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
+@Component("accountMasterIntermediateSeedRebuildFlow")
+public class AccountMasterIntermediateSeedRebuildFlow
+        extends TypesafeDataFlowBuilder<AccountMasterIntermediateSeedParameters> {
 
-@Component("accountMasterSeedRebuildFlow")
-public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<AccountMasterSeedParameters> {
-
-    private Map<String, SeedMergeFieldMapping> accountMasterSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
-    // dnbCacheSeed columns -> accountMasterSeed columns
+    private Map<String, SeedMergeFieldMapping> accountMasterIntermediateSeedColumnMapping = new HashMap<String, SeedMergeFieldMapping>();
+    // dnbCacheSeed columns -> accountMasterIntermediateSeed columns
     private Map<String, String> dnbCacheSeedColumnMapping = new HashMap<String, String>();
-    // latticeCacheSeed columns -> accountMasterSeed columns
+    // latticeCacheSeed columns -> accountMasterIntermediateSeed columns
     private Map<String, String> latticeCacheSeedColumnMapping = new HashMap<String, String>();
     private String dnbDunsColumn;
     private String leDunsColumn;
@@ -47,12 +47,12 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private static final String COUNTRY = "Country";
 
     /*
-        The detailed description of implementation of PD-1196 to build AccountMasterSeed is at the bottom of this java file
-    */
-
+     * The detailed description of implementation of PD-1196 to build
+     * AccountMasterIntermediateSeed is at the bottom of this java file
+     */
 
     @Override
-    public Node construct(AccountMasterSeedParameters parameters) {
+    public Node construct(AccountMasterIntermediateSeedParameters parameters) {
         try {
             getColumnMapping(parameters.getColumns());
         } catch (IOException e) {
@@ -106,14 +106,14 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         Node resC2 = processC2(joinedC);
         Node resC3 = processC3(joinedC);
 
-        Node accountMasterSeed = resA.merge(resB).merge(resC1).merge(resC2).merge(resC3);
-        accountMasterSeed = retainAccountMasterSeedColumnNode(accountMasterSeed);
-        accountMasterSeed = renameAccountMasterSeedColumnNode(accountMasterSeed);
-        accountMasterSeed = addColumnNode(accountMasterSeed, parameters.getColumns());
-        accountMasterSeed = accountMasterSeed.apply(
+        Node accountMasterIntermediateSeed = resA.merge(resB).merge(resC1).merge(resC2).merge(resC3);
+        accountMasterIntermediateSeed = retainAccountMasterIntermediateSeedColumnNode(accountMasterIntermediateSeed);
+        accountMasterIntermediateSeed = renameAccountMasterIntermediateSeedColumnNode(accountMasterIntermediateSeed);
+        accountMasterIntermediateSeed = addColumnNode(accountMasterIntermediateSeed, parameters.getColumns());
+        accountMasterIntermediateSeed = accountMasterIntermediateSeed.apply(
                 new CountryStandardizationFunction(COUNTRY, parameters.getStandardCountries()), new FieldList(COUNTRY),
                 new FieldMetadata(COUNTRY, String.class));
-        return accountMasterSeed;
+        return accountMasterIntermediateSeed;
     }
 
     private Node retainDnBColumns(Node node) {
@@ -133,7 +133,8 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     }
 
     private Node processA(Node node) {
-        node = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
+        node = callAccountMasterIntermediateSeedFunction(node, true, new HashSet<String>(),
+                new HashMap<String, Object>());
         return node;
     }
 
@@ -144,7 +145,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         map.put(dnbIsPrimaryDomainColumn, "Y");
         map.put(dnbIsPrimaryLocationColumn, "Y");
         map.put(dnbNumberOfLocationColumn, 1);
-        node = callAccountMasterSeedFunction(node, false, new HashSet<String>(), map);
+        node = callAccountMasterIntermediateSeedFunction(node, false, new HashSet<String>(), map);
         return node;
     }
 
@@ -155,7 +156,7 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         map.put(dnbIsPrimaryDomainColumn, "N");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
-        node = callAccountMasterSeedFunction(node, true, set, map);
+        node = callAccountMasterIntermediateSeedFunction(node, true, set, map);
         return node;
     }
 
@@ -166,33 +167,34 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         map.put(dnbIsPrimaryDomainColumn, "Y");
         Set<String> set = new HashSet<String>();
         set.add(leDomainColumn);
-        node = callAccountMasterSeedFunction(node, true, set, map);
+        node = callAccountMasterIntermediateSeedFunction(node, true, set, map);
         return node;
     }
 
     private Node processC3(Node node) {
         String filterExpression = leDunsColumn + " == null && " + dnbDomainColumn + " == null";
         node = node.filter(filterExpression, new FieldList(leDunsColumn, dnbDomainColumn));
-        node = callAccountMasterSeedFunction(node, true, new HashSet<String>(), new HashMap<String, Object>());
+        node = callAccountMasterIntermediateSeedFunction(node, true, new HashSet<String>(),
+                new HashMap<String, Object>());
         return node;
     }
 
-    private Node callAccountMasterSeedFunction(Node node, boolean takeAllFromDnB, Set<String> exceptColumns,
+    private Node callAccountMasterIntermediateSeedFunction(Node node, boolean takeAllFromDnB, Set<String> exceptColumns,
             Map<String, Object> setDnBColumnValues) {
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterIntermediateSeedColumnMapping.entrySet()) {
             String outputColumn = "Tmp_" + entry.getKey();
             String latticeColumn = entry.getValue().getLeColumn();
             String dnbColumn = entry.getValue().getDnbColumn();
             if ((takeAllFromDnB && !exceptColumns.contains(latticeColumn))
                     || (!takeAllFromDnB && exceptColumns.contains(dnbColumn))) {
                 node = node.apply(
-                        new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, true,
+                        new AccountMasterIntermediateSeedFunction(outputColumn, dnbColumn, latticeColumn, true,
                                 setDnBColumnValues),
                         new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn,
                                 entry.getKey().equals(dnbNumberOfLocationColumn) ? Integer.class : String.class));
             } else {
                 node = node.apply(
-                        new AccountMasterSeedFunction(outputColumn, dnbColumn, latticeColumn, false,
+                        new AccountMasterIntermediateSeedFunction(outputColumn, dnbColumn, latticeColumn, false,
                                 setDnBColumnValues),
                         new FieldList(node.getFieldNames()), new FieldMetadata(outputColumn,
                                 entry.getKey().equals(dnbNumberOfLocationColumn) ? Integer.class : String.class));
@@ -201,18 +203,18 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         return node;
     }
 
-    private Node retainAccountMasterSeedColumnNode(Node node) {
+    private Node retainAccountMasterIntermediateSeedColumnNode(Node node) {
         List<String> columnNames = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterIntermediateSeedColumnMapping.entrySet()) {
             columnNames.add("Tmp_" + entry.getKey());
         }
         return node.retain(new FieldList(columnNames));
     }
 
-    private Node renameAccountMasterSeedColumnNode(Node node) {
+    private Node renameAccountMasterIntermediateSeedColumnNode(Node node) {
         List<String> newColumnNames = new ArrayList<String>();
         List<String> oldColumnNames = new ArrayList<String>();
-        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterSeedColumnMapping.entrySet()) {
+        for (Map.Entry<String, SeedMergeFieldMapping> entry : accountMasterIntermediateSeedColumnMapping.entrySet()) {
             oldColumnNames.add("Tmp_" + entry.getKey());
             newColumnNames.add(entry.getKey());
         }
@@ -222,17 +224,17 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
     private Node addColumnNode(Node node, List<SourceColumn> sourceColumns) {
         for (SourceColumn sourceColumn : sourceColumns) {
             switch (sourceColumn.getCalculation()) {
-                case ADD_UUID:
-                    node = node.addUUID(sourceColumn.getColumnName());
-                    break;
-                case ADD_TIMESTAMP:
-                    node = node.addTimestamp(sourceColumn.getColumnName());
-                    break;
-                case ADD_ROWNUM:
-                    node = node.addRowID(sourceColumn.getColumnName());
-                    break;
-                default:
-                    break;
+            case ADD_UUID:
+                node = node.addUUID(sourceColumn.getColumnName());
+                break;
+            case ADD_TIMESTAMP:
+                node = node.addTimestamp(sourceColumn.getColumnName());
+                break;
+            case ADD_ROWNUM:
+                node = node.addRowID(sourceColumn.getColumnName());
+                break;
+            default:
+                break;
             }
         }
         return node;
@@ -244,41 +246,40 @@ public class AccountMasterSeedRebuildFlow extends TypesafeDataFlowBuilder<Accoun
         for (SourceColumn sourceColumn : sourceColumns) {
             if (sourceColumn.getCalculation() == Calculation.MERGE_SEED) {
                 ObjectMapper om = new ObjectMapper();
-                list = om.readValue(sourceColumn.getArguments(), TypeFactory.defaultInstance()
-                        .constructCollectionType(List.class, SeedMergeFieldMapping.class));
+                list = om.readValue(sourceColumn.getArguments(),
+                        TypeFactory.defaultInstance().constructCollectionType(List.class, SeedMergeFieldMapping.class));
                 break;
             }
         }
 
         for (SeedMergeFieldMapping item : list) {
-            accountMasterSeedColumnMapping.put(item.getTargetColumn(), item);
+            accountMasterIntermediateSeedColumnMapping.put(item.getTargetColumn(), item);
             dnbCacheSeedColumnMapping.put(item.getDnbColumn(), item.getTargetColumn());
             if (item.getLeColumn() != null) {
                 latticeCacheSeedColumnMapping.put(item.getLeColumn(), item.getTargetColumn());
             }
             switch (item.getColumnType()) {
-                case DOMAIN:
-                    dnbDomainColumn = item.getDnbColumn();
-                    leDomainColumn = item.getLeColumn();
-                    break;
-                case DUNS:
-                    dnbDunsColumn = item.getDnbColumn();
-                    leDunsColumn = item.getLeColumn();
-                    break;
-                case IS_PRIMARY_DOMAIN:
-                    dnbIsPrimaryDomainColumn = item.getDnbColumn();
-                    break;
-                case IS_PRIMARY_LOCATION:
-                    dnbIsPrimaryLocationColumn = item.getDnbColumn();
-                    break;
-                case NUMBER_OF_LOCATION:
-                    dnbNumberOfLocationColumn = item.getDnbColumn();
-                    break;
-                default:
-                    break;
+            case DOMAIN:
+                dnbDomainColumn = item.getDnbColumn();
+                leDomainColumn = item.getLeColumn();
+                break;
+            case DUNS:
+                dnbDunsColumn = item.getDnbColumn();
+                leDunsColumn = item.getLeColumn();
+                break;
+            case IS_PRIMARY_DOMAIN:
+                dnbIsPrimaryDomainColumn = item.getDnbColumn();
+                break;
+            case IS_PRIMARY_LOCATION:
+                dnbIsPrimaryLocationColumn = item.getDnbColumn();
+                break;
+            case NUMBER_OF_LOCATION:
+                dnbNumberOfLocationColumn = item.getDnbColumn();
+                break;
+            default:
+                break;
             }
         }
     }
-
 
 }

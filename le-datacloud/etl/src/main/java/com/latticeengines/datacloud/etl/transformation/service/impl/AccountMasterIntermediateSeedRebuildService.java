@@ -14,24 +14,24 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
+import com.latticeengines.datacloud.core.source.impl.AccountMasterIntermediateSeed;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterSeedParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterIntermediateSeedParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component("accountMasterSeedRebuildService")
-public class AccountMasterSeedRebuildService
-        extends SimpleTransformationServiceBase<BasicTransformationConfiguration, AccountMasterSeedParameters>
+@Component("accountMasterIntermediateSeedRebuildService")
+public class AccountMasterIntermediateSeedRebuildService extends
+        SimpleTransformationServiceBase<BasicTransformationConfiguration, AccountMasterIntermediateSeedParameters>
         implements TransformationService<BasicTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildService.class);
+    private static final Log log = LogFactory.getLog(AccountMasterIntermediateSeedRebuildService.class);
 
     @Autowired
-    private AccountMasterSeed source;
+    private AccountMasterIntermediateSeed source;
 
     @Autowired
     private CountryCodeService countryCodeService;
@@ -47,18 +47,18 @@ public class AccountMasterSeedRebuildService
     }
 
     @SuppressWarnings("unchecked")
-    protected Class<AccountMasterSeedParameters> getDataFlowParametersClass() {
-        return AccountMasterSeedParameters.class;
+    protected Class<AccountMasterIntermediateSeedParameters> getDataFlowParametersClass() {
+        return AccountMasterIntermediateSeedParameters.class;
     }
 
     @Override
     protected String getDataFlowBeanName() {
-        return "accountMasterSeedRebuildFlow";
+        return "accountMasterIntermediateSeedRebuildFlow";
     }
 
     @Override
     protected String getServiceBeanName() {
-        return "accountMasterSeedRebuildService";
+        return "accountMasterIntermediateSeedRebuildService";
     }
 
     @Override
@@ -67,9 +67,9 @@ public class AccountMasterSeedRebuildService
     }
 
     @Override
-    protected AccountMasterSeedParameters getDataFlowParameters(TransformationProgress progress,
+    protected AccountMasterIntermediateSeedParameters getDataFlowParameters(TransformationProgress progress,
             BasicTransformationConfiguration transConf) {
-        AccountMasterSeedParameters parameters;
+        AccountMasterIntermediateSeedParameters parameters;
         try {
             parameters = getDataFlowParametersClass().newInstance();
         } catch (IllegalAccessException | InstantiationException e) {

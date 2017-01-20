@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterIntermediateSeed;
@@ -19,9 +18,9 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 
-public class AccountMasterSeedRebuildServiceImplTestNG
+public class AccountMasterIntermediateSeedRebuildServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(AccountMasterSeedRebuildServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(AccountMasterIntermediateSeedRebuildServiceImplTestNG.class);
 
     private String baseSourceVersionDnB = "2016-10-01_00-00-00_UTC";
     private String baseSourceVersionLattice = "2016-09-01_00-00-00_UTC";
@@ -59,9 +58,9 @@ public class AccountMasterSeedRebuildServiceImplTestNG
     LatticeCacheSeed latticeCacheSeed;
 
     @Autowired
-    private AccountMasterSeedRebuildService accountMasterSeedRebuildService;
+    private AccountMasterIntermediateSeedRebuildService accountMasterIntermediateSeedRebuildService;
 
-//    @Test(groups = "functional")
+    // @Test(groups = "functional")
     public void testTransformation() {
         uploadBaseAvro(dnBCacheSeed, dnBCacheSeed.getSourceName() + "_Test" + source.getSourceName(),
                 baseSourceVersionDnB);
@@ -75,7 +74,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     @Override
     TransformationService<BasicTransformationConfiguration> getTransformationService() {
-        return accountMasterSeedRebuildService;
+        return accountMasterIntermediateSeedRebuildService;
     }
 
     @Override
@@ -137,21 +136,20 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                     + sicCode + " " + naicsCode + " " + industry + " " + revenueRange + " " + employeeRange);
 
             Assert.assertTrue(
-                            (primaryDuns.equals("DnB_04_PRIMARY_DUNS")
-                            && companyPhone.equals("DnB_04_COMPANY_PHONE")
-                                    && employeeRange.equals("DnB_04_EMPLOYEE_RANGE")
-                                    && companyDescription.equals("DnB_04_COMPANY_DESCRIPTION")
-                                    && zipcode.equals("DnB_04_ZIPCODE") && numberOfLocations == 6
-                                    && sicCode.equals("DnB_04_SIC_CODE") && isPrimaryLocation.equals("Y")
-                                    && city.equals("DnB_04_CITY") && industry.equals("DnB_04_INDUSTRY")
-                                    && name.equals("DnB_04_NAME") && duns.equals("04") && state.equals("DnB_04_STATE")
-                                    && naicsCode.equals("DnB_04_NAICS_CODE")
-                                    && revenueRange.equals("DnB_04_REVENUE_RANGE")
-                                    && street.equals("DnB_04_ADDR")
+                    (primaryDuns.equals("DnB_04_PRIMARY_DUNS") && companyPhone.equals("DnB_04_COMPANY_PHONE")
+                            && employeeRange.equals("DnB_04_EMPLOYEE_RANGE")
+                            && companyDescription.equals("DnB_04_COMPANY_DESCRIPTION")
+                            && zipcode.equals("DnB_04_ZIPCODE") && numberOfLocations == 6
+                            && sicCode.equals("DnB_04_SIC_CODE") && isPrimaryLocation.equals("Y")
+                            && city.equals("DnB_04_CITY") && industry.equals("DnB_04_INDUSTRY")
+                            && name.equals("DnB_04_NAME") && duns.equals("04") && state.equals("DnB_04_STATE")
+                            && naicsCode.equals("DnB_04_NAICS_CODE") && revenueRange.equals("DnB_04_REVENUE_RANGE")
+                            && street
+                                    .equals("DnB_04_ADDR")
                             && country.equals("GERMANY") && domain.equals("null")
-                                    && isPrimaryDomain.equals("N"))
-                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS")
-                                    && companyPhone.equals("DnB_01_COMPANY_PHONE")
+                            && isPrimaryDomain
+                                    .equals("N"))
+                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS") && companyPhone.equals("DnB_01_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_01_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_01_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_01_ZIPCODE") && numberOfLocations == 3
@@ -159,11 +157,11 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && city.equals("DnB_01_CITY") && industry.equals("DnB_01_INDUSTRY")
                                     && name.equals("DnB_01_NAME") && duns.equals("01") && state.equals("DnB_01_STATE")
                                     && naicsCode.equals("DnB_01_NAICS_CODE")
-                                    && revenueRange.equals("DnB_01_REVENUE_RANGE")
-                                    && street.equals("DnB_01_ADDR") && country.equals("USA")
-                                    && domain.equals("e.com") && isPrimaryDomain.equals("N"))
-                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS")
-                                    && companyPhone.equals("DnB_01_COMPANY_PHONE")
+                                    && revenueRange.equals("DnB_01_REVENUE_RANGE") && street.equals("DnB_01_ADDR")
+                                    && country.equals("USA") && domain.equals("e.com")
+                                    && isPrimaryDomain
+                                            .equals("N"))
+                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS") && companyPhone.equals("DnB_01_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_01_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_01_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_01_ZIPCODE") && numberOfLocations == 3
@@ -171,11 +169,13 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && city.equals("DnB_01_CITY") && industry.equals("DnB_01_INDUSTRY")
                                     && name.equals("DnB_01_NAME") && duns.equals("01") && state.equals("DnB_01_STATE")
                                     && naicsCode.equals("DnB_01_NAICS_CODE")
-                                    && revenueRange.equals("DnB_01_REVENUE_RANGE")
-                                    && street.equals("DnB_01_ADDR") && country.equals("USA") 
-                                    && domain.equals("b.com") && isPrimaryDomain.equals("N"))
-                            || (primaryDuns.equals("DnB_03_PRIMARY_DUNS")
-                                    && companyPhone.equals("DnB_03_COMPANY_PHONE")
+                                    && revenueRange.equals("DnB_01_REVENUE_RANGE") && street.equals("DnB_01_ADDR")
+                                    && country
+                                            .equals("USA")
+                                    && domain.equals("b.com")
+                                    && isPrimaryDomain
+                                            .equals("N"))
+                            || (primaryDuns.equals("DnB_03_PRIMARY_DUNS") && companyPhone.equals("DnB_03_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_03_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_03_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_03_ZIPCODE") && numberOfLocations == 5
@@ -185,9 +185,9 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && naicsCode.equals("DnB_03_NAICS_CODE")
                                     && revenueRange.equals("DnB_03_REVENUE_RANGE") && street.equals("DnB_03_ADDR")
                                     && country.equals("CHINA") && domain.equals("a.com")
-                                    && isPrimaryDomain.equals("Y"))
-                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS")
-                                    && companyPhone.equals("DnB_01_COMPANY_PHONE")
+                                    && isPrimaryDomain
+                                            .equals("Y"))
+                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS") && companyPhone.equals("DnB_01_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_01_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_01_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_01_ZIPCODE") && numberOfLocations == 3
@@ -195,11 +195,11 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && city.equals("DnB_01_CITY") && industry.equals("DnB_01_INDUSTRY")
                                     && name.equals("DnB_01_NAME") && duns.equals("01") && state.equals("DnB_01_STATE")
                                     && naicsCode.equals("DnB_01_NAICS_CODE")
-                                    && revenueRange.equals("DnB_01_REVENUE_RANGE")
-                                    && street.equals("DnB_01_ADDR") && country.equals("USA")
+                                    && revenueRange.equals("DnB_01_REVENUE_RANGE") && street.equals("DnB_01_ADDR")
+                                    && country
+                                            .equals("USA")
                                     && domain.equals("c.com") && isPrimaryDomain.equals("Y"))
-                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS")
-                                    && companyPhone.equals("DnB_01_COMPANY_PHONE")
+                            || (primaryDuns.equals("DnB_01_PRIMARY_DUNS") && companyPhone.equals("DnB_01_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_01_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_01_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_01_ZIPCODE") && numberOfLocations == 3
@@ -209,27 +209,29 @@ public class AccountMasterSeedRebuildServiceImplTestNG
                                     && naicsCode.equals("DnB_01_NAICS_CODE")
                                     && revenueRange.equals("DnB_01_REVENUE_RANGE") && street.equals("DnB_01_ADDR")
                                     && country.equals("USA") && domain.equals("a.com")
-                                    && isPrimaryDomain.equals("N"))
-                            || (primaryDuns.equals("null")
-                                    && companyPhone.equals("null") && employeeRange.equals("null")
-                                    && companyDescription.equals("null") && zipcode.equals("null")
-                                    && numberOfLocations == 1 && sicCode.equals("null") && isPrimaryLocation.equals("Y")
-                                    && city.equals("LE_NULL_CITY_2") && industry.equals("null")
-                                    && name.equals("LE_NULL_NAME_2") && duns.equals("null")
+                                    && isPrimaryDomain
+                                            .equals("N"))
+                            || (primaryDuns.equals("null") && companyPhone.equals("null")
+                                    && employeeRange.equals("null") && companyDescription.equals("null")
+                                    && zipcode.equals("null") && numberOfLocations == 1 && sicCode.equals("null")
+                                    && isPrimaryLocation.equals("Y") && city.equals("LE_NULL_CITY_2")
+                                    && industry.equals("null") && name.equals("LE_NULL_NAME_2") && duns.equals("null")
                                     && state.equals("LE_NULL_STATE_2") && naicsCode.equals("null")
                                     && revenueRange.equals("null") && street.equals("null")
-                                    && country.equals("BRAZIL") && domain.equals("d.com") && isPrimaryDomain.equals("Y"))
-                            || (primaryDuns.equals("DnB_02_PRIMARY_DUNS")
-                            && companyPhone.equals("DnB_02_COMPANY_PHONE")
+                                    && country
+                                            .equals("BRAZIL")
+                                    && domain.equals("d.com") && isPrimaryDomain.equals("Y"))
+                            || (primaryDuns.equals("DnB_02_PRIMARY_DUNS") && companyPhone.equals("DnB_02_COMPANY_PHONE")
                                     && employeeRange.equals("DnB_02_EMPLOYEE_RANGE")
                                     && companyDescription.equals("DnB_02_COMPANY_DESCRIPTION")
                                     && zipcode.equals("DnB_02_ZIPCODE") && numberOfLocations == 4
                                     && sicCode.equals("DnB_02_SIC_CODE") && isPrimaryLocation.equals("Y")
                                     && city.equals("DnB_02_CITY") && industry.equals("DnB_02_INDUSTRY")
                                     && name.equals("DnB_02_NAME") && duns.equals("02") && state.equals("DnB_02_STATE")
-                                    && naicsCode.equals("DnB_02_NAICS_CODE") && revenueRange.equals("DnB_02_REVENUE_RANGE")
-                                    && street.equals("DnB_02_ADDR") && country.equals("CANADA")
-                                    && domain.equals("a.com") && isPrimaryDomain.equals("Y")));
+                                    && naicsCode.equals("DnB_02_NAICS_CODE")
+                                    && revenueRange.equals("DnB_02_REVENUE_RANGE") && street.equals("DnB_02_ADDR")
+                                    && country.equals("CANADA") && domain.equals("a.com")
+                                    && isPrimaryDomain.equals("Y")));
             rowNum = rowNum + 1;
         }
         Assert.assertEquals(rowNum, 8);
