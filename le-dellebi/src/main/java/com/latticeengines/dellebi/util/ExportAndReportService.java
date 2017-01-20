@@ -12,7 +12,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -26,8 +25,8 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class ExportAndReportService {
 
@@ -81,7 +80,7 @@ public class ExportAndReportService {
     private JobService jobService;
 
     @Autowired
-    private SqoopProxy sqoopProxy;
+    private SqoopJobService sqoopJobService;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -130,8 +129,7 @@ public class ExportAndReportService {
                 .addExtraOption(optionalEnclosureValue).build();
 
         try {
-            ApplicationId appId = ConverterUtils
-                    .toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
+            ApplicationId appId = sqoopJobService.exportData(exporter);
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
 
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
