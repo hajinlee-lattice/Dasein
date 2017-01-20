@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -161,12 +163,17 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
         String podId = CamilleEnvironment.getPodId();
         Assert.assertNotNull(podId);
 
+        Level originalLevel = LogManager.getLogger(TenantLifecycleManager.class).getLevel();
+        LogManager.getLogger(TenantLifecycleManager.class).setLevel(Level.DEBUG);
+
         try {
             deleteTenant(TestContractId, TestTenantId);
         } catch (Exception e) {
             // ignore
         }
         createTenant(TestContractId, TestTenantId);
+
+        LogManager.getLogger(TenantLifecycleManager.class).setLevel(originalLevel);
 
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);

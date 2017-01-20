@@ -41,30 +41,27 @@ public class TenantLifecycleManager {
         }
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
+        boolean tenantExists = false;
         try {
+            log.debug("Creating Tenant @ {}", tenantPath);
             camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
-            log.debug("created Tenant @ {}", tenantPath);
-
-            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId, defaultSpaceInfo);
-
-            // create default space file
-            Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
-            Document defaultSpaceDoc = new Document(defaultSpaceId);
-            try {
-                camille.create(defaultSpacePath, defaultSpaceDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
-                log.debug("created .default-space @ {}", defaultSpacePath);
-            } catch (KeeperException.NodeExistsException e) {
-                log.debug(".default-space already existed @ {}, forcing update", defaultSpacePath);
-                camille.set(defaultSpacePath, defaultSpaceDoc, true);
-            }
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
+            tenantExists = true;
+        }
 
-            if (defaultSpaceId != null) {
-                log.debug("updating default space Id to {}", defaultSpaceId);
+        if (defaultSpaceId != null) {
+            try {
+                log.debug("Creating default space {}", defaultSpaceId);
                 SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId, defaultSpaceInfo);
-                setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
+            } catch (KeeperException.NodeExistsException e) {
+                log.debug("Default space {} already existed for tenant {}, ignoring create", defaultSpaceId, tenantId);
             }
+        }
+
+        if (!(tenantExists && defaultSpaceId == null)) {
+            // upsert default space file
+            setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
         }
 
         Document properties = DocumentUtils.toRawDocument(tenantInfo.properties);
@@ -78,9 +75,10 @@ public class TenantLifecycleManager {
         LifecycleUtils.validateIds(contractId, tenantId, defaultSpaceId);
 
         if (SpaceLifecycleManager.exists(contractId, tenantId, defaultSpaceId)) {
-            CamilleEnvironment.getCamille().set(
-                    PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                            PathConstants.DEFAULT_SPACE_FILE), new Document(defaultSpaceId));
+            CamilleEnvironment.getCamille()
+                    .upsert(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)
+                            .append(PathConstants.DEFAULT_SPACE_FILE), new Document(defaultSpaceId),
+                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } else {
             RuntimeException e = new RuntimeException(String.format("No Space exists with spaceId=%s", defaultSpaceId));
             log.error(e.getMessage(), e);
@@ -91,10 +89,10 @@ public class TenantLifecycleManager {
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId);
 
-        return CamilleEnvironment
-                .getCamille()
-                .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                        PathConstants.DEFAULT_SPACE_FILE)).getData();
+        return CamilleEnvironment.getCamille()
+                .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)
+                        .append(PathConstants.DEFAULT_SPACE_FILE))
+                .getData();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {
@@ -112,8 +110,8 @@ public class TenantLifecycleManager {
     public static boolean exists(String contractId, String tenantId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId);
 
-        return CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
+        return CamilleEnvironment.getCamille()
+                .exists(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
 
     public static List<AbstractMap.SimpleEntry<String, TenantInfo>> getAll(String contractId) throws Exception {
@@ -121,8 +119,8 @@ public class TenantLifecycleManager {
         List<AbstractMap.SimpleEntry<String, TenantInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, TenantInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildTenantsPath(
-                CamilleEnvironment.getPodId(), contractId));
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
+                .getChildren(PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId));
 
         for (Map.Entry<Document, Path> childPair : childPairs) {
             TenantProperties properties = null;
@@ -149,8 +147,8 @@ public class TenantLifecycleManager {
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         Document tenantPropertiesDocument = c.get(tenantPath.append(PathConstants.PROPERTIES_FILE));
-        TenantProperties properties = DocumentUtils
-                .toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+        TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument,
+                TenantProperties.class);
 
         return new TenantInfo(properties);
     }
