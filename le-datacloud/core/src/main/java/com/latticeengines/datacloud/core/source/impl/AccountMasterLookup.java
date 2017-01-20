@@ -15,9 +15,12 @@ public class AccountMasterLookup implements DerivedSource {
     @Autowired
     AccountMasterSeed accountMasterSeed;
 
+    @Autowired
+    OrbCacheSeedSecondaryDomain orbCacheSeedSecondaryDomain;
+
     @Override
     public Source[] getBaseSources() {
-        return new Source[] { accountMasterSeed };
+        return new Source[] { accountMasterSeed, orbCacheSeedSecondaryDomain };
     }
 
     @Override

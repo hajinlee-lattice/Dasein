@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterLookupKeyFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -21,6 +22,10 @@ public class AccountMasterLookupRebuildFlow
     private final static String KEY_FIELD = "Key";
     private final static String DOMAIN_FIELD = "Domain";
     private final static String DUNS_FIELD = "DUNS";
+    private final static String DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD = "PrimaryDomain";
+    private final static String DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD = "SecondaryDomain";
+    private final static String DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED = "_" + DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD
+            + "_";
     private final static String PRIMARY_DOMAIN_FIELD = "LE_IS_PRIMARY_DOMAIN";
     private final static String PRIMARY_LOCATION_FIELD = "LE_IS_PRIMARY_LOCATION";
     private final static String GLOBAL_DUNS_FIELD = "GLOBAL_ULTIMATE_DUNS_NUMBER";
@@ -33,15 +38,37 @@ public class AccountMasterLookupRebuildFlow
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
+
+        Node secondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
+        secondaryDomainMapping = secondaryDomainMapping.rename(new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
+                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
+
+        Node accountMasterSeedWithSecondaryDomain = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
+                secondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED), JoinType.INNER);
+        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain.filter(
+                DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD + " != null",
+                new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD));
+        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
+                .discard(new FieldList(DOMAIN_FIELD, DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
+        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
+                .rename(new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD), new FieldList(DOMAIN_FIELD));
+
+        accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
+                .retain(new FieldList(accountMasterSeed.getFieldNames()));
+        accountMasterSeed = accountMasterSeed.merge(accountMasterSeedWithSecondaryDomain);
+
         Node searchByDuns = addSearchByDuns(accountMasterSeed);
+
         Node searchByDomain = addSearchByDomainNode(accountMasterSeed);
+
         Node searchByBoth = addSearchByBothNode(accountMasterSeed);
         return searchByDuns.merge(searchByDomain).merge(searchByBoth);
     }
 
     private Node addSearchByDomainNode(Node node) {
         node = node.filter(DOMAIN_FIELD + " != null", new FieldList(DOMAIN_FIELD));
-        //node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
+        // node = node.groupByAndLimit(new FieldList(DOMAIN_FIELD), new
+        // FieldList(PRIMARY_LOCATION_FIELD), 1, true, true);
         node = node.groupByAndBuffer(new FieldList(DOMAIN_FIELD), new FieldList(PRIMARY_LOCATION_FIELD, DUNS_FIELD),
                 new AccountMasterLookupBuffer(
                         new Fields(node.getFieldNames().toArray(new String[node.getFieldNames().size()])),
