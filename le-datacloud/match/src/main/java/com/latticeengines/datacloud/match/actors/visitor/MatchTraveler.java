@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -32,6 +33,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private boolean matchDebugEnabled;
 
     private boolean logDnBBulkResult = false;
+
+    private Map<String, String> dunsOriginMap;
 
     public MatchTraveler(String rootOperationUid, MatchKeyTuple matchKeyTuple) {
         super(rootOperationUid);
@@ -137,6 +140,7 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public void setUseDnBCache(boolean useDnBCache) {
         this.useDnBCache = useDnBCache;
     }
+
     public boolean isUseRemoteDnB() {
         return useRemoteDnB;
     }
@@ -156,11 +160,19 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     public boolean isMatchDebugEnabled() {
         return matchDebugEnabled;
     }
-    
+
     public void setMatchDebugEnabled(boolean matchDebugEnabled) {
         this.matchDebugEnabled = matchDebugEnabled;
     }
-    
+
+    public Map<String, String> getDunsOriginMap() {
+        return dunsOriginMap;
+    }
+
+    public void setDunsOriginMap(Map<String, String> dunsOriginMap) {
+        this.dunsOriginMap = dunsOriginMap;
+    }
+
     @Override
     public void start() {
         super.start();

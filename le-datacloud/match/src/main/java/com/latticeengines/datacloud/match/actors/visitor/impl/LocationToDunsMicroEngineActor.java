@@ -1,7 +1,11 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,8 +42,12 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
     @Override
     protected boolean accept(Traveler traveler) {
         MatchKeyTuple matchKeyTuple = ((MatchTraveler) traveler).getMatchKeyTuple();
+        Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
 
-        if (matchKeyTuple.getDuns() != null) {
+        if (matchKeyTuple.getDuns() != null && MapUtils.isNotEmpty(dunsOriginMap)
+                && dunsOriginMap.containsKey(this.getClass().getName())) {
+            // if DunsOriginMap has entry which was already made by this actor
+            // class and current DUNS is not null then reject it
             return false;
         }
 
@@ -76,6 +84,12 @@ public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<Dnb
                         (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
             }
             matchKeyTuple.setDuns(res.getDuns());
+            Map<String, String> dunsOriginMap = ((MatchTraveler) traveler).getDunsOriginMap();
+            if (dunsOriginMap == null) {
+                dunsOriginMap = new HashMap<String, String>();
+                ((MatchTraveler) traveler).setDunsOriginMap(dunsOriginMap);
+            }
+            dunsOriginMap.put(this.getClass().getName(), res.getDuns());
             traveler.getDnBMatchContexts().add(res);
             response.setResult(null);
         }
