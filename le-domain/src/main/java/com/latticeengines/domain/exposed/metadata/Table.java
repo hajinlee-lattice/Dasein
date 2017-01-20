@@ -41,6 +41,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
@@ -73,6 +74,7 @@ uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TY
     @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @EntityListeners(TableListener.class)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     private static final Log log = LogFactory.getLog(Table.class);
