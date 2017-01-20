@@ -812,6 +812,20 @@ angular.module('common.datacloud.explorer', [
         return 0;
     }
 
+
+    var getEnrichmentCube = function() {
+        var deferred = $q.defer();
+
+        DataCloudStore.getCube().then(function(result) {
+            deferred.resolve(result);
+        });
+        return deferred.promise;
+    }
+
+    getEnrichmentCube().then(function(result){
+        console.log(result);
+    });
+
     vm.init();
 })
 .directive('fallbackSrc', function () {

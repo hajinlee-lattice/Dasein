@@ -200,6 +200,14 @@ angular.module('common.datacloud')
         this.topAttributes = this.topAttributes || [];
         this.topAttributes[category] = items;
     }
+
+    this.getCube = function(){
+        var deferred = $q.defer();
+        DataCloudService.getCube().then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
 })
 .service('DataCloudService', function($q, $http){
     this.getPremiumSelectMaximum = function(){
@@ -328,6 +336,22 @@ angular.module('common.datacloud')
                 loadEnrichmentMetadata: opts.loadEnrichmentMetadata
             }
         }).then(function(response) {
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
+    this.getCube = function(opts){
+        var deferred = $q.defer(),
+            opts = opts || {},
+            query = opts.query || '';
+        $http({
+            method: 'get',
+            url: '/pls/enrichment/stats/cube',
+            params: {
+                q: query
+            }
+        }).then(function(response){
             deferred.resolve(response);
         });
         return deferred.promise;
