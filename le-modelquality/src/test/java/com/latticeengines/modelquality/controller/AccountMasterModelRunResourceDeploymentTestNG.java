@@ -139,7 +139,7 @@ public class AccountMasterModelRunResourceDeploymentTestNG extends ModelQualityD
             modelQualityProxy.createAnalyticPipeline(analyticPipelineEntityNames);
 
             aModelRunEntityNames.setAnalyticPipelineName(analyticPipelineEntityNames.getName());
-            aModelRunEntityNames.setDataSetName(dataset.getName());
+            aModelRunEntityNames.setDataSetName(thisPropData.getName());
             log.info("Tenant=" + user + " Dataset=" + dataSetName);
             String modelName = modelQualityProxy.createModelRun(aModelRunEntityNames, //
                     mainTestTenant.getId(), user, password, plsDeployedHostPort);
