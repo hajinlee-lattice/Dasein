@@ -1,8 +1,5 @@
 package com.latticeengines.dataplatform.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +24,9 @@ import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelReviewConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.network.exposed.dataplatform.ModelInterface;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "models", description = "REST resource for machine learning models")
 @RestController

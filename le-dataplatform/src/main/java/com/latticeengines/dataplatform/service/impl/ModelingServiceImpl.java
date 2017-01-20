@@ -10,10 +10,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +78,6 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 
 @Component("modelingService")

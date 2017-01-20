@@ -8,7 +8,6 @@ import static org.testng.Assert.assertFalse;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +20,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;

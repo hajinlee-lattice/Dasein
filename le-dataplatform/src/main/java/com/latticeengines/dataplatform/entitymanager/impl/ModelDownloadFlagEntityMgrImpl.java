@@ -1,16 +1,17 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
-import com.latticeengines.dataplatform.dao.ModelDownloadFlagDao;
-import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import com.latticeengines.dataplatform.dao.ModelDownloadFlagDao;
+import com.latticeengines.dataplatform.entitymanager.ModelDownloadFlagEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 
 @Component("modelDownloadFlagEntityMgr")
 public class ModelDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<ModelSummaryDownloadFlag> implements

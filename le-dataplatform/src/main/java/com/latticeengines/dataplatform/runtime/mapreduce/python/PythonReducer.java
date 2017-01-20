@@ -17,11 +17,11 @@ import org.apache.hadoop.mapreduce.Reducer;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.AggregatorFactory;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.DiagnosticsJsonAggregator;
+import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FeatureImportanceAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FileAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ModelPickleAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ModelingProfileAvroAggregator;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.ProfileAvroAggregator;
-import com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator.FeatureImportanceAggregator;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
