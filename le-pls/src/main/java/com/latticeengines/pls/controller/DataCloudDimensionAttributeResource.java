@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 import com.latticeengines.proxy.exposed.matchapi.DimensionAttributeProxy;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dimensionattributes", description = "REST resource for Dimension Attributes")
 @RestController

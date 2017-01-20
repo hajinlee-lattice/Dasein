@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.pls.service.SalesforceURLService;
+
 import io.swagger.annotations.Api;
 
 @Api(value = "salesforce", description = "Redirect to Salesforce")

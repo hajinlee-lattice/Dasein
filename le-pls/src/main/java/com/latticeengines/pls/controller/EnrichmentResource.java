@@ -1,7 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -29,6 +27,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;

@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.pls.service.ScoringJobService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "scores", description = "REST resource for interacting with score workflows")
 @RestController

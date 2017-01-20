@@ -9,10 +9,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 
 public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 

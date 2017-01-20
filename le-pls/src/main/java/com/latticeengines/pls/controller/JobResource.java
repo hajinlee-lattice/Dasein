@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import com.latticeengines.pls.service.WorkflowJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.pls.service.WorkflowJobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -1,8 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,9 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.service.UserService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "bisaccesstoken", description = "REST resource for getting the one-time bis access token")
 @RestController

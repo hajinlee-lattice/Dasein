@@ -35,8 +35,8 @@ import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.query.ExistsRestriction;
 import com.latticeengines.common.exposed.query.Restriction;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.IntentScore;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;

@@ -1,9 +1,9 @@
 package com.latticeengines.pls.entitymanager;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
-
-import java.util.List;
 
 public interface MarketoCredentialEntityMgr extends BaseEntityMgr<MarketoCredential> {
 

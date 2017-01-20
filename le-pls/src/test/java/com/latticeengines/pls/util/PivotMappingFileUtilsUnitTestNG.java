@@ -1,6 +1,7 @@
 package com.latticeengines.pls.util;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 

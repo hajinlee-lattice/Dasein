@@ -4,12 +4,11 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -19,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;

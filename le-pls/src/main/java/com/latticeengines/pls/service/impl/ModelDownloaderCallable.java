@@ -2,7 +2,11 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.StringUtils;
@@ -12,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.hdfs.BlockMissingException;
+import org.hibernate.exception.ConstraintViolationException;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -22,7 +27,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.newrelic.api.agent.Trace;
-import org.hibernate.exception.ConstraintViolationException;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
