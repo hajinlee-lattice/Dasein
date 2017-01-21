@@ -3,36 +3,22 @@ package com.latticeengines.datacloud.match.service;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
-import com.latticeengines.datacloud.match.entitymgr.DnBBlackCacheEntityMgr;
-import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
+import com.latticeengines.datacloud.match.entitymgr.DnBCacheEntityMgr;
 
 public interface DnBCacheService {
-    void addCache(DnBMatchContext context);
 
-    // White Cache
-    DnBWhiteCacheEntityMgr getWhiteCacheMgr();
+    DnBCacheEntityMgr getCacheMgr();
 
-    DnBWhiteCache lookupWhiteCache(DnBMatchContext context);
+    DnBCache lookupCache(DnBMatchContext context);
 
-    Map<String, DnBWhiteCache> batchLookupWhiteCache(Map<String, DnBMatchContext> contexts);
+    Map<String, DnBCache> batchLookupCache(Map<String, DnBMatchContext> contexts);
 
-    DnBWhiteCache addWhiteCache(DnBMatchContext context);
+    DnBCache addCache(DnBMatchContext context);
 
-    List<DnBWhiteCache> batchAddWhiteCache(List<DnBMatchContext> contexts);
+    List<DnBCache> batchAddCache(List<DnBMatchContext> contexts);
 
-    void removeWhiteCache(DnBWhiteCache cache);
+    void removeCache(DnBCache cache);
 
-    // Black Cache
-    DnBBlackCacheEntityMgr getBlackCacheMgr();
-
-    DnBBlackCache lookupBlackCache(DnBMatchContext context);
-
-    Map<String, DnBBlackCache> batchLookupBlackCache(Map<String, DnBMatchContext> contexts);
-
-    DnBBlackCache addBlackCache(DnBMatchContext context);
-
-    List<DnBBlackCache> batchAddBlackCache(List<DnBMatchContext> contexts);
 }

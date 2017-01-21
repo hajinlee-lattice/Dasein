@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -73,7 +73,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         context.setInputNameLocation(nameLocation);
 
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+        DnBCache whiteCache = dnbCacheService.lookupCache(context);
         Assert.assertTrue(whiteCache == null);
 
     }
@@ -91,7 +91,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocationService.normalize(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+        DnBCache whiteCache = dnbCacheService.lookupCache(context);
 
         Assert.assertTrue(whiteCache != null);
         Assert.assertEquals(whiteCache.getDuns(), "039891115");
@@ -135,7 +135,7 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         nameLocationService.normalize(nameLocation);
         context.setInputNameLocation(nameLocation);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
+        DnBCache whiteCache = dnbCacheService.lookupCache(context);
 
         Assert.assertTrue(whiteCache != null);
         Assert.assertEquals(whiteCache.getDuns(), "149259751");

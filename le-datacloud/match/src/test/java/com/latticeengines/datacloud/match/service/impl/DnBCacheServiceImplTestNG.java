@@ -12,9 +12,9 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
+import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -25,9 +25,9 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
     @Autowired
     private DnBCacheService dnbCacheService;
 
-    private List<DnBWhiteCache> whiteCaches = new ArrayList<DnBWhiteCache>();
+    private List<DnBCache> whiteCaches = new ArrayList<DnBCache>();
 
-    private List<DnBBlackCache> blackCaches = new ArrayList<DnBBlackCache>();
+    private List<DnBCache> blackCaches = new ArrayList<DnBCache>();
 
     @AfterClass(groups = "functional", enabled = true)
     public void afterClass() {
@@ -36,12 +36,12 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
 
     private void deleteEntities() {
         Assert.assertTrue(!whiteCaches.isEmpty());
-        for (DnBWhiteCache whiteCache : whiteCaches) {
-            dnbCacheService.getWhiteCacheMgr().delete(whiteCache);
+        for (DnBCache whiteCache : whiteCaches) {
+            dnbCacheService.getCacheMgr().delete(whiteCache);
         }
         Assert.assertTrue(!blackCaches.isEmpty());
-        for (DnBBlackCache blackCache : blackCaches) {
-            dnbCacheService.getBlackCacheMgr().delete(blackCache);
+        for (DnBCache blackCache : blackCaches) {
+            dnbCacheService.getCacheMgr().delete(blackCache);
         }
     }
     
@@ -65,15 +65,15 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         entityContext.setConfidenceCode((Integer) data[0][8]);
         entityContext.setMatchGrade((String) data[0][9]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        whiteCaches.add(dnbCacheService.addWhiteCache(entityContext));
+        entityContext.setDnbCode(DnBReturnCode.OK);
+        whiteCaches.add(dnbCacheService.addCache(entityContext));
         
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setDuns((String) data[0][7]);
-        emailContext.setConfidenceCode((Integer) data[0][8]);
-        emailContext.setMatchGrade((String) data[0][9]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        whiteCaches.add(dnbCacheService.addWhiteCache(emailContext));
+        emailContext.setDnbCode(DnBReturnCode.OK);
+        whiteCaches.add(dnbCacheService.addCache(emailContext));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWhiteCache", enabled = true)
@@ -94,9 +94,10 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.setConfidenceCode((Integer) data[i][8]);
             entityContext.setMatchGrade((String) data[i][9]);
             entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
+            entityContext.setDnbCode(DnBReturnCode.OK);
             entityContexts.add(entityContext);
         }
-        whiteCaches.addAll(dnbCacheService.batchAddWhiteCache(entityContexts));
+        whiteCaches.addAll(dnbCacheService.batchAddCache(entityContexts));
 
         List<DnBMatchContext> emailContexts = new ArrayList<DnBMatchContext>();
         for (int i = 0; i < data.length - 1; i++) {
@@ -106,9 +107,10 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             emailContext.setConfidenceCode((Integer) data[i][8]);
             emailContext.setMatchGrade((String) data[i][9]);
             emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
+            emailContext.setDnbCode(DnBReturnCode.OK);
             emailContexts.add(emailContext);
         }
-        whiteCaches.addAll(dnbCacheService.batchAddWhiteCache(emailContexts));
+        whiteCaches.addAll(dnbCacheService.batchAddCache(emailContexts));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateWhiteCache",
@@ -124,7 +126,7 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         entityContext.getInputNameLocation().setPhoneNumber((String) data[0][4]);
         entityContext.getInputNameLocation().setZipcode((String) data[0][5]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(entityContext);
+        DnBCache whiteCache = dnbCacheService.lookupCache(entityContext);
         Assert.assertEquals(whiteCache.getDuns(), (String) data[0][7]);
         Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[0][8]);
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[0][9]);
@@ -132,10 +134,8 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        whiteCache = dnbCacheService.lookupWhiteCache(emailContext);
+        whiteCache = dnbCacheService.lookupCache(emailContext);
         Assert.assertEquals(whiteCache.getDuns(), (String) data[0][7]);
-        Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[0][8]);
-        Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[0][9]);
 
         // cache miss
         entityContext = new DnBMatchContext();
@@ -146,12 +146,12 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         entityContext.getInputNameLocation().setPhoneNumber((String) data[data.length - 1][4]);
         entityContext.getInputNameLocation().setZipcode((String) data[data.length - 1][5]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        Assert.assertNull(dnbCacheService.lookupWhiteCache(entityContext));
+        Assert.assertNull(dnbCacheService.lookupCache(entityContext));
 
         emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[data.length - 1][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        Assert.assertNull(dnbCacheService.lookupWhiteCache(emailContext));
+        Assert.assertNull(dnbCacheService.lookupCache(emailContext));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateWhiteCache",
@@ -170,10 +170,10 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.put(String.valueOf(i), entityContext);
         }
-        Map<String, DnBWhiteCache> whiteCaches = dnbCacheService.batchLookupWhiteCache(entityContexts);
+        Map<String, DnBCache> whiteCaches = dnbCacheService.batchLookupCache(entityContexts);
         Assert.assertEquals(whiteCaches.size(), data.length - 2);
         for (int i = 1; i < data.length - 1; i++) {
-            DnBWhiteCache whiteCache = whiteCaches.get(String.valueOf(i));
+            DnBCache whiteCache = whiteCaches.get(String.valueOf(i));
             Assert.assertNotNull(whiteCache);
             Assert.assertEquals(whiteCache.getDuns(), (String) data[i][7]);
             Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[i][8]);
@@ -188,14 +188,12 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
             emailContexts.put(String.valueOf(i), emailContext);
         }
-        whiteCaches = dnbCacheService.batchLookupWhiteCache(emailContexts);
+        whiteCaches = dnbCacheService.batchLookupCache(emailContexts);
         Assert.assertEquals(whiteCaches.size(), data.length - 2);
         for (int i = 1; i < data.length - 1; i++) {
-            DnBWhiteCache whiteCache = whiteCaches.get(String.valueOf(i));
+            DnBCache whiteCache = whiteCaches.get(String.valueOf(i));
             Assert.assertNotNull(whiteCache);
             Assert.assertEquals(whiteCache.getDuns(), (String) data[i][7]);
-            Assert.assertEquals(whiteCache.getConfidenceCode(), (Integer) data[i][8]);
-            Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), (String) data[i][9]);
         }
         Assert.assertTrue(!whiteCaches.containsKey(String.valueOf(data.length - 1)));
     }
@@ -217,12 +215,14 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         nameLocation.setZipcode((String) data[0][5]);
         entityContext.setInputNameLocation(nameLocation);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        blackCaches.add(dnbCacheService.addBlackCache(entityContext));
+        entityContext.setDnbCode(DnBReturnCode.UNMATCH);
+        blackCaches.add(dnbCacheService.addCache(entityContext));
 
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        blackCaches.add(dnbCacheService.addBlackCache(emailContext));
+        emailContext.setDnbCode(DnBReturnCode.UNMATCH);
+        blackCaches.add(dnbCacheService.addCache(emailContext));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateBlackCache", enabled = true)
@@ -240,18 +240,20 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             nameLocation.setZipcode((String) data[i][5]);
             entityContext.setInputNameLocation(nameLocation);
             entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
+            entityContext.setDnbCode(DnBReturnCode.UNMATCH);
             entityContexts.add(entityContext);
         }
-        blackCaches.addAll(dnbCacheService.batchAddBlackCache(entityContexts));
+        blackCaches.addAll(dnbCacheService.batchAddCache(entityContexts));
 
         List<DnBMatchContext> emailContexts = new ArrayList<DnBMatchContext>();
         for (int i = 0; i < data.length - 1; i++) {
             DnBMatchContext emailContext = new DnBMatchContext();
             emailContext.setInputEmail((String) data[i][6]);
             emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
+            emailContext.setDnbCode(DnBReturnCode.UNMATCH);
             emailContexts.add(emailContext);
         }
-        blackCaches.addAll(dnbCacheService.batchAddBlackCache(emailContexts));
+        blackCaches.addAll(dnbCacheService.batchAddCache(emailContexts));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateBlackCache",
@@ -267,13 +269,13 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         entityContext.getInputNameLocation().setPhoneNumber((String) data[0][4]);
         entityContext.getInputNameLocation().setZipcode((String) data[0][5]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(entityContext);
+        DnBCache blackCache = dnbCacheService.lookupCache(entityContext);
         Assert.assertNotNull(blackCache);
 
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        blackCache = dnbCacheService.lookupBlackCache(emailContext);
+        blackCache = dnbCacheService.lookupCache(emailContext);
         Assert.assertNotNull(blackCache);
 
         // cache miss
@@ -285,12 +287,12 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
         entityContext.getInputNameLocation().setPhoneNumber((String) data[data.length - 1][4]);
         entityContext.getInputNameLocation().setZipcode((String) data[data.length - 1][5]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        Assert.assertNull(dnbCacheService.lookupBlackCache(entityContext));
+        Assert.assertNull(dnbCacheService.lookupCache(entityContext));
 
         emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[data.length - 1][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
-        Assert.assertNull(dnbCacheService.lookupBlackCache(emailContext));
+        Assert.assertNull(dnbCacheService.lookupCache(emailContext));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateBlackCache",
@@ -309,10 +311,10 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
             entityContexts.put(String.valueOf(i), entityContext);
         }
-        Map<String, DnBBlackCache> blackCaches = dnbCacheService.batchLookupBlackCache(entityContexts);
+        Map<String, DnBCache> blackCaches = dnbCacheService.batchLookupCache(entityContexts);
         Assert.assertEquals(blackCaches.size(), data.length - 2);
         for (int i = 1; i < data.length - 1; i++) {
-            DnBBlackCache blackCache = blackCaches.get(String.valueOf(i));
+            DnBCache blackCache = blackCaches.get(String.valueOf(i));
             Assert.assertNotNull(blackCache);
         }
         Assert.assertTrue(!blackCaches.containsKey(String.valueOf(data.length - 1)));
@@ -324,10 +326,10 @@ public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBas
             emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
             emailContexts.put(String.valueOf(i), emailContext);
         }
-        blackCaches = dnbCacheService.batchLookupBlackCache(emailContexts);
+        blackCaches = dnbCacheService.batchLookupCache(emailContexts);
         Assert.assertEquals(blackCaches.size(), data.length - 2);
         for (int i = 1; i < data.length - 1; i++) {
-            DnBBlackCache blackCache = blackCaches.get(String.valueOf(i));
+            DnBCache blackCache = blackCaches.get(String.valueOf(i));
             Assert.assertNotNull(blackCache);
         }
         Assert.assertTrue(!blackCaches.containsKey(String.valueOf(data.length - 1)));

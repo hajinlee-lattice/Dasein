@@ -13,6 +13,7 @@ import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public abstract class MatchCache<T> implements FabricEntity<T> {
@@ -21,6 +22,7 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
 
     private static final String KEY = "Key";
     private static final String CACHE_CONTEXT = "CacheContext";
+    private static final String TIMESTAMP = "Timestamp";
     private static final String UNKNOWN = "NULL";
 
     private Map<String, String> keyTokenValues = new TreeMap<String, String>();
@@ -39,6 +41,10 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
 
     @JsonProperty(CACHE_CONTEXT)
     private Map<String, Object> cacheContext;
+
+    @DynamoAttribute(TIMESTAMP)
+    @JsonProperty(TIMESTAMP)
+    private Long timestamp;
 
     public String buildId() {
         StringBuilder sb = new StringBuilder();
@@ -136,4 +142,14 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
     public void setKeyTokenValues(Map<String, String> keyTokenValues) {
         this.keyTokenValues = keyTokenValues;
     }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+
 }

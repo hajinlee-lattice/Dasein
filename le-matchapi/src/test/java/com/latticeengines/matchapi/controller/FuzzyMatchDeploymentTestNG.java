@@ -45,7 +45,7 @@ import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 @Component
 public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(FuzzyMatchDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(FuzzyMatchDeploymentTestNG.class);;
 
     private static final String invalidDomain = "abcdefghijklmn.com";
     private static final String podId = "FuzzyMatchDeploymentTestNG";
@@ -138,7 +138,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "bulkCatchScenarios", enabled = true)
+    @Test(groups = "deployment", dataProvider = "bulkCatchScenarios", enabled = false)
     public void testBulkMatchWithCache(String scenario) {
         MatchInput input = prepareBulkMatchInput(scenario, true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
@@ -163,8 +163,8 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     @DataProvider(name = "bulkCatchScenarios")
     private Iterator<Object[]> bulkCatchScenarios() {
         String[] scenarios = { SCENARIO_VALIDLOCATION, SCENARIO_VALIDLOCATION_INVALIDDOMAIN, SCENARIO_WITHOUT_NAME,
-                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_INCOMPLETELOCATION,
-                SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
+                SCENARIO_WITHOUT_COUNTRY, SCENARIO_WITHOUT_STATE, SCENARIO_WITHOUT_CITY, SCENARIO_WITHOUT_STATE_CITY,
+                SCENARIO_INCOMPLETELOCATION, SCENARIO_NAME_PHONE, SCENARIO_NAME_ZIPCODE };
         List<Object[]> objs = new ArrayList<>();
         for (String scenario : scenarios) {
             objs.add(new Object[] { scenario });

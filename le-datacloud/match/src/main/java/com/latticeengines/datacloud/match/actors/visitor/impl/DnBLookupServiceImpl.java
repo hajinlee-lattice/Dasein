@@ -20,10 +20,9 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest
 import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.metric.DnBMatchHistory;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
@@ -82,35 +81,36 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         MatchTraveler traveler = request.getMatchTravelerContext();
         if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
-            DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
-            if (whiteCache != null) {
-                if (isValidDuns(whiteCache.getDuns(), traveler.getDataCloudVersion())) {
-                    context.copyResultFromWhiteCache(whiteCache);
-                    dnbMatchResultValidator.validate(context);
+            DnBCache cache = dnbCacheService.lookupCache(context);
+            if (cache != null) {
+                if (cache.isWhiteCache()) {
+                    if (isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                        context.copyResultFromCache(cache);
+                        dnbMatchResultValidator.validate(context);
+                        context.setDuration(System.currentTimeMillis() - startTime);
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format(
+                                    "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                                    context.getLookupRequestId(), context.getDnbCode().getMessage(),
+                                    context.getDuration()));
+                        }
+                        return context;
+                    } else {
+                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS=" + cache.getDuns());
+                        dnbCacheService.removeCache(cache);
+                    }
+                } else {
+                    context.copyResultFromCache(cache);
                     context.setDuration(System.currentTimeMillis() - startTime);
                     if (log.isDebugEnabled()) {
                         log.debug(String.format(
-                                "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                                "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
                                 context.getLookupRequestId(), context.getDnbCode().getMessage(),
                                 context.getDuration()));
                     }
                     return context;
-                } else {
-                    log.info("Remove invalid white cache: Id= " + whiteCache.getId() + " DUNS="
-                            + whiteCache.getDuns());
-                    dnbCacheService.removeWhiteCache(whiteCache);
                 }
-            }
-            DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
-            if (blackCache != null) {
-                context.copyResultFromBlackCache(blackCache);
-                context.setDuration(System.currentTimeMillis() - startTime);
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format(
-                            "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
-                }
-                return context;
+
             }
         }
         if (traveler.isUseRemoteDnB()) {
@@ -144,53 +144,56 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setLogDnBBulkResult(traveler.getLogDnBBulkResult());
         if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
-            DnBWhiteCache whiteCache = dnbCacheService.lookupWhiteCache(context);
-            if (whiteCache != null) {
-                if (isValidDuns(whiteCache.getDuns(), traveler.getDataCloudVersion())) {
-                    context.copyResultFromWhiteCache(whiteCache);
-                    dnbMatchResultValidator.validate(context);
+            DnBCache cache = dnbCacheService.lookupCache(context);
+            if (cache != null) {
+                if (cache.isWhiteCache()) {
+                    if (isValidDuns(cache.getDuns(), traveler.getDataCloudVersion())) {
+                        context.copyResultFromCache(cache);
+                        dnbMatchResultValidator.validate(context);
+                        context.setDuration(System.currentTimeMillis() - startTime);
+                        sendResponse(lookupRequestId, context, returnAddress);
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format(
+                                    "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
+                                    context.getLookupRequestId(), context.getDnbCode().getMessage(),
+                                    context.getDuration()));
+                        } else if (context.getLogDnBBulkResult()) {
+                            log.info(String.format(
+                                    "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
+                                    context.getInputNameLocation().getName(),
+                                    context.getInputNameLocation().getCountry(),
+                                    context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
+                                    context.getInputNameLocation().getZipcode(),
+                                    context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
+                                    context.getConfidenceCode(), context.getMatchGrade().getRawCode()));
+                        }
+                        return;
+                    } else {
+                        log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS=" + cache.getDuns());
+                        dnbCacheService.removeCache(cache);
+                    }
+                } else {
+                    context.copyResultFromCache(cache);
                     context.setDuration(System.currentTimeMillis() - startTime);
                     sendResponse(lookupRequestId, context, returnAddress);
                     if (log.isDebugEnabled()) {
                         log.debug(String.format(
-                                "Found DnB match context for request %s in white cache: Status = %s, Duration = %d",
-                                context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                                "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
+                                context.getLookupRequestId(), context.getDnbCode().getMessage(),
+                                context.getDuration()));
                     } else if (context.getLogDnBBulkResult()) {
                         log.info(String.format(
-                                "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
+                                "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
+                                        + "ZipCode = %s, PhoneNumber = %s",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
-                                context.getInputNameLocation().getPhoneNumber(), context.getDuns(),
-                                context.getConfidenceCode(), context.getMatchGrade().getRawCode()));
+                                context.getInputNameLocation().getPhoneNumber()));
                     }
                     return;
-                } else {
-                    log.info("Remove invalid white cache: Id= " + whiteCache.getId() + " DUNS="
-                            + whiteCache.getDuns());
-                    dnbCacheService.removeWhiteCache(whiteCache);
                 }
-            }
-            DnBBlackCache blackCache = dnbCacheService.lookupBlackCache(context);
-            if (blackCache != null) {
-                context.copyResultFromBlackCache(blackCache);
-                context.setDuration(System.currentTimeMillis() - startTime);
-                sendResponse(lookupRequestId, context, returnAddress);
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format(
-                            "Found DnB match context for request %s in black cache: Status = %s, Duration = %d",
-                            context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
-                } else if (context.getLogDnBBulkResult()) {
-                    log.info(String.format(
-                            "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                    + "ZipCode = %s, PhoneNumber = %s",
-                            context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
-                            context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
-                            context.getInputNameLocation().getZipcode(),
-                            context.getInputNameLocation().getPhoneNumber()));
-                }
-                return;
+
             }
         }
 

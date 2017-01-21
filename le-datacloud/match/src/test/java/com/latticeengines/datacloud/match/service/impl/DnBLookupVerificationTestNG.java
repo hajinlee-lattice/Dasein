@@ -66,8 +66,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
-        // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME);
-        prepareFortune1000InputData(FORTUNE1000_FILENAME);
+        // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME, true, true);
+        prepareFortune1000InputData(FORTUNE1000_FILENAME, false, false);
         // Submit to DnB bulk match
         DnBBatchMatchContext batchContext = prepareBulkMatchInput();
         batchContext = dnBBulkLookupDispatcher.sendRequest(batchContext);
@@ -194,7 +194,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         return batchContext;
     }
 
-    private void prepareFortune1000InputData(String fileName) {
+    private void prepareFortune1000InputData(String fileName, boolean includeState, boolean includeCity) {
         try {
             contextsRealtime = new HashMap<String, DnBMatchContext>();
             contextsBulk = new HashMap<String, DnBMatchContext>();
@@ -210,10 +210,16 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 String countryCode = countryCodeService.getCountryCode(country);
                 String name = record.get(0);
                 name = StringUtils.getStandardString(name);
-                String state = record.get(FORTUNE1000_STATE);
-                state = LocationUtils.getStandardState(country, state);
-                String city = record.get(FORTUNE1000_CITY);
-                city = StringUtils.getStandardString(city);
+                String state = null;
+                if (includeState) {
+                    state = record.get(FORTUNE1000_STATE);
+                    state = LocationUtils.getStandardState(country, state);
+                }
+                String city = null;
+                if (includeCity) {
+                    city = record.get(FORTUNE1000_CITY);
+                    city = StringUtils.getStandardString(city);
+                }
                 if (name != null && countryCode != null) {
                     MatchKeyTuple input = new MatchKeyTuple();
                     input.setCountry(country);

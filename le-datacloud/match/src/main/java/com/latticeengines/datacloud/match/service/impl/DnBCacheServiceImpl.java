@@ -12,14 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.datacloud.match.dnb.DnBBlackCache;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
-import com.latticeengines.datacloud.match.entitymgr.DnBBlackCacheEntityMgr;
-import com.latticeengines.datacloud.match.entitymgr.DnBWhiteCacheEntityMgr;
-import com.latticeengines.datacloud.match.entitymgr.impl.DnBBlackCacheEntityMgrImpl;
-import com.latticeengines.datacloud.match.entitymgr.impl.DnBWhiteCacheEntityMgrImpl;
+import com.latticeengines.datacloud.match.entitymgr.DnBCacheEntityMgr;
+import com.latticeengines.datacloud.match.entitymgr.impl.DnBCacheEntityMgrImpl;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
@@ -32,9 +29,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     @Value("${datacloud.dnb.cache.version}")
     private String cacheVersion;
 
-    private Map<String, DnBWhiteCacheEntityMgr> whiteCacheEntityMgrs = new HashMap<String, DnBWhiteCacheEntityMgr>();
-
-    private Map<String, DnBBlackCacheEntityMgr> blackCacheEntityMgrs = new HashMap<String, DnBBlackCacheEntityMgr>();
+    private Map<String, DnBCacheEntityMgr> cacheEntityMgrs = new HashMap<String, DnBCacheEntityMgr>();
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -45,25 +40,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     @Autowired
     private FabricDataService dataService;
 
-    public void addCache(DnBMatchContext context) {
-        if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
-            addWhiteCache(context);
-        }
-        if ((context.getMatchStrategy() == DnBMatchContext.DnBMatchStrategy.ENTITY
-                || context.getMatchStrategy() == DnBMatchContext.DnBMatchStrategy.EMAIL)
-                && context.getDnbCode() == DnBReturnCode.UNMATCH) {
-            addBlackCache(context);
-        }
-    }
-
-    /*********************************
-     * White Cache
-     *********************************/
-
     @Override
-    public DnBWhiteCache lookupWhiteCache(DnBMatchContext context) {
-        DnBWhiteCache input = initWhiteCacheEntity(context, true);
-        DnBWhiteCache output = getWhiteCacheMgr().findByKey(input);
+    public DnBCache lookupCache(DnBMatchContext context) {
+        DnBCache input = initCacheEntity(context, true);
+        DnBCache output = getCacheMgr().findByKey(input);
         if (output != null) {
             output.parseCacheContext();
         }
@@ -71,18 +51,18 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     }
 
     @Override
-    public Map<String, DnBWhiteCache> batchLookupWhiteCache(Map<String, DnBMatchContext> contexts) {
+    public Map<String, DnBCache> batchLookupCache(Map<String, DnBMatchContext> contexts) {
         List<String> keys = new ArrayList<String>();
         List<String> lookupRequestIds = new ArrayList<String>();
         for (String lookupRequestId : contexts.keySet()) {
-            DnBWhiteCache input = initWhiteCacheEntity(contexts.get(lookupRequestId), true);
+            DnBCache input = initCacheEntity(contexts.get(lookupRequestId), true);
             keys.add(input.getId());
             lookupRequestIds.add(lookupRequestId);
         }
-        List<DnBWhiteCache> outputs = getWhiteCacheMgr().batchFindByKey(keys);
-        Map<String, DnBWhiteCache> result = new HashMap<String, DnBWhiteCache>();
+        List<DnBCache> outputs = getCacheMgr().batchFindByKey(keys);
+        Map<String, DnBCache> result = new HashMap<String, DnBCache>();
         for (int i = 0; i < outputs.size(); i++) {
-            DnBWhiteCache output = outputs.get(i);
+            DnBCache output = outputs.get(i);
             if (output != null) {
                 output.parseCacheContext();
                 result.put(lookupRequestIds.get(i), output);
@@ -92,172 +72,98 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     }
 
     @Override
-    public DnBWhiteCache addWhiteCache(DnBMatchContext context) {
-        DnBWhiteCache cache = initWhiteCacheEntity(context, false);
-        getWhiteCacheMgr().create(cache);
-        log.info("Added Id=" + cache.getId() + " to white cache.");
+    public DnBCache addCache(DnBMatchContext context) {
+        DnBCache cache = null;
+        if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
+            cache = initCacheEntity(context, false);
+        } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
+            cache = initCacheEntity(context, true);
+        } else {
+            return cache;
+        }
+        getCacheMgr().create(cache);
+        log.info(String.format("Added Id = %s to %s cache", cache.getId(), cache.isWhiteCache() ? "white" : "black"));
         return cache;
     }
 
     @Override
-    public List<DnBWhiteCache> batchAddWhiteCache(List<DnBMatchContext> contexts) {
-        List<DnBWhiteCache> caches = new ArrayList<DnBWhiteCache>();
-        for(DnBMatchContext context : contexts) {
-            DnBWhiteCache cache = initWhiteCacheEntity(context, false);
-            caches.add(cache);
-            log.info("Added Id=" + cache.getId() + " to white cache.");
-        }
-        getWhiteCacheMgr().batchCreate(caches);
-        return caches;
-    }
-
-    @Override
-    public void removeWhiteCache(DnBWhiteCache cache) {
-        getWhiteCacheMgr().delete(cache);
-        log.info("Removed Id=" + cache.getId() + " from white cache.");
-    }
-
-    @Override
-    public DnBWhiteCacheEntityMgr getWhiteCacheMgr() {
-        DnBWhiteCacheEntityMgr whiteCacheEntityMgr = whiteCacheEntityMgrs.get(cacheVersion);
-        if (whiteCacheEntityMgr == null)
-            whiteCacheEntityMgr = getWhiteCacheMgrSync();
-        return whiteCacheEntityMgr;
-    }
-
-    private synchronized DnBWhiteCacheEntityMgr getWhiteCacheMgrSync() {
-        DnBWhiteCacheEntityMgr whiteCacheEntityMgr = whiteCacheEntityMgrs.get(cacheVersion);
-
-        if (whiteCacheEntityMgr == null) {
-            DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(cacheVersion);
-            if (dataCloudVersion == null) {
-                throw new IllegalArgumentException("Cannot find the specified data cloud version " + cacheVersion);
-            }
-            log.info("Use " + cacheVersion + " as full version of DnBWhiteCache for " + cacheVersion);
-            whiteCacheEntityMgr = new DnBWhiteCacheEntityMgrImpl(messageService, dataService, cacheVersion);
-            whiteCacheEntityMgr.init();
-            whiteCacheEntityMgrs.put(cacheVersion, whiteCacheEntityMgr);
-        }
-
-        return whiteCacheEntityMgr;
-    }
-
-    private DnBWhiteCache initWhiteCacheEntity(DnBMatchContext context, boolean lookup) {
-        switch (context.getMatchStrategy()) {
-        case ENTITY:
-            if (lookup) {
-                return new DnBWhiteCache(context.getInputNameLocation());
-            } else {
-                return new DnBWhiteCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation());
-            }
-        case EMAIL:
-            if (lookup) {
-                return new DnBWhiteCache(context.getInputEmail());
-            } else {
-                return new DnBWhiteCache(context.getInputEmail(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade());
-            }
-        case BATCH:
-            if (lookup) {
-                return new DnBWhiteCache(context.getInputNameLocation());
-            } else {
-                return new DnBWhiteCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
-                        context.getMatchGrade(), context.getMatchedNameLocation());
-            }
-        default:
-            throw new UnsupportedOperationException("DnBWhiteCache.CacheType " + context.getMatchStrategy().name()
-                    + " is supported in DnB white cache lookup");
-        }
-    }
-
-    /*********************************
-     * Black Cache
-     *********************************/
-
-    @Override
-    public DnBBlackCache lookupBlackCache(DnBMatchContext context) {
-        DnBBlackCache input = initBlackCacheEntity(context);
-        DnBBlackCache output = getBlackCacheMgr().findByKey(input);
-        return output;
-    }
-
-    @Override
-    public Map<String, DnBBlackCache> batchLookupBlackCache(Map<String, DnBMatchContext> contexts) {
-        List<String> keys = new ArrayList<String>();
-        List<String> lookupRequestIds = new ArrayList<String>();
-        for (String lookupRequestId : contexts.keySet()) {
-            DnBBlackCache input = initBlackCacheEntity(contexts.get(lookupRequestId));
-            keys.add(input.getId());
-            lookupRequestIds.add(lookupRequestId);
-        }
-        List<DnBBlackCache> outputs = getBlackCacheMgr().batchFindByKey(keys);
-        Map<String, DnBBlackCache> result = new HashMap<String, DnBBlackCache>();
-        for (int i = 0; i < outputs.size(); i++) {
-            DnBBlackCache output = outputs.get(i);
-            if (output != null) {
-                result.put(lookupRequestIds.get(i), output);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public DnBBlackCache addBlackCache(DnBMatchContext context) {
-        DnBBlackCache cache = initBlackCacheEntity(context);
-        getBlackCacheMgr().create(cache);
-        log.info("Added Id=" + cache.getId() + " to black cache.");
-        return cache;
-    }
-
-    @Override
-    public List<DnBBlackCache> batchAddBlackCache(List<DnBMatchContext> contexts) {
-        List<DnBBlackCache> caches = new ArrayList<DnBBlackCache>();
+    public List<DnBCache> batchAddCache(List<DnBMatchContext> contexts) {
+        List<DnBCache> caches = new ArrayList<DnBCache>();
         for (DnBMatchContext context : contexts) {
-            DnBBlackCache cache = initBlackCacheEntity(context);
+            DnBCache cache = null;
+            if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
+                cache = initCacheEntity(context, false);
+            } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
+                cache = initCacheEntity(context, true);
+            } else {
+                continue;
+            }
             caches.add(cache);
-            log.info("Added Id=" + cache.getId() + " to black cache.");
+            log.info(String.format("Added Id = %s to %s cache", cache.getId(),
+                    cache.isWhiteCache() ? "white" : "black"));
         }
-        getBlackCacheMgr().batchCreate(caches);
+        getCacheMgr().batchCreate(caches);
         return caches;
     }
 
     @Override
-    public DnBBlackCacheEntityMgr getBlackCacheMgr() {
-        DnBBlackCacheEntityMgr blackCacheEntityMgr = blackCacheEntityMgrs.get(cacheVersion);
-        if (blackCacheEntityMgr == null)
-            blackCacheEntityMgr = getBlackCacheMgrSync();
-        return blackCacheEntityMgr;
+    public void removeCache(DnBCache cache) {
+        getCacheMgr().delete(cache);
+        log.info("Removed Id=" + cache.getId() + " from cache.");
     }
 
-    private synchronized DnBBlackCacheEntityMgr getBlackCacheMgrSync() {
-        DnBBlackCacheEntityMgr blackCacheEntityMgr = blackCacheEntityMgrs.get(cacheVersion);
+    @Override
+    public DnBCacheEntityMgr getCacheMgr() {
+        DnBCacheEntityMgr cacheEntityMgr = cacheEntityMgrs.get(cacheVersion);
+        if (cacheEntityMgr == null)
+            cacheEntityMgr = getCacheMgrSync();
+        return cacheEntityMgr;
+    }
 
-        if (blackCacheEntityMgr == null) {
+    private synchronized DnBCacheEntityMgr getCacheMgrSync() {
+        DnBCacheEntityMgr cacheEntityMgr = cacheEntityMgrs.get(cacheVersion);
+
+        if (cacheEntityMgr == null) {
             DataCloudVersion dataCloudVersion = versionEntityMgr.findVersion(cacheVersion);
             if (dataCloudVersion == null) {
                 throw new IllegalArgumentException("Cannot find the specified data cloud version " + cacheVersion);
             }
-            log.info("Use " + cacheVersion + " as full version of DnBBlackCache for " + cacheVersion);
-            blackCacheEntityMgr = new DnBBlackCacheEntityMgrImpl(messageService, dataService, cacheVersion);
-            blackCacheEntityMgr.init();
-            blackCacheEntityMgrs.put(cacheVersion, blackCacheEntityMgr);
+            log.info("Use " + cacheVersion + " as full version of DnBCache for " + cacheVersion);
+            cacheEntityMgr = new DnBCacheEntityMgrImpl(messageService, dataService, cacheVersion);
+            cacheEntityMgr.init();
+            cacheEntityMgrs.put(cacheVersion, cacheEntityMgr);
         }
 
-        return blackCacheEntityMgr;
+        return cacheEntityMgr;
     }
 
-    private DnBBlackCache initBlackCacheEntity(DnBMatchContext context) {
+    private DnBCache initCacheEntity(DnBMatchContext context, boolean noMatchedContext) {
         switch (context.getMatchStrategy()) {
         case ENTITY:
-            return new DnBBlackCache(context.getInputNameLocation());
+            if (noMatchedContext) {
+                return new DnBCache(context.getInputNameLocation());
+            } else {
+                return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
+                        context.getMatchGrade(), context.getMatchedNameLocation());
+            }
         case EMAIL:
-            return new DnBBlackCache(context.getInputEmail());
+            if (noMatchedContext) {
+                return new DnBCache(context.getInputEmail());
+            } else {
+                return new DnBCache(context.getInputEmail(), context.getDuns());
+            }
         case BATCH:
-            return new DnBBlackCache(context.getInputNameLocation());
+            if (noMatchedContext) {
+                return new DnBCache(context.getInputNameLocation());
+            } else {
+                return new DnBCache(context.getInputNameLocation(), context.getDuns(), context.getConfidenceCode(),
+                        context.getMatchGrade(), context.getMatchedNameLocation());
+            }
         default:
-            throw new UnsupportedOperationException("DnBBlackCache.CacheType " + context.getMatchStrategy().name()
-                    + " is supported in DnB black cache lookup");
+            throw new UnsupportedOperationException(
+                    "DnBCache.CacheType " + context.getMatchStrategy().name() + " is supported in DnB cache lookup");
         }
     }
+
+
 }

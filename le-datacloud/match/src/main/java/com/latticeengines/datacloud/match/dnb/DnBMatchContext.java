@@ -55,23 +55,23 @@ public class DnBMatchContext implements Fact, Dimension {
         matchedNameLocation = result.getMatchedNameLocation();
     }
 
-    public void copyResultFromWhiteCache(DnBWhiteCache whiteCache) {
-        duns = whiteCache.getDuns();
-        dnbCode = DnBReturnCode.OK;
-        confidenceCode = whiteCache.getConfidenceCode();
-        matchGrade = whiteCache.getMatchGrade();
-        cacheId = whiteCache.getId();
-        matchedNameLocation = whiteCache.getMatchedNameLocation();
-        hitWhiteCache = true;
-    }
-
-    public void copyResultFromBlackCache(DnBBlackCache blackCache) {
-        duns = null;
-        dnbCode = DnBReturnCode.UNMATCH;
-        cacheId = blackCache.getId();
-        confidenceCode = null;
-        matchGrade = null;
-        hitBlackCache = true;
+    public void copyResultFromCache(DnBCache cache) {
+        if (cache.isWhiteCache()) {
+            duns = cache.getDuns();
+            dnbCode = DnBReturnCode.OK;
+            confidenceCode = cache.getConfidenceCode();
+            matchGrade = cache.getMatchGrade();
+            cacheId = cache.getId();
+            matchedNameLocation = cache.getMatchedNameLocation();
+            hitWhiteCache = true;
+        } else {
+            duns = null;
+            dnbCode = DnBReturnCode.UNMATCH;
+            cacheId = cache.getId();
+            confidenceCode = null;
+            matchGrade = null;
+            hitBlackCache = true;
+        }
     }
 
     @MetricFieldGroup

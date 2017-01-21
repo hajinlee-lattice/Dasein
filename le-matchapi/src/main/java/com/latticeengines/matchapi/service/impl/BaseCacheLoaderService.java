@@ -36,8 +36,9 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
+import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBWhiteCache;
+import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DnBCacheService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -108,7 +109,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         defaultFieldMap.put("LDC_PhoneNumber", "phoneNumber");
     }
     protected static String defaultDunsField = "LDC_DUNS";
-    protected static String defaultMatchGrade = "AAAAAAAAA";
+    protected static String defaultMatchGrade = "AAAAAAAAAAA";
     protected static int defaultConfidenceCode = 10;
 
     @Override
@@ -313,6 +314,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchContext.setMatchGrade(defaultMatchGrade);
         }
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
+        matchContext.setDnbCode(DnBReturnCode.OK);
     }
 
     private void setFieldValues(E record, NameLocation nameLocation, CacheLoaderConfig config) {
@@ -378,7 +380,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                     return callMatchSync(config, matchContexts, records, recordStart);
                 }
 
-                List<DnBWhiteCache> caches = dnbCacheService.batchAddWhiteCache(matchContexts);
+                List<DnBCache> caches = dnbCacheService.batchAddCache(matchContexts);
                 log.info("Finished loading cache! record start=" + recordStart + " batch size=" + records.size()
                         + " cache size=" + matchContexts.size() + " returned size=" + caches.size());
                 return caches.size();
