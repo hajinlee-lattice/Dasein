@@ -104,7 +104,7 @@ def ecs_metadata(ec2, ecscluster, efs):
                             "rm -rf /etc/ecs/ecs.config\n",
                             "touch /etc/ecs/ecs.config\n",
                             "echo ECS_CLUSTER=", ecscluster.ref(), " >> /etc/ecs/ecs.config\n",
-                            "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\"] >> /etc/ecs/ecs.config\n",
+                            "echo ECS_AVAILABLE_LOGGING_DRIVERS=[\\\"json-file\\\", \\\"awslogs\\\",\\\"splunk\\\"] >> /etc/ecs/ecs.config\n",
                             "echo ECS_RESERVED_PORTS=[22] >> /etc/ecs/ecs.config\n"
                         ] ] }
                     },
