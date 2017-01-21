@@ -38,7 +38,6 @@ class Sampling(EntityBase):
         super(Sampling, self).__init__('samplingconfigs/')
         self._config['name'] = name
         self._config['sampling_property_defs'] = []
-        self.setProperty('model.sampling.test.percentage', ['100', '80', '20'])
 
     def setName(self, name):
         self._config['name'] = name

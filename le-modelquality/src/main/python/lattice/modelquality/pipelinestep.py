@@ -38,7 +38,11 @@ class PipelineStep(EntityBase):
         self._config['ColumnTransformFilePath'] = name + '.py'
 
     def setName(self, name):
+        i = name.rfind('.py')
+        if( i != -1 ):
+            name = name[:i]
         self._config['Name'] = name
+        self._config['ColumnTransformFilePath'] = name + '.py'
 
     def getName(self):
         return self._config['Name']
@@ -87,7 +91,7 @@ class PipelineStep(EntityBase):
         return self._config['OperatesOnColumns']
 
     def setColumnTransformFilePath(self, columnTransformFilePath):
-        self._config['ColumnTransformFilePath'] = columnTransformFilePath
+        self.setName(columnTransformFilePath)
 
     def getColumnTransformFilePath(self):
         return self._config['ColumnTransformFilePath']
