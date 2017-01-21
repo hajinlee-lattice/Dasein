@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -40,8 +41,9 @@ public class PropDataEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         propDataEntityMgr.create(propData);
 
         List<PropData> propDatas = propDataEntityMgr.findAll();
+        assertNotNull(propDatas);
+        
         PropData retrievedPropData = propDataEntityMgr.findByName("PropDataEntityMgrImplTestNG");
-
         assertEquals(retrievedPropData.getName(), propData.getName());
         assertEquals(retrievedPropData.getDataCloudVersion(), propData.getDataCloudVersion());
     }

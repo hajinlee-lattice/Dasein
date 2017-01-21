@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -53,8 +54,9 @@ public class DataSetEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBase
         dataSetEntityMgr.create(dataSet);
 
         List<DataSet> dataSets = dataSetEntityMgr.findAll();
+        assertNotNull(dataSets);
+        
         DataSet retrievedDataSet = dataSetEntityMgr.findByName(datasetName);
-
         assertEquals(retrievedDataSet.getName(), dataSet.getName());
         assertEquals(retrievedDataSet.getIndustry(), dataSet.getIndustry());
         assertEquals(retrievedDataSet.getTenant().getId(), dataSet.getTenant().getId());

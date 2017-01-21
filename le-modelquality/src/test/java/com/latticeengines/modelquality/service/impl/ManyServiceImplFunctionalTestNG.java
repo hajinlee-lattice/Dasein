@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -22,12 +21,8 @@ import com.latticeengines.domain.exposed.modelquality.PipelineStepOrFile;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
-import com.latticeengines.modelquality.service.AlgorithmService;
 
 public class ManyServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
-
-    @Autowired
-    private AlgorithmService algorithmService;
 
     @Test(groups = "functional")
     public void testServiceImpl() throws Exception {

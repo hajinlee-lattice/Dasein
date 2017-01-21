@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.modelquality.service.AlgorithmService;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.modelquality.service.impl.PipelineStepType;
@@ -67,9 +66,6 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     @Autowired
     private AnalyticPipelineService analyticPipelineService;
-
-    @Autowired
-    private AlgorithmService algorithmService;
 
     @Resource(name = "modelRunService")
     protected ModelRunService modelRunService;

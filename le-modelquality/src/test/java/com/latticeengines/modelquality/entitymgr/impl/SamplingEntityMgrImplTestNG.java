@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -49,8 +50,9 @@ public class SamplingEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         samplingEntityMgr.create(sampling);
 
         List<Sampling> retrievedSamplings = samplingEntityMgr.findAll();
+        assertNotNull(retrievedSamplings);
+        
         Sampling retrievedSampling = samplingEntityMgr.findByName("SamplingEntityMgrImplTestNG");
-
         assertEquals(retrievedSampling.getName(), sampling.getName());
 
         List<SamplingPropertyDef> retrievedPropertyDefs = sampling.getSamplingPropertyDefs();

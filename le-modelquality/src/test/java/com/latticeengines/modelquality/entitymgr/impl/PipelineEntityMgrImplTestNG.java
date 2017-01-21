@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +67,9 @@ public class PipelineEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         pipelineEntityMgr.create(pipeline);
 
         List<Pipeline> pipelines = pipelineEntityMgr.findAll();
+        assertNotNull(pipelines);
+        
         Pipeline retrievedPineline = pipelineEntityMgr.findByName(pipelineName);
-
         assertEquals(retrievedPineline.getName(), pipeline.getName());
         assertEquals(retrievedPineline.getPipelineSteps().size(), pipeline.getPipelineSteps().size());
 

@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -50,6 +51,7 @@ public class ModelRunEntityMgrImplDeploymentTestNG extends ModelQualityDeploymen
         modelRunEntityMgr.create(modelRun);
 
         List<ModelRun> retrievedModelRuns = modelRunEntityMgr.findAll();
+        assertNotNull(retrievedModelRuns);
         ModelRun retrievedModelRun = modelRunEntityMgr.findByName(modelRunName);
         assertEquals(retrievedModelRun.getName(), modelRun.getName());
         assertEquals(retrievedModelRun.getDescription(), modelRun.getDescription());

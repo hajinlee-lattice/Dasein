@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -51,8 +52,9 @@ public class AlgorithmEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBa
         algorithmEntityMgr.create(algorithm);
 
         List<Algorithm> retrievedAlgorithms = algorithmEntityMgr.findAll();
+        assertNotNull(retrievedAlgorithms);
+        
         Algorithm retrievedAlgorithm = algorithmEntityMgr.findByName(algorithmName);
-
         assertEquals(retrievedAlgorithm.getName(), algorithm.getName());
         assertEquals(retrievedAlgorithm.getScript(), algorithm.getScript());
 

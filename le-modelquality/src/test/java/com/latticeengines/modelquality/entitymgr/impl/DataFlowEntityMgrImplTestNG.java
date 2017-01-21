@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -42,8 +43,9 @@ public class DataFlowEntityMgrImplTestNG extends ModelQualityFunctionalTestNGBas
         dataFlowEntityMgr.create(dataFlow);
 
         List<DataFlow> dataFlows = dataFlowEntityMgr.findAll();
+        assertNotNull(dataFlows);
+        
         DataFlow retrievedDataFlow = dataFlowEntityMgr.findByName("DataFlowEntityMgrImplTestNG");
-
         assertEquals(retrievedDataFlow.getName(), dataFlow.getName());
         assertEquals(retrievedDataFlow.getMatch(), Boolean.TRUE);
         assertEquals(retrievedDataFlow.getTransformationGroup(), TransformationGroup.STANDARD);

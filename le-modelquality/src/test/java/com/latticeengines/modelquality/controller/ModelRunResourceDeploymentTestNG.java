@@ -127,7 +127,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
     @Test(groups = "deployment", dependsOnMethods = "runModelNGINX", enabled = true)
     public void getModelRuns() {
         try {
-            List<ModelRunEntityNames> response = modelQualityProxy.getModelRuns();
+            modelQualityProxy.getModelRuns();
         } catch (Exception ex) {
             Assert.fail(ex.getMessage());
         }
