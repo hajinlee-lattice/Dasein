@@ -2,7 +2,7 @@ angular
 .module('lp.create.import')
 .controller('ScoreFieldsController', function(
     $scope, $state, $stateParams, $timeout, $rootScope, $anchorScroll, ResourceUtility,
-    ScoreLeadEnrichmentModal, ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal
+    ScoreLeadEnrichmentModal, ImportService, ImportStore, FileHeaders, FieldDocument, CancelJobModal, Model
 ) {
     var vm = this;
 
@@ -10,10 +10,9 @@ angular
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
         csvFileName: $stateParams.csvFileName,
-        standardFieldsList: ['Id', 'Email', 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Id', null, 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Id': true,
-            'Email': true,
             'CompanyName': true
         },
         standardFieldMappings: {},
@@ -26,8 +25,19 @@ angular
 
     vm.init = function() {
         vm.initialized = true;
-        var fieldMappingsMap = {};
 
+        switch (Model.ModelDetails.SourceSchemaInterpretation) {
+            case 'SalesforceAccount':
+                vm.standardFieldsList[1] = 'Website';
+                vm.requiredFieldsMissing['Website'] = true;
+                break;
+            case 'SalesforceLead':
+            default:
+                vm.standardFieldsList[1] = 'Email';
+                vm.requiredFieldsMissing['Email'] = true;
+        }
+
+        var fieldMappingsMap = {};
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
             fieldMappingsMap[fieldMapping.userField] = fieldMapping;
         });
