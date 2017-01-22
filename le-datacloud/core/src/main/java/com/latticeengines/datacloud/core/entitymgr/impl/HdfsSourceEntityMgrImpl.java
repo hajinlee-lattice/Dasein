@@ -25,7 +25,6 @@ import com.latticeengines.datacloud.core.util.TableUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
@@ -206,7 +205,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public String getRequest(Source source, String requestName) {
         String request = null;
         try {
-            String requestFile = hdfsPathBuilder.constructSourceDir(source).append("requests").append(requestName + ".json").toString();
+            String requestFile = hdfsPathBuilder.constructSourceDir(source).append("requests")
+                    .append(requestName + ".json").toString();
             request = HdfsUtils.getHdfsFileContents(yarnConfiguration, requestFile);
         } catch (Exception e) {
             log.error("Failed to load request " + requestName + " from source " + source.getSourceName(), e);
@@ -313,9 +313,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             log.info(
                     String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
                     (source instanceof IngestionSource ? ((IngestionSource) source).getIngetionName() : ""), version));
-        } finally {
-            return sourceExists;
         }
+        return sourceExists;
     }
 
     @Override
@@ -323,14 +322,13 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         boolean sourceExists = false;
         String sourceDir = hdfsPathBuilder.constructSourceDir(source).toString();
         try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, sourceDir))  {
+            if (HdfsUtils.isDirectory(yarnConfiguration, sourceDir)) {
                 sourceExists = true;
             }
         } catch (Exception e) {
             log.info("Failed to check " + source.getSourceName() + " in HDFS");
-        } finally {
-            return sourceExists;
         }
+        return sourceExists;
     }
 
     @Override
@@ -339,7 +337,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, sourceDir)) {
                 return;
-            }  else {
+            } else {
                 HdfsUtils.mkdir(yarnConfiguration, sourceDir);
             }
         } catch (Exception e) {

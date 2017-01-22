@@ -14,8 +14,6 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-datacloud-collection-context.xml" })
@@ -49,9 +47,6 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private SqoopJobService sqoopService;
-
-    @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
@@ -63,14 +58,10 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     protected JdbcTemplate jdbcTemplateBulkDB;
 
     protected void uploadAvroToCollectionDB(String avroDir, String destTable) {
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        String customer = "TestSqoopAgent";
-
         truncateJdbcTableIfExists(destTable);
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
-        DbCreds creds = new DbCreds(builder);
         // sqoopProxy.exportDataSync(destTable, avroDir, creds, assignedQueue, customer + "-upload-" + destTable, numMappers, null);
     }
 

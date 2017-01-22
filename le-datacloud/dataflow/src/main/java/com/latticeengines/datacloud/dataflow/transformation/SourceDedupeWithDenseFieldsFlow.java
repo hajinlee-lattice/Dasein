@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -21,7 +19,6 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<SourceDedupeWithDenseFieldsTransformerConfig> {
     private static final String DENSE_FIELDS_COUNT = "__DENSE_FIELDS_COUNT__";
     private static final String NEW_DEDUPE_FIELD_PREFIX = "__NEW_DEDUPE_FIELD_PREFIX__";
-    private static final Log log = LogFactory.getLog(SourceDedupeWithDenseFieldsFlow.class);
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {

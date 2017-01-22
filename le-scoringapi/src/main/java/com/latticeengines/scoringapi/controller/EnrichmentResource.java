@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -178,18 +177,6 @@ public class EnrichmentResource {
     public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         return internalResourceRestApiProxy.getSelectedAttributePremiumCount(customerSpace);
-    }
-
-    private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
-            Category category) {
-        if (!CollectionUtils.isEmpty(allAttributes)) {
-            for (LeadEnrichmentAttribute attr : allAttributes) {
-                if (category.toString().equals(attr.getCategory())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     // ------------END for LeadEnrichment-------------------//

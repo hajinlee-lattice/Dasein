@@ -15,7 +15,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.BomboraDepivoted;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -31,9 +30,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
 
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
-
-    @Autowired
-    private TransformationProgressEntityMgr progressEntityMgr;
 
     @Autowired
     private BomboraDepivoted source;

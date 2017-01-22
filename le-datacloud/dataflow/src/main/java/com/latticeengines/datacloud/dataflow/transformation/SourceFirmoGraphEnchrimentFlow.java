@@ -6,11 +6,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
-
-import cascading.tuple.Fields;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -21,9 +17,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
+import cascading.tuple.Fields;
+
 @Component("sourceFirmoGraphEnrichmentFlow")
 public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceFirmoGraphEnrichmentTransformerConfig> {
-    private static final Log log = LogFactory.getLog(SourceFirmoGraphEnchrimentFlow.class);
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {

@@ -42,6 +42,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     private ThreadPoolTaskScheduler scheduler;
 
     // Not used for now, will use when figured out logic
+    @SuppressWarnings("unused")
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 

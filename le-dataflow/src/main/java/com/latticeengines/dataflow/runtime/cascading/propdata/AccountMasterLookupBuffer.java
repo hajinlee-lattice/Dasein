@@ -16,6 +16,7 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class AccountMasterLookupBuffer extends BaseOperation implements Buffer {
+    private static final long serialVersionUID = 4217950767704131475L;
 
     protected Map<String, Integer> namePositionMap;
     private String latticeIdField;
@@ -61,17 +62,6 @@ public class AccountMasterLookupBuffer extends BaseOperation implements Buffer {
             positionMap.put(fieldName, pos++);
         }
         return positionMap;
-    }
-
-    private void setupTupleForGroup(Tuple result, TupleEntry group) {
-        Fields fields = group.getFields();
-        for (Object field : fields) {
-            String fieldName = (String) field;
-            Integer loc = namePositionMap.get(fieldName);
-            if (loc != null && loc >= 0) {
-                result.set(loc, group.getObject(fieldName));
-            }
-        }
     }
 
     // The group is ordered by primaryLocation descendingly

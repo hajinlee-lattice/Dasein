@@ -12,6 +12,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings({ "rawtypes", "serial" })
 public class CountryStandardizationFunction extends BaseOperation implements Function {
     private Map<String, String> standardCountries;
     private String countryField;

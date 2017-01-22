@@ -8,8 +8,6 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,8 +40,6 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("bulkMatchServiceWithAccountMaster")
 public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServiceWithDerivedColumnCacheImpl {
-
-    private static Log log = LogFactory.getLog(BulkMatchServiceWithAccountMasterServiceImpl.class);
 
     private static final String ACCOUNT_MASTER_KEY = "AccountMaster";
     private static final String ACCOUNT_MASTER_LOOKUP_KEY = "AccountMasterLookup";

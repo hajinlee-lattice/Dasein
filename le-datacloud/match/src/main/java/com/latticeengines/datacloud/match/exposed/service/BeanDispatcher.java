@@ -15,8 +15,10 @@ public interface BeanDispatcher {
 
     ColumnMetadataService getColumnMetadataService(String dataCloudVersion);
 
+    @SuppressWarnings("rawtypes")
     MetadataColumnService getMetadataColumnService(String dataCloudVersion);
 
+    @SuppressWarnings("rawtypes")
     MetadataColumnService getMetadataColumnService(MatchContext context);
 
 }

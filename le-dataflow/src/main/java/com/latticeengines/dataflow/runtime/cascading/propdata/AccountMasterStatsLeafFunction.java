@@ -21,6 +21,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class AccountMasterStatsLeafFunction extends BaseOperation implements Function {
+    private static final long serialVersionUID = -4039806083023012431L;
+
     private List<String> leafSchemaNewColumnNames;
     private Map<String, List<String>> dimensionDefinitionMap;
     private Map<String, String> reverseDimensionDefinitionMap;

@@ -66,6 +66,10 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     private Map<String, DnBMatchContext> contextsBulk = new HashMap<String, DnBMatchContext>();
 
+    private CSVParser csvFileParser;
+
+    private CSVParser csvFileParser2;
+
     @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
         // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME, true, true);
@@ -203,7 +207,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + fileName);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
-            CSVParser csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
+            csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
             for (int i = 1; i < csvRecords.size(); i++) {
                 CSVRecord record = csvRecords.get(i);
@@ -253,8 +257,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + FORTUNE1000_FILENAME);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
-            CSVParser csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
-            List<CSVRecord> csvRecords = csvFileParser.getRecords();
+            csvFileParser2 = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
+            List<CSVRecord> csvRecords = csvFileParser2.getRecords();
             for (int j = 0; j < 10; j++) {
                 for (int i = 1; i < csvRecords.size(); i++) {
                     CSVRecord record = csvRecords.get(i);

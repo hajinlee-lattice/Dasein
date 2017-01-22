@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +26,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/amstats")
 public class AMStatsResource {
-    private static final Log log = LogFactory.getLog(AMStatsResource.class);
 
     private static final ObjectMapper OM = new ObjectMapper();
 

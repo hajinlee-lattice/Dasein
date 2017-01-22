@@ -189,11 +189,6 @@ public class SourceColumn implements HasPid, Serializable {
         return categories;
     }
 
-    private void setCategories(String categories) {
-        this.categories = categories;
-        getCategoryList();
-    }
-
     public List<String> getCategoryList() {
         if (categoryList == null) {
             List<String> catList = new ArrayList<>();

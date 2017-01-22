@@ -15,6 +15,7 @@ public class FirmoGraphNewColumnEnrichmentFunction extends BaseOperation impleme
     private String leftMatchField;
     private String rightMatchField;
     private String enrichingField;
+    @SuppressWarnings("unused")
     private String enrichedField;
 
     public FirmoGraphNewColumnEnrichmentFunction(String leftMatchField, String rightMatchField, String enrichingField,

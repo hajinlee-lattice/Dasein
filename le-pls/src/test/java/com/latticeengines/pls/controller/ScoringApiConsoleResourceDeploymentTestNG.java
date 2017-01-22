@@ -26,7 +26,6 @@ public class ScoringApiConsoleResourceDeploymentTestNG extends PlsDeploymentTest
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
     public void testWithDomain() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/scores/apiconsole/record/debug";
@@ -48,7 +47,6 @@ public class ScoringApiConsoleResourceDeploymentTestNG extends PlsDeploymentTest
         assertTrue(nonNullEnrichmentValues > 5000, "Actual : " + nonNullEnrichmentValues);
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", enabled = true)
     public void testWithDUNS() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/scores/apiconsole/record/debug";

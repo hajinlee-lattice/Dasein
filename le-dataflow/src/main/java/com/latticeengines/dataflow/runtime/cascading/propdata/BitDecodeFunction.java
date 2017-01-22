@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
@@ -25,7 +23,6 @@ import cascading.tuple.TupleEntry;
 public class BitDecodeFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -1829655353767648350L;
-    private static final Log log = LogFactory.getLog(BitDecodeFunction.class);
 
     private final BitCodeBook codeBook;
     private final String encodedColumn;

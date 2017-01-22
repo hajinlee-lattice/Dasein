@@ -12,7 +12,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
@@ -31,9 +30,6 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
     private static final String podId = "CacheLoaderServiceImplTestNG";
     private static final String avroDir = "/tmp/CacheLoaderServiceImplTestNG";
     private static final String AM_CACHE_FILE = "am_cache.avro";
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
     private CacheLoaderService<GenericRecord> cacheLoaderService;
@@ -158,8 +154,8 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     private void uploadTestAVro(String avroDir, String fileName) {
         try {
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, String.format("accountmaster/%s", fileName), avroDir
-                    + "/" + fileName);
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, String.format("accountmaster/%s", fileName),
+                    avroDir + "/" + fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }

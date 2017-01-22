@@ -55,6 +55,7 @@ public class TopNAttributes {
         private Integer nonNullCount;
 
         // dummy constructor for jackson
+        @SuppressWarnings("unused")
         private TopAttribute() {
         }
 

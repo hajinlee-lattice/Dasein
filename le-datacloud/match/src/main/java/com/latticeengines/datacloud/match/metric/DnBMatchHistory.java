@@ -39,7 +39,6 @@ public class DnBMatchHistory extends BaseMeasurement<DnBMatchContext, DnBMatchCo
         return RetentionPolicyImpl.ONE_MONTH;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<MetricStore> getMetricStores() {
         return Arrays.<MetricStore>asList(MetricStoreImpl.INFLUX_DB, MetricStoreImpl.SPLUNK_LOG);

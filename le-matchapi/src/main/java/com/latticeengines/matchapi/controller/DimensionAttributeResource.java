@@ -1,12 +1,7 @@
 package com.latticeengines.matchapi.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,11 +13,13 @@ import com.latticeengines.datacloud.core.service.DimensionalQueryService;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "dimensionattributes", description = "REST resource for Dimension Attributes")
 @RestController
 @RequestMapping("/dimensionattributes")
 public class DimensionAttributeResource {
-    private static final Log log = LogFactory.getLog(DimensionAttributeResource.class);
 
     @Autowired
     private DimensionalQueryService dimensionalQueryService;

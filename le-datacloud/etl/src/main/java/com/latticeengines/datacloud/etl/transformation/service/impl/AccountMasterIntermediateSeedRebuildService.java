@@ -46,7 +46,6 @@ public class AccountMasterIntermediateSeedRebuildService extends
         return log;
     }
 
-    @SuppressWarnings("unchecked")
     protected Class<AccountMasterIntermediateSeedParameters> getDataFlowParametersClass() {
         return AccountMasterIntermediateSeedParameters.class;
     }

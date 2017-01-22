@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.core.service.CountryCodeService;
-import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -47,12 +45,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
 
-    @Autowired
-    private CountryCodeService countryCodeService;
-
-    @Autowired
-    private ZkConfigurationService zkConfigurationService;
-    
     @Autowired
     private NameLocationService nameLocationService;
 
@@ -84,7 +76,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection(), input.getDataCloudVersion());
         } else if (input.getPredefinedSelection() != null) {
-            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(), input.getDataCloudVersion());
+            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
+                    input.getDataCloudVersion());
         } else {
             return input.getCustomSelection();
         }
@@ -284,7 +277,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                             originalPhoneNumber = (String) inputRecord.get(pos);
                         }
                     }
-                    
+
                     NameLocation nameLocation = new NameLocation();
                     nameLocation.setName(originalName);
                     nameLocation.setState(originalState);

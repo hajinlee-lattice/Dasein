@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "DecisionGraph")
 public class DecisionGraph implements HasPid, Serializable {
+    private static final long serialVersionUID = -803250604271710254L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,32 +64,16 @@ public class DecisionGraph implements HasPid, Serializable {
         return graphName;
     }
 
-    private void setGraphName(String graphName) {
-        this.graphName = graphName;
-    }
-
     private String getVertices() {
         return vertices;
-    }
-
-    private void setVertices(String vertices) {
-        this.vertices = vertices;
     }
 
     private String getStartingVertices() {
         return startingVertices;
     }
 
-    private void setStartingVertices(String startingVertices) {
-        this.startingVertices = startingVertices;
-    }
-
     private String getEdges() {
         return edges;
-    }
-
-    private void setEdges(String edges) {
-        this.edges = edges;
     }
 
     public List<Node> getStartingNodes() {
@@ -108,24 +93,24 @@ public class DecisionGraph implements HasPid, Serializable {
     private void constructGraph() {
         nodeMap = new HashMap<>();
         List<String> nodeNameList = new ArrayList<>();
-        for (String nodeName: getVertices().split(",")) {
+        for (String nodeName : getVertices().split(",")) {
             Node node = new Node(nodeName);
             nodeMap.put(nodeName, node);
             nodeNameList.add(nodeName);
         }
 
         Map<Integer, List<Integer>> edgeMap = parseEdges();
-        for (Map.Entry<Integer, List<Integer>> entry: edgeMap.entrySet()) {
+        for (Map.Entry<Integer, List<Integer>> entry : edgeMap.entrySet()) {
             Integer idx = entry.getKey();
             Node node = nodeMap.get(nodeNameList.get(idx));
-            for (Integer idx2: entry.getValue()) {
+            for (Integer idx2 : entry.getValue()) {
                 Node child = nodeMap.get(nodeNameList.get(idx2));
                 node.addChild(child);
             }
         }
 
         startingNodes = new ArrayList<>();
-        for (String idxStr: getStartingVertices().split(",")) {
+        for (String idxStr : getStartingVertices().split(",")) {
             String nodeName = nodeNameList.get(Integer.valueOf(idxStr));
             startingNodes.add(nodeMap.get(nodeName));
         }
@@ -134,14 +119,14 @@ public class DecisionGraph implements HasPid, Serializable {
     private Map<Integer, List<Integer>> parseEdges() {
         String[] groups = getEdges().split("\\|");
         Map<Integer, List<Integer>> toReturn = new HashMap<>();
-        for (String group: groups) {
+        for (String group : groups) {
             String[] ends = group.split(":");
             if (ends.length != 2) {
                 throw new IllegalArgumentException("Invalid edge definition " + group);
             }
             Integer fromVertex = Integer.valueOf(ends[0]);
             List<Integer> toVertices = new ArrayList<>();
-            for (String v: ends[1].split(",")) {
+            for (String v : ends[1].split(",")) {
                 toVertices.add(Integer.valueOf(v));
             }
             toReturn.put(fromVertex, toVertices);

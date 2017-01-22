@@ -155,7 +155,10 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         int transformDifferences = 0;
         int errors = 0;
         List<Map.Entry<Double, Double>> errorKeys = new ArrayList<>();
+
+        @SuppressWarnings("unused")
         JythonEngine engine = new JythonEngine(modelExtractionDir.getAbsolutePath());
+        
         for (GenericRecord record : reader) {
             Object recId = record.get(keyColumn);
             Double recIdAsDouble = null;

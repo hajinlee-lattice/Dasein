@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -47,9 +46,6 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     public ApplicationId submit(String modelId, String fileName, boolean enableLeadEnrichment, boolean enableDebug) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);

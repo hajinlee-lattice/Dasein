@@ -12,6 +12,7 @@ import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
+@SuppressWarnings("rawtypes")
 @Component("beanDispatcher")
 public class BeanDispatcherImpl implements BeanDispatcher {
 
