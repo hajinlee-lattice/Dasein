@@ -17,10 +17,19 @@ function build_docker() {
 	TGT_WAR=$3
 	WORKSPACE=tmp/${SRC_WAR}
 
+    DIR="${PWD}"
 	rm -rf ${WORKSPACE}
-	mkdir -p ${WORKSPACE}/webapps
-	cp webapps/${SRC_WAR}.war ${WORKSPACE}/webapps/${TGT_WAR}.war
-	cp Dockerfile ${WORKSPACE}
+	mkdir -p ${WORKSPACE}/webapps/${TGT_WAR}
+	cd ${WORKSPACE}/webapps/${TGT_WAR}
+	jar xvf ${DIR}/webapps/${SRC_WAR}.war
+	cp -f ${DIR}/log4j.properties WEB-INF/classes/log4j.properties
+	cp -f ${DIR}/context.xml META-INF/context.xml
+	cd ..
+	jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .
+	rm -rf ${TGT_WAR}
+
+	cd ${DIR}
+	cp ${DIR}/Dockerfile ${WORKSPACE}
 
 	pushd ${WORKSPACE}
     sed -i "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
