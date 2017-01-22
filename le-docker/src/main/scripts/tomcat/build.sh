@@ -27,5 +27,3 @@ wait
 pushd le-microservice
 bash build.sh $MICROSERVICES
 popd
-
-docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
