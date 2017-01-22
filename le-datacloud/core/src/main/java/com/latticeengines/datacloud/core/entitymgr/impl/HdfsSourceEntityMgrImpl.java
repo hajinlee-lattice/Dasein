@@ -11,7 +11,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -20,8 +19,10 @@ import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.TransformedToAvroSource;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.TableUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 
@@ -297,13 +298,21 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Override
     public boolean checkSourceExist(Source source, String version) {
         boolean sourceExists = false;
-        String avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        String versionDir = null;
+        if (source instanceof IngestionSource) {
+            versionDir = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngetionName(), version)
+                    .toString();
+        } else {
+            versionDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        }
         try {
-            if (HdfsUtils.isDirectory(yarnConfiguration, avroDir))  {
+            if (HdfsUtils.isDirectory(yarnConfiguration, versionDir)) {
                 sourceExists = true;
             }
         } catch (Exception e) {
-            log.info("Failed to check " + source.getSourceName() + "@version " + version + " in HDFS");
+            log.info(
+                    String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
+                    (source instanceof IngestionSource ? ((IngestionSource) source).getIngetionName() : ""), version));
         } finally {
             return sourceExists;
         }

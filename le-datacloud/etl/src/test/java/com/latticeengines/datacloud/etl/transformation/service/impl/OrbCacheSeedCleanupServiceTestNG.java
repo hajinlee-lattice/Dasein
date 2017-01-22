@@ -52,7 +52,7 @@ public class OrbCacheSeedCleanupServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        uploadBaseAvro(baseSource, "OrbCacheSeed_Test", "2017-01-09_19-12-43_UTC");
+        uploadBaseSourceFile(baseSource, "OrbCacheSeed_Test", "2017-01-09_19-12-43_UTC");
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -80,7 +80,6 @@ public class OrbCacheSeedCleanupServiceTestNG
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
-            ObjectMapper om = new ObjectMapper();
             // -----------
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();

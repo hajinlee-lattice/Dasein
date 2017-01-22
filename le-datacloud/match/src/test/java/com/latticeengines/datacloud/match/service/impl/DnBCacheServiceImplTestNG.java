@@ -20,6 +20,7 @@ import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctional
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DnBCacheServiceImplTestNG.class);
 
     @Autowired

@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
@@ -121,7 +122,12 @@ public class HdfsPathBuilder {
     }
 
     public Path constructVersionFile(Source source) {
-        Path baseDir = constructSourceDir(source);
+        Path baseDir = null;
+        if (source instanceof IngestionSource) {
+            baseDir = constructIngestionDir(((IngestionSource) source).getIngetionName());
+        } else {
+            baseDir = constructSourceDir(source);
+        }
         return baseDir.append(VERSION_FILE);
     }
 

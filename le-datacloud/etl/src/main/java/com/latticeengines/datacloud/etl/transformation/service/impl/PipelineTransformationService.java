@@ -12,8 +12,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
 /**
@@ -191,6 +194,19 @@ public class PipelineTransformationService
                     if (source == null) {
                         updateStatusToFailed(progress, "Base source " + sourceName + " not found", null);
                         return null;
+                    }
+                    if (source instanceof IngestionSource) {
+                        try {
+                            IngestedFileToSourceTransformerConfig ingestedFileToSourceTransformerConfig = new ObjectMapper()
+                                    .readValue(config.getConfiguration(), IngestedFileToSourceTransformerConfig.class);
+                            ((IngestionSource) source)
+                                    .setIngetionName(ingestedFileToSourceTransformerConfig.getIngetionName());
+                        } catch (IOException e) {
+                            updateStatusToFailed(progress, "Failed to parse IngestedFileToSourceTransformerConfig "
+                                    + config.getConfiguration(), null);
+                            return null;
+                        }
+
                     }
                     baseSources[baseSourceIdx] = source;
 

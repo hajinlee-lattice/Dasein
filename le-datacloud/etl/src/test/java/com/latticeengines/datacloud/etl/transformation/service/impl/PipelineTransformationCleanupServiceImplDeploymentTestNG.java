@@ -72,8 +72,8 @@ public class PipelineTransformationCleanupServiceImplDeploymentTestNG extends
     @Test(groups = "deployment")
     public void testTransformation() throws IOException {
 
-        uploadBaseAvro(baseLatticeCacheSource, "LatticeCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
-        uploadBaseAvro(baseDnbCacheSource, "DnBCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        uploadBaseSourceFile(baseLatticeCacheSource, "LatticeCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        uploadBaseSourceFile(baseDnbCacheSource, "DnBCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
         String targetSourcePath = hdfsPathBuilder.podDir().append(LATTICE_CACHE_SEED_CLEANED).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
 

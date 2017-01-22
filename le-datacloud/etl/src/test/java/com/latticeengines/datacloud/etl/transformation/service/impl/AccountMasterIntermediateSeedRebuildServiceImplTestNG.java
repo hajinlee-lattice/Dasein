@@ -46,7 +46,6 @@ public class AccountMasterIntermediateSeedRebuildServiceImplTestNG
     private static final String LE_INDUSTRY = "LE_INDUSTRY";
     private static final String LE_REVENUE_RANGE = "LE_REVENUE_RANGE";
     private static final String LE_EMPLOYEE_RANGE = "LE_EMPLOYEE_RANGE";
-    private static final String LE_COUNTRY = "LE_COUNTRY";
 
     @Autowired
     AccountMasterIntermediateSeed source;
@@ -62,7 +61,7 @@ public class AccountMasterIntermediateSeedRebuildServiceImplTestNG
 
     // @Test(groups = "functional")
     public void testTransformation() {
-        uploadBaseAvro(dnBCacheSeed, dnBCacheSeed.getSourceName() + "_Test" + source.getSourceName(),
+        uploadBaseSourceFile(dnBCacheSeed, dnBCacheSeed.getSourceName() + "_Test" + source.getSourceName(),
                 baseSourceVersionDnB);
         uploadBaseAvro(latticeCacheSeed, baseSourceVersionLattice);
         TransformationProgress progress = createNewProgress();

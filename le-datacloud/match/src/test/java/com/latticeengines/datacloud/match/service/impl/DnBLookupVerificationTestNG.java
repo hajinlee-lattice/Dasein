@@ -46,12 +46,14 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     @Autowired
     private DnBBulkLookupFetcher dnBBulkLookupFetcher;
 
+    @SuppressWarnings("unused")
     private static final String FORTUNE1000_SMALL_FILENAME = "Fortune1000_Small.csv";
 
     private static final String FORTUNE1000_FILENAME = "Fortune1000.csv";
 
     private static final String[] FORTUNE1000_FILENAME_HEADER = { "﻿Name", "Domain", "City", "State", "Country" };
 
+    @SuppressWarnings("unused")
     private static final String FORTUNE1000_NAME = "Name";
 
     private static final String FORTUNE1000_CITY = "City";
@@ -238,6 +240,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                     contextsBulk.put(contextBulk.getLookupRequestId(), contextBulk);
                 }
             }
+            csvFileParser.close();
             log.info(String.format("Submitted %d rows from Fortune1000 to DnB api", contextsRealtime.size()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -278,6 +281,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                     }
                 }
             }
+            csvFileParser.close();
             log.info(String.format("Submitted %d rows from Fortune1000 to DnB", contextsBulk.size()));
         } catch (IOException e) {
             e.printStackTrace();

@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 
@@ -95,18 +96,32 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
-    protected void uploadBaseAvro(Source baseSource, String baseSourceFile, String baseSourceVersion) {
-        InputStream baseAvroStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");
-        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
-                .toString();
+    protected void uploadBaseSourceFile(Source baseSource, String baseSourceFile, String baseSourceVersion) {
+        InputStream baseSourceStream = null;
+        String targetPath = null;
+        String successPath = null;
+        if (baseSource instanceof IngestionSource) {
+            baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile);
+            targetPath = hdfsPathBuilder
+                    .constructIngestionDir(((IngestionSource) baseSource).getIngetionName(), baseSourceVersion)
+                    .append("/" + baseSourceFile).toString();
+            successPath = hdfsPathBuilder
+                    .constructIngestionDir(((IngestionSource) baseSource).getIngetionName(), baseSourceVersion)
+                    .append("_SUCCESS").toString();
+        } else {
+            baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");
+            targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
+                    .toString();
+            successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                    .toString();
+        }
+        
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, targetPath);
             }
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseSourceStream, targetPath);
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
-                    .toString();
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {
             throw new RuntimeException(e);

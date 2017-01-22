@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component("orbCacheSeedCleanedTransformerFlow")
 public class OrbCacheSeedSecondaryDomainCleanupFlow
         extends ConfigurableFlowBase<OrbCacheSeedSecondaryDomainCleanupTransformerConfig> {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(OrbCacheSeedSecondaryDomainCleanupFlow.class);
 
     @Override

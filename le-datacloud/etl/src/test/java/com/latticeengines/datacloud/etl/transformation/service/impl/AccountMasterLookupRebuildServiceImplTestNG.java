@@ -38,8 +38,9 @@ public class AccountMasterLookupRebuildServiceImplTestNG
 
     @Test(groups = "functional")
     public void testTransformation() {
-        uploadBaseAvro(baseSource, baseSource.getSourceName() + "_Test" + source.getSourceName(), baseSourceVersion);
-        uploadBaseAvro(baseSourceOrbCacheSeedSecondaryDomain,
+        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + source.getSourceName(),
+                baseSourceVersion);
+        uploadBaseSourceFile(baseSourceOrbCacheSeedSecondaryDomain,
                 baseSourceOrbCacheSeedSecondaryDomain.getSourceName() + "_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);

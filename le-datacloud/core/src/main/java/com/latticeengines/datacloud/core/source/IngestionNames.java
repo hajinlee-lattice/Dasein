@@ -12,4 +12,5 @@ public class IngestionNames {
     public static final String BOMBORA_FIREHOSE = "BomboraFirehose";
     public static final String CACHESEED_CSVGZ = "CacheSeedCsvGz";
     public static final String DNB_CASHESEED = "DnBCacheSeed";
+    public static final String ORB_INTELLIGENCE = "OrbIntelligence";
 }

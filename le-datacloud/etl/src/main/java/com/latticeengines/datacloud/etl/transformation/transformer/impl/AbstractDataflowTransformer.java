@@ -43,7 +43,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return;
     }
 
-    private P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates, Source targetTemplate, T configuration,
+    protected P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates,
+            Source targetTemplate, T configuration,
                             String confJson) {
         P parameters;
         try {
