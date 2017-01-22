@@ -25,7 +25,7 @@ function build_docker() {
 	pushd ${WORKSPACE}
     sed -i "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
     sed -i "s|{{WAR}}|${TGT_WAR}|g" Dockerfile
-    docker build -t $IMAGE . 2>/tmp/${IMAGE}-errors.txt
+    docker build -t ${IMAGE} . 2>/tmp/${IMAGE}-errors.txt
     process_error ${IMAGE}
     popd
 }
@@ -59,7 +59,7 @@ for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&
-    build_docker $IMAGE $service $WAR &
+    build_docker ${IMAGE} ${service} ${WAR} &
 done
 wait
 
