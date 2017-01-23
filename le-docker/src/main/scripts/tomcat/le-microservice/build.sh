@@ -68,7 +68,9 @@ for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&
-    build_docker ${IMAGE} ${service} ${WAR} &
+    if [ "${service}" != "playmaker" ] && [ "${service}" != "oauth2" ]; then
+        build_docker ${IMAGE} ${service} ${WAR}
+    fi &
 done
 wait
 
