@@ -1,15 +1,15 @@
-USE `LDC_ManageDB`;
+USE `PLS_MultiTenant`;
 
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 
 DELIMITER //
-CREATE PROCEDURE `UpdateSchema`()
+CREATE PROCEDURE `UpdateSchema` ()
   BEGIN
 
   END //
 DELIMITER ;
 
-CALL `UpdateSchema`();
+CALL `UpdateSchema`() ;
 
 
 
