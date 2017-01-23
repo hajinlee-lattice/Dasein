@@ -197,6 +197,13 @@
 							CANCEL
 						</button>
 					</div>
+					<div class="section-validation pull-left" ng-if="fieldMappingForm.$invalid">
+						<div class="has-error">
+							<div class="help-block">
+								* One or more of your columns is unmapped or is using a reserved name
+							</div>
+						</div>
+					</div>
 					<div class="pull-right">
 						<button
 								ng-click="vm.clickNextModel(); NextClicked2 = true;"
