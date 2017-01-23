@@ -21,6 +21,7 @@ PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
 PARAM_EFS = Parameter("Efs", "EFS Id")
 PARAM_SNS_TOPIC_ARN = ArnParameter("SNSTopicArn", "SNS Topic Arn")
 PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
+PARAM_SECOND_TGRP = Parameter("SecondTgrp", "Secondary target group")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -31,10 +32,10 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, upload=args.upload)
+    template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, second_tgrp=args.secondtgrp, upload=args.upload)
 
-def template(environment, stackname, profile, fixed_instances=False, num_instances=1, upload=False):
-    stack = create_template(profile, fixed_instances, num_instances)
+def template(environment, stackname, profile, fixed_instances=False, num_instances=1, second_tgrp=False, upload=False):
+    stack = create_template(profile, fixed_instances, num_instances, second_tgrp=second_tgrp)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -42,9 +43,12 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
         print stack.json()
         stack.validate()
 
-def create_template(profile, fixed_instances=False, num_instances=1):
+def create_template(profile, fixed_instances=False, num_instances=1, second_tgrp=False):
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS, PARAM_SNS_TOPIC_ARN, PARAM_ECS_SCALE_ROLE_ARN])
+    if second_tgrp:
+        stack.add_param(PARAM_SECOND_TGRP)
+    stack.attach_tgrp(PARAM_SECOND_TGRP)
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = tomcat_task(profile_vars)
@@ -60,7 +64,7 @@ def tomcat_task(profile_vars):
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
-        .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, PARAM_DOCKER_IMAGE.ref()]]},) \
+        .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, "tomcat"]]},) \
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
         .publish_port(1099, 1099) \
@@ -92,10 +96,10 @@ def tomcat_task(profile_vars):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public, le_stack=args.lestack)
+    provision(args.environment, args.app, args.stackname, args.tgrp, args.profile, args.instancetype, tag=args.tag, init_cap=args.ic, max_cap=args.mc, public=args.public, le_stack=args.lestack, second_tgrp=args.secondtgrp)
 
 
-def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False, le_stack=None):
+def provision(environment, app, stackname, tgrp, profile, instance_type, tag="latest", init_cap=2, max_cap=8, public=False, le_stack=None, second_tgrp=None):
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
@@ -118,9 +122,14 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     extra_params.append(PARAM_SNS_TOPIC_ARN.config(config.scaling_sns_topic_arn()))
     extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
 
+    if second_tgrp is not None:
+        extra_params.append(PARAM_SECOND_TGRP.config(second_tgrp))
+
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 
     register_ec2_to_targetgroup(stackname, tgrp)
+    if second_tgrp is not None:
+        register_ec2_to_targetgroup(stackname, second_tgrp)
 
 def teardown_cli(args):
     teardown(args.stackname)
@@ -184,6 +193,7 @@ def parse_args():
     parser1.add_argument('-u', dest='upload', action='store_true', help='upload to S3')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='stack name')
     parser1.add_argument('--fixed-instances', dest='fixed', action='store_true', help='use fixed number of instances, instead of auto scaling group')
+    parser1.add_argument('--second-tgrp', dest='secondtgrp', action='store_true', help='use secondary tgrp')
     parser1.add_argument('-n', dest='numinstances', type=int, default="1", help='number of instances. only honored when --fixed-instances option is used.')
     parser1.add_argument('-p', dest='profile', type=str, help='stack profile file')
     parser1.set_defaults(func=template_cli)
@@ -201,6 +211,7 @@ def parse_args():
     parser1.add_argument('--initial-capacity', dest='ic', type=int, default='2', help='initial capacity. only honored when using auto scaling group.')
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity. only honored when using auto scaling group.')
     parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
+    parser1.add_argument('--second-tgrp', dest='secondtgrp', type=str, help='name of the secondary tgrp')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
