@@ -289,14 +289,32 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public List<BucketMetadata> getUpToDateABCDBuckets(String modelId, CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/abcdbuckets/uptodate/modelid", modelId);
+            String url = constructUrl("pls/internal/abcdbuckets/uptodate", modelId);
             url += "?tenantId=" + customerSpace.toString();
             List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
             return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Remote call failure for the model %s of tenant %s", modelId,
-                    customerSpace.toString()), e);
+            throw new RuntimeException(
+                    String.format("Remote call failure for getting the up-to-date bucekts of the model %s of tenant %s",
+                            modelId, customerSpace.toString()),
+                    e);
         }
+    }
+
+    public void createABCDBuckets(String modelId, CustomerSpace customerSpace,
+            List<BucketMetadata> bucketMetadataList) {
+        try {
+            String url = constructUrl("pls/internal/abcdbuckets/", modelId);
+            url += "?tenantId=" + customerSpace.toString();
+            log.debug(String.format("Posting to %s", url));
+            restTemplate.postForEntity(url, bucketMetadataList, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("Remote call failure for creating abcd buckets for model %s of tenant %s", modelId,
+                            customerSpace.toString()),
+                    e);
+        }
+
     }
 
     @SuppressWarnings("unchecked")
