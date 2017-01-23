@@ -3,6 +3,8 @@ package com.latticeengines.datacloud.match.actors;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,8 @@ import scala.concurrent.duration.FiniteDuration;
 @Component
 public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(MatchActorTestNG.class);
+
     private static final String COUNTRY_CODE = "US";
     private static final String STATE = "CALIFORNIA";
     private static final String CITY = "FOSTER CITY";
@@ -60,11 +64,16 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         String rootOperationUid = UUID.randomUUID().toString();
         MatchTraveler matchTravelerContext = new MatchTraveler(rootOperationUid, matchKeyTuple);
         matchTravelerContext.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        matchTravelerContext.setUseDnBCache(true);
+        matchTravelerContext.setUseRemoteDnB(true);
         msg.setMatchTravelerContext(matchTravelerContext);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, false);
         Assert.assertNotNull(result);
         DnBMatchContext data = (DnBMatchContext) result.getResult();
+        log.info(String.format("DnBReturnCode = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s",
+                data.getDnbCodeAsString(), data.getDuns(), data.getConfidenceCode(),
+                data.getMatchGrade().getRawCode()));
         Assert.assertEquals(data.getDnbCode(), DnBReturnCode.OK);
         Assert.assertEquals(data.getDuns(), DUNS);
         Assert.assertEquals((int) data.getConfidenceCode(), CONFIDENCE_CODE);
