@@ -104,9 +104,6 @@ class AwsEnvironment:
     def consul_server(self):
         return self._props['consul.server']
 
-    def sqoop_server(self):
-        return self._props['sqoop.server']
-
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry(),

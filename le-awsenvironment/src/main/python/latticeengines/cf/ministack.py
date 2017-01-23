@@ -254,8 +254,6 @@ def tomcat_container(environment, stackname, ecr_url, app, ip, profile_file, tag
     protocol = params["HTTP_PROTOCOL"] if "HTTP_PROTOCOL" in params else "http"
     params["AWS_PRIVATE_LB"] = "%s://%s" % (protocol, ip)
     params["AWS_PUBLIC_LB"] = "%s://%s" % (protocol, ip)
-    params["AWS_SQOOP_ADDRESS"] = config.sqoop_server()
-
     params["LE_STACK"] = stackname
     params["LE_ENVIRONMENT"] = environment
     params["CATALINA_OPTS"] = "-Xmx%dm -XX:ReservedCodeCacheSize=%dm" % (int(alloc["mem"] * 0.9), 256 if alloc["mem"] <= 1024 else 512)
