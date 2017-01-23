@@ -319,7 +319,7 @@ section.container.custom-fields {
             }
         }
         td {
-            padding: 0.3em 0.5em .3em 0.5em;
+            padding: 0.3em 1em;
             margin: 0;
             vertical-align: middle;
 
@@ -337,7 +337,6 @@ section.container.custom-fields {
             select {
                 display: inline-block;
                 font-size: 14px;
-                height: 35px;
                 border-radius: 0;
                 -moz-border-radius: 0;
                 -webkit-border-radius: 0;
@@ -676,9 +675,10 @@ Media Queries
                 border-right: 1px solid #e9e9e9;
 
                 &.field-mapping-inputs {
-                    padding: 0.5em;
+                    padding: 0.5em 1em;
                     select {
                         width: auto;
+                        padding: 0.3em;
                     }
                 }
 
