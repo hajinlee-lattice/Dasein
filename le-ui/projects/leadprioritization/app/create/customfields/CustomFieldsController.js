@@ -1,7 +1,7 @@
 angular
 .module('lp.create.import')
 .controller('CustomFieldsController', function(
-    $scope, $state, $stateParams, $timeout, $anchorScroll, ResourceUtility,
+    $scope, $state, $stateParams, $timeout, $anchorScroll, ResourceUtility, FeatureFlagService,
     ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
 ) {
     var vm = this;
@@ -10,6 +10,7 @@ angular
         FormValidated: true,
         ResourceUtility: ResourceUtility,
         csvFileName: $stateParams.csvFileName,
+        fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
         mappingOptions: [
             { id: 0, name: "Use as Custom Predictor" },
             { id: 1, name: "Map to Standard Field" },
@@ -22,8 +23,7 @@ angular
         standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Event': true,
-            'Id': true,
-            'CompanyName': true
+            'Id': true
         },
         ignoredFieldLabel: '-- Unmapped Field --',
         UnmappedFieldsMap: {},
@@ -36,8 +36,13 @@ angular
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
+
         vm.standardFieldsList[2] = (vm.schema === 'SalesforceLead') ? 'Email' : 'Website';
         vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
+
+        if (vm.fuzzyMatchEnabled) {
+            vm.requiredFieldsMissing['CompanyName'] = true;
+        }
 
         vm.UnmappedFields.forEach(function(UnmappedField) {
             vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
@@ -267,17 +272,19 @@ angular
             }
         }
 
-        if (vm.schema === 'SalesforceAccount') {
-            if (!vm.requiredFieldsMissing['Website']) {
-                vm.requiredFieldsMissing['CompanyName'] = false;
-            } else if (!vm.requiredFieldsMissing['CompanyName']) {
-                vm.requiredFieldsMissing['Website'] = false;
-            }
-        } else {
-            if (!vm.requiredFieldsMissing['Email']) {
-                vm.requiredFieldsMissing['CompanyName'] = false;
-            } else if (!vm.requiredFieldsMissing['CompanyName']) {
-                vm.requiredFieldsMissing['Email'] = false;
+        if (vm.fuzzyMatchEnabled) {
+            if (vm.schema === 'SalesforceAccount') {
+                if (!vm.requiredFieldsMissing['Website']) {
+                    vm.requiredFieldsMissing['CompanyName'] = false;
+                } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                    vm.requiredFieldsMissing['Website'] = false;
+                }
+            } else {
+                if (!vm.requiredFieldsMissing['Email']) {
+                    vm.requiredFieldsMissing['CompanyName'] = false;
+                } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                    vm.requiredFieldsMissing['Email'] = false;
+                }
             }
         }
 
