@@ -50,7 +50,7 @@ angular.module('mainApp.models.leadenrichment', [
         });
     };
 })
-.controller('ScoreLeadEnrichmentController', function($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, JobsService, ImportService, EnrichmentService) {
+.controller('ScoreLeadEnrichmentController', function($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, JobsService, ImportService, DataCloudStore) {
     var vm = this;
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
@@ -70,7 +70,7 @@ angular.module('mainApp.models.leadenrichment', [
     $scope.enableLeadEnrichmentClicked = function() {
         vm.enableLeadEnrichment = true;
     };
-    
+
     $scope.scoreClicked = function($event) {
         if (vm.rescore) {
             $scope.saveInProgress = true;
@@ -108,7 +108,7 @@ angular.module('mainApp.models.leadenrichment', [
     };
 
     vm.init = function() {
-        EnrichmentService.getSelectedCount().then(function(response){
+        DataCloudStore.getSelectedCount().then(function(response){
             if(response.data === 0){
                 $scope.noEnrichmentsSelected = true;
             }
