@@ -57,6 +57,7 @@ def express_task(profile_vars, port, mode):
         { "Fn::FindInMap" : [ "Environment2Props", {"Ref" : "Environment"}, "EcrRegistry" ] },
         "/latticeengines/express:",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
         .mem_mb(PARAM_MEM.ref()) \
+        .hostname({ "Fn::Join" : ["-", [{ "Ref" : "AWS::StackName" }, "express"]]},) \
         .publish_port(port, 443) \
         .set_logging({
         "LogDriver": "awslogs",

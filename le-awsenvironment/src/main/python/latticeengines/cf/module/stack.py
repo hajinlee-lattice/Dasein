@@ -233,6 +233,9 @@ class ECSStack(Stack):
         self.add_resources([asgroup, launchconfig, scale_up_policy, scale_back_policy])
         return asgroup
 
+    def attach_tgrp(self, tgrp):
+        self._asgroup.attach_tgrp(tgrp)
+
     @staticmethod
     def _userdata(launch_config, asgroup):
         assert isinstance(launch_config, LaunchConfiguration)
