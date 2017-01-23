@@ -1,5 +1,10 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,6 +14,7 @@ import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.domain.exposed.pls.AttributeCustomization;
 import com.latticeengines.domain.exposed.pls.AttributeFlags;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationService")
@@ -32,5 +38,30 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     @Override
     public AttributeFlags retrieve(String name, AttributeUseCase useCase) {
         return attributeCustomizationEntityMgr.find(name, useCase).getFlags();
+    }
+
+    @Override
+    public void addFlags(List<LeadEnrichmentAttribute> attributes) {
+        List<AttributeCustomization> allCustomizations = attributeCustomizationEntityMgr.findAll();
+        Map<String, List<AttributeCustomization>> customizationMap = new HashMap<>();
+        for (AttributeCustomization customization : allCustomizations) {
+            List<AttributeCustomization> list = customizationMap.get(customization.getName());
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            list.add(customization);
+            customizationMap.put(customization.getName(), list);
+        }
+
+        for (LeadEnrichmentAttribute attribute : attributes) {
+            List<AttributeCustomization> customizations = customizationMap.get(attribute.getFieldName());
+            if (customizations != null) {
+                Map<AttributeUseCase, AttributeFlags> flagsMap = new HashMap<>();
+                for (AttributeCustomization customization : customizations) {
+                    flagsMap.put(customization.getUseCase(), customization.getFlags());
+                }
+                attribute.setAttributeFlagsMap(flagsMap);
+            }
+        }
     }
 }

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
@@ -48,13 +49,13 @@ import com.wordnik.swagger.annotations.ApiParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "enrichment", description = "REST resource for configuring enrichment")
+@Api(value = "latticeinsights", description = "REST resource for Lattice Insights")
 @RestController
-@RequestMapping(value = "/enrichment")
+@RequestMapping(value = "/latticeinsights")
 @PreAuthorize("hasRole('Edit_PLS_Configurations')")
-public class EnrichmentResource {
+public class LatticeInsightsResource {
 
-    public static final String LEAD_ENRICH_PATH = "/lead";
+    public static final String INSIGHTS_PATH = "/insights";
 
     public static final String AM_STATS_PATH = "/stats";
 
@@ -69,13 +70,16 @@ public class EnrichmentResource {
     @Autowired
     private EnrichmentService enrichmentService;
 
-    // ------------START for LeadEnrichment-------------------//
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/categories", method = RequestMethod.GET, //
+    @Autowired
+    private AttributeCustomizationService attributeCustomizationService;
+
+    // ------------START for Insights-------------------//
+    @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
-    public List<String> getLeadEnrichmentCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, null, null, false,
+    public List<String> getInsightsCategories(HttpServletRequest request) {
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null, null, false,
                 null, null);
 
         List<String> categoryStrList = new ArrayList<>();
@@ -87,15 +91,15 @@ public class EnrichmentResource {
         return categoryStrList;
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/subcategories", method = RequestMethod.GET, //
+    @RequestMapping(value = INSIGHTS_PATH + "/subcategories", method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
-    public List<String> getLeadEnrichmentSubcategories(HttpServletRequest request, //
+    public List<String> getInsightsSubcategories(HttpServletRequest request, //
             @ApiParam(value = "category", required = true)//
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getLeadEnrichmentAttributes(request, null, category, null, false,
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, category, null, false,
                 null, null);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
@@ -104,26 +108,26 @@ public class EnrichmentResource {
         return new ArrayList<String>(subcategories);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH, //
+    @RequestMapping(value = INSIGHTS_PATH, //
     method = RequestMethod.PUT, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
-    public void saveLeadEnrichmentAttributes(HttpServletRequest request, //
+    public void saveInsightsAttributes(HttpServletRequest request, //
             @ApiParam(value = "Update lead enrichment selection", required = true)//
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        selectedAttrService.save(attributes, tenant, getLeadEnrichmentPremiumAttributesLimitation(request),
+        selectedAttrService.save(attributes, tenant, getInsightsPremiumAttributesLimitation(request),
                 considerInternalAttributes);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH, //
+    @RequestMapping(value = INSIGHTS_PATH, //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public void getLeadEnrichmentAttributes(HttpServletRequest request, //
+    public void getInsightsAttributes(HttpServletRequest request, //
             HttpServletResponse response, //
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false)//
@@ -147,12 +151,12 @@ public class EnrichmentResource {
             @ApiParam(value = "Maximum number of matching attributes in page", required = false)//
             @RequestParam(value = "max", required = false)//
             Integer max) {
-        List<LeadEnrichmentAttribute> result = getLeadEnrichmentAttributes(request, attributeDisplayNameFilter,
+        List<LeadEnrichmentAttribute> result = getInsightsAttributes(request, attributeDisplayNameFilter,
                 category, subcategory, onlySelectedAttributes, offset, max);
         writeToGzipStream(response, result);
     }
 
-    private List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(HttpServletRequest request,
+    private List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request,
             String attributeDisplayNameFilter, //
             String category, //
             String subcategory, //
@@ -162,16 +166,19 @@ public class EnrichmentResource {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
+        List<LeadEnrichmentAttribute> attributes = selectedAttrService.getAttributes(tenant,
+                attributeDisplayNameFilter, categoryEnum, subcategory, onlySelectedAttributes, offset, max,
+                considerInternalAttributes);
+        attributeCustomizationService.addFlags(attributes);
+        return attributes;
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/count", //
+    @RequestMapping(value = INSIGHTS_PATH + "/count", //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public int getLeadEnrichmentAttributesCount(HttpServletRequest request,
+    public int getInsightsAttributesCount(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false)//
             @RequestParam(value = "attributeDisplayNameFilter", required = false)//
@@ -195,7 +202,7 @@ public class EnrichmentResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = INSIGHTS_PATH + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadEnrichmentCSV(HttpServletRequest request, HttpServletResponse response,
@@ -214,33 +221,33 @@ public class EnrichmentResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/premiumattributeslimitation", //
+    @RequestMapping(value = INSIGHTS_PATH + "/premiumattributeslimitation", //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getLeadEnrichmentPremiumAttributesLimitation(HttpServletRequest request) {
+    public Map<String, Integer> getInsightsPremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/selectedattributes/count", //
+    @RequestMapping(value = INSIGHTS_PATH + "/selectedattributes/count", //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
-    public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
+    public Integer getInsightsSelectedAttributeCount(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         return selectedAttrService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
 
-    @RequestMapping(value = LEAD_ENRICH_PATH + "/selectedpremiumattributes/count", //
+    @RequestMapping(value = INSIGHTS_PATH + "/selectedpremiumattributes/count", //
     method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
-    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
+    public Integer getInsightsSelectedAttributePremiumCount(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         return selectedAttrService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
@@ -265,7 +272,7 @@ public class EnrichmentResource {
         return considerInternalAttributes;
     }
 
-    // ------------END for LeadEnrichment-------------------//
+    // ------------END for Insights-------------------//
 
     // ------------START for statistics---------------------//
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
@@ -282,7 +289,7 @@ public class EnrichmentResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null, null, null,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null,
                     null, null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
@@ -302,7 +309,7 @@ public class EnrichmentResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null, null, null,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null,
                     null, null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
@@ -342,7 +349,7 @@ public class EnrichmentResource {
                     allEnrichAttrNames.add(attr.getAttribute());
                 }
             }
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getLeadEnrichmentAttributes(request, null,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null,
                     categoryName, null, null, null, null);
             List<LeadEnrichmentAttribute> attrs = new ArrayList<>();
 
@@ -369,7 +376,7 @@ public class EnrichmentResource {
             Boolean loadEnrichmentMetadata, //
             @ApiParam(value = "max", defaultValue = "5")//
             @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
-        List<String> categories = getLeadEnrichmentCategories(request);
+        List<String> categories = getInsightsCategories(request);
         Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
 
         for (String categoryName : categories) {

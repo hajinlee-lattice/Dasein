@@ -500,7 +500,7 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/categories" + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/categories" + "/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
@@ -518,7 +518,7 @@ public class InternalResource extends InternalResourceBase {
         return categoryStrList;
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/subcategories" + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/subcategories" + "/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
@@ -536,7 +536,7 @@ public class InternalResource extends InternalResourceBase {
         return new ArrayList<String>(subcategories);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
@@ -574,7 +574,7 @@ public class InternalResource extends InternalResourceBase {
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/" + "count" + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/" + "count" + "/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get lead enrichment")
@@ -604,7 +604,7 @@ public class InternalResource extends InternalResourceBase {
                 onlySelectedAttributes, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
@@ -618,7 +618,7 @@ public class InternalResource extends InternalResourceBase {
         selectedAttrService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/premiumattributeslimitation" + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation" + "/"
             + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -631,7 +631,7 @@ public class InternalResource extends InternalResourceBase {
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/selectedattributes/count" + "/"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count" + "/"
             + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -644,7 +644,7 @@ public class InternalResource extends InternalResourceBase {
         return selectedAttrService.getSelectedAttributeCount(tenant, Boolean.FALSE);
     }
 
-    @RequestMapping(value = "/enrichment" + EnrichmentResource.LEAD_ENRICH_PATH + "/selectedpremiumattributes/count"
+    @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count"
             + "/" + TENANT_ID_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -658,7 +658,7 @@ public class InternalResource extends InternalResourceBase {
     }
 
     @RequestMapping(value = "/enrichment/all"
-            + EnrichmentResource.LEAD_ENRICH_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+            + LatticeInsightsResource.INSIGHTS_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all lead enrichment")
     public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(HttpServletRequest request) {

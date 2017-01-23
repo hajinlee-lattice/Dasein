@@ -10,8 +10,8 @@
 
     <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:common-threadpool-context.xml"/>
-    <import resource="classpath:oauth2db-persistence-context.xml"/>
-    <import resource="classpath:oauth2db-context.xml"/>
+    <import resource="classpath:oauth2db-persistence-datasource-context.xml"/>
+    <import resource="classpath:db-context.xml"/>
     <import resource="classpath:aws-context.xml"/>
     <import resource="classpath:datafabric-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
@@ -23,7 +23,7 @@
     <context:component-scan base-package="com.latticeengines.ulysses">
         <!-- Need to exclude instantiating the swagger config except for bringing up the API
              since the servlet container instances are not available when running tests. -->
-        <context:exclude-filter type="assignable" expression="com.latticeengines.ulysses.swagger.SwaggerConfig" />
+        <context:exclude-filter type="assignable" expression="com.latticeengines.ulysses.swagger.SwaggerConfig"/>
     </context:component-scan>
 
     <mvc:annotation-driven/>

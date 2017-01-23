@@ -46,9 +46,7 @@ public class AttributeCustomizationServiceImplTestNG extends AppTestNGBase {
 
     @Test(groups = "functional")
     public void save() {
-        saved = new CompanyProfileAttributeFlags();
-        saved.setHidden(true);
-        saved.setHighlighted(false);
+        saved = new CompanyProfileAttributeFlags(true, false);
         attributeCustomizationService.save("TestAttribute", AttributeUseCase.CompanyProfile, saved);
     }
 

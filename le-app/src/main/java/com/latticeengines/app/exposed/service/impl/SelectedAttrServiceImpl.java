@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,25 +18,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
+import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
+import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
 
 @Component("selectedAttrService")
 public class SelectedAttrServiceImpl implements SelectedAttrService {
-    private static final String SPACE_DELIM = " ";
 
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
 
@@ -115,24 +110,28 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
             Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
-        List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
+                .selectedAttrEntityMgr(selectedAttrEntityMgr) //
+                .attributeDisplayNameFilter(attributeDisplayNameFilter) //
+                .category(category) //
+                .subcategory(subcategory) //
+                .onlySelectedAttributes(onlySelectedAttributes) //
+                .offset(offset) //
+                .max(max) //
+                .considerInternalAttributes(considerInternalAttributes) //
+                .build();
 
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
-                currentDataCloudVersion);
-
-        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
+        return processor.getPage();
     }
 
     @Override
     public List<LeadEnrichmentAttribute> getAllAttributes() {
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment, //
-                currentDataCloudVersion);
-
-        return superimpose(allColumns, new ArrayList<SelectedAttribute>(), null, null, null, false, 0,
-                allColumns.size(), true);
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
+                .selectedAttrEntityMgr(selectedAttrEntityMgr) //
+                .considerInternalAttributes(true).build();
+        return processor.getPage();
     }
 
     @Override
@@ -183,13 +182,14 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                currentDataCloudVersion);
-        List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
+                .selectedAttrEntityMgr(selectedAttrEntityMgr) //
+                .onlySelectedAttributes(isSelected) //
+                .considerInternalAttributes(considerInternalAttributes) //
+                .build();
 
-        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes, null, null, null,
-                isSelected, null, null, considerInternalAttributes);
+        List<LeadEnrichmentAttribute> attributes = processor.getPage();
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName, getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
     }
@@ -246,148 +246,6 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
         return displayName;
     }
 
-    private List<LeadEnrichmentAttribute> superimpose(List<ColumnMetadata> allColumns,
-            List<SelectedAttribute> selectedAttributes, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
-            Boolean considerInternalAttributes) {
-        if ((offset != null && offset < 0) || (max != null && max <= 0)) {
-            // TODO - throw LEDP exception
-            throw new RuntimeException("Invalid pagination option");
-        }
-
-        List<String> selectedAttributeNames = new ArrayList<>();
-
-        for (SelectedAttribute selectedAttribute : selectedAttributes) {
-            selectedAttributeNames.add(selectedAttribute.getColumnId());
-        }
-
-        List<LeadEnrichmentAttribute> superimposedList = new ArrayList<>();
-        List<String> searchTokens = getSearchTokens(attributeDisplayNameFilter);
-
-        for (ColumnMetadata column : allColumns) {
-            if (onlySelectedAttributes == Boolean.TRUE //
-                    && !selectedAttributeNames.contains(column.getColumnId())) {
-                continue;
-            }
-
-            if (considerInternalAttributes != Boolean.TRUE //
-                    && column.isCanInternalEnrich()) {
-                continue;
-            }
-
-            if (category != null) {
-                if (column.getCategory() != category) {
-                    continue;
-                }
-
-                if (subcategory != null //
-                        && (column.getSubcategory() == null //
-                        || (column.getSubcategory() != null //
-                        && !subcategory.equals(column.getSubcategory())))//
-                ) {
-                    continue;
-                }
-            }
-
-            if (!isMatchingSearchTokens(searchTokens, column)) {
-                continue;
-            }
-
-            addAttrInFinalList(selectedAttributeNames, superimposedList, column);
-        }
-
-        return extractPage(superimposedList, offset, max);
-    }
-
-    private List<String> getSearchTokens(String attributeDisplayNameFilter) {
-        Set<String> searchTokens = new HashSet<>();
-
-        // tokenize and find set of unique tokens from search string
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
-            StringTokenizer st = new StringTokenizer(attributeDisplayNameFilter.trim(), SPACE_DELIM);
-            while (st.hasMoreTokens()) {
-                searchTokens.add(st.nextToken().toUpperCase());
-            }
-        }
-
-        return new ArrayList<String>(searchTokens);
-    }
-
-    private boolean isMatchingSearchTokens(List<String> searchTokens, ColumnMetadata column) {
-        // if column's display name does not contain any of the search tokens
-        // then return false otherwise retrun true
-        //
-        // note that good searching result comes if order of search tokens is
-        // not important. Otherwise search becomes very restrictive
-
-        if (!CollectionUtils.isEmpty(searchTokens)) {
-            String displayName = column.getDisplayName().toUpperCase();
-            for (String token : searchTokens) {
-                if (!displayName.contains(token)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private List<LeadEnrichmentAttribute> extractPage(List<LeadEnrichmentAttribute> superimposedList, Integer offset,
-            Integer max) {
-        if (offset == null && max == null) {
-            return superimposedList;
-        } else {
-            if (offset != null && offset >= superimposedList.size()) {
-                return new ArrayList<LeadEnrichmentAttribute>();
-            }
-
-            int effectiveStartIndex = offset == null ? 0 : offset;
-            int effectiveEndIndex = max == null ? superimposedList.size() : effectiveStartIndex + max;
-            if (effectiveEndIndex > superimposedList.size()) {
-                effectiveEndIndex = superimposedList.size();
-            }
-
-            return superimposedList.subList(effectiveStartIndex, effectiveEndIndex);
-        }
-    }
-
-    private void addAttrInFinalList(List<String> selectedAttributeNames,
-            List<LeadEnrichmentAttribute> superimposedList, ColumnMetadata column) {
-        LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
-        attr.setDisplayName(column.getDisplayName());
-        attr.setFieldName(column.getColumnId());
-        attr.setFieldNameInTarget(column.getColumnName());
-        attr.setFieldType(column.getDataType());
-        attr.setFieldJavaType(column.getJavaClass());
-        attr.setFundamentalType(column.getFundamentalType());
-        attr.setDataSource(column.getMatchDestination());
-        attr.setDescription(column.getDescription());
-        attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
-        attr.setIsPremium(column.isPremium());
-        attr.setCategory(column.getCategory().toString());
-        attr.setSubcategory(column.getSubcategory() == null ? //
-        null
-                : column.getSubcategory().toString());
-        attr.setIsInternal(column.isCanInternalEnrich());
-        superimposedList.add(attr);
-    }
-
-    private void checkAmbiguityInFieldNames(LeadEnrichmentAttributesOperationMap attributes) {
-        Set<String> attrSet = new HashSet<>();
-        checkDuplicate(attrSet, attributes.getSelectedAttributes());
-        checkDuplicate(attrSet, attributes.getDeselectedAttributes());
-    }
-
-    private void checkDuplicate(Set<String> attrSet, List<String> attributes) {
-        if (!CollectionUtils.isEmpty(attributes)) {
-            for (String attrStr : attributes) {
-                if (attrSet.contains(attrStr)) {
-                    throw new LedpException(LedpCode.LEDP_18113, new String[] { attrStr });
-                }
-                attrSet.add(attrStr);
-            }
-        }
-    }
-
     private LeadEnrichmentAttribute findEnrichmentAttributeByName(List<LeadEnrichmentAttribute> allAttributes,
             String selectedAttrStr) {
         for (LeadEnrichmentAttribute attr : allAttributes) {
@@ -411,6 +269,23 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
             totalCount += limitationMap.get(key);
         }
         return totalCount;
+    }
+
+    private void checkAmbiguityInFieldNames(LeadEnrichmentAttributesOperationMap attributes) {
+        Set<String> attrSet = new HashSet<>();
+        checkDuplicate(attrSet, attributes.getSelectedAttributes());
+        checkDuplicate(attrSet, attributes.getDeselectedAttributes());
+    }
+
+    private void checkDuplicate(Set<String> attrSet, List<String> attributes) {
+        if (!CollectionUtils.isEmpty(attributes)) {
+            for (String attrStr : attributes) {
+                if (attrSet.contains(attrStr)) {
+                    throw new LedpException(LedpCode.LEDP_18113, new String[] { attrStr });
+                }
+                attrSet.add(attrStr);
+            }
+        }
     }
 
 }

@@ -6,6 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class CompanyProfileAttributeFlags extends AttributeFlags {
+
+    public CompanyProfileAttributeFlags() {
+    }
+
+    public CompanyProfileAttributeFlags(boolean hidden, boolean highlighted) {
+        this.hidden = hidden;
+        this.highlighted = highlighted;
+    }
+
     @JsonProperty
     private boolean hidden;
 

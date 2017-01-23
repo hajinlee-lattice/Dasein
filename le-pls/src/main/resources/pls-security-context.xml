@@ -26,8 +26,8 @@
     </context:component-scan>
 
     <mvc:annotation-driven/>
-    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
-    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
+    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 
     <security:http use-expressions="true"
                    pattern="/pls/modelsummaries/**"
@@ -119,7 +119,7 @@
     </security:http>
 
     <security:http use-expressions="true"
-                   pattern="/pls/enrichment/**"
+                   pattern="/pls/latticeinsights/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

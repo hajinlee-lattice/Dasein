@@ -1,5 +1,6 @@
 package com.latticeengines.ulysses.web;
 
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
@@ -40,24 +41,24 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        MultiTenantContext.setStrategy(new OAuth2MultiTenantContextStrategy());
         // define URL patterns to enable OAuth2 security
 
         // @formatter:off
         http.requestMatchers() //
                 .antMatchers("/ulysses/**") //
                 .and() //
-                .authorizeRequests() //
-                    .antMatchers( //
-                            "/ulysses/v2/api-docs", //
-                            "/ulysses/webjars/**", //
-                            "/**/favicon.ico", //
-                            "/ulysses/swagger-ui.html", //
-                            "/ulysses/swagger-resources/**", //
-                            "/ulysses/health/**") //
+            .authorizeRequests() //
+                .antMatchers( //
+                        "/ulysses/v2/api-docs", //
+                        "/ulysses/webjars/**", //
+                        "/**/favicon.ico", //
+                        "/ulysses/swagger-ui.html", //
+                        "/ulysses/swagger-resources/**", //
+                        "/ulysses/health/**") //
                     .permitAll() //
-                    .antMatchers("/ulysses/**") //
+                .antMatchers("/ulysses/**") //
                     .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");
         // @formatter:on
     }
-
 }

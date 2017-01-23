@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
@@ -39,8 +40,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.Top
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
@@ -58,21 +58,21 @@ public class LatticeInsightsResource {
     private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
-    private OAuthUserEntityMgr oAuthUserEntityMgr;
-
-    @Autowired
     private SelectedAttrService selectedAttrService;
 
     @Autowired
     private EnrichmentService enrichmentService;
+
+    @Autowired
+    private AttributeCustomizationService attributeCustomizationService;
 
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
-    public List<String> getInsightCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getInsightAttributes(request, null, null, null, false, null, null);
+    public List<String> getInsightsCategories(HttpServletRequest request) {
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null, null, false, null, null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -87,11 +87,11 @@ public class LatticeInsightsResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
-    public List<String> getInsightSubcategories(HttpServletRequest request, //
+    public List<String> getInsightsSubcategories(HttpServletRequest request, //
             @ApiParam(value = "category", required = true)//
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
-        List<LeadEnrichmentAttribute> allAttributes = getInsightAttributes(request, null, category, null, false, null,
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, category, null, false, null,
                 null);
 
         for (LeadEnrichmentAttribute attr : allAttributes) {
@@ -105,7 +105,7 @@ public class LatticeInsightsResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public void getInsightAttributes(HttpServletRequest request, //
+    public void getInsightsAttributes(HttpServletRequest request, //
             HttpServletResponse response, //
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false)//
@@ -129,23 +129,26 @@ public class LatticeInsightsResource {
             @ApiParam(value = "Maximum number of matching attributes in page", required = false)//
             @RequestParam(value = "max", required = false)//
             Integer max) {
-        List<LeadEnrichmentAttribute> result = getInsightAttributes(request, attributeDisplayNameFilter, category,
+        List<LeadEnrichmentAttribute> result = getInsightsAttributes(request, attributeDisplayNameFilter, category,
                 subcategory, onlySelectedAttributes, offset, max);
         writeToGzipStream(response, result);
     }
 
-    private List<LeadEnrichmentAttribute> getInsightAttributes(HttpServletRequest request,
+    private List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request,
             String attributeDisplayNameFilter, //
             String category, //
             String subcategory, //
             Boolean onlySelectedAttributes, //
             Integer offset, //
             Integer max) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
+        List<LeadEnrichmentAttribute> attributes = selectedAttrService.getAttributes(tenant,
+                attributeDisplayNameFilter, categoryEnum, subcategory, onlySelectedAttributes, offset, max,
+                considerInternalAttributes);
+        attributeCustomizationService.addFlags(attributes);
+        return attributes;
     }
 
     @RequestMapping(value = INSIGHTS_PATH + "/count", //
@@ -153,7 +156,7 @@ public class LatticeInsightsResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
-    public int getInsightAttributesCount(HttpServletRequest request,
+    public int getInsightsAttributesCount(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
                     + "text for attributeDisplayNameFilter", required = false)//
             @RequestParam(value = "attributeDisplayNameFilter", required = false)//
@@ -170,7 +173,7 @@ public class LatticeInsightsResource {
             required = false)//
             @RequestParam(value = "onlySelectedAttributes", required = false)//
             Boolean onlySelectedAttributes) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
@@ -185,7 +188,7 @@ public class LatticeInsightsResource {
             required = false)//
             @RequestParam(value = "onlySelectedAttributes", required = false)//
             Boolean onlySelectedAttributes) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
@@ -201,31 +204,9 @@ public class LatticeInsightsResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
-    public Map<String, Integer> getInsightsPremiumAttributesLimitation(HttpServletRequest request) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
+    public Map<String, Integer> getInsightssPremiumAttributesLimitation(HttpServletRequest request) {
+        Tenant tenant = MultiTenantContext.getTenant();
         return selectedAttrService.getPremiumAttributesLimitation(tenant);
-    }
-
-    @RequestMapping(value = INSIGHTS_PATH + "/selectedattributes/count", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get selected attributes count")
-    public Integer getLeadEnrichmentSelectedAttributeCount(HttpServletRequest request) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
-        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        return selectedAttrService.getSelectedAttributeCount(tenant, considerInternalAttributes);
-    }
-
-    @RequestMapping(value = INSIGHTS_PATH + "/selectedpremiumattributes/count", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get selected premium attributes count")
-    public Integer getLeadEnrichmentSelectedAttributePremiumCount(HttpServletRequest request) {
-        Tenant tenant = OAuth2Utils.getTenant(request, oAuthUserEntityMgr);
-        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        return selectedAttrService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
 
     private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
@@ -264,7 +245,7 @@ public class LatticeInsightsResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightAttributes(request, null, null, null, null,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
@@ -284,7 +265,7 @@ public class LatticeInsightsResource {
         AccountMasterCube cube = enrichmentService.getCube(query);
 
         if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightAttributes(request, null, null, null, null,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
                     null, null);
             cube.setEnrichmentAttributes(enrichmentAttributes);
         }
@@ -324,7 +305,7 @@ public class LatticeInsightsResource {
                     allEnrichAttrNames.add(attr.getAttribute());
                 }
             }
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightAttributes(request, null, categoryName,
+            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, categoryName,
                     null, null, null, null);
             List<LeadEnrichmentAttribute> attrs = new ArrayList<>();
 
@@ -351,7 +332,7 @@ public class LatticeInsightsResource {
             Boolean loadEnrichmentMetadata, //
             @ApiParam(value = "max", defaultValue = "5")//
             @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
-        List<String> categories = getInsightCategories(request);
+        List<String> categories = getInsightsCategories(request);
         Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
 
         for (String categoryName : categories) {

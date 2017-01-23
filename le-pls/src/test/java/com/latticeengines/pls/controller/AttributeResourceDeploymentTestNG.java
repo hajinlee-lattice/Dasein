@@ -25,9 +25,7 @@ public class AttributeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testSaveFlags() {
         String url = getRestAPIHostPort() + "/pls/attributes/flags/TestFlag/CompanyProfile";
-        flags = new CompanyProfileAttributeFlags();
-        flags.setHidden(true);
-        flags.setHighlighted(false);
+        flags = new CompanyProfileAttributeFlags(true, false);
         restTemplate.postForObject(url, flags, Void.class);
     }
 

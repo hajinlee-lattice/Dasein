@@ -19,11 +19,10 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
 public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
@@ -45,49 +44,25 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Autowired
-    private OAuthUserEntityMgr oAuthUserEntityMgr;
+    private Oauth2RestApiProxy oauth2RestApiProxy;
 
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
     private OAuth2RestTemplate oAuth2RestTemplate;
 
-    protected OAuthUser oAuthUser;
-
     @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
         Tenant tenant = setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
-        oAuthUser = getOAuthUser(tenant.getId());
+        String oneTimeKey = oauth2RestApiProxy.createAPIToken(tenant.getId());
 
-        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(), oAuthUser.getPassword(),
-                CLIENT_ID_LP);
+        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID_LP);
         OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(getOAuth2RestTemplate());
         log.info("Access Token: " + accessToken.getValue());
     }
 
     protected RestTemplate getGlobalAuthRestTemplate() {
         return deploymentTestBed.getRestTemplate();
-    }
-
-    protected OAuthUser getOAuthUser(String userId) {
-        OAuthUser user = oAuthUserEntityMgr.get(userId);
-        if (user == null) {
-            user = new OAuthUser();
-            user.setUserId(userId);
-            setPassword(user, userId);
-            oAuthUserEntityMgr.create(user);
-        } else {
-            setPassword(user, userId);
-            user.setPasswordExpired(false);
-            oAuthUserEntityMgr.update(user);
-        }
-
-        return user;
-    }
-
-    private void setPassword(OAuthUser user, String userId) {
-        user.setPassword(OAuth2Utils.generatePassword());
-        user.setPasswordExpiration(oAuthUserEntityMgr.getPasswordExpiration(userId));
     }
 
     protected Tenant setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product) throws IOException {
@@ -125,8 +100,11 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         return oAuth2RestTemplate;
     }
 
-    public String getRestAPIHostPort() {
+    public String getUlyssesRestAPIPort() {
         return ulyssesHostPort;
     }
 
+    public String getPLSRestAPIPort() {
+        return plsApiHostPort;
+    }
 }
