@@ -348,15 +348,15 @@ angular.module('common.datacloud.explorer', [
                 
                 items.forEach(function(item) {
                     var enrichment = vm.enrichments[vm.enrichmentsMap[item.Attribute]];
-//console.log(catKey, subcategory, item.Attribute, vm.enrichmentsMap[item.Attribute])
+
                     if (enrichment && enrichment.DisplayName) {
                         var displayName = enrichment.DisplayName;
+
                         item.DisplayName = displayName;
                     }
                 });
             });
         });
-//console.log(vm.enrichments, vm.enrichmentsMap);
 
         vm.topAttributes = EnrichmentTopAttributes;
     }
@@ -404,7 +404,7 @@ angular.module('common.datacloud.explorer', [
                 });
             }
         }
-//console.log(category, subcategory, items);
+
         return items;
     }
 

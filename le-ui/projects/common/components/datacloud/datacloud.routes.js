@@ -88,7 +88,7 @@ angular
                 }
             },
             views: {
-                "summary@": {
+                "subsummary@": {
                     controller: function(LookupResponse, LookupStore) {
                         LookupStore.add('count', 0);//Object.keys(LookupResponse.enrichmentAttributeValues).length;
                         
