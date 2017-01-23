@@ -71,11 +71,11 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
 
     private String tenant;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "sqoop")
     public void beforeMethod() throws Exception {
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "sqoop")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
@@ -96,7 +96,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), filePath);
     }
 
-    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
+    @AfterMethod(groups = "sqoop", enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         if (outputTable != null) {
             dbMetadataService.dropTable(scoringJdbcTemplate, outputTable);
@@ -111,7 +111,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "sqoop")
     public void executeYarnSteps() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
                 4352, new Timestamp(System.currentTimeMillis()));
