@@ -32,6 +32,9 @@ public class SamplingFactory extends ModelFactory {
             Map<String, String> paramMap = getParamMap(sampling);
             try {
                 samplingConfig.setRandomSeed(123456L);
+                if (paramMap.containsKey(MODEL_SAMPLING_SEED_KEY)) {
+                    samplingConfig.setRandomSeed(Long.parseLong(paramMap.get(MODEL_SAMPLING_SEED_KEY)));
+                }
                 if (paramMap.containsKey(MODEL_SAMPLING_RATE_KEY)) {
                     samplingConfig.setSamplingRate(Integer.parseInt(paramMap.get(MODEL_SAMPLING_RATE_KEY)));
                 }
@@ -53,7 +56,7 @@ public class SamplingFactory extends ModelFactory {
                 samplingConfig.setRandomSeed(Long.valueOf(seed));
             }
         }
-        
+
     }
 
     private static Map<String, String> getParamMap(Sampling sampling) {

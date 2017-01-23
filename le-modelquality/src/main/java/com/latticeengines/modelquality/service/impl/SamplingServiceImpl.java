@@ -12,7 +12,7 @@ import com.latticeengines.modelquality.service.SamplingService;
 
 @Component("samplingService")
 public class SamplingServiceImpl extends BaseServiceImpl implements SamplingService {
-    
+
     @Autowired
     private SamplingEntityMgr samplingEntityMgr;
 
@@ -20,40 +20,47 @@ public class SamplingServiceImpl extends BaseServiceImpl implements SamplingServ
     public Sampling createLatestProductionSamplingConfig() {
         String version = getVersion();
         String samplingName = "PRODUCTION-" + version.replace('/', '_');
-        
+
         Sampling sampling = samplingEntityMgr.findByName(samplingName);
-        
-        if(sampling != null)
-        {
+
+        if (sampling != null) {
             return sampling;
         }
-        
-        sampling =new Sampling();
+
+        sampling = new Sampling();
         sampling.setName(samplingName);
 
-        SamplingPropertyDef def = new SamplingPropertyDef();
-        def.setName(SamplingFactory.MODEL_SAMPLING_RATE_KEY);
-        SamplingPropertyValue value = new SamplingPropertyValue("100");
-        def.addSamplingPropertyValue(value);
-        sampling.addSamplingPropertyDef(def);
+        SamplingPropertyDef defSeed = new SamplingPropertyDef();
+        defSeed.setName(SamplingFactory.MODEL_SAMPLING_SEED_KEY);
+        SamplingPropertyValue valueSeed = new SamplingPropertyValue("123456");
+        defSeed.addSamplingPropertyValue(valueSeed);
+        sampling.addSamplingPropertyDef(defSeed);
 
-        def.setName(SamplingFactory.MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY);
-        value = new SamplingPropertyValue("80");
-        def.addSamplingPropertyValue(value);
-        sampling.addSamplingPropertyDef(def);
+        SamplingPropertyDef defRate = new SamplingPropertyDef();
+        defRate.setName(SamplingFactory.MODEL_SAMPLING_RATE_KEY);
+        SamplingPropertyValue valueRate = new SamplingPropertyValue("100");
+        defRate.addSamplingPropertyValue(valueRate);
+        sampling.addSamplingPropertyDef(defRate);
 
-        def.setName(SamplingFactory.MODEL_SAMPLING_TEST_PERCENTAGE_KEY);
-        value = new SamplingPropertyValue("20");
-        def.addSamplingPropertyValue(value);
-        sampling.addSamplingPropertyDef(def);
-        
+        SamplingPropertyDef defTraining = new SamplingPropertyDef();
+        defTraining.setName(SamplingFactory.MODEL_SAMPLING_TRAINING_PERCENTAGE_KEY);
+        SamplingPropertyValue valueTraining = new SamplingPropertyValue("80");
+        defTraining.addSamplingPropertyValue(valueTraining);
+        sampling.addSamplingPropertyDef(defTraining);
+
+        SamplingPropertyDef defTesting = new SamplingPropertyDef();
+        defTesting.setName(SamplingFactory.MODEL_SAMPLING_TEST_PERCENTAGE_KEY);
+        SamplingPropertyValue valueTesting = new SamplingPropertyValue("20");
+        defTesting.addSamplingPropertyValue(valueTesting);
+        sampling.addSamplingPropertyDef(defTesting);
+
         Sampling previousLatest = samplingEntityMgr.getLatestProductionVersion();
         int versionNo = 1;
-        if(previousLatest != null) {
+        if (previousLatest != null) {
             versionNo = previousLatest.getVersion() + 1;
         }
         sampling.setVersion(versionNo);
-        
+
         samplingEntityMgr.create(sampling);
 
         return sampling;
