@@ -26,6 +26,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
 import com.latticeengines.scoringapi.functionalframework.TestModelSummaryParser;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
@@ -35,14 +36,22 @@ public class TestRegisterModels {
 
     public TestModelArtifactDataComposition createModels(Configuration yarnConfiguration,
             InternalResourceRestApiProxy plsRest, Tenant tenant, TestModelConfiguration modelConfiguration,
-            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser, String hdfsSubPathForModel)
-            throws IOException {
-        createModel(plsRest, tenant, modelConfiguration, customerSpace, testModelSummaryParser);
+            CustomerSpace customerSpace, MetadataProxy metadataProxy, TestModelSummaryParser testModelSummaryParser,
+            String hdfsSubPathForModel) throws IOException {
+        ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace,
+                testModelSummaryParser);
+        createBucketMetadata(plsRest, modelSummary, customerSpace);
         TestModelArtifactDataComposition testModelArtifactDataComposition = setupHdfsArtifacts(yarnConfiguration,
-                tenant, modelConfiguration,  hdfsSubPathForModel);
+                tenant, modelConfiguration, hdfsSubPathForModel);
         createTableEntryForModel(modelConfiguration.getEventTable(),
                 testModelArtifactDataComposition.getEventTableDataComposition().fields, customerSpace, metadataProxy);
         return testModelArtifactDataComposition;
+    }
+
+    private void createBucketMetadata(InternalResourceRestApiProxy plsRest, ModelSummary modelSummary,
+            CustomerSpace customerSpace) {
+        plsRest.createABCDBuckets(modelSummary.getId(), customerSpace,
+                ScoringApiTestUtils.generateDefaultBucketMetadataList());
     }
 
     private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,

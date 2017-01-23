@@ -778,7 +778,7 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
-    @RequestMapping(value = "/abcdbuckets/uptodate/modelid/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/abcdbuckets/uptodate/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
     public List<BucketMetadata> getUpToDateABCDBuckets(@PathVariable String modelId,
@@ -786,6 +786,16 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
+    }
+
+    @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Create a group of ABCD buckets")
+    public void createABCDBuckets(@PathVariable String modelId,
+            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request,
+            @RequestBody List<BucketMetadata> bucketMetadatas) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        bucketedScoreService.createBucketMetadatas(modelId, bucketMetadatas);
     }
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")

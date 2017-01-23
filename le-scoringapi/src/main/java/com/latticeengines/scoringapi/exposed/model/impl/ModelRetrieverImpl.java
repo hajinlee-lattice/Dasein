@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -255,6 +256,15 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return modelSummary;
     }
 
+    private List<BucketMetadata> getBucketMetadata(CustomerSpace customerSpace, String modelId) {
+        List<BucketMetadata> bucketMetadataList = internalResourceRestApiProxy.getUpToDateABCDBuckets(modelId,
+                customerSpace);
+        if (bucketMetadataList == null) {
+            throw new LedpException(LedpCode.LEDP_31200, new String[] { modelId });
+        }
+        return bucketMetadataList;
+    }
+
     private Triple<String, String, String> determineScoreArtifactBaseEventTableAndSamplePath(
             CustomerSpace customerSpace, ModelSummary modelSummary) {
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
@@ -277,6 +287,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             String modelId) {
         log.info(String.format("Retrieving model artifacts from HDFS for model:%s", modelId));
         ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
+        List<BucketMetadata> bucketMetadataList = getBucketMetadata(customerSpace, modelId);
         ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelSummary);
@@ -296,7 +307,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields,
-                modelJsonType);
+                modelJsonType, bucketMetadataList);
 
         return artifacts;
     }
@@ -571,7 +582,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String determineIdFieldName(Map<String, //
-    FieldSchema> fieldSchemas) {
+            FieldSchema> fieldSchemas) {
         // find ID field
         String idFieldName = null;
         for (String fieldName : fieldSchemas.keySet()) {

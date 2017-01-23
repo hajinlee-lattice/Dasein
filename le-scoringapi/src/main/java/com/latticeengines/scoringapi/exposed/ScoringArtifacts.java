@@ -1,8 +1,10 @@
 package com.latticeengines.scoringapi.exposed;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -21,12 +23,14 @@ public class ScoringArtifacts {
     private final File modelArtifactsDir;
     private final Map<String, FieldSchema> fieldSchemas;
     private final String modelJsonType;
+    private final List<BucketMetadata> bucketMetadataList;
 
     public ScoringArtifacts(ModelSummary modelSummary, //
             ModelType modelType, DataComposition dataScienceDataComposition, //
             DataComposition eventTableDataComposition, ScoreDerivation scoreDerivation, //
             ModelEvaluator pmmlEvaluator, File modelArtifactsDir, //
-            Map<String, FieldSchema> fieldSchemas, String modelJsonType) {
+            Map<String, FieldSchema> fieldSchemas, String modelJsonType, //
+            List<BucketMetadata> bucketMetadataList) {
         super();
         this.modelSummary = modelSummary;
         this.modelType = modelType;
@@ -37,6 +41,7 @@ public class ScoringArtifacts {
         this.modelArtifactsDir = modelArtifactsDir;
         this.fieldSchemas = fieldSchemas;
         this.modelJsonType = modelJsonType;
+        this.bucketMetadataList = bucketMetadataList;
     }
 
     public ModelSummary getModelSummary() {
@@ -73,6 +78,10 @@ public class ScoringArtifacts {
 
     public String getModelJsonType() {
         return modelJsonType;
+    }
+
+    public List<BucketMetadata> getBucketMetadataList() {
+        return bucketMetadataList;
     }
 
 }

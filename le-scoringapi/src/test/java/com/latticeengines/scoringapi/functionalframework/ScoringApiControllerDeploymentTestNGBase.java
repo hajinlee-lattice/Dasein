@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -61,7 +62,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     public static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
-    private static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
+    protected static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
     private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
@@ -237,6 +238,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             plsRest.deleteModelSummary(modelId, customerSpace);
         }
         plsRest.createModelSummary(modelSummary, customerSpace);
+
+        List<BucketMetadata> bucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
+        plsRest.createABCDBuckets(modelId, customerSpace, bucketMetadataList);
 
         return tenant;
     }

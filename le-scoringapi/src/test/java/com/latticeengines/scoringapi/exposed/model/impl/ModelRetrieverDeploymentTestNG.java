@@ -1,6 +1,8 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,8 +11,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
+import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
@@ -30,8 +36,14 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
         testArtifacts(cachedArtifacts);
     }
 
-    private void testArtifacts(ScoringArtifacts artifacts) {
+    private void testArtifacts(ScoringArtifacts artifacts) throws IOException {
         Assert.assertNotNull(artifacts);
+        Assert.assertNotNull(artifacts.getModelSummary());
+        ModelSummary expectedModelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
+        Assert.assertEquals(artifacts.getModelSummary().getDisplayName(), expectedModelSummary.getDisplayName());
+        Assert.assertNotNull(artifacts.getBucketMetadataList());
+        List<BucketMetadata> expectedBucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
+        Assert.assertEquals(artifacts.getBucketMetadataList().size(), expectedBucketMetadataList.size());
         String localModelJsonCacheDir = String.format(modelRetriever.getLocalModelJsonCacheDirProperty(),
                 modelRetriever.getLocalModelJsonCacheDirIdentifier(), customerSpace.toString(), MODEL_ID);
         File modelArtifactsDir = new File(localModelJsonCacheDir + ModelRetrieverImpl.LOCAL_MODEL_ARTIFACT_CACHE_DIR);

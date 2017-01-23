@@ -27,6 +27,8 @@ import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -201,7 +203,9 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             Map<String, Object> transformedRecord) {
         ScoreResponse scoreResponse = new ScoreResponse();
         int percentile = score(scoringArtifacts, transformedRecord).getPercentile();
+        BucketName bucket = score(scoringArtifacts, transformedRecord).getBucketName();
         scoreResponse.setScore(percentile);
+        scoreResponse.setBucket(bucket);
         return scoreResponse;
     }
 
@@ -213,6 +217,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbabilityOrValue());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
+        debugScoreResponse.setBucket(scoreEvaluation.getBucketName());
         debugScoreResponse.setTransformedRecord(transformedRecord);
         debugScoreResponse.setMatchedRecord(matchedRecord);
         debugScoreResponse.setMatchLogs(matchLogs);
@@ -415,6 +420,52 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             percentile = Math.max(percentile, 5);
         }
 
-        return new ScoreEvaluation(probability, percentile);
+        BucketName bucketName = bucketPercileScore(scoringArtifacts, percentile);
+        return new ScoreEvaluation(probability, percentile, bucketName);
+    }
+
+    protected BucketName bucketPercileScore(ScoringArtifacts scoringArtifacts, int percentile) {
+        BucketName bucketName = null;
+        List<BucketMetadata> bucketMetadataList = scoringArtifacts.getBucketMetadataList();
+        int min = 99;
+        int max = 5;
+        BucketName minBucket = null;
+        BucketName maxBucket = null;
+        boolean withinRange = false;
+        if (bucketMetadataList != null && !bucketMetadataList.isEmpty()) {
+            for (BucketMetadata bucketMetadata : bucketMetadataList) {
+                int leftBoundScore = bucketMetadata.getLeftBoundScore();
+                int rightBoundScore = bucketMetadata.getRightBoundScore();
+                BucketName currentBucketName = bucketMetadata.getBucketName();
+                if (leftBoundScore < min) {
+                    min = leftBoundScore;
+                    minBucket = currentBucketName;
+                }
+                if (rightBoundScore > max) {
+                    max = rightBoundScore;
+                    maxBucket = currentBucketName;
+                }
+                if (percentile > leftBoundScore && percentile <= rightBoundScore) {
+                    withinRange = true;
+                    bucketName = currentBucketName;
+                }
+            }
+            if (min > max) {
+                throw new RuntimeException("Bucket metadata has wrong buckets");
+            }
+            if (!withinRange && percentile == min) {
+                withinRange = true;
+                bucketName = minBucket;
+            } else if (!withinRange && percentile < min) {
+                log.warn(String.format("%d is less than minimum bound, setting to %s", percentile,
+                        minBucket.toString()));
+                bucketName = minBucket;
+            } else if (!withinRange && percentile > max) {
+                log.warn(String.format("%d is more than maximum bound, setting to %s", percentile,
+                        maxBucket.toString()));
+                bucketName = maxBucket;
+            }
+        }
+        return bucketName;
     }
 }

@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Field;
@@ -97,6 +98,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -110,6 +113,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         Assert.assertTrue(difference < 0.1);
         Assert.assertNotNull(scoreResponse.getEnrichmentAttributeValues());
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 0);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -125,6 +130,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -141,6 +148,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         System.out.println("scoreResponse.getEnrichmentAttributeValues().size() = "
                 + scoreResponse.getEnrichmentAttributeValues().size() + "\n\n" + om.writeValueAsString(scoreResponse));
         Assert.assertTrue(scoreResponse.getEnrichmentAttributeValues().size() == 6);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -156,6 +165,8 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })

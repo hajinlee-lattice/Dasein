@@ -16,4 +16,5 @@ public class ScoringApiFunctionalTestNGBase extends AbstractTestNGSpringContextT
     protected String generateRandomModelId() {
         return String.format("ms__%s-PLSModel", UUID.randomUUID());
     }
+
 }

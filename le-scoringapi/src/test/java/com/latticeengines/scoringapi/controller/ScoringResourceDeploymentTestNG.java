@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -85,6 +86,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                 ScoreResponse.class);
         ScoreResponse scoreResponse = response.getBody();
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -99,6 +102,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         double difference = Math.abs(scoreResponse.getProbability() - 0.41640343016092707d);
         Assert.assertTrue(difference < 0.1);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -116,6 +121,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         System.out.println(JsonUtils.serialize(scoreResponse));
         Assert.assertEquals(scoreResponse.getScore(), EXPECTED_SCORE_99);
         Assert.assertTrue(scoreResponse.getProbability() > 0.27);
+        Assert.assertNotNull(scoreResponse.getBucket());
+        Assert.assertEquals(scoreResponse.getBucket(), BucketName.A);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "scoreRecords" })

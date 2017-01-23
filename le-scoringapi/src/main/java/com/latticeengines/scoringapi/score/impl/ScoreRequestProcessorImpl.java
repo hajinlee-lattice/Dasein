@@ -545,6 +545,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             if (exception == null) {
                 score.setScore(resp.getScore());
+                score.setBucket(resp.getBucket());
                 if (isDebugMode) {
                     score.setProbability(((DebugScoreResponse) resp).getProbability());
                 }

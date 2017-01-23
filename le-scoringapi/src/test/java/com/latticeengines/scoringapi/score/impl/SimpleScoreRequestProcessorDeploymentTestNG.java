@@ -187,6 +187,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getScore());
         Assert.assertTrue(recordScoreResponseDebugList.get(0).getScores().get(0).getProbability()
                 .doubleValue() != recordScoreResponseDebugList.get(0).getScores().get(0).getScore().doubleValue());
+        // Assert.assertNotNull(recordScoreResponseDebugList.get(0).getScores().get(0).getBucket());
 
         checkScoreResultList(recordScoreResponseDebugList, true);
 
@@ -205,6 +206,7 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getScore());
         Assert.assertTrue(recordScoreResponseList.get(0).getScores().get(0).getProbability()
                 .doubleValue() != recordScoreResponseList.get(0).getScores().get(0).getScore().doubleValue());
+        // Assert.assertNotNull(recordScoreResponseList.get(0).getScores().get(0).getBucket());
 
         checkScoreResultList(recordScoreResponseList, false);
     }

@@ -1,0 +1,59 @@
+package com.latticeengines.scoringapi.exposed.model.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
+
+import edu.emory.mathcs.backport.java.util.Collections;
+
+public class DefaultModelJsonTypeHandlerUnitTestNG {
+
+    private DefaultModelJsonTypeHandler defaultModelJsonTypeHandler = new DefaultModelJsonTypeHandler();
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "unit", enabled = true)
+    public void testBucketPercileScore() {
+        ScoringArtifacts scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,
+                generateDefaultBucketMetadataList());
+        Assert.assertNotNull(scoringArtifacts);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 4), BucketName.A);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 5), BucketName.A);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 10), BucketName.A);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 11), BucketName.B);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 40), BucketName.B);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 50), BucketName.C);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 99), BucketName.C);
+        Assert.assertEquals(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100), BucketName.C);
+
+        scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,
+                Collections.emptyList());
+        Assert.assertNull(defaultModelJsonTypeHandler.bucketPercileScore(scoringArtifacts, 100));
+
+    }
+
+    private List<BucketMetadata> generateDefaultBucketMetadataList() {
+        List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
+        BucketMetadata bucket1 = new BucketMetadata();
+        bucket1.setBucketName(BucketName.A);
+        bucket1.setLeftBoundScore(5);
+        bucket1.setRightBoundScore(10);
+        BucketMetadata bucket2 = new BucketMetadata();
+        bucket2.setBucketName(BucketName.B);
+        bucket2.setLeftBoundScore(10);
+        bucket2.setRightBoundScore(40);
+        BucketMetadata bucket3 = new BucketMetadata();
+        bucket3.setBucketName(BucketName.C);
+        bucket3.setLeftBoundScore(40);
+        bucket3.setRightBoundScore(99);
+        bucketMetadataList.add(bucket1);
+        bucketMetadataList.add(bucket2);
+        bucketMetadataList.add(bucket3);
+        return bucketMetadataList;
+    }
+}

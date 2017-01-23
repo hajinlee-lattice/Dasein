@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -89,7 +90,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
         BulkRecordScoreRequest scoreRequest = null;
         do {
-            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig, new HashMap<String, String>());
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig,
+                    new HashMap<String, String>());
             if (scoreRequest == null) {
                 break;
             }
@@ -133,8 +135,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testConvertBulkScoreResponseToAvroWithIncompleteAttributeMap() throws IllegalArgumentException,
-            Exception {
+    public void testConvertBulkScoreResponseToAvroWithIncompleteAttributeMap()
+            throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponseWithEnrichmentAttributeMap();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -162,8 +164,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testConvertBulkScoreResponseToAvroWithAttributeMapButNullAttributs() throws IllegalArgumentException,
-            Exception {
+    public void testConvertBulkScoreResponseToAvroWithAttributeMapButNullAttributs()
+            throws IllegalArgumentException, Exception {
         List<RecordScoreResponse> recordScoreResponseList = generateRecordScoreResponse();
         Map<String, Schema.Type> leadEnrichmentAttributeMap = new HashMap<>();
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = new HashMap<>();
@@ -204,10 +206,12 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
             Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
             Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
+            Assert.assertEquals(fields.get(3).name(), ScoreResultField.Bucket.displayName);
             System.out.println(record.get(0));
             System.out.println(record.get(1));
             System.out.println(record.get(2));
             System.out.println(record.get(3));
+            System.out.println(record.get(4));
             for (GenericRecord ele : list) {
                 Assert.assertNotNull(ele.get("attr1"));
                 Assert.assertNotNull(ele.get("attr2"));
@@ -216,8 +220,8 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
     }
 
     private void checkErrorCSV(String filePath) throws IOException {
-        try (CSVParser parser = new CSVParser(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
-                filePath)), LECSVFormat.format)) {
+        try (CSVParser parser = new CSVParser(
+                new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, filePath)), LECSVFormat.format)) {
             List<CSVRecord> records = parser.getRecords();
             Assert.assertEquals(records.size(), 1);
             CSVRecord record = records.get(0);
@@ -284,9 +288,11 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple1 = new ScoreModelTuple();
         tuple1.setModelId("model1");
         tuple1.setScore(99.0);
+        tuple1.setBucket(BucketName.A);
         ScoreModelTuple tuple2 = new ScoreModelTuple();
         tuple2.setModelId("model2");
         tuple2.setScore(98.0);
+        tuple2.setBucket(BucketName.A);
         scores1.add(tuple1);
         scores1.add(tuple2);
 
@@ -294,11 +300,13 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         ScoreModelTuple tuple3 = new ScoreModelTuple();
         tuple3.setModelId("model1");
         tuple3.setScore(8.0);
+        tuple3.setBucket(BucketName.D);
         scores2.add(tuple3);
 
         ScoreModelTuple tuple4 = new ScoreModelTuple();
         tuple4.setModelId("model2");
         tuple4.setErrorDescription("some error occurred");
+        tuple4.setBucket(null);
         scores2.add(tuple4);
         record1.setScores(scores1);
         record2.setScores(scores2);

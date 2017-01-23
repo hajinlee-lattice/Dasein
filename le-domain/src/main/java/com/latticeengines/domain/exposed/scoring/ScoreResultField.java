@@ -5,7 +5,8 @@ import org.apache.avro.Schema.Type;
 public enum ScoreResultField {
 
     Percentile(Type.INT.name(), "Score", Integer.class.getSimpleName()), //
-    RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()); //
+    RawScore(Type.DOUBLE.name(), "RawScore", Double.class.getSimpleName()), //
+    Bucket(Type.STRING.name(), "Bucket", String.class.getSimpleName());
 
     public String physicalDataType;
 
