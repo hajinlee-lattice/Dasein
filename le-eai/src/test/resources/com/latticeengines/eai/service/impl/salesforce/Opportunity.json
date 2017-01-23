@@ -6,7 +6,7 @@
       "name": "Id",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -43,7 +43,7 @@
       "name": "AccountId",
       "length": 18,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -80,7 +80,7 @@
       "name": "StageName",
       "length": 40,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -117,7 +117,7 @@
       "name": "Amount",
       "length": 0,
       "nullable": true,
-      "physicalDataType": "DOUBLE",
+      "physical_data_type": "DOUBLE",
       "precision": 18,
       "scale": 2,
       "properties": {
@@ -154,7 +154,7 @@
       "name": "LeadSource",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -191,7 +191,7 @@
       "name": "IsClosed",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "BOOLEAN",
+      "physical_data_type": "BOOLEAN",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -228,7 +228,7 @@
       "name": "IsWon",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "BOOLEAN",
+      "physical_data_type": "BOOLEAN",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -265,7 +265,7 @@
       "name": "CreatedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -303,7 +303,7 @@
       "name": "LastModifiedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
