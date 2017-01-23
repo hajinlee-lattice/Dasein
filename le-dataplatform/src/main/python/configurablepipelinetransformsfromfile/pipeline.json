@@ -15,8 +15,20 @@
       },
       "ColumnTransformFilePath": "addtitleattributesstep.py"
     },
-    "HighNumberUniqueValuesRemovalStep": {
+    "RemediateDataRulesStep": {
       "KeyWhenSortingByAscending": "2",
+      "Name": "remediatedatarulesstep",
+      "MainClassName": "RemediateDataRulesStep",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "enabledRules": {},
+        "params": "params"
+      },
+      "ColumnTransformFilePath": "remediatedatarulesstep.py"
+    },
+    "HighNumberUniqueValuesRemovalStep": {
+      "KeyWhenSortingByAscending": "3",
       "Name": "highnumberuniquevaluesremovalstep",
       "MainClassName": "HighNumberUniqueValuesRemovalStep",
       "UniqueColumnTransformName": "",
@@ -29,7 +41,7 @@
       "ColumnTransformFilePath": "highnumberuniquevaluesremovalstep.py"
     },
     "PivotStep": {
-      "KeyWhenSortingByAscending": "3",
+      "KeyWhenSortingByAscending": "4",
       "Name": "pivotstep",
       "MainClassName": "PivotStep",
       "UniqueColumnTransformName": "",
@@ -45,7 +57,7 @@
       "ColumnTransformFilePath": "pivotstep.py"
     },
     "EnumeratedColumnTransformStep": {
-      "KeyWhenSortingByAscending": "4",
+      "KeyWhenSortingByAscending": "5",
       "Name": "enumeratedcolumntransformstep",
       "MainClassName": "EnumeratedColumnTransformStep",
       "UniqueColumnTransformName": "",
@@ -58,7 +70,7 @@
       "ColumnTransformFilePath": "enumeratedcolumntransformstep.py"
     },
     "ColumnTypeConversionStep": {
-      "KeyWhenSortingByAscending": "5",
+      "KeyWhenSortingByAscending": "6",
       "Name": "columntypeconversionstep",
       "MainClassName": "ColumnTypeConversionStep",
       "UniqueColumnTransformName": "",
@@ -69,7 +81,7 @@
       "ColumnTransformFilePath": "columntypeconversionstep.py"
     },
     "ImputationStep": {
-      "KeyWhenSortingByAscending": "6",
+      "KeyWhenSortingByAscending": "7",
       "Name": "imputationstep",
       "MainClassName": "ImputationStep",
       "UniqueColumnTransformName": "",
@@ -84,7 +96,7 @@
       "ColumnTransformFilePath": "imputationstep.py"
     },
     "FeatureSelectionStep": {
-      "KeyWhenSortingByAscending": "7",
+      "KeyWhenSortingByAscending": "8",
       "Name": "featureselectionstep",
       "MainClassName": "FeatureSelectionStep",
       "UniqueColumnTransformName": "",
@@ -97,7 +109,7 @@
       "ColumnTransformFilePath": "featureselectionstep.py"
     },
     "ExportDataFrameStep": {
-      "KeyWhenSortingByAscending": "8",
+      "KeyWhenSortingByAscending": "9",
       "Name": "exportdfstep",
       "MainClassName": "ExportDataFrameStep",
       "UniqueColumnTransformName": "",

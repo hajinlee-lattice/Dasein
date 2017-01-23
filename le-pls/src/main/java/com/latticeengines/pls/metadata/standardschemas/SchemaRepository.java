@@ -186,7 +186,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
@@ -201,7 +201,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -280,7 +280,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -332,7 +332,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -411,7 +411,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -457,7 +457,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "COMPANY", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
@@ -473,7 +473,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -516,7 +516,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "FIRSTNAME", "FIRST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.FirstName) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -524,7 +524,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTNAME", "LAST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastName) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -567,7 +567,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -645,7 +645,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -689,7 +689,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "FIRSTNAME", "FIRST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.FirstName) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -697,7 +697,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTNAME", "LAST NAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastName) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
@@ -740,7 +740,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());

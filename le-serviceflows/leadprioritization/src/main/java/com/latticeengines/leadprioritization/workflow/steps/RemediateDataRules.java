@@ -1,6 +1,7 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +36,27 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             log.info("No datarules in configuration, nothing to do.");
         } else {
             List<DataRule> dataRules = new ArrayList<>(configuration.getDataRules());
-            log.info("Remediating datarules: " + JsonUtils.serialize(dataRules));
+
+            // This rule causes problematic derived attributes to be removed in
+            // the pipeline before the modeling algorithm is executed. Doing
+            // this (1) makes the ApprovedUsage consistent with the presence of
+            // the derived attribute in the model and (2) leaves the attribute
+            // available at the start of the pipeline for pipeline steps to use.
+            DataRule derivedAttribute = new DataRule("DerivedAttribute");
+            derivedAttribute.setDisplayName("Derived from a Removed Attribute");
+            derivedAttribute.setDescription(
+                    "This attribute is derived from an attribute that has been flagged and removed by a rule, and it suffers from the same problem as the source attribute.");
+            derivedAttribute.setMandatoryRemoval(true);
+
             Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-            editTableAgainstDataRules(dataRules, eventTable,
+            editTableAgainstDataRules(dataRules, derivedAttribute, eventTable,
                     configuration.isDefaultDataRuleConfiguration());
+            dataRules.add(derivedAttribute);
+            log.info("Remediating datarules: " + JsonUtils.serialize(dataRules));
             eventTable.setDataRules(dataRules);
             if (configuration.isDefaultDataRuleConfiguration()) {
-                metadataProxy.updateTable(configuration.getCustomerSpace().toString(),
-                        eventTable.getName(), eventTable);
+                metadataProxy.updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(),
+                        eventTable);
             }
             putObjectInContext(EVENT_TABLE, eventTable);
             putObjectInContext(DATA_RULES, dataRules);
@@ -50,12 +64,13 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
     }
 
     @SuppressWarnings("rawtypes")
-    private void editTableAgainstDataRules(List<DataRule> dataRules, Table eventTable, boolean isDefault) {
+    private void editTableAgainstDataRules(List<DataRule> dataRules, DataRule derivedAttribute, Table eventTable,
+            boolean isDefault) {
         for (DataRule dataRule : dataRules) {
-            if (dataRule.isEnabled()){
+            if (dataRule.isEnabled()) {
                 if (isDefault) {
-                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS,
-                            String.class, List.class);
+                    Map<String, List> eventToColumnResults = getMapObjectFromContext(COLUMN_RULE_RESULTS, String.class,
+                            List.class);
                     Iterator<List> iter = eventToColumnResults.values().iterator();
                     if (iter.hasNext()) {
                         List<ColumnRuleResult> results = JsonUtils.convertList(iter.next(), ColumnRuleResult.class);
@@ -68,14 +83,25 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                 }
                 log.info(String.format("Enabled columns: %s for data rule: %s",
                         JsonUtils.serialize(dataRule.getFlaggedColumnNames()), dataRule.getName()));
-                editTableAttributesAgainstDataRule(dataRule, eventTable);
+                editTableAttributesAgainstDataRule(dataRule, derivedAttribute, eventTable);
             }
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private void editTableAttributesAgainstDataRule(DataRule dataRule, Table eventTable) {
+    private void editTableAttributesAgainstDataRule(DataRule dataRule, DataRule derivedAttribute, Table eventTable) {
         if (!CollectionUtils.isEmpty(dataRule.getFlaggedColumnNames())) {
+
+            Map<Attribute, List<Attribute>> parentChild = new HashMap<>();
+            for (Attribute attribute : eventTable.getAttributes()) {
+                for (String parentName : attribute.getParentAttributeNames()) {
+                    Attribute parent = eventTable.getAttribute(parentName);
+                    if (!parentChild.containsKey(parent)) {
+                        parentChild.put(parent, new ArrayList<Attribute>());
+                    }
+                    parentChild.get(parent).add(attribute);
+                }
+            }
+
             for (String flaggedColumn : dataRule.getFlaggedColumnNames()) {
                 Attribute attribute = eventTable.getAttribute(flaggedColumn);
                 attribute.addAssociatedDataRuleName(dataRule.getName());
@@ -85,6 +111,23 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
                 } else {
                     attribute.setIsCoveredByOptionalRule(true);
                 }
+
+                if (attribute.getIsCoveredByMandatoryRule() && attribute.getIsCoveredByOptionalRule()
+                        && parentChild.containsKey(attribute)) {
+                    setApprovedUsageNoneRecursively(parentChild.get(attribute), derivedAttribute, parentChild);
+                }
+            }
+        }
+    }
+
+    private void setApprovedUsageNoneRecursively(List<Attribute> attributes, DataRule derivedAttribute,
+            Map<Attribute, List<Attribute>> parentChild) {
+        for (Attribute attribute : attributes) {
+            attribute.setApprovedUsage(ApprovedUsage.NONE);
+            if (!derivedAttribute.getFlaggedColumnNames().contains(attribute.getName()))
+                derivedAttribute.getFlaggedColumnNames().add(attribute.getName());
+            if (parentChild.containsKey(attribute)) {
+                setApprovedUsageNoneRecursively(parentChild.get(attribute), derivedAttribute, parentChild);
             }
         }
     }

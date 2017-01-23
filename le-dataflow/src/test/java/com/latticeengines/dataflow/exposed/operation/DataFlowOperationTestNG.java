@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,9 +47,6 @@ import com.latticeengines.dataflow.runtime.cascading.DenormalizeIntoListBuffer;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 
@@ -262,7 +258,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
-
     private void prepareAddRowId(String avroDir, String fileName) {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
@@ -428,8 +423,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features,
-                        columnMappings, Integer.class, PivotType.SUM, 0);
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features, columnMappings,
+                        Integer.class, PivotType.SUM, 0);
                 return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
@@ -525,26 +520,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
-    public void testTransformCompanyNameLengthCascadeMetadata() throws Exception {
-        final TransformDefinition definition = TransformationPipeline.stdLengthCompanyName;
-        Table table = execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
-            @Override
-            public Node construct(DataFlowParameters parameters) {
-                Node lead = addSource("Lead2");
-                lead.getSchema("CompanyName").setPropertyValue("ApprovedUsage",
-                        Collections.singletonList(ApprovedUsage.NONE).toString());
-                return lead.addTransformFunction("com.latticeengines.transform.v2_0_25.functions", definition);
-            }
-        });
-        List<GenericRecord> output = readOutput();
-        for (GenericRecord record : output) {
-            Assert.assertNotNull(record.get(definition.output));
-        }
-        Attribute attribute = table.getAttribute("CompanyName_Length");
-        Assert.assertEquals(attribute.getApprovedUsage().get(0), ApprovedUsage.NONE.toString());
-    }
-
-    @Test(groups = "functional")
     public void testTransformFundingStage() throws Exception {
         final TransformDefinition definition = TransformationPipeline.stdVisidbDsPdFundingstageOrdered;
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
@@ -608,13 +583,11 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     public void testBitEncode() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
-        Object[][] data = new Object[][] {
-                { "dom1.com", "f1", 1, 123L }, //
+        Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, //
                 { "dom1.com", "f2", 2, 125L }, //
                 { "dom1.com", "f3", 3, 124L }, //
                 { "dom2.com", "f2", 4, 101L }, //
-                { "dom2.com", "f3", 2, 102L }
-        };
+                { "dom2.com", "f3", 2, 102L } };
 
         uploadAvro(data, avroDir, fileName);
 
@@ -637,7 +610,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         for (GenericRecord record : output) {
             System.out.println(record);
             String encoded = record.get("Encoded").toString();
-            boolean[] bits = BitCodecUtils.decode(encoded, new int[]{0, 1, 2, 3});
+            boolean[] bits = BitCodecUtils.decode(encoded, new int[] { 0, 1, 2, 3 });
             String domain = record.get("Domain").toString();
             if ("dom1.com".equals(domain)) {
                 Assert.assertTrue(bits[0]);
@@ -655,17 +628,14 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
-
     @Test(groups = "functional")
     public void testBitDecode() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
 
-        Object[][] data = new Object[][] {
-                { "dom1.com", BitCodecUtils.encode(new int[]{1, 3}), 1, 123L }, //
-                { "dom2.com", BitCodecUtils.encode(new int[]{0, 2}), 2, 102L }, //
-                { "dom3.com", null, 2, 102L }
-        };
+        Object[][] data = new Object[][] { { "dom1.com", BitCodecUtils.encode(new int[] { 1, 3 }), 1, 123L }, //
+                { "dom2.com", BitCodecUtils.encode(new int[] { 0, 2 }), 2, 102L }, //
+                { "dom3.com", null, 2, 102L } };
         uploadAvro(data, avroDir, fileName);
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
@@ -689,8 +659,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 bitPosMap2.put("g4", 0);
                 codebook2.setBitsPosMap(bitPosMap2);
 
-                node = node.bitDecode("Feature", new String[]{ "f1", "f2", "f3", "f4" }, codebook1);
-                node = node.bitDecode("Feature", new String[]{ "g1", "g2", "g3", "g4" }, codebook2);
+                node = node.bitDecode("Feature", new String[] { "f1", "f2", "f3", "f4" }, codebook1);
+                node = node.bitDecode("Feature", new String[] { "g1", "g2", "g3", "g4" }, codebook2);
                 node = node.retain(new FieldList("Domain", "f1", "f2", "f3", "f4", "g1", "g2", "g3", "g4"));
                 return node;
             }
@@ -699,36 +669,36 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         for (GenericRecord record : readOutput()) {
             String domain = record.get("Domain").toString();
             switch (domain) {
-                case "dom1.com":
-                    Assert.assertEquals(record.get("f1").toString(), "No");
-                    Assert.assertEquals(record.get("f2").toString(), "Yes");
-                    Assert.assertEquals(record.get("f3").toString(), "No");
-                    Assert.assertEquals(record.get("f4").toString(), "Yes");
-                    Assert.assertEquals(record.get("g1").toString(), "Yes");
-                    Assert.assertEquals(record.get("g2").toString(), "No");
-                    Assert.assertEquals(record.get("g3").toString(), "Yes");
-                    Assert.assertEquals(record.get("g4").toString(), "No");
-                    break;
-                case "dom2.com":
-                    Assert.assertEquals(record.get("f1").toString(), "Yes");
-                    Assert.assertEquals(record.get("f2").toString(), "No");
-                    Assert.assertEquals(record.get("f3").toString(), "Yes");
-                    Assert.assertEquals(record.get("f4").toString(), "No");
-                    Assert.assertEquals(record.get("g1").toString(), "No");
-                    Assert.assertEquals(record.get("g2").toString(), "Yes");
-                    Assert.assertEquals(record.get("g3").toString(), "No");
-                    Assert.assertEquals(record.get("g4").toString(), "Yes");
-                    break;
-                case "dom3.com":
-                    Assert.assertNull(record.get("f1"));
-                    Assert.assertNull(record.get("f2"));
-                    Assert.assertNull(record.get("f3"));
-                    Assert.assertNull(record.get("f4"));
-                    Assert.assertNull(record.get("g1"));
-                    Assert.assertNull(record.get("g2"));
-                    Assert.assertNull(record.get("g3"));
-                    Assert.assertNull(record.get("g4"));
-                    break;
+            case "dom1.com":
+                Assert.assertEquals(record.get("f1").toString(), "No");
+                Assert.assertEquals(record.get("f2").toString(), "Yes");
+                Assert.assertEquals(record.get("f3").toString(), "No");
+                Assert.assertEquals(record.get("f4").toString(), "Yes");
+                Assert.assertEquals(record.get("g1").toString(), "Yes");
+                Assert.assertEquals(record.get("g2").toString(), "No");
+                Assert.assertEquals(record.get("g3").toString(), "Yes");
+                Assert.assertEquals(record.get("g4").toString(), "No");
+                break;
+            case "dom2.com":
+                Assert.assertEquals(record.get("f1").toString(), "Yes");
+                Assert.assertEquals(record.get("f2").toString(), "No");
+                Assert.assertEquals(record.get("f3").toString(), "Yes");
+                Assert.assertEquals(record.get("f4").toString(), "No");
+                Assert.assertEquals(record.get("g1").toString(), "No");
+                Assert.assertEquals(record.get("g2").toString(), "Yes");
+                Assert.assertEquals(record.get("g3").toString(), "No");
+                Assert.assertEquals(record.get("g4").toString(), "Yes");
+                break;
+            case "dom3.com":
+                Assert.assertNull(record.get("f1"));
+                Assert.assertNull(record.get("f2"));
+                Assert.assertNull(record.get("f3"));
+                Assert.assertNull(record.get("f4"));
+                Assert.assertNull(record.get("g1"));
+                Assert.assertNull(record.get("g2"));
+                Assert.assertNull(record.get("g3"));
+                Assert.assertNull(record.get("g4"));
+                break;
             }
         }
 
@@ -764,8 +734,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]},"
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
@@ -794,8 +764,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadDepivotAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
-                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Topic1\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Score1\",\"type\":[\"double\",\"null\"]},"
                 + "{\"name\":\"Topic2\",\"type\":[\"string\",\"null\"]},"
@@ -865,14 +835,13 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                         new DenormalizeIntoListBuffer(new Fields("Timestamp", "ListFeature"), "ListFeature"), fms);
             }
         });
-        
-        
+
         List<GenericRecord> output = readOutput();
 
         for (GenericRecord record : output) {
             List<?> list = (List<?>) record.get("ListFeature");
             Long timestamp = (long) record.get("Timestamp");
-            
+
             if (timestamp == 124L) {
                 Assert.assertEquals(list.size(), 2);
             } else if (timestamp == 123L) {

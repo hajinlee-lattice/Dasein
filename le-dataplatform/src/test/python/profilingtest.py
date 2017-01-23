@@ -1,5 +1,5 @@
-from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
+from leframework.executors.learningexecutor import LearningExecutor
 
 import numpy as np
 
@@ -9,7 +9,7 @@ class ProfilingTest(ProfilingTestBase):
         self.assertSkewNessAndKurtosisWithNullData()
 
         from launcher import Launcher
-        profilinglauncher = Launcher("model-dataprofile.json")
+        profilinglauncher = Launcher("SlimEventTable_Mulesoft_Metadata_Profiling_20160624_155355.json")
         profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
@@ -34,7 +34,7 @@ class ProfilingTest(ProfilingTestBase):
     def assertSkewnessAndKurtosis(self, results):
         metadataDict = dict(results[0])
 
-        featureKey = "BusinessAnnualSalesAbs"
+        featureKey = "AlexaReachRank"
         self.assertTrue(metadataDict.has_key(featureKey))
 
         # Check if Kurtosis and Skewness keys are added
@@ -45,7 +45,7 @@ class ProfilingTest(ProfilingTestBase):
 
         # Check if Kurtosis and Skewness are calculated for an arbitrary record
         skew = metadataDict[featureKey][0][skewnessKey]
-        self.assertEqual(round(skew, 4), 1.4183)
+        self.assertEqual(round(skew, 4), 1.4228)
 
         kurtosis = metadataDict[featureKey][0][kurtosisKey]
-        self.assertEqual(round(kurtosis, 4), 0.6061)
+        self.assertEqual(round(kurtosis, 4), 0.7069)

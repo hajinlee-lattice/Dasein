@@ -173,12 +173,11 @@ class ArgumentParser(object):
         scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
         scoringColumns |= set([self.revenueColumn]) if self.revenueColumn != None else set()
         nonScoringColumns = set(self.readouts) | set(self.samples.values())
+        specifiedColumns = scoringColumns | nonScoringColumns
 
         if postProcessClf:
-            specifiedColumns = scoringColumns | nonScoringColumns
             (self.reserved, reservedFields, reservedFieldDefaultValues) = ReservedFieldUtil.configureReservedFields()
         else:
-            specifiedColumns = scoringColumns
             self.reserved = None
 
         for i, f in enumerate(self.fields):

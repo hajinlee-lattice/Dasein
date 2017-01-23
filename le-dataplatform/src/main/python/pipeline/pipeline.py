@@ -58,7 +58,7 @@ def setupSteps(pipelineDriver, pipelineLib, profile, columnMetadata, stringColum
                 continue
             if column['ColumnName'] in keys or column['ColumnName'] == targetColumn:
                 continue
-            if column['Tags'][-1] in ['Internal'] and column['ColumnName'] in features:
+            if column['Tags'][-1] in ['Internal']:
                 customerColumns.add(column['ColumnName'])
 
     allColumns = categoricalColumns.copy()

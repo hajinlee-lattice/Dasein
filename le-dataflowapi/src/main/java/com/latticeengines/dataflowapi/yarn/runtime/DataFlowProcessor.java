@@ -80,8 +80,8 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 continue;
             }
             if (sourceTable.getExtracts().size() > 0) {
-                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
-                        .getExtracts().get(0).getPath()));
+                log.info(String.format("The first extract of table %s is located at %s", name,
+                        sourceTable.getExtracts().get(0).getPath()));
             }
             sourceTables.put(name, sourceTable);
         }
@@ -136,7 +136,6 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         }
         ctx.setProperty(DataFlowProperty.APPCTX, appContext);
         ctx.setProperty(DataFlowProperty.PARAMETERS, dataFlowConfig.getDataFlowParameters());
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         Integer partitions = dataFlowConfig.getPartitions();
         if (partitions != null) {
             ctx.setProperty(DataFlowProperty.PARTITIONS, partitions);

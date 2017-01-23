@@ -26,6 +26,7 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
@@ -289,7 +290,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public void setCleanedUpEnumValuesAsString(String enumValues) {
         this.cleanedUpEnumValuesAsString = enumValues;
         if (enumValues != null) {
-            setCleanedUpEnumValues(Arrays.<String> asList(enumValues.split(",")));
+            setCleanedUpEnumValues(Arrays.<String>asList(enumValues.split(",")));
         }
     }
 
@@ -839,5 +840,37 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             strs.add(en.toString());
         }
         return strs;
+    }
+
+    @Transient
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public List<String> getParentAttributeNames() {
+        List<String> parents = new ArrayList<>();
+
+        boolean isInternalTransform = false;
+        List<String> tags = getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                if (tag.equals(Tag.INTERNAL_TRANSFORM.toString())) {
+                    isInternalTransform = true;
+                    break;
+                }
+            }
+        }
+        if (!isInternalTransform)
+            return parents;
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, String> arguments = mapper.readValue(getRTSArguments(), Map.class);
+            for (String attributeName : arguments.values()) {
+                parents.add(attributeName);
+            }
+        } catch (Exception e) {
+            return parents;
+        }
+
+        return parents;
     }
 }

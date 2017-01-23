@@ -115,7 +115,7 @@ public abstract class DataFlowBuilder {
                 if (logicalType != null && //
                         (logicalType.equals(LogicalDataType.InternalId.toString()) || //
                                 logicalType.equals(LogicalDataType.Reference.toString()) || //
-                        logicalType.equals(LogicalDataType.Id))) {
+                                logicalType.equals(LogicalDataType.Id))) {
                     continue;
                 }
             }
@@ -184,19 +184,19 @@ public abstract class DataFlowBuilder {
                     fm.setPropertyValue("displayName", attribute.getDisplayName());
                 }
                 if (fm.getPropertyValue("length") == null) {
-                    fm.setPropertyValue("length", attribute.getLength() != null ? attribute.getLength().toString()
-                            : null);
+                    fm.setPropertyValue("length",
+                            attribute.getLength() != null ? attribute.getLength().toString() : null);
                 }
                 if (fm.getPropertyValue("sourceLogicalType") == null) {
                     fm.setPropertyValue("sourceLogicalType", attribute.getSourceLogicalDataType());
                 }
                 if (fm.getPropertyValue("logicalType") == null) {
-                    fm.setPropertyValue("logicalType", attribute.getLogicalDataType() != null ? attribute
-                            .getLogicalDataType().toString() : null);
+                    fm.setPropertyValue("logicalType",
+                            attribute.getLogicalDataType() != null ? attribute.getLogicalDataType().toString() : null);
                 }
                 if (fm.getPropertyValue("precision") != null) {
-                    fm.setPropertyValue("precision", attribute.getPrecision() != null ? attribute.getPrecision()
-                            .toString() : null);
+                    fm.setPropertyValue("precision",
+                            attribute.getPrecision() != null ? attribute.getPrecision().toString() : null);
                 }
                 if (fm.getPropertyValue("scale") != null) {
                     fm.setPropertyValue("scale", attribute.getScale() != null ? attribute.getScale().toString() : null);
@@ -211,16 +211,15 @@ public abstract class DataFlowBuilder {
                     Object metadataValue = properties.get(key);
                     String avroValue = fm.getPropertyValue(key);
                     if (avroValue != null && metadataValue != null && !avroValue.equals(metadataValue.toString())) {
-                        log.warn(String
-                                .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
-                                        field.name(), table.getName(), avroValue, metadataValue));
+                        log.warn(String.format(
+                                "Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
+                                field.name(), table.getName(), avroValue, metadataValue));
                     }
                     fm.setPropertyValue(key, metadataValue != null ? metadataValue.toString() : null);
                 }
             } else {
-                log.warn(String.format(
-                        "Could not find field %s in table %s.  Attribute is in avro but not in metadata", field.name(),
-                        table.getName()));
+                log.warn(String.format("Could not find field %s in table %s.  Attribute is in avro but not in metadata",
+                        field.name(), table.getName()));
             }
 
             fields.add(fm);
@@ -230,11 +229,6 @@ public abstract class DataFlowBuilder {
 
     // Conversion to Table
     protected Table getTableMetadata(String tableName, String targetPath, List<FieldMetadata> metadata) {
-        Boolean cascade = getDataFlowCtx().getProperty(DataFlowProperty.CASCADEMETADATA, Boolean.class, false);
-        if (cascade) {
-            cascadeMetadata(metadata);
-        }
-
         Table table = new Table();
         table.setName(tableName);
         table.setDisplayName(tableName);
@@ -268,8 +262,8 @@ public abstract class DataFlowBuilder {
 
                 table.addAttribute(attribute);
             } catch (Exception e) {
-                throw new RuntimeException(String.format("Failed to convert field %s to output metadata format",
-                        fm.getFieldName()), e);
+                throw new RuntimeException(
+                        String.format("Failed to convert field %s to output metadata format", fm.getFieldName()), e);
             }
         }
 
@@ -284,11 +278,6 @@ public abstract class DataFlowBuilder {
         table.addStorageMechanism(mechanism);
 
         return table;
-    }
-
-    private void cascadeMetadata(List<FieldMetadata> metadata) {
-        MetadataCascade cascade = new MetadataCascade(metadata);
-        cascade.cascade();
     }
 
 }

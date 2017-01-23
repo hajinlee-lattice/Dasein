@@ -69,8 +69,8 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         HdfsUtils.rmdir(config, "/tmp/avro");
 
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        opportunity = ClassLoader
-                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
+                .getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
         extract1 = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/file1").getPath()
@@ -122,7 +122,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, true);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
 
         verifyMetadata(table, "/tmp/EventTable");
@@ -202,14 +201,13 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
 
         dataTransformationService.executeNamedTransformation(ctx, "tableWithExtractsDataFlowBuilder");
         verifyNumRows(config, "/tmp/CombinedImportTable", 7);
     }
 
     @Test(groups = "functional", dataProvider = "errorUseCaseProvider", //
-    dependsOnMethods = { "executeNamedTransformationForTableSource" })
+            dependsOnMethods = { "executeNamedTransformationForTableSource" })
     public void executeNamedTransformationForErrors(Table table, String message) throws Exception {
         Map<String, Table> sourceTables = new HashMap<>();
         sourceTables.put("Source", table);
@@ -224,7 +222,6 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
 
         boolean exception = false;
         try {

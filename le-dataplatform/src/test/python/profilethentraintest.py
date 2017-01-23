@@ -2,8 +2,8 @@ import json
 import os
 import sys
 
-from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
+from leframework.executors.learningexecutor import LearningExecutor
 
 
 class ProfilingThenTrainTest(TrainingTestBase):

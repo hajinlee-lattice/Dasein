@@ -24,6 +24,22 @@ class DataProfilingExecutor(Executor):
 
     @overrides(Executor)
     def transformData(self, params):
+        schema = params["schema"]
+        samples = schema["samples"]
+        features = schema["features"]
+        columnsMetadata = []
+        if "config_metadata" in schema and schema["config_metadata"] is not None \
+                and "Metadata" in schema["config_metadata"] and schema["config_metadata"]["Metadata"] is not None:
+            columnsMetadata = schema["config_metadata"]["Metadata"]
+
+        for (key, colname) in samples.iteritems():
+            if colname not in features:
+                features.append(colname)
+            for columnMetadata in [c for c in columnsMetadata]:
+                if columnMetadata['ColumnName'] == colname:
+                    index = columnsMetadata.index(columnMetadata)
+                    del(columnsMetadata[index])
+
         training = params["training"]
         test = params["test"]
         return (training, test, None)

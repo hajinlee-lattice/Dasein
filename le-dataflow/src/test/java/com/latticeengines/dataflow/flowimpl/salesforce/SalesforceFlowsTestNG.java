@@ -41,12 +41,13 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         HdfsUtils.rmdir(config, "/tmp/TmpEventTable");
         HdfsUtils.rmdir(config, "/tmp/checkpoints");
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        opportunity = ClassLoader
-                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
+                .getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
-        opportunityContactRole = ClassLoader.getSystemResource(
-                "com/latticeengines/dataflow/exposed/service/impl/OpportunityContactRole.avro").getPath();
+        opportunityContactRole = ClassLoader
+                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/OpportunityContactRole.avro")
+                .getPath();
 
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
@@ -86,7 +87,6 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty(DataFlowProperty.CHECKPOINT, checkpoint);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         verifyNumRows(config, "/tmp/TmpEventTable", 10787);
 

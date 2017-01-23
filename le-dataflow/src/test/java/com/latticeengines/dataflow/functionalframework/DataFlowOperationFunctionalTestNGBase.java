@@ -47,8 +47,8 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
 
         String lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro")
                 .getPath();
-        String opportunity = ClassLoader.getSystemResource(
-                "com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        String opportunity = ClassLoader
+                .getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         String contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
         String feature = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Feature.avro")
@@ -130,7 +130,6 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty(DataFlowProperty.CHECKPOINT, false);
         ctx.setProperty(DataFlowProperty.HADOOPCONF, configuration);
         ctx.setProperty(DataFlowProperty.ENGINE, "FLINK");
-        ctx.setProperty(DataFlowProperty.CASCADEMETADATA, true);
         return dataTransformationService.executeNamedTransformation(ctx, builder);
     }
 
