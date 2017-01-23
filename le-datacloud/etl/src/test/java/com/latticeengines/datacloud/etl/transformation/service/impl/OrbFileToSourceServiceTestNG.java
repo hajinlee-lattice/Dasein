@@ -44,7 +44,7 @@ public class OrbFileToSourceServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTransformation() {
         baseSource.setIngetionName(IngestionNames.ORB_INTELLIGENCE);
         uploadBaseSourceFile(baseSource, "orb-db2-export-sample/orb_companies.csv", baseSourceVersion);
