@@ -234,7 +234,8 @@ class ECSStack(Stack):
         return asgroup
 
     def attach_tgrp(self, tgrp):
-        self._asgroup.attach_tgrp(tgrp)
+        if self._asgroup is not None:
+            self._asgroup.attach_tgrp(tgrp)
 
     @staticmethod
     def _userdata(launch_config, asgroup):
