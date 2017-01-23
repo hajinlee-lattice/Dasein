@@ -11,8 +11,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.JdbcStorage;
+import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -21,9 +22,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private MetadataService mdService;
 
-    @Autowired
-    private AttributeDao attributeDao;
-
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
@@ -36,12 +35,27 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(table.getName(), tableName);
         assertNotNull(table.getLastModifiedKey());
         assertNotNull(table.getPrimaryKey());
+        assertEquals(table.getStorageMechanisms().size(), 1);
+        assertEquals(table.getStorageMechanisms().get(0).getName(), "HDFS");
     }
 
     @Test(groups = "functional")
     public void getTables() {
         List<Table> tables = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1));
         assertEquals(tables.size(), 1);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "getTables" })
+    public void addStorageMechanism() {
+        Table table = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1)).get(0);
+        JdbcStorage jdbcStorage = new JdbcStorage();
+        jdbcStorage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
+        jdbcStorage.setTableNameInStorage("TABLE1_IN_REDSHIFT");
+        mdService.addStorageMechanism(CustomerSpace.parse(CUSTOMERSPACE1), table.getName(), jdbcStorage);
+        
+        Table retrievedTable = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1)).get(0);
+        List<StorageMechanism> storageMechanisms = retrievedTable.getStorageMechanisms();
+        assertEquals(storageMechanisms.size(), 2);
     }
 
     @DataProvider(name = "tableProvider")

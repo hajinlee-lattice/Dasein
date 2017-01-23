@@ -6,7 +6,7 @@
       "name": "Id",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -43,7 +43,7 @@
       "name": "Name",
       "length": 255,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -80,7 +80,7 @@
       "name": "BillingStreet",
       "length": 255,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -117,7 +117,7 @@
       "name": "BillingCity",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -154,7 +154,7 @@
       "name": "BillingState",
       "length": 80,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -191,7 +191,7 @@
       "name": "BillingPostalCode",
       "length": 20,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -228,7 +228,7 @@
       "name": "BillingCountry",
       "length": 80,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -265,7 +265,7 @@
       "name": "Website",
       "length": 255,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -302,7 +302,7 @@
       "name": "Industry",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -339,7 +339,7 @@
       "name": "AnnualRevenue",
       "length": 0,
       "nullable": true,
-      "physicalDataType": "DOUBLE",
+      "physical_data_type": "DOUBLE",
       "precision": 18,
       "scale": 0,
       "properties": {
@@ -376,7 +376,7 @@
       "name": "NumberOfEmployees",
       "length": 0,
       "nullable": true,
-      "physicalDataType": "INT",
+      "physical_data_type": "INT",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -413,7 +413,7 @@
       "name": "Ownership",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -450,7 +450,7 @@
       "name": "TickerSymbol",
       "length": 20,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -487,7 +487,7 @@
       "name": "OwnerId",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -524,7 +524,7 @@
       "name": "CreatedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -562,7 +562,7 @@
       "name": "LastModifiedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -600,7 +600,7 @@
       "name": "LastActivityDate",
       "length": 0,
       "nullable": true,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -638,7 +638,7 @@
       "name": "LastViewedDate",
       "length": 0,
       "nullable": true,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -676,7 +676,7 @@
       "name": "AccountSource",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -712,7 +712,6 @@
   ],
   "extracts": [],
   "primary_key": {
-    "attributesAsStr": "Id",
     "name": "PK_ID",
     "display_name": "Primary key for the identity column(s)",
     "attributes": [
@@ -720,7 +719,6 @@
     ]
   },
   "last_modified_key": {
-    "attributesAsStr": "LastModifiedDate",
     "name": "LK_LUD",
     "display_name": "Last Modified Key to hold column containing last modified timestamp",
     "attributes": [

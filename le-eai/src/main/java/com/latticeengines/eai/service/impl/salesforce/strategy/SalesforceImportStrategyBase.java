@@ -197,7 +197,6 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                             ToStringFunctionWithCleanup.INSTANCE);
                     List<String> enumValues = Lists.transform(descField.getPicklistValues(), ToStringFunction.INSTANCE);
                     attr.setCleanedUpEnumValues(cleanedUpEnumValues);
-                    attr.setEnumValues(enumValues);
                 } else if (type.equals("date")) {
                     attr.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 } else if (type.equals("datetime")) {

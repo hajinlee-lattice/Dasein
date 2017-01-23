@@ -9,7 +9,6 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
-import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -55,8 +54,8 @@ public class TableUtils {
                 fieldBuilder.prop(entry.getKey(), entry.getValue() == null ? "" : entry.getValue().toString());
             }
 
-            if (attr.getEnumValues().size() > 0) {
-                fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));
+            if (attr.getCleanedUpEnumValues().size() > 0) {
+                fieldBuilder = fieldBuilder.prop("enumValues", attr.getCleanedUpEnumValuesAsString());
             }
 
             Type type = Type.valueOf(attr.getPhysicalDataType().toUpperCase());
@@ -81,8 +80,8 @@ public class TableUtils {
                 fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
                 break;
             case ENUM:
-                String[] enumValues = new String[attr.getEnumValues().size()];
-                attr.getEnumValues().toArray(enumValues);
+                String[] enumValues = new String[attr.getCleanedUpEnumValues().size()];
+                attr.getCleanedUpEnumValues().toArray(enumValues);
                 fieldAssembler = fieldBuilder.type().enumeration(attr.getName()).symbols(enumValues).noDefault();
                 break;
             default:

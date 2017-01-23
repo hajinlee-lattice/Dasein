@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImp
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -145,5 +146,19 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName) {
         return tableEntityMgr.copy(tableName, targetCustomerSpace);
+    }
+
+    @Override
+    public void addStorageMechanism(CustomerSpace customerSpace, final String tableName,
+            StorageMechanism storageMechanism) {
+        tableTypeHolder.setTableType(TableType.DATATABLE);
+        DatabaseUtils.retry("addStorageMechanism", new Closure() {
+            @Override
+            public void execute(Object input) {
+                Table found = tableEntityMgr.findByName(tableName);
+                found.addStorageMechanism(storageMechanism);
+                updateTable(customerSpace, found);
+            }
+        });
     }
 }

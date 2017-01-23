@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.MetadataService;
@@ -142,6 +143,10 @@ public class TableResourceHelper {
             mdService.updateTable(space, table);
         }
         return true;
+    }
+    
+    public void addStorageMechanism(String customerSpace, String tableName, StorageMechanism storageMechanism) {
+        mdService.addStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
     }
 
 }

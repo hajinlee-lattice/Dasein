@@ -23,7 +23,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.HdfsStorage;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
@@ -276,6 +278,10 @@ public abstract class DataFlowBuilder {
         extract.setPath(targetPath);
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         table.addExtract(extract);
+        
+        StorageMechanism mechanism = new HdfsStorage();
+        mechanism.setTableNameInStorage(table.getName());
+        table.addStorageMechanism(mechanism);
 
         return table;
     }

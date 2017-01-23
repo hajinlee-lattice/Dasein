@@ -13,25 +13,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class LastModifiedKey extends AttributeOwner {
 
-    private Long lastModifiedTimeStemp;
+    @Column(name = "LAST_MODIFIED_TS", nullable = false)
+    @JsonProperty("last_modified_ts")
+    private Long lastModifiedTimeStamp;
 
     public LastModifiedKey() {
     }
 
-    public LastModifiedKey(List<String> attributes, long lastModifiedTimeStemp) {
+    public LastModifiedKey(List<String> attributes, long lastModifiedTimeStamp) {
         this.setAttributes(attributes);
-        this.setLastModifiedTimestamp(lastModifiedTimeStemp);
+        this.setLastModifiedTimestamp(lastModifiedTimeStamp);
     }
 
-    @Column(name = "LAST_MODIFIED_TS", nullable = false)
-    @JsonProperty("last_modified_ts")
     public Long getLastModifiedTimestamp() {
-        return lastModifiedTimeStemp;
+        return lastModifiedTimeStamp;
     }
 
-    @JsonProperty("last_modified_ts")
-    public void setLastModifiedTimestamp(Long lastModifiedTimeStemp) {
-        this.lastModifiedTimeStemp = lastModifiedTimeStemp;
+    public void setLastModifiedTimestamp(Long lastModifiedTimeStamp) {
+        this.lastModifiedTimeStamp = lastModifiedTimeStamp;
     }
 
 }

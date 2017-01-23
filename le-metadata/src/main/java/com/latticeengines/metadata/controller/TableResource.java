@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
@@ -97,6 +98,15 @@ public class TableResource {
             @RequestParam("targetcustomerspace") String targetCustomerSpace, //
             HttpServletRequest request) {
         return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName, request);
+    }
+
+    @RequestMapping(value = "/tables/{tableName}/storage", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Add a storage mechanism")
+    public Boolean addStorageMechanism(@PathVariable String customerSpace, //
+            @PathVariable String tableName, @PathVariable String storageName, //
+            @RequestBody StorageMechanism storageMechanism, HttpServletRequest request) {
+        return true;
     }
 
     @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")

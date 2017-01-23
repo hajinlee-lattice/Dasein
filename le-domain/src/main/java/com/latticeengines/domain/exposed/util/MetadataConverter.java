@@ -173,7 +173,6 @@ public class MetadataConverter {
                 String enumValuesString = field.getProp("enumValues");
                 List<String> enumValues = Arrays.asList(enumValuesString.split(","));
                 attribute.setCleanedUpEnumValues(enumValues);
-                attribute.setEnumValues(enumValues);
             }
             AttributeUtils.setPropertiesFromStrings(attribute, field.props());
 

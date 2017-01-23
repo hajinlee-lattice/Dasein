@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,7 +17,6 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -30,19 +29,38 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @MappedSuperclass
+@EntityListeners(AttributeOwnerListener.class)
 public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     
-    protected Long pid;
-    protected String name;
-    protected String displayName;
-    private List<String> attributes = new ArrayList<>();
-    protected Table table;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
+    protected Long pid;
+    
+    @Column(name = "NAME", unique = false, nullable = false)
+    @JsonProperty("name")
+    protected String name;
+    
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    @JsonProperty("display_name")
+    protected String displayName;
+
+    @JsonProperty("attributes")
+    @Transient
+    private List<String> attributes = new ArrayList<>();
+    
+    @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
+    @JsonIgnore
+    private String attributesAsString;
+
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    protected Table table;
+
     @Override
     public Long getPid() {
         return pid;
@@ -54,21 +72,16 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
         this.pid = pid;
     }
 
-    @Column(name = "NAME", unique = false, nullable = false)
     @Override
-    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
     @Override
-    @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
     }
 
-    @Column(name = "DISPLAY_NAME", nullable = false)
-    @JsonProperty("display_name")
     public String getDisplayName() {
         return displayName;
     }
@@ -78,10 +91,6 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
         this.displayName = displayName;
     }
 
-    @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     public Table getTable() {
         return table;
     }
@@ -92,8 +101,6 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
     }
 
     
-    @JsonProperty("attributes")
-    @Transient
     public List<String> getAttributes() {
         return attributes;
     }
@@ -115,6 +122,7 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
         return new ArrayList<>();
     }
 
+    @Override
     @JsonIgnore
     @Transient
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
@@ -133,15 +141,13 @@ public abstract class AttributeOwner implements HasPid, HasName, GraphNode {
         attributes.add(attribute);
     }
     
-    @Column(name = "ATTRIBUTES", nullable = false, length = 2048)
+    
     public String getAttributesAsStr() {
-        return StringUtils.join(attributes, ",");
+        return attributesAsString;
     }
     
-    public void setAttributesAsStr(String attrStr) {
-        if (attrStr != null) {
-            attributes = Arrays.asList(attrStr.split(","));
-        }
+    public void setAttributesAsStr(String attributesAsString) {
+        this.attributesAsString = attributesAsString;
     }
 
 }

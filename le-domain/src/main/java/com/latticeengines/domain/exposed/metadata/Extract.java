@@ -31,19 +31,38 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
-    private Long pid;
-    private String name;
-    private String path;
-    private Long extractionTimestamp;
-    private Table table;
-    private Long tenantId;
-    private Long processedRecords;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @Column(name = "NAME", unique = false, nullable = false)
+    @JsonProperty("name")
+    private String name;
+
+    @Column(name = "PATH", unique = false, nullable = false, length = 2048)
+    @JsonProperty("path")
+    private String path;
+
+    @Column(name = "EXTRACTION_TS", nullable = false)
+    @JsonProperty("extraction_ts")
+    private Long extractionTimestamp;
+    
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    private Table table;
+    
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    private Long tenantId;
+
+    @Column(name = "PROCESSED_RECORDS", unique = false, nullable = false)
+    @JsonProperty("processed_records")
+    private Long processedRecords;
+
     @Override
     public Long getPid() {
         return pid;
@@ -55,7 +74,7 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         this.pid = pid;
     }
 
-    @Column(name = "NAME", unique = false, nullable = false)
+    
     @Override
     public String getName() {
         return name;
@@ -66,24 +85,18 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         this.name = name;
     }
 
-    @Column(name = "PATH", unique = false, nullable = false, length = 2048)
-    @JsonProperty("path")
     public String getPath() {
         return path;
     }
 
-    @JsonProperty("path")
     public void setPath(String path) {
         this.path = path;
     }
 
-    @Column(name = "EXTRACTION_TS", nullable = false)
-    @JsonProperty("extraction_ts")
     public Long getExtractionTimestamp() {
         return extractionTimestamp;
     }
 
-    @JsonProperty("extraction_ts")
     public void setExtractionTimestamp(Long extractionTimestamp) {
         this.extractionTimestamp = extractionTimestamp;
     }
@@ -107,46 +120,35 @@ public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Seriali
         return new HashMap<>();
     }
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     public Table getTable() {
         return table;
     }
 
-    @JsonIgnore
     public void setTable(Table table) {
         this.table = table;
     }
 
     @Override
-    @JsonIgnore
-    @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
         return tenantId;
     }
 
     @Override
-    @JsonIgnore
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
 
-    @JsonIgnore
     public void setTenant(Tenant tenant) {
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
 
     }
-
-    @Column(name = "PROCESSED_RECORDS", unique = false, nullable = false)
-    @JsonProperty("processed_records")
+    
     public Long getProcessedRecords() {
         return processedRecords;
     }
 
-    @JsonProperty("processed_records")
     public void setProcessedRecords(long processedRecords) {
         this.processedRecords = processedRecords;
     }

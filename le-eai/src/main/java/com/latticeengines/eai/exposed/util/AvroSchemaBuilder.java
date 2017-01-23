@@ -2,6 +2,7 @@ package com.latticeengines.eai.exposed.util;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -68,8 +69,8 @@ public class AvroSchemaBuilder {
                     logicalType = attr.getLogicalDataType().toString();
                 }
 
-                if (attr.getEnumValues().size() > 0) {
-                    enumValues = StringUtils.join(attr.getEnumValues().toArray(), ",");
+                if (attr.getCleanedUpEnumValues().size() > 0) {
+                    enumValues = StringUtils.join(attr.getCleanedUpEnumValues().toArray(), ",");
                 }
 
                 assert (attr.getPhysicalDataType() != null);
