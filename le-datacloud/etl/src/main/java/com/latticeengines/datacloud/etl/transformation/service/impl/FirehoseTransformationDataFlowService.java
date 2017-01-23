@@ -156,9 +156,8 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping,
             String uncompressedFilePath, String avroDirPath, FileInputSourceConfig inputConfig)
                     throws IOException {
-        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath,
-                avroDirPath, inputConfig.getDelimiter(), inputConfig.getQualifier(),
-                inputConfig.getCharset());
+        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath,
+                inputConfig.getDelimiter(), inputConfig.getQualifier(), inputConfig.getCharset(), true);
     }
 
     public void setFieldTypeMapping(CsvToAvroFieldMapping fieldTypeMapping) {

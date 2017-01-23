@@ -56,10 +56,11 @@ public class SimpleCascadingExecutor {
     @Value("${dataflow.hdfs.stack:}")
     private String stackName;
 
-    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath,
-            String avroDirPath, String delimiter, String qualifier, String charset)
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
+            String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial)
             throws IOException {
         delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
+        log.info(String.format("Delimiter: %s, Qualifier: %s", delimiter, qualifier));
 
         Schema schema = fieldMapping.getAvroSchema();
         Properties properties = new Properties();
@@ -80,8 +81,8 @@ public class SimpleCascadingExecutor {
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
-        DelimitedParser delimitedParser = qualifier == null
-                ? new CustomDelimitedParserWithoutQuote(fieldMapping, delimiter, false, true,
+        DelimitedParser delimitedParser = (treatEqualQuoteSpecial && qualifier != null)
+                ? new CustomDelimitedParserSpecialEqualQuote(fieldMapping, delimiter, qualifier, false, true,
                         fieldTypeResolver)
                 : new CustomDelimitedParser(fieldMapping, delimiter, qualifier, false, true,
                         fieldTypeResolver);

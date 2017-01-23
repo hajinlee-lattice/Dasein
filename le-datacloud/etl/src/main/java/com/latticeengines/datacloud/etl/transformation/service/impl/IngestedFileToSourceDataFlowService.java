@@ -87,6 +87,6 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String inputPath, String outputPath,
             IngestedFileToSourceParameters parameters) throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, inputPath, outputPath, parameters.getDelimiter(),
-                parameters.getQualifier(), parameters.getCharset());
+                parameters.getQualifier(), parameters.getCharset(), false);
     }
 }
