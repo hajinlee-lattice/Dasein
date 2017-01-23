@@ -220,7 +220,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         while (records.hasNext()) {
-            GenericRecord record = records.next();
+            records.next();
             rowNum++;
         }
         log.info("Total result records " + rowNum);
