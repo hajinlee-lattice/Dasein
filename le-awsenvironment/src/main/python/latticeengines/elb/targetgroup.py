@@ -34,6 +34,20 @@ def register(tgrp, instance, port=443):
         ]
     )
 
+def deregister(tgrp, instance, port=443):
+    group_arn = find_tgrp_arn(tgrp)
+
+    client = boto3.client('elbv2')
+    client.deregister_targets(
+        TargetGroupArn=group_arn,
+        Targets=[
+            {
+                'Id': instance,
+                'Port': port
+            },
+        ]
+    )
+
 def find_tgrp_arn(name):
     client = boto3.client('elbv2')
     response = client.describe_target_groups()

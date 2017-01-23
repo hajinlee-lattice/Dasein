@@ -1,6 +1,6 @@
 import argparse
 
-from ec2 import register_ec2_to_targetgroup
+from ec2 import register_ec2_to_targetgroup, deregister_ec2_from_targetgroup
 
 def main():
     args = parse_args()
@@ -9,14 +9,25 @@ def main():
 def register(args):
     register_internal(args.stack, args.tgrp)
 
+def deregister(args):
+    deregister_internal(args.stack, args.tgrp)
+
 def register_internal(stack, tgrp):
     register_ec2_to_targetgroup(stack, tgrp)
+
+def deregister_internal(stack, tgrp):
+    deregister_ec2_from_targetgroup(stack, tgrp)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='EC2 load balancing management')
     commands = parser.add_subparsers(help="commands")
 
     subparser = commands.add_parser("register", description="Register ec2 in a cloudformation stack to a target group")
+    subparser.add_argument('-s', dest='stack', type=str, required=True, help='cloudformation stack name')
+    subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
+    subparser.set_defaults(func=register)
+
+    subparser = commands.add_parser("deregister", description="Deregister ec2 in a cloudformation stack to a target group")
     subparser.add_argument('-s', dest='stack', type=str, required=True, help='cloudformation stack name')
     subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
     subparser.set_defaults(func=register)

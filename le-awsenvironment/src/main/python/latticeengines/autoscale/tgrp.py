@@ -12,6 +12,9 @@ def main():
 def register(args):
     register_internal(args.asgroup, args.tgrp)
 
+def deregister(args):
+    deregister_internal(args.asgroup, args.tgrp)
+
 def register_internal(asgroup, tgrp):
     group_name = find_full_group_name(asgroup)
     tgrp_arn = find_tgrp_arn(tgrp)
@@ -36,6 +39,23 @@ def register_internal(asgroup, tgrp):
     print response
 
 
+def deregister_internal(asgroup, tgrp):
+    group_name = find_full_group_name(asgroup)
+    tgrp_arn = find_tgrp_arn(tgrp)
+
+    global AS_CLIENT
+    if AS_CLIENT is None:
+        AS_CLIENT = boto3.client('autoscaling')
+
+    response = AS_CLIENT.describe_load_balancer_target_groups(AutoScalingGroupName=group_name)
+    for t in response['LoadBalancerTargetGroups']:
+        if t['LoadBalancerTargetGroupARN'] == tgrp_arn:
+            response = AS_CLIENT.detach_load_balancer_target_groups(
+                AutoScalingGroupName=group_name,
+                TargetGroupARNs=[ tgrp_arn ]
+            )
+        print response
+
 def find_full_group_name(prefix):
     global AS_CLIENT
     if AS_CLIENT is None:
@@ -57,6 +77,11 @@ def parse_args():
     subparser.add_argument('-a', dest='asgroup', type=str, required=True, help='autoscaling group name (prefix)')
     subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
     subparser.set_defaults(func=register)
+
+    subparser = commands.add_parser("deregister", description="Deregister a target group from autoscaling group")
+    subparser.add_argument('-a', dest='asgroup', type=str, required=True, help='autoscaling group name (prefix)')
+    subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
+    subparser.set_defaults(func=deregister)
 
     args = parser.parse_args()
     return args

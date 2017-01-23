@@ -1,6 +1,6 @@
 import boto3
 
-from ..elb.targetgroup import register
+from ..elb.targetgroup import register, deregister
 
 
 def register_ec2_to_targetgroup(stackname, tgrp):
@@ -8,6 +8,12 @@ def register_ec2_to_targetgroup(stackname, tgrp):
     for ec2_id in ids:
         print "registering ec2 %s to target group %s" % (ec2_id, tgrp)
         register(tgrp, ec2_id)
+
+def deregister_ec2_from_targetgroup(stackname, tgrp):
+    ids = find_ec2_ids(stackname)
+    for ec2_id in ids:
+        print "registering ec2 %s to target group %s" % (ec2_id, tgrp)
+        deregister(tgrp, ec2_id)
 
 def find_ec2_ids(stackname):
     stack = boto3.resource('cloudformation').Stack(stackname)
