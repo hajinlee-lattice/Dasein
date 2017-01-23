@@ -15,6 +15,10 @@ for img in 'haproxy' 'swagger' 'tomcatbase'; do
 done
 wait
 
+pushd le-microservice
+bash build.sh $MICROSERVICES
+popd
+
 for img in 'config' 'playmaker' 'oauth2'; do
 
     pushd le-${img} &&
@@ -23,9 +27,5 @@ for img in 'config' 'playmaker' 'oauth2'; do
 
 done
 wait
-
-pushd le-microservice
-bash build.sh $MICROSERVICES
-popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
