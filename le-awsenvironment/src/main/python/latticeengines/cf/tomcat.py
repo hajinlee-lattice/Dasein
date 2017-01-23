@@ -21,7 +21,7 @@ PARAM_ENV_CATALINA_OPTS=EnvVarParameter("CATALINA_OPTS")
 PARAM_EFS = Parameter("Efs", "EFS Id")
 PARAM_SNS_TOPIC_ARN = ArnParameter("SNSTopicArn", "SNS Topic Arn")
 PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
-PARAM_SECOND_TGRP = Parameter("SecondTgrp", "Secondary target group")
+PARAM_SECOND_TGRP_ARN = ArnParameter("SecondTgrpArn", "Secondary target group arn")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -47,8 +47,9 @@ def create_template(profile, fixed_instances=False, num_instances=1, second_tgrp
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS, PARAM_SNS_TOPIC_ARN, PARAM_ECS_SCALE_ROLE_ARN])
     if second_tgrp:
-        stack.add_param(PARAM_SECOND_TGRP)
-    stack.attach_tgrp(PARAM_SECOND_TGRP)
+        stack.add_param(PARAM_SECOND_TGRP_ARN)
+        if not fixed_instances:
+            stack.attach_tgrp(PARAM_SECOND_TGRP_ARN)
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
     task = tomcat_task(profile_vars)
@@ -122,13 +123,14 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     extra_params.append(PARAM_SNS_TOPIC_ARN.config(config.scaling_sns_topic_arn()))
     extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
 
-    if second_tgrp is not None:
-        extra_params.append(PARAM_SECOND_TGRP.config(second_tgrp))
+    if (second_tgrp is not None) and (second_tgrp != ""):
+        second_tgrp_arn = find_tgrp_arn(second_tgrp)
+        extra_params.append(PARAM_SECOND_TGRP_ARN.config(second_tgrp_arn))
 
     ECSStack.provision(environment, s3_path(stackname), stackname, sg, tgrp_arn, init_cap=init_cap, max_cap=max_cap, public=public, instance_type=instance_type, additional_params=extra_params, le_stack=le_stack)
 
     register_ec2_to_targetgroup(stackname, tgrp)
-    if second_tgrp is not None:
+    if (second_tgrp is not None) and (second_tgrp != ""):
         register_ec2_to_targetgroup(stackname, second_tgrp)
 
 def teardown_cli(args):
