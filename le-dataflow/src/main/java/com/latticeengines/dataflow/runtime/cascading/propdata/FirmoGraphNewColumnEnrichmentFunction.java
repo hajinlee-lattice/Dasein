@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import org.apache.commons.lang3.StringUtils;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -30,10 +32,10 @@ public class FirmoGraphNewColumnEnrichmentFunction extends BaseOperation impleme
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        Object leftValue = arguments.getObject(leftMatchField);
-        Object rightValue = arguments.getObject(rightMatchField);
+        String leftValue = arguments.getString(leftMatchField);
+        String rightValue = arguments.getString(rightMatchField);
         Object enrichingValue = arguments.getObject(enrichingField);
-        if (leftValue != null && rightValue != null && leftValue.equals(rightValue)) {
+        if (StringUtils.isNotBlank(leftValue) && StringUtils.isNotBlank(rightValue) && leftValue.equals(rightValue)) {
             functionCall.getOutputCollector().add(new Tuple(enrichingValue));
         } else {
             functionCall.getOutputCollector().add(Tuple.size(1));

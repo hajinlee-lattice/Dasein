@@ -19,7 +19,7 @@ public class DenseFieldsCountFunction extends BaseOperation implements Function 
     private List<String> denseFields;
 
     public DenseFieldsCountFunction(List<String> denseColumns, String countField) {
-        super(1, new Fields(countField));
+        super(new Fields(countField));
         this.denseFields = denseColumns;
     }
 
