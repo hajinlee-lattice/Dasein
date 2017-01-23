@@ -267,17 +267,17 @@ angular
             }
         }
 
-        if (vm.schema === 'SalesforceLead') {
-            if (!vm.requiredFieldsMissing['Email']) {
-                vm.requiredFieldsMissing['CompanyName'] = false;
-            } else if (!vm.requiredFieldsMissing['CompanyName']) {
-                vm.requiredFieldsMissing['Email'] = false;
-            }
-        } else if (vm.schema === 'SalesforceAccount') {
+        if (vm.schema === 'SalesforceAccount') {
             if (!vm.requiredFieldsMissing['Website']) {
                 vm.requiredFieldsMissing['CompanyName'] = false;
             } else if (!vm.requiredFieldsMissing['CompanyName']) {
                 vm.requiredFieldsMissing['Website'] = false;
+            }
+        } else {
+            if (!vm.requiredFieldsMissing['Email']) {
+                vm.requiredFieldsMissing['CompanyName'] = false;
+            } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                vm.requiredFieldsMissing['Email'] = false;
             }
         }
 

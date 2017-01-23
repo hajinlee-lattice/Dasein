@@ -10,6 +10,7 @@ angular
         ResourceUtility: ResourceUtility,
         modelId: $stateParams.modelId,
         csvFileName: $stateParams.csvFileName,
+        schema: Model.ModelDetails.SourceSchemaInterpretation,
         standardFieldsList: ['Id', null, 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Id': true,
@@ -26,7 +27,7 @@ angular
     vm.init = function() {
         vm.initialized = true;
 
-        switch (Model.ModelDetails.SourceSchemaInterpretation) {
+        switch (vm.schema) {
             case 'SalesforceAccount':
                 vm.standardFieldsList[1] = 'Website';
                 vm.requiredFieldsMissing['Website'] = true;
@@ -151,10 +152,18 @@ angular
             }
         }
 
-        if (!vm.requiredFieldsMissing['Email']) {
-            vm.requiredFieldsMissing['CompanyName'] = false;
-        } else if (!vm.requiredFieldsMissing['CompanyName']) {
-            vm.requiredFieldsMissing['Email'] = false;
+        if (vm.schema === 'SalesforceAccount') {
+            if (!vm.requiredFieldsMissing['Website']) {
+                vm.requiredFieldsMissing['CompanyName'] = false;
+            } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                vm.requiredFieldsMissing['Website'] = false;
+            }
+        } else {
+            if (!vm.requiredFieldsMissing['Email']) {
+                vm.requiredFieldsMissing['CompanyName'] = false;
+            } else if (!vm.requiredFieldsMissing['CompanyName']) {
+                vm.requiredFieldsMissing['Email'] = false;
+            }
         }
 
         for (var field in vm.requiredFieldsMissing) {
