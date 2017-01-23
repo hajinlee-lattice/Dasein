@@ -125,7 +125,7 @@ angular
 
         ShowSpinner('Saving Field Mappings...');
 
-        FieldDocument.fieldMappings = _.chain(angular.extend({}, vm.standardFieldsMapping, vm.additionalFieldMappings))
+        FieldDocument.fieldMappings = _.chain(angular.extend({}, vm.standardFieldMappings, vm.additionalFieldMappings))
             .pick(function (item) {
                 return item.userField !== vm.ignoredFieldLabel;
             }).values().value();
