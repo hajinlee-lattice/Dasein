@@ -1,5 +1,46 @@
 <section class="container custom-fields">
-		<form novalidate name="standardFieldMappingForm">
+	<script type="text/ng-template" id="field-mapping-row-template.html">
+		<td class="field-mapping-inputs">
+			<select class="form-control"
+					ng-disabled="vm.NextClicked"
+					name="mapping_lattice_field_select_{{ ::fieldMapping.userField }}"
+					ng-model="fieldMapping.userField"
+					ng-change="vm.changeLatticeField(fieldMapping)"
+					ng-class="{'required': vm.requiredFieldsMissing[fieldMapping.mappedField], 'disabled': (fieldMapping.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[fieldMapping.mappedField])}">
+				<option value="{{::vm.ignoredFieldLabel }}"
+						ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
+					{{ ::vm.ignoredFieldLabel }}
+				</option>
+				<option value="{{ fieldMapping.userField }}"
+						ng-selected="true">
+					{{ fieldMapping.userField }}
+				</option>
+				<option value="{{ AvailableField }}"
+						ng-repeat="AvailableField in vm.AvailableFields"
+						ng-if="fieldMapping.userField !== AvailableField">
+					{{ AvailableField }}
+				</option>
+			</select>
+		</td>
+
+		<td class="field-mapping-label">
+			<label class="strong" for="fieldType_{{ ::field }}">{{ ::field }}</label>
+		</td>
+
+		<td class="field-mapping-type">
+			<select disabled
+					class="custom-select"
+					name="columnType_{{ ::fieldMapping.userField }}"
+					ng-model="fieldMapping.fieldType"
+					value="{{fieldMapping.fieldType}}">
+				<option value="TEXT" selected>Text</option>
+				<option value="NUMBER">Number</option>
+				<option value="BOOLEAN">Boolean</option>
+			</select>
+		</td>
+	</script>
+
+	<form novalidate name="standardFieldMappingForm">
 		<div class="row field-mapping-form">
 			<div class="ten offset-one columns box-outline">
 				<div class="section-header">
@@ -19,46 +60,15 @@
 					</thead>
 
 					<tbody>
-						<tr ng-repeat="field in vm.standardFieldsList"
-							ng-init="fieldMapping = vm.standardFieldMappings[field]">
-							<td class="field-mapping-inputs">
-								<select class="form-control"
-										ng-disabled="vm.NextClicked"
-										name="mapping_lattice_field_select_{{ ::fieldMapping.userField }}"
-										ng-model="fieldMapping.userField"
-										ng-change="vm.changeLatticeField(fieldMapping)"
-										ng-class="{'required': vm.requiredFieldsMissing[fieldMapping.mappedField], 'disabled': (fieldMapping.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[fieldMapping.mappedField])}">
-									<option value="{{::vm.ignoredFieldLabel }}"
-											ng-if="fieldMapping.userField && fieldMapping.userField !== vm.ignoredFieldLabel">
-										{{ ::vm.ignoredFieldLabel }}
-									</option>
-									<option value="{{ fieldMapping.userField }}"
-											ng-selected="true">
-										{{ fieldMapping.userField }}
-									</option>
-									<option value="{{ AvailableField }}"
-											ng-repeat="AvailableField in vm.AvailableFields"
-											ng-if="fieldMapping.userField !== AvailableField">
-										{{ AvailableField }}
-									</option>
-								</select>
-							</td>
-
-							<td class="field-mapping-label">
-								<label class="strong" for="fieldType_{{ ::field }}">{{ ::field }}</label>
-							</td>
-
-							<td class="field-mapping-type">
-								<select disabled
-										class="custom-select"
-										name="columnType_{{ ::fieldMapping.userField }}"
-										ng-model="fieldMapping.fieldType"
-										value="{{fieldMapping.fieldType}}">
-									<option value="TEXT" selected>Text</option>
-									<option value="NUMBER">Number</option>
-									<option value="BOOLEAN">Boolean</option>
-								</select>
-							</td>
+						<tr ng-repeat="field in vm.standardFieldsList | limitTo:2"
+							ng-init="fieldMapping = vm.standardFieldMappings[field]"
+							ng-include="'field-mapping-row-template.html'">
+						</tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr class="field-mapping-row-spacer"><td colspan=100></td></tr>
+						<tr ng-repeat="field in vm.standardFieldsList | limitTo:vm.standardFieldsList.length:2"
+							ng-init="fieldMapping = vm.standardFieldMappings[field]"
+							ng-include="'field-mapping-row-template.html'">
 						</tr>
 					</tbody>
 				</table>

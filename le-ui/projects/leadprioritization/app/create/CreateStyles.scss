@@ -362,6 +362,11 @@ section.container.custom-fields {
                 }
             }
         }
+        &.field-mapping-row-spacer {
+            height: 25px;
+            background: none;
+            visibility: hidden;
+        }
     }
     .field-mapping-actions {
         padding-top: 1em;
