@@ -296,6 +296,7 @@ section.container.custom-fields {
             &:last-child {
                 .custom-select {
                     width: 100px;
+                    padding: 0.3em;
                 }
             }
             &:first-child {
@@ -326,6 +327,7 @@ section.container.custom-fields {
             &:last-child {
                 .custom-select {
                     width: 100px;
+                    padding: 0.3em;
                 }
             }
             &:first-child {
@@ -337,6 +339,7 @@ section.container.custom-fields {
             select {
                 display: inline-block;
                 font-size: 14px;
+                padding: 0.3em;
                 border-radius: 0;
                 -moz-border-radius: 0;
                 -webkit-border-radius: 0;
@@ -347,7 +350,8 @@ section.container.custom-fields {
             input {
                 display: inline-block;
                 font-size: 14px;
-                padding-left: 10px;
+                padding: 0.3em 0.5em;
+
             }
             input,select {
                 -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
