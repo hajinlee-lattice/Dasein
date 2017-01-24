@@ -34,14 +34,14 @@ angular
             vm.requiredFieldsMissing['CompanyName'] = true;
         }
 
-        var fieldMappingsMap = {};
+        var fieldMappingsMappedFieldMap = {};
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
-            fieldMappingsMap[fieldMapping.userField] = fieldMapping;
+            fieldMappingsMappedFieldMap[fieldMapping.mappedField] = fieldMapping;
         });
 
         vm.standardFieldsList.forEach(function(field) {
-            if (fieldMappingsMap[field]) {
-                vm.standardFieldMappings[field] = fieldMappingsMap[field];
+            if (fieldMappingsMappedFieldMap[field]) {
+                vm.standardFieldMappings[field] = fieldMappingsMappedFieldMap[field];
             } else {
                 vm.standardFieldMappings[field] = {
                     fieldType: null,
@@ -53,8 +53,8 @@ angular
         });
 
         FieldDocument.fieldMappings.forEach(function (fieldMapping) {
-            if (!vm.standardFieldMappings[fieldMapping.userField]) {
-                vm.additionalFieldMappings[fieldMapping.userField] = fieldMappingsMap[fieldMapping.userField];
+            if (!vm.standardFieldMappings[fieldMapping.mappedField]) {
+                vm.additionalFieldMappings[fieldMapping.userField] = fieldMapping;
             }
         });
 
