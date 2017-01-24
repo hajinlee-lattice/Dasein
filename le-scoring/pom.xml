@@ -421,7 +421,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
-            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

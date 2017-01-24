@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ScoringMapperValidateUtilUnitTestNG {
 
-    private static final String MODEL_ID = ScoringUnitTestUtils.generateRandomModelId();
+    private static final String MODEL_ID = ScoringTestUtils.generateRandomModelId();
 
     @Test(groups = "unit")
     public void testValidateTransformation() {

@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -38,9 +39,10 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.scoring.exposed.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
@@ -96,7 +98,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
                 applicationId, modelVersion);
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         tenant = setupTenant();
-        createModel(plsRest, tenant, modelConfiguration, customerSpace);
+        ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace);
+        generateDefaultBucketMetadata(plsRest, tenant, modelSummary, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
     }
@@ -149,6 +152,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
             Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
+            Assert.assertNotNull(record.get(ScoreResultField.Bucket.displayName));
             Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
             System.out.println(record);
         }
@@ -161,7 +165,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
         Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
         Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
-        Assert.assertEquals(fields.size(), 6);
+        Assert.assertEquals(fields.get(3).name(), ScoreResultField.Bucket.displayName);
+        Assert.assertEquals(fields.size(), 7);
 
         List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");
         Assert.assertNotNull(csvfiles);
@@ -176,6 +181,12 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         plsRest.deleteTenant(customerSpace);
         plsRest.createTenant(tenant);
         return tenant;
+    }
+
+    private void generateDefaultBucketMetadata(InternalResourceRestApiProxy plsRest, Tenant tenant,
+            ModelSummary modelSummary, CustomerSpace customerSpace) {
+        List<BucketMetadata> bucketMetadataList = ScoringTestUtils.generateDefaultBucketMetadataList();
+        plsRest.createABCDBuckets(modelSummary.getId(), customerSpace, bucketMetadataList);
     }
 
     private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,

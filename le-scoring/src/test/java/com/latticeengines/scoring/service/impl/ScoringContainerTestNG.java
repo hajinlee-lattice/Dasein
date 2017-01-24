@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringJobService;
-import com.latticeengines.scoring.util.ScoringUnitTestUtils;
+import com.latticeengines.scoring.util.ScoringTestUtils;
 
 public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
@@ -35,7 +35,7 @@ public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
     private String scorePath;
 
-    private String modelId = ScoringUnitTestUtils.generateRandomModelId();
+    private String modelId = ScoringTestUtils.generateRandomModelId();
 
     @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {

@@ -32,7 +32,7 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtilTestNG {
 
-    private static final String MODEL_ID = ScoringUnitTestUtils.generateRandomModelId();
+    private static final String MODEL_ID = ScoringTestUtils.generateRandomModelId();
 
     @Test(groups = "unit")
     public void testProcessScoreFiles() throws IOException, DecoderException {

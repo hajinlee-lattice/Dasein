@@ -1,12 +1,13 @@
-package com.latticeengines.scoringapi.functionalframework;
+package com.latticeengines.scoring.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 
-public class ScoringApiTestUtils {
+public class ScoringTestUtils {
 
     private static final Double LIFT_1 = 3.4;
     private static final Double LIFT_2 = 2.4;
@@ -49,6 +50,10 @@ public class ScoringApiTestUtils {
         BUCKET_METADATA_D.setRightBoundScore(50);
         BUCKET_METADATA_D.setLift(LIFT_4);
         return bucketMetadataList;
+    }
+
+    public static String generateRandomModelId() {
+        return String.format("ms__%s-PLSModel", UUID.randomUUID());
     }
 
 }
