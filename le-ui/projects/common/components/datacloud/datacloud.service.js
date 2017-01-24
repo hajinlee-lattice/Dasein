@@ -223,7 +223,7 @@ angular.module('common.datacloud')
             method: 'get',
             //ENVs: Default, QA, Production
             //url: '/Pods/<ENV>/Default/PLS/EnrichAttributeMaxNumber'
-            url: '/pls/enrichment/lead/premiumattributeslimitation'
+            url: '/pls/latticeinsights/insights/premiumattributeslimitation'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -234,7 +234,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead/count'
+            url: '/pls/latticeinsights/insights/count'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -245,7 +245,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead/selectedattributes/count'
+            url: '/pls/latticeinsights/insights/selectedattributes/count'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -256,7 +256,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead/categories'
+            url: '/pls/latticeinsights/insights/categories'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -267,7 +267,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead/subcategories',
+            url: '/pls/latticeinsights/insights/subcategories',
             params: {
                 category: category
             }
@@ -285,7 +285,7 @@ angular.module('common.datacloud')
             onlySelectedAttributes = opts.onlySelectedAttributes || null;
         $http({
             method: 'get',
-            url: '/pls/enrichment/lead',
+            url: '/pls/latticeinsights/insights',
             params: {
                 offset: offset,
                 max: max,
@@ -301,7 +301,7 @@ angular.module('common.datacloud')
         var deferred = $q.defer();
         $http({
             method: 'put',
-            url: '/pls/enrichment/lead',
+            url: '/pls/latticeinsights/insights',
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
@@ -317,7 +317,7 @@ angular.module('common.datacloud')
         opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',
-            url: '/pls/enrichment/stats/topn',
+            url: '/pls/latticeinsights/stats/topn',
             params: {
                 category: opts.category,
                 limit: opts.limit,
@@ -337,7 +337,7 @@ angular.module('common.datacloud')
         opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
         $http({
             method: 'get',
-            url: '/pls/enrichment/stats/topn/all',
+            url: '/pls/latticeinsights/stats/topn/all',
             params: {
                 limit: opts.limit,
                 loadEnrichmentMetadata: opts.loadEnrichmentMetadata
@@ -354,7 +354,7 @@ angular.module('common.datacloud')
             query = opts.query || '';
         $http({
             method: 'get',
-            url: '/pls/enrichment/stats/cube',
+            url: '/pls/latticeinsights/stats/cube',
             params: {
                 q: query
             }
