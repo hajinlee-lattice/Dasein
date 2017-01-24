@@ -15,6 +15,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -48,6 +51,7 @@ public abstract class StorageMechanism implements HasPid, HasName {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Table table = null;
     
