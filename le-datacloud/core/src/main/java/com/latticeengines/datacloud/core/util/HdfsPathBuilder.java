@@ -88,8 +88,13 @@ public class HdfsPathBuilder {
         return dir;
     }
 
+    @Deprecated
     public Path constructSourceDir(Source source) {
         String sourceName = source.getSourceName();
+        return constructSourceDir(sourceName);
+    }
+
+    public Path constructSourceDir(String sourceName) {
         sourceName = sourceName.endsWith(PATH_SEPARATOR) ? sourceName.substring(0,
                 sourceName.lastIndexOf(PATH_SEPARATOR)) : sourceName;
         return propDataDir().append(SOURCES).append(sourceName);
@@ -100,13 +105,25 @@ public class HdfsPathBuilder {
         return baseDir.append(RAW_DATA_FLOW_TYPE);
     }
 
+    @Deprecated
     public Path constructSnapshotRootDir(Source source) {
         Path baseDir = constructSourceDir(source);
         return baseDir.append(SNAPSHOT);
     }
 
+    public Path constructSnapshotRootDir(String sourceName) {
+        Path baseDir = constructSourceDir(sourceName);
+        return baseDir.append(SNAPSHOT);
+    }
+
+    @Deprecated
     public Path constructSnapshotDir(Source source, String version) {
         Path baseDir = constructSnapshotRootDir(source);
+        return baseDir.append(version);
+    }
+
+    public Path constructSnapshotDir(String sourceName, String version) {
+        Path baseDir = constructSnapshotRootDir(sourceName);
         return baseDir.append(version);
     }
 
@@ -115,9 +132,14 @@ public class HdfsPathBuilder {
         return baseDir.append(WORK_FLOWS).append(flowName);
     }
 
+    @Deprecated
     public Path constructSchemaFile(Source source, String version) {
-        Path baseDir = constructSourceDir(source);
-        String avscFile = source.getSourceName() + AVRO_SCHEMA_FILE_EXTENSION;
+        return constructSchemaFile(source.getSourceName(), version);
+    }
+
+    public Path constructSchemaFile(String sourceName, String version) {
+        Path baseDir = constructSourceDir(sourceName);
+        String avscFile = sourceName + AVRO_SCHEMA_FILE_EXTENSION;
         return baseDir.append(SCHEMA).append(version).append(avscFile);
     }
 

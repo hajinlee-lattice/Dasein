@@ -26,6 +26,7 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloud.etl.transformation.ProgressHelper;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -65,6 +66,9 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     @Autowired
     private ProgressHelper progressHelper;
+
+    @Autowired
+    private HiveTableService hiveTableService;
 
     abstract Log getLogger();
 
@@ -293,6 +297,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             }
 
             HdfsUtils.writeToFile(yarnConfiguration, sourceDir + HDFS_PATH_SEPARATOR + SUCCESS_FLAG, "");
+
+            // register hive table
+            hiveTableService.createTable(source.getSourceName(), version);
+
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;

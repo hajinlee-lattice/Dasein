@@ -28,6 +28,7 @@ public class LocationUtils {
                 { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES",
                         "UNITED STATES AMERICA", "AMERICA", "AMERICAN", "UNITED STATES AMERICA USA",
                         "UNITED STATES USA", "ESTADOS UNIDOS" } }, //
+                { CANADA, new String[] { "CANADA", "CA" } }, //
                 { "ANTIGUA BARBUDA", new String[] { "ANTIGUA BARBUDA", "ANTIGUABARBUDA", "ANTIGUA" } }, //
                 { "ASIA PACIFIC REGION", new String[] { "ASIA PACIFIC REGION", "ASIAPACIFIC REGION", "AP", "APAC" } }, //
                 { "ÅLAND IS", new String[] { "ÅLAND IS", "ALAND IS" } }, //

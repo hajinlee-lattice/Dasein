@@ -1,16 +1,13 @@
 package com.latticeengines.metadata.hive.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.sql.DataSource;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.hive.HiveTableDao;
@@ -23,10 +20,11 @@ public class HiveTableDaoImpl implements HiveTableDao {
     private Logger log = Logger.getLogger(HiveTableDaoImpl.class);
 
     @Autowired
-    private DataSource hiveDataSource;
+    private Configuration yarnConfiguration;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    @Qualifier("hiveJdbcTemplate")
+    private JdbcTemplate hiveJdbcTemplate;
 
     @Override
     public void create(Table table) {
@@ -34,10 +32,10 @@ public class HiveTableDaoImpl implements HiveTableDao {
             log.info(String.format("Not creating table %s because there are no available extracts", table.getName()));
             return;
         }
-        try (Connection connection = getConnection()) {
+        try {
             String tableName = getTableName(table);
             String sql = HiveUtils.getCreateStatement(yarnConfiguration, tableName, table);
-            executeSql(connection, sql);
+            hiveJdbcTemplate.execute(sql);
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to create table %s in hive", table.getName()), e);
         }
@@ -46,33 +44,45 @@ public class HiveTableDaoImpl implements HiveTableDao {
     }
 
     @Override
-    public void test(Table table) {
-        try (Connection connection = getConnection()) {
-            String tableName = getTableName(table);
-            String sql = String.format("SELECT * FROM %s LIMIT 1", tableName);
-            executeSql(connection, sql);
+    public void create(String tableName, String avroDir, String avscPath) {
+        try {
+            String sql = AvroUtils.generateHiveCreateTableStatement(tableName, avroDir, avscPath);
+            hiveJdbcTemplate.execute(sql);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failure occurred when testing table %s", table.getName()), e);
+            throw new RuntimeException(String.format("Failed to create table %s in hive", tableName), e);
+        }
+        test(tableName);
+    }
+
+    @Override
+    public void test(Table table) {
+        String tableName = getTableName(table);
+        test(tableName);
+    }
+
+    @Override
+    public void test(String tableName) {
+        try {
+            String sql = String.format("SELECT * FROM %s LIMIT 1", tableName);
+            hiveJdbcTemplate.execute(sql);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failure occurred when testing table %s", tableName), e);
         }
     }
 
     @Override
     public void deleteIfExists(Table table) {
-        try (Connection connection = getConnection()) {
-            String tableName = getTableName(table);
-            String sql = HiveUtils.getDropStatement(tableName, true);
-            executeSql(connection, sql);
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to delete table %s in hive", table.getName()), e);
-        }
+        String tableName = getTableName(table);
+        deleteIfExists(tableName);
     }
 
-    private void executeSql(Connection connection, String sql) throws SQLException {
-
-        try (Statement stmt = connection.createStatement()) {
-            log.info(String.format("Executing sql %s", sql));
-            stmt.execute(sql);
-            stmt.getResultSet();
+    @Override
+    public void deleteIfExists(String tableName) {
+        try {
+            String sql = HiveUtils.getDropStatement(tableName, true);
+            hiveJdbcTemplate.execute(sql);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failed to delete table %s in hive", tableName), e);
         }
     }
 
@@ -84,9 +94,5 @@ public class HiveTableDaoImpl implements HiveTableDao {
 
     private String getSafeTenantId(Tenant tenant) {
         return tenant.getId().replace(".", "_").replace(" ", "_");
-    }
-
-    private Connection getConnection() throws SQLException {
-        return hiveDataSource.getConnection();
     }
 }
