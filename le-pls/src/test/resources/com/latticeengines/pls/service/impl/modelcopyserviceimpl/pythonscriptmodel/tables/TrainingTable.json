@@ -5,7 +5,7 @@
       "name": "Id",
       "length": null,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -25,7 +25,7 @@
       "name": "Website",
       "length": null,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -48,7 +48,7 @@
       "name": "Event",
       "length": null,
       "nullable": false,
-      "physicalDataType": "BOOLEAN",
+      "physical_data_type": "BOOLEAN",
       "precision": null,
       "scale": null,
       "properties": {
@@ -68,7 +68,7 @@
       "name": "CompanyName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -93,7 +93,7 @@
       "name": "City",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -121,7 +121,7 @@
       "name": "State",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -146,7 +146,7 @@
       "name": "Country",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -171,7 +171,7 @@
       "name": "PostalCode",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -191,7 +191,7 @@
       "name": "Industry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -211,7 +211,7 @@
       "name": "AnnualRevenue",
       "length": null,
       "nullable": true,
-      "physicalDataType": "DOUBLE",
+      "physical_data_type": "DOUBLE",
       "precision": null,
       "scale": null,
       "properties": {
@@ -231,7 +231,7 @@
       "name": "NumberOfEmployees",
       "length": null,
       "nullable": true,
-      "physicalDataType": "INT",
+      "physical_data_type": "INT",
       "precision": null,
       "scale": null,
       "properties": {
@@ -251,7 +251,7 @@
       "name": "CreatedDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": null,
       "scale": null,
       "properties": {
@@ -271,7 +271,7 @@
       "name": "LastModifiedDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": null,
       "scale": null,
       "properties": {
@@ -291,7 +291,7 @@
       "name": "Type",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -310,7 +310,7 @@
       "name": "Street",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -329,7 +329,7 @@
       "name": "Sic",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -348,7 +348,7 @@
       "name": "Ownership",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -367,7 +367,7 @@
       "name": "TickerSymbol",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -386,7 +386,7 @@
       "name": "Rating",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -405,7 +405,7 @@
       "name": "OwnerId",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -424,7 +424,7 @@
       "name": "LastActivityDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -443,7 +443,7 @@
       "name": "LastViewedDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -462,7 +462,7 @@
       "name": "AccountSource",
       "length": null,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": null,
       "scale": null,
       "properties": {
@@ -481,7 +481,7 @@
       "name": "InternalId",
       "length": null,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": null,
       "scale": null,
       "properties": {},

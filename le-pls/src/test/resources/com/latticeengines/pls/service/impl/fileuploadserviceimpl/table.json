@@ -5,7 +5,7 @@
       "name": "Activity_Count_Click_Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -29,7 +29,7 @@
       "name": "FeatureTermOrderHistory",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -54,7 +54,7 @@
       "name": "GooglePlus_Url",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -78,7 +78,7 @@
       "name": "CloudTechnologies_SoftwareBasic_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -103,7 +103,7 @@
       "name": "BusinessTechnologiesWebMaster",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -128,7 +128,7 @@
       "name": "SemrushOrganicTraffic",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -153,7 +153,7 @@
       "name": "CloudTechnologies_CRM_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -178,7 +178,7 @@
       "name": "FeatureJavaScriptCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -203,7 +203,7 @@
       "name": "FeatureAverageDocumentSizeFetched",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -227,7 +227,7 @@
       "name": "Bmbr30_AnalyticsReporting_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -252,7 +252,7 @@
       "name": "ExperianCreditRating",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -277,7 +277,7 @@
       "name": "FeatureExecutionEvaluate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -302,7 +302,7 @@
       "name": "Bmbr30_Database_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -327,7 +327,7 @@
       "name": "FeatureTermCreateAccount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -352,7 +352,7 @@
       "name": "AssetsStartOfYear",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -377,7 +377,7 @@
       "name": "FeatureCurrencySwissFranc",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -402,7 +402,7 @@
       "name": "CloudTechnologies_Philanthropic",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -427,7 +427,7 @@
       "name": "Bmbr30_eCommerce_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -452,7 +452,7 @@
       "name": "Bmbr30_TransactionsPayments_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -477,7 +477,7 @@
       "name": "Bmbr30_DocumentManagement_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -502,7 +502,7 @@
       "name": "ContentDeliveryNetworksTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -527,7 +527,7 @@
       "name": "Bmbr30_TradingInvesting_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -552,7 +552,7 @@
       "name": "AdvertisingTechnologiesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -577,7 +577,7 @@
       "name": "BusinessCity",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -601,7 +601,7 @@
       "name": "BusinessECommerceSite",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -626,7 +626,7 @@
       "name": "Bmbr30_ProductDevelopmentQA_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -651,7 +651,7 @@
       "name": "Bmbr30_APIsServices_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -676,7 +676,7 @@
       "name": "Bmbr30_DataCenterManagement_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -701,7 +701,7 @@
       "name": "CloudTechnologies_SustainabilityGreenEnterprise",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -726,7 +726,7 @@
       "name": "Country",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -752,7 +752,7 @@
       "name": "Bmbr30_HealthTechnology_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -777,7 +777,7 @@
       "name": "AnalyticsTechnologiesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -802,7 +802,7 @@
       "name": "Activity_Count_Open_Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -826,7 +826,7 @@
       "name": "Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -854,7 +854,7 @@
       "name": "LeasingTrades",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -878,7 +878,7 @@
       "name": "CloudTechnologies_RemoteComputerServerSolutions",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -903,7 +903,7 @@
       "name": "CompeteUniqueVisitors3",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -928,7 +928,7 @@
       "name": "FeatureJavaScriptStore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -953,7 +953,7 @@
       "name": "Bmbr30_Cloud_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -978,7 +978,7 @@
       "name": "Bmbr30_NetworkMonitoring_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1003,7 +1003,7 @@
       "name": "CloudTechnologies_WebPortalTechnology",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1028,7 +1028,7 @@
       "name": "CompeteUniqueVisitors2",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1053,7 +1053,7 @@
       "name": "CloudTechnologies_DataManagementStorageHardware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1078,7 +1078,7 @@
       "name": "BusinessTwitter",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1102,7 +1102,7 @@
       "name": "BusinessEmployeesRange",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1127,7 +1127,7 @@
       "name": "Bmbr30_AnalyticsReporting_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1152,7 +1152,7 @@
       "name": "FeatureTermShop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1177,7 +1177,7 @@
       "name": "JobsAsOf",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1201,7 +1201,7 @@
       "name": "AlexaUSUsers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1226,7 +1226,7 @@
       "name": "Bmbr30_NetworkMonitoring_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1251,7 +1251,7 @@
       "name": "FeatureTermReview",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1276,7 +1276,7 @@
       "name": "Alexa_Rank_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1301,7 +1301,7 @@
       "name": "Bmbr30_Fortune500_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1326,7 +1326,7 @@
       "name": "Bmbr30_Servers_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1351,7 +1351,7 @@
       "name": "CloudTechnologies_ChangeManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1376,7 +1376,7 @@
       "name": "CloudTechnologies_GRC",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1401,7 +1401,7 @@
       "name": "SemrushAdwordsTraffic",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1426,7 +1426,7 @@
       "name": "Bmbr30_HumanResourcesPayrol_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1451,7 +1451,7 @@
       "name": "BusinessIndustry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1476,7 +1476,7 @@
       "name": "BusinessTechnologiesRecentlyDetected",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1501,7 +1501,7 @@
       "name": "FeatureTermSoftwareforNonprofits",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1526,7 +1526,7 @@
       "name": "FeatureCurrencyUSDollar",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1551,7 +1551,7 @@
       "name": "AlexaAUPageViews",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1576,7 +1576,7 @@
       "name": "Bmbr30_HealthTechnology_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1601,7 +1601,7 @@
       "name": "BusinessTechnologiesSeoHeaders",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1626,7 +1626,7 @@
       "name": "FeatureTermBargain",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1651,7 +1651,7 @@
       "name": "CloudTechnologies_ITGovernance_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1676,7 +1676,7 @@
       "name": "CloudTechnologies_ServiceFieldSupportManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1701,7 +1701,7 @@
       "name": "Alexa_Rank_PctChange_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1726,7 +1726,7 @@
       "name": "CloudTechnologies_Procurement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1751,7 +1751,7 @@
       "name": "BusinessCountry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1775,7 +1775,7 @@
       "name": "Bmbr30_Businesssolutions_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1800,7 +1800,7 @@
       "name": "CloudTechnologies_VirtualizationServerDataCenter",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1825,7 +1825,7 @@
       "name": "JavascriptLibrariesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1850,7 +1850,7 @@
       "name": "CloudTechnologies_DataCenterSolutions_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1875,7 +1875,7 @@
       "name": "AlexaReachRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1900,7 +1900,7 @@
       "name": "FeatureTermReturnPolicy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1925,7 +1925,7 @@
       "name": "BusinessTechnologiesServer",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1950,7 +1950,7 @@
       "name": "BusinessType",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -1975,7 +1975,7 @@
       "name": "Bmbr30_Enterprise_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2000,7 +2000,7 @@
       "name": "Bmbr30_Enterprise_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2025,7 +2025,7 @@
       "name": "FeatureTermRetail",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2050,7 +2050,7 @@
       "name": "FeatureTermSale",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2075,7 +2075,7 @@
       "name": "Bmbr30_HumanResourcesPayrol_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2100,7 +2100,7 @@
       "name": "Alexa_Rank_12Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2125,7 +2125,7 @@
       "name": "Bmbr30_HumanResourcesTechno_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2150,7 +2150,7 @@
       "name": "Bmbr30_AdTech_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2175,7 +2175,7 @@
       "name": "CloudTechnologies_ServerTechnologiesSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2200,7 +2200,7 @@
       "name": "FeatureTermWishList",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2225,7 +2225,7 @@
       "name": "FundingStage",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2250,7 +2250,7 @@
       "name": "FundingAmount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2275,7 +2275,7 @@
       "name": "Bmbr30_Finance_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2300,7 +2300,7 @@
       "name": "BusinessSocialPresence",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2325,7 +2325,7 @@
       "name": "BusinessTechnologiesNs",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2350,7 +2350,7 @@
       "name": "CloudTechnologies_ServerTechnologiesHardware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2375,7 +2375,7 @@
       "name": "Bmbr30_Medical_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2400,7 +2400,7 @@
       "name": "Bmbr30_eCommerce_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2425,7 +2425,7 @@
       "name": "FeatureGlobalProduct",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2450,7 +2450,7 @@
       "name": "Alexa_Rank_PctChange_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2475,7 +2475,7 @@
       "name": "Bmbr30_RecruitmentHiringOnb_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2500,7 +2500,7 @@
       "name": "FeatureTermCustomerService",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2525,7 +2525,7 @@
       "name": "CloudTechnologies_HelpDeskManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2550,7 +2550,7 @@
       "name": "Bmbr30_Healthcare_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2575,7 +2575,7 @@
       "name": "FeatureTermFundraisingSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2600,7 +2600,7 @@
       "name": "FeatureTermShippingPolicy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2625,7 +2625,7 @@
       "name": "FeatureJavaScriptBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2650,7 +2650,7 @@
       "name": "CloudTechnologies_PPM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2675,7 +2675,7 @@
       "name": "HPANumPages",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2700,7 +2700,7 @@
       "name": "BusinessTechnologiesRecentTechnologies",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2725,7 +2725,7 @@
       "name": "Alexa_ViewsRank_PctChange_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2750,7 +2750,7 @@
       "name": "CloudTechnologies_CloudService_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2775,7 +2775,7 @@
       "name": "Bmbr30_MarketingDemandGenEm_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2800,7 +2800,7 @@
       "name": "AlexaUSRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2825,7 +2825,7 @@
       "name": "FeatureHtmlKeywords",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2850,7 +2850,7 @@
       "name": "FeatureTermOnlineStoreBuilder",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2875,7 +2875,7 @@
       "name": "ModelAction",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2900,7 +2900,7 @@
       "name": "Bmbr30_Benefits_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2925,7 +2925,7 @@
       "name": "Bmbr30_EnergyConstructionMa_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2950,7 +2950,7 @@
       "name": "CloudTechnologies_NetworkComputing_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -2975,7 +2975,7 @@
       "name": "Bmbr30_Medical_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3000,7 +3000,7 @@
       "name": "DisposableEmail",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3025,7 +3025,7 @@
       "name": "Bmbr30_Servers_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3050,7 +3050,7 @@
       "name": "FeatureGlobalBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3075,7 +3075,7 @@
       "name": "Bmbr30_GeneralBusiness_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3100,7 +3100,7 @@
       "name": "Bmbr30_DataCenterManagement_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3125,7 +3125,7 @@
       "name": "FeatureTermPluginforWordPress",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3150,7 +3150,7 @@
       "name": "FeatureTermOrderStatus",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3175,7 +3175,7 @@
       "name": "JobsRecentJobs",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3200,7 +3200,7 @@
       "name": "Alexa_ViewsRank_12Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3225,7 +3225,7 @@
       "name": "Bmbr30_HumanResources_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3250,7 +3250,7 @@
       "name": "CloudTechnologies_NewTechnologyDetected",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3275,7 +3275,7 @@
       "name": "CompeteDate2",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3300,7 +3300,7 @@
       "name": "CompeteDate3",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3325,7 +3325,7 @@
       "name": "FeatureInputValueAddToCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3350,7 +3350,7 @@
       "name": "FeatureCurrencyEuro",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3375,7 +3375,7 @@
       "name": "CloudTechnologies_AutomatedProcessWorkflowSystems",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3400,7 +3400,7 @@
       "name": "Bmbr30_StorageVirtualizatio_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3425,7 +3425,7 @@
       "name": "UCCFilingsPresent",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3450,7 +3450,7 @@
       "name": "Bmbr30_EmergingTech_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3475,7 +3475,7 @@
       "name": "Bmbr30_TradingInvesting_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3500,7 +3500,7 @@
       "name": "CloudTechnologies_CommTech_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3525,7 +3525,7 @@
       "name": "CloudTechnologies_CloudInfrastructureComputing",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3550,7 +3550,7 @@
       "name": "Total_Amount_Raised",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3574,7 +3574,7 @@
       "name": "BusinessTechnologiesSocialMediaPresence",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3599,7 +3599,7 @@
       "name": "AlexaKeywords",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3623,7 +3623,7 @@
       "name": "Bmbr30_MarketingDemandGenEm_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3648,7 +3648,7 @@
       "name": "Activity_Count_Interesting_Moment_Webinar",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3672,7 +3672,7 @@
       "name": "Bmbr30_CreativitySoftware_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3697,7 +3697,7 @@
       "name": "CloudTechnologies_RealEstate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3722,7 +3722,7 @@
       "name": "BusinessTechnologiesParked",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3747,7 +3747,7 @@
       "name": "CloudTechnologies_WCMS",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3772,7 +3772,7 @@
       "name": "FeatureGlobalStore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3797,7 +3797,7 @@
       "name": "CloudTechnologies_LegalProfessionalServices",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3822,7 +3822,7 @@
       "name": "FeatureNumDocumentsFetched",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3847,7 +3847,7 @@
       "name": "Alexa_ViewsRank_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3872,7 +3872,7 @@
       "name": "CloudTechnologies_VerticalMarkets_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3897,7 +3897,7 @@
       "name": "CloudTechnologies_ITInfrastructureOperations",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3922,7 +3922,7 @@
       "name": "FeatureRefSrcStore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3947,7 +3947,7 @@
       "name": "CloudTechnologies_TravelandExpenseManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3972,7 +3972,7 @@
       "name": "CloudTechnologies_Hypervisor",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -3997,7 +3997,7 @@
       "name": "Bmbr30_OperatingSystemsProg_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4022,7 +4022,7 @@
       "name": "Alexa_ViewsRank_PctChange_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4047,7 +4047,7 @@
       "name": "CloudTechnologies_ProjectMgnt_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4072,7 +4072,7 @@
       "name": "StageName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4099,7 +4099,7 @@
       "name": "FeatureTermYourstore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4124,7 +4124,7 @@
       "name": "Bmbr30_ConsumerTechnology_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4149,7 +4149,7 @@
       "name": "Bmbr30_Healthcare_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4174,7 +4174,7 @@
       "name": "Bmbr30_eCommerce_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4199,7 +4199,7 @@
       "name": "CloudTechnologies_SystemAnalyticsMonitoring",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4224,7 +4224,7 @@
       "name": "BusinessTechnologiesMapping",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4249,7 +4249,7 @@
       "name": "BusinessPrimaryNAICS",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4273,7 +4273,7 @@
       "name": "Bmbr30_Database_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4298,7 +4298,7 @@
       "name": "FeatureTermBillingSolution",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4323,7 +4323,7 @@
       "name": "BusinessRevenueRange",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4348,7 +4348,7 @@
       "name": "Bmbr30_EmergingTech_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4373,7 +4373,7 @@
       "name": "CloudTechnologies_SRM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4398,7 +4398,7 @@
       "name": "FeatureTermEcommerceSoftwareSolutions",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4423,7 +4423,7 @@
       "name": "BusinessPrimarySIC4Digit",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4447,7 +4447,7 @@
       "name": "AlexaCategories",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4471,7 +4471,7 @@
       "name": "BusinessRetirementParticipants",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4496,7 +4496,7 @@
       "name": "Bmbr30_Web_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4521,7 +4521,7 @@
       "name": "FeatureTermYourAccount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4546,7 +4546,7 @@
       "name": "FeatureTermBusinessManagementSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4571,7 +4571,7 @@
       "name": "FeatureTermShoppingCartPlatform",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4596,7 +4596,7 @@
       "name": "Bmbr30_Database_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4621,7 +4621,7 @@
       "name": "JobsDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4645,7 +4645,7 @@
       "name": "Bmbr30_Marketing_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4670,7 +4670,7 @@
       "name": "Activity_Count_Interesting_Moment_Any",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4694,7 +4694,7 @@
       "name": "UCCFilings",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4719,7 +4719,7 @@
       "name": "CRMAlert",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4744,7 +4744,7 @@
       "name": "FeatureTermAddItem",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4769,7 +4769,7 @@
       "name": "Bmbr30_DataCenterManagement_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4794,7 +4794,7 @@
       "name": "Bmbr30_Sales_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4819,7 +4819,7 @@
       "name": "CloudTechnologies_PLM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4844,7 +4844,7 @@
       "name": "CloudTechnologies_DatabaseManagementSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4869,7 +4869,7 @@
       "name": "Bmbr30_Government_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4894,7 +4894,7 @@
       "name": "DerogatoryIndicator",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4919,7 +4919,7 @@
       "name": "FundingDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4944,7 +4944,7 @@
       "name": "FeatureTermphpecommerceplatform",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4969,7 +4969,7 @@
       "name": "FeatureJavaScriptShop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -4994,7 +4994,7 @@
       "name": "FeatureJavaScriptBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5019,7 +5019,7 @@
       "name": "CloudTechnologies_VisualizationSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5044,7 +5044,7 @@
       "name": "Bmbr30_Web_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5069,7 +5069,7 @@
       "name": "Bmbr30_MobileWireless_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5094,7 +5094,7 @@
       "name": "CloudTechnologies_ProductivitySltns_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5119,7 +5119,7 @@
       "name": "Bmbr30_EmergingTech_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5144,7 +5144,7 @@
       "name": "Bmbr30_Government_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5169,7 +5169,7 @@
       "name": "CloudTechnologies_MarketingPerfMgmt_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5194,7 +5194,7 @@
       "name": "CloudTechnologies_WebOrntdArch_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5219,7 +5219,7 @@
       "name": "PatentID",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5244,7 +5244,7 @@
       "name": "CloudTechnologies_VirtualizationAppDesktop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5269,7 +5269,7 @@
       "name": "HPAExecutionFull",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5293,7 +5293,7 @@
       "name": "FundingGovAgency",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5317,7 +5317,7 @@
       "name": "Bmbr30_MessagingCommunicati_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5342,7 +5342,7 @@
       "name": "AlexaViewsPerMillion",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5367,7 +5367,7 @@
       "name": "FeatureRefSrcBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5392,7 +5392,7 @@
       "name": "BusinessAddress1",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5416,7 +5416,7 @@
       "name": "PatentsAsOf",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5440,7 +5440,7 @@
       "name": "Bmbr30_Sales_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5465,7 +5465,7 @@
       "name": "SemrushOrganicKeywords",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5490,7 +5490,7 @@
       "name": "AlexaLanguage",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5514,7 +5514,7 @@
       "name": "Activity_Count_Click_Link",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5538,7 +5538,7 @@
       "name": "Bmbr30_Enterprise_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5563,7 +5563,7 @@
       "name": "BusinessSICDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5587,7 +5587,7 @@
       "name": "CloudTechnologies_CRM_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5612,7 +5612,7 @@
       "name": "Bmbr30_HealthTechnology_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5637,7 +5637,7 @@
       "name": "CloudTechnologies_BPM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5662,7 +5662,7 @@
       "name": "Bmbr30_MarketingDemandGenEm_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5687,7 +5687,7 @@
       "name": "Bmbr30_DocumentManagement_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5712,7 +5712,7 @@
       "name": "FeatureTermShippingAddress",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5737,7 +5737,7 @@
       "name": "Bmbr30_CRM_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5762,7 +5762,7 @@
       "name": "Alexa_ReachRank_12Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5787,7 +5787,7 @@
       "name": "FeatureTermCreateaFreeWebsite",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5812,7 +5812,7 @@
       "name": "BusinessTechnologiesFramework",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5837,7 +5837,7 @@
       "name": "FirstName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5864,7 +5864,7 @@
       "name": "Bmbr30_NetworkMonitoring_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5889,7 +5889,7 @@
       "name": "FeatureTermFundraising",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5914,7 +5914,7 @@
       "name": "AlexaRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5939,7 +5939,7 @@
       "name": "Bmbr30_CRM_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5964,7 +5964,7 @@
       "name": "BusinessTechnologiesAnalytics",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -5989,7 +5989,7 @@
       "name": "BusinessEstimatedAnnualSales",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6013,7 +6013,7 @@
       "name": "FeatureTermBillingAddress",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6038,7 +6038,7 @@
       "name": "Bmbr30_ProductDevelopmentQA_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6063,7 +6063,7 @@
       "name": "Alexa_ViewsRank_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6088,7 +6088,7 @@
       "name": "Bmbr30_OperatingSystemsProg_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6113,7 +6113,7 @@
       "name": "Bmbr30_Businesssolutions_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6138,7 +6138,7 @@
       "name": "CloudTechnologies_EBS",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6163,7 +6163,7 @@
       "name": "Bmbr30_ProductDevelopmentQA_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6188,7 +6188,7 @@
       "name": "EcommerceTechnologiesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6213,7 +6213,7 @@
       "name": "AlexaCAUsers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6238,7 +6238,7 @@
       "name": "CloudTechnologies_AssetPerformanceManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6263,7 +6263,7 @@
       "name": "CloudTechnologies_HardwareOther",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6288,7 +6288,7 @@
       "name": "FundingContractDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6312,7 +6312,7 @@
       "name": "FeatureTermBuy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6337,7 +6337,7 @@
       "name": "Bmbr30_MarketingSearch_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6362,7 +6362,7 @@
       "name": "CloudTechnologies_ManufacturingEngineering",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6387,7 +6387,7 @@
       "name": "Bmbr30_HumanResourcesTechno_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6412,7 +6412,7 @@
       "name": "FeatureTermSecureOrder",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6437,7 +6437,7 @@
       "name": "Bmbr30_HumanResourcesPayrol_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6462,7 +6462,7 @@
       "name": "Bmbr30_GeneralBusiness_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6487,7 +6487,7 @@
       "name": "Bmbr30_StorageVirtualizatio_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6512,7 +6512,7 @@
       "name": "Bmbr30_Finance_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6537,7 +6537,7 @@
       "name": "Bmbr30_MobileWireless_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6562,7 +6562,7 @@
       "name": "FeatureTermPaywall",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6587,7 +6587,7 @@
       "name": "Bmbr30_NetworkMonitoring_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6612,7 +6612,7 @@
       "name": "WebsiteDocumentStandardsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6637,7 +6637,7 @@
       "name": "FeatureHtmlTitle",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6662,7 +6662,7 @@
       "name": "BusinessNAICSDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6687,7 +6687,7 @@
       "name": "CloudTechnologies_WebOrntdArch_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6712,7 +6712,7 @@
       "name": "CloudTechnologies_EnterpriseContent_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6737,7 +6737,7 @@
       "name": "CompeteDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6762,7 +6762,7 @@
       "name": "CloudTechnologies_AcademicEduMgmtSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6787,7 +6787,7 @@
       "name": "FeatureTermAddToCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6812,7 +6812,7 @@
       "name": "PercentileModel",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6837,7 +6837,7 @@
       "name": "CloudTechnologies_MobileEnterpriseManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6862,7 +6862,7 @@
       "name": "CloudTechnologies_InventoryManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6887,7 +6887,7 @@
       "name": "CloudTechnologies_CRM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6912,7 +6912,7 @@
       "name": "Facebook_Likes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6937,7 +6937,7 @@
       "name": "CloudTechnologies_ECM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6962,7 +6962,7 @@
       "name": "Bmbr30_Cloud_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -6987,7 +6987,7 @@
       "name": "FeatureTermCrowdfunding",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7012,7 +7012,7 @@
       "name": "BusinessVCFunded",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7037,7 +7037,7 @@
       "name": "Bmbr30_OperatingSystemsProg_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7062,7 +7062,7 @@
       "name": "BusinessTechnologiesCdn",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7087,7 +7087,7 @@
       "name": "FeatureTermSchedulingandAppointmentSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7112,7 +7112,7 @@
       "name": "Bmbr30_Marketing_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7137,7 +7137,7 @@
       "name": "Event",
       "length": null,
       "nullable": false,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7163,7 +7163,7 @@
       "name": "Bmbr30_HardwareITManagement_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7188,7 +7188,7 @@
       "name": "Bmbr30_SoftwareEngineering_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7213,7 +7213,7 @@
       "name": "CloudTechnologies_SoftwareOther",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7238,7 +7238,7 @@
       "name": "BusinessTechnologiesMarketingAutomation",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7263,7 +7263,7 @@
       "name": "Activity_Count_Visit_Webpage",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7287,7 +7287,7 @@
       "name": "WebMasterRegistrationsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7312,7 +7312,7 @@
       "name": "Bmbr30_TrainingDevelopment_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7337,7 +7337,7 @@
       "name": "FeatureTermRecurringBilling",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7362,7 +7362,7 @@
       "name": "ContentManagementSystemsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7387,7 +7387,7 @@
       "name": "CloudTechnologies_EDA",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7412,7 +7412,7 @@
       "name": "CloudTechnologies_HardwareBasic_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7437,7 +7437,7 @@
       "name": "Bmbr30_Government_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7462,7 +7462,7 @@
       "name": "Id",
       "length": null,
       "nullable": false,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7489,7 +7489,7 @@
       "name": "FeatureTermEcommercePlatformSolutions",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7514,7 +7514,7 @@
       "name": "Bmbr30_EnergyConstructionMa_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7539,7 +7539,7 @@
       "name": "Bmbr30_TrainingDevelopment_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7564,7 +7564,7 @@
       "name": "BusinessTechnologiesOpenSourceAdoption",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7589,7 +7589,7 @@
       "name": "CloudTechnologies_EDI",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7614,7 +7614,7 @@
       "name": "CloudTechnologies_MainframeComputers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7639,7 +7639,7 @@
       "name": "FeatureJavaScriptProduct",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7664,7 +7664,7 @@
       "name": "BusinessUrlNumPages",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7689,7 +7689,7 @@
       "name": "FundingContractNaics",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7713,7 +7713,7 @@
       "name": "CloudTechnologies_SystemSecurityServices",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7738,7 +7738,7 @@
       "name": "Bmbr30_Servers_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7763,7 +7763,7 @@
       "name": "PatentApplicationFiled",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7787,7 +7787,7 @@
       "name": "CloudTechnologies_EnterpriseApplications_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7812,7 +7812,7 @@
       "name": "SystemAlert",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7837,7 +7837,7 @@
       "name": "BusinessEstablishedYear",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7862,7 +7862,7 @@
       "name": "HostingProvidersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7887,7 +7887,7 @@
       "name": "TotalParticipantsSOY",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7912,7 +7912,7 @@
       "name": "WidgetsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7937,7 +7937,7 @@
       "name": "Bmbr30_FinanceIT_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7962,7 +7962,7 @@
       "name": "FundingTotalContractedAmount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -7987,7 +7987,7 @@
       "name": "AwardWebsite",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8011,7 +8011,7 @@
       "name": "AudioVideoMediaTechnologiesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8036,7 +8036,7 @@
       "name": "PatentGranted",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8060,7 +8060,7 @@
       "name": "Bmbr30_HumanResourcesPayrol_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8085,7 +8085,7 @@
       "name": "Bmbr30_DataCenterManagement_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8110,7 +8110,7 @@
       "name": "CloudTechnologies_CustomerOrderManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8135,7 +8135,7 @@
       "name": "Bmbr30_TrainingDevelopment_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8160,7 +8160,7 @@
       "name": "CloudTechnologies_PaaS",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8185,7 +8185,7 @@
       "name": "FeatureTermFreeOnlineStore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8210,7 +8210,7 @@
       "name": "InternalId",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8228,7 +8228,7 @@
       "name": "BusinessTechnologiesSeoMeta",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8253,7 +8253,7 @@
       "name": "JobsTrendString",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8278,7 +8278,7 @@
       "name": "WebServersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8303,7 +8303,7 @@
       "name": "ActiveRetirementParticipants",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8328,7 +8328,7 @@
       "name": "FeatureTermAssociationManagementSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8353,7 +8353,7 @@
       "name": "FeatureTermSellTickets",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8378,7 +8378,7 @@
       "name": "FeatureHtmlDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8403,7 +8403,7 @@
       "name": "Alexa_Rank_PctChange_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8428,7 +8428,7 @@
       "name": "Activity_Count_Fill_Out_Form",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8452,7 +8452,7 @@
       "name": "Bmbr30_MessagingCommunicati_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8477,7 +8477,7 @@
       "name": "SemrushRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8502,7 +8502,7 @@
       "name": "Bmbr30_AdTech_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8527,7 +8527,7 @@
       "name": "RetirementAssetsYOY",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8552,7 +8552,7 @@
       "name": "FeatureTermPaymentOption",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8577,7 +8577,7 @@
       "name": "SemrushOrganicCost",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8602,7 +8602,7 @@
       "name": "Twitter_Following",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8627,7 +8627,7 @@
       "name": "Bmbr30_Sales_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8652,7 +8652,7 @@
       "name": "CloudTechnologies_ITGovernance_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8677,7 +8677,7 @@
       "name": "HPAEmailSuffix",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8701,7 +8701,7 @@
       "name": "AlexaReachPerMillion",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8726,7 +8726,7 @@
       "name": "FeatureAverageDocumentSizeProcessed",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8751,7 +8751,7 @@
       "name": "Bmbr30_DocumentManagement_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8776,7 +8776,7 @@
       "name": "SSLCertificatesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8801,7 +8801,7 @@
       "name": "DNSProvidersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8826,7 +8826,7 @@
       "name": "Bmbr30_SoftwareEngineering_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8851,7 +8851,7 @@
       "name": "LinkedIn_Url",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8875,7 +8875,7 @@
       "name": "BusinessState",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8899,7 +8899,7 @@
       "name": "VCAsOf",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8923,7 +8923,7 @@
       "name": "FeatureTermShippingInfo",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8948,7 +8948,7 @@
       "name": "CloudTechnologies_EnterpriseContent_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -8973,7 +8973,7 @@
       "name": "PhoneNumber",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9000,7 +9000,7 @@
       "name": "CloudTechnologies_DocumentManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9025,7 +9025,7 @@
       "name": "FeatureTermEcommerceSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9050,7 +9050,7 @@
       "name": "FundingContractDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9074,7 +9074,7 @@
       "name": "Bmbr30_APIsServices_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9099,7 +9099,7 @@
       "name": "FeatureTermShopBy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9124,7 +9124,7 @@
       "name": "MarketingAutomationTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9149,7 +9149,7 @@
       "name": "Bmbr30_Cloud_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9174,7 +9174,7 @@
       "name": "AlexaViewsRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9199,7 +9199,7 @@
       "name": "FeatureTermContinueShopping",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9224,7 +9224,7 @@
       "name": "Bmbr30_CreativitySoftware_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9249,7 +9249,7 @@
       "name": "AlexaGBUsers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9274,7 +9274,7 @@
       "name": "BusinessIndustry2",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9299,7 +9299,7 @@
       "name": "FeatureTermWebsiteBuilder",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9324,7 +9324,7 @@
       "name": "FeatureGlobalBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9349,7 +9349,7 @@
       "name": "FeatureExecutionFull",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9374,7 +9374,7 @@
       "name": "Bmbr30_FinanceIT_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9399,7 +9399,7 @@
       "name": "Bmbr30_MessagingCommunicati_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9424,7 +9424,7 @@
       "name": "BusinessTechnologiesJavascript",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9449,7 +9449,7 @@
       "name": "Alexa_ReachRank_PctChange_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9474,7 +9474,7 @@
       "name": "OperatingSystemsAndServersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9499,7 +9499,7 @@
       "name": "SemrushAdwordsKeywords",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9524,7 +9524,7 @@
       "name": "Bmbr30_Healthcare_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9549,7 +9549,7 @@
       "name": "Bmbr30_Benefits_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9574,7 +9574,7 @@
       "name": "Bmbr30_Government_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9599,7 +9599,7 @@
       "name": "AwardCategory",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9623,7 +9623,7 @@
       "name": "FeatureRefSrcProduct",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9648,7 +9648,7 @@
       "name": "CloudTechnologies_MiddlewareSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9673,7 +9673,7 @@
       "name": "CloudTechnologies_EnterpriseApplications_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9698,7 +9698,7 @@
       "name": "Bmbr30_ConsumerTechnology_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9723,7 +9723,7 @@
       "name": "Activity_Count_Interesting_Moment_Search",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9747,7 +9747,7 @@
       "name": "BusinessTechnologiesShop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9772,7 +9772,7 @@
       "name": "FundingFiscalYear",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9797,7 +9797,7 @@
       "name": "Bmbr30_StorageVirtualizatio_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9822,7 +9822,7 @@
       "name": "AlexaGBPageViews",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9847,7 +9847,7 @@
       "name": "Bmbr30_APIsServices_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9872,7 +9872,7 @@
       "name": "BusinessTechnologiesWidgets",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9897,7 +9897,7 @@
       "name": "Activity_Count_Interesting_Moment_Multiple",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9921,7 +9921,7 @@
       "name": "Bmbr30_GeneralBusiness_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9946,7 +9946,7 @@
       "name": "BusinessTechnologiesSeoTitle",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9971,7 +9971,7 @@
       "name": "Bmbr30_Businesssolutions_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -9996,7 +9996,7 @@
       "name": "CloudTechnologies_Construction",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10021,7 +10021,7 @@
       "name": "Title",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10047,7 +10047,7 @@
       "name": "Alexa_ReachRank_PctChange_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10072,7 +10072,7 @@
       "name": "Bmbr30_Marketing_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10097,7 +10097,7 @@
       "name": "CloudTechnologies_ConsumerElectronics",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10122,7 +10122,7 @@
       "name": "CreatedDate",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10149,7 +10149,7 @@
       "name": "FeatureTermStore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10174,7 +10174,7 @@
       "name": "Alexa_ViewsRank_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10199,7 +10199,7 @@
       "name": "FeatureTermFreeShipping",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10224,7 +10224,7 @@
       "name": "Bmbr30_StorageVirtualizatio_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10249,7 +10249,7 @@
       "name": "Bmbr30_Database_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10274,7 +10274,7 @@
       "name": "FeatureTermMembershipManagementSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10299,7 +10299,7 @@
       "name": "BusinessTechnologiesPayment",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10324,7 +10324,7 @@
       "name": "WebsiteFrameworksTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10349,7 +10349,7 @@
       "name": "CloudTechnologies_PartnerManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10374,7 +10374,7 @@
       "name": "CloudTechnologies_Medical",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10399,7 +10399,7 @@
       "name": "CloudTechnologies_OSComputingLanguages",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10424,7 +10424,7 @@
       "name": "JobsLink",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10448,7 +10448,7 @@
       "name": "BusinessTechnologiesCms",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10473,7 +10473,7 @@
       "name": "AlexaAUUsers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10498,7 +10498,7 @@
       "name": "CloudTechnologies_Collaboration",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10523,7 +10523,7 @@
       "name": "CloudTechnologies_ApplicationDevelopmentMgmt",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10548,7 +10548,7 @@
       "name": "Bmbr30_RecruitmentHiringOnb_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10573,7 +10573,7 @@
       "name": "AlexaDomains",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10597,7 +10597,7 @@
       "name": "AlexaDescription",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10622,7 +10622,7 @@
       "name": "CloudTechnologies_Telephony",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10647,7 +10647,7 @@
       "name": "Tech_Used",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10671,7 +10671,7 @@
       "name": "IsClosed",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10699,7 +10699,7 @@
       "name": "Bmbr30_Benefits_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10724,7 +10724,7 @@
       "name": "Bmbr30_AdTech_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10749,7 +10749,7 @@
       "name": "CloudTechnologies_SocialMediaSystems",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10774,7 +10774,7 @@
       "name": "Bmbr30_MessagingCommunicati_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10799,7 +10799,7 @@
       "name": "JobsTitle",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10823,7 +10823,7 @@
       "name": "Alexa_ViewsRank_PctChange_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10848,7 +10848,7 @@
       "name": "Bmbr30_Sales_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10873,7 +10873,7 @@
       "name": "MarketingAutomationAlert",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10898,7 +10898,7 @@
       "name": "FundingContractAmount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10922,7 +10922,7 @@
       "name": "Twitter_Tweets",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10947,7 +10947,7 @@
       "name": "Bmbr30_HealthInsurance_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10972,7 +10972,7 @@
       "name": "Bmbr30_MarketingDemandGenEm_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -10997,7 +10997,7 @@
       "name": "Bmbr30_HardwareITManagement_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11022,7 +11022,7 @@
       "name": "Bmbr30_TransactionsPayments_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11047,7 +11047,7 @@
       "name": "Bmbr30_DocumentManagement_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11072,7 +11072,7 @@
       "name": "Bmbr30_ProductDevelopmentQA_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11097,7 +11097,7 @@
       "name": "FeatureTermPrice",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11122,7 +11122,7 @@
       "name": "Bmbr30_HealthInsurance_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11147,7 +11147,7 @@
       "name": "CloudTechnologies_CommunicationsTechnology",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11172,7 +11172,7 @@
       "name": "Bmbr30_MarketingSearch_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11197,7 +11197,7 @@
       "name": "Alexa_ReachRank_6Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11222,7 +11222,7 @@
       "name": "Bmbr30_Fortune500_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11247,7 +11247,7 @@
       "name": "Bmbr30_Fortune500_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11272,7 +11272,7 @@
       "name": "FeatureTermDeal",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11297,7 +11297,7 @@
       "name": "DomainParkingTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11322,7 +11322,7 @@
       "name": "Industry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11348,7 +11348,7 @@
       "name": "CloudTechnologies_BusinessIntelligence",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11373,7 +11373,7 @@
       "name": "CloudTechnologies_LeanKaizenValueStreamMapping",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11398,7 +11398,7 @@
       "name": "CloudTechnologies_VirtualizationPlatformMgmt",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11423,7 +11423,7 @@
       "name": "FeatureCurrencyJapanYen",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11448,7 +11448,7 @@
       "name": "Alexa_Rank_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11473,7 +11473,7 @@
       "name": "Bmbr30_CreativitySoftware_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11498,7 +11498,7 @@
       "name": "CloudTechnologies_QualityManagementSystem",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11523,7 +11523,7 @@
       "name": "Bmbr30_EnergyConstructionMa_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11548,7 +11548,7 @@
       "name": "Bmbr30_Fortune500_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11573,7 +11573,7 @@
       "name": "MapsPluginsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11598,7 +11598,7 @@
       "name": "FeatureTermCommerceSolutions",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11623,7 +11623,7 @@
       "name": "CloudTechnologies_ContactCenterManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11648,7 +11648,7 @@
       "name": "FeatureTermCatalog",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11673,7 +11673,7 @@
       "name": "CloudTechnologies_MobileTechnologies",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11698,7 +11698,7 @@
       "name": "Bmbr30_HardwareITManagement_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11723,7 +11723,7 @@
       "name": "Bmbr30_GeneralBusiness_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11748,7 +11748,7 @@
       "name": "AlexaUSPageViews",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11773,7 +11773,7 @@
       "name": "BusinessTechnologiesFirstDetected",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11798,7 +11798,7 @@
       "name": "FeatureTermCustomerSupport",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11823,7 +11823,7 @@
       "name": "AlexaLinksIn",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11847,7 +11847,7 @@
       "name": "BusinessTechnologiesAds",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11872,7 +11872,7 @@
       "name": "Bmbr30_Web_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11897,7 +11897,7 @@
       "name": "AlexaTitle",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11921,7 +11921,7 @@
       "name": "FeatureInputValueAddToBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11946,7 +11946,7 @@
       "name": "FeatureExecutionFetch",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11971,7 +11971,7 @@
       "name": "PaymentProvidersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -11996,7 +11996,7 @@
       "name": "FeatureTermCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12021,7 +12021,7 @@
       "name": "FeatureTermEventManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12046,7 +12046,7 @@
       "name": "CloudTechnologies_DesignPublishing",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12071,7 +12071,7 @@
       "name": "BusinessEstimatedAnnualSales_k",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12096,7 +12096,7 @@
       "name": "AlexaAURank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12121,7 +12121,7 @@
       "name": "FeatureTermFrequentlyAskedQuestion",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12146,7 +12146,7 @@
       "name": "CompanyName",
       "length": null,
       "nullable": false,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12174,7 +12174,7 @@
       "name": "CloudTechnologies_Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12199,7 +12199,7 @@
       "name": "CloudTechnologies_VerticalMarkets_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12224,7 +12224,7 @@
       "name": "BusinessTechnologiesFeeds",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12249,7 +12249,7 @@
       "name": "Bmbr30_Medical_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12274,7 +12274,7 @@
       "name": "State",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12301,7 +12301,7 @@
       "name": "Bmbr30_EnergyConstructionMa_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12326,7 +12326,7 @@
       "name": "FeatureGlobalShop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12351,7 +12351,7 @@
       "name": "Bmbr30_HardwareITManagement_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12376,7 +12376,7 @@
       "name": "Bmbr30_HealthInsurance_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12401,7 +12401,7 @@
       "name": "Bmbr30_Marketing_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12426,7 +12426,7 @@
       "name": "FeatureRefSrcBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12451,7 +12451,7 @@
       "name": "CompeteUniqueVisitors",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12476,7 +12476,7 @@
       "name": "CloudTechnologies_CaseManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12501,7 +12501,7 @@
       "name": "BusinessTechnologiesWebServer",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12526,7 +12526,7 @@
       "name": "Twitter_Followers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12551,7 +12551,7 @@
       "name": "CloudTechnologies_ProductivitySolutions",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12576,7 +12576,7 @@
       "name": "FundingFinanceRound",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12601,7 +12601,7 @@
       "name": "Bmbr30_MobileWireless_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12626,7 +12626,7 @@
       "name": "CloudTechnologies_ProductivitySltns_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12651,7 +12651,7 @@
       "name": "FeatureTermCrossChannelCommerce",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12676,7 +12676,7 @@
       "name": "LastName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12703,7 +12703,7 @@
       "name": "Bmbr30_TransactionsPayments_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12728,7 +12728,7 @@
       "name": "CloudTechnologies_HardwareBasic_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12753,7 +12753,7 @@
       "name": "Bmbr30_HumanResources_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12778,7 +12778,7 @@
       "name": "Alexa_ReachRank_PctChange_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12803,7 +12803,7 @@
       "name": "ConsolidatedIndustry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12828,7 +12828,7 @@
       "name": "AlexaCARank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12853,7 +12853,7 @@
       "name": "CloudTechnologies_CommTech_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12878,7 +12878,7 @@
       "name": "Bmbr30_AnalyticsReporting_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12903,7 +12903,7 @@
       "name": "PatentApplicationID",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12927,7 +12927,7 @@
       "name": "CloudTechnologies_EPM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12952,7 +12952,7 @@
       "name": "BusinessCompanyPhone",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -12976,7 +12976,7 @@
       "name": "CloudTechnologies_DataCenterSolutions_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13001,7 +13001,7 @@
       "name": "BusinessZip",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13025,7 +13025,7 @@
       "name": "Bmbr30_MobileWireless_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13050,7 +13050,7 @@
       "name": "Bmbr30_Finance_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13075,7 +13075,7 @@
       "name": "Bmbr30_HealthInsurance_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13100,7 +13100,7 @@
       "name": "Activity_Count_Interesting_Moment_key_web_page",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13124,7 +13124,7 @@
       "name": "Bmbr30_HumanResourcesTechno_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13149,7 +13149,7 @@
       "name": "Bmbr30_TradingInvesting_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13174,7 +13174,7 @@
       "name": "Bmbr30_eCommerce_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13199,7 +13199,7 @@
       "name": "SemrushAdwordsCost",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13224,7 +13224,7 @@
       "name": "DataFeedsTechnologiesTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13249,7 +13249,7 @@
       "name": "Bmbr30_Healthcare_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13274,7 +13274,7 @@
       "name": "IsPublicDomain",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13299,7 +13299,7 @@
       "name": "FeatureTermPaymentProcessing",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13324,7 +13324,7 @@
       "name": "Bmbr30_ConsumerTechnology_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13349,7 +13349,7 @@
       "name": "CloudTechnologies_SCM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13374,7 +13374,7 @@
       "name": "CloudTechnologies_MidrangeComputers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13399,7 +13399,7 @@
       "name": "Bmbr30_MarketingSearch_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13424,7 +13424,7 @@
       "name": "Bmbr30_Web_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13449,7 +13449,7 @@
       "name": "Bmbr30_Finance_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13474,7 +13474,7 @@
       "name": "AlexaViewsPerUser",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13499,7 +13499,7 @@
       "name": "FeatureProcessed",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13524,7 +13524,7 @@
       "name": "CloudTechnologies_ProjectMgnt_One",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13549,7 +13549,7 @@
       "name": "Source_BusinessCountry",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13573,7 +13573,7 @@
       "name": "BusinessTechnologiesRecentTags",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13598,7 +13598,7 @@
       "name": "CloudTechnologies_IaaS",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13623,7 +13623,7 @@
       "name": "CloudTechnologies_ProjectManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13648,7 +13648,7 @@
       "name": "FeatureTermFormBuilder",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13673,7 +13673,7 @@
       "name": "CloudTechnologies_SoftwareBasic_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13698,7 +13698,7 @@
       "name": "CloudTechnologies_CloudService_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13723,7 +13723,7 @@
       "name": "Activity_Count_Interesting_Moment_Pricing",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13747,7 +13747,7 @@
       "name": "Bmbr30_Cloud_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13772,7 +13772,7 @@
       "name": "CloudTechnologies_MarketingPerformanceMeasurement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13797,7 +13797,7 @@
       "name": "FeatureNumDocumentsProcessed",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13822,7 +13822,7 @@
       "name": "AwardYear",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13847,7 +13847,7 @@
       "name": "EmailProvidersTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13872,7 +13872,7 @@
       "name": "Bmbr30_Servers_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13897,7 +13897,7 @@
       "name": "FeatureTermCheckout",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13922,7 +13922,7 @@
       "name": "AlexaRelatedLinks",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13946,7 +13946,7 @@
       "name": "BusinessTechnologiesDocinfo",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13971,7 +13971,7 @@
       "name": "Some_Column",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -13995,7 +13995,7 @@
       "name": "CloudTechnologies_ERP",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14020,7 +14020,7 @@
       "name": "AlexaGBRank",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14045,7 +14045,7 @@
       "name": "Bmbr30_Businesssolutions_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14070,7 +14070,7 @@
       "name": "BusinessTechnologiesSsl",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14095,7 +14095,7 @@
       "name": "FeatureTermSellOnline",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14120,7 +14120,7 @@
       "name": "CloudTechnologies_ITManagement",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14145,7 +14145,7 @@
       "name": "City",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14171,7 +14171,7 @@
       "name": "Bmbr30_AdTech_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14196,7 +14196,7 @@
       "name": "Bmbr30_RecruitmentHiringOnb_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14221,7 +14221,7 @@
       "name": "CloudTechnologies_SIEM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14246,7 +14246,7 @@
       "name": "CloudTechnologies_NetworkManagementSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14271,7 +14271,7 @@
       "name": "Activity_Count_Email_Bounced_Soft",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14295,7 +14295,7 @@
       "name": "FeatureTermCreateastore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14320,7 +14320,7 @@
       "name": "CloudTechnologies_DataArchivingBackUpRecovery",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14345,7 +14345,7 @@
       "name": "Bmbr30_MarketingSearch_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14370,7 +14370,7 @@
       "name": "IsMatched",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14395,7 +14395,7 @@
       "name": "Bmbr30_HealthTechnology_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14420,7 +14420,7 @@
       "name": "CloudTechnologies_Media",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14445,7 +14445,7 @@
       "name": "CloudTechnologies_HRMS_HCM",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14470,7 +14470,7 @@
       "name": "Bmbr30_OperatingSystemsProg_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14495,7 +14495,7 @@
       "name": "Bmbr30_Enterprise_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14520,7 +14520,7 @@
       "name": "CloudTechnologies_SearchEngine",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14545,7 +14545,7 @@
       "name": "CloudTechnologies_MarketingPerfMgmt_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14570,7 +14570,7 @@
       "name": "FeatureRefSrcShop",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14595,7 +14595,7 @@
       "name": "BankruptcyFiled",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14620,7 +14620,7 @@
       "name": "FeatureTermProduct",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14645,7 +14645,7 @@
       "name": "BusinessTechnologiesHosting",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14670,7 +14670,7 @@
       "name": "Alexa_Rank_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14695,7 +14695,7 @@
       "name": "FeatureInputValueAddItem",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14720,7 +14720,7 @@
       "name": "Bmbr30_AnalyticsReporting_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14745,7 +14745,7 @@
       "name": "Bmbr30_SoftwareEngineering_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14770,7 +14770,7 @@
       "name": "FeatureTermSellDigitalDownloads",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14795,7 +14795,7 @@
       "name": "FeatureTermWebBuilder",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14820,7 +14820,7 @@
       "name": "BusinessTechnologiesEncoding",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14845,7 +14845,7 @@
       "name": "CloudTechnologies_DR",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14870,7 +14870,7 @@
       "name": "Bmbr30_Medical_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14895,7 +14895,7 @@
       "name": "Bmbr30_APIsServices_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14920,7 +14920,7 @@
       "name": "FeatureTermshoppingcartsolution",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14945,7 +14945,7 @@
       "name": "CloudTechnologies_OVP",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14970,7 +14970,7 @@
       "name": "FeatureTermShippingAndHandling",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -14995,7 +14995,7 @@
       "name": "CloudTechnologies_Printers",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15020,7 +15020,7 @@
       "name": "BusinessAnnualSalesAbs",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15045,7 +15045,7 @@
       "name": "Bmbr30_FinanceIT_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15070,7 +15070,7 @@
       "name": "Alexa_ReachRank_9Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15095,7 +15095,7 @@
       "name": "Activity_Count_Interesting_Moment_Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15119,7 +15119,7 @@
       "name": "Bmbr30_HumanResourcesTechno_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15144,7 +15144,7 @@
       "name": "Intelliscore",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15169,7 +15169,7 @@
       "name": "CloudTechnologies_NetworkComputing_Two",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15194,7 +15194,7 @@
       "name": "Bmbr30_CRM_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15219,7 +15219,7 @@
       "name": "FeatureTermSearch",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15244,7 +15244,7 @@
       "name": "Bmbr30_EmergingTech_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15269,7 +15269,7 @@
       "name": "CloudTechnologies_NetworkManagementHardware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15294,7 +15294,7 @@
       "name": "FeatureGlobalCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15319,7 +15319,7 @@
       "name": "FeatureTermAddToBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15344,7 +15344,7 @@
       "name": "Alexa_ReachRank_3Month",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15369,7 +15369,7 @@
       "name": "BusinessTechnologiesMx",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15394,7 +15394,7 @@
       "name": "CloudTechnologies_Retail",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15419,7 +15419,7 @@
       "name": "Bmbr30_TradingInvesting_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15444,7 +15444,7 @@
       "name": "CloudTechnologies_ReportingSoftware",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15469,7 +15469,7 @@
       "name": "Bmbr30_HumanResources_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15494,7 +15494,7 @@
       "name": "FeatureTermAddToBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15519,7 +15519,7 @@
       "name": "Bmbr30_Benefits_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15544,7 +15544,7 @@
       "name": "Activity_Count_Interesting_Moment_Event",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15568,7 +15568,7 @@
       "name": "FeatureTermPaymentMethod",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15593,7 +15593,7 @@
       "name": "BusinessWebsite",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15617,7 +15617,7 @@
       "name": "BusinessTechnologiesMedia",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15642,7 +15642,7 @@
       "name": "Bmbr30_CRM_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15667,7 +15667,7 @@
       "name": "Bmbr30_ConsumerTechnology_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15692,7 +15692,7 @@
       "name": "AlexaCAPageViews",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15717,7 +15717,7 @@
       "name": "FeatureTermBag",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15742,7 +15742,7 @@
       "name": "FeatureTermMarketplace",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15767,7 +15767,7 @@
       "name": "FeatureCurrencyUKPound",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15792,7 +15792,7 @@
       "name": "Bmbr30_HumanResources_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15817,7 +15817,7 @@
       "name": "Bmbr30_RecruitmentHiringOnb_TotalPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15842,7 +15842,7 @@
       "name": "BusinessUltimateParentName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15866,7 +15866,7 @@
       "name": "FeatureTermPaymentSolution",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15891,7 +15891,7 @@
       "name": "Bmbr30_CreativitySoftware_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15916,7 +15916,7 @@
       "name": "Bmbr30_TransactionsPayments_UniUsrPctCh",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15941,7 +15941,7 @@
       "name": "Facebook_Url",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15965,7 +15965,7 @@
       "name": "CloudTechnologies_Commerce",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -15990,7 +15990,7 @@
       "name": "WebsiteEncodingStandardsTopAttributes",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16015,7 +16015,7 @@
       "name": "RetirementAssetsEOY",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16040,7 +16040,7 @@
       "name": "FraudOrDishonesty",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16065,7 +16065,7 @@
       "name": "FundingContractCategory",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16089,7 +16089,7 @@
       "name": "FeatureTermBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16114,7 +16114,7 @@
       "name": "FeatureTermMyAccount",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16139,7 +16139,7 @@
       "name": "AlexaOnlineSince",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16164,7 +16164,7 @@
       "name": "FeatureRefSrcCart",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16189,7 +16189,7 @@
       "name": "CloudTechnologies_EnterpriseLearning",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16214,7 +16214,7 @@
       "name": "Bmbr30_TrainingDevelopment_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16239,7 +16239,7 @@
       "name": "FeatureInputValueAddToBasket",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16264,7 +16264,7 @@
       "name": "CloudTechnologies_FinancialAnalyticalApplications",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16289,7 +16289,7 @@
       "name": "Activity_Count_Unsubscribe_Email",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16313,7 +16313,7 @@
       "name": "Bmbr30_FinanceIT_UniUsr",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16338,7 +16338,7 @@
       "name": "Bmbr30_SoftwareEngineering_Total",
       "length": null,
       "nullable": true,
-      "physicalDataType": "int",
+      "physical_data_type": "int",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16363,7 +16363,7 @@
       "name": "CompanyName_Entropy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16390,7 +16390,7 @@
       "name": "Title_Length",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16418,7 +16418,7 @@
       "name": "CompanyName_Length",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16446,7 +16446,7 @@
       "name": "Domain_Length",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16474,7 +16474,7 @@
       "name": "RelatedLinks_Count",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16502,7 +16502,7 @@
       "name": "Phone_Entropy",
       "length": null,
       "nullable": true,
-      "physicalDataType": "double",
+      "physical_data_type": "double",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16529,7 +16529,7 @@
       "name": "Website_Age_Months",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16559,7 +16559,7 @@
       "name": "ModelAction1",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16588,7 +16588,7 @@
       "name": "SpamIndicator",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16616,7 +16616,7 @@
       "name": "Title_Level",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16645,7 +16645,7 @@
       "name": "Title_IsTechRelated",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16673,7 +16673,7 @@
       "name": "JobsTrendString1",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16702,7 +16702,7 @@
       "name": "FundingStage1",
       "length": null,
       "nullable": true,
-      "physicalDataType": "long",
+      "physical_data_type": "long",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16731,7 +16731,7 @@
       "name": "Title_IsAcademic",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16759,7 +16759,7 @@
       "name": "FirstName_SameAs_LastName",
       "length": null,
       "nullable": true,
-      "physicalDataType": "boolean",
+      "physical_data_type": "boolean",
       "precision": null,
       "scale": null,
       "properties": {
@@ -16787,7 +16787,7 @@
       "name": "Industry_Group",
       "length": null,
       "nullable": true,
-      "physicalDataType": "string",
+      "physical_data_type": "string",
       "precision": null,
       "scale": null,
       "properties": {

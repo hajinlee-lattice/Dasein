@@ -6,7 +6,7 @@
       "name": "Id",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -43,7 +43,7 @@
       "name": "AccountId",
       "length": 18,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -80,7 +80,7 @@
       "name": "Email",
       "length": 80,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -117,7 +117,7 @@
       "name": "CreatedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -155,7 +155,7 @@
       "name": "LastModifiedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {

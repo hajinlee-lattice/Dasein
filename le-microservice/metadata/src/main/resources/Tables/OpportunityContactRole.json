@@ -6,7 +6,7 @@
       "name": "Id",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -43,7 +43,7 @@
       "name": "OpportunityId",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -80,7 +80,7 @@
       "name": "ContactId",
       "length": 18,
       "nullable": false,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -117,7 +117,7 @@
       "name": "Role",
       "length": 40,
       "nullable": true,
-      "physicalDataType": "STRING",
+      "physical_data_type": "STRING",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -154,7 +154,7 @@
       "name": "IsPrimary",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "BOOLEAN",
+      "physical_data_type": "BOOLEAN",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -191,7 +191,7 @@
       "name": "CreatedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {
@@ -229,7 +229,7 @@
       "name": "LastModifiedDate",
       "length": 0,
       "nullable": false,
-      "physicalDataType": "LONG",
+      "physical_data_type": "LONG",
       "precision": 0,
       "scale": 0,
       "properties": {

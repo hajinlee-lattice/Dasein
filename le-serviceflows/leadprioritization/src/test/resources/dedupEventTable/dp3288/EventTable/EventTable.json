@@ -5,7 +5,7 @@
             "name": "Id",
             "length": null,
             "nullable": false,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -32,7 +32,7 @@
             "name": "Email",
             "length": null,
             "nullable": false,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -60,7 +60,7 @@
             "name": "Event",
             "length": null,
             "nullable": false,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -86,7 +86,7 @@
             "name": "CompanyName",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -119,7 +119,7 @@
             "name": "City",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -150,7 +150,7 @@
             "name": "State",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -182,7 +182,7 @@
             "name": "Country",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -213,7 +213,7 @@
             "name": "CreatedDate",
             "length": null,
             "nullable": true,
-            "physicalDataType": "long",
+            "physical_data_type": "long",
             "precision": null,
             "scale": null,
             "properties": {
@@ -240,7 +240,7 @@
             "name": "LastModifiedDate",
             "length": null,
             "nullable": true,
-            "physicalDataType": "long",
+            "physical_data_type": "long",
             "precision": null,
             "scale": null,
             "properties": {
@@ -267,7 +267,7 @@
             "name": "FirstName",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -294,7 +294,7 @@
             "name": "LastName",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -321,7 +321,7 @@
             "name": "Title",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -347,7 +347,7 @@
             "name": "IsClosed",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -375,7 +375,7 @@
             "name": "StageName",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -402,7 +402,7 @@
             "name": "PhoneNumber",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -429,7 +429,7 @@
             "name": "Industry",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -455,7 +455,7 @@
             "name": "Activity_Count_Click_Email",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -479,7 +479,7 @@
             "name": "Activity_Count_Click_Link",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -503,7 +503,7 @@
             "name": "Activity_Count_Email_Bounced_Soft",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -527,7 +527,7 @@
             "name": "Activity_Count_Fill_Out_Form",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -551,7 +551,7 @@
             "name": "Activity_Count_Interesting_Moment_Any",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -575,7 +575,7 @@
             "name": "Activity_Count_Open_Email",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -599,7 +599,7 @@
             "name": "Activity_Count_Unsubscribe_Email",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -623,7 +623,7 @@
             "name": "Activity_Count_Visit_Webpage",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -647,7 +647,7 @@
             "name": "Activity_Count_Interesting_Moment_Email",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -671,7 +671,7 @@
             "name": "Activity_Count_Interesting_Moment_Event",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -695,7 +695,7 @@
             "name": "Activity_Count_Interesting_Moment_Multiple",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -719,7 +719,7 @@
             "name": "Activity_Count_Interesting_Moment_Pricing",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -743,7 +743,7 @@
             "name": "Activity_Count_Interesting_Moment_Search",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -767,7 +767,7 @@
             "name": "Activity_Count_Interesting_Moment_Webinar",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -791,7 +791,7 @@
             "name": "Activity_Count_Interesting_Moment_key_web_page",
             "length": null,
             "nullable": true,
-            "physicalDataType": "double",
+            "physical_data_type": "double",
             "precision": null,
             "scale": null,
             "properties": {
@@ -815,7 +815,7 @@
             "name": "Lead_Source_Asset__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -839,7 +839,7 @@
             "name": "kickboxStatus",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -863,7 +863,7 @@
             "name": "Interest_esb__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -887,7 +887,7 @@
             "name": "Interest_tcat__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -911,7 +911,7 @@
             "name": "SICCode",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -935,7 +935,7 @@
             "name": "kickboxAcceptAll",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -959,7 +959,7 @@
             "name": "Free_Email_Address__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -983,7 +983,7 @@
             "name": "kickboxFree",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1007,7 +1007,7 @@
             "name": "Source_Detail__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1031,7 +1031,7 @@
             "name": "Unsubscribed",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1055,7 +1055,7 @@
             "name": "kickboxDisposable",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1079,7 +1079,7 @@
             "name": "Cloud_Plan__c",
             "length": null,
             "nullable": true,
-            "physicalDataType": "string",
+            "physical_data_type": "string",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1103,7 +1103,7 @@
             "name": "HasAnypointLogin",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1127,7 +1127,7 @@
             "name": "HasCEDownload",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1151,7 +1151,7 @@
             "name": "HasEEDownload",
             "length": null,
             "nullable": true,
-            "physicalDataType": "boolean",
+            "physical_data_type": "boolean",
             "precision": null,
             "scale": null,
             "properties": {
@@ -1175,7 +1175,7 @@
             "name": "InternalId",
             "length": null,
             "nullable": false,
-            "physicalDataType": "long",
+            "physical_data_type": "long",
             "precision": null,
             "scale": null,
             "properties": {
