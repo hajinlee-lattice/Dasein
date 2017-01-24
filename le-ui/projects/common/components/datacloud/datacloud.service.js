@@ -28,7 +28,8 @@ angular.module('common.datacloud')
             generalSelectedTotal: 0,
             premiumSelectLimit: 0,
             premiumSelectedTotal: 0,
-            enrichmentsTotal: 0
+            enrichmentsTotal: 0,
+            tabSection: 'browse'
         };
     }
 

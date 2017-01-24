@@ -83,7 +83,8 @@ angular.module('common.datacloud.explorer', [
         across: across,
         initialized: false,
         enable_category_dropdown: false,
-        enable_grid: true
+        enable_grid: true,
+        section: getSection($state.current.name)
     });
 
 
@@ -100,6 +101,14 @@ angular.module('common.datacloud.explorer', [
         }
     ];
 
+    function getSection(string, fromEnd) {
+        var arr = string.split('.'),
+            fromEnd = fromEnd || 1,
+            section = arr.slice(Math.max(arr.length - fromEnd, 1)).join('.');
+
+        return section;
+    }
+
     vm.init = function() {
         $scope.$watchGroup([
                 'vm.metadata.toggle.show.nulls', 
@@ -111,7 +120,7 @@ angular.module('common.datacloud.explorer', [
 
             vm.filterEmptySubcategories();
         });
-        
+
         $scope.$watchGroup([
                 'vm.premiumSelectedTotal',
                 'vm.generalSelectedTotal'

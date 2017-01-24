@@ -17,7 +17,6 @@
                         <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
-
                 <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
                     <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
@@ -30,35 +29,14 @@
                         <li ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
                     </ul>
                 </li>
-
                 <li class="sort" ng-disabled="!vm.category">
                     <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
                         <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
                     </a>
                 </li>
-
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
-
-                <li class="info noselect-children" ng-if="!vm.lookupMode">
-                    <div ng-if="vm.enrichments_completed || 1">
-                        Enrichment: {{vm.generalSelectedTotal||0}} of {{vm.generalSelectLimit}} / {{vm.premiumSelectedTotal||0}} of {{vm.premiumSelectLimit}} premium 
-                        <span class="more-info">&#105;
-                            <div class="tooltip_">
-                                <div class="cover">
-                                    <p>
-                                        Up to {{vm.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.premiumSelectLimit}} may be premium.
-                                    </p>
-                                    <p>
-                                        When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
-                                    </p>
-                                </div>
-                            </div>
-                        </span>
-                    </div>
-                </li>
-
                 <li class="download test dropdown-container" ng-show="!vm.lookupMode">
                     <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
                         <i class="fa fa-download"></i>
@@ -67,10 +45,6 @@
                         <li ng-repeat="button in vm.download_button.items"><a href="{{button.href}}"><i class="{{button.icon}}"></i>{{button.label}}</a></li>
                     </ul>
                     <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
-                </li>
-
-                <li class="account-lookup" ng-if="!vm.lookupMode">
-                    <button class="button white-button" ui-sref="home.datacloud.lookup">Account Lookup</button>
                 </li>
             </ul>
         </div>
@@ -287,12 +261,15 @@
                         </span>
 
                         <div class="controls" ng-if="!vm.lookupMode">
-                            <div class="toggle">
+                            <div class="toggle" ng-if="vm.section == 'edit'">
                                 <button class="button" 
                                         ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 
                                         ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                                     <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                                 </button>
+                            </div>
+                            <div class="toggle" ng-if="vm.section == 'team'">
+                                highlighting
                             </div>
                         </div>
                     </div>

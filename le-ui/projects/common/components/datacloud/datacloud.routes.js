@@ -54,7 +54,9 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-
+                    controller: 'ExplorerTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
                 },
                 "main@": {
                     controller: 'LookupController',
@@ -89,6 +91,11 @@ angular
                 }
             },
             views: {
+                "summary@": {
+                    controller: 'ExplorerTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
+                },
                 "subsummary@": {
                     controller: function(LookupResponse, LookupStore) {
                         LookupStore.add('count', 0);//Object.keys(LookupResponse.enrichmentAttributeValues).length;

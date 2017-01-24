@@ -1,25 +1,37 @@
 #ExplorerTabsView {
+    @include flex-container;
     position: relative;
-    z-index: 100;
+    z-index: 3;
+    border-bottom: 1px solid #d0d1d0;
     & > ul {
         @include flex-container;
+        @include flex-item(0 1 auto);
+        position: relative;
+        top: 1px;
+        border: 1px solid #d0d1d0;
+        border-bottom: 0;
         & > li {
             @include flex-item(0 1 auto);
-            margin-right: 20px;
             &[ui-sref] {
                 cursor: pointer;
             }
-            border: 1px solid gray;
-            border-bottom: 0;
-            &.active{
-                border-top-width: 5px; 
+            border-top: 4px solid transparent;
+            border-right: 1px solid #d0d1d0;
+            border-bottom: 1px solid #d0d1d0;
+            padding: 14px 20px;
+            &.active {
                 border-top-color: orange;
+                border-bottom-color: transparent;
+                background: #fafafa;
             }
             h2, h3 {
                 font-size: 100%;
             }
             h3 {
                 color: white;
+            }
+            .more-info {
+                padding: 1px 5px;
             }
         }
     }

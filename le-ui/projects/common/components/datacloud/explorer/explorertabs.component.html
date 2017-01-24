@@ -2,28 +2,26 @@
     <ul>
         <li ui-sref="home.datacloud.explorer.browse" ui-sref-active="active">
             <h2>Lattice Data Cloud Attributes</h2>
-            {{vm.DataCloudStore.metadata.enrichmentsTotal|number}}
-            </li>
-        <li ui-sref="home.datacloud.explorer.edit" ui-sref-active="active" class="info noselect-children" ng-if="!vm.DataCloudStore.metadata.lookupMode">
-            <div>
-                <h2>
-                    Enrichment
-                    <span class="more-info">&#105;
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <h3>Enrichment</h3>
-                                <p>
-                                    Up to {{vm.DataCloudStore.metadata.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.DataCloudStore.metadata.premiumSelectLimit}} may be premium.
-                                </p>
-                                <p>
-                                    When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
-                                </p>
-                            </div>
+            <div ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal|number}}</div>
+        </li>
+        <li ui-sref="home.datacloud.explorer.edit" ui-sref-active="active" class="info noselect-children" ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
+            <h2>
+                Enrichment
+                <span class="more-info">&#105;
+                    <div class="tooltip_">
+                        <div class="cover">
+                            <h3>Enrichment</h3>
+                            <p>
+                                Up to {{vm.DataCloudStore.metadata.generalSelectLimit}} attributes may be selected to enrich your MAP system. Of those, only {{vm.DataCloudStore.metadata.premiumSelectLimit}} may be premium.
+                            </p>
+                            <p>
+                                When enabled, these attributes will be written to your system during the scoring process. If you disable attributes that you were using for real-time scoring, they will no longer be updated in your system.
+                            </p>
                         </div>
-                    </span>
-                </h2>
-                {{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}} / {{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}} premium 
-            </div>
+                    </div>
+                </span>
+            </h2>
+            {{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}} / {{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}} premium 
         </li>
         <li ui-sref="home.datacloud.explorer.team" ui-sref-active="active">
             <h2>
@@ -44,6 +42,9 @@
                     </div>
                 </span>
             </h2>
+        </li>
+        <li ui-sref="home.datacloud.lookup" ui-sref-active="active">
+            <h2>Account Insights</h2>
         </li>
     </ul>
 </section>

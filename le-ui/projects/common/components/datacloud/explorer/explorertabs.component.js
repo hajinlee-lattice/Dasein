@@ -13,9 +13,10 @@ angular.module('common.datacloud.explorertabs', [
 
     function getSection(string, fromEnd) {
         var arr = string.split('.'),
-            fromEnd = fromEnd || 1;
+            fromEnd = fromEnd || 1,
+            section = arr.slice(Math.max(arr.length - fromEnd, 1)).join('.');
 
-        return arr.slice(Math.max(arr.length - fromEnd, 1)).join('.');
+        return section;
     }
 
 
