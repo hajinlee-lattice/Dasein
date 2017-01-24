@@ -88,17 +88,16 @@ def setUp(filesToCopy):
             shutil.copy(src, tgt)
 
 
-    otherFilesToCopy = { \
-        os.path.join(basePath, "main", "python", "pipeline", "encoder.py"): evpipelinefwkdir, \
-        os.path.join(basePath, 'main', 'python', 'columntransform.py'): pipelinefwkdir, \
-        os.path.join(basePath, 'main', 'python', 'columntransform.py'): evpipelinefwkdir, \
-        os.path.join(basePath, 'main', 'python', 'leframework', 'util', 'precisionutil.py'): pipelinefwkdir, \
-        os.path.join(basePath, 'main', 'python', 'leframework', 'util', 'precisionutil.py'): evpipelinefwkdir
-    }
+    otherFilesToCopy = [ \
+        {os.path.join(basePath, "main", "python", "pipeline", "encoder.py"): evpipelinefwkdir}, \
+        {os.path.join(basePath, 'main', 'python', 'columntransform.py'): pipelinefwkdir}, \
+        {os.path.join(basePath, 'main', 'python', 'columntransform.py'): evpipelinefwkdir}
+    ]
 
-    for (src, tgt) in otherFilesToCopy.iteritems():
-        print 'Copying: ', src, '==>', tgt
-        shutil.copy(src, tgt)
+    for m in otherFilesToCopy:
+        for (src, tgt) in m.iteritems():
+            print 'Copying: ', src, '==>', tgt
+            shutil.copy(src, tgt)
 
     for filename in glob.glob(os.path.join(basePath + "/main/python/configurablepipelinetransformsfromfile", "*")):
         if filename.find("/pipelinenullconversionrate.json") >= 0:

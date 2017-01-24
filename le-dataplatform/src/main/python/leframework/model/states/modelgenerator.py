@@ -51,11 +51,9 @@ class ModelGenerator(State, JsonGenBase):
         pipelineFwkPkl = self.__getSerializedFile(self.__compressFile("pipelinefwk.py"))
         pipelineBinaryPkl = self.__getSerializedFile(filename)
         pipelinePkl = self.__getSerializedFile(self.__compressFile(self.mediator.schema["python_pipeline_script"]))
-        precisionUtil = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/leframework/util/precisionutil.py"))
         model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": self.mediator.schema["python_pipeline_script"] },
                                            { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" },
-                                           { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" },
-                                           { "Value": precisionUtil, "Key": "precisionutil.py"}]
+                                           { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" }]
 
         (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
 

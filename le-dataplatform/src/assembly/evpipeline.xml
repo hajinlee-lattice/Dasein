@@ -45,12 +45,5 @@
                 <include>columntransform.py</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>src/main/python/leframework/util</directory>
-            <outputDirectory>.</outputDirectory>
-            <includes>
-                <include>precisionutil.py</include>
-            </includes>
-        </fileSet>
     </fileSets>
 </assembly>
