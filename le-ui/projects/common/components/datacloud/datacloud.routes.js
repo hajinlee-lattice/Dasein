@@ -177,7 +177,7 @@ angular
                             DataCloudStore.setMetadata('current', 1);
                         }
                     }*/
-                },
+                }
             }
         })
         .state('home.datacloud.explorer.browse', {

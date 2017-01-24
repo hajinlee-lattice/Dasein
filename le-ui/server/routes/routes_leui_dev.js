@@ -60,6 +60,7 @@ module.exports = [{
     }
 },{
     path: '/projects/insights',
+    html5mode: true,
     pages: {
         '/insights/': 'index.html',
         '/insights/index': 'index.html'

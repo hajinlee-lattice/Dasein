@@ -49,6 +49,7 @@ module.exports = [{
     }
 },{
     path: '/projects/insights',
+    html5mode: true,
     pages: {
         '/insights/': 'assets/index.html',
         '/insights/index': 'assets/index.html'

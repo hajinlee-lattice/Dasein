@@ -3,7 +3,16 @@ var mainApp = angular.module('insightsApp', [
     'templates-main',
     'ui.router',
     'ui.bootstrap',
-    'mainApp.core.utilities.BrowserStorageUtility'
+
+    'common.datacloud',
+    'common.utilities.SessionTimeout',
+    'pd.navigation.pagination',
+
+    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.modules.ServiceErrorModule',
+    'mainApp.core.services.ResourceStringsService',
+    'mainApp.core.services.FeatureFlagService',
+    'mainApp.login.services.LoginService'
 ])
 .config(function($httpProvider) {
     if (!$httpProvider.defaults.headers.get) {

@@ -12,13 +12,26 @@
         <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
         <!-- build:css app.css -->
         <link rel="stylesheet" type="text/css" href="../common/assets/css/font-awesome.min.css" />
-        <link rel="stylesheet" type="text/css" href="assets/css/production.css" />
+        <!-- link rel="stylesheet" type="text/css" href="assets/css/production.css" /-->
         <!-- endbuild -->
     </head>
 
     <body>
-        <div ui-view="info"></div>
-        <div ui-view="main"></div>
+        <div id="outer-wrap">
+            <div id="inner-wrap">
+
+                <section id="main" role="main" class="main-content">
+                    <div class="content-wrap">
+                        <div id="mainView">
+                            <div ui-view="summary" id="mainSummaryView"></div>
+                            <div ui-view="subsummary" id="subSummaryView"></div>
+                            <div ui-view="main" id="mainContentView"></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
     </body>
     
     <script src="/assets/vendor.min.js"></script>
