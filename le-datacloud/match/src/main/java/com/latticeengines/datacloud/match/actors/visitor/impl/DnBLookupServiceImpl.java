@@ -5,8 +5,20 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -46,6 +58,15 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Value("${datacloud.dnb.bulk.request.maximum}")
     private int maximumBatchSize;
 
+    @Value("${datacloud.match.actor.datasource.dnb.threadpool.count.min}")
+    private Integer dnbThreadpoolCountMin;
+
+    @Value("${datacloud.match.actor.datasource.dnb.threadpool.count.max}")
+    private Integer dnbThreadpoolCountMax;
+
+    @Value("${datacloud.match.actor.datasource.dnb.api.call.maxwait}")
+    private Integer dnbApiCallMaxWait;
+
     @Autowired
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
@@ -64,12 +85,25 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
     @Autowired
     private DnBMatchResultValidator dnbMatchResultValidator;
 
+    private ExecutorService dnbDataSourceServiceExecutor;
+
     private final Queue<DnBMatchContext> comingContexts = new ConcurrentLinkedQueue<>();
     @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> unsubmittedReqs = Collections.synchronizedList(new ArrayList<>());
     @SuppressWarnings("unchecked")
     private final List<DnBBatchMatchContext> submittedReqs = Collections.synchronizedList(new ArrayList<>());
+
     private static AtomicInteger previousUnsubmittedNum = new AtomicInteger(0);
+
+    @PostConstruct
+    public void postConstruct() {
+        initDnBDataSourceThreadPool();
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        dnbDataSourceServiceExecutor.shutdown();
+    }
 
     @Override
     protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
@@ -114,7 +148,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
         }
         if (traveler.isUseRemoteDnB()) {
-            context = dnbRealTimeLookupService.realtimeEntityLookup(context);
+            Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
+            Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
+
+            try {
+                context = dnbFuture.get(dnbApiCallMaxWait, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                log.error(e);
+                throw new RuntimeException(e);
+            }
+
             dnbCacheService.addCache(context);
             List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
             dnBMatchHistories.add(new DnBMatchHistory(context));
@@ -382,4 +425,27 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         }
     }
 
+    private void initDnBDataSourceThreadPool() {
+        log.info("Initialize dnb data source thread pool.");
+        BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>();
+        dnbDataSourceServiceExecutor = new ThreadPoolExecutor(dnbThreadpoolCountMin, dnbThreadpoolCountMax, 1,
+                TimeUnit.MINUTES, runnableQueue);
+    }
+
+    private Callable<DnBMatchContext> createCallableForRemoteDnBApiCall(final DnBMatchContext context) {
+        Callable<DnBMatchContext> task = new Callable<DnBMatchContext>() {
+
+            @Override
+            public DnBMatchContext call() throws Exception {
+                DnBMatchContext returnedContext = context;
+                try {
+                    returnedContext = dnbRealTimeLookupService.realtimeEntityLookup(context);
+                } catch (Exception ex) {
+                    log.error(ex);
+                }
+                return returnedContext;
+            }
+        };
+        return task;
+    }
 }
