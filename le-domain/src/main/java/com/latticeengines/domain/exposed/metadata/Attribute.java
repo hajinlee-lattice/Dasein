@@ -24,6 +24,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,12 +95,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     
     @Column(name = "ENUM_VALUES", nullable = true, length = 2048)
     @JsonProperty("enum_values")
-    private String cleanedUpEnumValuesAsString;
+    private String cleanedUpEnumValuesAsString = "";
     
-    @Transient
-    @JsonIgnore
-    private List<String> enumValues = new ArrayList<String>();
-
     @Column(name = "PROPERTIES", nullable = false)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
@@ -281,6 +279,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setCleanedUpEnumValues(List<String> cleanedUpEnumValues) {
         this.cleanedUpEnumValues = cleanedUpEnumValues;
+        setCleanedUpEnumValuesAsString(StringUtils.join(cleanedUpEnumValues, ","));
     }
 
     public String getCleanedUpEnumValuesAsString() {
@@ -841,6 +840,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
         return strs;
     }
+    
 
     @Transient
     @JsonIgnore
@@ -858,8 +858,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                 }
             }
         }
-        if (!isInternalTransform)
+        if (!isInternalTransform) {
             return parents;
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         try {
