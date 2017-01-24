@@ -12,7 +12,7 @@ angular
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
-        standardFieldsList: ['Id', null, 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Id', null, 'CompanyName', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Id': true
         },

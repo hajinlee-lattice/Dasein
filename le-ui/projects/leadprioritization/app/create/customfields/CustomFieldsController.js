@@ -20,7 +20,7 @@ angular
         fieldMappings: FieldDocument.fieldMappings,
         initialized: false,
         NextClicked: false,
-        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'State', 'Zip', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Event': true,
             'Id': true
