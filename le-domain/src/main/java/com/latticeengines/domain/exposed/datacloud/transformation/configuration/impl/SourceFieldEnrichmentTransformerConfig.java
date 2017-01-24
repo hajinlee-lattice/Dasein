@@ -12,9 +12,6 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
     @JsonProperty("ToFields")
     private List<String> toFields;
 
-    @JsonProperty("keepInternalColumns")
-    boolean keepInternalColumns = true;
-
     public List<String> getFromFields() {
         return fromFields;
     }
@@ -30,14 +27,5 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
     public void setToFields(List<String> toFields) {
         this.toFields = toFields;
     }
-
-    public boolean keepInternalColumns() {
-        return keepInternalColumns;
-    }
-
-    public void setKeepInternalColumns(boolean keepInternalColumns) {
-        this.keepInternalColumns = keepInternalColumns;
-    }
-    
     
 }

@@ -8,6 +8,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import cascading.tuple.Fields;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.FirmoGraphExistingColumnEnrichmentFunction;
@@ -16,8 +18,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFirmoGraphEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-
-import cascading.tuple.Fields;
 
 @Component("sourceFirmoGraphEnrichmentFlow")
 public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceFirmoGraphEnrichmentTransformerConfig> {
@@ -41,7 +41,7 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
         }
 
         List<String> newFieldNames = getNewFields(enrichedFields, latticeSeedFieldNames);
-
+        
         Node source = sourceLatticeSeed.leftOuterJoin(leftMatchField, sourceDnbSeed, rightMatchField);
 
         for (int i = 0; i < enrichedFields.size(); i++) {
@@ -66,8 +66,24 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
         
         source = source.retain(new FieldList(newFieldNames));
         
-        
+        if (!config.keepInternalColumns()) {
+            List<String> retainedFieldNames = resolveFieldNames(source.getFieldNames());
+            source = source.retain(new FieldList(retainedFieldNames));
+        }
         return source;
+    }
+
+    private List<String> resolveFieldNames(List<String> origFieldNames) {
+        List<String> newFieldNames = new ArrayList<>();
+        for (String origFieldName : origFieldNames) {
+            String fieldName = origFieldName.trim().toLowerCase();
+            if (fieldName.startsWith("__") || fieldName.equalsIgnoreCase("LatticeAccountId")) {
+                continue;
+            }
+            newFieldNames.add(origFieldName);
+        }
+
+        return newFieldNames;
     }
 
     private List<String> getNewFields(List<String> enrichedFields, List<String> latticeSeedFieldNames) {

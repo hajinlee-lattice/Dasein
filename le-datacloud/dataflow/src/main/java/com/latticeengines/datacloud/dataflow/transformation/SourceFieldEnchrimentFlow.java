@@ -1,11 +1,12 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
+
+import cascading.tuple.Fields;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -13,8 +14,6 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.FieldEnrichmentFun
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFieldEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-
-import cascading.tuple.Fields;
 
 @Component("sourceFieldEnrichmentFlow")
 public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldEnrichmentTransformerConfig> {
@@ -31,32 +30,14 @@ public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldE
         }
         Node source = addSource(parameters.getBaseTables().get(0));
         List<String> origFieldNames = source.getFieldNames();
-        List<String> newFieldNames = resolveFieldNames(origFieldNames);
         for (int i = 0; i < fromFields.size(); i++) {
             String fromField = fromFields.get(i);
             String toField = toFields.get(i);
             source = source.apply(new FieldEnrichmentFunction(fromField, toField), new FieldList(fromField, toField),
                     Arrays.asList(source.getSchema(fromField), source.getSchema(toField)),
-                    new FieldList(newFieldNames), Fields.REPLACE);
+                    new FieldList(origFieldNames), Fields.REPLACE);
         }
-        if (!config.keepInternalColumns()) {
-            source = source.retain(new FieldList(newFieldNames));
-        }
-
         return source;
-    }
-
-    private List<String> resolveFieldNames(List<String> origFieldNames) {
-        List<String> newFieldNames = new ArrayList<>();
-        for (String origFieldName : origFieldNames) {
-            String fieldName = origFieldName.trim().toLowerCase();
-            if (fieldName.startsWith("__") || fieldName.equalsIgnoreCase("LatticeAccountId")) {
-                continue;
-            }
-            newFieldNames.add(origFieldName);
-        }
-
-        return newFieldNames;
     }
 
     @Override

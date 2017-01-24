@@ -185,6 +185,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State",
                 "Country", "Industry", "Revenue_Range", "Employee_Range"));
         config.setSortFields(Arrays.asList("Revenue_Range"));
+        
+        config.setKeepInternalColumns(true);
         return JsonUtils.serialize(config);
     }
 
@@ -192,7 +194,6 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
         config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
         config.setToFields(Arrays.asList("DUNS", "City"));
-        config.setKeepInternalColumns(true);
         return JsonUtils.serialize(config);
     }
 

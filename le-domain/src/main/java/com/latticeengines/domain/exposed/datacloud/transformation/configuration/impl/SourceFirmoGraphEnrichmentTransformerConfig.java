@@ -16,7 +16,9 @@ public class SourceFirmoGraphEnrichmentTransformerConfig extends TransformerConf
     private List<String> enrichedFields;
     @JsonProperty("SortFields")
     private List<String> sortFields;
-
+    @JsonProperty("keepInternalColumns")
+    private boolean keepInternalColumns = true;
+    
     public String getLeftMatchField() {
         return leftMatchField;
     }
@@ -57,4 +59,11 @@ public class SourceFirmoGraphEnrichmentTransformerConfig extends TransformerConf
         this.sortFields = sortFields;
     }
 
+    public boolean keepInternalColumns() {
+        return keepInternalColumns;
+    }
+
+    public void setKeepInternalColumns(boolean keepInternalColumns) {
+        this.keepInternalColumns = keepInternalColumns;
+    }
 }
