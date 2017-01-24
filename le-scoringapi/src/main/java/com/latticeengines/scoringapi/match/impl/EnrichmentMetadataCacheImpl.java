@@ -83,11 +83,9 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
 
     @Override
     public List<LeadEnrichmentAttribute> getAllEnrichmentAttributesMetadata() {
+        loadAllEnrichmentMetadataFirstTimeIfNeeded();
+        readWriteLock.readLock().lock();
         try {
-
-            loadAllEnrichmentMetadataFirstTimeIfNeeded();
-
-            readWriteLock.readLock().lock();
             return allEnrichmentAttributes;
         } finally {
             readWriteLock.readLock().unlock();
@@ -97,8 +95,8 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     private boolean loadAllEnrichmentMetadataFirstTimeIfNeeded() {
         boolean loadedDuringCall = false;
         if (allEnrichmentAttributes == null) {
+            readWriteLock.writeLock().lock();
             try {
-                readWriteLock.writeLock().lock();
                 if (allEnrichmentAttributes == null) {
                     allEnrichmentAttributes = loadAllEnrichmentAttributesMetadata();
                     if (allEnrichmentAttributes != null) {
@@ -120,17 +118,13 @@ public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
     }
 
     private Runnable createRefreshAllEnrichmentRunnable() {
-        return new Runnable() {
+        return () -> {
+            boolean loadedDuringCall = loadAllEnrichmentMetadataFirstTimeIfNeeded();
 
-            @Override
-            public void run() {
-                boolean loadedDuringCall = loadAllEnrichmentMetadataFirstTimeIfNeeded();
+            if (!loadedDuringCall && allEnrichmentAttributes != null) {
+                List<LeadEnrichmentAttribute> tempAllEnrichmentAttributes = loadAllEnrichmentAttributesMetadata();
+                allEnrichmentAttributes = tempAllEnrichmentAttributes;
 
-                if (!loadedDuringCall && allEnrichmentAttributes != null) {
-                    List<LeadEnrichmentAttribute> tempAllEnrichmentAttributes = loadAllEnrichmentAttributesMetadata();
-                    allEnrichmentAttributes = tempAllEnrichmentAttributes;
-
-                }
             }
         };
     }
