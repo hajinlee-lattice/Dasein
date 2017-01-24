@@ -76,15 +76,16 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     private EaiMetadataServiceImpl eaiMetadataService;
 
-    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
-            "Opportunity", "OpportunityContactRole" });
+    private List<String> tableNameList = Arrays
+            .<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
 
     private List<String> attributes = Arrays.<String> asList(new String[] { "LastModifiedDate" });
 
-    private final Map<String, LastModifiedKey> map = ImmutableMap.of("Account", new LastModifiedKey(attributes,
-            1442544230000L), "Contact", new LastModifiedKey(attributes, 1223400194000L), "Lead", new LastModifiedKey(
-            attributes, 1237387254000L), "Opportunity", new LastModifiedKey(attributes, 1346770851000L),
-            "OpportunityContactRole", new LastModifiedKey(attributes, 1341330034000L));
+    private final Map<String, LastModifiedKey> map = ImmutableMap.of("Account",
+            new LastModifiedKey(attributes, 1442544230000L), "Contact", new LastModifiedKey(attributes, 1223400194000L),
+            "Lead", new LastModifiedKey(attributes, 1237387254000L), "Opportunity",
+            new LastModifiedKey(attributes, 1346770851000L), "OpportunityContactRole",
+            new LastModifiedKey(attributes, 1341330034000L));
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
@@ -102,8 +103,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         crmCredentialZKService.writeToZooKeeper("sfdc", customer, true, crmCredential, true);
 
         eaiMetadataService = mock(EaiMetadataServiceImpl.class);
-        when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class))).thenAnswer(
-                new Answer<LastModifiedKey>() {
+        when(eaiMetadataService.getLastModifiedKey(any(String.class), any(Table.class)))
+                .thenAnswer(new Answer<LastModifiedKey>() {
 
                     @Override
                     public LastModifiedKey answer(InvocationOnMock invocation) throws Throwable {
@@ -199,8 +200,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         lmk.setLastModifiedTimestamp(1000000000000L);
         table.setLastModifiedKey(lmk);
         table.setAttributes(Arrays.<Attribute> asList(new Attribute[] { attr, lmd }));
-        when(eaiMetadataService.getImportTables(any(String.class))).thenReturn(
-                Arrays.<Table> asList(new Table[] { table }));
+        when(eaiMetadataService.getImportTables(any(String.class)))
+                .thenReturn(Arrays.<Table> asList(new Table[] { table }));
 
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);

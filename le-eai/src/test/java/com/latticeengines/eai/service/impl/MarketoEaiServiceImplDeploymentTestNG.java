@@ -103,8 +103,8 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
 
         List<Table> tables = new ArrayList<>();
         for (String tableName : tableNameList) {
-            URL url = ClassLoader.getSystemResource(String.format(
-                    "com/latticeengines/eai/service/impl/marketo/%s.avsc", tableName).toString());
+            URL url = ClassLoader.getSystemResource(
+                    String.format("com/latticeengines/eai/service/impl/marketo/%s.avsc", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
             tables.add(table);
@@ -115,8 +115,8 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
 
     @AfterClass(groups = "deployment")
     private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
-                .toString());
+        HdfsUtils.rmdir(yarnConfiguration,
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer).toString());
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
     }
 

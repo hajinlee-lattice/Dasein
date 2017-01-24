@@ -11,8 +11,8 @@ import org.springframework.context.ApplicationContextAware;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 
-public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
-        ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
+public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
+        implements ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(EaiProcessor.class);
 
@@ -30,14 +30,14 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
         }
 
         switch (importType) {
-            case CamelRoute:
-            case AmazonS3:
-                log.info("Directing import job to " + camelRouteProcessor.getClass().getSimpleName());
-                return camelRouteProcessor.process(importConfig);
-            case ImportTable:
-            default:
-                log.info("Directing import job to " + importTableProcessor.getClass().getSimpleName());
-                return importTableProcessor.process(importConfig);
+        case CamelRoute:
+        case AmazonS3:
+            log.info("Directing import job to " + camelRouteProcessor.getClass().getSimpleName());
+            return camelRouteProcessor.process(importConfig);
+        case ImportTable:
+        default:
+            log.info("Directing import job to " + importTableProcessor.getClass().getSimpleName());
+            return importTableProcessor.process(importConfig);
         }
     }
 

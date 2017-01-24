@@ -30,8 +30,8 @@ public class DynamoExportJob extends AvroExportJob {
     }
 
     public DynamoExportJob(Configuration config, //
-                        MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
-                        VersionManager versionManager, String version) {
+            MapReduceCustomizationRegistry mapReduceCustomizationRegistry, //
+            VersionManager versionManager, String version) {
         super(config, mapReduceCustomizationRegistry, versionManager, version);
     }
 

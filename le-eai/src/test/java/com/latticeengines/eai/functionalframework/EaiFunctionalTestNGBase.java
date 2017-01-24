@@ -43,8 +43,8 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -176,8 +176,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     private void validateErrorFile(String avroFile) throws IOException {
         String errorPath = StringUtils.substringBeforeLast(avroFile, "/") + "/error.csv";
-        try (CSVParser parser = new CSVParser(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
-                errorPath)), LECSVFormat.format)) {
+        try (CSVParser parser = new CSVParser(
+                new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, errorPath)), LECSVFormat.format)) {
             Set<String> headers = parser.getHeaderMap().keySet();
             assertTrue(headers.contains("Id"));
             assertTrue(headers.contains("LineNumber"));
@@ -246,8 +246,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         List<Table> tables = new ArrayList<>();
 
         for (String tableName : tableNameList) {
-            URL url = ClassLoader.getSystemResource(String.format(
-                    "com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
+            URL url = ClassLoader.getSystemResource(
+                    String.format("com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
             DateTime date = new DateTime(2014, 1, 1, 0, 0);

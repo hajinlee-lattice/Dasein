@@ -16,7 +16,9 @@ public class GenerateLeadsUrlProcessor implements Processor {
         String filterType = exchange.getProperty(MarketoImportProperty.FILTERTYPE, String.class);
         List<?> filterValuesUnchecked = exchange.getProperty(MarketoImportProperty.FILTERVALUES, List.class);
         List<String> filterValues = new ArrayList<>();
-        for (Object object: filterValuesUnchecked) { filterValues.add((String) object); }
+        for (Object object : filterValuesUnchecked) {
+            filterValues.add((String) object);
+        }
         exchange.setProperty("leadsUrl",
                 new MarketoUrlGenerator().getLeadsUrl(baseUrl, accessToken, nextPageToken, filterType, filterValues));
     }

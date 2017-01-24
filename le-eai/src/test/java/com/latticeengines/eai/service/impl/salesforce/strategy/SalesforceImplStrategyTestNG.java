@@ -1,8 +1,8 @@
 package com.latticeengines.eai.service.impl.salesforce.strategy;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Autowired;

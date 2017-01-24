@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -45,7 +46,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private URL metadataUrl;
 
     private URL dataUrl;
-    
+
     private URL avroDataUrl;
 
     @Autowired
@@ -78,8 +79,8 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(
-                new File(avroDataUrl.getPath()), "file2") }));
+        fileImportConfig
+                .setTables(Arrays.<Table> asList(new Table[] { createFile(new File(avroDataUrl.getPath()), "file2") }));
         fileImportConfig.setProperties(properties);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);

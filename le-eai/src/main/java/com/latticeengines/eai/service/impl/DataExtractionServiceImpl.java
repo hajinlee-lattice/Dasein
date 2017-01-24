@@ -58,11 +58,12 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
-//        String metadataUrl = context.getProperty(ImportProperty.METADATAURL, String.class);
+        // String metadataUrl = context.getProperty(ImportProperty.METADATAURL,
+        // String.class);
 
-//        if (metadataUrl != null) {
-//            eaiMetadataService.setMetadataUrl(metadataUrl);
-//        }
+        // if (metadataUrl != null) {
+        // eaiMetadataService.setMetadataUrl(metadataUrl);
+        // }
 
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         String customerSpace = importConfig.getCustomerSpace().toString();
@@ -75,8 +76,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         List<Table> tableMetadata = new ArrayList<>();
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
-            context.setProperty(ImportProperty.TARGETPATH, targetPath + "/"
-                    + sourceImportConfig.getSourceType().getName());
+            context.setProperty(ImportProperty.TARGETPATH,
+                    targetPath + "/" + sourceImportConfig.getSourceType().getName());
 
             Map<String, String> props = sourceImportConfig.getProperties();
             log.info("Moving properties from import config to import context.");

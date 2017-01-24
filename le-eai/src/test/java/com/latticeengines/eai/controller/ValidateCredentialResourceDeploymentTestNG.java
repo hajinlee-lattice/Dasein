@@ -42,7 +42,8 @@ public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTes
         cred.setPassword(CipherUtils.encrypt(salesforcePasswd));
         cred.setSecurityToken(salesforceSecurityToken);
         cred.setUrl(productionLoginUrl);
-        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer",
+                CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertTrue(response.isSuccess());
     }
@@ -55,7 +56,8 @@ public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTes
         cred.setPassword(CipherUtils.encrypt("Happy2010"));
         cred.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
         cred.setUrl(sandboxLoginUrl);
-        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer",
+                CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertTrue(response.isSuccess());
     }
@@ -66,7 +68,8 @@ public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTes
         cred.setUserName(salesforceUserName);
         cred.setPassword(salesforcePasswd + "ab");
         cred.setUrl(productionLoginUrl);
-        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer",
+                CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertFalse(response.isSuccess());
     }

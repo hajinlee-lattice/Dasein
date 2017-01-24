@@ -62,21 +62,6 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
         }
     }
 
-    private enum ToStringFunction implements Function<PickListValue, String> {
-        INSTANCE;
-
-        @Override
-        public String toString() {
-            return "toString";
-        }
-
-        @Override
-        public String apply(PickListValue input) {
-            checkNotNull(input);
-            return input.getValue();
-        }
-    }
-
     public SalesforceImportStrategyBase() {
         this("Salesforce.AllTables");
     }
@@ -142,10 +127,10 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
 
             PrimaryKey pk = table.getPrimaryKey();
             LastModifiedKey lmk = table.getLastModifiedKey();
-            if(pk == null){
+            if (pk == null) {
                 throw new LedpException(LedpCode.LEDP_17009, new String[] { customerSpace });
             }
-            if(lmk == null) {
+            if (lmk == null) {
                 throw new LedpException(LedpCode.LEDP_17006, new String[] { customerSpace });
             }
 
@@ -220,13 +205,14 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
         for (SObjectField descField : descFields) {
             descFieldNames.add(descField.getName());
         }
-        List<AttributeOwner> attrOwners = Arrays.<AttributeOwner> asList(new AttributeOwner[] { table.getPrimaryKey(),
-                table.getLastModifiedKey() });
+        List<AttributeOwner> attrOwners = Arrays
+                .<AttributeOwner> asList(new AttributeOwner[] { table.getPrimaryKey(), table.getLastModifiedKey() });
         validateRequiredAttributes(table.getName(), attrOwners, descFieldNames);
         validateAttributes(table.getName(), nameAttrMap, descFieldNames);
     }
 
-    private void validateRequiredAttributes(String table, List<AttributeOwner> attrOwners, List<String> descFieldNames) {
+    private void validateRequiredAttributes(String table, List<AttributeOwner> attrOwners,
+            List<String> descFieldNames) {
         List<String> missedAttrNames = new ArrayList<>();
         for (AttributeOwner attrOwner : attrOwners) {
             for (String attrName : attrOwner.getAttributes()) {

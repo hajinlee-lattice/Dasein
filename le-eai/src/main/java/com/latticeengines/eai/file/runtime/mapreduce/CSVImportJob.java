@@ -94,14 +94,15 @@ public class CSVImportJob extends Configured implements Tool, MRJobCustomization
 
             mrJob.addFileToClassPath(new Path(inputDir));
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath
-                    + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
+            List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(),
+                    dependencyPath + versionManager.getCurrentVersionInStack(stackName) + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }
 
-//             config.set(MRJobConfig.MAP_JAVA_OPTS,
-//             "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+            // config.set(MRJobConfig.MAP_JAVA_OPTS,
+            // "-Xdebug -Xnoagent -Djava.compiler=NONE
+            // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);

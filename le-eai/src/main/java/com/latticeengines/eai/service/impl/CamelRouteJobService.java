@@ -27,8 +27,8 @@ public class CamelRouteJobService {
 
     public ApplicationId submitImportJob(ImportConfiguration importConfig) {
         if (!ImportConfiguration.ImportType.CamelRoute.equals(importConfig.getImportType())) {
-            throw new IllegalArgumentException("An import of type " + importConfig.getImportType()
-                    + " was directed to " + this.getClass().getSimpleName());
+            throw new IllegalArgumentException("An import of type " + importConfig.getImportType() + " was directed to "
+                    + this.getClass().getSimpleName());
         }
 
         EaiJob eaiJob = createJob(importConfig);

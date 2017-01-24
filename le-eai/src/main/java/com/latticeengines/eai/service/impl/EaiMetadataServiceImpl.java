@@ -130,7 +130,8 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         if (lmk != null) {
             Long lastModifiedDateValue = map.get(table.getName());
             lmk.setLastModifiedTimestamp(lastModifiedDateValue);
-            log.info("After import Table: " + table.getName() + " has LastModifedKeyTimeStamp:" + lastModifiedDateValue);
+            log.info(
+                    "After import Table: " + table.getName() + " has LastModifedKeyTimeStamp:" + lastModifiedDateValue);
         }
     }
 

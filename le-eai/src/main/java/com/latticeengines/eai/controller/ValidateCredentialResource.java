@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "validateCredential", description = "REST resource for importing data into Lattice")
 @RestController
 @RequestMapping("/validatecredential/customerspaces/{customerSpace}")
-public class ValidateCredentialResource implements ValidateCredentialInterface{
+public class ValidateCredentialResource implements ValidateCredentialInterface {
 
     @Autowired
     private ValidateCredentialResourceHelper validateCredentialResourceHelper;
@@ -26,8 +26,8 @@ public class ValidateCredentialResource implements ValidateCredentialInterface{
     @RequestMapping(value = "/sourcetypes/{sourceType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "validate credential")
-    public SimpleBooleanResponse validateCredential(@PathVariable String customerSpace,
-            @PathVariable String sourceType, @RequestBody CrmCredential crmCredential) {
+    public SimpleBooleanResponse validateCredential(@PathVariable String customerSpace, @PathVariable String sourceType,
+            @RequestBody CrmCredential crmCredential) {
         return validateCredentialResourceHelper.validateSourceCredential(customerSpace, sourceType, crmCredential);
     }
 }

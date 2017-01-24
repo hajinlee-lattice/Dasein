@@ -70,7 +70,7 @@ public class MarketoExtractAndImportUtil {
         attributes.setName("attributes");
         attributes.setDisplayName("Attributes");
         attributes.setSourceLogicalDataType("String");
-        
+
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
         lastModifiedDate.setDisplayName("LastModifiedDate");

@@ -94,7 +94,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
             sftpChannel.exit();
             session.disconnect();
             return true;
-        } catch (JSchException|SftpException e) {
+        } catch (JSchException | SftpException e) {
             throw new RuntimeException(e);
         }
     }
@@ -108,7 +108,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
                 }
                 Thread.sleep(1000L);
             } catch (Exception e) {
-                //ignore
+                // ignore
             }
         }
         return false;

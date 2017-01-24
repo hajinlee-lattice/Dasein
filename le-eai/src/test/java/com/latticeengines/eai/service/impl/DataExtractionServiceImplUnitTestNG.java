@@ -9,9 +9,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 
 public class DataExtractionServiceImplUnitTestNG {
-    
+
     private DataExtractionServiceImpl dataExtractionService = new DataExtractionServiceImpl();
-    
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         CamilleTestEnvironment.start();

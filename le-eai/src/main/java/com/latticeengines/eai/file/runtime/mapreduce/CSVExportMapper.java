@@ -72,8 +72,8 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 headers.add(header);
             }
         }
-        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), LECSVFormat.format.withHeader(headers
-                .toArray(new String[] {})));
+        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE),
+                LECSVFormat.format.withHeader(headers.toArray(new String[] {})));
         return this;
     }
 

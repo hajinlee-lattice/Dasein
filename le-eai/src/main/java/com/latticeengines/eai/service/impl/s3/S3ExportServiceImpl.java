@@ -77,8 +77,10 @@ public class S3ExportServiceImpl extends ExportService {
 
     private ApplicationId submitS3ExportJob(ExportContext context, ExportFormat format) {
         HdfsToS3Configuration routeConfiguration = getRouteConfiguration(context, format);
-        ImportConfiguration importConfiguration = ImportConfiguration.createForAmazonS3Configuration(routeConfiguration);
-        importConfiguration.setCustomerSpace(CustomerSpace.parse(context.getProperty(ExportProperty.CUSTOMER, String.class)));
+        ImportConfiguration importConfiguration = ImportConfiguration
+                .createForAmazonS3Configuration(routeConfiguration);
+        importConfiguration
+                .setCustomerSpace(CustomerSpace.parse(context.getProperty(ExportProperty.CUSTOMER, String.class)));
         return eaiService.extractAndImport(importConfiguration);
     }
 

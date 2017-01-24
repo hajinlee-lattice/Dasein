@@ -33,9 +33,9 @@ public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBas
 
     @Test(groups = "deployment")
     public void testDownloadSftpByRestCall() throws Exception {
-        SftpToHdfsRouteConfiguration camelRouteConfiguration =  routeServiceTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig =
-                ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfiguration);
+        SftpToHdfsRouteConfiguration camelRouteConfiguration = routeServiceTestNG.getRouteConfiguration();
+        ImportConfiguration importConfig = ImportConfiguration
+                .createForCamelRouteConfiguration(camelRouteConfiguration);
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         assertNotEquals(submission.getApplicationIds().size(), 0);
         String appId = submission.getApplicationIds().get(0);

@@ -32,9 +32,9 @@ public class SftpToHdfsEaiServiceTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testDownloadSftp() throws Exception {
-        SftpToHdfsRouteConfiguration camelRouteConfiguration =  routeServiceTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig =
-                ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfiguration);
+        SftpToHdfsRouteConfiguration camelRouteConfiguration = routeServiceTestNG.getRouteConfiguration();
+        ImportConfiguration importConfig = ImportConfiguration
+                .createForCamelRouteConfiguration(camelRouteConfiguration);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

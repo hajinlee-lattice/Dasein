@@ -12,7 +12,8 @@ import org.springframework.context.annotation.Configuration;
 public class ComponentsConfiguration {
 
     @Bean(name = "salesforce")
-    public SalesforceComponent constructSalesforceComponent(@Value("${eai.salesforce.production.loginurl}") String loginUrl,
+    public SalesforceComponent constructSalesforceComponent(
+            @Value("${eai.salesforce.production.loginurl}") String loginUrl,
             @Value("${eai.salesforce.clientid}") String clientId,
             @Value("${eai.salesforce.clientsecret}") String clientSecret) {
         SalesforceComponent salesForce = new SalesforceComponent();
@@ -24,7 +25,7 @@ public class ComponentsConfiguration {
         httpClient.setConnectTimeout(60 * 1000);
         httpClient.setTimeout(60 * 60 * 1000);
         config.setHttpClient(httpClient);
-        
+
         loginConfig.setClientId(clientId);
         loginConfig.setClientSecret(clientSecret);
         loginConfig.setLoginUrl(loginUrl);

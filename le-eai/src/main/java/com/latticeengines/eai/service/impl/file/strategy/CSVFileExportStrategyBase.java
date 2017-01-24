@@ -75,7 +75,8 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
 
         props.setProperty("eai.table.schema", JsonUtils.serialize(table));
 
-        props.setProperty("eai.export.displayname", ctx.getProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.class));
+        props.setProperty("eai.export.displayname",
+                ctx.getProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.class));
         return props;
     }
 }

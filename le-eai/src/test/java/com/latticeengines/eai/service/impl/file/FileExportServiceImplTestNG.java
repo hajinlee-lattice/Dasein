@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.csv.LECSVFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -29,6 +28,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
@@ -87,7 +87,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileExportConfig.setExportFormat(ExportFormat.CSV);
         fileExportConfig.setExportDestination(ExportDestination.FILE);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
-        //fileExportConfig.setUsingDisplayName(Boolean.FALSE);
+        // fileExportConfig.setUsingDisplayName(Boolean.FALSE);
         Table table = createFile(new File(csvUrl.getPath()).getParentFile(), "file2");
         Extract extract = new Extract();
         extract.setPath(sourceFilePath + "/file.avro");

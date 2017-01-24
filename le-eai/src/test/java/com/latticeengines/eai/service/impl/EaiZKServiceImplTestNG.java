@@ -1,9 +1,12 @@
 package com.latticeengines.eai.service.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -13,7 +16,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.eai.config.HttpClientConfig;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiZKService;
-import static org.testng.Assert.assertEquals;
 
 public class EaiZKServiceImplTestNG extends EaiFunctionalTestNGBase {
 

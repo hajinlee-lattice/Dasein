@@ -59,8 +59,8 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("DynamoTestCustomer");
     private AmazonDynamoDBClient client;
 
-    private static final String LATTICE_ACCOUNT=LatticeAccount.class.getSimpleName();
-    private static final String ACCOUNT_LOOKUP_ENTRY=AccountLookupEntry.class.getSimpleName();
+    private static final String LATTICE_ACCOUNT = LatticeAccount.class.getSimpleName();
+    private static final String ACCOUNT_LOOKUP_ENTRY = AccountLookupEntry.class.getSimpleName();
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -210,8 +210,8 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)), String.valueOf(i) + "@lattice-engines.com",
-                    "123456789");
+            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)),
+                    String.valueOf(i) + "@lattice-engines.com", "123456789");
             data.add(tuple);
         }
 
@@ -246,15 +246,17 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table table = new Table();
         table.setName("LatticeAccount");
         Schema schema = new Schema.Parser()
-                .parse("{\"type\":\"record\",\"name\":\"AccountMasterLookup\",\"doc\":\"Testing data\"," + "\"fields\":["
-                        + "{\"name\":\"" + AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS + "\",\"type\":[\"long\",\"null\"]},"
-                        + "{\"name\":\"Key\",\"type\":[\"string\",\"null\"]}" + "]}");
+                .parse("{\"type\":\"record\",\"name\":\"AccountMasterLookup\",\"doc\":\"Testing data\","
+                        + "\"fields\":[" + "{\"name\":\"" + AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS
+                        + "\",\"type\":[\"long\",\"null\"]}," + "{\"name\":\"Key\",\"type\":[\"string\",\"null\"]}"
+                        + "]}");
 
         List<GenericRecord> recordList = new ArrayList<>();
         List<List<Object>> data = new ArrayList<>();
 
         for (int i = 0; i < 10000; i++) {
-            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)), String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
+            List<Object> tuple = Arrays.asList(Long.valueOf(String.valueOf(i)),
+                    String.format("_DOMAIN_lattice-engines.com_DUNS_%09d", i));
             data.add(tuple);
         }
 

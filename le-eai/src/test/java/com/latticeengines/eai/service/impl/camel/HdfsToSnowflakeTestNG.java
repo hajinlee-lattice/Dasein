@@ -83,15 +83,14 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
     }
 
     private void verify(HdfsToSnowflakeConfiguration configuration) {
-        String db  = configuration.getDb();
+        String db = configuration.getDb();
         String table = configuration.getTableName();
         String sql = String.format("SELECT * FROM %s LIMIT 10",
                 SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)));
-        List<Map<String, Object>> results =  snowflakeJdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> results = snowflakeJdbcTemplate.queryForList(sql);
         Assert.assertTrue(results.size() > 0, "Got 0 result by querying [" + sql + "]");
 
-        sql = String.format("SELECT * FROM %s LIMIT 10",
-                SnowflakeUtils.toQualified(db, table));
+        sql = String.format("SELECT * FROM %s LIMIT 10", SnowflakeUtils.toQualified(db, table));
         results = snowflakeJdbcTemplate.queryForList(sql);
         Assert.assertTrue(results.size() > 0, "Got 0 result by querying [" + sql + "]");
     }
@@ -100,13 +99,12 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, HDFS_DIR);
         HdfsToSnowflakeConfiguration configuration = getRouteConfiguration();
         routeService.cleanupS3(configuration);
-        String db  = configuration.getDb();
+        String db = configuration.getDb();
         String table = configuration.getTableName();
         String sql = String.format("DROP TABLE IF EXISTS %s",
                 SnowflakeUtils.toQualified(db, SnowflakeUtils.toAvroRawTable(table)));
         snowflakeJdbcTemplate.execute(sql);
-        sql = String.format("DROP VIEW IF EXISTS %s",
-                SnowflakeUtils.toQualified(db, table));
+        sql = String.format("DROP VIEW IF EXISTS %s", SnowflakeUtils.toQualified(db, table));
         snowflakeJdbcTemplate.execute(sql);
         FileUtils.deleteQuietly(new File("tmp"));
     }

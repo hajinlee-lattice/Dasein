@@ -62,9 +62,10 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "aws")
     public void setup() throws Exception {
-        InputStream avroStream = ClassLoader.getSystemResourceAsStream("com/latticeengines/eai/service/impl/file/file.avro");
+        InputStream avroStream = ClassLoader
+                .getSystemResourceAsStream("com/latticeengines/eai/service/impl/file/file.avro");
         sourceFilePath = "/tmp/S3ExportServieImplTestNG/sourceFiles";
-        targetS3Path = "S3ExportServieImplTestNG/" + leStack ;
+        targetS3Path = "S3ExportServieImplTestNG/" + leStack;
         HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
         HdfsUtils.mkdir(yarnConfiguration, sourceFilePath);
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, avroStream, sourceFilePath + "/file.avro");

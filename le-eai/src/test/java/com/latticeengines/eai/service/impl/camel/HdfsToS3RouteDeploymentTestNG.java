@@ -40,9 +40,8 @@ public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "aws", enabled = false)
     public void testDownloadSftpByRestCall() throws Exception {
-        HdfsToS3Configuration camelRouteConfiguration =  hdfsToS3RouteTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig =
-                ImportConfiguration.createForAmazonS3Configuration(camelRouteConfiguration);
+        HdfsToS3Configuration camelRouteConfiguration = hdfsToS3RouteTestNG.getRouteConfiguration();
+        ImportConfiguration importConfig = ImportConfiguration.createForAmazonS3Configuration(camelRouteConfiguration);
         importConfig.setCustomerSpace(customerSpace);
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         assertNotEquals(submission.getApplicationIds().size(), 0);

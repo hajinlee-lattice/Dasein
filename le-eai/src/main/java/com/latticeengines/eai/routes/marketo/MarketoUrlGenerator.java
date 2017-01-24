@@ -24,7 +24,8 @@ public class MarketoUrlGenerator {
         return baseUrl + tokenUrl;
     }
 
-    public String getActivitiesUrl(String baseUrl, String accessToken, String nextPageToken, List<String> activityTypes) {
+    public String getActivitiesUrl(String baseUrl, String accessToken, String nextPageToken,
+            List<String> activityTypes) {
         String activitiesUrl = GETACTIVITIESURL.replace("$$ACCESSTOKEN$$", accessToken);
         // All invocations of the Marketo get activites API requires that a next
         // page token is always available

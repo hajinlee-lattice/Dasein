@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 @Component("vdbRouteConfig")
 public class VdbRouteConfig extends SpringRouteBuilder {
 
-	@Override
-	public void configure() throws Exception {
-	}
+    @Override
+    public void configure() throws Exception {
+    }
 
 }

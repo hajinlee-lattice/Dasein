@@ -23,8 +23,7 @@ public class ActivityToDataProcessor implements Processor {
     @SuppressWarnings("unchecked")
     @Override
     public void process(Exchange exchange) throws Exception {
-        List<?> activityList = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST,
-                List.class);
+        List<?> activityList = exchange.getProperty(MarketoImportProperty.ACTIVITYRESULTLIST, List.class);
         Table table = exchange.getProperty(MarketoImportProperty.TABLE, Table.class);
 
         if (table == null) {
@@ -41,7 +40,7 @@ public class ActivityToDataProcessor implements Processor {
         for (Object entry : activityList) {
             dataContainer.newRecord();
 
-            for (Map.Entry<String, Object> mapEntry : ((Map<String, Object>)entry).entrySet()) {
+            for (Map.Entry<String, Object> mapEntry : ((Map<String, Object>) entry).entrySet()) {
                 String attrName = mapEntry.getKey();
                 attrName = attrName.replace(" ", "_");
                 if (attrMap.containsKey(attrName)) {

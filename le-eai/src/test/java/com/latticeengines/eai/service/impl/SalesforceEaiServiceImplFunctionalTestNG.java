@@ -60,8 +60,8 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     private Tenant tenant;
 
-    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
-            "Opportunity", "OpportunityContactRole" });
+    private List<String> tableNameList = Arrays
+            .<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

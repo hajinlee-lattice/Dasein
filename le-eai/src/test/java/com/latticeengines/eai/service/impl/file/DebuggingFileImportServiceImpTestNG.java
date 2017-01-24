@@ -77,11 +77,12 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
-        Table t = JsonUtils.deserialize(IOUtils.toString(new FileInputStream(new File(metadataUrl.getPath()))), Table.class);
-        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { t}));
+        Table t = JsonUtils.deserialize(IOUtils.toString(new FileInputStream(new File(metadataUrl.getPath()))),
+                Table.class);
+        fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { t }));
         fileImportConfig.setProperties(properties);
 
-        List<Table> tables = Arrays.<Table> asList(new Table[] { t});
+        List<Table> tables = Arrays.<Table> asList(new Table[] { t });
 
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
@@ -94,7 +95,9 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
                 tables.get(0), //
                 9);
         Counters counters = jobService.getMRJobCounters(appId.toString());
-        assertEquals(counters.getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS).getValue(), 9);
+        assertEquals(counters
+                .getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS)
+                .getValue(), 9);
         assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 10);
         assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
         assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 5);
@@ -104,7 +107,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
     @DataProvider
     public Object[][] getPropertiesProvider() {
         Map<String, String> metadataFileProperties = getProperties(true);
-        return new Object[][] { { metadataFileProperties }};
+        return new Object[][] { { metadataFileProperties } };
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
@@ -120,7 +123,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
             }
             props.put(ImportProperty.METADATA, contents);
         }
-     // change file name
+        // change file name
         props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/Lead.csv");
         return props;
     }

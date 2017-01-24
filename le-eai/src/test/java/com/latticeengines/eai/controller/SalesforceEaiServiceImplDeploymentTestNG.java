@@ -65,8 +65,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     @Value("${eai.salesforce.production.loginurl}")
     private String productionLoginUrl;
 
-    private List<String> tableNameList = Arrays.<String> asList(new String[] { "Account", "Contact", "Lead",
-            "Opportunity", "OpportunityContactRole" });
+    private List<String> tableNameList = Arrays
+            .<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
 
     private String customer = "SFDC-Eai-Customer";
 
@@ -112,8 +112,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
 
     @AfterClass(groups = "deployment")
     private void cleanUp() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer)
-                .toString());
+        HdfsUtils.rmdir(yarnConfiguration,
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer).toString());
         Camille camille = CamilleEnvironment.getCamille();
         camille.delete(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), customer));
         tenantService.discardTenant(tenant);
@@ -168,11 +168,11 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
             for (Table tableBeforeExtract : tablesBeforeExtract) {
                 if (tableAfterExtract.getName().equals(tableBeforeExtract.getName())) {
                     if (changed) {
-                        assertEquals(lastModifiedValue.compareTo(tableBeforeExtract.getLastModifiedKey()
-                                .getLastModifiedTimestamp()), 1);
+                        assertEquals(lastModifiedValue
+                                .compareTo(tableBeforeExtract.getLastModifiedKey().getLastModifiedTimestamp()), 1);
                     } else {
-                        assertEquals(lastModifiedValue.compareTo(tableBeforeExtract.getLastModifiedKey()
-                                .getLastModifiedTimestamp()), 0);
+                        assertEquals(lastModifiedValue
+                                .compareTo(tableBeforeExtract.getLastModifiedKey().getLastModifiedTimestamp()), 0);
                     }
                 }
             }

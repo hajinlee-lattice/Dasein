@@ -73,7 +73,8 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
             if (attribute.getSourceLogicalDataType() != null) {
                 attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getSourceLogicalDataType()).name());
 
-                if (attribute.getSourceLogicalDataType().equals("Date") || attribute.getSourceLogicalDataType().equals("date")) {
+                if (attribute.getSourceLogicalDataType().equals("Date")
+                        || attribute.getSourceLogicalDataType().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }

@@ -57,8 +57,8 @@ public class MarketoImportServiceImpl extends ImportService {
         setupAccessToken(ctx);
         List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
-            MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(
-                    SourceType.MARKETO, table);
+            MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy
+                    .getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;

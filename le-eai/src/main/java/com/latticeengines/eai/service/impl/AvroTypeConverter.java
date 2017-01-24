@@ -60,7 +60,8 @@ public abstract class AvroTypeConverter {
 
             if (attr.getSourceLogicalDataType().equals("date") || attr.getSourceLogicalDataType().equals("Date")) {
                 dtf = ISODateTimeFormat.dateElementParser();
-            } else if (attr.getSourceLogicalDataType().equals("datetime") || attr.getSourceLogicalDataType().equals("Timestamp")) {
+            } else if (attr.getSourceLogicalDataType().equals("datetime")
+                    || attr.getSourceLogicalDataType().equals("Timestamp")) {
                 dtf = ISODateTimeFormat.dateTimeParser();
             }
             try {

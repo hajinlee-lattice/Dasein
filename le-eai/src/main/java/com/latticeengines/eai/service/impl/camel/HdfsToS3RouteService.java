@@ -97,8 +97,8 @@ public class HdfsToS3RouteService {
                         fileSize = FileUtils.sizeOf(avroFile);
                     }
                     downloadProgress += recordsInFile.doubleValue() / totalRecords.doubleValue();
-                    log.info("Downloaded " + recordsInFile + " records to split " + splitFileName + String
-                            .format(" (%.2f MB): %.2f %%", fileSize.doubleValue() / 1024.0 / 1024.0, downloadProgress * 100));
+                    log.info("Downloaded " + recordsInFile + " records to split " + splitFileName + String.format(
+                            " (%.2f MB): %.2f %%", fileSize.doubleValue() / 1024.0 / 1024.0, downloadProgress * 100));
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to write to split file " + splitFileName, e);
                 }

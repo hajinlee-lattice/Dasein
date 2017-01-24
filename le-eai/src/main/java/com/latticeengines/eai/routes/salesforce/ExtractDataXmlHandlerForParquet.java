@@ -18,12 +18,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import parquet.avro.AvroParquetWriter;
-import parquet.hadoop.metadata.CompressionCodecName;
-
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
+
+import parquet.avro.AvroParquetWriter;
+import parquet.hadoop.metadata.CompressionCodecName;
 
 public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandlerForParquet.class);

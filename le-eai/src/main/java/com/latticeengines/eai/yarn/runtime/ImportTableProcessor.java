@@ -37,8 +37,8 @@ import com.latticeengines.eai.service.EaiZKService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 @Component("importTableProcessor")
-public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
-        ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
+public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
+        implements ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(ImportTableProcessor.class);
 
