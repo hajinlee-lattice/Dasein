@@ -27,6 +27,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     private static final Log log = LogFactory.getLog(InternalResourceRestApiProxy.class);
 
+    private static final String INSIGHTS_PATH = "/insights";
+
+    private static final String PLS_INTERNAL_ENRICHMENT = "pls/internal/enrichment";
+
     private String internalResourceHostPort;
 
     public InternalResourceRestApiProxy(String internalResourceHostPort) {
@@ -172,7 +176,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String attributeDisplayNameFilter, Category category, String subcategory, //
             Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, offset, max, considerInternalAttributes);
 
@@ -190,7 +194,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
             Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/count", customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count", customerSpace.toString());
             url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, null, null, considerInternalAttributes);
 
@@ -204,7 +208,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes() {
         try {
-            String url = constructUrl("pls/internal/enrichment/all/lead");
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + "/all" + INSIGHTS_PATH);
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
@@ -220,7 +224,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             LeadEnrichmentAttributesOperationMap attributes) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead", customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH, customerSpace.toString());
             restTemplate.put(url, attributes);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
@@ -229,7 +233,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/premiumattributeslimitation",
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/premiumattributeslimitation",
                     customerSpace.toString());
 
             Map<?, ?> limitationMap = restTemplate.getForObject(url, Map.class);
@@ -248,7 +252,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Integer getSelectedAttributeCount(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/selectedattributes/count",
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
                     customerSpace.toString());
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
@@ -258,7 +262,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/selectedpremiumattributes/count",
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
                     customerSpace.toString());
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
@@ -268,7 +272,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public List<String> getLeadEnrichmentCategories(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/categories", customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/categories",
+                    customerSpace.toString());
             List<?> categoriesObjList = restTemplate.getForObject(url, List.class);
             return JsonUtils.convertList(categoriesObjList, String.class);
         } catch (Exception e) {
@@ -278,7 +283,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
         try {
-            String url = constructUrl("pls/internal/enrichment/lead/subcategories", customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
+                    customerSpace.toString());
             url += "?category=" + category;
             List<?> subCategoriesObjList = restTemplate.getForObject(url, List.class);
             return JsonUtils.convertList(subCategoriesObjList, String.class);
