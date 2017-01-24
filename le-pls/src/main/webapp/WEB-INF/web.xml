@@ -33,7 +33,7 @@
 
     <filter-mapping>
         <filter-name>GzipFilter</filter-name>
-        <url-pattern>/pls/enrichment/stats/*</url-pattern>
+        <url-pattern>/pls/latticeinsights/stats/*</url-pattern>
     </filter-mapping>
 
     <filter>

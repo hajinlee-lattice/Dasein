@@ -492,12 +492,11 @@ public enum LedpCode {
     LEDP_31112("enrichment_config_error", "Error while extracting enrichment configuration. Cause: {0}"), //
     LEDP_31113("missing_domain", "Either email or website is required"), //
     LEDP_31114("inactive_model", "The model {0} is not active for Real time scoring"), //
-    LEDP_31199("missing_domain",
-            "Required field(s) are missing: {0}. In case of lead type model, " //
-                    + "make sure to specify 'Email' field and for non-lead type model " //
-                    + "specify either 'Website' or 'Domain' fields. If these fields " //
-                    + "are not specified then specify both 'CompanyName' " //
-                    + "and 'State' fields."), //
+    LEDP_31199("missing_domain", "Required field(s) are missing: {0}. In case of lead type model, " //
+            + "make sure to specify 'Email' field and for non-lead type model " //
+            + "specify either 'Website' or 'Domain' fields. If these fields " //
+            + "are not specified then specify both 'CompanyName' " //
+            + "and 'State' fields."), //
     LEDP_31200("invalid_bucket_information", "The model {0} does not have valid bucket metadata information"), //
 
     // le-serviceflows
@@ -524,7 +523,7 @@ public enum LedpCode {
     LEDP_35005("Training set not found in HDFS for Tenant: {0} and modelID: {1}"), //
     LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"),
 
-    // le-ulysses
+    // le-app
     LEDP_36001("Invalid account attribute name: {0}");
 
     private String message;

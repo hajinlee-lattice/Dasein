@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.controller;
+package com.latticeengines.pls.controller;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "companyprofiles", description = "REST resource for company profiles")
 @RestController
 @RequestMapping("/companyprofiles/")
+@PreAuthorize("hasRole('View_PLS_Data')")
 public class CompanyProfileResource {
 
     private static final Logger log = Logger.getLogger(CompanyProfileResource.class);
