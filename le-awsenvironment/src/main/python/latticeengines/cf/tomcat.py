@@ -22,6 +22,8 @@ PARAM_EFS = Parameter("Efs", "EFS Id")
 PARAM_SNS_TOPIC_ARN = ArnParameter("SNSTopicArn", "SNS Topic Arn")
 PARAM_ECS_SCALE_ROLE_ARN = ArnParameter("EcsAutoscaleRoleArn", "ECS autoscale role Arn")
 PARAM_SECOND_TGRP_ARN = ArnParameter("SecondTgrpArn", "Secondary target group arn")
+PARAM_SPLUNK_URL=Parameter("SplunkUrl", "Url of splunk collector")
+PARAM_SPLUNK_TOKEN=Parameter("SplunkToken", "Splunk token")
 
 _S3_CF_PATH='cloudformation/'
 
@@ -45,7 +47,17 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
 
 def create_template(profile, fixed_instances=False, num_instances=1, second_tgrp=False):
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
-    stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_ENV_CATALINA_OPTS, PARAM_EFS, PARAM_SNS_TOPIC_ARN, PARAM_ECS_SCALE_ROLE_ARN])
+    stack.add_params([
+        PARAM_DOCKER_IMAGE,
+        PARAM_DOCKER_IMAGE_TAG,
+        PARAM_MEM,
+        PARAM_ENV_CATALINA_OPTS,
+        PARAM_EFS,
+        PARAM_SNS_TOPIC_ARN,
+        PARAM_ECS_SCALE_ROLE_ARN,
+        PARAM_SPLUNK_URL,
+        PARAM_SPLUNK_TOKEN
+    ])
     if second_tgrp:
         stack.add_param(PARAM_SECOND_TGRP_ARN)
         if not fixed_instances:
@@ -69,12 +81,15 @@ def tomcat_task(profile_vars):
         .publish_port(8080, 80) \
         .publish_port(8443, 443) \
         .publish_port(1099, 1099) \
+        .add_docker_label("stack", profile_vars["LE_STACK"].ref()) \
+        .add_docker_label("app", PARAM_DOCKER_IMAGE.ref()) \
         .set_logging({
-        "LogDriver": "awslogs",
+        "LogDriver": "splunk",
         "Options": {
-            "awslogs-group": { "Fn::Join": [ "-", ["lpi", profile_vars["LE_STACK"].ref()]] },
-            "awslogs-region": { "Ref": "AWS::Region" },
-            "awslogs-stream-prefix": PARAM_DOCKER_IMAGE.ref()
+            "splunk-url": PARAM_SPLUNK_URL.ref(),
+            "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
+            "splunk-index": "history",
+            "labels": "stack,app"
         }}) \
         .privileged()
 
@@ -122,6 +137,8 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     extra_params.append(PARAM_EFS.config(config.lpi_efs_id()))
     extra_params.append(PARAM_SNS_TOPIC_ARN.config(config.scaling_sns_topic_arn()))
     extra_params.append(PARAM_ECS_SCALE_ROLE_ARN.config(config.ecs_autoscale_role_arn()))
+    extra_params.append(PARAM_SPLUNK_URL.config(config.splunk_url()))
+    extra_params.append(PARAM_SPLUNK_TOKEN.config(config.splunk_token()))
 
     if (second_tgrp is not None) and (second_tgrp != ""):
         second_tgrp_arn = find_tgrp_arn(second_tgrp)

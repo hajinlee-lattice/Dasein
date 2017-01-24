@@ -104,6 +104,12 @@ class AwsEnvironment:
     def consul_server(self):
         return self._props['consul.server']
 
+    def splunk_url(self):
+        return self._props['splunk.url']
+
+    def splunk_token(self):
+        return self._props['splunk.token']
+
     def to_props(self):
         return {
             "EcrRegistry": self.ecr_registry(),
