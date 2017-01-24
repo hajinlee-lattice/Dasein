@@ -40,7 +40,7 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
         Assert.assertNotNull(artifacts);
         Assert.assertNotNull(artifacts.getModelSummary());
         ModelSummary expectedModelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
-        Assert.assertEquals(artifacts.getModelSummary().getDisplayName(), expectedModelSummary.getDisplayName());
+        Assert.assertEquals(artifacts.getModelSummary().getName(), expectedModelSummary.getName());
         Assert.assertNotNull(artifacts.getBucketMetadataList());
         List<BucketMetadata> expectedBucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
         Assert.assertEquals(artifacts.getBucketMetadataList().size(), expectedBucketMetadataList.size());
