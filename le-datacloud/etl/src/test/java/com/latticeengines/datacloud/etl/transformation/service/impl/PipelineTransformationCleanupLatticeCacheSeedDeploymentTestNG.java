@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.LatticeCacheSeed;
+import com.latticeengines.datacloud.core.source.impl.OrbCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -34,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFieldEnrichmentTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFirmoGraphEnrichmentTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceSeedFileMergeTransformerConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -46,16 +49,19 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
 
     @Autowired
-    PipelineSource source;
+    private PipelineSource source;
 
     @Autowired
-    LatticeCacheSeed baseLatticeCacheSource;
+    private LatticeCacheSeed baseLatticeCacheSource;
 
     @Autowired
-    DnBCacheSeed baseDnbCacheSource;
+    private DnBCacheSeed baseDnbCacheSource;
 
     @Autowired
-    SourceService sourceService;
+    private OrbCacheSeed orbCacheSource;
+
+    @Autowired
+    private SourceService sourceService;
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -74,6 +80,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
         uploadBaseSourceFile(baseLatticeCacheSource, "LatticeCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
         uploadBaseSourceFile(baseDnbCacheSource, "DnBCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
+        uploadBaseSourceFile(orbCacheSource, "OrbCacheSeed_Merge_Test", "2017-01-09_19-12-43_UTC");
         String targetSourcePath = hdfsPathBuilder.podDir().append(LATTICE_CACHE_SEED_CLEANED).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
 
@@ -109,14 +116,24 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
+        step.setBaseSources(Arrays.asList("LatticeCacheSeed", "OrbCacheSeed"));
+        step.setTransformer("sourceSeedFileMergeTransformer");
+        step.setConfiguration(getSeedFileMergeConfig());
+        steps.add(step);
+
+        
+        step = new TransformationStepConfig();
+//        step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
+        List<Integer> inputSteps = new ArrayList<Integer>();
+        inputSteps.add(0);
+        step.setInputSteps(inputSteps);
         step.setTransformer("bulkMatchTransformer");
         step.setConfiguration(getMatchConfig());
         steps.add(step);
 
         step = new TransformationStepConfig();
-        List<Integer> inputSteps = new ArrayList<Integer>();
-        inputSteps.add(0);
+        inputSteps = new ArrayList<Integer>();
+        inputSteps.add(1);
         step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceFieldEnrichmentTransformer");
@@ -125,18 +142,18 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
         step = new TransformationStepConfig();
         inputSteps = new ArrayList<Integer>();
-        inputSteps.add(1);
+        inputSteps.add(2);
         step.setInputSteps(inputSteps);
 //         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
-        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
-//        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"City\"]}");
+//        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
+        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"__Source_Priority__\"]}");
         steps.add(step);
 
         step = new TransformationStepConfig();
         step.setBaseSources(Arrays.asList("DnBCacheSeed"));
         inputSteps = new ArrayList<Integer>();
-        inputSteps.add(2);
+        inputSteps.add(3);
         step.setInputSteps(inputSteps);
         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceFirmoGraphEnrichmentTransformer");
@@ -148,6 +165,15 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
                 .createTransformationConfiguration(request);
 
         return configuration;
+    }
+
+    private String getSeedFileMergeConfig() {
+        SourceSeedFileMergeTransformerConfig config = new SourceSeedFileMergeTransformerConfig();
+        config.setSourceFieldName("__Source__");
+        config.setSourcePriorityFieldName("__Source_Priority__");
+        config.setSourceFieldValues(Arrays.asList("RTS", "Orb"));
+        config.setSourcePriorityFieldValues(Arrays.asList("0", "4")); // RTS=0, HG=1, BW=2, Bombora=3, Orb=4
+        return JsonUtils.serialize(config);
     }
 
     private String getFirmoGraphEnrichmentConfig() {
@@ -166,7 +192,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
         config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
         config.setToFields(Arrays.asList("DUNS", "City"));
-        config.setDebug(true);
+        config.setKeepInternalColumns(true);
         return JsonUtils.serialize(config);
     }
 
@@ -219,11 +245,28 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
+        Map<Long, GenericRecord> recordMap =new HashMap<>();
         while (records.hasNext()) {
-            records.next();
+            GenericRecord record = records.next();
+            Long id = (Long)record.get("SeedID");
+            recordMap.put(id, record);
             rowNum++;
         }
         log.info("Total result records " + rowNum);
         Assert.assertEquals(rowNum, 3);
+        GenericRecord record = recordMap.get(3L);
+        Assert.assertEquals(record.get("City").toString(), "New JACKSON");
+        Assert.assertEquals(record.get("State").toString(), "New CA10");
+        
+        Assert.assertTrue(record != null);
+        record = recordMap.get(6L);
+        Assert.assertEquals(record.get("City").toString(), "New MOUNTAIN VIEW");
+        Assert.assertEquals(record.get("State").toString(), "New CA0");
+        
+        Assert.assertTrue(record != null);
+        record = recordMap.get(7L);
+        Assert.assertEquals(record.get("City").toString(), "Menlo Park");
+        Assert.assertEquals(record.get("State").toString(), "California");
+        
     }
 }

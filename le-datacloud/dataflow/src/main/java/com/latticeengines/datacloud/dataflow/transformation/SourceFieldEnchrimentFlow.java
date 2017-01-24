@@ -39,7 +39,7 @@ public class SourceFieldEnchrimentFlow extends ConfigurableFlowBase<SourceFieldE
                     Arrays.asList(source.getSchema(fromField), source.getSchema(toField)),
                     new FieldList(newFieldNames), Fields.REPLACE);
         }
-        if (!config.isDebug()) {
+        if (!config.keepInternalColumns()) {
             source = source.retain(new FieldList(newFieldNames));
         }
 

@@ -12,8 +12,8 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
     @JsonProperty("ToFields")
     private List<String> toFields;
 
-    @JsonProperty("IsDebug")
-    boolean isDebug;
+    @JsonProperty("keepInternalColumns")
+    boolean keepInternalColumns = true;
 
     public List<String> getFromFields() {
         return fromFields;
@@ -31,12 +31,12 @@ public class SourceFieldEnrichmentTransformerConfig extends TransformerConfig {
         this.toFields = toFields;
     }
 
-    public boolean isDebug() {
-        return isDebug;
+    public boolean keepInternalColumns() {
+        return keepInternalColumns;
     }
 
-    public void setDebug(boolean isDebug) {
-        this.isDebug = isDebug;
+    public void setKeepInternalColumns(boolean keepInternalColumns) {
+        this.keepInternalColumns = keepInternalColumns;
     }
     
     

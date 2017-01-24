@@ -37,6 +37,8 @@ public class SourceDedupeWithDenseFieldsFlow extends ConfigurableFlowBase<Source
         if (CollectionUtils.isEmpty(sortFields)) {
             sortFields = new ArrayList<>();
             sortFields.add(DENSE_FIELDS_COUNT);
+        } else {
+            sortFields.add(DENSE_FIELDS_COUNT);
         }
         source = source.apply(new DenseFieldsCountFunction(denseFields, DENSE_FIELDS_COUNT),
                 new FieldList(denseFields), new FieldMetadata(DENSE_FIELDS_COUNT, Integer.class));
