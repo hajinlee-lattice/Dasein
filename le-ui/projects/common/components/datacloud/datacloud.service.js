@@ -22,7 +22,13 @@ angular.module('common.datacloud')
                 hide: {
                     premium: false
                 }
-            }
+            },
+            lookupMode: false,
+            generalSelectLimit: 0,
+            generalSelectedTotal: 0,
+            premiumSelectLimit: 0,
+            premiumSelectedTotal: 0,
+            enrichmentsTotal: 0
         };
     }
 

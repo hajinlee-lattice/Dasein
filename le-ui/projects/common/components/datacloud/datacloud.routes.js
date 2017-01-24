@@ -1,7 +1,8 @@
 angular
 .module('common.datacloud', [
     'common.datacloud.explorer',
-    'common.datacloud.lookup'
+    'common.datacloud.lookup',
+    'common.datacloud.explorertabs'
 ])
 .config(function($stateProvider) {
     $stateProvider
@@ -153,12 +154,11 @@ angular
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'LEAD_ENRICHMENT_SETUP_TITLE';
-                        }
-                    },
-                    controller: function($scope, DataCloudStore) {
+                    controller: 'ExplorerTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
+                    /*
+                        controller: function($scope, DataCloudStore) {
                         $scope.metadata = DataCloudStore.metadata;
                         $scope.$watch('metadata.current', function(newVal, oldVal){
                             if (newVal !== oldVal) {
@@ -169,8 +169,17 @@ angular
                             DataCloudStore.setMetadata('toggle.show.selected', bool);
                             DataCloudStore.setMetadata('current', 1);
                         }
-                    }
+                    }*/
                 },
+            }
+        })
+        .state('home.datacloud.explorer.browse', {
+            url: '/browse',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            views: {
                 "main@": {
                     resolve: {
                         // Note: this is needed for Account Lookup, dont remove!
@@ -181,7 +190,47 @@ angular
                     controller: 'DataCloudController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
-                }   
+                } 
+            }
+        })
+        .state('home.datacloud.explorer.edit', {
+            url: '/edit',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        // Note: this is needed for Account Lookup, dont remove!
+                        EnrichmentAccountLookup: function() {
+                            return null;
+                        }
+                    },
+                    controller: 'DataCloudController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                } 
+            }
+        })
+        .state('home.datacloud.explorer.team', {
+            url: '/team',
+            params: {
+                pageIcon: 'ico-enrichment',
+                pageTitle: 'Lattice Data Cloud'
+            },
+            views: {
+                "main@": {
+                    resolve: {
+                        // Note: this is needed for Account Lookup, dont remove!
+                        EnrichmentAccountLookup: function() {
+                            return null;
+                        }
+                    },
+                    controller: 'DataCloudController',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                } 
             }
         });
 });

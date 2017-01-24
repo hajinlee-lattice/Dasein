@@ -86,6 +86,9 @@ angular.module('common.datacloud.explorer', [
         enable_grid: true
     });
 
+
+    DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
+
     vm.download_button.items = [{ 
             href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
             label: vm.label.button_download,
@@ -105,7 +108,17 @@ angular.module('common.datacloud.explorer', [
                 'vm.metadata.toggle.hide.premium', 
                 'vm.metadata.toggle.show.internal'
             ], function(newValues, oldValues, scope) {
+
             vm.filterEmptySubcategories();
+        });
+        
+        $scope.$watchGroup([
+                'vm.premiumSelectedTotal',
+                'vm.generalSelectedTotal'
+            ], function(newValues, oldValues, scope) {
+
+            DataCloudStore.setMetadata('generalSelectedTotal', vm.generalSelectedTotal);
+            DataCloudStore.setMetadata('premiumSelectedTotal', vm.premiumSelectedTotal);
         });
 
         $scope.$watch('vm.queryText', function(newvalue, oldvalue){
@@ -164,8 +177,11 @@ angular.module('common.datacloud.explorer', [
         getEnrichmentCategories();
         getEnrichmentData();
 
-        vm.premiumSelectLimit = (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
-        vm.generalSelectLimit = 100;
+        DataCloudStore.setMetadata('premiumSelectLimit', (EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10);
+        DataCloudStore.setMetadata('generalSelectLimit', 100);
+        vm.premiumSelectLimit = DataCloudStore.getMetadata('premiumSelectLimit'); //(EnrichmentPremiumSelectMaximum.data && EnrichmentPremiumSelectMaximum.data['HGData_Pivoted_Source']) || 10;
+        vm.generalSelectLimit = DataCloudStore.getMetadata('generalSelectLimit');
+
         vm.statusMessageBox = angular.element('.status-alert');
     }
 
@@ -289,8 +305,13 @@ angular.module('common.datacloud.explorer', [
         }
 
         var selectedTotal = vm.filter(vm.enrichments, 'IsSelected', true);
-        vm.generalSelectedTotal = selectedTotal.length;
-        vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
+
+        DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
+        DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
+        DataCloudStore.setMetadata('enrichmentsTotal', vm.enrichments.length);
+
+        vm.generalSelectedTotal = DataCloudStore.getMetadata('generalSelectedTotal');
+        vm.premiumSelectedTotal = DataCloudStore.getMetadata('premiumSelectedTotal');
     }
 
     vm.generateTree = function(isComplete) {
@@ -823,7 +844,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     getEnrichmentCube().then(function(result){
-        console.log(result);
+        //console.log(result);
     });
 
     vm.init();

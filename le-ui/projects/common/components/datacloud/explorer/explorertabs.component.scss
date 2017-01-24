@@ -1,0 +1,26 @@
+#ExplorerTabsView {
+    position: relative;
+    z-index: 100;
+    & > ul {
+        @include flex-container;
+        & > li {
+            @include flex-item(0 1 auto);
+            margin-right: 20px;
+            &[ui-sref] {
+                cursor: pointer;
+            }
+            border: 1px solid gray;
+            border-bottom: 0;
+            &.active{
+                border-top-width: 5px; 
+                border-top-color: orange;
+            }
+            h2, h3 {
+                font-size: 100%;
+            }
+            h3 {
+                color: white;
+            }
+        }
+    }
+}
