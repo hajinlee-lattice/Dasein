@@ -30,7 +30,7 @@ def parse_args():
     subparser = commands.add_parser("deregister", description="Deregister ec2 in a cloudformation stack to a target group")
     subparser.add_argument('-s', dest='stack', type=str, required=True, help='cloudformation stack name')
     subparser.add_argument('-t', dest='tgrp', type=str, required=True, help='target group name')
-    subparser.set_defaults(func=register)
+    subparser.set_defaults(func=deregister)
 
     args = parser.parse_args()
     return args
