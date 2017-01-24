@@ -288,9 +288,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     public void setCleanedUpEnumValuesAsString(String enumValues) {
         this.cleanedUpEnumValuesAsString = enumValues;
-        if (enumValues != null) {
-            setCleanedUpEnumValues(Arrays.<String>asList(enumValues.split(",")));
-        }
     }
 
     @Transient
