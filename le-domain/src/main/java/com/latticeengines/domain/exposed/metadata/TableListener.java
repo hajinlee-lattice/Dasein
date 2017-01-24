@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.util.List;
-
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 
@@ -12,7 +10,7 @@ public class TableListener {
     @PostLoad
     public void tablePostLoad(Table table) {
         table.setTableTypeCode(table.getTableTypeCode());
-        HibernateUtils.inflateDetails(table.getStorageMechanisms());
+        HibernateUtils.inflateDetails(table.getStorageMechanism());
     }
     
     @PrePersist
@@ -22,16 +20,14 @@ public class TableListener {
             tag.setTenantId(table.getTenantId());
         }
 
-        List<StorageMechanism> storageMechanisms = table.getStorageMechanisms();
+        StorageMechanism storageMechanism = table.getStorageMechanism();
         
-        if (storageMechanisms.size() == 0) {
+        if (storageMechanism == null) {
             StorageMechanism hdfs = new HdfsStorage();
             hdfs.setTableNameInStorage(table.getName());
-            table.addStorageMechanism(hdfs);
+            table.setStorageMechanism(hdfs);
         }
         
-        for (StorageMechanism storageMechanism : table.getStorageMechanisms()) {
-            storageMechanism.setTable(table);
-        }
+        table.getStorageMechanism().setTable(table);
     }
 }

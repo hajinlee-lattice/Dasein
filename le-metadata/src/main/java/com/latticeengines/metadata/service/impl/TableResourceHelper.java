@@ -145,8 +145,8 @@ public class TableResourceHelper {
         return true;
     }
     
-    public void addStorageMechanism(String customerSpace, String tableName, StorageMechanism storageMechanism) {
-        mdService.addStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
+    public void setStorageMechanism(String customerSpace, String tableName, StorageMechanism storageMechanism) {
+        mdService.setStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
     }
 
 }

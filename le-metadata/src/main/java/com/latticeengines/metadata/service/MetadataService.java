@@ -35,5 +35,5 @@ public interface MetadataService {
 
     Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName);
     
-    void addStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
+    void setStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
 }

@@ -149,14 +149,14 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void addStorageMechanism(CustomerSpace customerSpace, final String tableName,
+    public void setStorageMechanism(CustomerSpace customerSpace, final String tableName,
             StorageMechanism storageMechanism) {
         tableTypeHolder.setTableType(TableType.DATATABLE);
         DatabaseUtils.retry("addStorageMechanism", new Closure() {
             @Override
             public void execute(Object input) {
                 Table found = tableEntityMgr.findByName(tableName);
-                found.addStorageMechanism(storageMechanism);
+                found.setStorageMechanism(storageMechanism);
                 updateTable(customerSpace, found);
             }
         });

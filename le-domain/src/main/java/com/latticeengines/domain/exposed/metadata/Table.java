@@ -34,8 +34,6 @@ import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -153,11 +151,10 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TableTag> tableTags = new ArrayList<>();
     
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "table")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "table")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("storage_mechanisms")
-    @Fetch(value = FetchMode.SUBSELECT)
-    private List<StorageMechanism> storageMechanisms = new ArrayList<>();
+    @JsonProperty("storage_mechanism")
+    private StorageMechanism storageMechanism = null;
 
     @JsonProperty("namespace")
     @Column(name = "NAMESPACE", nullable = true)
@@ -728,21 +725,16 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         return JsonUtils.serialize(this);
     }
 
-    public List<StorageMechanism> getStorageMechanisms() {
-        return storageMechanisms;
+    public StorageMechanism getStorageMechanism() {
+        return storageMechanism;
     }
 
-    public void setStorageMechanisms(List<StorageMechanism> storageMechanisms) {
-        this.storageMechanisms = storageMechanisms;
-    }
-
-    @JsonIgnore
-    public void addStorageMechanism(StorageMechanism mechanism) {
-        Set<Class<? extends StorageMechanism>> set = storageMechanisms.stream().map(x -> x.getClass()).collect(Collectors.toSet());
-        mechanism.setTable(this);
-        if (!set.contains(mechanism.getClass())) {
-            storageMechanisms.add(mechanism);
+    public void setStorageMechanism(StorageMechanism storageMechanism) {
+        this.storageMechanism = storageMechanism;
+        
+        if (storageMechanism != null) {
+            storageMechanism.setTable(this);
         }
     }
-    
+
 }

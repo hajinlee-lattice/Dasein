@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
-import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
@@ -35,8 +34,7 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(table.getName(), tableName);
         assertNotNull(table.getLastModifiedKey());
         assertNotNull(table.getPrimaryKey());
-        assertEquals(table.getStorageMechanisms().size(), 1);
-        assertEquals(table.getStorageMechanisms().get(0).getName(), "HDFS");
+        assertEquals(table.getStorageMechanism().getName(), "HDFS");
     }
 
     @Test(groups = "functional")
@@ -51,11 +49,11 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
         JdbcStorage jdbcStorage = new JdbcStorage();
         jdbcStorage.setDatabaseName(JdbcStorage.DatabaseName.REDSHIFT);
         jdbcStorage.setTableNameInStorage("TABLE1_IN_REDSHIFT");
-        mdService.addStorageMechanism(CustomerSpace.parse(CUSTOMERSPACE1), table.getName(), jdbcStorage);
+        mdService.setStorageMechanism(CustomerSpace.parse(CUSTOMERSPACE1), table.getName(), jdbcStorage);
         
         Table retrievedTable = mdService.getTables(CustomerSpace.parse(CUSTOMERSPACE1)).get(0);
-        List<StorageMechanism> storageMechanisms = retrievedTable.getStorageMechanisms();
-        assertEquals(storageMechanisms.size(), 2);
+        JdbcStorage storageMechanism = (JdbcStorage) retrievedTable.getStorageMechanism();
+        assertEquals(storageMechanism.getDatabaseName(), JdbcStorage.DatabaseName.REDSHIFT);
     }
 
     @DataProvider(name = "tableProvider")

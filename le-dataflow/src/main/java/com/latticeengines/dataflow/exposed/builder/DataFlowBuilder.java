@@ -275,7 +275,7 @@ public abstract class DataFlowBuilder {
         
         StorageMechanism mechanism = new HdfsStorage();
         mechanism.setTableNameInStorage(table.getName());
-        table.addStorageMechanism(mechanism);
+        table.setStorageMechanism(mechanism);
 
         return table;
     }
