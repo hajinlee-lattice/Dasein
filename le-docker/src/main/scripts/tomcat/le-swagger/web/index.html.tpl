@@ -36,7 +36,7 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
-        url = "doc/v2/api-docs";
+        url = "{{firstOption}}/v2/api-docs";
       }
 
       hljs.configure({

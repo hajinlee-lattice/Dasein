@@ -15,7 +15,6 @@ COPY tomcat-users.xml $CATALINA_HOME/conf/tomcat-users.xml
 
 COPY cacerts /etc/pki/java/cacerts
 COPY tomcat.jks /etc/pki/java/tomcat.jks
-COPY log4j.properties /log4j.properties
 COPY META-INF/context.xml /META-INF/context.xml
 COPY conf/env/devcluster_aws/latticeengines.properties /tmp/conf/env/devcluster/latticeengines.properties
 COPY conf/env/qacluster_aws/latticeengines.properties /tmp/conf/env/qacluster/latticeengines.properties

@@ -22,7 +22,12 @@ function build_docker() {
 	mkdir -p ${WORKSPACE}/webapps/${TGT_WAR}
 	cd ${WORKSPACE}/webapps/${TGT_WAR}
 	jar xvf ${DIR}/webapps/${SRC_WAR}.war
-	cp -f ${DIR}/log4j.properties WEB-INF/classes/log4j.properties
+	if [ "${SRC_WAR}" = "scoringapi" ]; then
+	    cp -f ${DIR}/log4j_scoringapi.properties WEB-INF/classes/log4j.properties
+	else
+	    cp -f ${DIR}/log4j.properties WEB-INF/classes/log4j.properties
+	fi
+	sed -i "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
 	cp -f ${DIR}/context.xml META-INF/context.xml
 	cd ..
 	jar cvf ${TGT_WAR}.war -C ${TGT_WAR}/ .

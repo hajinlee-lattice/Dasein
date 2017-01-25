@@ -4,6 +4,7 @@ FROM latticeengines/tomcatbase
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 COPY webapps/ROOT.war /ROOT.war
 COPY application.properties /application.properties
+COPY log4j.properties /log4j.properties
 
 RUN mkdir ROOT \
     && cd ROOT \

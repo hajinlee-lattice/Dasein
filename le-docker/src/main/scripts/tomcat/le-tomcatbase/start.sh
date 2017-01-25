@@ -39,8 +39,10 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.manageme
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
 fi
-export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_COMMON_JAR
 
 echo ${JAVA_OPTS}
+
+mkdir /var/log/ledp
+chmod a+w /var/log/ledp
 
 ${CATALINA_HOME}/bin/catalina.sh run
