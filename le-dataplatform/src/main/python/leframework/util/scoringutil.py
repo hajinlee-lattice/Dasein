@@ -1,6 +1,8 @@
 import random
 import numpy as np
 
+from .precisionutil import PrecisionUtil
+
 class ScoringUtil():
 
     @staticmethod
@@ -8,7 +10,8 @@ class ScoringUtil():
 
         if mediator.clf is None:
             return []
-        scored = mediator.clf.predict_proba(data[mediator.schema["features"]])
+
+        scored = mediator.clf.predict_proba(data[mediator.schema["features"]].apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x)))
         index = 1
         if len(scored) > 0 and len(scored[0]) < 2:
             logger.warn("All events have the same label.")

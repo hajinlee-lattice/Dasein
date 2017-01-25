@@ -6,8 +6,8 @@ import os
 import subprocess
 import sys
 
-from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
+from leframework.executors.learningexecutor import LearningExecutor
 
 class SuiteProfilingThenTrainTest(TrainingTestBase):
     def executeProfilingThenTrain(self):
@@ -126,7 +126,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                     typeAndValue = data["Value"]["SerializedValueAndType"].split("|")
                     valueType = typeAndValue[0]
                     value = 1.0
-                    if len(typeAndValue) == 2:
+                    if len(typeAndValue) == 2 and typeAndValue[1] != u'':
                         value = float(typeAndValue[1][1:-1])
                     if valueType == "Float":
                         data["Value"]["SerializedValueAndType"] = "%s|'%f'" % (valueType, value * 100)

@@ -4,6 +4,11 @@ import sys
 import pandas as pd
 import numpy as np
 
+try:
+    from precisionutil import PrecisionUtil
+except ImportError as e:
+    from leframework.util.precisionutil import PrecisionUtil
+
 def get_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
@@ -33,7 +38,10 @@ class Pipeline(object):
         for step in self.pipelineSteps:
             step.setMediator(self.mediator)
             try:
-                transformed = step.transform(transformed, configMetadata, test)                
+                transformed = step.transform(transformed, configMetadata, test)
+                modifiedCols = [c[0]['name'] for c in step.getOutputColumns() if c[0]['name'] in transformed.columns.values]
+                if len(modifiedCols) > 0:
+                    transformed[modifiedCols] = transformed[modifiedCols].apply(lambda x : PrecisionUtil.setPlatformStandardPrecision(x))
             except Exception as e:
                 logger.exception("Caught Exception while applying Transform. Stack trace below" + str(e))
 
