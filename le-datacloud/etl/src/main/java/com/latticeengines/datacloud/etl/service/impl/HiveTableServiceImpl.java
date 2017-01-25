@@ -39,6 +39,6 @@ public class HiveTableServiceImpl implements HiveTableService {
     }
 
     private static String tableName(String sourceName, String version) {
-        return sourceName + version.replace("-", "_");
+        return "LDC_" + sourceName + "_" + version.replace("-", "_");
     }
 }
