@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.mysql.jdbc.StringUtils;
 
 @Component("companyProfileService")
 public class CompanyProfileServiceImpl implements CompanyProfileService {
@@ -52,7 +53,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         matchInput.setFields(fields);
         matchInput.setData(data);
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
-        if (dataCloudVersion == null) {
+        if (StringUtils.isNullOrEmpty(dataCloudVersion)) {
             dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         }
         matchInput.setUseRemoteDnB(enforceFuzzyMatch);
@@ -77,7 +78,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         List<String> outputFields = matchOutput.getOutputFields();
         List<Object> outputRecords = matchOutput.getResult().get(0).getOutput();
         for (int i = 0; i < outputRecords.size(); i++) {
-            profile.attributes.put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
+            profile.getAttributes().put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
         }
         return profile;
     }

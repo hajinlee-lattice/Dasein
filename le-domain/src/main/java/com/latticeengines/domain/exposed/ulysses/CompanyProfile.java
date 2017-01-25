@@ -8,5 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CompanyProfile {
 
     @JsonProperty("attributes")
-    public Map<String, String> attributes = new HashMap<>();
+    private Map<String, String> attributes = new HashMap<>();
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
 }

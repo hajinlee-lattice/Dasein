@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.controller;
+package com.latticeengines.ulysses.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
@@ -24,19 +23,20 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
-public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase {
-    private int totalLeadEnrichmentCount;
+public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTestNGBase {
+    private List<LeadEnrichmentAttribute> attributes;
 
-    @BeforeClass(groups = {"deployment"})
+    @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
-    public void testGetCategories() throws IOException {
+    public void getCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights/categories";
@@ -56,8 +56,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment")
-    public void testGetSubcategories() throws IOException {
+    @Test(groups = "deployment", dependsOnMethods = "getCategories")
+    public void getSubcategories() throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights/subcategories?category="
                 + Category.TECHNOLOGY_PROFILE.toString();
 
@@ -76,7 +76,6 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
         List<LeadEnrichmentAttribute> combinedAttributeList = getAttributes(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
-        totalLeadEnrichmentCount = combinedAttributeList.size();
         Set<String> expectedCategorySet = new HashSet<>();
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
@@ -88,21 +87,20 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
         return expectedCategorySet;
     }
 
-    @Test(groups = "deployment")
-    public void testGetAttributes() throws IOException {
+    @Test(groups = "deployment", dependsOnMethods = "getSubcategories")
+    public void getAllAttributes() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getAttributes(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
-        totalLeadEnrichmentCount = combinedAttributeList.size();
 
         List<LeadEnrichmentAttribute> selectedAttributeList = getAttributes(true);
         assertNotNull(selectedAttributeList);
         assertTrue(selectedAttributeList.isEmpty());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "getAllAttributes")
     public void customizeAttributes() throws IOException {
-        List<LeadEnrichmentAttribute> attributes = getAttributes(false);
+        attributes = getAttributes(false);
         String fieldName = attributes.get(0).getFieldName();
         CompanyProfileAttributeFlags flags = new CompanyProfileAttributeFlags(true, true);
         setFlags(fieldName, flags);
@@ -111,8 +109,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
 
         for (LeadEnrichmentAttribute attribute : attributes) {
             if (fieldName.equals(attribute.getFieldName())) {
-                CompanyProfileAttributeFlags retrieved = (CompanyProfileAttributeFlags) attribute.getAttributeFlagsMap()
-                        .get(AttributeUseCase.CompanyProfile);
+                CompanyProfileAttributeFlags retrieved = (CompanyProfileAttributeFlags) attribute
+                        .getAttributeFlagsMap().get(AttributeUseCase.CompanyProfile);
                 assertNotNull(retrieved);
                 assertEquals(retrieved, flags);
             }
@@ -125,9 +123,18 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
         getGlobalAuthRestTemplate().postForObject(url, companyProfileAttributeFlags, Void.class);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = {"testGetAttributes"})
-    public void testPremiumAttributesLimitation() {
-        checkLimitation();
+    @Test(groups = "deployment", dependsOnMethods = "customizeAttributes")
+    public void retrieveCompanyProfile() {
+        CompanyProfile profile = getOAuth2RestTemplate().getForObject(
+                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/?Email=someuser@google.com", CompanyProfile.class);
+        assertNotNull(profile);
+        for (String fieldName : profile.getAttributes().keySet()) {
+            boolean found = false;
+            for (LeadEnrichmentAttribute attribute : attributes) {
+                found = found || fieldName.equals(attribute.getFieldName());
+            }
+            assertTrue(found, String.format("Could not find field %s in LatticeInsights attributes", fieldName));
+        }
     }
 
     private List<LeadEnrichmentAttribute> getAttributes(boolean onlySelectedAttr) throws IOException {
@@ -140,7 +147,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
     }
 
     private List<LeadEnrichmentAttribute> getAttributes(boolean onlySelectedAttr, String attributeDisplayNameFilter,
-                                                        Category category, boolean considerInternalAttributes) throws IOException {
+            Category category, boolean considerInternalAttributes) throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights";
         if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
                 || considerInternalAttributes) {
@@ -177,27 +184,5 @@ public class LatticeInsightsResourceDeploymentTestNG extends UlyssesDeploymentTe
         }
 
         return combinedAttributeList;
-    }
-
-    private void checkLimitation() {
-        String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights/premiumattributeslimitation";
-        @SuppressWarnings("unchecked")
-        Map<String, Integer> countMap = getOAuth2RestTemplate().getForObject(url, Map.class);
-        assertNotNull(countMap);
-        assertFalse(countMap.isEmpty());
-
-        boolean foundHGDataSourceInfo = false;
-
-        for (String dataSource : countMap.keySet()) {
-            assertFalse(StringUtils.objectIsNullOrEmptyString(dataSource));
-            assertNotNull(countMap.get(dataSource));
-            assertTrue(countMap.get(dataSource) > 0);
-
-            if (dataSource.equals("HGData_Pivoted_Source")) {
-                foundHGDataSourceInfo = true;
-            }
-        }
-
-        assertTrue(foundHGDataSourceInfo);
     }
 }
