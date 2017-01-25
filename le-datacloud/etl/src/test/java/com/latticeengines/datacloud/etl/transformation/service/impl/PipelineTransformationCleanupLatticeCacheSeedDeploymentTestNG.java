@@ -211,7 +211,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(true);
         matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
+        matchInput.setUseRemoteDnB(false);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(true);
 
