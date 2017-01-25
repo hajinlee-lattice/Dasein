@@ -30,7 +30,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private AddStandardAttributes addStandardAttributes;
 
     @Autowired
-    protected ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
+    private ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
 
     @Autowired
     private ModelWorkflow modelWorkflow;
