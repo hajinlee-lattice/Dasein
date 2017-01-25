@@ -3,38 +3,27 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.FieldType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
 public class StandardizationFlowParameter extends TransformationFlowParameters {
+    @JsonProperty("Sequence")
+    private StandardizationStrategy[] sequence;
+
     @JsonProperty("DomainFields")
     private String[] domainFields;
-
-    @JsonProperty("AddOrReplaceDomainFields")
-    private StandardizationStrategy addOrReplaceDomainFields;
 
     @JsonProperty("CountryFields")
     private String[] countryFields;
 
-    @JsonProperty("AddOrReplaceCountryFields")
-    private StandardizationStrategy addOrReplaceCountryFields;
-
     @JsonProperty("StateFields")
     private String[] stateFields;
-
-    @JsonProperty("AddOrReplaceStateFields")
-    private StandardizationStrategy addOrReplaceStateFields;
 
     @JsonProperty("StringToIntFields")
     private String[] stringToIntFields;
 
-    @JsonProperty("AddOrReplaceStringToIntFields")
-    private StandardizationStrategy addOrReplaceStringToIntFields;
-
     @JsonProperty("StringToLongFields")
     private String[] stringToLongFields;
-
-    @JsonProperty("AddOrReplaceStringToLongFields")
-    private StandardizationStrategy addOrReplaceStringToLongFields;
 
     @JsonProperty("DedupFields")
     private String[] dedupFields;
@@ -57,6 +46,18 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("MarkerField")
     private String markerField;
 
+    @JsonProperty("RenameFields")
+    private String[][] renameFields;
+
+    @JsonProperty("RetainFields")
+    private String[] retainFields;
+
+    @JsonProperty("AddNullFields")
+    private String[] addNullFields;
+
+    @JsonProperty("AddNullFieldTypes")
+    private FieldType[] addNullFieldTypes;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -68,28 +69,12 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.domainFields = domainFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceDomainFields() {
-        return addOrReplaceDomainFields;
-    }
-
-    public void setAddOrReplaceDomainFields(StandardizationStrategy addOrReplaceDomainFields) {
-        this.addOrReplaceDomainFields = addOrReplaceDomainFields;
-    }
-
     public String[] getCountryFields() {
         return countryFields;
     }
 
     public void setCountryFields(String[] countryFields) {
         this.countryFields = countryFields;
-    }
-
-    public StandardizationStrategy getAddOrReplaceCountryFields() {
-        return addOrReplaceCountryFields;
-    }
-
-    public void setAddOrReplaceCountryFields(StandardizationStrategy addOrReplaceCountryFields) {
-        this.addOrReplaceCountryFields = addOrReplaceCountryFields;
     }
 
     public String[] getStateFields() {
@@ -100,14 +85,6 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.stateFields = stateFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceStateFields() {
-        return addOrReplaceStateFields;
-    }
-
-    public void setAddOrReplaceStateFields(StandardizationStrategy addOrReplaceStateFields) {
-        this.addOrReplaceStateFields = addOrReplaceStateFields;
-    }
-
     public String[] getStringToIntFields() {
         return stringToIntFields;
     }
@@ -116,28 +93,12 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
         this.stringToIntFields = stringToIntFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceStringToIntFields() {
-        return addOrReplaceStringToIntFields;
-    }
-
-    public void setAddOrReplaceStringToIntFields(StandardizationStrategy addOrReplaceStringToIntFields) {
-        this.addOrReplaceStringToIntFields = addOrReplaceStringToIntFields;
-    }
-
     public String[] getStringToLongFields() {
         return stringToLongFields;
     }
 
     public void setStringToLongFields(String[] stringToLongFields) {
         this.stringToLongFields = stringToLongFields;
-    }
-
-    public StandardizationStrategy getAddOrReplaceStringToLongFields() {
-        return addOrReplaceStringToLongFields;
-    }
-
-    public void setAddOrReplaceStringToLongFields(StandardizationStrategy addOrReplaceStringToLongFields) {
-        this.addOrReplaceStringToLongFields = addOrReplaceStringToLongFields;
     }
 
     public String[] getDedupFields() {
@@ -202,6 +163,46 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setMarkerField(String markerField) {
         this.markerField = markerField;
+    }
+
+    public String[][] getRenameFields() {
+        return renameFields;
+    }
+
+    public void setRenameFields(String[][] renameFields) {
+        this.renameFields = renameFields;
+    }
+
+    public String[] getRetainFields() {
+        return retainFields;
+    }
+
+    public void setRetainFields(String[] retainFields) {
+        this.retainFields = retainFields;
+    }
+
+    public StandardizationStrategy[] getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(StandardizationStrategy[] sequence) {
+        this.sequence = sequence;
+    }
+
+    public String[] getAddNullFields() {
+        return addNullFields;
+    }
+
+    public void setAddNullFields(String[] addNullFields) {
+        this.addNullFields = addNullFields;
+    }
+
+    public FieldType[] getAddNullFieldTypes() {
+        return addNullFieldTypes;
+    }
+
+    public void setAddNullFieldTypes(FieldType[] addNullFieldTypes) {
+        this.addNullFieldTypes = addNullFieldTypes;
     }
 
 }

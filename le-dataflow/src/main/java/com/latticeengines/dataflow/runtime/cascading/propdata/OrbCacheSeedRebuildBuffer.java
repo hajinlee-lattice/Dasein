@@ -61,10 +61,6 @@ public class OrbCacheSeedRebuildBuffer extends BaseOperation implements Buffer {
         TupleEntry group = bufferCall.getGroup();
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
         setupTupleForArgument(bufferCall, arguments, group);
-        // Tuple result = Tuple.size(getFieldDeclaration().size());
-        // setupTupleForGroup(result, group);
-        // bufferCall.getOutputCollector().add(result);
-        // bufferCall.getOutputCollector().add(result);
     }
 
     private void setupTupleForArgument(BufferCall bufferCall, Iterator<TupleEntry> argumentsInGroup, TupleEntry group) {

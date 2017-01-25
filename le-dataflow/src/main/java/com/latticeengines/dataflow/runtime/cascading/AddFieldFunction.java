@@ -27,6 +27,8 @@ public class AddFieldFunction extends BaseOperation implements Function {
         Object value = strategy.compute(arguments);
         if (value != null) {
             functionCall.getOutputCollector().add(new Tuple(value));
+        } else {
+            functionCall.getOutputCollector().add(Tuple.size(1));
         }
     }
 

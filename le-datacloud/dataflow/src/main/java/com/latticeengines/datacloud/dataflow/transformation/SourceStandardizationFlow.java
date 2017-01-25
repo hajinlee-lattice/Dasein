@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +13,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunctio
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 @Component("sourceStandardizationFlow")
@@ -29,17 +27,95 @@ public class SourceStandardizationFlow
     @Override
     public Node construct(StandardizationFlowParameter parameters) {
         Node source = addSource(parameters.getBaseTables().get(0));
-        source = standardizeDomain(source, parameters.getDomainFields(), parameters.getAddOrReplaceDomainFields());
-        source = standardizeCountry(source, parameters.getCountryFields(), parameters.getAddOrReplaceCountryFields(),
-                parameters.getStandardCountries());
-        source = stringToInt(source, parameters.getStringToIntFields(), parameters.getAddOrReplaceStringToIntFields());
-        source = stringToLong(source, parameters.getStringToLongFields(),
-                parameters.getAddOrReplaceStringToLongFields());
-        source = filter(source, parameters.getFilterExpression(), parameters.getFilterFields());
-        source = dedup(source, parameters.getDedupFields());
-        source = addTimestamp(source, parameters.getUploadTimestampField());
-        source = mark(source, parameters.getMarkerExpression(), parameters.getMarkerCheckFields(),
-                parameters.getMarkerField());
+        for (StandardizationTransformerConfig.StandardizationStrategy strategy : parameters.getSequence()) {
+            switch (strategy) {
+            case DOMAIN:
+                source = standardizeDomain(source, parameters.getDomainFields());
+                break;
+            case COUNTRY:
+                source = standardizeCountry(source, parameters.getCountryFields(), parameters.getStandardCountries());
+                break;
+            case STRING_TO_INT:
+                source = stringToInt(source, parameters.getStringToIntFields());
+                break;
+            case STRING_TO_LONG:
+                source = stringToLong(source, parameters.getStringToLongFields());
+                break;
+            case DEDUP:
+                source = dedup(source, parameters.getDedupFields());
+                break;
+            case FILTER:
+                source = filter(source, parameters.getFilterExpression(), parameters.getFilterFields());
+                break;
+            case UPLOAD_TIMESTAMP:
+                source = addTimestamp(source, parameters.getUploadTimestampField());
+                break;
+            case MARKER:
+                source = mark(source, parameters.getMarkerExpression(), parameters.getMarkerCheckFields(),
+                        parameters.getMarkerField());
+                break;
+            case RENAME:
+                source = rename(source, parameters.getRenameFields());
+                break;
+            case RETAIN:
+                source = retain(source, parameters.getRetainFields());
+                break;
+            case ADD_NULL_FIELD:
+                source = addNullField(source, parameters.getAddNullFields(), parameters.getAddNullFieldTypes());
+                break;
+            default:
+                break;
+            }
+        }
+
+        return source;
+    }
+
+    private Node addNullField(Node source, String[] addNullFields,
+            StandardizationTransformerConfig.FieldType[] addNullFieldTypes) {
+        if (addNullFields != null && addNullFields.length > 0) {
+            for (int i = 0; i < addNullFields.length; i++) {
+                switch (addNullFieldTypes[i]) {
+                case STRING:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, String.class);
+                    break;
+                case INT:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, Integer.class);
+                    break;
+                case LONG:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, Long.class);
+                    break;
+                case BOOLEAN:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, Boolean.class);
+                    break;
+                case FLOAT:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, Float.class);
+                    break;
+                case DOUBLE:
+                    source = source.addColumnWithFixedValue(addNullFields[i], null, Double.class);
+                    break;
+                default:
+                    break;
+                }
+
+            }
+        }
+        return source;
+    }
+
+    private Node retain(Node source, String[] retainFields) {
+        if (retainFields != null && retainFields.length > 0) {
+            source = source.retain(new FieldList(retainFields));
+        }
+        return source;
+    }
+
+    private Node rename(Node source, String[][] renameFields) {
+        if (renameFields != null && renameFields.length > 0) {
+            for (String[] renameFieldMap : renameFields) {
+                source = source.rename(new FieldList(renameFieldMap[0]), new FieldList(renameFieldMap[1]));
+            }
+        }
         return source;
     }
 
@@ -65,8 +141,7 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node standardizeDomain(Node source, String[] domainFields,
-            StandardizationStrategy addOrReplaceDomainFields) {
+    private Node standardizeDomain(Node source, String[] domainFields) {
         if (domainFields != null && domainFields.length > 0) {
             for (String domainField : domainFields) {
                 source = source.apply(new DomainCleanupFunction(domainField, false), new FieldList(domainField),
@@ -76,8 +151,7 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node standardizeCountry(Node source, String[] countryFields,
-            StandardizationStrategy addOrReplaceCountryFields, Map<String, String> standardCountries) {
+    private Node standardizeCountry(Node source, String[] countryFields, Map<String, String> standardCountries) {
         if (countryFields != null && countryFields.length > 0) {
             for (String countryField : countryFields) {
                 source = source.apply(new CountryStandardizationFunction(countryField, standardCountries),
@@ -87,8 +161,7 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node stringToInt(Node source, String[] stringToIntFields,
-            StandardizationStrategy addOrReplaceStringToIntFields) {
+    private Node stringToInt(Node source, String[] stringToIntFields) {
         if (stringToIntFields != null && stringToIntFields.length > 0) {
             for (String stringToIntField : stringToIntFields) {
                 TypeConvertFunction function = new TypeConvertFunction(stringToIntField,
@@ -100,8 +173,7 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    private Node stringToLong(Node source, String[] stringToLongFields,
-            StandardizationStrategy addOrReplaceStringToLongFields) {
+    private Node stringToLong(Node source, String[] stringToLongFields) {
         if (stringToLongFields != null && stringToLongFields.length > 0) {
             for (String stringToLongField : stringToLongFields) {
                 TypeConvertFunction function = new TypeConvertFunction(stringToLongField,

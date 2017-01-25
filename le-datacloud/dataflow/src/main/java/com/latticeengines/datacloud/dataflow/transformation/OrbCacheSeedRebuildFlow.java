@@ -74,7 +74,8 @@ public class OrbCacheSeedRebuildFlow extends ConfigurableFlowBase<OrbCacheSeedRe
         orbCacheSeedGroup = orbCacheSeedGroup.renamePipe("OrbCacheSeedGroup");
         Node orbCacheSeed = orbCompany.join(new FieldList(config.getCompanyFileOrbNumField()), orbCacheSeedGroup,
                 new FieldList(config.getCompanyFileOrbNumField()), JoinType.LEFT);
-        orbCacheSeed = orbCacheSeed.discard(new FieldList(config.getCompanyFileDomainField()));
+        orbCacheSeed = orbCacheSeed.discard(new FieldList(config.getCompanyFileDomainField(),
+                "OrbCacheSeedGroup__" + config.getCompanyFileOrbNumField()));
         return orbCacheSeed;
     }
     

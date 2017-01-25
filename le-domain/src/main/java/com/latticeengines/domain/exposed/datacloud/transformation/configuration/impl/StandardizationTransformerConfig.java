@@ -3,35 +3,23 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StandardizationTransformerConfig extends TransformerConfig {
+    @JsonProperty("Sequence")
+    private StandardizationStrategy[] sequence;
+
     @JsonProperty("DomainFields")
     private String[] domainFields;
-
-    @JsonProperty("AddOrReplaceDomainFields")
-    private StandardizationStrategy addOrReplaceDomainFields = StandardizationStrategy.REPLACE;
 
     @JsonProperty("CountryFields")
     private String[] countryFields;
 
-    @JsonProperty("AddOrReplaceCountryFields")
-    private StandardizationStrategy addOrReplaceCountryFields = StandardizationStrategy.REPLACE;
-
     @JsonProperty("StateFields")
     private String[] stateFields;
-
-    @JsonProperty("AddOrReplaceStateFields")
-    private StandardizationStrategy addOrReplaceStateFields = StandardizationStrategy.REPLACE;
 
     @JsonProperty("StringToIntFields")
     private String[] stringToIntFields;
 
-    @JsonProperty("AddOrReplaceStringToIntFields")
-    private StandardizationStrategy addOrReplaceStringToIntFields = StandardizationStrategy.REPLACE;
-
     @JsonProperty("StringToLongFields")
     private String[] stringToLongFields;
-
-    @JsonProperty("AddOrReplaceStringToLongFields")
-    private StandardizationStrategy addOrReplaceStringToLongFields = StandardizationStrategy.REPLACE;
 
     @JsonProperty("DedupFields")
     private String[] dedupFields;
@@ -54,8 +42,24 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("MarkerField")
     private String markerField;
 
+    @JsonProperty("RenameFields")
+    private String[][] renameFields;    //String[][0] is old name, String[][1] is new name
+
+    @JsonProperty("RetainFields")
+    private String[] retainFields;
+
+    @JsonProperty("AddNullFields")
+    private String[] addNullFields;
+
+    @JsonProperty("AddNullFieldTypes")
+    private FieldType[] addNullFieldTypes;
+
     public enum StandardizationStrategy {
-        ADD, REPLACE
+        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD
+    }
+
+    public enum FieldType {
+        STRING, INT, LONG, BOOLEAN, FLOAT, DOUBLE
     }
 
     public String[] getDomainFields() {
@@ -66,28 +70,12 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.domainFields = domainFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceDomainFields() {
-        return addOrReplaceDomainFields;
-    }
-
-    public void setAddOrReplaceDomainFields(StandardizationStrategy addOrReplaceDomainFields) {
-        this.addOrReplaceDomainFields = addOrReplaceDomainFields;
-    }
-
     public String[] getCountryFields() {
         return countryFields;
     }
 
     public void setCountryFields(String[] countryFields) {
         this.countryFields = countryFields;
-    }
-
-    public StandardizationStrategy getAddOrReplaceCountryFields() {
-        return addOrReplaceCountryFields;
-    }
-
-    public void setAddOrReplaceCountryFields(StandardizationStrategy addOrReplaceCountryFields) {
-        this.addOrReplaceCountryFields = addOrReplaceCountryFields;
     }
 
     public String[] getStateFields() {
@@ -98,14 +86,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.stateFields = stateFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceStateFields() {
-        return addOrReplaceStateFields;
-    }
-
-    public void setAddOrReplaceStateFields(StandardizationStrategy addOrReplaceStateFields) {
-        this.addOrReplaceStateFields = addOrReplaceStateFields;
-    }
-
     public String[] getStringToIntFields() {
         return stringToIntFields;
     }
@@ -114,28 +94,12 @@ public class StandardizationTransformerConfig extends TransformerConfig {
         this.stringToIntFields = stringToIntFields;
     }
 
-    public StandardizationStrategy getAddOrReplaceStringToIntFields() {
-        return addOrReplaceStringToIntFields;
-    }
-
-    public void setAddOrReplaceStringToIntFields(StandardizationStrategy addOrReplaceStringToIntFields) {
-        this.addOrReplaceStringToIntFields = addOrReplaceStringToIntFields;
-    }
-
     public String[] getStringToLongFields() {
         return stringToLongFields;
     }
 
     public void setStringToLongFields(String[] stringToLongFields) {
         this.stringToLongFields = stringToLongFields;
-    }
-
-    public StandardizationStrategy getAddOrReplaceStringToLongFields() {
-        return addOrReplaceStringToLongFields;
-    }
-
-    public void setAddOrReplaceStringToLongFields(StandardizationStrategy addOrReplaceStringToLongFields) {
-        this.addOrReplaceStringToLongFields = addOrReplaceStringToLongFields;
     }
 
     public String[] getDedupFields() {
@@ -192,6 +156,46 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setMarkerField(String markerField) {
         this.markerField = markerField;
+    }
+
+    public String[][] getRenameFields() {
+        return renameFields;
+    }
+
+    public void setRenameFields(String[][] renameFields) {
+        this.renameFields = renameFields;
+    }
+
+    public String[] getRetainFields() {
+        return retainFields;
+    }
+
+    public void setRetainFields(String[] retainFields) {
+        this.retainFields = retainFields;
+    }
+
+    public StandardizationStrategy[] getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(StandardizationStrategy[] sequence) {
+        this.sequence = sequence;
+    }
+
+    public String[] getAddNullFields() {
+        return addNullFields;
+    }
+
+    public void setAddNullFields(String[] addNullFields) {
+        this.addNullFields = addNullFields;
+    }
+
+    public FieldType[] getAddNullFieldTypes() {
+        return addNullFieldTypes;
+    }
+
+    public void setAddNullFieldTypes(FieldType[] addNullFieldTypes) {
+        this.addNullFieldTypes = addNullFieldTypes;
     }
 
 }
