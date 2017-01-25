@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
-import com.latticeengines.domain.exposed.validation.ValidationExpression;
 import com.latticeengines.ulysses.service.AttributeService;
 
 import io.swagger.annotations.Api;
@@ -28,18 +27,15 @@ public class AttributeResource {
 
     @RequestMapping(value = "/primary", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Provides all matching attrinutes that are supported for ModelMapping or Scoring or Company Lookup API"
-    )
+    @ApiOperation(value = "Provides all matching attrinutes that are supported for ModelMapping or Scoring or Company Lookup API")
     public List<PrimaryField> getPrimaryAttributes() {
-    	return attributeService.getPrimaryFields();
+        return attributeService.getPrimaryFields();
     }
 
     @RequestMapping(value = "/primary/validation-expression", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validation Expression with different business rules, to invoke Scoring API / Company Profile API / enforcing Model Mapping "
-    )
-    public ValidationExpression getValidationExpression() {
-        return attributeService.getPrimaryFieldValidationExpression();
+    @ApiOperation(value = "Validation Expression with different business rules, to invoke Scoring API / Company Profile API / enforcing Model Mapping ")
+    public String getSimplifiedValidationExpression() {
+        return "((Website||Email||CompanyName)&&(Id))";
     }
-    
 }

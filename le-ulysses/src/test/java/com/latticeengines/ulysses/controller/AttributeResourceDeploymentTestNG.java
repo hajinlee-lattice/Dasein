@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -14,13 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
-import com.latticeengines.domain.exposed.validation.ValidationExpression;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase {
 
     private static final Logger log = Logger.getLogger(AttributeResourceDeploymentTestNG.class);
-    
+
     private static final ObjectMapper OM = new ObjectMapper();
 
     private String getAttributeResourceUrl() {
@@ -49,13 +47,11 @@ public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBa
     }
 
     @Test(groups = "deployment")
-    public void testGetPrimaryAttributesValidationExpression() {
+    public void testGetPrimaryAttributesValidationExpressionSimplified() {
         String url = getAttributeResourceUrl() + "/primary/validation-expression";
-        ValidationExpression expression = getOAuth2RestTemplate().getForObject(url, ValidationExpression.class);
+        String expression = getOAuth2RestTemplate().getForObject(url, String.class);
         log.info("Primary Fields Expression: " + expression);
         Assert.assertNotNull(expression);
-        Assert.assertNotNull(expression.getCondition());
-        Assert.assertTrue(CollectionUtils.isNotEmpty(expression.getExpressions())
-                || CollectionUtils.isNotEmpty(expression.getFields()));
+        Assert.assertEquals(expression, "((Website||Email||CompanyName)&&(Id))");
     }
 }
