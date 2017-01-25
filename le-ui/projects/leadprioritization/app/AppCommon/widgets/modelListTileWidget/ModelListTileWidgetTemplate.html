@@ -20,7 +20,14 @@
                     <a href="javascript:void(0)">Activate</a>
                     <i class="fa {{Activating ? 'fa-spinner fa-pulse fa-fw' : 'fa-play-circle-o'}}"></i>
                 </li>
-
+                <!-- <li ng-if="isNotPmmlModel">
+                    <a ui-sref="home.model.ratings({ modelId: '{{ data.Id | escape }}' })">
+                        <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</span>
+                        <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
+                            <span class="ico ico-ratings ico-light-gray"></span>
+                        </span>
+                    </a>
+                </li> -->
                 <li 
                         data-ng-if="mayChangeModelNames"
                         data-ng-click="modelNameEditClick($event)">

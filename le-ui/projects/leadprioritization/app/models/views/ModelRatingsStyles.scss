@@ -1,20 +1,83 @@
 .model-ratings {
+	.columns.twelve {
+	    width: 1134px;
+	}
 	hr {
 		margin-top: 30px;
 		border: solid 1px #e8e4e4;
 	}
 	h3 {
 		margin: 30px 0 20px;
-		font-family: ProximaNova;
 		font-size: 20px;
 		font-weight: 500;
+		text-transform: none;
 		text-align: center;
 		color: #222222;
+		background: url('/assets/images/ico-ratings-published.png') 34% center no-repeat;
 	}
+	.ratings-chart {
+		position: relative;
+		height: 124px;
+		&:after {
+			display: table;
+			clear: both;
+			content: "";	
+		}
+		.data {
+			position: absolute;
+			bottom: 8px;
+			left: 19px;
+			display: flex;
+			align-items: flex-end;
+			z-index: 2;	
+			li {
+				bottom: 0;
+				width: 34.5px;
+				margin-right: 1px;
+				margin-left: 1px;
+				&.bucket-one {
+	  				background-color: rgba(112,187,86,0.5);
+					border-top: rgba(112,187,86,1.0) solid 3px;
+				}
+				&.bucket-two {
+	  				background-color: rgba(255, 185, 61, 0.5);
+					border-top: rgba(255, 185, 61, 1.0) solid 3px;
+				}
+				&.bucket-three {
+	  				background-color: rgba(245,108,53,0.5);
+					border-top: rgba(245,108,53,1.0) solid 3px;
+				}
+				&.bucket-four {
+	  				background-color: rgba(214,43,48,0.5);
+					border-top: rgba(214,43,48,1.0) solid 3px;
+				}
+				&.bucket-five {
+	  				background-color: rgba(73,73,73,0.5);
+					border-top: rgba(73,73,73,1.0) solid 3px;
+				}
+				&.bucket-six {
+	  				background-color: rgba(73,73,73,0.5);
+					border-top: rgba(73,73,73,1.0) solid 3px;
+				}
+			}
+		}
+	}
+}
+.bucket {
+	position: absolute;
+	width: 80px;
+	height: 134px;
+	left: 200px;
+	bottom: 0;
+	border-left: #000 solid 1px;
 }
 
 .chart-header {
-	position: relative;
+	&:after {
+		display: table;
+		clear: both;
+		content: "";	
+	}
 	.list-data {
 		font-size: 18px;
 		font-weight: normal;
@@ -24,6 +87,100 @@
 		}
 	}
 }
+
+.bar-chart {
+	margin: 26px 0 34px;
+	&:after {
+		display: table;
+		clear: both;
+		content: "";
+	}
+}
+
+.sliders-container {
+	width: 18px;
+	background: #e8e8e8;
+	border: #dedada solid 1px;
+	float: right;
+	height: 117px;
+	position: relative;
+	z-index: 3;
+}
+.slider {
+	border-left: #1c3d59 solid 1px;
+	width: 1px;
+	position: absolute;
+	height: 117px;
+	z-index: 4;
+	.handle {
+		position: absolute;
+		bottom: 0;
+		left: -6px;
+		width: 12px;
+		height: 15px;
+		border-radius: 1px;
+		background-image: linear-gradient(to bottom, #989898, #3b3b3b);
+		box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.36);
+		border: solid 1px #333333;
+		&:hover {
+			cursor: col-resize;
+		}
+	}
+
+
+	&:nth-child(1) {
+		left: -989px;
+	}
+	&:nth-child(2) {
+		left: -806px;
+	}
+	&:nth-child(3) {
+		left: -661px;
+	}
+	&:nth-child(4) {
+		right: 8px;
+	}
+}
+
+.horizontal-axis {
+	position: absolute;
+	bottom: 0;
+	left: 20px;
+	display: flex;
+	li {
+		width: 1px;
+		height: 6px;
+		margin: 0 11.42% 0 0;
+		border-left: #d7d7d7 solid 1px;
+		font-size: 15px;
+		span {
+			margin: 0 0 -10px -4px;
+		}
+	}
+}
+.vertical-axis {
+	bottom: 8px;
+	width: 96.2%;
+	margin-left: 20px;
+	li {
+		margin-bottom: 11px;
+		height: 20px;
+		position: relative;
+		&:nth-child(1), &:nth-child(2) {
+			border-top: #e8e8e8 solid 1px;
+		}
+		&:last-of-type {
+			border-top: #242424 dashed 1px;
+		}
+		span {
+			position: absolute;
+			left: -18px;
+			top: -12px;
+		}
+	}
+}
+
+
 
 .bucket-tiles {
 	display: 					flex;
@@ -53,9 +210,9 @@
 	   	width: 14%;
 	   	padding: 6px 18px;
     	margin: 10px;
-	   	background-color: #ffffff;
-			border: solid 1px #e8e8e8;
-			text-align: center;
+    	background: url('/assets/images/ico-ratings-published.png') 97% 4px/18px no-repeat;
+		border: solid 1px #e8e8e8;
+		text-align: center;
     	&:nth-child(1){
     		.bucket-label{
     			background-color: #70bb56;
@@ -81,6 +238,27 @@
     			background-color: #494949;
     		}
     	}
+    }
+    &.large-buckets {
+    	li {
+    		padding: 12px 18px;
+    		background: none;
+    		background-color: #ffffff;
+    	}
+    	.bucket-label {
+	    	padding: 5px 13px 3px;
+	    	font-size: 18px;
+	    }
+	    dt {
+			font-size: 14px;
+	    }
+	    dd {
+			font-size: 28px;
+			line-height: 28px;
+	    }
+	   	dd.lift {
+			font-size: 30px;
+	    }	
     }
 
     .bucket-label {
@@ -116,26 +294,6 @@
 		font-size: 24px;
 		font-weight: bold;
 		color: #222222;
-    }
-
-    &.working-buckets {
-    	li {
-    		padding: 12px 18px;
-    	}
-    	.bucket-label {
-	    	padding: 5px 13px 3px;
-	    	font-size: 18px;
-	    }
-	    dt {
-			font-size: 14px;
-	    }
-	    dd {
-			font-size: 28px;
-			line-height: 28px;
-	    }
-	   	dd.lift {
-			font-size: 30px;
-	    }	
     }
 }
 

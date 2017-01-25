@@ -247,15 +247,33 @@ angular
                 pageTitle: ''
             },
             views: {
-                resolve: {
-                    ModelData: function($q) {
-                    }
-                },
                 "summary@": {
                     controller: '',
                     template: ''
                 },
                 "main@": {
+                    resolve: {
+                        ABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                            var deferred = $q.defer(),
+                                id = $stateParams.modelId;
+
+                            ModelRatingsService.GetABCDBuckets(id).then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        BucketSummary: function($q, $stateParams, ModelRatingsService) {
+                            var deferred = $q.defer(),
+                                id = $stateParams.modelId;
+
+                            ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
                     controller: 'ModelRatingsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsView.html'

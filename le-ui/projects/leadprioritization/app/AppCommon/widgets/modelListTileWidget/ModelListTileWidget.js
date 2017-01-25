@@ -34,6 +34,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $scope.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             $scope.mayEditModelsClass = $scope.mayChangeModelNames ? "model-name-editable" : "";
 
+            $scope.isNotPmmlModel = $scope.data.ModelFileType !== 'PmmlModel';
             $scope.canRemodel = ($scope.data.ModelFileType !== 'PmmlModel') && !$scope.data.Uploaded;
             $scope.menuFlag = !!$scope.data.ConflictWithOptionalRules;
 

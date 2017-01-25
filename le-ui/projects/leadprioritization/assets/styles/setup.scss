@@ -1,4 +1,4 @@
-#setup {
+  #setup {
   /*
   position: absolute;
   top: 44px;
@@ -6,78 +6,66 @@
   right: 0;
   bottom: 34px;
   */
+  .setup-sidebar {
+    display: none;
+    /*
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom:0;
+    width: 240px;
+    background: white;
+    */
+    .fa {
+      width: 12px;
+    }
+    .nav-stacked > li {
+      margin-top: 0;
+    }
+    .ident {
+      margin-left: 16px;
+    }
+  }
+  .setup-main-panel {
+    /*
+    position: absolute;
+    left: 243px;
+    top: 0;
+    right: 0;
+    bottom:0;
+    */
+    padding: 10px;
+    background: white;
+    .manage-fields {
+      position: relative;
+      .title {
+        height: 50px;
+        margin-bottom: 10px;
+        h2 {
+          display: inline-block;
+          max-width: 580px;
+          margin: 4px 0;
+        }
+        .button-area {
+          float: right;
+          /* margin-top: 10px; */
+          button {
+            margin: 0 16px 0 0;
+            &.disabled {
+              background: #999;
+              border: 1px solid #999;
+            }
+          }
+        }
+      }
+    }
+  }
 }
-
-#setup .setup-sidebar {
-  display: none;
-  /*
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom:0;
-  width: 240px;
-  background: white;
-  */
-}
-
-#setup .setup-sidebar .fa {
-  width: 12px;
-}
-
-#setup .setup-sidebar .nav-stacked > li {
-  margin-top: 0;
-}
-
 #setup .setup-sidebar li.active > a,
 #setup .setup-sidebar li.active > a:focus,
 #setup .setup-sidebar li.active > a:hover {
   color: white;
   background: #337ab7;
-}
-
-#setup .setup-sidebar .ident {
-  margin-left: 16px;
-}
-
-#setup .setup-main-panel {
-  /*
-  position: absolute;
-  left: 243px;
-  top: 0;
-  right: 0;
-  bottom:0;
-  */
-  padding: 10px;
-  background: white;
-}
-
-#setup .setup-main-panel .manage-fields {
-  position: relative;
-}
-
-#setup .manage-fields .title {
-  height: 50px;
-  margin-bottom: 10px;
-}
-
-#setup .manage-fields .title h2 {
-  display: inline-block;
-  max-width: 580px;
-  margin: 4px 0;
-}
-
-#setup .manage-fields .title .button-area {
-  float: right;
-  /* margin-top: 10px; */
-}
-
-#setup .manage-fields .title .button-area button {
-  margin: 0 16px 0 0;
-}
-
-#setup .manage-fields .title .button-area button.disabled {
-  background: #999;
-  border: 1px solid #999;
 }
 
 #setup .manage-fields .title #manage-fields-build-model {
