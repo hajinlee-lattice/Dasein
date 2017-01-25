@@ -1,10 +1,7 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                 .renamePipe("nullDomains");
         last = last.filter(String.format("%s != null && !%s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN));
 
-        if (!getPublicDomainResolutionFields(last).isEmpty()) {
+        if (!DataFlowUtils.getPublicDomainResolutionFields(last).isEmpty()) {
 
             Node publicDomain = addSource(parameters.publicDomain);
             publicDomain = DataFlowUtils.normalizeDomain(publicDomain, InterfaceName.Domain.name(), DOMAIN);
@@ -52,8 +49,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                     true, //
                     false);
 
-            publicDomains = publicDomains.discard(new FieldList(DOMAIN));
-            publicDomains = addHash(publicDomains, DOMAIN);
             publicDomains = publicDomains.groupByAndLimit(new FieldList(DOMAIN), //
                     new FieldList(SORT), //
                     1, //
@@ -82,23 +77,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         return last;
     }
 
-    private Node addHash(Node publicDomains, String hashFieldName) {
-        List<String> fields = getPublicDomainResolutionFields(publicDomains);
-
-        if (fields.isEmpty()) {
-            throw new RuntimeException("Could not find any fields for use in public domain resolution logic");
-        }
-
-        List<String> exprFields = new ArrayList<>();
-        for (int i = 0; i < fields.size(); ++i) {
-            exprFields.add(String.format("(%s != null ? %s : new String())", fields.get(i), fields.get(i)));
-        }
-
-        String expr = "(" + StringUtils.join(exprFields, "+") + ").hashCode()";
-
-        return publicDomains.addFunction(expr, new FieldList(fields), new FieldMetadata(hashFieldName, Integer.class));
-    }
-
     private Node addSortColumn(Node last, Node source, String field) {
         FieldMetadata targetField = new FieldMetadata(field, String.class);
 
@@ -116,20 +94,4 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         }
     }
 
-    private List<String> getPublicDomainResolutionFields(Node node) {
-        List<String> fields = new ArrayList<>();
-        fields.add(InterfaceName.City.name());
-        fields.add(InterfaceName.CompanyName.name());
-        fields.add(InterfaceName.State.name());
-        fields.add(InterfaceName.Country.name());
-
-        Iterator<String> iter = fields.iterator();
-        while (iter.hasNext()) {
-            if (!node.getFieldNames().contains(iter.next())) {
-                iter.remove();
-            }
-        }
-
-        return fields;
-    }
 }

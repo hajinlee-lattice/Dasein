@@ -1,9 +1,14 @@
 package com.latticeengines.serviceflows.dataflow.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -15,6 +20,8 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
+    private static final Log log = LogFactory.getLog(DataFlowUtils.class);
+
     public static Node extractDomain(Node last, String columnName) {
 
         if (last.getFieldNames().contains(InterfaceName.Domain.toString())) {
@@ -25,9 +32,42 @@ public class DataFlowUtils {
             last = DataFlowUtils.extractDomainFromEmail(last, InterfaceName.Email.toString(), columnName);
             last = DataFlowUtils.normalizeDomain(last, columnName);
         } else {
-            throw new RuntimeException("Need a website, domain, or email column");
+            log.info("No Domain, Website, or Email column found.  Using hash");
+            last = addHash(last, columnName, getPublicDomainResolutionFields(last));
         }
         return last;
+    }
+
+    public static Node addHash(Node node, String hashFieldName, List<String> sourceFields) {
+        if (sourceFields.isEmpty()) {
+            throw new RuntimeException("Could not find any fields to create a hash to act in place of a domain");
+        }
+
+        List<String> exprFields = new ArrayList<>();
+        for (int i = 0; i < sourceFields.size(); ++i) {
+            exprFields.add(String.format("(%s != null ? %s : new String())", sourceFields.get(i), sourceFields.get(i)));
+        }
+
+        String expr = "Integer.toString((" + StringUtils.join(exprFields, "+") + ").hashCode())";
+
+        return node.addFunction(expr, new FieldList(sourceFields), new FieldMetadata(hashFieldName, String.class));
+    }
+
+    public static List<String> getPublicDomainResolutionFields(Node node) {
+        List<String> fields = new ArrayList<>();
+        fields.add(InterfaceName.City.name());
+        fields.add(InterfaceName.CompanyName.name());
+        fields.add(InterfaceName.State.name());
+        fields.add(InterfaceName.Country.name());
+
+        Iterator<String> iter = fields.iterator();
+        while (iter.hasNext()) {
+            if (!node.getFieldNames().contains(iter.next())) {
+                iter.remove();
+            }
+        }
+
+        return fields;
     }
 
     public static Node normalizeDomain(Node last, String fieldName) {
