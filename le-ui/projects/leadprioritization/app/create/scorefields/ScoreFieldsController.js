@@ -34,14 +34,20 @@ angular
             vm.requiredFieldsMissing['CompanyName'] = true;
         }
 
-        var fieldMappingsMappedFieldMap = {};
+        var fieldMappingsMap = {};
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
-            fieldMappingsMappedFieldMap[fieldMapping.mappedField] = fieldMapping;
+            if (fieldMapping.mappedField) {
+                fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+            }
+
+            if (!fieldMapping.userField && fieldMapping.mappedField) {
+                fieldMapping.userField = vm.ignoredFieldLabel;
+            }
         });
 
         vm.standardFieldsList.forEach(function(field) {
-            if (fieldMappingsMappedFieldMap[field]) {
-                vm.standardFieldMappings[field] = fieldMappingsMappedFieldMap[field];
+            if (fieldMappingsMap[field]) {
+                vm.standardFieldMappings[field] = fieldMappingsMap[field];
             } else {
                 vm.standardFieldMappings[field] = {
                     fieldType: null,
@@ -49,12 +55,6 @@ angular
                     mappedToLatticeField: true,
                     userField: vm.ignoredFieldLabel
                 };
-            }
-        });
-
-        FieldDocument.fieldMappings.forEach(function (fieldMapping) {
-            if (!vm.standardFieldMappings[fieldMapping.mappedField]) {
-                vm.additionalFieldMappings[fieldMapping.userField] = fieldMapping;
             }
         });
 
@@ -76,15 +76,12 @@ angular
         }
 
         if (current) {
-            for (var additionalField in vm.additionalFieldMappings) {
-                var mapping = vm.additionalFieldMappings[additionalField];
-                if ((mapping.mappedField !== current.mappedField &&
-                    mapping.userField === current.userField) ||
-                    mappedSet[mapping.userField]) {
+            FieldDocument.fieldMappings.forEach(function(mapping) {
+                if (mapping.mappedField !== current.mappedField &&
+                    mapping.userField === current.userField) {
                     mapping.userField = vm.ignoredFieldLabel;
                 }
-
-            }
+            });
         }
 
         FileHeaders.forEach(function(userField, index) {
@@ -118,6 +115,21 @@ angular
 
     vm.clickNext = function() {
         vm.NextClicked = true;
+
+        var fieldMappingsMap = {};
+        FieldDocument.fieldMappings.forEach(function(fieldMapping) {
+            if (fieldMapping.mappedField && fieldMapping.mappedField !== vm.ignoredFieldLabel) {
+                fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
+            }
+        });
+
+        FieldDocument.fieldMappings.forEach(function (fieldMapping) {
+            if (!vm.standardFieldMappings[fieldMapping.mappedField]) {
+                if (fieldMapping.mappedField && fieldMapping.mappedField !== vm.ignoredFieldLabel) {
+                    vm.additionalFieldMappings[fieldMapping.mappedField] = fieldMappingsMap[fieldMapping.mappedField];
+                }
+            }
+        });
     };
 
     vm.clickNextScore = function() {

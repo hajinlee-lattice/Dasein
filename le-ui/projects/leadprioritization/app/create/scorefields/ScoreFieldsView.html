@@ -133,7 +133,7 @@
 										ng-change="vm.changeField(field)"
 										ng-class="{'required': vm.requiredFieldsMissing[field.mappedField], 'disabled': (field.userField == vm.ignoredFieldLabel && !vm.requiredFieldsMissing[field.mappedField])}">
 									<option value="{{ vm.ignoredFieldLabel }}"
-											ng-if="field.userField && field.userField != vm.ignoredFieldLabel""
+											ng-if="field.userField && field.userField !== vm.ignoredFieldLabel"
 											ng-selected="!field.userField">
 										{{ vm.ignoredFieldLabel }}
 									</option>
