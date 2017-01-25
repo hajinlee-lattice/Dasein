@@ -24,7 +24,7 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
     @Override
     public Node construct(DataFlowParameters parameters) {
         Node source = addSource("Source");
-        source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
+        source = source.apply(new DomainCleanupFunction(domainField, true), new FieldList(domainField),
                 new FieldMetadata(domainField, String.class));
 
         source = source.apply(new DateToTimestampFunction("DateLastVerified"), new FieldList("DateLastVerified"),

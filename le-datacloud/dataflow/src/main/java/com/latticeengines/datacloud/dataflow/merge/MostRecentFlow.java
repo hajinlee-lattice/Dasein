@@ -25,7 +25,7 @@ public class MostRecentFlow extends TypesafeDataFlowBuilder<MostRecentDataFlowPa
         String timestampField = parameters.getTimestampField();
         String domainField = parameters.getDomainField();
         if (StringUtils.isNotEmpty(domainField)) {
-            source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
+            source = source.apply(new DomainCleanupFunction(domainField, true), new FieldList(domainField),
                     new FieldMetadata(domainField, String.class));
         }
         source = source.apply(new OldDataCleanupFunction(timestampField, parameters.getEarliest()), new FieldList(

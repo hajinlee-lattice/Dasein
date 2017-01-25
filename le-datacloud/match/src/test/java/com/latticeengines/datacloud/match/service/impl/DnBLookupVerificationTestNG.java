@@ -73,7 +73,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
         // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME, true, true);
-        prepareFortune1000InputData(FORTUNE1000_FILENAME, false, false);
+        prepareFortune1000InputData(FORTUNE1000_FILENAME, true, true);
         // Submit to DnB bulk match
         DnBBatchMatchContext batchContext = prepareBulkMatchInput();
         batchContext = dnBBulkLookupDispatcher.sendRequest(batchContext);
@@ -177,10 +177,12 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             return true;
         }
         log.info("-------------------------------------");
-        log.info(String.format("Name: %s, CountryCode: %s, State: %s, City: %s",
+        log.info(String.format("Name: %s, CountryCode: %s, StateCode: %s, City: %s",
                 contextFromBatch.getInputNameLocation().getName(),
                 contextFromBatch.getInputNameLocation().getCountryCode(),
-                contextFromBatch.getInputNameLocation().getState(), contextFromBatch.getInputNameLocation().getCity()));
+                LocationUtils.getStardardStateCode(contextFromBatch.getInputNameLocation().getCountry(),
+                        contextFromBatch.getInputNameLocation().getState()),
+                contextFromBatch.getInputNameLocation().getCity()));
         log.info(String.format("Duns: %s(realtime) %s(bulk)", contextFromRealtime.getDuns(),
                 contextFromBatch.getDuns()));
         log.info(String.format("DnBReturnCode: %s(realtime) %s(bulk)",

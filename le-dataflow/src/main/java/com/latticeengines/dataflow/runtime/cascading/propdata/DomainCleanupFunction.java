@@ -16,8 +16,8 @@ public class DomainCleanupFunction extends CleanupFunction implements Function
     private static final long serialVersionUID = -4470533364538287281L;
     private String domainField;
 
-    public DomainCleanupFunction(String domainField) {
-        super(new Fields(domainField), true);
+    public DomainCleanupFunction(String domainField, boolean removeNull) {
+        super(new Fields(domainField), removeNull);
         this.domainField = domainField;
     }
 
