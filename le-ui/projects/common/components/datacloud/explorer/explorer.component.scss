@@ -7,9 +7,7 @@
 
     .filters {
         @include flex-container;
-        border-bottom: 1px solid #d0d1d0;
         padding-bottom: 10px;
-        margin-bottom: 20px;
         margin-right: 14px;
         input[type="radio"], input[type="checkbox"] {
             margin: 0;
@@ -373,6 +371,15 @@
         display: inline-block;
     }
 
+    &:not(.section-browse) {
+        .enrichments {
+            .box {
+                .box-inner {
+                    padding-bottom: 3.5em;
+                }
+            }
+        }
+    }
     .enrichments {
         @include flex-container;
         -webkit-flex-wrap: wrap;
@@ -390,7 +397,7 @@
                 position: relative;
                 text-align: center;
                 padding: 1em;
-                padding-bottom: 3.5em;
+                //padding-bottom: 3.5em;
                 background-color: white;
                 //height: 200px;
                 .header {
@@ -457,7 +464,7 @@
                     left: 0;
                     right: 0;
                     bottom: 1.5em;
-                    .toggle {
+                    .control {
                         @include flex-item(1 0 auto);
                         @include flex-container;
                         position: relative;
@@ -468,6 +475,7 @@
                             -ms-flex-item-align: center;
                             align-self: center;
                             margin: 0 auto;
+                            min-width: 170px;
 
                             position: relative;
                             padding: 3px 9px;
@@ -481,6 +489,10 @@
                             span {
                                  padding-right: 20px;
                             }
+                        }
+                    }
+                    .enrich {
+                        button {
                             &:after {
                                 @include font-awesome-inline("\f00d");
                                 position: absolute;
@@ -503,6 +515,55 @@
                                     right: auto;
                                     color: #6fbe4a;
                                     border-right: 1px solid #bbb;
+                                }
+                            }
+                        }
+                    }
+                    .highlight {
+                        button {
+                            font-size: 10px;
+                            position: relative;
+                            text-transform: none;
+                            text-align: left;
+                            padding: 2px 5px;
+                            &:after {
+                                @include font-awesome-inline("\f0d7");
+                                position: absolute;
+                                top: 0;
+                                bottom: 0;
+                                left: auto;
+                                right: 0;
+                                background-color: #fff;
+                                padding: 3px 5px;
+                            }
+                            &.enabled {
+                                background-color: #fafafa;
+                                span {
+                                    padding: 0;
+                                    padding-left: 20px;
+                                }
+                            }
+                            .highlightOptions {
+                                display: none;
+                                position: absolute;
+                                top: 100%;
+                                left: -1px;
+                                right: -1px;
+                                background: white;
+                                border: 1px solid #bbb;
+                                z-index: 1;
+                                padding-top: 10px;
+                                border-radius: 0 0 1px 1px;
+                                &.open {
+                                    display: block;
+                                }
+                                li {
+                                    margin: 3px 5px;
+                                    &.note {
+                                        border-top: 1px solid #d0d1d0;
+                                        padding: 8px 0;
+                                        margin-top: 9px;
+                                    }
                                 }
                             }
                         }

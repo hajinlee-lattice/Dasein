@@ -149,6 +149,10 @@ angular.module('common.datacloud.explorer', [
 
                 vm.queryInProgress = false;
             }, 333);
+
+            if(vm.section != 'browse') {
+                vm.category = vm.categories[0];
+            }
         });
 
         var download_buttons = angular.element('.dropdown-container > h2');
@@ -170,9 +174,9 @@ angular.module('common.datacloud.explorer', [
 
         angular.element(document).click(function(event) {
             var target = angular.element(event.target),
-            el = angular.element('.dropdown-container ul.dropdown'),
-            has_parent = target.parents().is('.dropdown-container'),
-            is_visible = el.is(':visible');
+                el = angular.element('.dropdown-container ul.dropdown, button ul.button-dropdown'),
+                has_parent = target.parents().is('.dropdown-container'),
+                is_visible = el.is(':visible');
             if(!has_parent) {
                 el.removeClass('open');
                 el.siblings('.button.active').removeClass('active');
@@ -404,6 +408,7 @@ angular.module('common.datacloud.explorer', [
         if (subcategories.length <= 1) {
             subcategoriesExclude.push(category);
         }
+        vm.filterEmptySubcategories();
     }
 
     vm.getTileTableItems = function(category, subcategory) {
@@ -718,9 +723,9 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.categoryIcon = function(category){
-        var path = '/assets/images/enrichments/',
-            category = subcategoryRenamer(category, '-'),
-            icon = 'ico-attr-' + category + '.png';
+        var path = '/assets/images/enrichments/subcategories/',
+            category = subcategoryRenamer(category, ''),
+            icon = category + '.png';
 
         return path + icon;
     }
@@ -826,6 +831,7 @@ angular.module('common.datacloud.explorer', [
                 addUniqueToArray(subcategoriesExclude, vm.category);
                 vm.subcategory = newCategories[0];
             } else {
+
                 if (subcategoriesExclude.includes(vm.category)) {
                     vm.subcategory = '';
                 }

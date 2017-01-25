@@ -19,19 +19,37 @@
             border-right: 1px solid #d0d1d0;
             border-bottom: 1px solid #d0d1d0;
             padding: 14px 20px;
+            &:last-child {
+                border-right: 0;
+            }
             &.active {
                 border-top-color: orange;
                 border-bottom-color: transparent;
                 background: #fafafa;
             }
             h2, h3 {
-                font-size: 100%;
+                font-weight: normal;
+            }
+            h2 {
+                font-size: 14px;
             }
             h3 {
+                font-size: 18px;
                 color: white;
             }
             .more-info {
-                padding: 1px 5px;
+                padding: 0;
+                text-align: center;
+                width: 12px;
+                height: 12px;
+                position: realtive;
+                top: -1px;
+                .tooltip_ {
+                    text-align: left;
+                    h3 {
+                        margin-bottom: 25px;
+                    }
+                }
             }
         }
     }

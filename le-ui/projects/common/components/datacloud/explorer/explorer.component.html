@@ -1,4 +1,4 @@
-<div class="enrichment-wizard-container container">
+<div class="enrichment-wizard-container container section-{{vm.section}}">
         <div class="status-alert-box {{vm.status_alert.type}}" ng-show="vm.status_alert.show">
             <div class="icon"></div>
             <div class="message" ng-bind-html="vm.status_alert.message"></div>
@@ -22,7 +22,7 @@
                         <i class="fa fa-filter"></i>
                     </h2>
                     <ul class="dropdown">
-                        <li><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
+                        <li ng-if="vm.section != 'browse'"><input type="checkbox" id="enabled" name="enabled" ng-model="vm.metadata.toggle.show.selected" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.selected" /> <label for="enabled">Enabled only</label></li>
                         <li><input type="checkbox" id="premium_show" name="premium_show" ng-model="vm.metadata.toggle.show.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.premium" ng-disabled="vm.metadata.toggle.hide.premium" /> <label for="premium_show">Premium only</label></li>
                         <li><input type="checkbox" id="premium_hide" name="premium_hide" ng-model="vm.metadata.toggle.hide.premium" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.hide.premium" ng-disabled="vm.metadata.toggle.show.premium" /> <label for="premium_hide">Non-Premium only</label></li>
                         <li ng-if="vm.show_internal_filter"><input type="checkbox" id="internal" name="internal" ng-model="vm.metadata.toggle.show.internal" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.internal" /> <label for="internal">Include Internal Attributes</label></li>
@@ -210,7 +210,7 @@
         </div>
 
         <div class="enrichments-container" ng-if="(!vm.subcategories[vm.category].length || vm.subcategory) && vm.category">
-            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategory">
+            <div class="subcategory-back" ng-if="vm.subcategories[vm.category].length && vm.subcategories[vm.category].length > 1 && vm.subcategory">
                 <span ng-click="vm.subcategory = ''; vm.metadata.current = 1;">Back</span> | {{vm.subcategory}}
             </div>
 
@@ -260,18 +260,28 @@
                             {{ enrichment.Description }}
                         </span>
 
-                        <div class="controls" ng-if="!vm.lookupMode">
-                            <div class="toggle" ng-if="vm.section == 'edit'">
+                        <ul class="controls noselect" ng-if="!vm.lookupMode">
+                            <li class="control enrich" ng-if="vm.section == 'edit'">
                                 <button class="button" 
                                         ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}" 
                                         ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
                                     <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
                                 </button>
-                            </div>
-                            <div class="toggle" ng-if="vm.section == 'team'">
-                                highlighting
-                            </div>
-                        </div>
+                            </li>
+                            <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
+                                <button class="button" 
+                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open}" 
+                                        ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
+                                    <span>{{openHighlighter[enrichment.FieldName].state || 'Highlight'}}</span>
+                                    <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
+                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'highlighted'">Highlight</li>
+                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'Enabled for sales team'">Enbable for sales team</li>
+                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'Disbled for sales team'">Disable for sales team</li>
+                                        <li class="note">Either selection will clear highlights</li>
+                                    </ul>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </li>
                 <li class="load-status" ng-show="!filteredList.length">
