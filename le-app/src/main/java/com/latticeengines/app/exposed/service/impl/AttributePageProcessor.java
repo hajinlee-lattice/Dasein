@@ -92,10 +92,9 @@ public class AttributePageProcessor {
         }
     }
 
-    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy,
-            SelectedAttrEntityMgr selectedAttrEntityMgr, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
-            Boolean considerInternalAttributes) {
+    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy, SelectedAttrEntityMgr selectedAttrEntityMgr,
+            String attributeDisplayNameFilter, Category category, String subcategory, Boolean onlySelectedAttributes,
+            Integer offset, Integer max, Boolean considerInternalAttributes) {
         this.columnMetadataProxy = columnMetadataProxy;
         this.selectedAttrEntityMgr = selectedAttrEntityMgr;
         this.attributeDisplayNameFilter = attributeDisplayNameFilter;
@@ -108,10 +107,15 @@ public class AttributePageProcessor {
     }
 
     public List<LeadEnrichmentAttribute> getPage() {
+        return getPage(false);
+    }
+
+    public List<LeadEnrichmentAttribute> getPage(boolean shouldSkipSelectedAttr) {
         String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment, //
                 currentDataCloudVersion);
-        List<SelectedAttribute> selectedAttributes = selectedAttrEntityMgr.findAll();
+        List<SelectedAttribute> selectedAttributes = shouldSkipSelectedAttr ? new ArrayList<>()
+                : selectedAttrEntityMgr.findAll();
         return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
@@ -153,8 +157,8 @@ public class AttributePageProcessor {
 
                 if (subcategory != null //
                         && (column.getSubcategory() == null //
-                        || (column.getSubcategory() != null //
-                        && !subcategory.equals(column.getSubcategory())))//
+                                || (column.getSubcategory() != null //
+                                        && !subcategory.equals(column.getSubcategory())))//
                 ) {
                     continue;
                 }
