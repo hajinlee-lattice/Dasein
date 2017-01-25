@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -45,6 +46,9 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private SourceFileService sourceFileService;
 
+    @Autowired
+    private PlsFeatureFlagService plsFeatureFlagService;
+
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
 
@@ -59,7 +63,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         TransformationGroup transformationGroup;
         String originalTransformationGroup = getTransformationGroupNameForModelSummary(modelSummary);
         if (parameters.enableTransformation() && originalTransformationGroup.equals("none")) {
-            transformationGroup = getTransformationGroupFromZK();
+            transformationGroup = plsFeatureFlagService.getTransformationGroupFromZK();
         } else if (parameters.enableTransformation()) {
             transformationGroup = TransformationGroup.fromName(originalTransformationGroup);
         } else {
@@ -109,8 +113,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .trainingTableName(cloneTableName) //
                 .transformationGroup(transformationGroup) //
-                .enableV2Profiling(isV2ProfilingEnabled() || modelSummary.getModelSummaryConfiguration()
-                        .getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //
+                .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled() || modelSummary
+                        .getModelSummaryConfiguration().getBoolean(ProvenancePropertyName.IsV2ProfilingEnabled, false)) //
                 .sourceModelSummary(modelSummary) //
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupDataFlowParams(new DedupEventTableParameters(cloneTableName, "PublicDomain",
@@ -118,7 +122,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dedupFlowExtraSources(extraSources) //
                 .matchClientDocument(matchClientDocument) //
                 .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
-                .treatPublicDomainAsNormalDomain(false) //TODO: hook up to UI
+                .treatPublicDomainAsNormalDomain(false) // TODO: hook up to UI
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .skipMatchingStep(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
@@ -126,8 +130,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
-                .matchColumnSelection(Predefined.getDefaultSelection(), null)
-                .moduleName(modelSummary.getModuleName()) //
+                .matchColumnSelection(Predefined.getDefaultSelection(), null).moduleName(modelSummary.getModuleName()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
@@ -141,7 +144,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     }
 
     private String getDataCloudVersion(String dataCloudVersion) {
-        if (useDnBFlagFromZK()) {
+        if (plsFeatureFlagService.useDnBFlagFromZK()) {
             // retrieve latest version from matchapi
             return columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
         }

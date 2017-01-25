@@ -212,7 +212,7 @@ public class ValidateFileHeaderUtils {
                 overlappedWords.add(reservedWord);
             }
         }
-        if (overlappedWords.size() > 0) {
+        if (!overlappedWords.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18122, new String[] { overlappedWords.toString(), displayName });
         }
 

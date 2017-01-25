@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
+import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.PivotMappingFileUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -63,6 +64,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Autowired
+    private PlsFeatureFlagService plsFeatureFlagService;
 
     @Value("${pls.modeling.validation.min.rows:300}")
     private long minRows;
@@ -113,6 +117,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             }
         }
 
+        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                trainingTableName);
+
         String moduleName = parameters.getModuleName();
         final String pivotFileName = parameters.getPivotFileName();
         Artifact pivotArtifact = null;
@@ -131,7 +138,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             }
         }
         if (pivotArtifact != null) {
-            updateTrainingTable(pivotArtifact.getPath(), trainingTableName);
+            updateTrainingTable(pivotArtifact.getPath(), trainingTable);
         }
         log.info("Modeling parameters: " + parameters.toString());
         ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder()
@@ -198,7 +205,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 //
                 .transformationGroup(parameters.getTransformationGroup())
                 //
-                .enableV2Profiling(isV2ProfilingEnabled())
+                .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled())
                 //
                 .excludePublicDomains(parameters.isExcludePublicDomains())
                 //
@@ -221,7 +228,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         if (StringUtils.isNotEmpty(parameters.getDataCloudVersion())) {
             return parameters.getDataCloudVersion();
         }
-        if (useDnBFlagFromZK()) {
+        if (plsFeatureFlagService.useDnBFlagFromZK()) {
             // retrieve latest version from matchapi
             return columnMetadataProxy.latestVersion(null).getVersion();
         }
@@ -231,7 +238,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
-        TransformationGroup transformationGroup = getTransformationGroupFromZK();
+        TransformationGroup transformationGroup = plsFeatureFlagService.getTransformationGroupFromZK();
 
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
@@ -245,9 +252,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         return applicationId;
     }
 
-    private void updateTrainingTable(String pivotArtifactPath, String trainingTableName) {
-        Table trainingTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                trainingTableName);
+    private void updateTrainingTable(String pivotArtifactPath, Table trainingTable) {
+
         List<Attribute> trainingAttrs = trainingTable.getAttributes();
         PivotValuesLookup pivotValues = null;
         try {
@@ -263,6 +269,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 trainingAttrs);
 
         trainingTable.setAttributes(attrs);
-        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTableName, trainingTable);
+        metadataProxy.updateTable(MultiTenantContext.getCustomerSpace().toString(), trainingTable.getName(),
+                trainingTable);
     }
 }

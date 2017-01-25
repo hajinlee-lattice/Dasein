@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -51,6 +53,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private PlsFeatureFlagService plsFeatureFlagService;
+
     @Override
     public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
             SchemaInterpretation schemaInterpretation, ModelingParameters parameters) {
@@ -66,7 +71,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private Table getTableFromParameters(SchemaInterpretation schemaInterpretation) {
-        return SchemaRepository.instance().getSchema(schemaInterpretation);
+        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
+        if (plsFeatureFlagService.isFuzzyMatchEnabled()) {
+            Attribute attr = table.getAttribute(InterfaceName.Email);
+            if (attr == null) {
+                attr = table.getAttribute(InterfaceName.Website);
+            }
+            if (attr != null) {
+                attr.setNullable(Boolean.TRUE);
+            }
+        }
+        return table;
     }
 
     @Override
@@ -74,11 +89,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SourceFile sourceFile = getSourceFile(sourceFileName);
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument);
 
-        log.info(String.format("the ignored fields are: %s",
-                fieldMappingDocument.getIgnoredFields()));
+        log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
-            throw new RuntimeException(
-                    String.format("Metadata is not fully defined for file %s", sourceFileName));
+            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
         resolver.calculateBasedOnFieldMappingDocument(table);
@@ -106,8 +119,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         stream.mark(1024 * 500);
 
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
-                closeableResourcePool);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {
@@ -118,15 +130,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Table metadata = repository.getSchema(schema);
         List<Attribute> attributes = metadata.getAttributes();
 
-        ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName,
-                headerFields, true);
+        ValidateFileHeaderUtils.checkForMissingRequiredFields(attributes, fileDisplayName, headerFields, true);
         ValidateFileHeaderUtils.checkForDuplicateHeaders(attributes, fileDisplayName, headerFields);
         return stream;
     }
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream,
-            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
+    public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
+            String fileDisplayName) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -134,8 +145,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         stream.mark(1024 * 500);
 
-        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream,
-                closeableResourcePool);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {
@@ -158,18 +168,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (Attribute accountAttribute : accountAttributes) {
             latticeAccountSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
         }
-        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceAccount,
-                latticeAccountSchemaFields);
+        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceAccount, latticeAccountSchemaFields);
 
-        List<Attribute> leadAttributes = SchemaRepository.instance()
-                .getSchema(SchemaInterpretation.SalesforceLead).getAttributes();
+        List<Attribute> leadAttributes = SchemaRepository.instance().getSchema(SchemaInterpretation.SalesforceLead)
+                .getAttributes();
         List<LatticeSchemaField> latticeLeadSchemaFields = new ArrayList<>();
         for (Attribute leadAttribute : leadAttributes) {
-            latticeLeadSchemaFields.add(
-                    getLatticeFieldFromTableAttribute(leadAttribute));
+            latticeLeadSchemaFields.add(getLatticeFieldFromTableAttribute(leadAttribute));
         }
-        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceLead,
-                latticeLeadSchemaFields);
+        schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceLead, latticeLeadSchemaFields);
 
         return schemaToLatticeSchemaFields;
     }
@@ -179,8 +186,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         latticeSchemaField.setName(attribute.getName());
         // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
-        latticeSchemaField
-                .setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
+        latticeSchemaField.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
         if (!attribute.getNullable()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
 
@@ -233,14 +239,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private SourceFile getSourceFile(String sourceFileName) {
         SourceFile sourceFile = sourceFileService.findByName(sourceFileName);
         if (sourceFile == null) {
-            throw new RuntimeException(
-                    String.format("Could not locate source file with name %s", sourceFileName));
+            throw new RuntimeException(String.format("Could not locate source file with name %s", sourceFileName));
         }
         return sourceFile;
     }
 
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile,
-            FieldMappingDocument fieldMappingDocument) {
+    private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument) {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
     }
 }

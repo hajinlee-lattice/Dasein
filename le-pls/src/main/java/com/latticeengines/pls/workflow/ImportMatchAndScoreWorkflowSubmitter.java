@@ -56,8 +56,9 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
         }
 
-        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
-                sourceFile.getTableName()) == null) {
+        Table table = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                sourceFile.getTableName());
+        if (table == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { sourceFile.getTableName() });
         }
 
@@ -69,8 +70,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
-        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile,
-                sourceFile.getDisplayName(), transformationGroup);
+        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName(),
+                transformationGroup);
 
         log.info(String.format(
                 "Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
@@ -83,8 +84,8 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     }
 
-    public ImportMatchAndScoreWorkflowConfiguration generateConfiguration(String modelId,
-            SourceFile sourceFile, String sourceDisplayName, TransformationGroup transformationGroup) {
+    public ImportMatchAndScoreWorkflowConfiguration generateConfiguration(String modelId, SourceFile sourceFile,
+            String sourceDisplayName, TransformationGroup transformationGroup) {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
         ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, true, false);

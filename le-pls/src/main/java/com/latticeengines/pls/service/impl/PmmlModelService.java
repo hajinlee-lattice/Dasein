@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,23 +103,23 @@ public class PmmlModelService extends ModelServiceBase {
         try {
             String eventTableName = modelSummary.getEventTableName();
             if (StringUtils.isEmpty(eventTableName)) {
-                eventTableName = ModelingHdfsUtils.getEventTableNameFromHdfs(yarnConfiguration, customerBaseDir
-                        + sourceTenantId + "/models", modelSummary.getId());
+                eventTableName = ModelingHdfsUtils.getEventTableNameFromHdfs(yarnConfiguration,
+                        customerBaseDir + sourceTenantId + "/models", modelSummary.getId());
             }
             String cpEventTable = "copy_PMML" + UUID.randomUUID().toString();
 
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, "", cpEventTable, modelSummary);
         } catch (IOException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
-            throw new LedpException(LedpCode.LEDP_18111, new String[] { modelSummary.getName(), sourceTenantId,
-                    targetTenantId });
+            throw new LedpException(LedpCode.LEDP_18111,
+                    new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
         }
         return true;
     }
 
     @Override
     public Set<String> getLatticeAttributeNames(String modelId) {
-        return null;
+        return Collections.<String> emptySet();
     }
 
 }
