@@ -1,8 +1,13 @@
 package com.latticeengines.scoringapi.exposed.model.impl.pmmlresult;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.dmg.pmml.FieldName;
 import org.jpmml.evaluator.EvaluationException;
+import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.ProbabilityDistribution;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +22,7 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
     }
 
     @Override
-    public void processResult(Map<ScoreType, Object> result, Object originalResult) {
+    public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         ProbabilityDistribution distribution = (ProbabilityDistribution) originalResult;
         Object r = null;
 
@@ -29,21 +34,28 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
         }
 
         double predicted = 0.0;
-        if (distribution.getCategoryValues().size() == 2
-                && distribution.getCategoryValues().equals(Sets.newHashSet("0", "1"))) {
-            predicted = distribution.getProbability("1");
-            if (r == null) {
-                result.put(ScoreType.CLASSIFICATION, "1");
-            }
-        } else {
-            if (r != null) {
-                predicted = distribution.getProbability(r.toString());
-            } else {
+        List<FieldName> outputFieldNames = evaluator.getOutputFields();
+        if (outputFieldNames.size() == 3) {
+            Set<String> outputValues = new HashSet<>();
+            outputValues.add(evaluator.getOutputField(outputFieldNames.get(1)).getValue());
+            outputValues.add(evaluator.getOutputField(outputFieldNames.get(2)).getValue());
+
+            if (outputValues.equals(Sets.<String> newHashSet("0", "1"))) {
                 predicted = distribution.getProbability("1");
-                result.put(ScoreType.CLASSIFICATION, "1");
+                if (r == null) {
+                    result.put(ScoreType.CLASSIFICATION, "1");
+                }
+                result.put(ScoreType.PROBABILITY_OR_VALUE, null);
+                result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+                return;
             }
         }
-
+        if (r != null) {
+            predicted = distribution.getProbability(r.toString());
+        } else {
+            predicted = distribution.getProbability("1");
+            result.put(ScoreType.CLASSIFICATION, "1");
+        }
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
         result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
     }

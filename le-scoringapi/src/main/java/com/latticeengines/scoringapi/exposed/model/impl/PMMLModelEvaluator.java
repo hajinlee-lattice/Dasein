@@ -35,7 +35,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
     }
 
     @Override
-    protected void calculatePercentile(ScoreDerivation derivation, Map<FieldName, ?> results,
+    protected void calculatePercentile(Evaluator evaluator, ScoreDerivation derivation, Map<FieldName, ?> results,
             Map<ScoreType, Object> result) {
         String target = results.keySet().iterator().next().getValue();
 
@@ -46,7 +46,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
             log.error(String.format("No handler for %s class type.", o.getClass().toString()));
             result.put(ScoreType.PERCENTILE, -1);
         } else {
-            handler.processResult(result, o);
+            handler.processResult(evaluator, result, o);
         }
     }
 
@@ -104,7 +104,7 @@ public class PMMLModelEvaluator extends DefaultModelEvaluator {
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
 
-        calculatePercentile(derivation, results, result);
+        calculatePercentile(evaluator, derivation, results, result);
 
         return result;
     }

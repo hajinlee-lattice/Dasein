@@ -136,7 +136,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
 
-        calculatePercentile(derivation, results, result);
+        calculatePercentile(evaluator, derivation, results, result);
 
         return result;
     }
@@ -157,7 +157,7 @@ public class DefaultModelEvaluator implements ModelEvaluator {
         return true;
     }
 
-    protected void calculatePercentile(ScoreDerivation derivation, //
+    protected void calculatePercentile(Evaluator evaluator, ScoreDerivation derivation, //
             Map<FieldName, ?> results, //
             Map<ScoreType, Object> result) {
         String target = derivation.target;

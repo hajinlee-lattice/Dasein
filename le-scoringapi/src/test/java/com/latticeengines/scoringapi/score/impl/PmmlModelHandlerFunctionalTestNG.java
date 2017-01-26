@@ -26,9 +26,32 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
         Double p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
         Integer i = (Integer) evaluation.get(ScoreType.PERCENTILE);
         Object c = evaluation.get(ScoreType.CLASSIFICATION);
-        assertEquals(p, null);
         assertEquals(i.intValue(), 6);
         assertEquals(c.toString(), "0");
+
+        arguments = new HashMap<>();
+        arguments.put("x", new Double(1.0));
+        arguments.put("y", new Double(1.0));
+        arguments.put("z", new Double(1.0));
+        arguments.put("label", "1.0");
+        evaluation = d.evaluate(arguments, null);
+        p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
+        i = (Integer) evaluation.get(ScoreType.PERCENTILE);
+        c = evaluation.get(ScoreType.CLASSIFICATION);
+        assertEquals(i.intValue(), 0);
+        assertEquals(c.toString(), "0");
+
+        arguments = new HashMap<>();
+        arguments.put("x", new Double(10.0));
+        arguments.put("y", new Double(10.0));
+        arguments.put("z", new Double(10.0));
+        arguments.put("label", "10.0");
+        evaluation = d.evaluate(arguments, null);
+        p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
+        i = (Integer) evaluation.get(ScoreType.PERCENTILE);
+        c = evaluation.get(ScoreType.CLASSIFICATION);
+        assertEquals(i.intValue(), 100);
+        assertEquals(c.toString(), "1");
     }
 
     @Test(groups = "functional")

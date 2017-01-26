@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.exposed.model.impl.pmmlresult;
 
 import java.util.Map;
 
+import org.jpmml.evaluator.Evaluator;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -14,7 +15,7 @@ public class ScalarTypeHandler extends PMMLResultHandlerBase {
     }
 
     @Override
-    public void processResult(Map<ScoreType, Object> result, Object originalResult) {
+    public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         double predicted = Double.valueOf(originalResult.toString());
 
         result.put(ScoreType.PROBABILITY_OR_VALUE, predicted);

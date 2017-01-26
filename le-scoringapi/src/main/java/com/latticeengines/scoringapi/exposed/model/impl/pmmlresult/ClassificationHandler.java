@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.jpmml.evaluator.Classification;
 import org.jpmml.evaluator.EvaluationException;
+import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.NodeScoreDistribution;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class ClassificationHandler extends PMMLResultHandlerBase {
     }
 
     @Override
-    public void processResult(Map<ScoreType, Object> result, Object originalResult) {
+    public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         Classification distribution = (Classification) originalResult;
         Object r = null;
         
@@ -27,9 +28,9 @@ public class ClassificationHandler extends PMMLResultHandlerBase {
         } catch (EvaluationException e) {
             // this means it's Lattice RF model
         }
-        
+
         double predicted = 0.0;
-        
+
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
         result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
     }

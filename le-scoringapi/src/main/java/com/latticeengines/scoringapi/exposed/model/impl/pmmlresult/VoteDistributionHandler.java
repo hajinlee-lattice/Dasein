@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.exposed.model.impl.pmmlresult;
 import java.util.Map;
 
 import org.jpmml.evaluator.EvaluationException;
+import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.VoteDistribution;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public class VoteDistributionHandler extends PMMLResultHandlerBase {
     }
 
     @Override
-    public void processResult(Map<ScoreType, Object> result, Object originalResult) {
+    public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         VoteDistribution distribution = (VoteDistribution) originalResult;
         Object r = null;
         

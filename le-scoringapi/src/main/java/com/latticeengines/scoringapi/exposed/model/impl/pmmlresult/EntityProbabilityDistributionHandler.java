@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.exposed.model.impl.pmmlresult;
 import java.util.Map;
 
 import org.jpmml.evaluator.EntityProbabilityDistribution;
+import org.jpmml.evaluator.Evaluator;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -15,7 +16,7 @@ public class EntityProbabilityDistributionHandler extends PMMLResultHandlerBase 
     }
 
     @Override
-    public void processResult(Map<ScoreType, Object> result, Object originalResult) {
+    public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         EntityProbabilityDistribution<?> distribution = (EntityProbabilityDistribution<?>) originalResult;
         Object r = distribution.getResult();
         result.put(ScoreType.CLASSIFICATION, r);
