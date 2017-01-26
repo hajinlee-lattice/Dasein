@@ -196,6 +196,7 @@ public class StandardizationTransformer
                     log.error("IsValidDomainField and ValidDomainCheckField are both required for domain validation");
                     return false;
                 }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
