@@ -39,12 +39,29 @@ public class AccountMasterLookupRebuildFlow
     public Node construct(TransformationFlowParameters parameters) {
         Node accountMasterSeed = addSource(parameters.getBaseTables().get(0));
 
-        Node secondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
-        secondaryDomainMapping = secondaryDomainMapping.rename(new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
+        Node orbCacheSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
+
+        Node accountMasterSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(2));
+
+        orbCacheSeedSecondaryDomainMapping = orbCacheSeedSecondaryDomainMapping.rename(
+                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
                 new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
 
-        Node accountMasterSeedWithSecondaryDomain = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
-                secondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED), JoinType.INNER);
+        accountMasterSeedSecondaryDomainMapping = accountMasterSeedSecondaryDomainMapping.rename(
+                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
+                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
+
+        Node accountMasterSeedWithSecondaryDomain1 = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
+                orbCacheSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED),
+                JoinType.INNER);
+
+        Node accountMasterSeedWithSecondaryDomain2 = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
+                accountMasterSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED),
+                JoinType.INNER);
+
+        Node accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain1
+                .merge(accountMasterSeedWithSecondaryDomain2);
+
         accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain.filter(
                 DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD + " != null",
                 new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD));
