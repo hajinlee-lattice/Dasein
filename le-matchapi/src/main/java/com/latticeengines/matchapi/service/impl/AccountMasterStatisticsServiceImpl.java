@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +31,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
@@ -46,8 +47,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("accountMasterStatisticsService")
 public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisticsService {
-
-    private static final Log log = LogFactory.getLog(AccountMasterStatisticsServiceImpl.class);
 
     @Value("${datacloud.core.accountmasterstats.locationbased}")
     private boolean isLocationBased;
@@ -117,6 +116,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
             expandEncodedAttributes(cube);
+            populateDummyBuckets(cube);
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
             return cube;
@@ -319,6 +319,33 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
 
                 for (String attrName : codeBookInfo.get(encodedColumnName)) {
                     cube.getStatistics().put(attrName, encodedValueCountInfo);
+                }
+            }
+        }
+    }
+
+    private void populateDummyBuckets(AccountMasterCube cube) {
+        for (String columnName : cube.getStatistics().keySet()) {
+            AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(columnName);
+            if (encodedValueCountInfo.getRowBasedStatistics() != null
+                    && (encodedValueCountInfo.getRowBasedStatistics().getBuckets() == null //
+                            || CollectionUtils.isEmpty(
+                                    encodedValueCountInfo.getRowBasedStatistics().getBuckets().getBucketList()))) {
+
+                if (encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() > 0) {
+                    Buckets buckets = new Buckets();
+                    List<Bucket> bucketList = new ArrayList<>();
+                    Bucket bucket = new Bucket();
+                    bucket.setBucketLabel(columnName + " label A");
+                    bucket.setCount(encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() * 2 / 3);
+                    bucketList.add(bucket);
+                    bucket = new Bucket();
+                    bucket.setBucketLabel(columnName + " label B");
+                    bucket.setCount(encodedValueCountInfo.getRowBasedStatistics().getNonNullCount()
+                            - encodedValueCountInfo.getRowBasedStatistics().getNonNullCount() * 2 / 3);
+                    bucketList.add(bucket);
+                    buckets.setBucketList(bucketList);
+                    encodedValueCountInfo.getRowBasedStatistics().setBuckets(buckets);
                 }
             }
         }
