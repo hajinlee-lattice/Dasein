@@ -25,8 +25,8 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-propdata</artifactId>
-            <version>${le.propdata.version}</version>
+            <artifactId>le-datacloudapi</artifactId>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -41,8 +41,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-propdata</artifactId>
-            <version>${le.propdata.version}</version>
+            <artifactId>le-datacloudapi</artifactId>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>

@@ -73,8 +73,8 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-propdata</artifactId>
-            <version>${le.propdata.version}</version>
+            <artifactId>le-datacloudapi</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError:
             javax.persistence.OneToMany.orphanRemoval()Z" -->
