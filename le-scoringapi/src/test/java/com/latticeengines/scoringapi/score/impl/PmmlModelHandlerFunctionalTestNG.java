@@ -23,7 +23,6 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
         arguments.put("z", new Double(5.0));
         arguments.put("label", "5.0");
         Map<ScoreType, Object> evaluation = d.evaluate(arguments, null);
-        Double p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
         Integer i = (Integer) evaluation.get(ScoreType.PERCENTILE);
         Object c = evaluation.get(ScoreType.CLASSIFICATION);
         assertEquals(i.intValue(), 6);
@@ -35,7 +34,6 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
         arguments.put("z", new Double(1.0));
         arguments.put("label", "1.0");
         evaluation = d.evaluate(arguments, null);
-        p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
         i = (Integer) evaluation.get(ScoreType.PERCENTILE);
         c = evaluation.get(ScoreType.CLASSIFICATION);
         assertEquals(i.intValue(), 0);
@@ -47,7 +45,6 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
         arguments.put("z", new Double(10.0));
         arguments.put("label", "10.0");
         evaluation = d.evaluate(arguments, null);
-        p = (Double) evaluation.get(ScoreType.PROBABILITY_OR_VALUE);
         i = (Integer) evaluation.get(ScoreType.PERCENTILE);
         c = evaluation.get(ScoreType.CLASSIFICATION);
         assertEquals(i.intValue(), 100);
