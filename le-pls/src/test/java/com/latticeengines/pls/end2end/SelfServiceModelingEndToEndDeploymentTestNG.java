@@ -34,6 +34,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -101,13 +102,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Value("${pls.test.e2e.use.fuzzy.match}")
     private boolean useFuzzyMatch;
 
-    private Tenant tenantToAttach;
+    private Tenant firstTenant;
+    private Tenant secondTenant;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
     private ModelSummary copiedModelSummary;
     private ModelSummary clonedModelSummary;
+    private ModelSummary replacedModelSummary;
     private String fileName;
     private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
     private ModelingParameters parameters;
@@ -124,20 +127,20 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("Overwrite the featureFlagMap to be " + featureFlagMap);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, featureFlagMap);
-        tenantToAttach = testBed.getMainTestTenant();
+        firstTenant = testBed.getMainTestTenant();
 
         if (EncryptionGlobalState.isEnabled()) {
             ConfigurationController<CustomerSpaceScope> controller = ConfigurationController
-                    .construct(new CustomerSpaceScope(CustomerSpace.parse(tenantToAttach.getId())));
+                    .construct(new CustomerSpaceScope(CustomerSpace.parse(firstTenant.getId())));
             assertTrue(controller.exists(new Path("/EncryptionKey")));
         }
 
         // Create second tenant for copy model use case
         testBed.bootstrapForProduct(LatticeProduct.LPA3);
-        log.info("Test environment setup finished.");
-        saveAttributeSelection(CustomerSpace.parse(tenantToAttach.getName()));
+        saveAttributeSelection(CustomerSpace.parse(firstTenant.getName()));
+        secondTenant = testBed.getTestTenants().get(1);
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-
+        log.info("Test environment setup finished.");
     }
 
     @SuppressWarnings("rawtypes")
@@ -270,7 +273,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             "precheckin" }, dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
     public void retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
-        originalModelSummary = getModelSummary(modelName);
+        originalModelSummary = waitToDownloadModelSummary(modelName);
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
@@ -279,29 +282,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
                 ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
-        // Inspect some predictors
-        String rawModelSummary = originalModelSummary.getDetails().getPayload();
-        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode predictors = modelSummaryJson.get("Predictors");
-        for (int i = 0; i < predictors.size(); ++i) {
-            JsonNode predictor = predictors.get(i);
-            assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
-            if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
-                if (predictor.get("Name").asText().equals("Some_Column")) {
-                    JsonNode tags = predictor.get("Tags");
-                    assertEquals(tags.size(), 1);
-                    assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-                } else if (predictor.get("Name").asText().equals("Industry")) {
-                    JsonNode approvedUsages = predictor.get("ApprovedUsage");
-                    assertEquals(approvedUsages.size(), 1);
-                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
-                }
-            }
-        }
+        inspectOrignialModelSummaryPredictors(originalModelSummary);
     }
 
-    private void activateModelSummary(String modelId) {
+    void activateModelSummary(String modelId) {
         log.info("Update model " + modelId + " to active.");
         String modelApi = getRestAPIHostPort() + "/pls/modelsummaries/" + modelId;
         AttributeMap attrMap = new AttributeMap();
@@ -316,7 +300,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException {
-        compareRtsScoreWithModeling(originalModelSummary, 843);
+        compareRtsScoreWithModeling(originalModelSummary, 843, firstTenant.getId());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -335,13 +319,16 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(errors.length() > 0);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void copyModel() {
+        copyModel(originalModelSummary.getId(), secondTenant.getId());
+    }
+
+    void copyModel(String originalModelId, String targetTenantId) {
         log.info("Copy the model that is created ...");
         ResponseDocument response = getRestTemplate().postForObject(
-                String.format("%s/pls/models/copymodel/%s?targetTenantId=%s", getRestAPIHostPort(),
-                        originalModelSummary.getId(), testBed.getTestTenants().get(1).getId()), //
+                String.format("%s/pls/models/copymodel/%s?targetTenantId=%s", getRestAPIHostPort(), originalModelId,
+                        targetTenantId), //
                 null, ResponseDocument.class);
         Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
         assertTrue(res);
@@ -350,9 +337,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", dependsOnMethods = "copyModel", timeOut = 1200000, enabled = true)
     public void retrieveModelSummaryForCopiedModel() throws InterruptedException, IOException {
         log.info("Retrieving the copied model summary ...");
-        tenantToAttach = testBed.getTestTenants().get(1);
-        testBed.switchToSuperAdmin(tenantToAttach);
-        copiedModelSummary = getModelSummary(modelName);
+        testBed.switchToSuperAdmin(secondTenant);
+        copiedModelSummary = waitToDownloadModelSummary(modelName);
         assertNotNull(copiedModelSummary);
         assertEquals(copiedModelSummary.getSourceSchemaInterpretation(),
                 originalModelSummary.getSourceSchemaInterpretation());
@@ -360,36 +346,20 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertFalse(copiedModelSummary.getTrainingTableName().isEmpty());
         assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
                 ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
-        // Inspect some predictors
-        String rawModelSummary = copiedModelSummary.getDetails().getPayload();
-        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
-        JsonNode predictors = modelSummaryJson.get("Predictors");
-        for (int i = 0; i < predictors.size(); ++i) {
-            JsonNode predictor = predictors.get(i);
-            if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
-                if (predictor.get("Name").asText().equals("Some_Column")) {
-                    JsonNode tags = predictor.get("Tags");
-                    assertEquals(tags.size(), 1);
-                    assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
-                    assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
-                } else if (predictor.get("Name").asText().equals("Industry")) {
-                    JsonNode approvedUsages = predictor.get("ApprovedUsage");
-                    assertEquals(approvedUsages.size(), 1);
-                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
-                }
-            }
-        }
-
-        compareRtsScoreWithModeling(copiedModelSummary, 687);
+        inspectOrignialModelSummaryPredictors(copiedModelSummary);
+        compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForCopiedModel" })
     public void cloneAndRemodel() {
+        cloneAndRemodel(copiedModelSummary);
+    }
+
+    void cloneAndRemodel(ModelSummary baseModelSummary) {
         log.info("Cloning and remodel the model summary ...");
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
-                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), copiedModelSummary.getId()),
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), baseModelSummary.getId()),
                 List.class);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Object rawField : rawFields) {
@@ -411,7 +381,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setDisplayName(MODEL_DISPLAY_NAME);
         parameters.setDescription("clone");
         parameters.setAttributes(fields);
-        parameters.setSourceModelSummaryId(copiedModelSummary.getId());
+        parameters.setSourceModelSummaryId(baseModelSummary.getId());
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
         parameters.setEnableTransformations(true);
         parameters.setExcludePropDataAttributes(true);
@@ -431,7 +401,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException, IOException {
         log.info("Retrieve the model summary after cloning and remodeling ...");
-        clonedModelSummary = getModelSummary(modelName);
+        clonedModelSummary = waitToDownloadModelSummary(modelName);
         assertNotNull(clonedModelSummary);
         assertJobExistsWithModelIdAndModelName(clonedModelSummary.getId());
         List<Predictor> predictors = clonedModelSummary.getPredictors();
@@ -471,17 +441,37 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
         }));
 
-        compareRtsScoreWithModeling(clonedModelSummary, 843);
+        compareRtsScoreWithModeling(clonedModelSummary, 843, secondTenant.getId());
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForClonedModel" })
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "scoreTrainingDataOfClonedModel" })
     public void replaceModel() {
-
+        log.info("Replacing the cloned model with original model ...");
+        testBed.switchToSuperAdmin(firstTenant);
+        ResponseDocument response = restTemplate.postForObject(
+                String.format("%s/pls/models/replacemodel/%s?targetTenantId=%s&targetModelId=%s", getRestAPIHostPort(),
+                        originalModelSummary.getId(), secondTenant.getId(), clonedModelSummary.getId()),
+                parameters, ResponseDocument.class);
+        Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
+        Assert.assertTrue(res);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "replaceModel", timeOut = 120000)
     public void retrieveModelSummaryForReplacedModel() throws InterruptedException, IOException {
+        log.info("Retrieve the model summary after replacing ...");
+        testBed.switchToSuperAdmin(secondTenant);
+        replacedModelSummary = waitToDownloadModelSummary(modelName);
+        assertNotNull(replacedModelSummary);
+        assertEquals(replacedModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceLead.toString());
+        assertNotNull(replacedModelSummary.getTrainingTableName());
+        assertEquals(replacedModelSummary.getTrainingTableName(), clonedModelSummary.getTrainingTableName());
+        assertEquals(replacedModelSummary.getModelSummaryConfiguration().getString(
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
 
+        // Inspect some predictors
+        inspectOrignialModelSummaryPredictors(replacedModelSummary);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 600000)
@@ -584,7 +574,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return selectedAttributeMap;
     }
 
-    private ModelSummary getModelSummary(String modelName) throws InterruptedException {
+    ModelSummary waitToDownloadModelSummary(String modelName) throws InterruptedException {
+        log.info(String.format("Getting the model whose name contains %s", modelName));
         ModelSummary found = null;
         // Wait for model downloader
         while (true) {
@@ -602,7 +593,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             Thread.sleep(1000);
         }
         assertNotNull(found);
-        assertEquals(found.getStatus(), ModelSummaryStatus.INACTIVE);
 
         @SuppressWarnings("unchecked")
         List<Object> predictors = restTemplate.getForObject(
@@ -651,10 +641,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring) throws IOException {
+    private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring, String tenantId)
+            throws IOException {
         activateModelSummary(modelSummary.getId());
 
-        Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantToAttach.getId(),
+        Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantId,
                 RESOURCE_BASE + "/" + fileName, modelSummary.getId(), countsForScoring);
         checkExpectedDifferentCount(diffRecords);
     }
@@ -669,6 +660,29 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             assertEquals(diffRecords.size(), expectedDiffCount);
         } else {
             log.info("Property DIFFCOUNT not set.");
+        }
+    }
+
+    private void inspectOrignialModelSummaryPredictors(ModelSummary modelSummary) {
+        // Inspect some predictors
+        String rawModelSummary = modelSummary.getDetails().getPayload();
+        JsonNode modelSummaryJson = JsonUtils.deserialize(rawModelSummary, JsonNode.class);
+        JsonNode predictors = modelSummaryJson.get("Predictors");
+        for (int i = 0; i < predictors.size(); ++i) {
+            JsonNode predictor = predictors.get(i);
+            assertNotEquals(predictor.get("Name"), "Activity_Count_Interesting_Moment_Webinar");
+            if (predictor.get("Name") != null && predictor.get("Name").asText() != null) {
+                if (predictor.get("Name").asText().equals("Some_Column")) {
+                    JsonNode tags = predictor.get("Tags");
+                    assertEquals(tags.size(), 1);
+                    assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
+                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                } else if (predictor.get("Name").asText().equals("Industry")) {
+                    JsonNode approvedUsages = predictor.get("ApprovedUsage");
+                    assertEquals(approvedUsages.size(), 1);
+                    assertEquals(approvedUsages.get(0).textValue(), ApprovedUsage.MODEL_ALLINSIGHTS.toString());
+                }
+            }
         }
     }
 
@@ -731,8 +745,20 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return restTemplate;
     }
 
-    public Tenant getTenant() {
-        return tenantToAttach;
+    public Tenant getFirstTenant() {
+        return firstTenant;
+    }
+
+    public Tenant getSecondTenant() {
+        return secondTenant;
+    }
+
+    public String getModelName() {
+        return this.modelName;
+    }
+
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
     }
 
     public ModelSummary getModelSummary() {

@@ -113,7 +113,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         selfServiceModeling.setup();
         trainingFileName = TRAINING_CSV_FILE;
         testingFileName = TESTING_CSV_FILE;
-        tenant = selfServiceModeling.getTenant();
+        tenant = selfServiceModeling.getFirstTenant();
         modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, trainingFileName);
     }
 
@@ -332,7 +332,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 fieldMappingDocument, Void.class);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "unused" })
     private void assertAllHeaderFieldsIncludedInFieldMappings(List<FieldMapping> fieldMappings) {
         List<String> fileHeaders = selfServiceModeling.getRestTemplate()
                 .getForObject(String.format("%s/pls/scores/fileuploads/headerfields?csvFileName=%s",
@@ -365,8 +365,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
-                byte[].class);
+                String.format("%s/pls/scores/jobs/%d/results/score", getRestAPIHostPort(), jobId), HttpMethod.GET,
+                entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("_scored.csv"));

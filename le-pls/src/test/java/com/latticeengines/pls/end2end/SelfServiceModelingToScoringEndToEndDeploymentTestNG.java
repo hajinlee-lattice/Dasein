@@ -33,7 +33,7 @@ public class SelfServiceModelingToScoringEndToEndDeploymentTestNG extends PlsDep
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        tenant = selfServiceModeling.getTenant();
+        tenant = selfServiceModeling.getFirstTenant();
         log.info(tenant);
     }
 
