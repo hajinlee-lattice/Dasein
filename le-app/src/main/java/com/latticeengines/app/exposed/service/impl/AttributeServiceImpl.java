@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
+import com.latticeengines.app.exposed.service.AttributeCustomizationService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,7 +34,7 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("selectedAttrService")
-public class SelectedAttrServiceImpl implements SelectedAttrService {
+public class AttributeServiceImpl implements AttributeService {
 
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
 
@@ -53,15 +55,17 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Autowired
     private AppTenantConfigServiceImpl appTenantConfigService;
 
+    @Autowired
+    private AttributeCustomizationService attributeCustomizationService;
+
     @Override
-    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
-            Boolean considerInternalAttributes) {
+    public void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant,
+            Map<String, Integer> limitationMap, Boolean considerInternalAttributes) {
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         Integer premiumAttributeLimitation = getTotalMaxCount(limitationMap);
         checkAmbiguityInFieldNames(attributes);
 
-        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant,
-                considerInternalAttributes);
+        int existingSelectedAttributePremiumCount = getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
         int additionalPremiumAttrCount = 0;
         List<LeadEnrichmentAttribute> allAttributes = getAttributes(tenant, null, null, null, false, null, null,
                 considerInternalAttributes);
@@ -82,8 +86,7 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
         if (!CollectionUtils.isEmpty(attributes.getDeselectedAttributes())) {
             for (String deselectedAttrStr : attributes.getDeselectedAttributes()) {
-                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes,
-                        deselectedAttrStr);
+                LeadEnrichmentAttribute deselectedAttr = findEnrichmentAttributeByName(allAttributes, deselectedAttrStr);
                 SelectedAttribute attr = populateAttrObj(deselectedAttr, tenant);
                 deleteAttrList.add(attr);
                 if (attr.getIsPremium()) {
@@ -112,8 +115,10 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     public List<LeadEnrichmentAttribute> getAttributes(Tenant tenant, String attributeDisplayNameFilter,
             Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
+                .attributeCustomizationService(attributeCustomizationService) //
                 .attributeDisplayNameFilter(attributeDisplayNameFilter) //
                 .category(category) //
                 .subcategory(subcategory) //
@@ -128,10 +133,13 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
 
     @Override
     public List<LeadEnrichmentAttribute> getAllAttributes() {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
-                .considerInternalAttributes(true).build();
-        return processor.getPage(true);
+                .considerInternalAttributes(true) //
+                .skipTenantLevelCustomization(true) //
+                .build();
+        return processor.getPage();
     }
 
     @Override
@@ -182,16 +190,26 @@ public class SelectedAttrServiceImpl implements SelectedAttrService {
     @Override
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
-        AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+        AttributePageProcessor processor = new AttributePageProcessor.Builder()
+                .columnMetadataProxy(columnMetadataProxy) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .onlySelectedAttributes(isSelected) //
                 .considerInternalAttributes(considerInternalAttributes) //
                 .build();
 
         List<LeadEnrichmentAttribute> attributes = processor.getPage();
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName,
-                getCSVFromAttributes(attributes));
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(mimeType, fileName, getCSVFromAttributes(attributes));
         downloader.downloadFile(request, response);
+    }
+
+    @Override
+    public LeadEnrichmentAttribute getAttribute(String fieldName) {
+        List<LeadEnrichmentAttribute> matches = getAllAttributes().stream()
+                .filter(a -> a.getFieldName().equals(fieldName)).collect(Collectors.toList());
+        if (matches.size() == 0) {
+            return null;
+        }
+        return matches.get(0);
     }
 
     private String getCSVFromAttributes(List<LeadEnrichmentAttribute> attributes) {

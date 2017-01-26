@@ -1,7 +1,7 @@
 package com.latticeengines.app.exposed.service.impl;
 
 import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private AMStatsProxy amStatsProxy;
 
     @Autowired
-    private SelectedAttrService selectedAttrService;
+    private AttributeService attributeService;
 
     @PostConstruct
     public void postConstruct() {
@@ -208,7 +208,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     }
 
     private AccountMasterCube createDummyCube() {
-        List<LeadEnrichmentAttribute> allAttrs = selectedAttrService.getAllAttributes();
+        List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
         return createDummyCube(allAttrs);
     }
 
@@ -245,7 +245,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     }
 
     private TopNAttributes createTopNAttributes(String category, int max) {
-        List<LeadEnrichmentAttribute> allAttrs = selectedAttrService.getAllAttributes();
+        List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
         TopNAttributes topNAttributes = new TopNAttributes();
         AccountMasterCube cube = createDummyCube(allAttrs);
         Map<String, List<TopNAttributes.TopAttribute>> topAttributes = new HashMap<>();

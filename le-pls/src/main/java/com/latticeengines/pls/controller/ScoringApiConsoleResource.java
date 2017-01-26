@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.SelectedAttrService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -45,7 +45,7 @@ public class ScoringApiConsoleResource {
     private SessionService sessionService;
 
     @Autowired
-    private SelectedAttrService selectedAttrService;
+    private AttributeService attributeService;
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
@@ -101,7 +101,7 @@ public class ScoringApiConsoleResource {
             needEnrichmentMetadataLoading = //
             needEnrichmentMetadataLoading && !shouldSkipLoadingEnrichmentMetadata;
 
-            List<LeadEnrichmentAttribute> fullEnrichmentMetadataList = selectedAttrService.getAttributes(tenant, null,
+            List<LeadEnrichmentAttribute> fullEnrichmentMetadataList = attributeService.getAttributes(tenant, null,
                     null, null, null, null, null, true);
 
             List<LeadEnrichmentAttribute> requiredEnrichmentMetadataList = new ArrayList<>();

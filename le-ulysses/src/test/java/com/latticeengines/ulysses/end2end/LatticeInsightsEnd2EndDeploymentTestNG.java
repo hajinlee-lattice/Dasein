@@ -92,10 +92,6 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
         List<LeadEnrichmentAttribute> combinedAttributeList = getAttributes(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
-
-        List<LeadEnrichmentAttribute> selectedAttributeList = getAttributes(true);
-        assertNotNull(selectedAttributeList);
-        assertTrue(selectedAttributeList.isEmpty());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "getAllAttributes")

@@ -524,7 +524,8 @@ public enum LedpCode {
     LEDP_35006("No SchemaInterpretation found for the training set specified for Tenant: {0} and modelID: {1}"),
 
     // le-app
-    LEDP_36001("Invalid account attribute name: {0}");
+    LEDP_36001("Invalid attribute name: {0}");
+
 
     private String message;
 

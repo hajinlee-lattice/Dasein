@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -136,7 +136,7 @@ public class InternalResource extends InternalResourceBase {
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
     @Autowired
-    private SelectedAttrService selectedAttrService;
+    private AttributeService attributeService;
 
     @Autowired
     private UserService userService;
@@ -570,7 +570,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+        return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, offset, max, considerInternalAttributes);
     }
 
@@ -600,7 +600,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, Boolean.FALSE);
     }
 
@@ -614,8 +614,8 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Map<String, Integer> limitationMap = selectedAttrService.getPremiumAttributesLimitation(tenant);
-        selectedAttrService.save(attributes, tenant, limitationMap, Boolean.FALSE);
+        Map<String, Integer> limitationMap = attributeService.getPremiumAttributesLimitation(tenant);
+        attributeService.save(attributes, tenant, limitationMap, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/premiumattributeslimitation" + "/"
@@ -628,7 +628,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return selectedAttrService.getPremiumAttributesLimitation(tenant);
+        return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedattributes/count" + "/"
@@ -641,7 +641,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return selectedAttrService.getSelectedAttributeCount(tenant, Boolean.FALSE);
+        return attributeService.getSelectedAttributeCount(tenant, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment" + LatticeInsightsResource.INSIGHTS_PATH + "/selectedpremiumattributes/count"
@@ -654,7 +654,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("tenantId") String tenantId) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        return selectedAttrService.getSelectedAttributePremiumCount(tenant, Boolean.FALSE);
+        return attributeService.getSelectedAttributePremiumCount(tenant, Boolean.FALSE);
     }
 
     @RequestMapping(value = "/enrichment/all"
@@ -662,7 +662,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get all lead enrichment")
     public List<LeadEnrichmentAttribute> getAllLeadEnrichmentAttributes(HttpServletRequest request) {
-        return selectedAttrService.getAllAttributes();
+        return attributeService.getAllAttributes();
     }
 
     @RequestMapping(value = "/emails/createmodel/result/{result}/"

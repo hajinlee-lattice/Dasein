@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
+import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeCustomization;
 import com.latticeengines.domain.exposed.pls.AttributeFlags;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
@@ -24,10 +27,17 @@ public class AttributeCustomizationServiceImpl implements AttributeCustomization
     @Autowired
     private AttributeCustomizationEntityMgr attributeCustomizationEntityMgr;
 
+    @Autowired
+    private AttributeService attributeService;
+
     @Override
     public void save(String name, AttributeUseCase useCase, AttributeFlags flags) {
         log.info(String.format("Customizing attribute %s for tenant %s and use case %s with flags %s", name,
                 MultiTenantContext.getCustomerSpace(), useCase, flags));
+        if (attributeService.getAttribute(name) == null) {
+            throw new LedpException(LedpCode.LEDP_36001, new String[] { name });
+        }
+
         AttributeCustomization customization = new AttributeCustomization();
         customization.setName(name);
         customization.setUseCase(useCase);

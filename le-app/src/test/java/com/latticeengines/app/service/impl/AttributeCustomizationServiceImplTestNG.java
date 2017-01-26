@@ -2,14 +2,17 @@ package com.latticeengines.app.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.entitymanager.AttributeCustomizationEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeFlags;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
@@ -26,8 +29,12 @@ public class AttributeCustomizationServiceImplTestNG extends AppTestNGBase {
     private AttributeCustomizationEntityMgr attributeCustomizationEntityMgr;
 
     @Autowired
+    private AttributeService attributeService;
+
+    @Autowired
     private TenantService tenantService;
     private CompanyProfileAttributeFlags saved;
+    private String attributeName;
 
     @BeforeClass(groups = "functional")
     private void setUp() {
@@ -44,15 +51,22 @@ public class AttributeCustomizationServiceImplTestNG extends AppTestNGBase {
         MultiTenantContext.setTenant(tenant);
     }
 
+    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    public void saveFailure() {
+        attributeCustomizationService.save("TestAttribute", AttributeUseCase.CompanyProfile,
+                new CompanyProfileAttributeFlags(true, false));
+    }
+
     @Test(groups = "functional")
     public void save() {
-        saved = new CompanyProfileAttributeFlags(true, false);
-        attributeCustomizationService.save("TestAttribute", AttributeUseCase.CompanyProfile, saved);
+        attributeName = attributeService.getAllAttributes().get(0).getFieldName();
+        saved = new CompanyProfileAttributeFlags(RandomUtils.nextBoolean(), RandomUtils.nextBoolean());
+        attributeCustomizationService.save(attributeName, AttributeUseCase.CompanyProfile, saved);
     }
 
     @Test(groups = "functional", dependsOnMethods = "save")
     public void retrieve() {
-        AttributeFlags flags = attributeCustomizationService.retrieve("TestAttribute", AttributeUseCase.CompanyProfile);
+        AttributeFlags flags = attributeCustomizationService.retrieve(attributeName, AttributeUseCase.CompanyProfile);
         assertEquals(flags, saved);
     }
 }

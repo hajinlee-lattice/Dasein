@@ -26,9 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.app.exposed.service.AttributeCustomizationService;
+import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.app.exposed.service.SelectedAttrService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -58,13 +57,10 @@ public class LatticeInsightsResource {
     private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
-    private SelectedAttrService selectedAttrService;
+    private AttributeService attributeService;
 
     @Autowired
     private EnrichmentService enrichmentService;
-
-    @Autowired
-    private AttributeCustomizationService attributeCustomizationService;
 
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
@@ -72,7 +68,8 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getInsightsCategories(HttpServletRequest request) {
-        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null, null, false, null, null);
+        List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, null, null, false, null,
+                null);
 
         List<String> categoryStrList = new ArrayList<>();
         for (Category category : Category.values()) {
@@ -144,10 +141,8 @@ public class LatticeInsightsResource {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        List<LeadEnrichmentAttribute> attributes = selectedAttrService.getAttributes(tenant,
-                attributeDisplayNameFilter, categoryEnum, subcategory, onlySelectedAttributes, offset, max,
-                considerInternalAttributes);
-        attributeCustomizationService.addFlags(attributes);
+        List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant, attributeDisplayNameFilter,
+                categoryEnum, subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
         return attributes;
     }
 
@@ -176,7 +171,7 @@ public class LatticeInsightsResource {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
-        return selectedAttrService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
@@ -195,7 +190,7 @@ public class LatticeInsightsResource {
         String fileName = onlySelectedAttributes != null && onlySelectedAttributes ? String.format(
                 "selectedEnrichmentAttributes_%s.csv", dateString) : String.format("enrichmentAttributes_%s.csv",
                 dateString);
-        selectedAttrService.downloadAttributes(request, response, "application/csv", fileName, tenant,
+        attributeService.downloadAttributes(request, response, "application/csv", fileName, tenant,
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
@@ -206,7 +201,7 @@ public class LatticeInsightsResource {
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getInsightssPremiumAttributesLimitation(HttpServletRequest request) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return selectedAttrService.getPremiumAttributesLimitation(tenant);
+        return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
     private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,

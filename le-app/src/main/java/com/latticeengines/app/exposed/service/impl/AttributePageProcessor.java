@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.collections.CollectionUtils;
 
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
+import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -29,6 +30,8 @@ public class AttributePageProcessor {
     private final Integer offset;
     private final Integer max;
     private final Boolean considerInternalAttributes;
+    private final AttributeCustomizationService attributeCustomizationService;
+    private final boolean skipTenantLevelCustomization;
 
     public static class Builder {
         private SelectedAttrEntityMgr selectedAttrEntityMgr;
@@ -40,6 +43,8 @@ public class AttributePageProcessor {
         private Integer offset;
         private Integer max;
         private Boolean considerInternalAttributes;
+        private AttributeCustomizationService attributeCustomizationService;
+        private boolean skipTenantLevelCustomization;
 
         public Builder selectedAttrEntityMgr(SelectedAttrEntityMgr selectedAttrEntityMgr) {
             this.selectedAttrEntityMgr = selectedAttrEntityMgr;
@@ -86,17 +91,30 @@ public class AttributePageProcessor {
             return this;
         }
 
+        public Builder skipTenantLevelCustomization(boolean skipTenantLevelCustomization) {
+            this.skipTenantLevelCustomization = skipTenantLevelCustomization;
+            return this;
+        }
+
         public AttributePageProcessor build() {
-            return new AttributePageProcessor(columnMetadataProxy, selectedAttrEntityMgr, attributeDisplayNameFilter,
-                    category, subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
+            return new AttributePageProcessor(columnMetadataProxy, selectedAttrEntityMgr,
+                    attributeCustomizationService, attributeDisplayNameFilter, category, subcategory,
+                    onlySelectedAttributes, offset, max, considerInternalAttributes, skipTenantLevelCustomization);
+        }
+
+        public Builder attributeCustomizationService(AttributeCustomizationService attributeCustomizationService) {
+            this.attributeCustomizationService = attributeCustomizationService;
+            return this;
         }
     }
 
-    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy, SelectedAttrEntityMgr selectedAttrEntityMgr,
+    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy,
+            SelectedAttrEntityMgr selectedAttrEntityMgr, AttributeCustomizationService attributeCustomizationService,
             String attributeDisplayNameFilter, Category category, String subcategory, Boolean onlySelectedAttributes,
-            Integer offset, Integer max, Boolean considerInternalAttributes) {
+            Integer offset, Integer max, Boolean considerInternalAttributes, boolean skipTenantLevelCustomization) {
         this.columnMetadataProxy = columnMetadataProxy;
         this.selectedAttrEntityMgr = selectedAttrEntityMgr;
+        this.attributeCustomizationService = attributeCustomizationService;
         this.attributeDisplayNameFilter = attributeDisplayNameFilter;
         this.category = category;
         this.subcategory = subcategory;
@@ -104,20 +122,22 @@ public class AttributePageProcessor {
         this.offset = offset;
         this.max = max;
         this.considerInternalAttributes = considerInternalAttributes;
+        this.skipTenantLevelCustomization = skipTenantLevelCustomization;
     }
 
     public List<LeadEnrichmentAttribute> getPage() {
-        return getPage(false);
-    }
-
-    public List<LeadEnrichmentAttribute> getPage(boolean shouldSkipSelectedAttr) {
         String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment, //
                 currentDataCloudVersion);
-        List<SelectedAttribute> selectedAttributes = shouldSkipSelectedAttr ? new ArrayList<>()
+        List<SelectedAttribute> selectedAttributes = skipTenantLevelCustomization ? new ArrayList<>()
                 : selectedAttrEntityMgr.findAll();
-        return superimpose(allColumns, selectedAttributes, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, offset, max, considerInternalAttributes);
+        List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes,
+                attributeDisplayNameFilter, category, subcategory, onlySelectedAttributes, offset, max,
+                considerInternalAttributes);
+        if (!skipTenantLevelCustomization) {
+            attributeCustomizationService.addFlags(attributes);
+        }
+        return attributes;
     }
 
     @SuppressWarnings("unchecked")
@@ -157,8 +177,8 @@ public class AttributePageProcessor {
 
                 if (subcategory != null //
                         && (column.getSubcategory() == null //
-                                || (column.getSubcategory() != null //
-                                        && !subcategory.equals(column.getSubcategory())))//
+                        || (column.getSubcategory() != null //
+                        && !subcategory.equals(column.getSubcategory())))//
                 ) {
                     continue;
                 }
