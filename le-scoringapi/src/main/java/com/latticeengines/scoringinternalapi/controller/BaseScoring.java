@@ -112,7 +112,7 @@ public abstract class BaseScoring extends CommonBase {
     protected Fields getModelFields(HttpServletRequest request, @PathVariable String modelId,
             CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            log.info(modelId);
+            log.info(String.format("Getting model fields for the model %s", modelId));
             Fields fields = modelRetriever.getModelFields(customerSpace, modelId);
             log.info(JsonUtils.serialize(fields));
             return fields;
@@ -160,8 +160,8 @@ public abstract class BaseScoring extends CommonBase {
     }
 
     protected DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, ScoreRequest scoreRequest,
-            CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId,
-            boolean enforceFuzzyMatch, boolean skipDnBCache) {
+            CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId, boolean enforceFuzzyMatch,
+            boolean skipDnBCache) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
                 false, requestId, true, enforceFuzzyMatch, skipDnBCache);
     }

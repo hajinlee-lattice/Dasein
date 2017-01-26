@@ -33,15 +33,18 @@ import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NetworkUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -177,6 +180,20 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
 
         Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
+        ModelSummary modelSummary = artifacts.getModelSummary();
+        boolean fuzzyMatchEnabled = FeatureFlagClient.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
+        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
+        if (schemaInterpretationStr == null) {
+            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
+        }
+        String requiredColumnName = "";
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+        if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
+            requiredColumnName = InterfaceName.Website.name();
+        } else {
+            requiredColumnName = InterfaceName.Email.name();
+        }
 
         if (!CollectionUtils.isEmpty(predictors)) {
             for (String fieldName : mapFields.keySet()) {
@@ -194,7 +211,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema);
+                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, requiredColumnName,
+                            fuzzyMatchEnabled);
                 }
             }
         } else {
@@ -202,7 +220,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             // table if modelSummary metadata does not have predictors
             Table modelMetadataTable = metadataProxy.getTable(customerSpace.toString(),
                     StringUtils.capitalize(StringUtils.lowerCase(artifacts.getModelSummary().getEventTableName())));
-            Map<String, Attribute> attributeMap = new HashMap<>();
+            Map<String, Attribute> attributeMap = null;
             if (modelMetadataTable != null) {
                 attributeMap = modelMetadataTable.getNameAttributeMap();
             }
@@ -212,11 +230,12 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 FieldSchema fieldSchema = mapFields.get(fieldName);
 
                 if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                    if (attributeMap.containsKey(fieldName)) {
+                    if (attributeMap != null && attributeMap.containsKey(fieldName)) {
                         displayName = attributeMap.get(fieldName).getDisplayName();
                     }
 
-                    setField(fieldList, fieldName, displayName, fieldSchema);
+                    setField(fieldList, fieldName, displayName, fieldSchema, schemaInterpretation, requiredColumnName,
+                            fuzzyMatchEnabled);
                 }
             }
         }
@@ -224,13 +243,25 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
-    private void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema) {
+    @VisibleForTesting
+    void setField(List<Field> fieldList, String fieldName, String displayName, FieldSchema fieldSchema,
+            SchemaInterpretation schemaInterpretation, String requiredColumnName, boolean fuzzyMatchEnabled) {
         if (StringUtils.isEmpty(displayName)) {
             // by default use field name as display name
             displayName = fieldName;
         }
 
         Field field = new Field(fieldName, fieldSchema.type, displayName);
+        // Mark fields as required for scoring according to model type and
+        // feature flag
+        if (fieldName.equals(InterfaceName.Id.name())) {
+            field.setRequiredForScoring(true);
+        }
+        if (!fuzzyMatchEnabled) {
+            if (fieldName.equals(requiredColumnName)) {
+                field.setRequiredForScoring(true);
+            }
+        }
 
         // Mark Fuzzylogic fields as primary fields to enforce model field
         // mapping

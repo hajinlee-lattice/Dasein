@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -76,14 +77,19 @@ public class InternalScoringResourceDeploymentTestNG extends ScoringResourceDepl
     @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
+
         Fields fields = internalScoringApiProxy.getModelFields(modelId, customerSpace.toString());
         Assert.assertNotNull(fields);
+        System.out.println(JsonUtils.serialize(fields));
         Assert.assertEquals(fields.getModelId(), modelId);
 
         for (Field field : fields.getFields()) {
             FieldSchema expectedSchema = eventTableDataComposition.fields.get(field.getFieldName());
             Assert.assertEquals(expectedSchema.type, field.getFieldType());
             Assert.assertEquals(expectedSchema.source, FieldSource.REQUEST);
+            if (field.getFieldName().equals(InterfaceName.Id) || field.getFieldName().equals(InterfaceName.Email)) {
+                Assert.assertTrue(field.isRequiredForScoring());
+            }
         }
     }
 
