@@ -183,8 +183,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         config.setEnrichingFields(Arrays.asList("BUSINESS_NAME", "STREET_ADDRESS", "CITY_NAME", "STATE_PROVINCE_NAME",
                 "COUNTRY_NAME", "LE_INDUSTRY", "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE"));
         config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State",
-                "Country", "Industry", "Revenue_Range", "Employee_Range"));
-        config.setSortFields(Arrays.asList("Revenue_Range"));
+                "Country", "Industry", "RevenueRange", "EmployeeRange"));
+        config.setGroupFields(Arrays.asList("DUNS", "Domain"));
         
         config.setKeepInternalColumns(true);
         return JsonUtils.serialize(config);

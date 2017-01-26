@@ -60,13 +60,13 @@ public class SourceFirmoGraphEnchrimentFlow extends ConfigurableFlowBase<SourceF
             }
         }
         
-        if (CollectionUtils.isNotEmpty(config.getSortFields())) {
-            source = source.groupByAndLimit(new FieldList(leftMatchField), new FieldList(config.getSortFields()), 1, true, false);
+        if (CollectionUtils.isNotEmpty(config.getGroupFields())) {
+            source = source.groupByAndLimit(new FieldList(config.getGroupFields()), 1);
         }
         
         source = source.retain(new FieldList(newFieldNames));
         
-        if (!config.keepInternalColumns()) {
+        if (!config.isKeepInternalColumns()) {
             List<String> retainedFieldNames = resolveFieldNames(source.getFieldNames());
             source = source.retain(new FieldList(retainedFieldNames));
         }
