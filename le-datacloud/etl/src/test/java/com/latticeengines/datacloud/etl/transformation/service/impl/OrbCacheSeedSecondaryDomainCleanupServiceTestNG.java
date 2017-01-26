@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.OrbCacheSeedSecondaryDomainMarkerTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
-public class OrbCacheSeedCleanupServiceTestNG
+public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     @Autowired
     PipelineSource source;
@@ -89,19 +89,21 @@ public class OrbCacheSeedCleanupServiceTestNG
             step1.setTargetSource("OrbCacheSeedMarked");
             String confParamStr1 = getMarkerConfig();
             step1.setConfiguration(confParamStr1);
-            // -----------
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
-            step2.setTargetSource("OrbCacheSeedCleaned");
-            step2.setTransformer("orbCacheSeedCleanedTransformer");
-
-            String confParamStr2 = getCleanupConfig();
-
-            step2.setConfiguration(confParamStr2);
+            // // -----------
+            // TransformationStepConfig step2 = new TransformationStepConfig();
+            // List<Integer> inputSteps = new ArrayList<Integer>();
+            // inputSteps.add(0);
+            // step2.setInputSteps(inputSteps);
+            // step2.setTargetSource("OrbCacheSeedCleaned");
+            // step2.setTransformer("orbCacheSeedCleanedTransformer");
+            //
+            // String confParamStr2 = getCleanupConfig();
+            //
+            // step2.setConfiguration(confParamStr2);
             // -----------
             TransformationStepConfig step3 = new TransformationStepConfig();
+            List<Integer> inputSteps = new ArrayList<Integer>();
+            inputSteps.add(0);
             step3.setInputSteps(inputSteps);
             step3.setTargetSource("OrbCacheSeedSecondaryDomain");
             step3.setTransformer("orbCacheSeedSecondaryDomainTransformer");
@@ -112,12 +114,13 @@ public class OrbCacheSeedCleanupServiceTestNG
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
-            steps.add(step2);
+            // steps.add(step2);
             steps.add(step3);
             // -----------
             configuration.setSteps(steps);
 
             configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+            System.out.println(om.writeValueAsString(configuration));
             return configuration;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
