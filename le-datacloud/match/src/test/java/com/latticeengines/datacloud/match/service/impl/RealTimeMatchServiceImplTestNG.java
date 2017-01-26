@@ -153,7 +153,9 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         input.setExcludeUnmatchedWithPublicDomain(true);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        Assert.assertEquals(output.getResult().size(), 0);
+        Assert.assertEquals(output.getResult().size(), 1);
+        Assert.assertNull(output.getResult().get(0).getOutput());
+        Assert.assertFalse(output.getResult().get(0).isMatched());
     }
 
     @Test(groups = "functional")
