@@ -133,6 +133,9 @@ angular
         })
         .state('home.datacloud.lookup.tabs.attr', {
             url: '/attr/:category/:subcategory',
+            params: {
+                section: 'lookup'
+            },
             views: {
                 "main@": {
                     resolve: {

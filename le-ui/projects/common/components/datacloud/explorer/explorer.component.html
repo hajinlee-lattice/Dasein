@@ -17,7 +17,7 @@
                         <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
                     </div>
                 </li>
-                <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed">
+                <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed" ng-if="vm.section != 'lookup'">
                     <h2 class="button icon-button white-button" ng-class="{active:openFilters, selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal}">
                         <i class="fa fa-filter"></i>
                     </h2>
