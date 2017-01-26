@@ -1,6 +1,7 @@
 <section id="ExplorerTabsView" class="container">
     <ul>
-        <li ng-click="vm.setStateParams('browse')"
+        <li class="tab-browse" 
+            ng-click="vm.setStateParams('browse')"
             ng-class="{ 'active': vm.section == 'browse' }">
 
             <h2>Lattice Data Cloud Attributes</h2>
@@ -8,7 +9,7 @@
         </li>
         <li ng-click="vm.setStateParams('edit')"
             ng-class="{ 'active': vm.section == 'edit' }" 
-            class="info noselect-children" 
+            class="tab-edit info noselect-children" 
             ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
 
             <h2>
@@ -29,7 +30,8 @@
             </h2>
             {{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}} / {{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}} premium 
         </li>
-        <li ng-click="vm.setStateParams('team')"
+        <li class="tab-team"
+            ng-click="vm.setStateParams('team')"
             ng-class="{ 'active': vm.section == 'team' }">
 
             <h2>
@@ -51,7 +53,8 @@
                 </span>
             </h2>
         </li>
-        <li ui-sref="home.datacloud.lookup" ui-sref-active="active">
+        <li class="tab-lookup"
+            ui-sref="home.datacloud.lookup" ui-sref-active="active">
             <h2>Account Insights</h2>
         </li>
     </ul>

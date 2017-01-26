@@ -5,20 +5,21 @@
     border-bottom: 1px solid #d0d1d0;
     & > ul {
         @include flex-container;
-        @include flex-item(0 1 auto);
+        @include flex-item(1 1 auto);
         position: relative;
         top: 1px;
         border: 1px solid #d0d1d0;
         border-bottom: 0;
         & > li {
-            @include flex-item(0 1 auto);
-            &[ui-sref] {
-                cursor: pointer;
-            }
-            border-top: 4px solid transparent;
+            @include flex-item(1 1 auto);
+            border-top: 5px solid transparent;
             border-right: 1px solid #d0d1d0;
             border-bottom: 1px solid #d0d1d0;
             padding: 14px 20px;
+            font-size: 9px;
+            &[ui-sref] {
+                cursor: pointer;
+            }
             &:last-child {
                 border-right: 0;
             }
@@ -26,6 +27,79 @@
                 border-top-color: orange;
                 border-bottom-color: transparent;
                 background: #fafafa;
+            }
+            .count {
+                color: #26649b;
+                font-size: 18px;
+            }
+            &.tab-edit {
+                .enrichmentCounts {
+                    white-space: nowrap;
+                    text-transform: uppercase;
+                    .count {
+                        margin-right: 5px;
+                        &:not(:first-child) {
+                            margin-left: 5px;
+                            padding-left: 5px;
+                            border-left: 1px solid #d0d1d0;
+                        }
+                    }
+                }
+            }
+            & > h2 {
+                position: relative;
+                padding-left: 28px;
+                &:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    transform: translateY(-50%);
+                    margin-top: -1px;
+                    height: 20px;
+                    width: 20px;
+                    background-size: contain;
+                }
+            }
+            &.tab-browse {
+                & > h2 {
+                    padding-left: 24px;
+                    &:after {
+                        height: 13px;
+                        width: 17px;
+                        background: url(/assets/images/enrichments/tabs/lattice-data-cloud-attributes.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-edit {
+                & > h2 {
+                    padding-left: 24px;
+                    &:after {
+                        height: 16px;
+                        width: 17px;
+                        background: url(/assets/images/enrichments/tabs/enrichment-icon.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-team {
+                & > h2 {
+                    padding-left: 28px;
+                    &:after {
+                        height: 20px;
+                        width: 20px;
+                        background: url(/assets/images/ico-salesforce-black.png) no-repeat center center;
+                    }
+                }
+            }
+            &.tab-lookup {
+                h2 {
+                    position: relative;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    padding: 0;
+                    text-align: center;
+                }
             }
             h2, h3 {
                 font-weight: normal;

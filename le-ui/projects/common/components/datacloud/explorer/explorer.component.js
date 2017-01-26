@@ -149,10 +149,11 @@ angular.module('common.datacloud.explorer', [
 
                 vm.query = vm.queryText;
                 
-                vm.filterEmptySubcategories();
+                vm.filterEmptySubcategories(); // ben:note this is breaking 
 
                 vm.queryInProgress = false;
             }, 333);
+
 
             if(vm.section != 'browse') {
                 //vm.category = vm.categories[0];
@@ -836,6 +837,7 @@ angular.module('common.datacloud.explorer', [
             }
 
             if (newCategories.length <= 1) {
+
                 addUniqueToArray(subcategoriesExclude, vm.category);
                 vm.subcategory = newCategories[0];
                 vm.updateStateParams();

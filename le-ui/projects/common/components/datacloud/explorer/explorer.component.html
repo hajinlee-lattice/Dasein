@@ -37,7 +37,7 @@
                 <li class="save" ng-if="vm.enabledManualSave">
                     <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
                 </li>
-                <li class="download test dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights'">
+                <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights'">
                     <h2 class="button icon-button white-button" ng-class="{active:openDownload}">
                         <i class="fa fa-download"></i>
                     </h2>
