@@ -3,8 +3,6 @@ package com.latticeengines.leadprioritization.dataflow;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.List;
-import java.util.Map;
-
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
