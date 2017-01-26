@@ -78,7 +78,7 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
                 Object website = record.get(InterfaceName.Website.name());
 
                 if (website != null) {
-                    return website.toString().replaceAll("^http://", "").replaceAll("^www[.]", "")
+                    return website.toString().replaceAll("^https?://", "").replaceAll("^www[.]", "")
                             .replaceAll("/.*$", "").toUpperCase();
                 } else {
                     return email.toString().replaceAll("^.*@", "").toUpperCase();
