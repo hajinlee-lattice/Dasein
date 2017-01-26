@@ -15,8 +15,8 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
 
     @Test(groups = "functional")
     public void testProcess() throws FileNotFoundException {
-        PMMLModelEvaluator d = new PMMLModelEvaluator(
-                ClassLoader.getSystemResourceAsStream("com/latticeengines/scoringapi/numeric_mapping_test.xml.fixed.xml"));
+        PMMLModelEvaluator d = new PMMLModelEvaluator(ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/scoringapi/pmmlmodels/numeric_mapping_test.xml.fixed.xml"));
         Map<String, Object> arguments = new HashMap<>();
         arguments.put("x", new Double(5.0));
         arguments.put("y", new Double(5.0));
@@ -29,5 +29,22 @@ public class PmmlModelHandlerFunctionalTestNG extends ScoringApiFunctionalTestNG
         assertEquals(p, null);
         assertEquals(i.intValue(), 6);
         assertEquals(c.toString(), "0");
+    }
+
+    @Test(groups = "functional")
+    public void testProcessNNIris() throws FileNotFoundException {
+        PMMLModelEvaluator d = new PMMLModelEvaluator(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/scoringapi/pmmlmodels/nn_iris.xml"));
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("sepal_length", new Double(0));
+        arguments.put("sepal_width", new Double(10));
+        arguments.put("petal_length", new Double(1));
+        arguments.put("petal_width", new Double(5));
+        Map<ScoreType, Object> evaluation = d.evaluate(arguments, null);
+        System.out.println(evaluation);
+        Integer i = (Integer) evaluation.get(ScoreType.PERCENTILE);
+        Object c = evaluation.get(ScoreType.CLASSIFICATION);
+        assertEquals(i.intValue(), 93);
+        assertEquals(c.toString(), "Iris-versicolor");
     }
 }
