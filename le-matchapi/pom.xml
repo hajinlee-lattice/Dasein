@@ -144,7 +144,7 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-propdata</artifactId>
+            <artifactId>le-serviceflows-datacloud</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
