@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
@@ -23,6 +26,9 @@ public class SourceStandardizationFlow
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
     }
+
+    private final static String IS_VALID_DOMAIN = "IsValidDomain";
+    private final static String DOMAIN = "Domain";
 
     @Override
     public Node construct(StandardizationFlowParameter parameters) {
@@ -63,12 +69,46 @@ public class SourceStandardizationFlow
             case ADD_NULL_FIELD:
                 source = addNullField(source, parameters.getAddNullFields(), parameters.getAddNullFieldTypes());
                 break;
+            case VALID_DOMAIN:
+                Node domainValidation = addSource(parameters.getBaseTables().get(1));
+                source = validateDomain(source, domainValidation, parameters.getIsValidDomainField(),
+                        parameters.getValidDomainCheckField());
+                break;
             default:
                 break;
             }
         }
 
         return source;
+    }
+
+    private Node validateDomain(Node source, Node domainValidation, String isValidDomainField,
+            String validDomainCheckField) {
+        if (StringUtils.isNotEmpty(isValidDomainField) && StringUtils.isNotEmpty(validDomainCheckField)) {
+            domainValidation = renameAllFields(domainValidation);
+            Node joined = source.join(new FieldList(validDomainCheckField), domainValidation,
+                    new FieldList(getRenamedFieldName(domainValidation, DOMAIN)), JoinType.LEFT);
+            List<String> retainedFields = new ArrayList<String>();
+            retainedFields.addAll(source.getFieldNames());
+            retainedFields.add(getRenamedFieldName(domainValidation, IS_VALID_DOMAIN));
+            source = joined.retain(new FieldList(retainedFields));
+            source = source.rename(new FieldList(getRenamedFieldName(domainValidation, IS_VALID_DOMAIN)),
+                    new FieldList(isValidDomainField));
+        }
+        return source;
+    }
+
+    private Node renameAllFields(Node node) {
+        List<String> newNames = new ArrayList<String>();
+        List<String> oldNames = node.getFieldNames();
+        for (String oldName : oldNames) {
+            newNames.add(node.getPipeName() + "_" + oldName);
+        }
+        return node.rename(new FieldList(oldNames), new FieldList(newNames));
+    }
+
+    private String getRenamedFieldName(Node node, String originalName) {
+        return node.getPipeName() + "_" + originalName;
     }
 
     private Node addNullField(Node source, String[] addNullFields,

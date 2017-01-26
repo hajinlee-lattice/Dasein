@@ -58,6 +58,12 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("AddNullFieldTypes")
     private FieldType[] addNullFieldTypes;
 
+    @JsonProperty("IsValidDomainField")
+    private String isValidDomainField;
+
+    @JsonProperty("ValidDomainCheckField")
+    private String validDomainCheckField;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -203,6 +209,22 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setAddNullFieldTypes(FieldType[] addNullFieldTypes) {
         this.addNullFieldTypes = addNullFieldTypes;
+    }
+
+    public String getIsValidDomainField() {
+        return isValidDomainField;
+    }
+
+    public void setIsValidDomainField(String isValidDomainField) {
+        this.isValidDomainField = isValidDomainField;
+    }
+
+    public String getValidDomainCheckField() {
+        return validDomainCheckField;
+    }
+
+    public void setValidDomainCheckField(String validDomainCheckField) {
+        this.validDomainCheckField = validDomainCheckField;
     }
 
 }

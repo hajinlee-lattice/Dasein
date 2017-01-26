@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.DomainValidation;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -39,7 +40,8 @@ public class StandardizationTransformer
 
     @Override
     protected boolean validateConfig(StandardizationTransformerConfig config, List<String> baseSources) {
-        if (baseSources.size() != 1) {
+        if (baseSources == null || (baseSources.size() != 1
+                && !(baseSources.size() == 2 && baseSources.get(1).equals(DomainValidation.class.getName())))) {
             log.error("Standardize only one source at a time");
             return false;
         }
@@ -183,6 +185,17 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case VALID_DOMAIN:
+                if (baseSources.size() != 2 || !baseSources.get(1).equals(DomainValidation.class.getName())) {
+                    log.error(
+                            "The first base source should be the input data source and the second base source must be DomainValidation");
+                    return false;
+                }
+                if (StringUtils.isEmpty(config.getIsValidDomainField())
+                        || StringUtils.isEmpty(config.getValidDomainCheckField())) {
+                    log.error("IsValidDomainField and ValidDomainCheckField are both required for domain validation");
+                    return false;
+                }
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -221,6 +234,8 @@ public class StandardizationTransformer
         parameters.setSequence(config.getSequence());
         parameters.setAddNullFields(config.getAddNullFields());
         parameters.setAddNullFieldTypes(config.getAddNullFieldTypes());
+        parameters.setIsValidDomainField(config.getIsValidDomainField());
+        parameters.setValidDomainCheckField(config.getValidDomainCheckField());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

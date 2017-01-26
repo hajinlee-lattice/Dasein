@@ -54,8 +54,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("AddNullFieldTypes")
     private FieldType[] addNullFieldTypes;
 
+    @JsonProperty("IsValidDomainField")
+    private String isValidDomainField;
+
+    @JsonProperty("ValidDomainCheckField")
+    private String validDomainCheckField;
+
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD
+        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN
     }
 
     public enum FieldType {
@@ -196,6 +202,22 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setAddNullFieldTypes(FieldType[] addNullFieldTypes) {
         this.addNullFieldTypes = addNullFieldTypes;
+    }
+
+    public String getIsValidDomainField() {
+        return isValidDomainField;
+    }
+
+    public void setIsValidDomainField(String isValidDomainField) {
+        this.isValidDomainField = isValidDomainField;
+    }
+
+    public String getValidDomainCheckField() {
+        return validDomainCheckField;
+    }
+
+    public void setValidDomainCheckField(String validDomainCheckField) {
+        this.validDomainCheckField = validDomainCheckField;
     }
 
 }

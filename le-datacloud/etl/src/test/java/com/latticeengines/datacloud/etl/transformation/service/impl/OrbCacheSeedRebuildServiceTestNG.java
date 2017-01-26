@@ -96,7 +96,6 @@ public class OrbCacheSeedRebuildServiceTestNG
             step1.setTransformer("standardizationTransformer");
             step1.setTargetSource("OrbCompanyRawMarked");
             String confParamStr1 = getStandardizationTransformerConfigForOrbCompanyMarker();
-            log.info("Configuration string 1: " + confParamStr1);
             step1.setConfiguration(confParamStr1);
 
             // Data cleanup for OrbCompany
