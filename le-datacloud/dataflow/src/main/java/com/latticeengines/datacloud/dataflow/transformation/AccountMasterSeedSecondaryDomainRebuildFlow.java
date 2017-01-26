@@ -8,10 +8,12 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("accountMasterSeedSecondaryDomainRebuildFlowTransformerFlow")
+@Component("accountMasterSeedSecondaryDomainFlowTransformerFlow")
 public class AccountMasterSeedSecondaryDomainRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
 
     private static final String DOMAIN = "Domain";
+    private static final String PRIMARY_DOMAIN = "PrimaryDomain";
+    private static final String SECONDARY_DOMAIN = "SecondaryDomain";
     private static final String FLAG_DROP_LESS_POPULAR_DOMAIN = "_FLAG_DROP_LESS_POPULAR_DOMAIN_";
 
     @Override
@@ -24,7 +26,7 @@ public class AccountMasterSeedSecondaryDomainRebuildFlow extends ConfigurableFlo
 
         node = node.retain(new FieldList(DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN));
         node = node.rename(new FieldList(DOMAIN, FLAG_DROP_LESS_POPULAR_DOMAIN),
-                new FieldList("SecondaryDomain", "PrimaryDomain"));
+                new FieldList(SECONDARY_DOMAIN, PRIMARY_DOMAIN));
         return node;
     }
 
@@ -35,12 +37,12 @@ public class AccountMasterSeedSecondaryDomainRebuildFlow extends ConfigurableFlo
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterSeedSecondaryDomainRebuildFlowTransformerFlow";
+        return "accountMasterSeedSecondaryDomainFlowTransformerFlow";
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterSeedSecondaryDomainRebuildFlowTransformer";
+        return "accountMasterSeedSecondaryDomainTransformer";
 
     }
 }

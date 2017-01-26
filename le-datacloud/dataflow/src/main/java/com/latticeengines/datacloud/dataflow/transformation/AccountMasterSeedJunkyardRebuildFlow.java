@@ -8,12 +8,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterSeedMarkerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("accountMasterSeedReportTransformerFlow")
-public class AccountMasterSeedReportRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
+@Component("accountMasterSeedJunkyardTransformerFlow")
+public class AccountMasterSeedJunkyardRebuildFlow extends ConfigurableFlowBase<AccountMasterSeedMarkerConfig> {
     private static final String FLAG_DROP_OOB_ENTRY = "_FLAG_DROP_OOB_ENTRY_";
     private static final String FLAG_DROP_SMALL_BUSINESS = "_FLAG_DROP_SMALL_BUSINESS_";
     private static final String FLAG_DROP_INCORRECT_DATA = "_FLAG_DROP_INCORRECT_DATA_";
-    private static final String FLAG_DROP_LESS_POPULAR_DOMAIN = "_FLAG_DROP_LESS_POPULAR_DOMAIN_";
     private static final String FLAG_DROP_ORPHAN_ENTRY = "_FLAG_DROP_ORPHAN_ENTRY_";
 
     @Override
@@ -21,13 +20,10 @@ public class AccountMasterSeedReportRebuildFlow extends ConfigurableFlowBase<Acc
         Node node = addSource(parameters.getBaseTables().get(0));
 
         FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
-                FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_ORPHAN_ENTRY);
-
-        node = node.retain(fieldList);
+                FLAG_DROP_ORPHAN_ENTRY);
 
         node = node.filter(FLAG_DROP_OOB_ENTRY + " != null || " + FLAG_DROP_SMALL_BUSINESS + " != null || "
-                + FLAG_DROP_INCORRECT_DATA + " != null || " + FLAG_DROP_ORPHAN_ENTRY + " != null || "
-                + FLAG_DROP_LESS_POPULAR_DOMAIN + " != null ", fieldList);
+                + FLAG_DROP_INCORRECT_DATA + " != null || " + FLAG_DROP_ORPHAN_ENTRY + " != null ", fieldList);
 
         return node;
     }
@@ -39,12 +35,12 @@ public class AccountMasterSeedReportRebuildFlow extends ConfigurableFlowBase<Acc
 
     @Override
     public String getDataFlowBeanName() {
-        return "accountMasterSeedReportTransformerFlow";
+        return "accountMasterSeedJunkyardTransformerFlow";
     }
 
     @Override
     public String getTransformerName() {
-        return "accountMasterSeedReportTransformer";
+        return "accountMasterSeedJunkyardTransformer";
 
     }
 }

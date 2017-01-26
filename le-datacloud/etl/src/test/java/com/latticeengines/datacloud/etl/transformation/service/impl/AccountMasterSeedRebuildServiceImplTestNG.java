@@ -117,21 +117,31 @@ public class AccountMasterSeedRebuildServiceImplTestNG
             String confParamStr3 = getReportConfig();
 
             step3.setConfiguration(confParamStr3);
+            // // -----------
+            // TransformationStepConfig step4 = new TransformationStepConfig();
+            // step4.setInputSteps(inputSteps);
+            // step4.setTargetSource("AccountMasterSeedSecondaryDomain");
+            // step4.setTransformer("accountMasterSeedSecondaryDomainTransformer");
+            //
+            // String confParamStr4 = getReportConfig();
+            //
+            // step4.setConfiguration(confParamStr4);
             // -----------
-            TransformationStepConfig step4 = new TransformationStepConfig();
-            step4.setInputSteps(inputSteps);
-            step4.setTargetSource("AccountMasterSeedSecondaryDomain");
-            step4.setTransformer("accountMasterSeedSecondaryDomainRebuildFlowTransformer");
+            TransformationStepConfig step5 = new TransformationStepConfig();
+            step5.setInputSteps(inputSteps);
+            step5.setTargetSource("AccountMasterSeedJunkyard");
+            step5.setTransformer("accountMasterSeedJunkyardTransformer");
 
-            String confParamStr4 = getReportConfig();
+            String confParamStr5 = getJunkyardConfig();
 
-            step4.setConfiguration(confParamStr4);
+            step5.setConfiguration(confParamStr5);
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
             steps.add(step2);
             steps.add(step3);
-            steps.add(step4);
+            // steps.add(step4);
+            steps.add(step5);
             // -----------
             configuration.setSteps(steps);
 
@@ -149,6 +159,11 @@ public class AccountMasterSeedRebuildServiceImplTestNG
     }
 
     private String getReportConfig() throws JsonProcessingException {
+        AccountMasterSeedMarkerConfig conf = new AccountMasterSeedMarkerConfig();
+        return om.writeValueAsString(conf);
+    }
+
+    private String getJunkyardConfig() throws JsonProcessingException {
         AccountMasterSeedMarkerConfig conf = new AccountMasterSeedMarkerConfig();
         return om.writeValueAsString(conf);
     }

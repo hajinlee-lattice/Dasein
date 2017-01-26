@@ -69,6 +69,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
 
         node = markOrphanRecordsForSmallBusiness(node, fieldDeclaration);
 
+        node.renamePipe("mergeFinalResult");
         return nodeWithNullDUNS.merge(node).retain(new FieldList(fieldNames));
     }
 
@@ -87,6 +88,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     }
 
     private Node markOrphanRecordsForSmallBusiness(Node node, Fields fieldDeclaration) {
+        node.renamePipe("markOrphanRecordsForSmallBusiness");
+
         Node orphanRecordWithDomainNode = node//
                 .filter(DUNS + " != null", new FieldList(DUNS))//
                 .filter(LE_EMPLOYEE_RANGE + " != null", new FieldList(LE_EMPLOYEE_RANGE))//
@@ -119,10 +122,14 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     }
 
     private Node markRecordsWithIncorrectIndustryRevenueEmployeeData(Node node) {
+        node.renamePipe("markRecordsWithIncorrectIndustryRevenueEmployeeData");
+
         return node;
     }
 
     private Node markOrphanRecordWithDomain(Node node, Fields fieldDeclaration) {
+        node.renamePipe("markOrphanRecordWithDomain");
+
         Node orphanRecordWithDomainNode = node//
                 .filter(DOMAIN + " != null", new FieldList(DOMAIN))//
                 .filter(LE_IS_PRIMARY_LOCATION + " != null", new FieldList(LE_IS_PRIMARY_LOCATION))//
@@ -149,6 +156,8 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     }
 
     private Node markLessPopularDomainsForDUNS(Node node, Fields fieldDeclaration, Node alexaMostRecentNode) {
+        node.renamePipe("markLessPopularDomainsForDUNS");
+
         FieldList fieldsInNode = new FieldList(node.getFieldNames());
 
         Node nodeForJoiningWithAlexaMostRecent = node//
@@ -205,6 +214,7 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
     }
 
     private Node markOOBEntries(Node node, Fields fieldDeclaration) {
+        node.renamePipe("markOOBEntries");
         Node noOOBInfoNode = node.filter(OUT_OF_BUSINESS_INDICATOR + " == null",
                 new FieldList(OUT_OF_BUSINESS_INDICATOR));
         Node oobRemovedNode = node.filter(OUT_OF_BUSINESS_INDICATOR + " != null",

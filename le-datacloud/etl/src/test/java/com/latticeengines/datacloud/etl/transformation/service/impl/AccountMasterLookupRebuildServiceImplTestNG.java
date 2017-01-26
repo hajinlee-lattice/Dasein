@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedSecondaryDomain;
 import com.latticeengines.datacloud.core.source.impl.OrbCacheSeedSecondaryDomain;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -35,9 +34,6 @@ public class AccountMasterLookupRebuildServiceImplTestNG
     OrbCacheSeedSecondaryDomain baseSourceOrbCacheSeedSecondaryDomain;
 
     @Autowired
-    AccountMasterSeedSecondaryDomain baseSourceAccountMasterSeedSecondaryDomain;
-
-    @Autowired
     private AccountMasterLookupRebuildService accountMasterLookupRebuildService;
 
     @Test(groups = "functional")
@@ -46,8 +42,6 @@ public class AccountMasterLookupRebuildServiceImplTestNG
                 baseSourceVersion);
         uploadBaseSourceFile(baseSourceOrbCacheSeedSecondaryDomain,
                 baseSourceOrbCacheSeedSecondaryDomain.getSourceName() + "_Test", baseSourceVersion);
-        uploadBaseSourceFile(baseSourceAccountMasterSeedSecondaryDomain,
-                baseSourceAccountMasterSeedSecondaryDomain.getSourceName() + "_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);

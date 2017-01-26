@@ -41,13 +41,7 @@ public class AccountMasterLookupRebuildFlow
 
         Node orbCacheSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(1));
 
-        Node accountMasterSeedSecondaryDomainMapping = addSource(parameters.getBaseTables().get(2));
-
         orbCacheSeedSecondaryDomainMapping = orbCacheSeedSecondaryDomainMapping.rename(
-                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
-                new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
-
-        accountMasterSeedSecondaryDomainMapping = accountMasterSeedSecondaryDomainMapping.rename(
                 new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
                 new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
 
@@ -55,12 +49,7 @@ public class AccountMasterLookupRebuildFlow
                 orbCacheSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED),
                 JoinType.INNER);
 
-        Node accountMasterSeedWithSecondaryDomain2 = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
-                accountMasterSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED),
-                JoinType.INNER);
-
-        Node accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain1
-                .merge(accountMasterSeedWithSecondaryDomain2);
+        Node accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain1;
 
         accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain.filter(
                 DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD + " != null",
