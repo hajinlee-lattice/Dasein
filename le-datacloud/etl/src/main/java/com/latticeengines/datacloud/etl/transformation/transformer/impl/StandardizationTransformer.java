@@ -41,7 +41,7 @@ public class StandardizationTransformer
     @Override
     protected boolean validateConfig(StandardizationTransformerConfig config, List<String> baseSources) {
         if (baseSources == null || (baseSources.size() != 1
-                && !(baseSources.size() == 2 && baseSources.get(1).equals(DomainValidation.class.getName())))) {
+                && !(baseSources.size() == 2 && baseSources.get(1).equals(DomainValidation.class.getSimpleName())))) {
             log.error("Standardize only one source at a time");
             return false;
         }
@@ -186,7 +186,7 @@ public class StandardizationTransformer
                 }
                 break;
             case VALID_DOMAIN:
-                if (baseSources.size() != 2 || !baseSources.get(1).equals(DomainValidation.class.getName())) {
+                if (baseSources.size() != 2 || !baseSources.get(1).equals(DomainValidation.class.getSimpleName())) {
                     log.error(
                             "The first base source should be the input data source and the second base source must be DomainValidation");
                     return false;
