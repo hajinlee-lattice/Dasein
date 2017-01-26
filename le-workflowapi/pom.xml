@@ -18,7 +18,6 @@
         <le.serviceflows.core.version>3.2.0-SNAPSHOT</le.serviceflows.core.version>
         <le.serviceflows.prospectdiscovery.version>3.2.0-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>3.2.0-SNAPSHOT</le.serviceflows.leadprioritization.version>
-        <le.serviceflows.propdata.version>3.2.0-SNAPSHOT</le.serviceflows.propdata.version>
         <le.workflow.version>3.2.0-SNAPSHOT</le.workflow.version>
         <le.oauth2.db.version>3.2.0-SNAPSHOT</le.oauth2.db.version>
         <le.scoringapi.version>3.2.0-SNAPSHOT</le.scoringapi.version>
@@ -55,8 +54,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-propdata</artifactId>
-            <version>${le.serviceflows.propdata.version}</version>
+            <artifactId>le-serviceflows-datacloud</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

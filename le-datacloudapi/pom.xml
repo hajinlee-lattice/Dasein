@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-propdata</artifactId>
+    <artifactId>le-datacloudapi</artifactId>
     <name>le-${component-name}</name>
     <description>LE PropData</description>
 
@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <component-name>propdata</component-name>
+        <component-name>datacloudapi</component-name>
     </properties>
 
     <profiles>

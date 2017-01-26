@@ -68,6 +68,7 @@ public class LocationUtilsUnitTestNG {
                 { "USA", "NB", "NEBRASKA", "WEST NORTH CENTRAL" }, //
                 { "Canada", "NB", "NEW BRUNSWICK", "CANADA" }, //
                 { "Canada", "Québec", "QUEBEC", "CANADA" }, //
+                { "Canada", "ONTARIO", "ONTARIO", "CANADA" }, //
                 { "China", "Beijing", "BEIJING", "CHINA" }, //
                 { "Japan", "Nowhere", "NOWHERE", "JAPAN" }, //
                 { "USA", "Beijing", null, "OTHER" }, //

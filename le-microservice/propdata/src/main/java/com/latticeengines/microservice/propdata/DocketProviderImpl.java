@@ -17,7 +17,7 @@ public class DocketProviderImpl extends DocketProviderBase implements DocketProv
     }
 
     protected Predicate<RequestHandler> apiSelector() {
-        return RequestHandlerSelectors.basePackage("com.latticeengines.propdata.api.controller");
+        return RequestHandlerSelectors.basePackage("com.latticeengines.datacloudapi.api.controller");
     }
 
     protected String contextPath()  {

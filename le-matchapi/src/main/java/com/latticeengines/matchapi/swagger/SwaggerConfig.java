@@ -37,7 +37,7 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.basePackage("com.latticeengines.matchapi.controller")) //
                 .paths(PathSelectors.any()) //
                 .build() //
-                .pathMapping("/match") //
+                .pathMapping("/") //
                 .apiInfo(apiInfo()) //
                 .useDefaultResponseMessages(false).globalResponseMessage(RequestMethod.GET,
                         newArrayList(

@@ -35,7 +35,7 @@
 
     <modules>
         <module>core</module>
-        <module>propdata</module>
+        <module>datacloud</module>
         <module>prospectdiscovery</module>
         <module>leadprioritization</module>
     </modules>

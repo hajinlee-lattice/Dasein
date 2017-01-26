@@ -9,7 +9,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.propdata.workflow.match.BulkMatchWorkflowConfiguration;
+import com.latticeengines.datacloud.workflow.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class BulkMatchWorkflowSubmitter {

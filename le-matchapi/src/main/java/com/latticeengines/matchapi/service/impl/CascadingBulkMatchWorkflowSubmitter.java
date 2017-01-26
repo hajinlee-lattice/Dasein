@@ -4,7 +4,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.propdata.workflow.match.CascadingBulkMatchWorkflowConfiguration;
+import com.latticeengines.datacloud.workflow.match.CascadingBulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class CascadingBulkMatchWorkflowSubmitter {
