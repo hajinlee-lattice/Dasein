@@ -17,7 +17,6 @@
 	}
 	.ratings-chart {
 		position: relative;
-		height: 124px;
 		&:after {
 			display: table;
 			clear: both;
@@ -32,7 +31,7 @@
 			z-index: 2;	
 			li {
 				bottom: 0;
-				width: 34.5px;
+				width: 32.23px;
 				margin-right: 1px;
 				margin-left: 1px;
 				&.bucket-one {
@@ -102,19 +101,17 @@
 	background: #e8e8e8;
 	border: #dedada solid 1px;
 	float: right;
-	height: 117px;
-	position: relative;
 	z-index: 3;
 }
 .slider {
 	border-left: #1c3d59 solid 1px;
 	width: 1px;
 	position: absolute;
-	height: 117px;
 	z-index: 4;
+	right: 8px;
 	.handle {
 		position: absolute;
-		bottom: 0;
+		bottom: -5px;
 		left: -6px;
 		width: 12px;
 		height: 15px;
@@ -122,23 +119,11 @@
 		background-image: linear-gradient(to bottom, #989898, #3b3b3b);
 		box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.36);
 		border: solid 1px #333333;
+		color: #fff;
+		line-height: 17px;
 		&:hover {
 			cursor: col-resize;
 		}
-	}
-
-
-	&:nth-child(1) {
-		left: -989px;
-	}
-	&:nth-child(2) {
-		left: -806px;
-	}
-	&:nth-child(3) {
-		left: -661px;
-	}
-	&:nth-child(4) {
-		right: 8px;
 	}
 }
 
@@ -153,23 +138,24 @@
 		margin: 0 11.42% 0 0;
 		border-left: #d7d7d7 solid 1px;
 		font-size: 15px;
+		&::selection {
+			background: transparent;
+		}
 		span {
 			margin: 0 0 -10px -4px;
 		}
 	}
 }
 .vertical-axis {
-	bottom: 8px;
 	width: 96.2%;
 	margin-left: 20px;
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: space-between;
 	li {
-		margin-bottom: 11px;
-		height: 20px;
 		position: relative;
-		&:nth-child(1), &:nth-child(2) {
-			border-top: #e8e8e8 solid 1px;
-		}
-		&:last-of-type {
+		border-top: #e8e8e8 solid 1px;
+		&:nth-child(1) {
 			border-top: #242424 dashed 1px;
 		}
 		span {

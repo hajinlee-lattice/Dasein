@@ -11,7 +11,7 @@
 
 
             <div class="chart-header">
-                <div class="list-data pull-left">All Leads: <strong>93,893</strong></div>
+                <div class="list-data pull-left">All Leads: <strong>{{vm.summary.total_num_leads}}</strong></div>
                 <div class="actions pull-right">
                 	<button 
                 		type="button" 
@@ -23,61 +23,26 @@
             </div><!-- End .chart-header -->
 
             <div class="bar-chart">
+                <div class="ratings-chart" style="height:{{vm.chartContainerHeight}}px">
 
-                <div class="ratings-chart">
-
-                    <div class="sliders-container">
-                        <div class="slider">
-                            <div class="handle"></div>
-                        </div>
-                        <div class="slider">
-                            <div class="handle"></div>
-                        </div>
-                        <div class="slider">
-                            <div class="handle"></div>
-                        </div>
-                        <div class="slider">
-                            <div class="handle"></div>
+                    <div class="sliders-container" style="height:{{vm.dugoutHeight}}px">
+                        <div 
+                            class="slider" 
+                            style="height:{{vm.dugoutHeight}}px;right:{{bucket.right_bound_score}}%"
+                            ng-repeat="bucket in vm.buckets">
+                            <div class="handle">|||</div>
                         </div>
                     </div><!-- End .sliders-container -->
 
                     <ul class="data">
-                        <li style="height:109px" class="bucket-one">&nbsp;</li>
-                        <li style="height:90px" class="bucket-one">&nbsp;</li>
-                        <li style="height:70px" class="bucket-one">&nbsp;</li>
-                        <li style="height:70px" class="bucket-two">&nbsp;</li>
-                        <li style="height:68px" class="bucket-two">&nbsp;</li>
-                        <li style="height:67px" class="bucket-two">&nbsp;</li>
-                        <li style="height:67px" class="bucket-two">&nbsp;</li>
-                        <li style="height:67px" class="bucket-two">&nbsp;</li>
-                        <li style="height:64px" class="bucket-three">&nbsp;</li>
-                        <li style="height:42px" class="bucket-three">&nbsp;</li>
-                        <li style="height:30px" class="bucket-three">&nbsp;</li>
-                        <li style="height:26px" class="bucket-three">&nbsp;</li>
-                        <li style="height:20px" class="bucket-four">&nbsp;</li>
-                        <li style="height:18px" class="bucket-four">&nbsp;</li>
-                        <li style="height:16px" class="bucket-four">&nbsp;</li>
-                        <li style="height:18px" class="bucket-four">&nbsp;</li>
-                        <li style="height:21px" class="bucket-four">&nbsp;</li>
-                        <li style="height:20px" class="bucket-four">&nbsp;</li>
-                        <li style="height:14px" class="bucket-four">&nbsp;</li>
-                        <li style="height:17px" class="bucket-four">&nbsp;</li>
-                        <li style="height:18px" class="bucket-four">&nbsp;</li>
-                        <li style="height:16px" class="bucket-four">&nbsp;</li>
-                        <li style="height:20px" class="bucket-four">&nbsp;</li>
-                        <li style="height:20px" class="bucket-four">&nbsp;</li>
-                        <li style="height:14px" class="bucket-four">&nbsp;</li>
-                        <li style="height:9px" class="bucket-four">&nbsp;</li>
-                        <li style="height:2px" class="bucket-four">&nbsp;</li>
-                        <li style="height:8px" class="bucket-four">&nbsp;</li>
-                        <li style="height:12px" class="bucket-four">&nbsp;</li>
-                        <li style="height:10px" class="bucket-four">&nbsp;</li>
+                        <li 
+                            ng-repeat="data in vm.summary.bar_lifts track by $index" style="height: {{Math.round(10*data)}}px" 
+                            class="bucket-one"
+                            title="{{data}}"
+                            >&nbsp;</li>
                     </ul>
                     <ul class="vertical-axis">
-                        <li><span>4x</span></li>
-                        <li><span>3x</span></li>
-                        <li><span>2x</span></li>
-                        <li><span>1x</span></li>
+                        <li ng-repeat="i in vm.getNumber(vm.yAxisNumber) track by $index" style="height: {{vm.axisItemHeight}}px"><span>{{$index+1}}x</span></li>
                     </ul>
                     <ul class="horizontal-axis">
                         <li><span>99</span></li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li><li>&nbsp;</li>
@@ -103,7 +68,7 @@
             			<dt>Lift</dt>
             			<dd class="lift">{{bucket.lift}}x</dd>
             			<dt>Leads %</dt>
-            			<dd>XX%</dd>
+            			<dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
             			<dt>Leads</dt>
             			<dd>{{bucket.num_leads}}</dd>
             		</dl>
@@ -120,7 +85,7 @@
                         <dt>Lift</dt>
                         <dd class="lift">{{bucket.lift}}x</dd>
                         <dt>Leads %</dt>
-                        <dd>30%</dd>
+                        <dd>{{Math.round(100*bucket.num_leads/vm.summary.total_num_leads)}}%</dd>
                         <dt>Leads</dt>
                         <dd>{{bucket.num_leads}}</dd>
                     </dl>
