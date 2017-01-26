@@ -52,7 +52,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         matchInput.setTenant(tenant);
         matchInput.setFields(fields);
         matchInput.setData(data);
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.Enrichment);
         if (StringUtils.isNullOrEmpty(dataCloudVersion)) {
             dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         }

@@ -124,12 +124,13 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
         CompanyProfile profile = getOAuth2RestTemplate().getForObject(
                 getUlyssesRestAPIPort() + "/ulysses/companyprofiles/?Email=someuser@google.com", CompanyProfile.class);
         assertNotNull(profile);
-        for (String fieldName : profile.getAttributes().keySet()) {
+
+        for (LeadEnrichmentAttribute attribute : attributes) {
             boolean found = false;
-            for (LeadEnrichmentAttribute attribute : attributes) {
+            for (String fieldName : profile.getAttributes().keySet()) {
                 found = found || fieldName.equals(attribute.getFieldName());
             }
-            assertTrue(found, String.format("Could not find field %s in LatticeInsights attributes", fieldName));
+            assertTrue(found, String.format("Find field %s in profile", attribute.getFieldName()));
         }
     }
 
