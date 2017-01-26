@@ -1,5 +1,10 @@
 package com.latticeengines.leadprioritization.dataflow;
 
+import static org.testng.AssertJUnit.assertEquals;
+
+import java.util.List;
+
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -13,6 +18,8 @@ public class DedupEventTablePLS2847TestNG extends ServiceFlowsDataFlowFunctional
     public void test() {
         DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "PublicDomain");
         executeDataFlow(parameters);
+        List<GenericRecord> output = readOutput();
+        assertEquals(output.size(), 796);
     }
 
     @Override
