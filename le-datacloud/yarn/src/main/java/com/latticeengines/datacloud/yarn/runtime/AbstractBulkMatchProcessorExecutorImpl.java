@@ -241,19 +241,22 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             MatchResponse response = new MatchResponse(context);
             metricService.write(MetricDB.LDC_Match, response);
         } catch (Exception e) {
-            log.warn("Failed to extract output metric.");
+            log.error("Failed to extract output metric.", e);
         }
     }
 
     private void finalizeMatchOutput(ProcessorContext processorContext) throws IOException {
-        Date finishedAt = new Date();
-        MatchOutput blockOutput = processorContext.getBlockOutput();
-        blockOutput.setFinishedAt(finishedAt);
-        blockOutput.setReceivedAt(processorContext.getReceivedAt());
-        blockOutput.getStatistics().setRowsRequested(processorContext.getBlockSize());
-        blockOutput.getStatistics().setTimeElapsedInMsec(
-                finishedAt.getTime() - processorContext.getReceivedAt().getTime());
         try {
+            Date finishedAt = new Date();
+            MatchOutput blockOutput = processorContext.getBlockOutput();
+            if (blockOutput == null) {
+                throw new IllegalStateException("Block match output object is null.");
+            }
+            blockOutput.setFinishedAt(finishedAt);
+            blockOutput.setReceivedAt(processorContext.getReceivedAt());
+            blockOutput.getStatistics().setRowsRequested(processorContext.getBlockSize());
+            blockOutput.getStatistics().setTimeElapsedInMsec(
+                    finishedAt.getTime() - processorContext.getReceivedAt().getTime());
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(new File(MATCHOUTPUT_BUFFER_FILE), blockOutput);
             HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, MATCHOUTPUT_BUFFER_FILE, processorContext.getOutputJson());

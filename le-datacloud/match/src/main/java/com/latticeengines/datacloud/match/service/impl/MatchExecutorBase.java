@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -21,11 +23,12 @@ import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.newrelic.api.agent.Trace;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
+
+    private static final Log log = LogFactory.getLog(MatchExecutorBase.class);
 
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
@@ -79,6 +82,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
+        boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludeUnmatchedWithPublicDomain());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -100,7 +104,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 continue;
             }
 
-            internalRecord.setColumnMatched(new ArrayList<Boolean>());
+            internalRecord.setColumnMatched(new ArrayList<>());
             List<Object> output = new ArrayList<>();
 
             Map<String, Object> results = internalRecord.getQueryResult();
@@ -124,35 +128,31 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
                 if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
-                    matched = true;
                     value = internalRecord.getLatticeAccountId();
+                    matched = (value != null);
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
-                    matched = true;
+                    if (!excludeUnmatchedPublicDomain && returnUnmatched) {
+                        matched = true;
+                    }
                     value = true;
                 } else if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
-                    matched = true;
+                    if (!excludeUnmatchedPublicDomain && returnUnmatched) {
+                        matched = true;
+                    }
                     value = true;
                 } else if (results.containsKey(field)) {
-                    matched = true;
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
+                    matched = (value != null);
                 }
 
                 output.add(value);
-
-                if (Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())
-                        || Predefined.DerivedColumns.equals(matchContext.getInput().getPredefinedSelection())) {
-                    columnMatchCount[i] += (value == null ? 0 : 1);
-                    internalRecord.getColumnMatched().add(value != null);
-                } else {
-                    columnMatchCount[i] += (matched ? 1 : 0);
-                    internalRecord.getColumnMatched().add(matched);
-                }
-
+                columnMatchCount[i] += (value == null ? 0 : 1);
+                internalRecord.getColumnMatched().add(value != null);
                 matchedAnyColumn = matchedAnyColumn || matched;
             }
 
@@ -177,13 +177,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 totalMatched++;
                 internalRecord.setMatched(true);
             } else {
+                internalRecord.setMatched(false);
                 internalRecord.addErrorMessages("The input does not match to any source.");
             }
 
             internalRecord.setResultsInPartition(null);
             OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || matchedAnyColumn) {
-                outputRecord.setOutput(internalRecord.getOutput());
+                if (excludeUnmatchedPublicDomain && !matchedAnyColumn && internalRecord.isPublicDomain()) {
+                    log.warn("Excluding the record, because it is using the public domain: " + internalRecord.getParsedDomain());
+                } else {
+                    outputRecord.setOutput(internalRecord.getOutput());
+                }
             }
             outputRecord.setInput(internalRecord.getInput());
             outputRecord.setMatched(internalRecord.isMatched());

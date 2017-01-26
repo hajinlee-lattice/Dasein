@@ -89,7 +89,7 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
                 processorContext.getRowsProcessed().addAndGet(context.getInput().getNumRows());
             }
         }
-        if (combinedContext != null && !combinedContext.getOutput().getResult().isEmpty()) {
+        if (combinedContext != null) {
             processMatchOutput(processorContext, combinedContext.getOutput());
             int rows = processorContext.getRowsProcessed().get();
             processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());

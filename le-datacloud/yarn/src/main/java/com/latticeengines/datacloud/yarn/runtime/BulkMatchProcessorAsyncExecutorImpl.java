@@ -8,12 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Future;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+
+import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -136,12 +136,10 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         log.info("Returned " + combinedContext.getOutput().getResult().size() + " of record results.");
         processorContext.getRowsProcessed().addAndGet(internalCompletedRecords.size());
 
-        if (combinedContext != null && !combinedContext.getOutput().getResult().isEmpty()) {
-            processMatchOutput(processorContext, combinedContext.getOutput());
-            int rows = processorContext.getRowsProcessed().get();
-            processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());
-            log.info("Processed " + rows + " out of " + processorContext.getBlockSize() + " rows.");
-        }
+        processMatchOutput(processorContext, combinedContext.getOutput());
+        int rows = processorContext.getRowsProcessed().get();
+        processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());
+        log.info("Processed " + rows + " out of " + processorContext.getBlockSize() + " rows.");
 
         completedFutures.clear();
         internalCompletedRecords.clear();

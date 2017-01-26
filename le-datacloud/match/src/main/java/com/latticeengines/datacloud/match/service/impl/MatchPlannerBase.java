@@ -120,7 +120,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     input.getFields().size(), keyPositionMap, domainSet, nameLocationSet,
                     input.getExcludeUnmatchedWithPublicDomain(), input.getPublicDomainAsNormalDomain());
             if (record != null) {
-                record.setColumnMatched(new ArrayList<Boolean>());
+                record.setColumnMatched(new ArrayList<>());
                 records.add(record);
             }
         }
@@ -178,13 +178,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             return record;
         }
 
-        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, excludePublicDomains, treatPublicDomainAsNormal,
-                record);
-
-        if (excludePublicDomains && record.isPublicDomain()) {
-            return null;
-        }
-
+        parseRecordForDomain(inputRecord, keyPositionMap, domainSet, treatPublicDomainAsNormal, record);
         parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
@@ -193,7 +187,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     private void parseRecordForDomain(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
-            Set<String> domainSet, boolean excludeUnmatchedPublicDomain, boolean treadPublicDomainAsNormal,
+            Set<String> domainSet, boolean treadPublicDomainAsNormal,
             InternalOutputRecord record) {
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
             List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
@@ -210,13 +204,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     record.addErrorMessages("Parsed to a public domain: " + cleanDomain);
                     record.setPublicDomain(true);
-                    if (excludeUnmatchedPublicDomain) {
-                        log.warn("A record with public domain is excluded from input.");
-                        if (treadPublicDomainAsNormal) {
-                            record.setMatchEvenIsPublicDomain(true);
-                            domainSet.add(cleanDomain);
-                        }
-                        return;
+                    if (treadPublicDomainAsNormal) {
+                        record.setMatchEvenIsPublicDomain(true);
+                        domainSet.add(cleanDomain);
                     }
                 } else if (StringUtils.isNotEmpty(cleanDomain)) {
                     // update domain set
