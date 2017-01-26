@@ -75,7 +75,7 @@ public class DataFlowUtils {
     }
 
     public static Node normalizeDomain(Node last, String fieldName, String outputFieldName) {
-        final String normalizeDomain = "%s != null ? %s.replaceAll(\"^http://\", \"\").replaceAll(\"^www[.]\", \"\").replaceAll(\"/.*$\", \"\") : null";
+        final String normalizeDomain = "%s != null ? %s.replaceAll(\"^https?://\", \"\").replaceAll(\"^www[.]\", \"\").replaceAll(\"/.*$\", \"\") : null";
         final String replaceNulls = "%s != null && %s.equals(\"NULL\") ? null : %s";
         final String toUpperCase = "%s != null ? %s.toUpperCase() : %s";
         return last
