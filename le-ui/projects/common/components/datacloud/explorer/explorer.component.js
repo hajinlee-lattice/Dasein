@@ -3,9 +3,9 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, BrowserStorageUtility, 
-    FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, EnrichmentTopAttributes, 
-    EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, 
+    BrowserStorageUtility, FeatureFlagService, DataCloudStore, DataCloudService, EnrichmentCount, 
+    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, EnrichmentAccountLookup, LookupStore
 ){
     var vm = this,
         across = 4, // how many across in grid view
@@ -84,7 +84,9 @@ angular.module('common.datacloud.explorer', [
         initialized: false,
         enable_category_dropdown: false,
         enable_grid: true,
-        section: getSection($state.current.name)
+        section: $stateParams.section,
+        category: $stateParams.category,
+        subcategory: $stateParams.subcategory
     });
 
 
@@ -101,12 +103,13 @@ angular.module('common.datacloud.explorer', [
         }
     ];
 
-    function getSection(string, fromEnd) {
-        var arr = string.split('.'),
-            fromEnd = fromEnd || 1,
-            section = arr.slice(Math.max(arr.length - fromEnd, 1)).join('.');
-
-        return section;
+    vm.updateStateParams = function() {
+        $state.go('.', { 
+            category: vm.category, 
+            subcategory: vm.subcategory 
+        }, { 
+            notify: false 
+        });
     }
 
     vm.init = function() {
@@ -141,6 +144,7 @@ angular.module('common.datacloud.explorer', [
             vm.queryTimeout = $timeout(function() {
                 if(!vm.category && newvalue) {
                     vm.category = vm.categories[0];
+                    vm.updateStateParams();
                 }
 
                 vm.query = vm.queryText;
@@ -151,8 +155,10 @@ angular.module('common.datacloud.explorer', [
             }, 333);
 
             if(vm.section != 'browse') {
-                vm.category = vm.categories[0];
+                //vm.category = vm.categories[0];
+                vm.updateStateParams();
             }
+
         });
 
         var download_buttons = angular.element('.dropdown-container > h2');
@@ -749,6 +755,8 @@ angular.module('common.datacloud.explorer', [
 
             vm.filterEmptySubcategories();
         }
+
+        vm.updateStateParams();
     }
 
     vm.companyInfoFormatted = function (type, value) {
@@ -830,10 +838,12 @@ angular.module('common.datacloud.explorer', [
             if (newCategories.length <= 1) {
                 addUniqueToArray(subcategoriesExclude, vm.category);
                 vm.subcategory = newCategories[0];
+                vm.updateStateParams();
             } else {
 
                 if (subcategoriesExclude.includes(vm.category)) {
                     vm.subcategory = '';
+                    vm.updateStateParams();
                 }
                 removeFromArray(subcategoriesExclude, vm.category);
             }

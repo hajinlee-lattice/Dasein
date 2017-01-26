@@ -29,8 +29,9 @@ pd-pagination-controls .pd-pagination {
     }
     
     button[disabled] {
-        border-color: #eee;
+        border-color: #dadada;
         color: #ccc;
+        background-color: #f0f0f0;
     }
 
     .active {

@@ -1,10 +1,16 @@
 <section id="ExplorerTabsView" class="container">
     <ul>
-        <li ui-sref="home.datacloud.explorer.browse" ui-sref-active="active">
+        <li ng-click="vm.setStateParams('browse')"
+            ng-class="{ 'active': vm.section == 'browse' }">
+
             <h2>Lattice Data Cloud Attributes</h2>
             <div ng-if="vm.DataCloudStore.metadata.enrichmentsTotal">{{vm.DataCloudStore.metadata.enrichmentsTotal|number}}</div>
         </li>
-        <li ui-sref="home.datacloud.explorer.edit" ui-sref-active="active" class="info noselect-children" ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
+        <li ng-click="vm.setStateParams('edit')"
+            ng-class="{ 'active': vm.section == 'edit' }" 
+            class="info noselect-children" 
+            ng-if="!vm.DataCloudStore.metadata.lookupMode || 1">
+
             <h2>
                 Enrichment
                 <span class="more-info">&#105;
@@ -23,7 +29,9 @@
             </h2>
             {{vm.DataCloudStore.metadata.generalSelectedTotal||0}} of {{vm.DataCloudStore.metadata.generalSelectLimit}} / {{vm.DataCloudStore.metadata.premiumSelectedTotal||0}} of {{vm.DataCloudStore.metadata.premiumSelectLimit}} premium 
         </li>
-        <li ui-sref="home.datacloud.explorer.team" ui-sref-active="active">
+        <li ng-click="vm.setStateParams('team')"
+            ng-class="{ 'active': vm.section == 'team' }">
+
             <h2>
                 Insights for Sales Team
                 <span class="more-info">&#105;

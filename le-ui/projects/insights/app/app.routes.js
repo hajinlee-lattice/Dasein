@@ -71,7 +71,7 @@ angular.module('insightsApp')
         })
         .state('home.main', {
             url: '/main',
-            redirectTo: 'home.datacloud.explorer.browse'
+            redirectTo: 'home.datacloud.insights'
         });
 });
 

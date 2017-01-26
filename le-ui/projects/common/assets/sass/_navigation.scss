@@ -33,6 +33,10 @@ $slide-transition: 200ms;
     min-height: 100vh;
 }
 
+section.insights-content {
+    @include flex-item(1 1 auto);
+    position: relative;
+}
 section.main-content {
     @include flex-item(1 1 auto);
     @include transition(padding $slide-transition ease);
