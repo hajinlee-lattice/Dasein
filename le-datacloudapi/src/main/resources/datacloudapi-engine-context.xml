@@ -4,8 +4,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <context:component-scan base-package="com.latticeengines.datacloud.engine"/>
+    <context:component-scan base-package="com.latticeengines.datacloudapi.engine"/>
 
-    <import resource="classpath:serviceflows-propdata-etl-context.xml"/>
+    <import resource="classpath:serviceflows-datacloud-etl-context.xml"/>
 
 </beans>

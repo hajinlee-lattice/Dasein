@@ -95,7 +95,7 @@ def create_infra_template(stackname, instances, apps):
 
     task = haproxy_task(stackname, stack.get_ec2s())
     stack.add_resource(task)
-    haproxy = stack.create_service("haproxy", task, capacity=instances)
+    haproxy, _ = stack.create_service("haproxy", task, capacity=instances)
     stack.add_resource(haproxy)
 
     return stack

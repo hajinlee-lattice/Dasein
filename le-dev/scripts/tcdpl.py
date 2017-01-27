@@ -26,7 +26,7 @@ else:
     print 'HADOOP_COMMON_JAR=%s' % HADOOP_COMMON_JAR
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
-MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality', 'sqoop']
+MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi', 'modelquality', 'sqoop', 'datacloudapi']
 COMMON_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop']
 
 def cleanupWars():

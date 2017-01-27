@@ -19,7 +19,7 @@
 
     <properties>
         <branchPath>trunk</branchPath>
-        <argLine>-XX:MaxPermSize=1024m -Dsqoop.throwOnError=true</argLine>
+        <argLine>-Dsqoop.throwOnError=true</argLine>
         <svnrepourl/>
         <nexusrepourl/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -85,13 +85,13 @@
 
     <bean name="dataCloudRefresh" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="dataCloudRefresh" />
-        <property name="cronTrigger" value="${quartz.propdata.refresh.job.cron:*/10 * * * * ?}" />
-        <property name="destUrl" value="${quartz.propdata.predefined.job.primary.url:}" />
-        <property name="secondaryDestUrl" value="${quartz.propdata.predefined.job.secondary.url:}" />
-        <property name="queryApi" value="${quartz.propdata.predefined.job.query.api:}" />
-        <property name="checkJobBeanUrl" value="${quartz.propdata.predefined.job.check.bean.url:}" />
+        <property name="cronTrigger" value="${quartz.datacloudapi.refresh.job.cron:*/10 * * * * ?}" />
+        <property name="destUrl" value="${quartz.datacloudapi.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.datacloudapi.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.datacloudapi.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.datacloudapi.predefined.job.check.bean.url:}" />
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;dataCloudRefresh&quot;}" />
-        <property name="jobTimeout" value="${quartz.propdata.refresh.job.timeout:3600}" />
+        <property name="jobTimeout" value="${quartz.datacloudapi.refresh.job.timeout:3600}" />
     </bean>
 
     <bean name="scoringManagerJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">

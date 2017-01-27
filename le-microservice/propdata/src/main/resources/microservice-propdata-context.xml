@@ -6,15 +6,8 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:microservice-context.xml"/>
-    <import resource="classpath:datacloudapi-api-context.xml"/>
-    <import resource="classpath:quartzclient-context.xml"/>
-    <import resource="classpath:workflow-context.xml"/>
 
-    <context:component-scan base-package="
-        com.latticeengines.datacloud.api.controller,
-        com.latticeengines.microservice.propdata,
-        com.latticeengines.datacloud.qbean"
-    />
+    <context:component-scan base-package="com.latticeengines.microservice.propdata"/>
 
     <bean id="propdataHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
         <property name="componentName" value="propdata-microservice" />

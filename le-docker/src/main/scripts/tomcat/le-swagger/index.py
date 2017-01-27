@@ -23,7 +23,7 @@ def replace_options(options):
             if "{{options}}" in line:
                 new_content += generate_options(options)
             elif "{{firstOption}}" in line:
-                new_content.append(line.replace("{{firstOption}}", options[0]))
+                new_content.append(line.replace("{{firstOption}}", options.split(",")[0]))
             else:
                 new_content.append(line)
 
