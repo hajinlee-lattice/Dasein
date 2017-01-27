@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <import resource="classpath:serviceflows-propdata-etl-context.xml"/>
-    <import resource="classpath:serviceflows-propdata-match-context.xml"/>
+    <import resource="classpath:serviceflows-datacloud-etl-context.xml"/>
+    <import resource="classpath:serviceflows-datacloud-match-context.xml"/>
 
 </beans>
