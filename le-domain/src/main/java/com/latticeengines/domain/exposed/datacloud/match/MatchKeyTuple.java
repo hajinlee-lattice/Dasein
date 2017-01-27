@@ -1,10 +1,9 @@
-package com.latticeengines.datacloud.match.actors.visitor;
+package com.latticeengines.domain.exposed.datacloud.match;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
-import com.latticeengines.datacloud.match.service.impl.MatchConstants;
 
 public class MatchKeyTuple implements Fact {
     private String domain;

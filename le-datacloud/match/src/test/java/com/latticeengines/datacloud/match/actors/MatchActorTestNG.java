@@ -17,12 +17,12 @@ import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;

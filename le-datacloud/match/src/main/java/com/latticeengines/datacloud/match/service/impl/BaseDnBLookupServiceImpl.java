@@ -23,9 +23,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
-import com.latticeengines.datacloud.match.dnb.DnBAPIType;
-import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
 public abstract class BaseDnBLookupServiceImpl<T> {

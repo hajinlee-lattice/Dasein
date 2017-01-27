@@ -27,6 +27,7 @@ import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;

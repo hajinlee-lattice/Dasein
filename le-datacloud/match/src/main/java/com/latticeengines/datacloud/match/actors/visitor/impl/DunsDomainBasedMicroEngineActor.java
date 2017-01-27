@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.datacloud.match.actors.visitor.LookupMicroEngineActorTemplate;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("dunsDomainBasedMicroEngineActor")
 @Scope("prototype")

@@ -1,11 +1,11 @@
-package com.latticeengines.datacloud.match.service;
+package com.latticeengines.datacloud.core.service;
 
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.datacloud.match.dnb.DnBCache;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.entitymgr.DnBCacheEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 
 public interface DnBCacheService {
 

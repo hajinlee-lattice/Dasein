@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.actors.visitor.BulkLookupStrategy;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("dynamoDBLookupService")
 public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {

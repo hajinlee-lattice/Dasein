@@ -20,14 +20,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 // Test 1: use Fortune1000 to compare match result between DnB realtime match and DnB bulk match
 // Test 2: submit DnB bulk match with large input set

@@ -13,6 +13,7 @@
         <le.domain.version>3.2.0-SNAPSHOT</le.domain.version>
         <le.scheduler.version>3.2.0-SNAPSHOT</le.scheduler.version>
         <le.transform.version>3.2.0-SNAPSHOT</le.transform.version>
+        <org.scala-lang-version>2.10.6</org.scala-lang-version>
     </properties>
 
     <parent>
@@ -313,6 +314,11 @@
                     <artifactId>flink-shaded-hadoop2</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${org.scala-lang-version}</version>
         </dependency>
     </dependencies>
 

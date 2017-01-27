@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service;
+package com.latticeengines.datacloud.core.service;
 
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 

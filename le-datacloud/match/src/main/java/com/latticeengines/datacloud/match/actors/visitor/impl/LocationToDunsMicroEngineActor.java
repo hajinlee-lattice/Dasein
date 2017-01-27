@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.actors.exposed.traveler.Traveler;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.MicroEngineActorTemplate;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")

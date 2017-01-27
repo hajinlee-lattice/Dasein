@@ -1,13 +1,10 @@
-package com.latticeengines.matchapi.service.impl;
+package com.latticeengines.datacloud.engine.transformation.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,33 +23,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.core.service.DnBCacheService;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
-import com.latticeengines.datacloud.match.dnb.DnBCache;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
+import com.latticeengines.datacloud.engine.transformation.service.CacheLoaderConfig;
+import com.latticeengines.datacloud.engine.transformation.service.CacheLoaderService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
-import com.latticeengines.datacloud.match.service.DnBCacheService;
-import com.latticeengines.datacloud.match.service.MatchExecutor;
-import com.latticeengines.datacloud.match.service.MatchPlanner;
-import com.latticeengines.datacloud.match.service.NameLocationService;
-import com.latticeengines.datacloud.match.service.impl.MatchContext;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.matchapi.service.CacheLoaderConfig;
-import com.latticeengines.matchapi.service.CacheLoaderService;
 
 public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>, ApplicationContextAware {
 
@@ -78,18 +65,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     private DnBCacheService dnbCacheService;
 
     @Autowired
-    @Qualifier("bulkMatchPlanner")
-    protected MatchPlanner matchPlanner;
-
-    @Autowired
-    @Qualifier("bulkMatchExecutor")
-    protected MatchExecutor matchExecutor;
-
-    @Autowired
     private NameLocationService nameLocationService;
-
-    @Autowired
-    private MatchActorSystem matchActorSystem;
 
     private ApplicationContext applicationContext;
     private ExecutorService executor;
@@ -127,13 +103,10 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         } catch (Exception ex) {
             log.error("Failed to load cache!", ex);
             throw new RuntimeException(ex);
-        } finally {
-            matchActorSystem.setBatchMode(false);
-        }
+        } 
     }
 
     protected long startLoad(String dirPath, CacheLoaderConfig config) throws Exception {
-        matchActorSystem.setBatchMode(config.isBatchMode());
         log.info("Started to load cache on path=" + dirPath);
         long startTime = System.currentTimeMillis();
         Iterator<E> iterator = iterator(dirPath);
@@ -376,9 +349,6 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                     log.info("Batch has no required records, record start=" + recordStart);
                     return 0;
                 }
-                if (config.isCallMatch()) {
-                    return callMatchSync(config, matchContexts, records, recordStart);
-                }
 
                 List<DnBCache> caches = dnbCacheService.batchAddCache(matchContexts);
                 log.info("Finished loading cache! record start=" + recordStart + " batch size=" + records.size()
@@ -389,83 +359,5 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
                 return 0;
             }
         }
-
-        public int callMatchSync(CacheLoaderConfig config, List<DnBMatchContext> matchContexts, List<E> records,
-                long recordStart) {
-
-            MatchInput input = getMatchInput(config, matchContexts);
-            MatchContext matchContext = matchPlanner.plan(input);
-            matchContext = matchExecutor.execute(matchContext);
-            List<OutputRecord> results = matchContext.getOutput().getResult();
-            int matchSize = matchContext.getOutput().getStatistics().getRowsMatched();
-            log.info("Finished matching and loading cache! record start=" + recordStart + " batch size="
-                    + records.size() + " input size=" + matchContexts.size() + " returned size=" + results.size()
-                    + " matched size=" + matchSize);
-            return results.size();
-        }
-
-        private MatchInput getMatchInput(CacheLoaderConfig config, List<DnBMatchContext> matchContexts) {
-            MatchInput matchInput = new MatchInput();
-            matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-            matchInput.setTenant(new Tenant("CacheLoader"));
-            matchInput.setPredefinedSelection(Predefined.ID);
-            matchInput.setPredefinedVersion("1.0");
-            matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
-            matchInput.setFields(getFields());
-            matchInput.setKeyMap(getKeyMap());
-            matchInput.setData(toMatchRecords(config, matchContexts));
-            matchInput.setDecisionGraph("DragonClaw");
-            matchInput.setExcludeUnmatchedWithPublicDomain(false);
-            matchInput.setPublicDomainAsNormalDomain(true);
-            matchInput.setDataCloudVersion(getDataCloudVersion(config));
-            matchInput.setSkipKeyResolution(true);
-            matchInput.setUseDnBCache(false);
-            matchInput.setUseRemoteDnB(true);
-            matchInput.setLogDnBBulkResult(false);
-
-            return matchInput;
-        }
-
-        private List<List<Object>> toMatchRecords(CacheLoaderConfig config, List<DnBMatchContext> matchContexts) {
-            List<List<Object>> data = new ArrayList<List<Object>>();
-            for (int i = 0; i < matchContexts.size(); i++) {
-                DnBMatchContext matchContext = matchContexts.get(i);
-                NameLocation nameLocation = matchContext.getInputNameLocation();
-                List<Object> datum = new ArrayList<>();
-                datum.add(nameLocation.getName());
-                datum.add(nameLocation.getCountryCode());
-                datum.add(nameLocation.getState());
-                datum.add(nameLocation.getCity());
-                datum.add(nameLocation.getZipcode());
-                datum.add(nameLocation.getPhoneNumber());
-                data.add(datum);
-            }
-            return data;
-        }
-
-        private String getDataCloudVersion(CacheLoaderConfig config) {
-            String dataCloudVersion = config.getDataCloudVersion();
-            if (StringUtils.isEmpty(dataCloudVersion)) {
-                dataCloudVersion = versionEntityMgr.currentApprovedVersion().getVersion();
-            }
-            return dataCloudVersion;
-        }
-
-        private Map<MatchKey, List<String>> getKeyMap() {
-            Map<MatchKey, List<String>> keyMap = new TreeMap<>();
-            keyMap.put(MatchKey.Name, Arrays.asList("Name"));
-            keyMap.put(MatchKey.Country, Arrays.asList("Country"));
-            keyMap.put(MatchKey.State, Arrays.asList("State"));
-            keyMap.put(MatchKey.City, Arrays.asList("City"));
-            keyMap.put(MatchKey.Zipcode, Arrays.asList("Zipcode"));
-            keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
-            return keyMap;
-        }
-
-        private List<String> getFields() {
-            List<String> fields = Arrays.asList("Name", "Country", "State", "City", "Zipcode", "PhoneNumber");
-            return fields;
-        }
     }
-
 }

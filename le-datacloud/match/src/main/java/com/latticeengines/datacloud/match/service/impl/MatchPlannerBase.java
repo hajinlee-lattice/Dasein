@@ -17,12 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
-import com.latticeengines.datacloud.match.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;

@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.datacloud.core.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.common.exposed.util.PhoneNumberUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
-import com.latticeengines.datacloud.match.service.NameLocationService;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 @Component("nameLocationService")

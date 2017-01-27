@@ -100,7 +100,8 @@ public class PipelineTransformationCleanupAccountMasterSeedDeploymentTestNG exte
         request.setSteps(steps);
         PipelineTransformationConfiguration configuration = pipelineTransformationService
                 .createTransformationConfiguration(request);
-
+        String configJson =  JsonUtils.serialize(configuration);
+        log.info("Transformation Cleanup Json=" + configJson);
         return configuration;
     }
 

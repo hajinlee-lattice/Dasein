@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.datacloud.core.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,14 +12,14 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.dnb.DnBCache;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
-import com.latticeengines.datacloud.match.service.DnBCacheService;
-import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.datacloud.core.service.DnBCacheService;
+import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
-public class DnBCacheServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DnBCacheServiceImplTestNG.class);
 

@@ -13,8 +13,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
 @Component("configurableSampleFlow")
-public class ConfigurableSampleFlow
-       extends ConfigurableFlowBase<SampleTransformerConfig> {
+public class ConfigurableSampleFlow extends ConfigurableFlowBase<SampleTransformerConfig> {
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -26,7 +25,7 @@ public class ConfigurableSampleFlow
         String filter = config.getFilter();
         List<String> attrs = sampled.getFieldNames();
         if (filter != null) {
-            sampled = sampled.filter(filter, new FieldList(attrs.toArray(new String[attrs.size()])));
+            sampled = sampled.filter(filter, new FieldList(config.getFilterFields()));
         }
 
         Float fraction = config.getFraction();

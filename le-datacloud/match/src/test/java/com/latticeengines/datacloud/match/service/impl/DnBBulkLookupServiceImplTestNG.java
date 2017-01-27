@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
-import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBMatchGrade;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 

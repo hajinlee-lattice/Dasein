@@ -1,7 +1,8 @@
-package com.latticeengines.datacloud.match.entitymgr;
+package com.latticeengines.datacloud.core.entitymgr;
 
-import com.latticeengines.datacloud.match.dnb.DnBCache;
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+
 
 public interface DnBCacheEntityMgr extends BaseFabricEntityMgr<DnBCache> {
 

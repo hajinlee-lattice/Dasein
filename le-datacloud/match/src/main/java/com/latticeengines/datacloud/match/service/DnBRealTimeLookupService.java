@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service;
 
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 
 public interface DnBRealTimeLookupService {
 

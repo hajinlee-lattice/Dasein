@@ -15,6 +15,7 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 import akka.actor.ActorRef;

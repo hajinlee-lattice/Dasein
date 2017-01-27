@@ -39,6 +39,7 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;

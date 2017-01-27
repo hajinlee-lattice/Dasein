@@ -17,6 +17,7 @@ import com.latticeengines.datacloud.match.testframework.TestMatchInputUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;

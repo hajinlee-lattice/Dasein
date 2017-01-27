@@ -18,6 +18,9 @@ public class SampleTransformerConfig extends TransformerConfig {
     @JsonProperty("ExcludeAttrs")
     private List<String> excludeAttrs;
 
+    @JsonProperty("FilterFields")
+    private List<String> filterFields;
+
     public Float getFraction() {
         return fraction;
     }
@@ -49,4 +52,14 @@ public class SampleTransformerConfig extends TransformerConfig {
     public void setExcludeAttrs(List<String> excludeAttrs) {
         this.excludeAttrs = excludeAttrs;
     }
+
+    public List<String> getFilterFields() {
+        return this.filterFields;
+    }
+
+    public void setFilterFields(List<String> filterFields) {
+        this.filterFields = filterFields;
+    }
+    
+    
 }

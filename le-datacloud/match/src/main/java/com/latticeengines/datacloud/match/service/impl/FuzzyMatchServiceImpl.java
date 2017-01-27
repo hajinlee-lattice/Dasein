@@ -23,13 +23,13 @@ import akka.util.Timeout;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
-import com.latticeengines.datacloud.match.actors.visitor.MatchKeyTuple;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;

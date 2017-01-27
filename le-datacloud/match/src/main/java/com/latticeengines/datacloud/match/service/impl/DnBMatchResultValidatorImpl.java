@@ -3,10 +3,10 @@ package com.latticeengines.datacloud.match.service.impl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBMatchGrade;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
 @Component("dnbMatchResultValidatorImpl")
 public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {

@@ -1,11 +1,11 @@
-package com.latticeengines.datacloud.match.service.impl;
+package com.latticeengines.domain.exposed.datacloud.match;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public final class MatchConstants {
-    static final String CACHE_TABLE = "DerivedColumnsCache";
-    static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
-    static final String DISPOSABLE_EMAIL = "DisposableEmail";
+    public static final String CACHE_TABLE = "DerivedColumnsCache";
+    public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+    public static final String DISPOSABLE_EMAIL = "DisposableEmail";
 
     // these are the same as column names in RTS Cache, if applicable
     public static final String DOMAIN_FIELD = "Domain";

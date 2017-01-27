@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.actors.visitor;
 
 import com.latticeengines.actors.exposed.traveler.Response;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public abstract class LookupMicroEngineActorTemplate extends MicroEngineActorTemplate<DynamoLookupActor> {
 

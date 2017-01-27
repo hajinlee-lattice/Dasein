@@ -22,6 +22,7 @@ import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.newrelic.api.agent.Trace;

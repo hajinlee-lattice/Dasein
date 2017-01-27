@@ -10,7 +10,8 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
     private final MatchKeyTuple matchKeyTuple;

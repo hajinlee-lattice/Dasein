@@ -1,4 +1,4 @@
-package com.latticeengines.matchapi.service.impl;
+package com.latticeengines.datacloud.engine.transformation.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,18 +12,18 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.service.DnBCacheService;
+import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.match.dnb.DnBCache;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.service.DnBCacheService;
-import com.latticeengines.datacloud.match.service.NameLocationService;
+import com.latticeengines.datacloud.engine.testframework.PropDataEngineAbstractTestNGBase;
+import com.latticeengines.datacloud.engine.transformation.service.CacheLoaderConfig;
+import com.latticeengines.datacloud.engine.transformation.service.CacheLoaderService;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.matchapi.service.CacheLoaderConfig;
-import com.latticeengines.matchapi.service.CacheLoaderService;
-import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
 
 @Component
-public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
+public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBase {
 
     private static final Log log = LogFactory.getLog(CacheLoaderServiceImplTestNG.class);
 
@@ -95,51 +95,6 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AAA");
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void startLoadWithoutDuns() {
-        try {
-            HdfsPodContext.changeHdfsPodId(podId);
-            uploadTestAVro(avroDir, AM_CACHE_FILE);
-            CacheLoaderConfig config = new CacheLoaderConfig();
-            config.setDirPath(avroDir);
-            getFieldMap(config);
-
-            config.setDunsField("DUNS");
-            config.setCallMatch(true);
-            // config.setBatchMode(true);
-            long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
-
-            Assert.assertEquals(count, 17);
-            assertCachePositiveWithoutDuns();
-
-        } catch (Exception ex) {
-            log.error("Exception!", ex);
-            Assert.fail("Test failed! due to=" + ex.getMessage());
-        }
-    }
-
-    private void assertCachePositiveWithoutDuns() {
-
-        DnBMatchContext context = new DnBMatchContext();
-        NameLocation nameLocation = new NameLocation();
-        nameLocation.setName("Angeles Grocery");
-        nameLocation.setCity("Jersey City");
-        nameLocation.setState("New Jersey");
-        nameLocation.setCountry("USA");
-        nameLocation.setZipcode(null);
-        nameLocation.setPhoneNumber(null);
-        nameLocationService.normalize(nameLocation);
-        context.setInputNameLocation(nameLocation);
-        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBCache whiteCache = dnbCacheService.lookupCache(context);
-
-        Assert.assertTrue(whiteCache != null);
-        Assert.assertEquals(whiteCache.getDuns(), "149259751");
-
-        Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(7));
-        Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AZZAAZZZFBA");
-    }
-
     private void getFieldMap(CacheLoaderConfig config) {
         Map<String, String> fieldMap = new HashMap<>();
 
@@ -154,8 +109,8 @@ public class CacheLoaderServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     private void uploadTestAVro(String avroDir, String fileName) {
         try {
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, String.format("accountmaster/%s", fileName),
-                    avroDir + "/" + fileName);
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, String.format("sources/%s", fileName), avroDir + "/"
+                    + fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }

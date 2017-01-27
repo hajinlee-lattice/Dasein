@@ -1,10 +1,10 @@
-package com.latticeengines.datacloud.match.entitymgr.impl;
+package com.latticeengines.datacloud.core.entitymgr.impl;
 
-import com.latticeengines.datacloud.match.dnb.DnBCache;
-import com.latticeengines.datacloud.match.entitymgr.DnBCacheEntityMgr;
+import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class DnBCacheEntityMgrImpl extends BaseFabricEntityMgrImpl<DnBCache> implements DnBCacheEntityMgr {

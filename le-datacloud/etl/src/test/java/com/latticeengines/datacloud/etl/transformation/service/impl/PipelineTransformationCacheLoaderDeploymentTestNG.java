@@ -21,9 +21,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.LatticeCacheSeed;
-import com.latticeengines.datacloud.core.source.impl.OrbCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -34,31 +32,23 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFieldEnrichmentTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceFirmoGraphEnrichmentTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SourceSeedFileMergeTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SampleTransformerConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG extends
+public class PipelineTransformationCacheLoaderDeploymentTestNG extends
         TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeedCleaned";
+    private static final String LATTICE_CACHE_SEED_LOADER = "LatticeCacheSeedCacheLoader";
 
-    private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(PipelineTransformationCacheLoaderDeploymentTestNG.class);
 
     @Autowired
     private PipelineSource source;
 
     @Autowired
     private LatticeCacheSeed baseLatticeCacheSource;
-
-    @Autowired
-    private DnBCacheSeed baseDnbCacheSource;
-
-    @Autowired
-    private OrbCacheSeed orbCacheSource;
 
     @Autowired
     private SourceService sourceService;
@@ -78,10 +68,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     @Test(groups = "deployment")
     public void testTransformation() throws IOException {
 
-        uploadBaseSourceFile(baseLatticeCacheSource, "LatticeCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
-        uploadBaseSourceFile(baseDnbCacheSource, "DnBCacheSeed_Cleanup_Test", "2017-01-09_19-12-43_UTC");
-        uploadBaseSourceFile(orbCacheSource, "OrbCacheSeed_Merge_Test", "2017-01-09_19-12-43_UTC");
-        String targetSourcePath = hdfsPathBuilder.podDir().append(LATTICE_CACHE_SEED_CLEANED).toString();
+        uploadBaseSourceFile(baseLatticeCacheSource, "am_cache", "2017-01-09_19-12-43_UTC");
+        String targetSourcePath = hdfsPathBuilder.podDir().append(LATTICE_CACHE_SEED_LOADER).toString();
         HdfsUtils.rmdir(yarnConfiguration, targetSourcePath);
 
         TransformationProgress progress = createNewProgress();
@@ -111,92 +99,41 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
-        request.setName("LatticeCacheSeedCleanupPipeline");
+        request.setName("LatticeCacheSeedCacheLoaderPipeline");
         request.setVersion("2017-01-09_19-12-43_UTC");
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setBaseSources(Arrays.asList("LatticeCacheSeed", "OrbCacheSeed"));
-        step.setTransformer("sourceSeedFileMergeTransformer");
-        step.setConfiguration(getSeedFileMergeConfig());
+        step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
+        step.setTransformer("sampler");
+        step.setConfiguration(getSourceFileFilterConfig());
+//        step.setTargetSource(LATTICE_CACHE_SEED_LOADER);
         steps.add(step);
 
-        
         step = new TransformationStepConfig();
-//        step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
+        // step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
         List<Integer> inputSteps = new ArrayList<Integer>();
         inputSteps.add(0);
         step.setInputSteps(inputSteps);
         step.setTransformer("bulkMatchTransformer");
         step.setConfiguration(getMatchConfig());
-        steps.add(step);
-
-        step = new TransformationStepConfig();
-        inputSteps = new ArrayList<Integer>();
-        inputSteps.add(1);
-        step.setInputSteps(inputSteps);
-        // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
-        step.setTransformer("sourceFieldEnrichmentTransformer");
-        step.setConfiguration(getFieldsEnrichmentConfig());
-        steps.add(step);
-
-        step = new TransformationStepConfig();
-        inputSteps = new ArrayList<Integer>();
-        inputSteps.add(2);
-        step.setInputSteps(inputSteps);
-//         step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
-        step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
-//        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
-        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"__Source_Priority__\"]}");
-        steps.add(step);
-
-        step = new TransformationStepConfig();
-        step.setBaseSources(Arrays.asList("DnBCacheSeed"));
-        inputSteps = new ArrayList<Integer>();
-        inputSteps.add(3);
-        step.setInputSteps(inputSteps);
-        step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
-        step.setTransformer("sourceFirmoGraphEnrichmentTransformer");
-        step.setConfiguration(getFirmoGraphEnrichmentConfig());
+        step.setTargetSource(LATTICE_CACHE_SEED_LOADER);
         steps.add(step);
 
         request.setSteps(steps);
         PipelineTransformationConfiguration configuration = pipelineTransformationService
                 .createTransformationConfiguration(request);
-        String configJson =  JsonUtils.serialize(configuration);
-        log.info("Transformation Cleanup Json=" + configJson);
+
         return configuration;
     }
-
-    private String getSeedFileMergeConfig() {
-        SourceSeedFileMergeTransformerConfig config = new SourceSeedFileMergeTransformerConfig();
-        config.setSourceFieldName("__Source__");
-        config.setSourcePriorityFieldName("__Source_Priority__");
-        config.setSourceFieldValues(Arrays.asList("RTS", "Orb"));
-        config.setSourcePriorityFieldValues(Arrays.asList("0", "4")); // RTS=0, HG=1, BW=2, Bombora=3, Orb=4
+    
+    private String getSourceFileFilterConfig() {
+        SampleTransformerConfig config = new SampleTransformerConfig();
+        config.setFilter("DUNS == null || DUNS == \"\"");
+        config.setFilterFields(Arrays.asList("DUNS"));
         return JsonUtils.serialize(config);
     }
 
-    private String getFirmoGraphEnrichmentConfig() {
-        SourceFirmoGraphEnrichmentTransformerConfig config = new SourceFirmoGraphEnrichmentTransformerConfig();
-        config.setLeftMatchField("DUNS");
-        config.setRightMatchField("DUNS_NUMBER");
-        config.setEnrichingFields(Arrays.asList("BUSINESS_NAME", "STREET_ADDRESS", "CITY_NAME", "STATE_PROVINCE_NAME",
-                "COUNTRY_NAME", "LE_INDUSTRY", "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE"));
-        config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State",
-                "Country", "Industry", "RevenueRange", "EmployeeRange"));
-        config.setGroupFields(Arrays.asList("DUNS", "Domain"));
-        
-        config.setKeepInternalColumns(true);
-        return JsonUtils.serialize(config);
-    }
-
-    private String getFieldsEnrichmentConfig() {
-        SourceFieldEnrichmentTransformerConfig config = new SourceFieldEnrichmentTransformerConfig();
-        config.setFromFields(Arrays.asList("__Matched_DUNS__", "__Matched_City__"));
-        config.setToFields(Arrays.asList("DUNS", "City"));
-        return JsonUtils.serialize(config);
-    }
 
     private String getMatchConfig() {
         MatchTransformerConfig config = new MatchTransformerConfig();
@@ -214,7 +151,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(false);
         matchInput.setLogDnBBulkResult(false);
-        matchInput.setMatchDebugEnabled(true);
+        matchInput.setMatchDebugEnabled(false);
 
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
@@ -237,7 +174,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
     @Override
     protected String getPathForResult() {
-        targetSourceName = LATTICE_CACHE_SEED_CLEANED;
+        targetSourceName = LATTICE_CACHE_SEED_LOADER;
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
@@ -249,26 +186,11 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         int rowNum = 0;
         Map<Long, GenericRecord> recordMap =new HashMap<>();
         while (records.hasNext()) {
-            GenericRecord record = records.next();
-            Long id = (Long)record.get("SeedID");
-            recordMap.put(id, record);
+            records.next();
             rowNum++;
         }
         log.info("Total result records " + rowNum);
-        Assert.assertEquals(rowNum, 3);
-        GenericRecord record = recordMap.get(3L);
-        Assert.assertEquals(record.get("City").toString(), "New JACKSON");
-        Assert.assertEquals(record.get("State").toString(), "New CA10");
-        
-        Assert.assertTrue(record != null);
-        record = recordMap.get(6L);
-        Assert.assertEquals(record.get("City").toString(), "New MOUNTAIN VIEW");
-        Assert.assertEquals(record.get("State").toString(), "New CA0");
-        
-        Assert.assertTrue(record != null);
-        record = recordMap.get(7L);
-        Assert.assertEquals(record.get("City").toString(), "Menlo Park");
-        Assert.assertEquals(record.get("State").toString(), "California");
+        Assert.assertEquals(rowNum, 17);
         
     }
 }

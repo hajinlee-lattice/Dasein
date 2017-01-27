@@ -21,13 +21,13 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.match.dnb.DnBAPIType;
-import com.latticeengines.datacloud.match.dnb.DnBBatchMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBKeyType;
-import com.latticeengines.datacloud.match.dnb.DnBMatchContext;
-import com.latticeengines.datacloud.match.dnb.DnBReturnCode;
 import com.latticeengines.datacloud.match.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
