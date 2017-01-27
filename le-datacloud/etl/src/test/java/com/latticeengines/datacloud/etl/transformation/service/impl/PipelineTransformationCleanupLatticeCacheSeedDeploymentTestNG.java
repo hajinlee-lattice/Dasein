@@ -48,7 +48,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
     private static final String VERSION = "2017-01-26_19-05-51_UTC";
 
-    private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeedCleaned";
+    private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeed";
 
     private static final Log log = LogFactory.getLog(AccountMasterLookupRebuildServiceImplTestNG.class);
 
@@ -121,7 +121,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
         request.setName("LatticeCacheSeedCleanupPipeline");
-        request.setVersion("2017-01-09_19-12-43_UTC");
+        request.setVersion(VERSION);
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         TransformationStepConfig step = new TransformationStepConfig();
