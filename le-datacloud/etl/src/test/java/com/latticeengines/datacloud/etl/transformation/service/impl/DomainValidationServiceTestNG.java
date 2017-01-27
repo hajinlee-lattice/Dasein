@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 public class DomainValidationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DomainValidationServiceTestNG.class);
 
     @Autowired
@@ -124,7 +124,18 @@ public class DomainValidationServiceTestNG
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // TODO Auto-generated method stub
-
+        log.info("Start to verify records one by one.");
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String domain = record.get("Domain").toString();
+            Boolean isValidDomain = (Boolean) record.get("IsValidDomain");
+            Assert.assertTrue((domain.equals("baidu.com") && isValidDomain == null)
+                           || (domain.equals("google.com") && isValidDomain == Boolean.TRUE)
+                           || (domain.equals("yahoo.com") && isValidDomain == null)
+                           || (domain.equals("abcdefghijklmn.com") && isValidDomain == Boolean.FALSE));
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 4);
     }
 }
