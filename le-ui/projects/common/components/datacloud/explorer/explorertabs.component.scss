@@ -2,21 +2,37 @@
     @include flex-container;
     position: relative;
     z-index: 3;
+    border-top: 1px solid #d0d1d0;
     border-bottom: 1px solid #d0d1d0;
+    background: #efefef;
+    margin-top: 0;
     & > ul {
         @include flex-container;
         @include flex-item(1 1 auto);
-        position: relative;
-        top: 1px;
-        border: 1px solid #d0d1d0;
-        border-bottom: 0;
+        border-right: 1px solid #d0d1d0;
+        border-left: 1px solid #d0d1d0;
+        max-width: 1200px;
+        margin: 0 auto;
         & > li {
             @include flex-item(1 1 auto);
-            border-top: 5px solid transparent;
             border-right: 1px solid #d0d1d0;
-            border-bottom: 1px solid #d0d1d0;
-            padding: 14px 20px;
             font-size: 9px;
+            position: relative;
+            height: 73px;
+            min-width: 237px;
+            .tab-container {
+                margin: 0;
+                padding: 14px 20px;
+                border-top: 5px solid transparent;
+                border-bottom: 1px solid transparent;
+                height: calc(100% + 1px);
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2;
+            }
             &[ui-sref] {
                 cursor: pointer;
             }
@@ -24,15 +40,20 @@
                 border-right: 0;
             }
             &.active {
-                border-top-color: orange;
-                border-bottom-color: transparent;
                 background: #fafafa;
+                .tab-container {
+                    border-top-color: orange;
+                    border-bottom-color: transparent;
+                    background: #fafafa;
+                    z-index: 1;
+                }
             }
             .count {
                 color: #26649b;
                 font-size: 18px;
             }
             &.tab-edit {
+                min-width: 237px;
                 .enrichmentCounts {
                     white-space: nowrap;
                     text-transform: uppercase;

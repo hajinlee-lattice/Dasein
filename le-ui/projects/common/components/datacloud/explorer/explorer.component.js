@@ -149,7 +149,7 @@ angular.module('common.datacloud.explorer', [
 
                 vm.query = vm.queryText;
                 
-                vm.filterEmptySubcategories(); // ben:note this is breaking 
+                vm.filterEmptySubcategories(); // ben:note this is breaking
 
                 vm.queryInProgress = false;
             }, 333);
@@ -162,22 +162,31 @@ angular.module('common.datacloud.explorer', [
 
         });
 
-        var download_buttons = angular.element('.dropdown-container > h2');
-        download_buttons.click(function(e){
-            var button = angular.element(this),
-                toggle_on = !button.hasClass('active');
+        var find_dropdown_buttons = $interval(dropdown_buttons, 300),
+            find_dropdown_buttons_count = 0;
 
-            download_buttons.removeClass('active');
-            download_buttons.siblings('ul.dropdown').removeClass('open');
-
-            if(toggle_on) {
-                button.addClass('active');
-                button.siblings('ul.dropdown').addClass('open');
+        function dropdown_buttons() {
+            var buttons = angular.element('.dropdown-container > h2');
+            find_dropdown_buttons_count++;
+            if(buttons.length > 0 || find_dropdown_buttons_count > 5) {
+                $interval.cancel(find_dropdown_buttons);
             }
+            buttons.click(function(e){
+                var button = angular.element(this),
+                    toggle_on = !button.hasClass('active');
 
-            e.stopPropagation();
+                buttons.removeClass('active');
+                buttons.siblings('ul.dropdown').removeClass('open');
 
-        });
+                if(toggle_on) {
+                    button.addClass('active');
+                    button.siblings('ul.dropdown').addClass('open');
+                }
+
+                e.stopPropagation();
+
+            });
+        }
 
         angular.element(document).click(function(event) {
             var target = angular.element(event.target),
