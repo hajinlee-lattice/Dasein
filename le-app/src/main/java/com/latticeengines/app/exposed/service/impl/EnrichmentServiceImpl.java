@@ -1,7 +1,5 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.app.exposed.service.AttributeService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +17,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -43,9 +38,8 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private static final Log log = LogFactory.getLog(EnrichmentServiceImpl.class);
     private static final String DUMMY_KEY = "TopNAttrTree";
 
-    private boolean useDummyData = false;
-
     private LoadingCache<String, TopNAttributeTree> topAttrsCache;
+    private Map<String, Boolean> flagMapForInternalEnrichment;
 
     @Autowired
     private AMStatsProxy amStatsProxy;
@@ -59,16 +53,15 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                 .build(new CacheLoader<String, TopNAttributeTree>() {
                     @Override
                     public TopNAttributeTree load(String dummyKey) throws Exception {
-                        TopNAttributeTree attributeTree;
-                        if (useDummyData) {
-                            attributeTree = new TopNAttributeTree();
-                            for (Category category : Category.values()) {
-                                attributeTree.put(category, createTopNAttributes(category.getName(), 20));
-                            }
-                        } else {
-                            attributeTree = amStatsProxy.getTopAttrTree();
-                        }
+                        TopNAttributeTree attributeTree = amStatsProxy.getTopAttrTree();
                         log.info("Loaded attributeTree into LoadingCache.");
+
+                        List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
+                        Map<String, Boolean> updatedFlagMapForInternalEnrichment = new HashMap<>();
+                        for (LeadEnrichmentAttribute attr : allAttrs) {
+                            updatedFlagMapForInternalEnrichment.put(attr.getFieldName(), attr.getIsInternal());
+                        }
+                        flagMapForInternalEnrichment = updatedFlagMapForInternalEnrichment;
                         return attributeTree;
                     }
                 });
@@ -81,11 +74,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
 
     @Override
     public AccountMasterCube getCube(AccountMasterFactQuery query) {
-        if (useDummyData) {
-            return createDummyCube();
-        } else {
-            return amStatsProxy.getCube(query);
-        }
+        return amStatsProxy.getCube(query);
     }
 
     @Override
@@ -95,12 +84,12 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     }
 
     @Override
-    public TopNAttributes getTopAttrs(Category category, int max) {
+    public TopNAttributes getTopAttrs(Category category, int max, boolean shouldConsiderInternalEnrichment) {
         TopNAttributeTree topAttrsTree = getTopAttrTree();
         TopNAttributes topAttrsForCategory = //
                 topAttrsTree == null ? //
                         null : topAttrsTree.get(category);
-        return selectTopN(topAttrsForCategory, max);
+        return selectTopN(topAttrsForCategory, max, shouldConsiderInternalEnrichment);
     }
 
     private TopNAttributeTree getTopAttrTree() {
@@ -108,20 +97,12 @@ public class EnrichmentServiceImpl implements EnrichmentService {
             return topAttrsCache.get(DUMMY_KEY);
         } catch (Exception e) {
             log.error("Failed to load top attr tree from cache", e);
-            TopNAttributeTree attributeTree;
-            if (useDummyData) {
-                attributeTree = new TopNAttributeTree();
-                for (Category category : Category.values()) {
-                    attributeTree.put(category, createTopNAttributes(category.getName(), 5));
-                }
-            } else {
-                attributeTree = amStatsProxy.getTopAttrTree();
-            }
+            TopNAttributeTree attributeTree = amStatsProxy.getTopAttrTree();
             return attributeTree;
         }
     }
 
-    private TopNAttributes selectTopN(TopNAttributes attributes, int max) {
+    private TopNAttributes selectTopN(TopNAttributes attributes, int max, boolean shouldConsiderInternalEnrichment) {
         Map<String, List<TopNAttributes.TopAttribute>> topAttrs = new HashMap<>();
         TopNAttributes topNAttributes = new TopNAttributes();
         topNAttributes.setTopAttributes(topAttrs);
@@ -133,6 +114,11 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                 String subCategory = entry.getKey();
                 for (TopNAttributes.TopAttribute attr : entry.getValue()) {
                     if (attrs.size() < max) {
+                        if (!shouldConsiderInternalEnrichment
+                                && flagMapForInternalEnrichment.get(attr.getAttribute()) != null
+                                && flagMapForInternalEnrichment.get(attr.getAttribute()).booleanValue()) {
+                            continue;
+                        }
                         attrs.add(attr);
                     } else {
                         break;
@@ -206,84 +192,4 @@ public class EnrichmentServiceImpl implements EnrichmentService {
         query.setQualifiers(qualifiers);
         return query;
     }
-
-    private AccountMasterCube createDummyCube() {
-        List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
-        return createDummyCube(allAttrs);
-    }
-
-    private AccountMasterCube createDummyCube(List<LeadEnrichmentAttribute> allAttrs) {
-        AccountMasterCube cube = new AccountMasterCube();
-
-        Map<String, AttributeStatistics> statistics = new HashMap<>();
-
-        int count = 500000;
-        for (LeadEnrichmentAttribute attr : allAttrs) {
-            AttributeStatistics value = new AttributeStatistics();
-            AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
-            rowBasedStatistics.setNonNullCount(count--);
-            Buckets buckets = new Buckets();
-            buckets.setType(BucketType.Numerical);
-            List<Bucket> bucketList = new ArrayList<>();
-            Bucket bucket = new Bucket();
-            bucket.setBucketLabel("First Bucket");
-            bucket.setCount(count - 10);
-            bucketList.add(bucket);
-            bucket = new Bucket();
-            bucket.setBucketLabel("Second Bucket");
-            bucket.setCount(10);
-            bucketList.add(bucket);
-            buckets.setBucketList(bucketList);
-            rowBasedStatistics.setBuckets(buckets);
-            value.setRowBasedStatistics(rowBasedStatistics);
-
-            statistics.put(attr.getFieldName(), value);
-        }
-
-        cube.setStatistics(statistics);
-        return cube;
-    }
-
-    private TopNAttributes createTopNAttributes(String category, int max) {
-        List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
-        TopNAttributes topNAttributes = new TopNAttributes();
-        AccountMasterCube cube = createDummyCube(allAttrs);
-        Map<String, List<TopNAttributes.TopAttribute>> topAttributes = new HashMap<>();
-        topNAttributes.setTopAttributes(topAttributes);
-
-        for (LeadEnrichmentAttribute attr : allAttrs) {
-            if (!attr.getCategory().equalsIgnoreCase(category)) {
-                continue;
-            }
-
-            String subcategory = attr.getSubcategory();
-            if (!topAttributes.containsKey(subcategory)) {
-                List<TopNAttributes.TopAttribute> topNList = new ArrayList<>();
-                topAttributes.put(subcategory, topNList);
-            }
-            List<TopNAttributes.TopAttribute> topNList = topAttributes.get(subcategory);
-
-            updateTopNList(attr, max, topNList, cube.getStatistics().get(attr.getFieldName()).getRowBasedStatistics());
-
-        }
-
-        return topNAttributes;
-    }
-
-    private void updateTopNList(LeadEnrichmentAttribute attr, int max, List<TopNAttributes.TopAttribute> topNList,
-            AttributeStatsDetails rowBasedStatistics) {
-        if (topNList.size() >= max) {
-            return;
-        } else {
-            TopNAttributes.TopAttribute topAttr = new TopNAttributes.TopAttribute(attr.getFieldName(),
-                    rowBasedStatistics.getNonNullCount());
-            topNList.add(topAttr);
-        }
-    }
-
-    private TopNAttributeTree constructDummyTree() {
-        TopNAttributeTree tree = new TopNAttributeTree();
-        return tree;
-    }
-
 }

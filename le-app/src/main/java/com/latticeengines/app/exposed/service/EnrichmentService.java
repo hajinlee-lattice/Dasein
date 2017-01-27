@@ -16,6 +16,6 @@ public interface EnrichmentService {
 
     AccountMasterCube getCube(String query);
 
-    TopNAttributes getTopAttrs(Category category, int max);
+    TopNAttributes getTopAttrs(Category category, int max, boolean shouldConsiderInternalEnrichment);
 
 }

@@ -39,6 +39,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.Top
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.ApiParam;
 
@@ -62,9 +64,12 @@ public class LatticeInsightsResource {
     @Autowired
     private EnrichmentService enrichmentService;
 
+    @Autowired
+    private OAuthUserEntityMgr oAuthUserEntityMgr;
+
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getInsightsCategories(HttpServletRequest request) {
@@ -81,11 +86,11 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = INSIGHTS_PATH + "/subcategories", method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getInsightsSubcategories(HttpServletRequest request, //
-            @ApiParam(value = "category", required = true)//
+            @ApiParam(value = "category", required = true) //
             @RequestParam String category) {
         Set<String> subcategories = new HashSet<String>();
         List<LeadEnrichmentAttribute> allAttributes = getInsightsAttributes(request, null, category, null, false, null,
@@ -98,33 +103,33 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = INSIGHTS_PATH, //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
     public void getInsightsAttributes(HttpServletRequest request, //
             HttpServletResponse response, //
             @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeDisplayNameFilter", required = false)//
-            @RequestParam(value = "attributeDisplayNameFilter", required = false)//
+                    + "text for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
             String attributeDisplayNameFilter, //
             @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false)//
-            @RequestParam(value = "category", required = false)//
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
             String category, //
             @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false)//
-            @RequestParam(value = "subcategory", required = false)//
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
             String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
-            required = false)//
-            @RequestParam(value = "onlySelectedAttributes", required = false)//
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes, //
-            @ApiParam(value = "Offset for pagination of matching attributes", required = false)//
-            @RequestParam(value = "offset", required = false)//
+            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
+            @RequestParam(value = "offset", required = false) //
             Integer offset, //
-            @ApiParam(value = "Maximum number of matching attributes in page", required = false)//
-            @RequestParam(value = "max", required = false)//
+            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
+            @RequestParam(value = "max", required = false) //
             Integer max) {
         List<LeadEnrichmentAttribute> result = getInsightsAttributes(request, attributeDisplayNameFilter, category,
                 subcategory, onlySelectedAttributes, offset, max);
@@ -147,26 +152,26 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = INSIGHTS_PATH + "/count", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag")
     public int getInsightsAttributesCount(HttpServletRequest request,
             @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeDisplayNameFilter", required = false)//
-            @RequestParam(value = "attributeDisplayNameFilter", required = false)//
+                    + "text for attributeDisplayNameFilter", required = false) //
+            @RequestParam(value = "attributeDisplayNameFilter", required = false) //
             String attributeDisplayNameFilter, //
             @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false)//
-            @RequestParam(value = "category", required = false)//
+                    + "with specified category", required = false) //
+            @RequestParam(value = "category", required = false) //
             String category, //
             @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false)//
-            @RequestParam(value = "subcategory", required = false)//
+                    + "with specified subcategory", required = false) //
+            @RequestParam(value = "subcategory", required = false) //
             String subcategory, //
             @ApiParam(value = "Should get only selected attribute", //
-            required = false)//
-            @RequestParam(value = "onlySelectedAttributes", required = false)//
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
@@ -175,28 +180,29 @@ public class LatticeInsightsResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = INSIGHTS_PATH
+            + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadInsightsCSV(HttpServletRequest request, HttpServletResponse response,
             @ApiParam(value = "Should get only selected attribute", //
-            required = false)//
-            @RequestParam(value = "onlySelectedAttributes", required = false)//
+                    required = false) //
+            @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
-        String fileName = onlySelectedAttributes != null && onlySelectedAttributes ? String.format(
-                "selectedEnrichmentAttributes_%s.csv", dateString) : String.format("enrichmentAttributes_%s.csv",
-                dateString);
+        String fileName = onlySelectedAttributes != null && onlySelectedAttributes
+                ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
+                : String.format("enrichmentAttributes_%s.csv", dateString);
         attributeService.downloadAttributes(request, response, "application/csv", fileName, tenant,
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
     @RequestMapping(value = INSIGHTS_PATH + "/premiumattributeslimitation", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getInsightssPremiumAttributesLimitation(HttpServletRequest request) {
@@ -227,14 +233,14 @@ public class LatticeInsightsResource {
 
     // ------------START for statistics---------------------//
     @RequestMapping(value = STATS_PATH + "/cube", //
-    method = RequestMethod.POST, //
-    headers = "Accept=application/json")
+            method = RequestMethod.POST, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
     public void loadAMStatisticsCubeByPost(HttpServletRequest request, //
             HttpServletResponse response, //
-            @ApiParam(value = "Should load enrichment attribute metadata")//
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false")//
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestBody(required = false) AccountMasterFactQuery query) {
         AccountMasterCube cube = enrichmentService.getCube(query);
@@ -248,13 +254,13 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = STATS_PATH + "/cube", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection")
     public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata")//
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false")//
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
             @RequestParam(value = "q", required = false) String query) {
         AccountMasterCube cube = enrichmentService.getCube(query);
@@ -268,17 +274,17 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = STATS_PATH + "/topn", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get top N attributes per subcategory for a given category")
     public TopNAttributes getTopNAttributes(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata")//
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false")//
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
-            @ApiParam(value = "category", required = true)//
+            @ApiParam(value = "category", required = true) //
             @RequestParam(value = "category") String categoryName, //
-            @ApiParam(value = "max", defaultValue = "5")//
+            @ApiParam(value = "max", defaultValue = "5") //
             @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
         Category category;
         try {
@@ -291,7 +297,12 @@ public class LatticeInsightsResource {
             }
         }
 
-        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category, max);
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+
+        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category, max,
+                considerInternalAttributes == null ? true : considerInternalAttributes);
 
         if (loadEnrichmentMetadata) {
             Set<String> allEnrichAttrNames = new HashSet<>();
@@ -317,15 +328,15 @@ public class LatticeInsightsResource {
     }
 
     @RequestMapping(value = STATS_PATH + "/topn/all", //
-    method = RequestMethod.GET, //
-    headers = "Accept=application/json")
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get top N attributes per subcategory for each category")
     public Map<String, TopNAttributes> getAllTopNAttributes(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata")//
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false")//
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
             Boolean loadEnrichmentMetadata, //
-            @ApiParam(value = "max", defaultValue = "5")//
+            @ApiParam(value = "max", defaultValue = "5") //
             @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
         List<String> categories = getInsightsCategories(request);
         Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
