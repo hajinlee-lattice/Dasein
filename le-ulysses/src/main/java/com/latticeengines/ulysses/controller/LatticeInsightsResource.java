@@ -39,8 +39,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.Top
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.ApiParam;
 
@@ -63,9 +61,6 @@ public class LatticeInsightsResource {
 
     @Autowired
     private EnrichmentService enrichmentService;
-
-    @Autowired
-    private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     // ------------START for LeadEnrichment-------------------//
     @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
@@ -297,7 +292,7 @@ public class LatticeInsightsResource {
             }
         }
 
-        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
 
