@@ -91,7 +91,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
             if (dataCloudVersion == null) {
                 throw new IllegalArgumentException("Cannot find the specified data cloud version " + version);
             }
-            String signature = dataCloudVersion.getDynamoTableSignature();
+            String signature = dataCloudVersion.getDynamoTableSignatureLookup();
             String fullVersion = version;
             if (StringUtils.isNotEmpty(signature)) {
                 fullVersion += "_" + signature;

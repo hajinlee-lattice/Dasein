@@ -62,6 +62,10 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "DynamoTableSignature", length = 100)
     private String dynamoTableSignature;
 
+    @JsonIgnore
+    @Column(name = "DynamoTableSignature_Lookup", length = 100)
+    private String dynamoTableSignatureLookup;
+
     @JsonProperty("Status")
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
@@ -131,6 +135,14 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setDynamoTableSignature(String dynamoTableSignature) {
         this.dynamoTableSignature = dynamoTableSignature;
+    }
+
+    public String getDynamoTableSignatureLookup() {
+        return dynamoTableSignatureLookup;
+    }
+
+    public void setDynamoTableSignatureLookup(String dynamoTableSignatureLookup) {
+        this.dynamoTableSignatureLookup = dynamoTableSignatureLookup;
     }
 
     public enum Status {
