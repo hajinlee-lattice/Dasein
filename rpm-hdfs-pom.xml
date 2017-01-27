@@ -17,7 +17,6 @@
     <modules>
         <module>le-config/pom-config-hdfs-rpm.xml</module>
         <module>le-dataplatform/pom-dataplatform-hdfs.xml</module>
-        <module>le-scoring/pom-scoring-hdfs.xml</module>
         <module>le-dataflow/pom-dataflow-hdfs.xml</module>
         <module>le-serviceflows/pom-serviceflows-rpm.xml</module>
         <module>le-dellebi/pom-dellebi-hdfs.xml</module>

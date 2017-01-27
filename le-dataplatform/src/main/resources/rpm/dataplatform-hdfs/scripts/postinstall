@@ -28,6 +28,8 @@ chmod 755 /tmp/app/dataplatform/scripts
 chmod 755 /tmp/app/dataplatform/lib
 chmod 755 /tmp/app/dataplatform/scripts/algorithm
 chmod 755 /tmp/app/playmaker/evmodel
+chmod 755 /tmp/app/scoring/scripts
+chmod 755 /tmp/app/scoring/lib
 
 rm /tmp/app/dataplatform/scripts/*.pyc
 rm /tmp/app/dataplatform/scripts/*.pyo
@@ -35,10 +37,14 @@ rm /tmp/app/dataplatform/scripts/algorithm/*.pyc
 rm /tmp/app/dataplatform/scripts/algorithm/*.pyo
 rm /tmp/app/playmaker/evmodel/*.pyc
 rm /tmp/app/playmaker/evmodel/*.pyo
+rm /tmp/app/scoring/scripts/*.pyc
+rm /tmp/app/scoring/scripts/*.pyo
 
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/scripts /app/$VERSION/dataplatform"
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/lib /app/$VERSION/dataplatform"
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/playmaker/* /app/$VERSION/playmaker"
+su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/scoring/scripts /app/$VERSION/scoring"
+su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/scoring/lib /app/$VERSION/scoring"
 
 for microservice in 'eai' 'dataflowapi' 'workflowapi' 'sqoop'
 do
@@ -47,3 +53,4 @@ done
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/le-datacloud-yarn*-shaded.jar /app/$VERSION/datacloud/lib"
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
+rm -rf /tmp/app/scoring

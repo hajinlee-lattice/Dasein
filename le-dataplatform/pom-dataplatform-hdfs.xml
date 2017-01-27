@@ -137,6 +137,28 @@
                                 </source>
                             </sources>
                         </mapping>
+                        <mapping>
+                            <directory>/tmp/app/scoring/scripts</directory>
+                            <filemode>644</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>../le-scoring/src/main/python/scoring.py</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/app/scoring/lib</directory>
+                            <filemode>750</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>../le-scoring/target/le-scoring-${le.rpm.version}-shaded.jar</location>
+                                </source>
+                            </sources>
+                        </mapping>
                     </mappings>
                     <preinstallScriptlet>
                         <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/${pre.install.script}</scriptFile>
