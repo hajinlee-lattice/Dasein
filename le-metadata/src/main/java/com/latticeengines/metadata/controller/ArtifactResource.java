@@ -1,9 +1,6 @@
 package com.latticeengines.metadata.controller;
 
-import java.util.Arrays;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,15 +54,7 @@ public class ArtifactResource {
         if (artifactValidationService == null) {
             return ResponseDocument.successResponse("");
         }
-        try {
-            artifactValidationService.validate(artifactFilePath);
-        } catch (Exception e) {
-            ResponseDocument<String> error = new ResponseDocument<>();
-            error.setSuccess(false);
-            error.setErrors(Arrays.<String>asList(new String[] { e.getMessage() }));
-            return error;
-        }
-        
+        artifactValidationService.validate(artifactFilePath);
         return ResponseDocument.successResponse("");
     }
 

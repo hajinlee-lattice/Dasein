@@ -1,16 +1,15 @@
 package com.latticeengines.metadata.controller;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.HttpServerErrorException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -52,16 +51,16 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
         hdfsPath += "/pivot.csv";
         addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        @SuppressWarnings("rawtypes")
-        ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/metadata/customerspaces/%s/artifacttype/%s?file=%s", getRestAPIHostPort(),
-                        "validateArtifact.validateArtifact.Production", ArtifactType.PivotMapping, hdfsPath), //
-                null, ResponseDocument.class);
-        assertFalse(response.isSuccess());
-        @SuppressWarnings("unchecked")
-        List<String> error = new ObjectMapper().convertValue(response.getErrors(), List.class);
-        assertEquals(error.get(0),
-                "Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType] from the file");
+        try {
+            restTemplate.postForObject( //
+                    String.format("%s/metadata/customerspaces/%s/artifacttype/%s?file=%s", getRestAPIHostPort(),
+                            "validateArtifact.validateArtifact.Production", ArtifactType.PivotMapping, hdfsPath), //
+                    null, ResponseDocument.class);
+            assertTrue(false);
+        } catch (HttpServerErrorException e) {
+            assertTrue(e.getResponseBodyAsString().contains(
+                            "Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));
+        }
     }
 
     @Test(groups = "functional")
