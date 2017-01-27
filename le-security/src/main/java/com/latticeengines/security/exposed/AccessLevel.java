@@ -44,6 +44,7 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
             GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
             GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.EDIT_PLS_MODELS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
