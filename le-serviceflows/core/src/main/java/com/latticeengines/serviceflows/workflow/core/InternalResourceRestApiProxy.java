@@ -1,11 +1,14 @@
 package com.latticeengines.serviceflows.workflow.core;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -35,7 +38,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public TargetMarket createDefaultTargetMarket(String tenantId) {
         try {
-            return restTemplate.postForObject(constructUrl("pls/internal/targetmarkets/default", tenantId), null,
+            return restTemplate.postForObject(
+                    constructUrl("pls/internal/targetmarkets/default", tenantId), null,
                     TargetMarket.class);
         } catch (Exception e) {
             throw new RuntimeException("createDefaultTargetMarket: Remote call failure", e);
@@ -44,7 +48,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public TargetMarket findTargetMarketByName(String targetMarketName, String tenantId) {
         try {
-            return restTemplate.getForObject(constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId),
+            return restTemplate.getForObject(
+                    constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId),
                     TargetMarket.class);
         } catch (Exception e) {
             throw new RuntimeException("findTargetMarketByName: Remote call failure", e);
@@ -53,7 +58,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public void updateTargetMarket(TargetMarket targetMarket, String tenantId) {
         try {
-            restTemplate.put(constructUrl("pls/internal/targetmarkets/", targetMarket.getName(), tenantId),
+            restTemplate.put(
+                    constructUrl("pls/internal/targetmarkets/", targetMarket.getName(), tenantId),
                     targetMarket);
         } catch (Exception e) {
             throw new RuntimeException("updateTargetMarket: Remote call failure", e);
@@ -62,7 +68,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public void deleteTargetMarketByName(String targetMarketName, String tenantId) {
         try {
-            restTemplate.delete(constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId));
+            restTemplate.delete(
+                    constructUrl("pls/internal/targetmarkets/", targetMarketName, tenantId));
         } catch (Exception e) {
             throw new RuntimeException("deleteTargetMarketByName: Remote call failure", e);
         }
@@ -76,10 +83,26 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public ModelSummary getModelSummaryFromApplicationId(String applicationId, String tenantId) {
+    @SuppressWarnings("unchecked")
+    public ModelSummary getModelSummaryFromApplicationId(String applicationId,
+            String tenantId) {
         try {
-            return restTemplate.getForObject(constructUrl("pls/internal/modelsummaries", applicationId, tenantId),
-                    ModelSummary.class);
+            return restTemplate
+                    .getForObject(constructUrl("pls/internal/modelsummaries",
+                            applicationId, tenantId), ModelSummary.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getModelSummaryFromApplicationId: Remote call failure", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<ModelSummary> getModelSummariesCrossTenantFromApplicationId(String applicationId,
+            String tenantId) {
+        try {
+            List<?> modelSummaries = restTemplate
+                    .getForObject(constructUrl("pls/internal/modelsummaries/crosstenant",
+                            applicationId, tenantId), List.class);
+            return JsonUtils.convertList(modelSummaries, ModelSummary.class);
         } catch (Exception e) {
             throw new RuntimeException("getModelSummaryFromApplicationId: Remote call failure", e);
         }
@@ -91,8 +114,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String url = constructUrl("pls/internal/modelsummaries", modelId);
             HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
             log.info(String.format("Putting to %s", url));
-            ResponseEntity<ResponseDocument> response = restTemplate.<ResponseDocument> exchange(url, HttpMethod.PUT,
-                    requestEntity, ResponseDocument.class);
+            ResponseEntity<ResponseDocument> response = restTemplate.<ResponseDocument> exchange(
+                    url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
             ResponseDocument responseDoc = response.getBody();
             if (!responseDoc.isSuccess()) {
                 throw new RuntimeException("updateModelSummary failed!");
@@ -104,7 +127,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public void registerReport(String targetMarketName, Report report, String tenantId) {
         try {
-            String url = constructUrl("pls/internal/targetmarkets", targetMarketName, "reports", tenantId);
+            String url = constructUrl("pls/internal/targetmarkets", targetMarketName, "reports",
+                    tenantId);
             log.info(String.format("Posting to %s", url));
             restTemplate.postForObject(url, report, Void.class);
         } catch (Exception e) {
@@ -175,7 +199,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public ModelSummary getModelSummaryFromModelId(String modelId, CustomerSpace customerSpace) {
         ModelSummary modelSummary = null;
         try {
-            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId,
+                    customerSpace.toString());
             log.debug("Get from " + url);
             modelSummary = restTemplate.getForObject(url, ModelSummary.class);
         } catch (Exception e) {
@@ -194,9 +219,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public void sendPlsEnrichInternalAttributeEmail(String result, String tenantId, AdditionalEmailInfo info) {
+    public void sendPlsEnrichInternalAttributeEmail(String result, String tenantId,
+            AdditionalEmailInfo info) {
         try {
-            String url = constructUrl("pls/internal/emails/enrichment/internal/result", result, tenantId);
+            String url = constructUrl("pls/internal/emails/enrichment/internal/result", result,
+                    tenantId);
             log.info(String.format("Putting to %s", url));
             restTemplate.put(url, info);
         } catch (Exception e) {
@@ -216,7 +243,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public void deleteModelSummary(String modelId, CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/modelsummaries/", modelId, customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummaries/", modelId,
+                    customerSpace.toString());
             log.debug(String.format("Deleting to %s", url));
             restTemplate.delete(url);
         } catch (Exception e) {

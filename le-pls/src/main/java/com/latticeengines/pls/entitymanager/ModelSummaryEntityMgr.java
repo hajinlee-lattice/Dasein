@@ -19,6 +19,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     ModelSummary findByApplicationId(String applicationId);
 
+    List<ModelSummary> getModelSummariesByApplicationId(String applicationId);
+
     ModelSummary getByModelNameInTenant(String modelName, Tenant tenant);
 
     void deleteByModelId(String modelId);

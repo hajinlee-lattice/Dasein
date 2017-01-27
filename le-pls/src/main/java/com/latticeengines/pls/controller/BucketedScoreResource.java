@@ -29,7 +29,8 @@ public class BucketedScoreResource {
     @RequestMapping(value = "/summary/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get bucketed scores for specific model")
-    public BucketedScoreSummary getBuckedScoresSummary(@PathVariable String modelId) throws Exception {
+    public BucketedScoreSummary getBuckedScoresSummary(@PathVariable String modelId)
+            throws Exception {
         return bucketedScoreService.getBucketedScoreSummaryForModelId(modelId);
     }
 
@@ -49,7 +50,8 @@ public class BucketedScoreResource {
 
     @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Create a group of ABCD buckets")
-    public void createABCDBuckets(@PathVariable String modelId, @RequestBody List<BucketMetadata> bucketMetadatas) {
+    public void createABCDBuckets(@PathVariable String modelId,
+            @RequestBody List<BucketMetadata> bucketMetadatas) {
         bucketedScoreService.createBucketMetadatas(modelId, bucketMetadatas);
     }
 

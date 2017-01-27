@@ -26,13 +26,13 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrImpl<BucketMetadat
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<BucketMetadata> findBucketMetadatasForModelId(String modelId) {
+    public List<BucketMetadata> getBucketMetadatasForModelId(String modelId) {
         return bucketMetadataDao.findBucketMetadatasForModelId(modelId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<BucketMetadata> findUpToDateBucketMetadatasForModelId(String modelId) {
+    public List<BucketMetadata> getUpToDateBucketMetadatasForModelId(String modelId) {
         return bucketMetadataDao.findUpToDateBucketMetadatasForModelId(modelId);
     }
 

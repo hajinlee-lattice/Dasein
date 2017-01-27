@@ -45,7 +45,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public List<?> getActiveModelSummaries(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/modelsummaries/active", customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummaries/active",
+                    customerSpace.toString());
             log.debug("Get from " + url);
             return restTemplate.getForObject(url, List.class);
         } catch (Exception e) {
@@ -56,7 +57,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public ModelSummary getModelSummaryFromModelId(String modelId, CustomerSpace customerSpace) {
         ModelSummary modelSummary = null;
         try {
-            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummaries/modelid", modelId,
+                    customerSpace.toString());
             log.debug("Get from " + url);
             modelSummary = restTemplate.getForObject(url, ModelSummary.class);
             if (modelSummary != null && StringUtils.isEmpty(modelSummary.getEventTableName())) {
@@ -72,7 +74,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     public List<String> getRequiredColumnNames(String modelId, CustomerSpace customerSpace) {
-        String url = constructUrl("pls/internal/metadata/required/modelId/", modelId, customerSpace.toString());
+        String url = constructUrl("pls/internal/metadata/required/modelId/", modelId,
+                customerSpace.toString());
         List<?> requiredColumnObjList = restTemplate.getForObject(url, List.class);
         return JsonUtils.convertList(requiredColumnObjList, String.class);
     }
@@ -89,7 +92,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public void deleteModelSummary(String modelId, CustomerSpace customerSpace) {
         try {
-            String url = constructUrl("pls/internal/modelsummaries/", modelId, customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummaries/", modelId,
+                    customerSpace.toString());
             log.debug(String.format("Deleting to %s", url));
             restTemplate.delete(url);
         } catch (Exception e) {
@@ -117,9 +121,11 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public int getModelsCount(CustomerSpace customerSpace, String start, boolean considerAllStatus) {
+    public int getModelsCount(CustomerSpace customerSpace, String start,
+            boolean considerAllStatus) {
         try {
-            String url = constructUrl("pls/internal/modelsummarydetails/count", customerSpace.toString());
+            String url = constructUrl("pls/internal/modelsummarydetails/count",
+                    customerSpace.toString());
             url += "?" + "considerAllStatus" + "=" + considerAllStatus;
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
@@ -131,59 +137,64 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<ModelSummary> getPaginatedModels(CustomerSpace customerSpace, String start, int offset, int maximum,
-            boolean considerAllStatus) {
+    public List<ModelSummary> getPaginatedModels(CustomerSpace customerSpace, String start,
+            int offset, int maximum, boolean considerAllStatus) {
         try {
-            String url = constructUrl("pls/internal/modelsummarydetails/paginate", customerSpace.toString());
-            url += "?" + "considerAllStatus" + "=" + considerAllStatus + "&" + "offset" + "=" + offset + "&" + "maximum"
-                    + "=" + maximum;
+            String url = constructUrl("pls/internal/modelsummarydetails/paginate",
+                    customerSpace.toString());
+            url += "?" + "considerAllStatus" + "=" + considerAllStatus + "&" + "offset" + "="
+                    + offset + "&" + "maximum" + "=" + maximum;
             if (!StringUtils.isEmpty(start)) {
                 url += "&" + "start" + "=" + start;
             }
 
             log.debug("Get from " + url);
             List<?> modelSummaryObjList = restTemplate.getForObject(url, List.class);
-            List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList, ModelSummary.class);
+            List<ModelSummary> modelSummaryList = JsonUtils.convertList(modelSummaryObjList,
+                    ModelSummary.class);
 
             return modelSummaryList;
         } catch (Exception e) {
-            throw new RuntimeException("getPaginatedModels: Remote call failure: " + e.getMessage(), e);
+            throw new RuntimeException("getPaginatedModels: Remote call failure: " + e.getMessage(),
+                    e);
         }
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, onlySelectedAttributes,
-                Boolean.FALSE);
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category,
+                onlySelectedAttributes, Boolean.FALSE);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, //
             Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, null,
-                onlySelectedAttributes, considerInternalAttributes);
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category,
+                null, onlySelectedAttributes, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, String subcategory, //
             Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
-        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category, subcategory,
-                onlySelectedAttributes, null, null, considerInternalAttributes);
+        return getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter, category,
+                subcategory, onlySelectedAttributes, null, null, considerInternalAttributes);
     }
 
     public List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             String attributeDisplayNameFilter, Category category, String subcategory, //
-            Boolean onlySelectedAttributes, Integer offset, Integer max, Boolean considerInternalAttributes) {
+            Boolean onlySelectedAttributes, Integer offset, Integer max,
+            Boolean considerInternalAttributes) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "", customerSpace.toString());
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
-                    onlySelectedAttributes, offset, max, considerInternalAttributes);
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "",
+                    customerSpace.toString());
+            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category,
+                    subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
-            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
-                    LeadEnrichmentAttribute.class);
+            List<LeadEnrichmentAttribute> attributeList = JsonUtils
+                    .convertList(combinedAttributeObjList, LeadEnrichmentAttribute.class);
 
             return attributeList;
         } catch (Exception e) {
@@ -191,12 +202,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace, String attributeDisplayNameFilter,
-            Category category, String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
+    public int getLeadEnrichmentAttributesCount(CustomerSpace customerSpace,
+            String attributeDisplayNameFilter, Category category, String subcategory,
+            Boolean onlySelectedAttributes, Boolean considerInternalAttributes) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count", customerSpace.toString());
-            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category, subcategory,
-                    onlySelectedAttributes, null, null, considerInternalAttributes);
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/count",
+                    customerSpace.toString());
+            url = augumentEnrichmentAttributesUrl(url, attributeDisplayNameFilter, category,
+                    subcategory, onlySelectedAttributes, null, null, considerInternalAttributes);
 
             log.debug("Get from " + url);
             return restTemplate.getForObject(url, Integer.class);
@@ -212,8 +225,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
             log.debug("Get from " + url);
             List<?> combinedAttributeObjList = restTemplate.getForObject(url, List.class);
-            List<LeadEnrichmentAttribute> attributeList = JsonUtils.convertList(combinedAttributeObjList,
-                    LeadEnrichmentAttribute.class);
+            List<LeadEnrichmentAttribute> attributeList = JsonUtils
+                    .convertList(combinedAttributeObjList, LeadEnrichmentAttribute.class);
 
             return attributeList;
         } catch (Exception e) {
@@ -224,7 +237,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void saveLeadEnrichmentAttributes(CustomerSpace customerSpace, //
             LeadEnrichmentAttributesOperationMap attributes) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH, customerSpace.toString());
+            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH,
+                    customerSpace.toString());
             restTemplate.put(url, attributes);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
@@ -233,7 +247,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Map<String, Integer> getPremiumAttributesLimitation(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/premiumattributeslimitation",
+            String url = constructUrl(
+                    PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/premiumattributeslimitation",
                     customerSpace.toString());
 
             Map<?, ?> limitationMap = restTemplate.getForObject(url, Map.class);
@@ -241,7 +256,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             Map<String, Integer> premiumAttributesLimitationMap = new HashMap<>();
 
             if (!MapUtils.isEmpty(limitationMap)) {
-                premiumAttributesLimitationMap = JsonUtils.convertMap(limitationMap, String.class, Integer.class);
+                premiumAttributesLimitationMap = JsonUtils.convertMap(limitationMap, String.class,
+                        Integer.class);
             }
 
             return premiumAttributesLimitationMap;
@@ -252,7 +268,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Integer getSelectedAttributeCount(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
+            String url = constructUrl(
+                    PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedattributes/count",
                     customerSpace.toString());
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
@@ -262,7 +279,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     public Integer getSelectedAttributePremiumCount(CustomerSpace customerSpace) {
         try {
-            String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
+            String url = constructUrl(
+                    PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/selectedpremiumattributes/count",
                     customerSpace.toString());
             return restTemplate.getForObject(url, Integer.class);
         } catch (Exception e) {
@@ -281,7 +299,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace, String category) {
+    public List<String> getLeadEnrichmentSubcategories(CustomerSpace customerSpace,
+            String category) {
         try {
             String url = constructUrl(PLS_INTERNAL_ENRICHMENT + INSIGHTS_PATH + "/subcategories",
                     customerSpace.toString());
@@ -293,17 +312,17 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    public List<BucketMetadata> getUpToDateABCDBuckets(String modelId, CustomerSpace customerSpace) {
+    public List<BucketMetadata> getUpToDateABCDBuckets(String modelId,
+            CustomerSpace customerSpace) {
         try {
             String url = constructUrl("pls/internal/abcdbuckets/uptodate", modelId);
             url += "?tenantId=" + customerSpace.toString();
             List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
             return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Remote call failure for getting the up-to-date bucekts of the model %s of tenant %s",
-                            modelId, customerSpace.toString()),
-                    e);
+            throw new RuntimeException(String.format(
+                    "Remote call failure for getting the up-to-date bucekts of the model %s of tenant %s",
+                    modelId, customerSpace.toString()), e);
         }
     }
 
@@ -315,10 +334,9 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             log.debug(String.format("Posting to %s", url));
             restTemplate.postForEntity(url, bucketMetadataList, Void.class);
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Remote call failure for creating abcd buckets for model %s of tenant %s", modelId,
-                            customerSpace.toString()),
-                    e);
+            throw new RuntimeException(String.format(
+                    "Remote call failure for creating abcd buckets for model %s of tenant %s",
+                    modelId, customerSpace.toString()), e);
         }
 
     }
@@ -333,11 +351,22 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
-    private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
-            String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
-            Boolean considerInternalAttributes) {
+    public List<BucketMetadata> createDefaultABCDBuckets(String modelId) {
+        try {
+            String url = constructUrl("pls/internal/bucketmetadata", modelId);
+            List<?> abcdBuckets = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
+        } catch (Exception e) {
+            throw new RuntimeException("create default abcd buckets: Remote call failure", e);
+        }
+    }
+
+    private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter,
+            Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset,
+            Integer max, Boolean considerInternalAttributes) {
         url += "?" + "onlySelectedAttributes" + "="
-                + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true : false);
+                + ((onlySelectedAttributes != null && onlySelectedAttributes == true) ? true
+                        : false);
         if (!StringUtils.isEmpty(attributeDisplayNameFilter)) {
             url += "&" + "attributeDisplayNameFilter" + "=" + attributeDisplayNameFilter;
         }

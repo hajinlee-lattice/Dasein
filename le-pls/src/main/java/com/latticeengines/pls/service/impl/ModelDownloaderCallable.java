@@ -21,10 +21,14 @@ import org.hibernate.exception.ConstraintViolationException;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.newrelic.api.agent.Trace;
 
@@ -35,6 +39,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private BucketedScoreService bucketedScoreService;
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
     private FeatureImportanceParser featureImportanceParser;
@@ -43,6 +48,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
         this.modelServiceHdfsBaseDir = builder.getModelServiceHdfsBaseDir();
+        this.bucketedScoreService = builder.getBucketedScoreService();
         this.modelSummaryEntityMgr = builder.getModelSummaryEntityMgr();
         this.yarnConfiguration = builder.getYarnConfiguration();
         this.parser = builder.getModelSummaryParser();
@@ -53,7 +59,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     @Override
     @Trace(dispatcher = true)
     public Boolean call() throws Exception {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + CustomerSpace.parse(tenant.getId()) + "/models";
+        String startingHdfsPoint = modelServiceHdfsBaseDir + "/"
+                + CustomerSpace.parse(tenant.getId()) + "/models";
         final Long tenantRegistrationTime = tenant.getRegisteredTime();
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
@@ -74,7 +81,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         };
 
         if (!HdfsUtils.fileExists(yarnConfiguration, startingHdfsPoint)) {
-            log.debug(String.format("No models seem to have been created yet for tenant with id %s", tenant.getId()));
+            log.debug(String.format("No models seem to have been created yet for tenant with id %s",
+                    tenant.getId()));
             return false;
         }
 
@@ -82,10 +90,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         try {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
-            log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.", files.size(),
-                    tenant.getId()));
+            log.debug(String.format("%d file(s) downloaded from modeling service for tenant %s.",
+                    files.size(), tenant.getId()));
         } catch (FileNotFoundException e) {
-            log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
+            log.warn(String.format(
+                    "No models seem to have been created yet for tenant with id %s. Error message: %s",
                     tenant.getId(), e.getMessage()));
             return false;
         }
@@ -110,7 +119,6 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 ModelSummary summary = parser.parse(file, contents);
                 String[] tokens = file.split("/");
                 summary.setTenant(tenant);
-
                 try {
                     setFeatureImportance(summary, file);
                 } catch (IOException e) {
@@ -120,15 +128,20 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 try {
                     summary.setApplicationId("application_" + tokens[tokens.length - 3]);
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    log.error(String.format("Cannot set application id of model summary with id %s.",
-                            modelSummaryId));
+                    log.error(
+                            String.format("Cannot set application id of model summary with id %s.",
+                                    modelSummaryId));
                 }
                 long totalSeconds = (System.currentTimeMillis() - startTime) / 1000;
-                log.info(String.format("Creating model summary with id %s appId %s from file %s. Duration: %d seconds.", //
+                log.info(String.format(
+                        "Creating model summary with id %s appId %s from file %s. Duration: %d seconds.", //
                         summary.getId(), summary.getApplicationId(), file, totalSeconds));
                 constraintViolationId = summary.getId();
                 modelSummaryEntityMgr.create(summary);
                 foundFilesToDownload = true;
+                if (summary.getEventTableName().startsWith("copy_")) {
+                    createBucketMetadatasForCopiedModel(summary.getId());
+                }
             } catch (BlockMissingException e) {
                 log.error(e);
                 // delete the bad model summary file
@@ -137,7 +150,8 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 // Will trigger PagerDuty alert
                 log.fatal(ExceptionUtils.getFullStackTrace(e));
             } catch (ConstraintViolationException e) {
-                log.info(String.format("Cannot create model summary with Id %s, constraint violation.",
+                log.info(String.format(
+                        "Cannot create model summary with Id %s, constraint violation.",
                         constraintViolationId));
             } catch (Exception e) {
                 log.error(e);
@@ -147,7 +161,47 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         return foundFilesToDownload;
     }
 
-    private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath) throws IOException {
+    private void createBucketMetadatasForCopiedModel(String copiedModelId) {
+        ModelSummary copiedModelSummary = modelSummaryEntityMgr.getByModelId(copiedModelId);
+        List<ModelSummary> modelSummaries = modelSummaryEntityMgr
+                .getModelSummariesByApplicationId(copiedModelSummary.getApplicationId());
+        ModelSummary originalModelSummary = null;
+        for (ModelSummary modelSummary : modelSummaries) {
+            if (!modelSummary.getEventTableName().startsWith("copy_")) {
+                originalModelSummary = modelSummary;
+            }
+        }
+        if (originalModelSummary == null) {
+            throw new LedpException(LedpCode.LEDP_18127, new String[] { copiedModelId });
+        }
+        List<BucketMetadata> bucketMetadatas = bucketedScoreService
+                .getUpToDateModelBucketMetadata(originalModelSummary.getId());
+        bucketedScoreService.createBucketMetadatas(copiedModelId,
+                copyBucketMetadatasForCopiedModel(bucketMetadatas, copiedModelId));
+    }
+
+    private List<BucketMetadata> copyBucketMetadatasForCopiedModel(
+            List<BucketMetadata> originalBucketMetadatas, String copiedModelId) {
+        List<BucketMetadata> bucketMetadatas = new ArrayList<>();
+
+        for (BucketMetadata originalBucketMetadata : originalBucketMetadatas) {
+            BucketMetadata bucketMetadata = new BucketMetadata();
+
+            bucketMetadata.setBucketName(originalBucketMetadata.getBucketName());
+            bucketMetadata.setLeftBoundScore(originalBucketMetadata.getLeftBoundScore());
+            bucketMetadata.setRightBoundScore(originalBucketMetadata.getRightBoundScore());
+            bucketMetadata.setNumLeads(originalBucketMetadata.getNumLeads());
+            bucketMetadata.setLift(originalBucketMetadata.getLift());
+            bucketMetadata.setModelId(copiedModelId);
+
+            bucketMetadatas.add(bucketMetadata);
+        }
+
+        return bucketMetadatas;
+    }
+
+    private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath)
+            throws IOException {
         String fiPath = getRandomForestFiHdfsPath(modelSummaryHdfsPath);
         Map<String, Double> fiMap = featureImportanceParser.parse(fiPath, //
                 HdfsUtils.getHdfsFileContents(yarnConfiguration, fiPath));
@@ -178,6 +232,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         private Tenant tenant;
         private String modelServiceHdfsBaseDir;
         private ModelSummaryEntityMgr modelSummaryEntityMgr;
+        private BucketedScoreService bucketedScoreService;
         private Configuration yarnConfiguration;
         private ModelSummaryParser modelSummaryParser;
         private FeatureImportanceParser featureImportanceParser;
@@ -199,6 +254,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         public Builder modelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
             this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+            return this;
+        }
+
+        public Builder bucketedScoreService(BucketedScoreService bucketedScoreService) {
+            this.bucketedScoreService = bucketedScoreService;
             return this;
         }
 
@@ -232,6 +292,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
             return modelSummaryEntityMgr;
+        }
+
+        public BucketedScoreService getBucketedScoreService() {
+            return bucketedScoreService;
         }
 
         public Configuration getYarnConfiguration() {

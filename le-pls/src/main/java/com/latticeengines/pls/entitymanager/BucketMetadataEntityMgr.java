@@ -7,8 +7,8 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public interface BucketMetadataEntityMgr extends BaseEntityMgr<BucketMetadata> {
 
-    List<BucketMetadata> findBucketMetadatasForModelId(String modelId);
+    List<BucketMetadata> getBucketMetadatasForModelId(String modelId);
 
-    List<BucketMetadata> findUpToDateBucketMetadatasForModelId(String modelId);
+    List<BucketMetadata> getUpToDateBucketMetadatasForModelId(String modelId);
 
 }

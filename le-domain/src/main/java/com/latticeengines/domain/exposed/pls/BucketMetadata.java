@@ -4,6 +4,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,10 +28,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "BUCKET_METADATA")
 @Entity
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class BucketMetadata implements HasPid, HasTenant, HasTenantId {
+public class BucketMetadata implements HasPid, HasTenantId, HasTenant {
 
     private Long pid;
-    private ModelSummary modelSummary;
+    private String modelId;
     private BucketName bucketName;
     private int leftBoundScore;
     private int rightBoundScore;
@@ -55,21 +57,19 @@ public class BucketMetadata implements HasPid, HasTenant, HasTenantId {
         this.pid = pid;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "MODEL_SUMMARY_ID", nullable = false)
-    @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public ModelSummary getModelSummary() {
-        return this.modelSummary;
+    @Column(name = "MODEL_ID", nullable = false)
+    @JsonProperty("model_id")
+    public String getModelId() {
+        return this.modelId;
     }
 
-    @JsonIgnore
-    public void setModelSummary(ModelSummary modelSummary) {
-        this.modelSummary = modelSummary;
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
+    @Enumerated(EnumType.STRING)
     public BucketName getBucketName() {
         return bucketName;
     }

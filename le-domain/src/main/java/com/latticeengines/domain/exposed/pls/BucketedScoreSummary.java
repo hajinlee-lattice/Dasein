@@ -6,6 +6,7 @@ public class BucketedScoreSummary {
 
     private int totalNumLeads;
     private int totalNumConverted;
+    private double overallLift;
     private double[] barLifts = new double[32];
     private BucketedScore[] bucketedScores = new BucketedScore[100];
 
@@ -25,6 +26,15 @@ public class BucketedScoreSummary {
 
     public void setTotalNumConverted(int totalNumConverted) {
         this.totalNumConverted = totalNumConverted;
+    }
+
+    @JsonProperty("overall_lift")
+    public double getOverallLift() {
+        return overallLift;
+    }
+
+    public void setOverallLift(double overallLift) {
+        this.overallLift = overallLift;
     }
 
     @JsonProperty("bar_lifts")

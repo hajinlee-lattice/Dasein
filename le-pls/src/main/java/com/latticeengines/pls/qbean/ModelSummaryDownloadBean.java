@@ -2,6 +2,9 @@ package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
 
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
+import com.latticeengines.pls.service.BucketedScoreService;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,6 +48,9 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
 
+    @Autowired
+    private BucketedScoreService bucketedScoreService;
+
     @Value("${pls.downloader.max.pool.size}")
     private int maxPoolSize;
 
@@ -70,6 +76,7 @@ public class ModelSummaryDownloadBean implements QuartzJobBean {
         builder.tenantEntityMgr(tenantEntityMgr)//
                 .modelServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelSummaryEntityMgr(modelSummaryEntityMgr) //
+                .bucketedScoreService(bucketedScoreService) //
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(modelSummaryParser)
                 .featureImportanceParser(featureImportanceParser)

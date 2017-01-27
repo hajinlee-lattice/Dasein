@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
                 cumulativeNumConverted);
         bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
+        bucketedScoreSummary.setOverallLift((double) cumulativeNumConverted / cumulativeNumLeads);
 
         double totalLift = (double) cumulativeNumConverted / cumulativeNumLeads;
         for (int i = 32; i > 0; i--) {
@@ -134,7 +136,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
 
         List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
-                .findBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
+                .getBucketMetadatasForModelId(modelSummary.getId());
         Map<Long, List<BucketMetadata>> creationTimesToBucketMetadatas = new HashMap<>();
 
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
@@ -150,16 +152,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
-        }
-
         List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
-                .findUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
-
+                .getUpToDateBucketMetadatasForModelId(modelId);
         return bucketMetadatas;
-
     }
 
     @Override
@@ -170,7 +165,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             bucketMetadata.setCreationTimestamp(creationTimestamp);
-            bucketMetadata.setModelSummary(modelSummary);
+            bucketMetadata.setModelId(modelSummary.getId());
             bucketMetadata.setTenant(tenant);
             bucketMetadataEntityMgr.create(bucketMetadata);
         }

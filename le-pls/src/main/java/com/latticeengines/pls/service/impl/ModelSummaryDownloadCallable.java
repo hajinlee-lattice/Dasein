@@ -10,6 +10,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.pls.BucketedScore;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.pls.service.BucketedScoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -35,6 +39,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
     private TenantEntityMgr tenantEntityMgr;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private BucketedScoreService bucketedScoreService;
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
     private FeatureImportanceParser featureImportanceParser;
@@ -48,6 +53,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         this.tenantEntityMgr = builder.getTenantEntityMgr();
         this.modelServiceHdfsBaseDir = builder.getModelServiceHdfsBaseDir();
         this.modelSummaryEntityMgr = builder.getModelSummaryEntityMgr();
+        this.bucketedScoreService = builder.getBucketedScoreService();
         this.yarnConfiguration = builder.getYarnConfiguration();
         this.parser = builder.getModelSummaryParser();
         this.featureImportanceParser = builder.getFeatureImportanceParser();
@@ -64,6 +70,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         builder.modelServiceHdfsBaseDir(modelServiceHdfsBaseDir) //
                 .tenant(tenant) //
                 .modelSummaryEntityMgr(modelSummaryEntityMgr) //
+                .bucketedScoreService(bucketedScoreService) //
                 .yarnConfiguration(yarnConfiguration) //
                 .modelSummaryParser(parser) //
                 .featureImportanceParser(featureImportanceParser)
@@ -184,6 +191,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         private TenantEntityMgr tenantEntityMgr;
         private String modelServiceHdfsBaseDir;
         private ModelSummaryEntityMgr modelSummaryEntityMgr;
+        private BucketedScoreService bucketedScoreService;
         private Configuration yarnConfiguration;
         private ModelSummaryParser modelSummaryParser;
         private FeatureImportanceParser featureImportanceParser;
@@ -209,6 +217,11 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
         public Builder modelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
             this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+            return this;
+        }
+
+        public Builder bucketedScoreService(BucketedScoreService bucketedScoreService) {
+            this.bucketedScoreService = bucketedScoreService;
             return this;
         }
 
@@ -263,6 +276,10 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
         public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
             return modelSummaryEntityMgr;
+        }
+
+        public BucketedScoreService getBucketedScoreService() {
+            return bucketedScoreService;
         }
 
         public Configuration getYarnConfiguration() {

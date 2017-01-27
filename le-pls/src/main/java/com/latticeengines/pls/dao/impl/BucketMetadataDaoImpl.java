@@ -11,7 +11,8 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.pls.dao.BucketMetadataDao;
 
 @Component("bucketMetadataDao")
-public class BucketMetadataDaoImpl extends BaseDaoImpl<BucketMetadata> implements BucketMetadataDao {
+public class BucketMetadataDaoImpl extends BaseDaoImpl<BucketMetadata>
+        implements BucketMetadataDao {
 
     @Override
     protected Class<BucketMetadata> getEntityClass() {
@@ -23,7 +24,8 @@ public class BucketMetadataDaoImpl extends BaseDaoImpl<BucketMetadata> implement
     public List<BucketMetadata> findBucketMetadatasForModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<BucketMetadata> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where MODEL_SUMMARY_ID = :modelId", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where MODEL_ID = :modelId",
+                entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("modelId", modelId);
         return query.list();
@@ -35,7 +37,7 @@ public class BucketMetadataDaoImpl extends BaseDaoImpl<BucketMetadata> implement
         Session session = getSessionFactory().getCurrentSession();
         Class<BucketMetadata> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where CREATION_TIMESTAMP = ( SELECT MAX(creationTimestamp) FROM %s ) AND MODEL_SUMMARY_ID = :modelId",
+                "from %s where CREATION_TIMESTAMP = ( SELECT MAX(creationTimestamp) FROM %s WHERE MODEL_ID = :modelId ) AND MODEL_ID = :modelId",
                 entityClz.getSimpleName(), entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("modelId", modelId);

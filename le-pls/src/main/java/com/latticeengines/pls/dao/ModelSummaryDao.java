@@ -28,4 +28,6 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     ModelSummary getByModelNameInTenant(String modelName, Tenant tenant);
 
+    List<ModelSummary> getModelSummariesByApplicationId(String applicationId);
+
 }
