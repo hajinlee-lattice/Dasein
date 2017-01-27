@@ -259,6 +259,9 @@ Model List
         margin-left: 16px;
         border-left: #ddd solid 1px;
         font-size: 1.45em;
+        .orange-text {
+            font-size: 16px;
+        }
     }
 }
 .delete-model {
@@ -332,6 +335,10 @@ Model List
       width: 1em;
       text-align: center;
       vertical-align: middle;
+      &.ico-ratings {
+        background-size: 11px;
+        opacity: 0.5;
+      }
     }
     &:last-of-type {
       margin-bottom: 0;

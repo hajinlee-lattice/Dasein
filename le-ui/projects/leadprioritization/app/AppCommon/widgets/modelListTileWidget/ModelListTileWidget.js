@@ -65,6 +65,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
                     });
                 }
             };
+            
+            $scope.reviewRatingsClick = function ($event) {
+                if ($event != null) {
+                    $event.stopPropagation();
+                }
+            };
 
             $scope.refineAndCloneClick = function ($event) {
                 if ($event != null) {
