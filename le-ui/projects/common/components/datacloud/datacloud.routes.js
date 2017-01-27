@@ -56,7 +56,7 @@ angular
                 "summary@": {
                     controller: 'ExplorerTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
                 },
                 "main@": {
                     controller: 'LookupController',
@@ -94,7 +94,7 @@ angular
                 "summary@": {
                     controller: 'ExplorerTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
                 },
                 "subsummary@": {
                     controller: function(LookupResponse, LookupStore) {
@@ -167,7 +167,7 @@ angular
                 "summary@": {
                     controller: 'ExplorerTabsController',
                     controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/explorer/explorertabs.component.html'
+                    templateUrl: '/components/datacloud/tabs/explorertabs.component.html'
                 },
                 "main@": {
                     resolve: {
