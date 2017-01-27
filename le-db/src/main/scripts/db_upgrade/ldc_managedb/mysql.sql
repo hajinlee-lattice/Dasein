@@ -1,5 +1,7 @@
 USE `LDC_ManageDB`;
 
+SET SQL_SAFE_UPDATES = 0;
+
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 
 DROP PROCEDURE IF EXISTS `UpdateDataCloudVersionTable`;
@@ -18,6 +20,10 @@ CREATE PROCEDURE `UpdateDataCloudVersionTable`()
     THEN
       ALTER TABLE `DataCloudVersion`
         ADD `DynamoTableSignature_Lookup` VARCHAR(100);
+
+      UPDATE `DataCloudVersion`
+      SET `DynamoTableSignature_Lookup` = `DynamoTableSignature`;
+
     END IF;
 
   END //
