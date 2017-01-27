@@ -646,11 +646,6 @@
                     &.data {
                         @include flex-item(0 1 auto);
                         text-align: right;
-                        &:not(.records) {
-                            text-overflow: ellipsis;
-                            overflow: hidden;
-                            min-width: 20%;
-                        }
                         &.data-value-yes {
                             font-weight: bold;
                         }
