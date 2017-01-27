@@ -197,7 +197,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 
 
     attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[],
-                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DistinctValue":[]}
+                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
 
     otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
     categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)
@@ -278,9 +278,9 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
             columnMetadata = columnMetadataDict[colName]
             statType = columnMetadata["StatisticalType"] if columnMetadata.has_key("StatisticalType") else None
             if statType is not None:
-                if statType == "nominal" or statType == "ordinal" or statType == "interval":
+                if statType == "nominal" or statType == "ordinal":
                     categoricalMetadataFromSchema.add(colName)
-                elif (statType == "ratio") and colName in categoricalMetadataFromSchema:
+                elif (statType == "ratio" or statType == "interval") and colName in categoricalMetadataFromSchema:
                     categoricalMetadataFromSchema.remove(colName)
             else:
                 logger.warn("No statistical type for column %s." % colName)
@@ -378,8 +378,9 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
-            if not filtered: attributeStats["GT200_DistinctValue"].append(colName)
-            columnData = columnData.apply(lambda x: 'LATTICE_GT200_DistinctValue' if not isnull(x) else None)
+            if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
+            logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
+            return (index, diagnostics)
         groupingDict = getCatGroupingAndStatsForModel(columnData.tolist(), eventVector.tolist())
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriterFull['Model'], groupingDict, mode, colName, otherMetadata, index)
         groupingDict = getCatGroupingAndStatsForDisplay(groupingDict['groupingResults'])
@@ -404,7 +405,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
                        minRegBucketRatio = 0.005, sigThreshold = 8, minNumBuckets = 3, 
                        maxNumBuckets = 10, forUI = False, kurtThreshold=3, numTailBuckets=3, 
                        tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8, 
-                       fixBoundaries=False, evevtDiffThreshold=10)
+                       fixBoundaries=False, eventDiffThreshold=10)
         # use different parameters for UI buckets
         # if colname is in revenue or employees, fix boundaries
         fixBoundCols = ["BusinessEstimatedAnnualSales", "BusinessEstimatedEmployees",
@@ -415,11 +416,11 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         fixBoundCols = [x.lower() for x in fixBoundCols]
         fixbound = colName.lower() in fixBoundCols
         bandsDictUI = getBucketsAndStats(columnData.tolist(), eventVector,  rawBinNumber = 100,
-                       minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 20,
-                       minRegBucketRatio = 0.01, sigThreshold = 8, minNumBuckets = 3, 
-                       maxNumBuckets = 7, forUI = True, kurtThreshold=3, numTailBuckets=3, tailSize=0.03, 
-                       sizeThreshold=0.05, 
-                       liftThreshold=1.8, fixBoundaries=fixbound, evevtDiffThreshold=10)
+                       minPtsToBucket = 50, minSpecialValRatio = 0.02, minRegBucketSize = 100,
+                       minRegBucketRatio = 0.02, sigThreshold = 8, minNumBuckets = 3, 
+                       maxNumBuckets = 7, forUI = True, kurtThreshold=3, numTailBuckets=3, 
+                       tailSize=0.03, sizeThreshold=0.05, liftThreshold=1.8, 
+                       fixBoundaries=fixbound, eventDiffThreshold=10)
         diagnostics["BucketingStrategy"] = "UnifiedBucketer"
         index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriterFull['Model'], bandsDictMI,
                                                         mean, median, kurtosis, skewness, colName, otherMetadata, index)
@@ -454,9 +455,6 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
     Returns:
         index: id of next column in output file
     '''
-
-    (displayname, approvedusage, category, fundamentaltype) = otherMetadata
-    
     groupingResults = groupingDict['groupingResults']
     mi = groupingDict['mi']
     entropyValue = groupingDict['entropyValue']
@@ -466,10 +464,10 @@ def writeCategoricalValuesToAvro(dataWriter, groupingDict, mode, colName, otherM
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colName
-        datum["displayname"] = displayname
-        datum["approvedusage"] = approvedusage
-        datum["category"] = category
-        datum["fundamentaltype"] = fundamentaltype
+        datum["displayname"] = otherMetadata[0]
+        datum["approvedusage"] = otherMetadata[1]
+        datum["category"] = otherMetadata[2]
+        datum["fundamentaltype"] = otherMetadata[3]
         datum["columnvalue"] = key
         datum["Dtype"] = "STR"
         datum["minV"] = None
