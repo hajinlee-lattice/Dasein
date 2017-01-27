@@ -42,7 +42,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    String targetSourceName = "OrbCacheSeedCleaned";
+    String targetSourceName = "OrbCacheSeedSecondaryDomain";
     String targetVersion;
 
     private static final String MARKER_FIELD_NAME = "_secondaryDomainMarker_";
