@@ -78,25 +78,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datafabric</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.confluent</groupId>
-                    <artifactId>kafka-connect-hdfs</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
