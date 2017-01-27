@@ -42,7 +42,6 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "segment", description = "REST resource for segments")
 @RestController
 @RequestMapping("/segments")
-@PreAuthorize("hasRole('Edit_PLS_Models')")
 public class SegmentResource {
 
     private static final Log log = LogFactory.getLog(SegmentResource.class);
@@ -138,6 +137,7 @@ public class SegmentResource {
     @RequestMapping(value = "/list", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Updates list of segments")
+    @PreAuthorize("hasRole('Edit_PLS_Models')")
     public ResponseDocument<?> updateSegments(@RequestBody List<Segment> segments, HttpServletRequest request) {
         try {
             Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);

@@ -28,7 +28,6 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "metadatauploads", description = "REST resource for uploading metadata files")
 @RestController
 @RequestMapping("/metadatauploads")
-@PreAuthorize("hasRole('Edit_PLS_Models')")
 public class MetadataFileUploadResource {
 
     private static final Logger log = Logger.getLogger(MetadataFileUploadResource.class);
