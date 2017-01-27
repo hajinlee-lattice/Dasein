@@ -59,9 +59,6 @@ class AwsEnvironment:
     def lpi_efs_ip_3(self):
         return self._props['lpi.efs.ip.3']
 
-    def zk_observer_ips(self):
-        return self._props['zk.observer.ips'].split(',')
-
     def zk_sg(self):
         return self._props['zookeeper.sg']
 
