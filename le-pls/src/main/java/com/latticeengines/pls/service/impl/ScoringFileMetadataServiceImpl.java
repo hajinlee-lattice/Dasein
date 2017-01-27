@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -20,8 +18,6 @@ import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -29,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -41,8 +36,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
@@ -92,56 +85,6 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         Collection<String> reservedWords = Arrays.asList(new String[] { "Score" });
         ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
         return stream;
-    }
-
-    @Override
-    public Table registerMetadataTable(SourceFile sourceFile, String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (modelSummary == null) {
-            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
-        }
-        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
-        if (schemaInterpretationStr == null) {
-            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
-        }
-        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
-
-        final Table table = modelMetadataService.getEventTableFromModelId(modelId);
-
-        log.info("table is: " + table.toString());
-        final Table schema = SchemaRepository.instance().getSchema(schemaInterpretation);
-        Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
-            @Override
-            public boolean apply(@Nullable Attribute attr) {
-                List<String> approvedUsages = attr.getApprovedUsage();
-                List<String> tags = attr.getTags();
-                if (schema.getAttribute(attr.getName()) == null
-                        && (approvedUsages == null || approvedUsages.isEmpty()
-                                || approvedUsages.get(0).equals(ApprovedUsage.NONE.toString())) //
-                        || (tags == null || tags.isEmpty() || !tags.get(0).equals(Tag.INTERNAL.toString()))) {
-                    log.info(String.format("Removing attribute %s in table %s", attr.getName(), table.getName()));
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        MetadataResolver resolver = new MetadataResolver(sourceFile.getPath(), schemaInterpretation, yarnConfiguration,
-                null);
-        List<FieldMapping> fieldMappings = resolver.calculateBasedOnExistingMetadata(table);
-        FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
-        fieldMappingDocument.setFieldMappings(fieldMappings);
-        resolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument);
-        resolver.calculateBasedOnFieldMappingDocumentAndTable(table);
-        log.info("After resolving table is: " + table.toString());
-
-        // Don't dedup on primary key for scoring
-        table.setPrimaryKey(null);
-        table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
-        table.setDisplayName(sourceFile.getDisplayName());
-        Tenant tenant = MultiTenantContext.getTenant();
-        metadataProxy.createTable(tenant.getId(), table.getName(), table);
-        return table;
     }
 
     @Override

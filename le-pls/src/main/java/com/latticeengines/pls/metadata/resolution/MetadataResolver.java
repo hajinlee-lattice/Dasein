@@ -27,10 +27,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
 public class MetadataResolver {
@@ -44,7 +42,6 @@ public class MetadataResolver {
             "SICCode", "Source_Detail__c", "Cloud_Plan__c" });
 
     private String csvPath;
-    private SchemaInterpretation schema;
     private FieldMappingDocument fieldMappingDocument;
     private Configuration yarnConfiguration;
 
@@ -54,15 +51,6 @@ public class MetadataResolver {
     }
 
     private Result result;
-
-    public MetadataResolver(String csvPath, SchemaInterpretation schemaInterpretation, Configuration yarnConfiguration,
-            FieldMappingDocument fieldMappingDocument) {
-        this.csvPath = csvPath;
-        this.schema = schemaInterpretation;
-        this.yarnConfiguration = yarnConfiguration;
-        this.fieldMappingDocument = fieldMappingDocument;
-        this.result = new Result();
-    }
 
     public MetadataResolver(String csvPath, Configuration yarnConfiguration,
             FieldMappingDocument fieldMappingDocument) {
@@ -218,13 +206,6 @@ public class MetadataResolver {
 
     public void setFieldMappingDocument(FieldMappingDocument fieldMappingDocument) {
         this.fieldMappingDocument = fieldMappingDocument;
-    }
-
-    private void calculate() {
-        SchemaRepository repository = SchemaRepository.instance();
-        result.metadata = repository.getSchema(schema);
-        result.fieldMappings = new ArrayList<>();
-        calculateHelper();
     }
 
     private void calculateHelper() {

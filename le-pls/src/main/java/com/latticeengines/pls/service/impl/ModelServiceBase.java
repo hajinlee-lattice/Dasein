@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -55,9 +54,6 @@ public abstract class ModelServiceBase implements ModelService {
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private MetadataFileUploadService metadataFileUploadService;
 
     @Value("${pls.modelingservice.basedir}")
     protected String customerBaseDir;
