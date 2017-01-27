@@ -116,7 +116,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                         + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .transformationGroup(transformationGroup) //
-                .transformDefinitions(modelingEventTable.getRealTimeTransformationMetadata().getValue())//
+                .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//
                 .build();
     }
 }

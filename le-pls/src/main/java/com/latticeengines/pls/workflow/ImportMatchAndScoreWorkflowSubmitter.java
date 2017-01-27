@@ -139,7 +139,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(inputProperties) //
                 .internalResourcePort(internalResourceHostPort) //
                 .transformationGroup(transformationGroup) //
-                .transformDefinitions(modelingEventTable.getRealTimeTransformationMetadata().getValue()) //
+                .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup)) //
                 .build();
     }
 }
