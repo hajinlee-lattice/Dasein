@@ -39,7 +39,7 @@ public class SwaggerConfig {
                         "com.latticeengines.security.controller.UserResource")) //
                 .paths(PathSelectors.any()) //
                 .build() //
-                .pathMapping("/pls") //
+                .pathMapping("/") //
                 .apiInfo(apiInfo()) //
                 .useDefaultResponseMessages(false).globalResponseMessage(RequestMethod.GET,
                         newArrayList(

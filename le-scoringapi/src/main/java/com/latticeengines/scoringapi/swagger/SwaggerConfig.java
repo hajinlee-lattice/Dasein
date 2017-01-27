@@ -33,7 +33,7 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.latticeengines.scoringapi.controller"))
                 .build()
-                .pathMapping("/score")
+                .pathMapping("/")
                 .apiInfo(apiInfo())
                 .useDefaultResponseMessages(false)
                 .globalResponseMessage(
