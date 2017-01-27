@@ -43,6 +43,11 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
 
             Node publicDomains = last.innerJoin(new FieldList(DOMAIN), publicDomain, new FieldList(DOMAIN));
             Node nonPublicDomains = last.stopList(publicDomain, DOMAIN, DOMAIN);
+
+            publicDomains = publicDomains.discard(new FieldList(DOMAIN));
+            publicDomains = DataFlowUtils.addHash(publicDomains, DOMAIN,
+                    DataFlowUtils.getPublicDomainResolutionFields(publicDomains));
+
             nonPublicDomains = nonPublicDomains.groupByAndLimit(new FieldList(DOMAIN), //
                     new FieldList(SORT), //
                     1, //

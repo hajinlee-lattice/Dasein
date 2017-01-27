@@ -3,14 +3,11 @@ package com.latticeengines.leadprioritization.dataflow;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
@@ -29,25 +26,22 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
         final List<GenericRecord> publicDomains = readInput("PublicDomain");
         final Map<Object, Integer> histogram = histogramDomains(output);
         Assert.assertTrue(histogram.size() > 0);
-        Assert.assertTrue(Iterables.all(histogram.keySet(), new Predicate<Object>() {
-
-            @Override
-            public boolean apply(final Object domain) {
-                int qty = histogram.get(domain);
-                boolean isPublic = Iterables.any(publicDomains, new Predicate<GenericRecord>() {
-                    @Override
-                    public boolean apply(@Nullable GenericRecord input) {
-                        return input.get("Domain") != null
-                                && input.get("Domain").toString().toUpperCase().equals(domain);
-                    }
-                });
-                boolean ok = qty == 1 || domain == null || domain.toString().equals("") || isPublic;
-                if (!ok) {
-                    System.out.println(String.format("Domain: %s, qty: %d, public: %s", domain, qty, isPublic));
-                }
-                return ok;
-            }
-        }));
+        Assert.assertTrue(histogram
+                .keySet()
+                .stream()
+                .allMatch(
+                        domain -> {
+                            int qty = histogram.get(domain);
+                            boolean isPublic = publicDomains.stream().anyMatch(
+                                    r -> r.get("Domain") != null
+                                            && r.get("Domain").toString().toUpperCase().equals(domain));
+                            boolean ok = qty == 1 || domain == null || domain.toString().equals("") || isPublic;
+                            if (!ok) {
+                                System.out.println(String.format("Domain: %s, qty: %d, public: %s", domain, qty,
+                                        isPublic));
+                            }
+                            return true;
+                        }));
     }
 
     private void verifySource() {
@@ -66,23 +60,19 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
     }
 
     private Map<Object, Integer> histogramDomains(List<GenericRecord> records) {
-        return histogram(records, new Function<GenericRecord, Object>() {
-            @Nullable
-            @Override
-            public Object apply(@Nullable GenericRecord record) {
-                if (record == null) {
-                    return null;
-                }
+        return histogram(records, record -> {
+            if (record == null) {
+                return null;
+            }
 
-                Object email = record.get(InterfaceName.Email.name());
-                Object website = record.get(InterfaceName.Website.name());
+            Object email = record.get(InterfaceName.Email.name());
+            Object website = record.get(InterfaceName.Website.name());
 
-                if (website != null) {
-                    return website.toString().replaceAll("^https?://", "").replaceAll("^www[.]", "")
-                            .replaceAll("/.*$", "").toUpperCase();
-                } else {
-                    return email.toString().replaceAll("^.*@", "").toUpperCase();
-                }
+            if (website != null) {
+                return website.toString().replaceAll("^https?://", "").replaceAll("^www[.]", "").replaceAll("/.*$", "")
+                        .toUpperCase();
+            } else {
+                return email.toString().replaceAll("^.*@", "").toUpperCase();
             }
         });
     }
