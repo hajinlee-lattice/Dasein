@@ -3,10 +3,10 @@ package com.latticeengines.modelquality.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
+import com.latticeengines.domain.exposed.modelquality.AlgorithmType;
 import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 import com.latticeengines.modelquality.service.AlgorithmService;
 
@@ -19,21 +19,20 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
     @Override
     public Algorithm createLatestProductionAlgorithm() {
         String version = getVersion();
-
-        String algorithmName = AlgorithmFactory.ALGORITHM_NAME_RF;
+        String algorithmName = "PRODUCTION-" + version.replace('/', '_');
         Algorithm algorithm = algorithmEntityMgr.findByName(algorithmName);
-
         if (algorithm != null) {
             return algorithm;
         }
 
         algorithm = new Algorithm();
         algorithm.setName(algorithmName);
+        algorithm.setType(AlgorithmType.RANDOMFOREST);
         String algorithmScript = String.format("/app/%s/dataplatform/scripts/algorithm/rf_train.py", version);
         algorithm.setScript(algorithmScript);
 
         AlgorithmPropertyDef def = new AlgorithmPropertyDef("n_estimators");
-        AlgorithmPropertyValue value = new AlgorithmPropertyValue("100");
+        AlgorithmPropertyValue value = new AlgorithmPropertyValue("200");
         def.addAlgorithmPropertyValue(value);
         algorithm.addAlgorithmPropertyDef(def);
 
@@ -58,12 +57,12 @@ public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmSe
         algorithm.addAlgorithmPropertyDef(def);
 
         def = new AlgorithmPropertyDef("min_samples_leaf");
-        value = new AlgorithmPropertyValue("10");
+        value = new AlgorithmPropertyValue("20");
         def.addAlgorithmPropertyValue(value);
         algorithm.addAlgorithmPropertyDef(def);
 
         def = new AlgorithmPropertyDef("max_depth");
-        value = new AlgorithmPropertyValue("8");
+        value = new AlgorithmPropertyValue("6");
         def.addAlgorithmPropertyValue(value);
         algorithm.addAlgorithmPropertyDef(def);
 

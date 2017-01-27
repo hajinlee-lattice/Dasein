@@ -49,9 +49,12 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
+    @Column(name = "TYPE", nullable = true)
+    private AlgorithmType type;
+
     @Column(name = "SCRIPT", nullable = false)
     private String script;
-    
+
     @JsonIgnore
     @Column(name = "VERSION", nullable = true)
     private Integer version;
@@ -73,6 +76,22 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
         this.name = name;
     }
 
+    public AlgorithmType getType() {
+        return type;
+    }
+
+    @MetricTag(tag = "AlgorithmType")
+    @JsonIgnore
+    public String getTypeStrValue() {
+        if (type == null)
+            return "";
+        return type.toString();
+    }
+
+    public void setType(AlgorithmType type) {
+        this.type = type;
+    }
+
     @MetricTag(tag = "AlgorithmScript")
     public String getScript() {
         return script;
@@ -91,7 +110,7 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
     public void setPid(Long pid) {
         this.pid = pid;
     }
-    
+
     @Override
     public Integer getVersion() {
         return version;

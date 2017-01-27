@@ -133,6 +133,27 @@ CREATE PROCEDURE `CreateMetadataStorage`()
   END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `UpdateModelQualityAlgorithm`;
+
+DELIMITER //
+CREATE PROCEDURE `UpdateModelQualityAlgorithm`()
+  BEGIN
+
+    # add column if not exists
+    IF NOT EXISTS(SELECT *
+                  FROM information_schema.COLUMNS
+                  WHERE
+                    TABLE_SCHEMA = 'PLS_MultiTenant'
+                    AND TABLE_NAME = 'MODELQUALITY_ALGORITHM'
+                    AND COLUMN_NAME = 'TYPE')
+    THEN
+      ALTER TABLE `MODELQUALITY_ALGORITHM`
+        ADD `TYPE` INT(11) DEFAULT NULL;
+    END IF;
+
+  END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
@@ -140,6 +161,7 @@ CREATE PROCEDURE `UpdateSchema`()
     CALL `UpdateMetadataTable`();
     CALL `CreateMetadataTableTag`();
     CALL `CreateMetadataStorage`();
+    CALL `UpdateModelQualityAlgorithm`();
 
   END //
 DELIMITER ;

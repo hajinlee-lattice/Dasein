@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAl
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
+import com.latticeengines.domain.exposed.modelquality.AlgorithmType;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class AlgorithmFactory extends ModelFactory {
@@ -35,32 +36,34 @@ public class AlgorithmFactory extends ModelFactory {
         com.latticeengines.domain.exposed.modelquality.Algorithm modelAlgo = getModelAlgorithm(runTimeParams);
         Algorithm algorithm = null;
         if (modelAlgo != null) {
-            switch (modelAlgo.getName()) {
-            case ALGORITHM_NAME_RF:
+            if (modelAlgo.getType() == null)
+                modelAlgo.setType(AlgorithmType.RANDOMFOREST);
+            switch (modelAlgo.getType()) {
+            case RANDOMFOREST:
                 algorithm = createRF(modelAlgo);
                 break;
-            case ALGORITHM_NAME_LR:
+            case LOGISTICREGRESSION:
                 algorithm = createLR(modelAlgo);
                 break;
-            case ALGORITHM_NAME_DT:
+            case DECISIONTREE:
                 algorithm = createDT(modelAlgo);
                 break;
             }
-        }
-        algorithm = getDefaultAlgorithm(runTimeParams);
+        } else
+            algorithm = getDefaultAlgorithm(runTimeParams);
         log.info("Successfully created Algorithm=" + algorithm.getName() + " algorithm properties="
                 + algorithm.getAlgorithmProperties());
         return algorithm;
     }
-    
+
     private static Algorithm getDefaultAlgorithm(Map<String, String> runTimeParams) {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setSampleName("all");
-        
+
         Properties props = randomForestAlgorithm.getAlgorithmProps();
         String seed = runTimeParams == null ? null : runTimeParams.get(RF_SEED_KEY);
-        
+
         if (seed != null) {
             props.put("random_state", seed);
             randomForestAlgorithm.setAlgorithmProps(props);

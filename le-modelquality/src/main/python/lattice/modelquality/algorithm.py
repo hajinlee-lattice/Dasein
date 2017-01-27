@@ -31,6 +31,7 @@ class Algorithm(EntityBase):
     def createFromConfig(cls, config):
         alg = Algorithm(config['name'])
         alg.setScript(config['script'])
+        alg.setType(config['type'])
         for m in config['algorithm_property_defs']:
             alg.setProperty(m['name'], [v['value'] for v in m['algorithm_property_values']])
         return alg
@@ -38,6 +39,7 @@ class Algorithm(EntityBase):
     def __init__(self, name):
         super(Algorithm, self).__init__('algorithms/')
         self._config['name'] = name
+        self._config['type'] = 'RANDOMFOREST'
         self._config['script'] = '/app//dataplatform/scripts/algorithm/rf_train.py'
         self._config['algorithm_property_defs'] = []
         self.setProperty('n_estimators'     , ['100'])
@@ -55,6 +57,12 @@ class Algorithm(EntityBase):
 
     def getName(self):
         return self._config['name']
+
+    def setType(self, type):
+        self._config['type'] = type
+
+    def getType(self):
+        return self._config['type']
 
     def setScript(self, script):
         self._config['script'] = script
