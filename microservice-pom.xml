@@ -32,6 +32,7 @@
         <module>le-microservice/modeling</module>
 
         <module>le-datacloudapi</module>
+        <module>le-microservice/datacloudapi</module>
         <module>le-microservice/propdata</module>
 
         <module>le-quartz</module>

@@ -58,6 +58,10 @@
                                     <destination>propdata.war</destination>
                                 </source>
                                 <source>
+                                    <location>datacloudapi/target/le-datacloudapi-microservice-${le.rpm.version}.war</location>
+                                    <destination>datacloudapi.war</destination>
+                                </source>
+                                <source>
                                     <location>scoring/target/le-scoring-microservice-${le.rpm.version}.war</location>
                                     <destination>scoring.war</destination>
                                 </source>
