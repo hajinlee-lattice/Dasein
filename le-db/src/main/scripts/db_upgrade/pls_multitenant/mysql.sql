@@ -80,7 +80,7 @@ CREATE PROCEDURE `CreateMetadataStorage`()
   BEGIN
     DECLARE dbName VARCHAR(20) DEFAULT 'PLS_MultiTenant';
 
-    # create table METADATA_TABLE_TAG if not exists
+    # create table METADATA_STORAGE if not exists
     IF NOT EXISTS(SELECT table_name
                   FROM INFORMATION_SCHEMA.TABLES
                   WHERE TABLE_SCHEMA = dbName
@@ -133,6 +133,65 @@ CREATE PROCEDURE `CreateMetadataStorage`()
   END //
 DELIMITER ;
 
+DROP PROCEDURE IF EXISTS `CreateBucketMetadaTable`;
+
+DELIMITER //
+CREATE PROCEDURE `CreateBucketMetadaTable`()
+  BEGIN
+    DECLARE dbName VARCHAR(20) DEFAULT 'PLS_MultiTenant';
+
+    # create table BUCKET_METADATA if not exists
+    IF NOT EXISTS(SELECT table_name
+                  FROM INFORMATION_SCHEMA.TABLES
+                  WHERE TABLE_SCHEMA = dbName
+                        AND TABLE_NAME = 'BUCKET_METADATA')
+    THEN
+      CREATE TABLE `BUCKET_METADATA` (
+        `NAME`          VARCHAR(31)  NOT NULL,
+        `PID`           BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
+        `CREATION_TIMESTAMP` BIGINT NOT NULL,
+        `LEFT_BOUND_SCORE` INTEGER NOT NULL,
+        `LIFT` DOUBLE PRECISION NOT NULL,
+        `MODEL_ID` VARCHAR(255) NOT NULL,
+        `NUM_LEADS` INTEGER NOT NULL,
+        `RIGHT_BOUND_SCORE` INTEGER NOT NULL,
+        `TENANT_ID` BIGINT NOT NULL,
+        FK_TENANT_ID BIGINT NOT NULL,
+        PRIMARY KEY (`PID`)
+      )
+        ENGINE = InnoDB;
+
+    END IF;
+
+    # recreate index FK398165E436865BC
+    IF EXISTS(SELECT *
+              FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+              WHERE table_schema = dbName
+                    AND TABLE_NAME = 'BUCKET_METADATA'
+                    AND CONSTRAINT_NAME = 'FK398165E436865BC')
+    THEN
+      ALTER TABLE `BUCKET_METADATA`
+        DROP FOREIGN KEY `FK398165E436865BC`;
+    END IF;
+
+    IF EXISTS(SELECT *
+              FROM INFORMATION_SCHEMA.STATISTICS
+              WHERE table_schema = dbName
+                    AND TABLE_NAME = 'BUCKET_METADATA'
+                    AND INDEX_NAME = 'FK398165E436865BC')
+    THEN
+      ALTER TABLE `BUCKET_METADATA`
+        DROP INDEX `FK398165E436865BC`;
+    END IF;
+
+    ALTER TABLE `BUCKET_METADATA`
+      ADD INDEX FK398165E436865BC (FK_TENANT_ID),
+      ADD CONSTRAINT FK398165E436865BC FOREIGN KEY (FK_TENANT_ID) REFERENCES `TENANT` (`PID`)
+      ON DELETE CASCADE;
+
+  END //
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS `UpdateModelQualityAlgorithm`;
 
 DELIMITER //
@@ -161,6 +220,7 @@ CREATE PROCEDURE `UpdateSchema`()
     CALL `UpdateMetadataTable`();
     CALL `CreateMetadataTableTag`();
     CALL `CreateMetadataStorage`();
+    CALL `CreateBucketMetadaTable`();
     CALL `UpdateModelQualityAlgorithm`();
 
   END //
