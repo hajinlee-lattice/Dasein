@@ -104,8 +104,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
         sourceFile.setState(SourceFileState.Uploaded);
         HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
-        MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(),
-                sourceFile.getSchemaInterpretation(), yarnConfiguration, null) {
+        MetadataResolver metadataResolver = new MetadataResolver(sourceFile.getPath(), yarnConfiguration, null) {
         };
 
         metadataResolver.calculateBasedOnExistingMetadata(metadataTable);
