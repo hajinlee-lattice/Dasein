@@ -1,0 +1,67 @@
+11|Food Production
+22|Utilities
+23|Construction
+31|Manufacturing - Other
+32|Manufacturing - Other
+33|Manufacturing - Other
+42|Wholesale
+43|Retail
+44|Retail
+45|Retail
+48|Transportation
+52|Financial Services
+53|Real Estate
+54|Business Services
+55|Business Services
+56|Business Services
+61|Education
+71|Entertainment, Restaurant & Hospitality
+72|Entertainment, Restaurant & Hospitality
+81|Consumer Services
+91|Government
+92|Government
+211|Energy
+212|Mining & Metals
+213|Mining & Metals
+311|Manufacturing - Consumer
+312|Manufacturing - Consumer
+315|Manufacturing - Consumer
+325|Chemicals
+334|Manufacturing - Computer and Electronic
+491|Transportation
+492|Transportation
+493|Warehousing
+511|Media
+512|Media
+515|Media
+516|Media
+517|Telecommunications
+518|Computer Software and Services
+519|Media
+524|Insurance
+621|Healthcare
+622|Healthcare
+623|Healthcare
+624|Civic & Social Organization
+813|Non-profit
+3162|Manufacturing - Consumer
+3344|Manufacturing - Semiconductors
+3361|Manufacturing - Automotive
+3362|Manufacturing - Automotive
+3363|Manufacturing - Automotive
+3254|Pharmaceuticals
+3351|Manufacturing - Consumer
+3352|Manufacturing - Consumer
+3364|Defense, Aviation & Aeorospace
+3371|Manufacturing - Consumer
+3391|Pharmaceuticals & Biotech
+5112|Computer Software and Services
+5411|Legal
+5412|Accounting
+5413|Engineering, Design, Architecture & Planning
+5415|Engineering, Design, Architecture & Planning
+5417|Research
+5418|Marketing and Advertising
+51913|Computer Software and Services
+541714|Biotechnology
+541511|Computer Software and Services

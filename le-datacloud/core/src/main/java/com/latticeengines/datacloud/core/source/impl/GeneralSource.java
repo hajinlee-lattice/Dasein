@@ -11,6 +11,14 @@ public class GeneralSource implements DerivedSource {
 
     private static final long serialVersionUID = 603829385601451985L;
 
+    public GeneralSource() {
+
+    }
+
+    public GeneralSource(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
     String sourceName = null;
     /*
      * name of the source

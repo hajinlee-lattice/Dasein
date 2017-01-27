@@ -169,9 +169,9 @@ public class OrbCacheSeedRebuildServiceTestNG
         conf.setStringToLongFields(stringToLongFields);
         String[] dedupFields = { "OrbNum" };
         conf.setDedupFields(dedupFields);
-        String markerExpression = "OrbNum != null && Name != null && Country != null && Website != null";
+        String markerExpression = "OrbNum != null && Website != null";
         conf.setMarkerExpression(markerExpression);
-        String[] markerCheckFields = { "OrbNum", "Name", "Country", "Website" };
+        String[] markerCheckFields = { "OrbNum", "Website" };
         conf.setMarkerCheckFields(markerCheckFields);
         String markerField = "IsValid";
         conf.setMarkerField(markerField);
@@ -220,9 +220,9 @@ public class OrbCacheSeedRebuildServiceTestNG
 
     private String getOrbCacheSeedStandardConfig() throws JsonProcessingException {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
-        String filterExpression = "IsSecondaryDomain == false";
+        String filterExpression = "IsSecondaryDomain == false && (DomainHasEmail == null || DomainHasEmail == false)";
         conf.setFilterExpression(filterExpression);
-        String[] filterFields = { "IsSecondaryDomain" };
+        String[] filterFields = { "IsSecondaryDomain", "DomainHasEmail" };
         conf.setFilterFields(filterFields);
         String[][] renameFields = { { "OrbNum", "ID" }, { "Address1", "Street" }, { "Zip", "ZipCode" },
                 { "Phone", "PhoneNumber" } };

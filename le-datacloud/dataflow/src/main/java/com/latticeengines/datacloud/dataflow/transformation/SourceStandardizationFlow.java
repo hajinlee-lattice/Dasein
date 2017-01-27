@@ -1,8 +1,14 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
@@ -10,6 +16,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.ConsolidateIndustryFromNaicsFunction;
+import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
@@ -74,11 +82,65 @@ public class SourceStandardizationFlow
                 source = validateDomain(source, domainValidation, parameters.getIsValidDomainField(),
                         parameters.getValidDomainCheckField());
                 break;
+            case CONSOLIDATE_INDUSTRY:
+                source = consolidateIndustry(source, parameters.getAddConsolidatedIndustryField(),
+                        parameters.getConsolidateIndustryStrategy(), parameters.getIndustryField(),
+                        parameters.getIndustryMapFileName(), parameters.getNaicsField(),
+                        parameters.getNaicsMapFileName());
+                break;
             default:
                 break;
             }
         }
 
+        return source;
+    }
+    
+    private Node consolidateIndustry(Node source, String addConsolidatedIndustryField,
+            StandardizationTransformerConfig.ConsolidateIndustryStrategy strategy, String industryField,
+            String industryMapFileName, String naicsField, String naicsMapFileName) {
+        switch (strategy) {
+        case MAP_INDUSTRY:
+            Map<Serializable, Serializable> industryMap = new HashMap<>();
+            InputStream is = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("etl/" + industryMapFileName);
+            if (is == null) {
+                throw new RuntimeException("Cannot find resource " + industryMapFileName);
+            }
+            Scanner scanner = new Scanner(is);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] pair = line.split("\\|");
+                industryMap.put(pair[0], pair[1]);
+            }
+            scanner.close();
+            source = source.apply(new MappingFunction(industryField, addConsolidatedIndustryField, industryMap),
+                    new FieldList(industryField), new FieldMetadata(addConsolidatedIndustryField, String.class));
+            break;
+        case PARSE_NAICS:
+            Map<Integer, Map<Serializable, Serializable>> naicsMap = new TreeMap<>(Collections.reverseOrder());
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream("etl/" + naicsMapFileName);
+            if (is == null) {
+                throw new RuntimeException("Cannot find resource " + naicsMapFileName);
+            }
+            scanner = new Scanner(is);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] pair = line.split("\\|");
+                if (!naicsMap.containsKey(pair[0].length())) {
+                    naicsMap.put(pair[0].length(), new HashMap<>());
+                }
+                naicsMap.get(pair[0].length()).put(pair[0], pair[1]);
+            }
+            scanner.close();
+            source = source.apply(
+                    new ConsolidateIndustryFromNaicsFunction(naicsField, addConsolidatedIndustryField, naicsMap),
+                    new FieldList(naicsField), new FieldMetadata(addConsolidatedIndustryField, String.class));
+            break;
+        default:
+            throw new RuntimeException(
+                    String.format("ConsolidateIndustryStrategy %s is not supported", strategy.name()));
+        }
         return source;
     }
 

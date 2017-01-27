@@ -60,12 +60,34 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("ValidDomainCheckField")
     private String validDomainCheckField;
 
+    @JsonProperty("AddConsolidatedIndustryField")
+    private String addConsolidatedIndustryField;
+
+    @JsonProperty("ConsolidateIndustryStrategy")
+    private ConsolidateIndustryStrategy consolidateIndustryStrategy;
+
+    @JsonProperty("IndustryField")
+    private String industryField;
+
+    @JsonProperty("NaicsField")
+    private String naicsField;
+
+    @JsonProperty("IndustryMapFileName")
+    private String industryMapFileName;
+
+    @JsonProperty("NaicsMapFileName")
+    private String naicsMapFileName;
+
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN
+        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY
     }
 
     public enum FieldType {
         STRING, INT, LONG, BOOLEAN, FLOAT, DOUBLE
+    }
+    
+    public enum ConsolidateIndustryStrategy {
+        MAP_INDUSTRY, PARSE_NAICS
     }
 
     public String[] getDomainFields() {
@@ -219,5 +241,55 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     public void setValidDomainCheckField(String validDomainCheckField) {
         this.validDomainCheckField = validDomainCheckField;
     }
+
+    public String getAddConsolidatedIndustryField() {
+        return addConsolidatedIndustryField;
+    }
+
+    public void setAddConsolidatedIndustryField(String addConsolidatedIndustryField) {
+        this.addConsolidatedIndustryField = addConsolidatedIndustryField;
+    }
+
+    public ConsolidateIndustryStrategy getConsolidateIndustryStrategy() {
+        return consolidateIndustryStrategy;
+    }
+
+    public void setConsolidateIndustryStrategy(ConsolidateIndustryStrategy consolidateIndustryStrategy) {
+        this.consolidateIndustryStrategy = consolidateIndustryStrategy;
+    }
+
+    public String getIndustryField() {
+        return industryField;
+    }
+
+    public void setIndustryField(String industryField) {
+        this.industryField = industryField;
+    }
+
+    public String getNaicsField() {
+        return naicsField;
+    }
+
+    public void setNaicsField(String naicsField) {
+        this.naicsField = naicsField;
+    }
+
+    public String getIndustryMapFileName() {
+        return industryMapFileName;
+    }
+
+    public void setIndustryMapFileName(String industryMapFileName) {
+        this.industryMapFileName = industryMapFileName;
+    }
+
+    public String getNaicsMapFileName() {
+        return naicsMapFileName;
+    }
+
+    public void setNaicsMapFileName(String naicsMapFileName) {
+        this.naicsMapFileName = naicsMapFileName;
+    }
+    
+    
 
 }

@@ -197,6 +197,29 @@ public class StandardizationTransformer
                     return false;
                 }
                 break;
+            case CONSOLIDATE_INDUSTRY:
+                if (StringUtils.isEmpty(config.getAddConsolidatedIndustryField())) {
+                    log.error("AddConsolidatedIndustryField is required for industry consolidation");
+                    return false;
+                }
+                switch(config.getConsolidateIndustryStrategy()) {
+                case MAP_INDUSTRY:
+                    if (StringUtils.isEmpty(config.getIndustryField()) || StringUtils.isEmpty(config.getIndustryMapFileName())) {
+                        log.error(String.format("For ConsolidateIndustryStrategy %s, IndustryField and IndustryMapFileName are required.", config.getConsolidateIndustryStrategy().name()));
+                        return false;
+                    }
+                    break;
+                case PARSE_NAICS:
+                    if (StringUtils.isEmpty(config.getNaicsField()) || StringUtils.isEmpty(config.getNaicsMapFileName())) {
+                        log.error(String.format("For ConsolidateIndustryStrategy %s, NaicsField and NaicsMapFileName are required.", config.getConsolidateIndustryStrategy().name()));
+                        return false;
+                    }
+                    break;
+                default:
+                    log.error(String.format("ConsolidateIndustryStrategy %s is not supported", config.getConsolidateIndustryStrategy().name()));
+                    return false;
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -237,6 +260,12 @@ public class StandardizationTransformer
         parameters.setAddNullFieldTypes(config.getAddNullFieldTypes());
         parameters.setIsValidDomainField(config.getIsValidDomainField());
         parameters.setValidDomainCheckField(config.getValidDomainCheckField());
+        parameters.setAddConsolidatedIndustryField(config.getAddConsolidatedIndustryField());
+        parameters.setConsolidateIndustryStrategy(config.getConsolidateIndustryStrategy());
+        parameters.setIndustryField(config.getIndustryField());
+        parameters.setNaicsField(config.getNaicsField());
+        parameters.setIndustryMapFileName(config.getIndustryMapFileName());
+        parameters.setNaicsMapFileName(config.getNaicsMapFileName());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

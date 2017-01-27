@@ -1,0 +1,151 @@
+Accounting|Accounting
+Airlines/Aviation|Transportation
+Alternative Dispute Resolution|Consumer Services
+Alternative Medicine|Consumer Services
+Animation|Computer Software and Services
+Apparel & Fashion|Manufacturing - Consumer
+Architecture & Planning|Engineering, Design, Architecture & Planning
+Arts and Crafts|Retail
+Automotive|Manufacturing - Automotive
+Aviation & Aerospace|Defense, Aviation & Aeorospace
+Banking|Financial Services
+Biotechnology|Biotechnology
+Broadcast Media|Media
+Building Materials|Manufacturing - Other
+Business Supplies and Equipment|Financial Services
+Capital Markets|Financial Services
+Chemicals|Chemicals
+Civic & Social Organization|Civic & Social Organization
+Civil Engineering|Engineering, Design, Architecture & Planning
+Commercial Real Estate|Real Estate
+Computer Games|Computer Software and Services
+Computer Hardware|Manufacturing - Computer and Electronic
+Computer Networking|Manufacturing - Computer and Electronic
+Computer & Network Security|Manufacturing - Computer and Electronic
+Computer Software|Computer Software and Services
+Construction|Construction
+Consumer Electronics|Manufacturing - Computer and Electronic
+Consumer Goods|Manufacturing - Consumer
+Consumer Services|Consumer Services
+Cosmetics|Retail
+Credit Unions|Financial Services
+Dairy|Food Production
+Defense & Space|Defense, Aviation & Aeorospace
+Design|Engineering, Design, Architecture & Planning
+Education Management|Education
+E-Learning|Education
+Electrical/Electronic Manufacturing|Manufacturing - Computer and Electronic
+Entertainment|Entertainment, Restaurant & Hospitality
+Environmental Services|Business Services
+Events Services|Business Services
+Executive Office|Business Services
+Facilities Services|Business Services
+Farming|Food Production
+Financial Services|Financial Services
+Fine Art|Retail
+Fishery|Food Production
+Food & Beverages|Manufacturing - Consumer
+Food Production|Food Production
+Fund-Raising|Non-profit
+Furniture|Manufacturing - Consumer
+Gambling & Casinos|Entertainment, Restaurant & Hospitality
+Glass, Ceramics & Concrete|Manufacturing - Other
+Government Administration|Government
+Government Relations|Business Services
+Graphic Design|Engineering, Design, Architecture & Planning
+Health, Wellness and Fitness|Consumer Services
+Higher Education|Education
+Hospital & Health Care|Healthcare
+Hospitality|Entertainment, Restaurant & Hospitality
+Human Resources|Business Services
+Import and Export|Wholesale
+Individual & Family Services|Consumer Services
+Industrial Automation|Manufacturing - Other
+Information Services|Media
+Information Technology and Services|Computer Software and Services
+Insurance|Insurance
+International Affairs|Business Services
+International Trade and Development|Business Services
+Internet|Telecommunications
+Investment Banking|Financial Services
+Investment Management|Financial Services
+Judiciary|Government
+Law Enforcement|Government
+Law Practice|Legal
+Legal Services|Legal
+Legislative Office|Government
+Leisure, Travel & Tourism|Entertainment, Restaurant & Hospitality
+Libraries|Government
+Logistics and Supply Chain|Transportation
+Luxury Goods & Jewelry|Retail
+Machinery|Manufacturing - Other
+Management Consulting|Business Services
+Maritime|Transportation
+Marketing and Advertising|Marketing and Advertising
+Market Research|Marketing and Advertising
+Mechanical or Industrial Engineering|Engineering, Design, Architecture & Planning
+Media Production|Media
+Medical Devices|Manufacturing - Other
+Medical Practice|Healthcare
+Mental Health Care|Healthcare
+Military|Government
+Mining & Metals|Mining & Metals
+Motion Pictures and Film|Media
+Museums and Institutions|Entertainment, Restaurant & Hospitality
+Music|Entertainment, Restaurant & Hospitality
+Nanotechnology|Research
+Newspapers|Media
+Nonprofit Organization Management|Non-profit
+Oil & Energy|Energy
+Online Media|Media
+Outsourcing/Offshoring|Business Services
+Package/Freight Delivery|Transportation
+Packaging and Containers|Manufacturing - Other
+Paper & Forest Products|Manufacturing - Other
+Performing Arts|Entertainment, Restaurant & Hospitality
+Pharmaceuticals|Pharmaceuticals
+Philanthropy|Civic & Social Organization
+Photography|Business Services
+Plastics|Manufacturing - Semiconductors
+Political Organization|Civic & Social Organization
+Primary/Secondary Education|Education
+Printing|Business Services
+Professional Training & Coaching|Consumer Services
+Program Development|Business Services
+Public Policy|Business Services
+Public Relations and Communications|Business Services
+Public Safety|Business Services
+Publishing|Media
+Railroad Manufacture|Manufacturing - Other
+Ranching|Food Production
+Real Estate|Real Estate
+Recreational Facilities and Services|Consumer Services
+Religious Institutions|Civic & Social Organization
+Renewables & Environment|Manufacturing - Other
+Research|Research
+Restaurants|Entertainment, Restaurant & Hospitality
+Retail|Retail
+Security and Investigations|Business Services
+Semiconductors|Manufacturing - Semiconductors
+Shipbuilding|Manufacturing - Other
+Sporting Goods|Manufacturing - Consumer
+Sports|Entertainment, Restaurant & Hospitality
+Staffing and Recruiting|Business Services
+Supermarkets|Retail
+Telecommunications|Telecommunications
+Textiles|Manufacturing - Other
+Think Tanks|Engineering, Design, Architecture & Planning
+Tobacco|Food Production
+Translation and Localization|Business Services
+Transportation/Trucking/Railroad|Transportation
+Utilities|Utilities
+Venture Capital & Private Equity|Financial Services
+Veterinary|Healthcare
+Warehousing|Warehousing
+Wholesale|Wholesale
+Wine and Spirits|Food Production
+Wireless|Telecommunications
+Writing and Editing|Business Services
+Local Business|Business Services
+Dentistry|Healthcare
+Manufacturing|Manufacturing - Other
