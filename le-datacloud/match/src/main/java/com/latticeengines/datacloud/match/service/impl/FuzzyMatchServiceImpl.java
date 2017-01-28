@@ -115,9 +115,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private void addNameLocationValues(List<String> debugValues, DnBMatchContext matchContext) {
-        log.info("NameLocation value="
-                + (matchContext.getMatchedNameLocation() == null ? "null" : matchContext.getMatchedNameLocation()
-                        .toString()));
         debugValues.add(getFieldValue(matchContext, "name"));
         debugValues.add(getFieldValue(matchContext, "street"));
         debugValues.add(getFieldValue(matchContext, "city"));
