@@ -77,7 +77,7 @@ def template_cli(args):
     template(args.environment, args.stackname, args.instances, args.apps, upload=args.upload)
 
 def template(environment, stackname, instances, apps, upload=False):
-    infra_stack = create_infra_template(stackname, instances, apps)
+    infra_stack = create_infra_template(environment, stackname, instances, apps)
     if upload:
         infra_stack.validate()
         infra_stack.upload(environment, infra_stack_s3(stackname))
@@ -85,8 +85,8 @@ def template(environment, stackname, instances, apps, upload=False):
         print infra_stack.json()
         infra_stack.validate()
 
-def create_infra_template(stackname, instances, apps):
-    stack = ECSStack("AWS CloudFormation template for mini-stack infrastructure.", use_asgroup=False, instances=instances, efs=PARAM_EFS)
+def create_infra_template(environment, stackname, instances, apps):
+    stack = ECSStack("AWS CloudFormation template for mini-stack infrastructure.", environment, use_asgroup=False, instances=instances, efs=PARAM_EFS)
     stack.add_params([PARAM_EFS, PARAM_DOCKER_IMAGE_TAG])
 
     task = swagger_task(stackname, apps)
