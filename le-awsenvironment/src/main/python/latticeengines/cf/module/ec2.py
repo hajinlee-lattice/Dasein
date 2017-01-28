@@ -131,11 +131,11 @@ def ecs_metadata(ec2, ecscluster, efs, env):
                     "04_le_yum_repo" : {
                         "command" : { "Fn::Join": [ "\n", [
                             "#!/bin/bash",
-                            "yum clean all",
-                            "yum makecache",
-                            "yum install lce_client",
-                            "chkconfig lce_client on",
-                            "/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
+                            "#yum clean all",
+                            "#yum makecache",
+                            "#yum install lce_client",
+                            "#chkconfig lce_client on",
+                            "#/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
                         ] ] }
                     },
                     "05_iss_user" : {
