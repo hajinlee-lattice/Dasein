@@ -1,11 +1,16 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,8 +27,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.IngestedFileToSourceTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 public class OrbFileToSourceServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+
+    private static final Log log = LogFactory.getLog(OrbFileToSourceServiceTestNG.class);
 
     @Autowired
     OrbCompanyRaw source;
@@ -67,8 +76,7 @@ public class OrbFileToSourceServiceTestNG
 
     @Override
     String getPathToUploadBaseData() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
@@ -113,13 +121,25 @@ public class OrbFileToSourceServiceTestNG
     String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // TODO Auto-generated method stub
-
+        log.info("Start to verify records one by one.");
+        String[] expectedDuns = new String[] { "8129065", "12438907", "12221764", "17145445", "11780445", "11417478",
+                "13262799", "17149076", "8825824", "116109312", "117155602", "126441554", "133303900", "117155600",
+                "117155604", "109785854" };
+        Set<String> expectedDunsSet = new HashSet<>(Arrays.asList(expectedDuns));
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String orbNum = record.get("OrbNum").toString();
+            Assert.assertTrue(expectedDunsSet.contains(orbNum));
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 16);
     }
 
 }
