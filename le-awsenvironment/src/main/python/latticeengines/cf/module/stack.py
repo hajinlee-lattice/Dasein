@@ -125,15 +125,15 @@ class Stack(Template):
             return self
 
 class ECSStack(Stack):
-    def __init__(self, description, use_asgroup=True, instances=1, efs=None, ips=(), sns_topic=None):
+    def __init__(self, description, env, use_asgroup=True, instances=1, efs=None, ips=(), sns_topic=None):
         Stack.__init__(self, description)
         self.add_params(ECS_PARAMETERS)
         self.instances = instances
         if use_asgroup:
-            self._ecscluster, self._asgroup = self._construct(efs, sns_topic)
+            self._ecscluster, self._asgroup = self._construct(efs, sns_topic, env)
         else:
             self._asgroup = None
-            self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, ips=ips)
+            self._ecscluster, self._ec2s = self._construct_by_ec2(instances, efs, env, ips=ips)
 
     def add_service(self, service_name, task, capacity=None, asrolearn=None):
         service, tgt = self.create_service(service_name, task, capacity=capacity, asrolearn=asrolearn)
@@ -174,13 +174,13 @@ class ECSStack(Stack):
     def get_ec2s(self):
         return self._ec2s
 
-    def _construct_by_ec2(self, instances, efs, ips=()):
+    def _construct_by_ec2(self, instances, efs, env, ips=()):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        ec2s = self._create_ec2_instances(ecscluster, instances, efs, ips=ips)
+        ec2s = self._create_ec2_instances(ecscluster, instances, efs, env, ips=ips)
         return ecscluster, ec2s
 
-    def _create_ec2_instances(self, ecscluster, instances, efs, ips=()):
+    def _create_ec2_instances(self, ecscluster, instances, efs, env, ips=()):
         ec2s = []
         seed = random.randint(0, 2)
         outputs = {}
@@ -188,7 +188,7 @@ class ECSStack(Stack):
             name = "EC2Instance%d" % (n + 1)
             subnet_idx = (seed + n) % 3
             subnet = SUBNETS[subnet_idx]
-            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs) \
+            ec2 = ECSInstance(name, PARAM_INSTANCE_TYPE, PARAM_KEY_NAME, PARAM_ECS_INSTANCE_PROFILE_NAME, ecscluster, efs, env) \
                 .add_sg(PARAM_SECURITY_GROUP) \
                 .set_subnet(subnet) \
                 .add_tag("Name", { "Ref" : "AWS::StackName" })
@@ -208,16 +208,16 @@ class ECSStack(Stack):
         self.add_resources(ec2s)
         return ec2s
 
-    def _construct(self, efs, sns_topic):
+    def _construct(self, efs, sns_topic, env):
         ecscluster = ECSCluster("ecscluster")
         self.add_resource(ecscluster)
-        asgroup = self._create_asgroup(ecscluster, efs, sns_topic)
+        asgroup = self._create_asgroup(ecscluster, efs, sns_topic, env)
         return ecscluster, asgroup
 
-    def _create_asgroup(self, ecscluster, efs, sns_topic):
+    def _create_asgroup(self, ecscluster, efs, sns_topic, env):
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(PARAM_ECS_INSTANCE_PROFILE_ARN)
-        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs))
+        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs, env))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)
@@ -261,6 +261,14 @@ class ECSStack(Stack):
     def _metadata(ec2, ecscluster):
         assert isinstance(ec2, LaunchConfiguration)
         assert isinstance(ecscluster, ECSCluster)
+
+        if env == 'dev':
+            lerepo = "http://10.51.1.65/dev"
+            chefbucket= "latticeengines-dev-chef"
+        else:
+            lerepo = "http://10.51.1.65/prod"
+            chefbucket= "latticeengines-prod-chef"
+
         return {
             "AWS::CloudFormation::Init" : {
                 "configSets": {
@@ -297,6 +305,27 @@ class ECSStack(Stack):
                                 "         --region ", { "Ref" : "AWS::Region" }, "\n",
                                 "runas=root\n"
                             ]]}
+                        },
+                        "/etc/yum.repos.d/le.repo": {
+                            "content": {
+                                "Fn::Join": [
+                                    "",
+                                    [ '[lattice]\n',
+                                      'name=Lattice Engines Development Repo\n',
+                                      'baseurl=', lerepo,'/6.7/os/x86_64\n',
+                                      '#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch\n',
+                                      '#failovermethod=priority\n',
+                                      'priority=1\n',
+                                      'enabled=1\n',
+                                      'gpgcheck=1\n',
+                                      'gpgkey=', lerepo,'/RPM-GPG-KEY\n',
+                                      'assumeyes=1\n'
+                                      ]
+                                ]
+                            },
+                            "mode": "000755",
+                            "owner": "root",
+                            "group": "root"
                         },
                         "/tmp/mount_efs.sh": {
                             "content": {
@@ -342,8 +371,32 @@ class ECSStack(Stack):
                                 "#!/bin/bash",
                                 "mkdir -p /etc/ledp",
                                 "chmod 777 /etc/ledp",
+                                "mkdir -p /var/log/ledp",
+                                "chmod 777 /var/log/ledp",
                                 "mkdir -p /var/cache/scoringapi",
                                 "chmod 777 /var/cache/scoringapi"
+                            ] ] }
+                        },
+                        "04_le_yum_repo" : {
+                            "command" : { "Fn::Join": [ "\n", [
+                                "#!/bin/bash",
+                                "yum clean all",
+                                "yum makecache",
+                                "yum install lce_client",
+                                "chkconfig lce_client on",
+                                "/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
+                            ] ] }
+                        },
+                        "05_iss_user" : {
+                            "command" : { "Fn::Join": [ "\n", [
+                                "#!/bin/bash",
+                                "useradd s-iss",
+                                "mkdir -p /home/s-iss/.ssh",
+                                "chmod 0700 /home/s-iss/.ssh",
+                                "aws s3api get-object --bucket ", chefbucket, " --key ssh_keys/s-iss/pub s-iss.pub",
+                                "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
+                                "chmod 0600 /home/s-iss/.ssh/authorized_keys",
+                                "rm -f s-iss.pub"
                             ] ] }
                         },
                         "10_add_instance_to_cluster" : {

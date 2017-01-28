@@ -12,7 +12,14 @@ def ec2_defn():
     with open(json_file) as f:
         return json.load(f)
 
-def ecs_metadata(ec2, ecscluster, efs):
+def ecs_metadata(ec2, ecscluster, efs, env):
+    if env == 'dev':
+        lerepo = "http://10.51.1.65/dev"
+        chefbucket= "latticeengines-dev-chef"
+    else:
+        lerepo = "http://10.51.1.65/prod"
+        chefbucket= "latticeengines-prod-chef"
+
     md = {
         "AWS::CloudFormation::Init" : {
             "configSets": {
@@ -49,6 +56,27 @@ def ecs_metadata(ec2, ecscluster, efs):
                             "         --region ", { "Ref" : "AWS::Region" }, "\n",
                             "runas=root\n"
                         ]]}
+                    },
+                    "/etc/yum.repos.d/le.repo": {
+                        "content": {
+                            "Fn::Join": [
+                                "",
+                                [ '[lattice]\n',
+                                  'name=Lattice Engines Development Repo\n',
+                                  'baseurl=', lerepo,'/6.7/os/x86_64\n',
+                                  '#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch\n',
+                                  '#failovermethod=priority\n',
+                                  'priority=1\n',
+                                  'enabled=1\n',
+                                  'gpgcheck=1\n',
+                                  'gpgkey=', lerepo,'/RPM-GPG-KEY\n',
+                                  'assumeyes=1\n'
+                                  ]
+                            ]
+                        },
+                        "mode": "000755",
+                        "owner": "root",
+                        "group": "root"
                     },
                     "/tmp/mount_efs.sh": {
                         "content": {
@@ -94,8 +122,32 @@ def ecs_metadata(ec2, ecscluster, efs):
                             "#!/bin/bash",
                             "mkdir -p /etc/ledp",
                             "chmod 777 /etc/ledp",
+                            "mkdir -p /var/log/ledp",
+                            "chmod 777 /var/log/ledp",
                             "mkdir -p /var/cache/scoringapi",
                             "chmod 777 /var/cache/scoringapi"
+                        ] ] }
+                    },
+                    "04_le_yum_repo" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "yum clean all",
+                            "yum makecache",
+                            "yum install lce_client",
+                            "chkconfig lce_client on",
+                            "/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
+                        ] ] }
+                    },
+                    "05_iss_user" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "useradd s-iss",
+                            "mkdir -p /home/s-iss/.ssh",
+                            "chmod 0700 /home/s-iss/.ssh",
+                            "aws s3api get-object --bucket ", chefbucket, " --key ssh_keys/s-iss/pub s-iss.pub",
+                            "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
+                            "chmod 0600 /home/s-iss/.ssh/authorized_keys",
+                            "rm -f s-iss.pub"
                         ] ] }
                     },
                     "10_add_instance_to_cluster" : {
@@ -229,7 +281,7 @@ class EC2Instance(Resource):
 
 
 class ECSInstance(EC2Instance):
-    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster, efs):
+    def __init__(self, name, instance_type, ec2_key, instance_profile_name, ecscluster, efs, env):
         assert isinstance(instance_type, Parameter)
         assert isinstance(ec2_key, Parameter)
         Resource.__init__(self, name)
@@ -250,7 +302,7 @@ class ECSInstance(EC2Instance):
                 }
             }
         }
-        self.set_metadata(ecs_metadata(self, ecscluster, efs))
+        self.set_metadata(ecs_metadata(self, ecscluster, efs, env))
         self.set_instanceprofile(instance_profile_name)
 
     def __ecs_userdata(self):

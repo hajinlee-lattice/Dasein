@@ -37,7 +37,7 @@ def template_cli(args):
     template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, second_tgrp=args.secondtgrp, upload=args.upload)
 
 def template(environment, stackname, profile, fixed_instances=False, num_instances=1, second_tgrp=False, upload=False):
-    stack = create_template(profile, fixed_instances, num_instances, second_tgrp=second_tgrp)
+    stack = create_template(environment, profile, fixed_instances, num_instances, second_tgrp=second_tgrp)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -45,8 +45,8 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
         print stack.json()
         stack.validate()
 
-def create_template(profile, fixed_instances=False, num_instances=1, second_tgrp=False):
-    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
+def create_template(environment, profile, fixed_instances=False, num_instances=1, second_tgrp=False):
+    stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", environment, use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS, sns_topic=PARAM_SNS_TOPIC_ARN)
     stack.add_params([
         PARAM_DOCKER_IMAGE,
         PARAM_DOCKER_IMAGE_TAG,
