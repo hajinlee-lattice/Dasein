@@ -146,9 +146,9 @@ def haproxy_task(stackname, ec2s):
     return task
 
 def provision_cli(args):
-    provision(args.environment, args.stackname, args.tag)
+    provision(args.environment, args.stackname, args.tag, args.instancetype)
 
-def provision(environment, stackname, tag):
+def provision(environment, stackname, tag, instance_type='r3.large'):
     global ALLOCATION
     ALLOCATION = load_allocation()
 
@@ -169,7 +169,7 @@ def provision(environment, stackname, tag):
         PARAM_SUBNET_3.config(subnet3),
         PARAM_KEY_NAME.config(config.ec2_key()),
         PARAM_SECURITY_GROUP.config(config.tomcat_sg()),
-        PARAM_INSTANCE_TYPE.config('m4.xlarge'),
+        PARAM_INSTANCE_TYPE.config(instance_type),
         PARAM_ENVIRONMENT.config(environment),
         PARAM_CAPACITY.config("0"),
         PARAM_MAX_CAPACITY.config("0"),
@@ -336,6 +336,7 @@ def parse_args():
     parser1.add_argument('-e', dest='environment', type=str, default='devcluster', choices=['devcluster', 'qacluster','prodcluster'], help='environment')
     parser1.add_argument('-s', dest='stackname', type=str, required=True, help='the LE_STACK to be created')
     parser1.add_argument('-t', dest='tag', type=str, default='latest', help='docker image tag')
+    parser1.add_argument('-i', dest='instancetype', type=str, default='r3.large', help='EC2 instance type')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("bootstrap")
