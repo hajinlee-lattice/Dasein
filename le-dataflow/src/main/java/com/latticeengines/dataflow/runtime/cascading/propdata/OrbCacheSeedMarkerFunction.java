@@ -34,19 +34,21 @@ public class OrbCacheSeedMarkerFunction extends BaseOperation implements Functio
         Iterator<Object> itr = fields.iterator();
         int pos = 0;
 
-        boolean isSecondary = false;
+        boolean isSecondaryOrEmail = false;
 
-        while (itr.hasNext() && !isSecondary) {
+        while (itr.hasNext() && !isSecondaryOrEmail) {
             String field = (String) itr.next();
-            Object value = tuple.getObject(pos++);
+            Boolean value = tuple.getBoolean(pos++);
             for (String fieldToCheck : fieldsToCheck) {
-                if (field.equals(fieldToCheck) && value.toString().equals(Boolean.TRUE.toString())) {
-                    isSecondary = true;
+                if (field.equals(fieldToCheck) //
+                        && value != null //
+                        && value == Boolean.TRUE) {
+                    isSecondaryOrEmail = true;
                     break;
                 }
             }
         }
-        result.setBoolean(0, isSecondary);
+        result.setBoolean(0, isSecondaryOrEmail);
         functionCall.getOutputCollector().add(result);
     }
 }
