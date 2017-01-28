@@ -13,12 +13,12 @@ def ec2_defn():
         return json.load(f)
 
 def ecs_metadata(ec2, ecscluster, efs, env):
-    if env == 'dev':
-        lerepo = "http://10.51.1.65/dev"
-        chefbucket= "latticeengines-dev-chef"
-    else:
+    if env == 'prod':
         lerepo = "http://10.51.1.65/prod"
         chefbucket= "latticeengines-prod-chef"
+    else:
+        lerepo = "http://10.51.1.65/dev"
+        chefbucket= "latticeengines-dev-chef"
 
     md = {
         "AWS::CloudFormation::Init" : {
