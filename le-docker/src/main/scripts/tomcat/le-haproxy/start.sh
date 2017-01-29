@@ -36,7 +36,7 @@ if [ ! -z "${HOSTS}" ]; then
     WORKFLOWAPI_HOSTPORTS=""
     QUATZ_HOSTPORTS=""
     MODELQUALITY_HOSTPORTS=""
-    PROPDATA_HOSTPORTS=""
+    DATACLOUDAPI_HOSTPORTS=""
     DELLEBI_HOSTPORTS=""
 
     for h in $(echo $HOSTS | sed "s/,/ /g")
@@ -57,7 +57,7 @@ if [ ! -z "${HOSTS}" ]; then
             WORKFLOWAPI_HOSTPORTS="${WORKFLOWAPI_HOSTPORTS}${h}:9006,"
             QUATZ_HOSTPORTS="${QUATZ_HOSTPORTS}${h}:9007,"
             MODELQUALITY_HOSTPORTS="${MODELQUALITY_HOSTPORTS}${h}:9008,"
-            PROPDATA_HOSTPORTS="${PROPDATA_HOSTPORTS}${h}:9009,"
+            DATACLOUDAPI_HOSTPORTS="${DATACLOUDAPI_HOSTPORTS}${h}:9009,"
             DELLEBI_HOSTPORTS="${DELLEBI_HOSTPORTS}${h}:9010,"
         done
 
@@ -78,7 +78,7 @@ replace_token dataflowapi ${DATAFLOWAPI_HOSTPORTS}
 replace_token workflowapi ${WORKFLOWAPI_HOSTPORTS}
 replace_token quartz ${QUATZ_HOSTPORTS}
 replace_token modelquality ${MODELQUALITY_HOSTPORTS}
-replace_token propdata ${PROPDATA_HOSTPORTS}
+replace_token datacloudapi ${DATACLOUDAPI_HOSTPORTS}
 replace_token dellebi ${DELLEBI_HOSTPORTS}
 
 cat /usr/local/etc/haproxy/haproxy.cfg
