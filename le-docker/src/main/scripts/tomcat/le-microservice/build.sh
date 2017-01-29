@@ -76,9 +76,8 @@ for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     IMAGE=latticeengines/${service} &&
     if [ "${service}" != "playmaker" ] && [ "${service}" != "oauth2" ]; then
         build_docker ${IMAGE} ${service} ${WAR}
-    fi &
+    fi
 done
-wait
 
 rm -rf tmp
 rm -rf /tmp/latticeengines

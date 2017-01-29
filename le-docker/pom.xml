@@ -119,7 +119,7 @@
                                 <copy file="${project.basedir}/../le-microservice/modelquality/target/le-modelquality-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/modelquality.war"
                                       overwrite="true" />
-                                <copy file="${project.basedir}/../le-microservice/propdata/target/le-datacloudapi-microservice-${project.version}.war"
+                                <copy file="${project.basedir}/../le-microservice/datacloudapi/target/le-datacloudapi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/datacloudapi.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/propdata/target/le-propdata-microservice-${project.version}.war"
