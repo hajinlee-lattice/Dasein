@@ -26,7 +26,7 @@ _S3_CF_PATH='cloudformation/ministack/'
 PARAM_DOCKER_IMAGE_TAG=Parameter("DockerImageTag", "Docker image tag to be deployed", default="latest")
 PARAM_EFS = Parameter("Efs", "EFS Id")
 
-ALL_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi,quartz,modelquality,propdata,dellebi"
+ALL_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi,quartz,modelquality,propdata,dellebi,datacloudapi"
 DEFAULT_APPS="pls,admin,matchapi,scoringapi,oauth2,playmaker,eai,metadata,scoring,modeling,dataflowapi,workflowapi"
 ALLOCATION = {}
 HAPROXY_KEY="HAProxy"
