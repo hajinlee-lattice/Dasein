@@ -5,6 +5,7 @@ from .iam import InstanceProfile
 from .parameter import Parameter, PARAM_ENVIRONMENT
 from .resource import Resource
 from .template import TEMPLATE_DIR
+from ...conf import AwsEnvironment
 
 
 def ec2_defn():
@@ -13,13 +14,9 @@ def ec2_defn():
         return json.load(f)
 
 def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
-    if env == 'prod':
-        lerepo = "http://10.51.1.65/prod"
-        chefbucket= "latticeengines-prod-chef"
-    else:
-        lerepo = "http://10.41.1.10/dev"
-        chefbucket= "latticeengines-dev-chef"
-
+    config = AwsEnvironment(env)
+    lerepo = config.le_repo()
+    chefbucket= config.chef_bucket()
     assert isinstance(instance_role_name, Parameter)
 
     md = {

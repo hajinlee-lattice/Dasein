@@ -74,9 +74,6 @@ class AwsEnvironment:
     def ecr_registry(self):
         return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
 
-    def cf_bucket(self):
-        return self._props['cf.s3.bucket']
-
     def ecs_instance_profile_arn(self):
         return "arn:aws:iam::%s:instance-profile/%s" % (self.aws_account_id(), self.ecs_instance_profile_name())
 
@@ -106,6 +103,15 @@ class AwsEnvironment:
 
     def splunk_token(self):
         return self._props['splunk.token']
+
+    def le_repo(self):
+        return self._props['le.repo']
+
+    def cf_bucket(self):
+        return self._props['s3.cf.bucket']
+
+    def chef_bucket(self):
+        return self._props['s3.chef.bucket']
 
     def to_props(self):
         return {
