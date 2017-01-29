@@ -60,16 +60,16 @@ class AwsEnvironment:
         return self._props['lpi.efs.ip.3']
 
     def zk_sg(self):
-        return self._props['zookeeper.sg']
+        return self._props['sg.zookeeper']
 
     def kafka_sg(self):
-        return self._props['kafka.sg']
+        return self._props['sg.kafka']
 
     def tomcat_sg(self):
-        return self._props['tomcat.sg']
+        return self._props['sg.tomcat']
 
     def nodejs_sg(self):
-        return self._props['nodejs.sg']
+        return self._props['sg.nodejs']
 
     def ecr_registry(self):
         return "%s.dkr.ecr.us-east-1.amazonaws.com" % self.aws_account_id()
