@@ -12,7 +12,7 @@ def ec2_defn():
     with open(json_file) as f:
         return json.load(f)
 
-def ecs_metadata(ec2, ecscluster, efs, env):
+def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     if env == 'prod':
         lerepo = "http://10.51.1.65/prod"
         chefbucket= "latticeengines-prod-chef"
@@ -20,7 +20,15 @@ def ecs_metadata(ec2, ecscluster, efs, env):
         lerepo = "http://10.41.1.10/dev"
         chefbucket= "latticeengines-dev-chef"
 
+    assert isinstance(instance_role_name, Parameter)
+
     md = {
+        "AWS::CloudFormation::Authentication":{
+            "S3AccessCreds":{
+                "type":"S3",
+                "roleName": instance_role_name.ref()
+            }
+        },
         "AWS::CloudFormation::Init" : {
             "configSets": {
                 "bootstrap": [ "install" ],
@@ -56,6 +64,13 @@ def ecs_metadata(ec2, ecscluster, efs, env):
                             "         --region ", { "Ref" : "AWS::Region" }, "\n",
                             "runas=root\n"
                         ]]}
+                    },
+                    "/tmp/s-iss.pub":{
+                        "source":"http://" + chefbucket + ".s3.amazonaws.com/ssh_keys/s-iss/pub",
+                        "mode":"000777",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
                     },
                     "/etc/yum.repos.d/le.repo": {
                         "content": {
@@ -133,7 +148,7 @@ def ecs_metadata(ec2, ecscluster, efs, env):
                             "#!/bin/bash",
                             "yum clean all",
                             "yum makecache",
-                            "yum install lce_client",
+                            "yum install -y lce_client",
                             "chkconfig lce_client on",
                             "/opt/lce_client/set-server-ip.sh 10.51.1.40 31300",
                         ] ] }
@@ -144,7 +159,7 @@ def ecs_metadata(ec2, ecscluster, efs, env):
                             "useradd s-iss",
                             "mkdir -p /home/s-iss/.ssh",
                             "chmod 0700 /home/s-iss/.ssh",
-                            "aws s3api get-object --bucket ", chefbucket, " --key ssh_keys/s-iss/pub s-iss.pub",
+                            "mv /tmp/s-iss.pub .",
                             "cat s-iss.pub > /home/s-iss/.ssh/authorized_keys",
                             "chmod 0600 /home/s-iss/.ssh/authorized_keys",
                             "rm -f s-iss.pub"
@@ -302,7 +317,7 @@ class ECSInstance(EC2Instance):
                 }
             }
         }
-        self.set_metadata(ecs_metadata(self, ecscluster, efs, env))
+        self.set_metadata(ecs_metadata(self, ecscluster, efs, env, instance_profile_name))
         self.set_instanceprofile(instance_profile_name)
 
     def __ecs_userdata(self):

@@ -217,7 +217,7 @@ class ECSStack(Stack):
     def _create_asgroup(self, ecscluster, efs, sns_topic, env):
         asgroup = AutoScalingGroup("scalinggroup", PARAM_CAPACITY, PARAM_CAPACITY, PARAM_MAX_CAPACITY)
         launchconfig = LaunchConfiguration("containerpool").set_instance_profile(PARAM_ECS_INSTANCE_PROFILE_ARN)
-        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs, env))
+        launchconfig.set_metadata(ecs_metadata(launchconfig, ecscluster, efs, env, PARAM_ECS_INSTANCE_PROFILE_NAME))
         launchconfig.set_userdata(ECSStack._userdata(launchconfig, asgroup))
 
         asgroup.add_pool(launchconfig)
