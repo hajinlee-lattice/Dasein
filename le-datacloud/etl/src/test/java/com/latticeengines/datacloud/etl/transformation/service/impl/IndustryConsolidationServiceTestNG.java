@@ -1,13 +1,16 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,8 +50,6 @@ public class IndustryConsolidationServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        // source.setSourceName("ConsolidateIndustry");
-        // baseSource.setSourceName("ConsolidateIndustry_Test");
         uploadBaseSourceFile(baseSource, "ConsolidateIndustry_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -146,5 +147,35 @@ public class IndustryConsolidationServiceTestNG
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        Map<String, String> expectedIndustryMap = new HashMap<String, String>() {
+            {
+                put("Accounting", "Accounting");
+                put("Aviation & Aerospace", "Defense, Aviation & Aeorospace");
+                put("Business Supplies and Equipment", "Financial Services");
+                put("Electrical/Electronic Manufacturing", "Manufacturing - Computer and Electronic");
+                put("null", "null");
+            }
+        };
+        Map<String, String> expectedNaicsMap = new HashMap<String, String>() {
+            {
+                put("561613", "Business Services");
+                put("238220", "Construction");
+                put("811111", "Consumer Services");
+                put("424990", "Wholesale");
+                put("null", "null");
+            }
+        };
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String industry = String.valueOf(record.get("Industry"));
+            String naics = String.valueOf(record.get("Naics"));
+            String consolidatedIndustryFromIndustry = String.valueOf(record.get("ConsolidatedIndustryFromIndustry"));
+            String consolidatedIndustryFromNaics = String.valueOf(record.get("ConsolidatedIndustryFromNaics"));
+            Assert.assertEquals(expectedIndustryMap.get(industry), consolidatedIndustryFromIndustry);
+            Assert.assertEquals(expectedNaicsMap.get(naics), consolidatedIndustryFromNaics);
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 5);
     }
 }
