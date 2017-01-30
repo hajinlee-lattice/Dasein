@@ -272,12 +272,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         } catch (IllegalArgumentException e) {
             fieldMalFormed = true;
-            LOG.warn(e);
+            LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot convert %s to type %s for column %s.", fieldCsvValue,
                     avroType, attr.getDisplayName()));
         } catch (Exception e) {
             fieldMalFormed = true;
-            LOG.warn(e);
+            LOG.warn(e.getMessage());
             throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
                     fieldCsvValue, attr.getDisplayName()));
         }
