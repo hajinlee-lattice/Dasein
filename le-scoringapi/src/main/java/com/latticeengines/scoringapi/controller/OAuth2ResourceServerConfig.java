@@ -50,12 +50,14 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                 .and() //
                 .authorizeRequests() //
                 .antMatchers( //
-                        "/score/v2/api-docs", //
                         "/score/webjars/**", //
                         "/**/favicon.ico", //
                         "/score/swagger-ui.html", //
                         "/score/swagger-resources/**", //
-                        "/score/health/**") //
+                        "/score/health/**", //
+                        "/score/v2/api-docs", //
+                        "/score/configuration/**", //
+                        "/score/enrich/record/**") //
                 .permitAll() //
                 .antMatchers("/score/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");
