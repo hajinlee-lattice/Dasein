@@ -181,35 +181,31 @@ public class AccountMasterSeedMarkerRebuildFlow extends ConfigurableFlowBase<Acc
                 alexaMostRecentNode, new FieldList(URL_FIELD), JoinType.LEFT);
 
         Node accountMasterSeedPopularDomainRecordNode = nodeForJoiningWithAlexaMostRecent//
-                .filter(ALEXA_RANK + " != null", new FieldList(ALEXA_RANK))//
-                .filter(LE_IS_PRIMARY_DOMAIN + " != null", new FieldList(LE_IS_PRIMARY_DOMAIN))//
+                .filter(ALEXA_RANK + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null ",
+                        new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN))//
                 .filter("\"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
                         new FieldList(LE_IS_PRIMARY_DOMAIN));
 
         Fields fieldDeclarationExpanded = new Fields(accountMasterSeedPopularDomainRecordNode.getFieldNames()
                 .toArray(new String[accountMasterSeedPopularDomainRecordNode.getFieldNames().size()]));
         AccountMasterSeedDomainRankBuffer buffer = new AccountMasterSeedDomainRankBuffer(fieldDeclarationExpanded);
-        Node accountMasterSeedPopularDomainRecordNode1 = accountMasterSeedPopularDomainRecordNode//
+        accountMasterSeedPopularDomainRecordNode = accountMasterSeedPopularDomainRecordNode//
                 .groupByAndBuffer(new FieldList(DUNS), buffer);
 
         Node remainingRecordNode = nodeForJoiningWithAlexaMostRecent//
-                .filter(ALEXA_RANK + " == null", new FieldList(ALEXA_RANK));
+                .filter(ALEXA_RANK + " == null || " + LE_IS_PRIMARY_DOMAIN + " == null ",
+                        new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN));
         remainingRecordNode = remainingRecordNode.merge(nodeForJoiningWithAlexaMostRecent//
-                .filter(ALEXA_RANK + " != null", new FieldList(ALEXA_RANK))//
-                .filter(LE_IS_PRIMARY_DOMAIN + " == null", new FieldList(LE_IS_PRIMARY_DOMAIN)));
-        remainingRecordNode = remainingRecordNode.merge(nodeForJoiningWithAlexaMostRecent//
-                .filter(ALEXA_RANK + " != null", new FieldList(ALEXA_RANK))//
-                .filter(LE_IS_PRIMARY_DOMAIN + " != null", new FieldList(LE_IS_PRIMARY_DOMAIN))//
+                .filter(ALEXA_RANK + " != null && " + LE_IS_PRIMARY_DOMAIN + " != null ",
+                        new FieldList(ALEXA_RANK, LE_IS_PRIMARY_DOMAIN))//
                 .filter("! \"Y\"" + ".equalsIgnoreCase(" + LE_IS_PRIMARY_DOMAIN + ")",
                         new FieldList(LE_IS_PRIMARY_DOMAIN)));
 
         remainingRecordNode = remainingRecordNode.retain(fieldsInNode);
         accountMasterSeedPopularDomainRecordNode = accountMasterSeedPopularDomainRecordNode.retain(fieldsInNode);
-        accountMasterSeedPopularDomainRecordNode1 = accountMasterSeedPopularDomainRecordNode1.retain(fieldsInNode);
 
         return remainingRecordNode//
                 .merge(accountMasterSeedPopularDomainRecordNode)//
-                .merge(accountMasterSeedPopularDomainRecordNode1)//
                 .merge(nodeNotForJoiningWithAlexaMostRecent);
     }
 
