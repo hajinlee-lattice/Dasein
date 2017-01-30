@@ -12,8 +12,8 @@ angular
         csvFileName: $stateParams.csvFileName,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
         mappingOptions: [
-            { id: 0, name: "Use as Custom Predictor" },
-            { id: 1, name: "Map to Standard Field" },
+            { id: 0, name: "Custom Predictor" },
+            { id: 1, name: "Standard Field" },
             { id: 2, name: "Ignore this field" }
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
