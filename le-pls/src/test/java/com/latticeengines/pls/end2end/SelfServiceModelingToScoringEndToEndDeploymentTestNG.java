@@ -43,6 +43,8 @@ public class SelfServiceModelingToScoringEndToEndDeploymentTestNG extends PlsDep
         String modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, fileName);
         Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenant.getId(),
                 RESOURCE_BASE + "/" + fileName, modelId, 1000);
+        
+        diffRecords.keySet().forEach((k) -> log.info("Key : " + k));
 
         String expectedDiffCountStr = System.getProperty("DIFFCOUNT");
 
