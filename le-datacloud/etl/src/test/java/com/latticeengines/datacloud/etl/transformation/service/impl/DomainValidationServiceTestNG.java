@@ -50,8 +50,8 @@ public class DomainValidationServiceTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, "DomainValidation_Test", baseSourceVersion);
-        uploadBaseSourceFile(source, "DomainValidation", baseSourceVersion);
+        uploadBaseSourceFile(baseSource, "DomainValidation_TestInput", baseSourceVersion);
+        uploadBaseSourceFile(source, "DomainValidation_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
