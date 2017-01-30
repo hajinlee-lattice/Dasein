@@ -96,9 +96,11 @@ public class SqlServerHelper implements DbHelper {
                     public Set<String> load(String key) {
                         JdbcTemplate jdbcTemplate = dataSourceService
                                 .getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-                        List<String> columnsByQuery = jdbcTemplate.queryForList("SELECT COLUMN_NAME "
-                                + "FROM INFORMATION_SCHEMA.COLUMNS\n" + "WHERE TABLE_NAME = '" + key
-                                + "' AND TABLE_SCHEMA='dbo'", String.class);
+                        List<String> columnsByQuery = jdbcTemplate
+                                .queryForList(
+                                        "SELECT COLUMN_NAME " + "FROM INFORMATION_SCHEMA.COLUMNS\n"
+                                                + "WHERE TABLE_NAME = '" + key + "' AND TABLE_SCHEMA='dbo'",
+                                        String.class);
                         Set<String> columnsInSql = new HashSet<>();
                         for (String columnName : columnsByQuery) {
                             columnsInSql.add(columnName.toLowerCase());
@@ -172,7 +174,8 @@ public class SqlServerHelper implements DbHelper {
             }
             sql = constructSqlQueryForFetching(involvedPartitions, targetColumns, latticeAccountIds);
         } else {
-            sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(), context.getNameLocations());
+            sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
+                    context.getNameLocations());
         }
 
         List<JdbcTemplate> jdbcTemplates = dataSourceService.getJdbcTemplatesFromDbPool(DataSourcePool.SourceDB,
@@ -267,9 +270,9 @@ public class SqlServerHelper implements DbHelper {
     private String constructSqlQuery(Set<String> involvedPartitions, Set<String> targetColumns,
             Collection<String> domains, Collection<NameLocation> nameLocations) {
 
-        String sql = String.format("SELECT p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]", MatchConstants.DOMAIN_FIELD,
-                MatchConstants.NAME_FIELD, MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD,
-                MatchConstants.CITY_FIELD);
+        String sql = String.format("SELECT p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]",
+                MatchConstants.LID_FIELD, MatchConstants.DOMAIN_FIELD, MatchConstants.NAME_FIELD,
+                MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD, MatchConstants.CITY_FIELD);
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
         sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
@@ -280,16 +283,16 @@ public class SqlServerHelper implements DbHelper {
                 sql += String.format("p1.[%s] = '%s'", MatchConstants.NAME_FIELD,
                         nameLocation.getName().replace("'", "''"));
                 if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.COUNTRY_FIELD, nameLocation.getCountry()
-                            .replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.COUNTRY_FIELD,
+                            nameLocation.getCountry().replace("'", "''"));
                 }
                 if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.STATE_FIELD, nameLocation.getState()
-                            .replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.STATE_FIELD,
+                            nameLocation.getState().replace("'", "''"));
                 }
                 if (StringUtils.isNotEmpty(nameLocation.getCity())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.CITY_FIELD, nameLocation.getCity()
-                            .replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.CITY_FIELD,
+                            nameLocation.getCity().replace("'", "''"));
                 }
                 sql += " )\n";
             }
@@ -439,11 +442,17 @@ public class SqlServerHelper implements DbHelper {
                                 record.getResultsInPartition().put(sourceName, row);
                             }
 
+                            matched = true;
+
                             break;
                         }
                     }
                 }
 
+            }
+
+            if (matched) {
+                record.setMatched(true);
             }
         }
     }

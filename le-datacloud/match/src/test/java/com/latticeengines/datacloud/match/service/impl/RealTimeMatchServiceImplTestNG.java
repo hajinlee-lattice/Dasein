@@ -14,7 +14,6 @@ import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputService;
 import com.latticeengines.datacloud.match.testframework.TestMatchInputUtils;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -35,10 +34,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Test(groups = "functional")
-    public void testSimpleMatch() {
+    public void testSimpleMatchRTSCache() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
@@ -46,12 +45,12 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     }
 
     @Test(groups = "functional")
-    public void testSimpleRealTimeBulkMatch() {
+    public void testSimpleRealTimeBulkMatchRTSCache() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         List<MatchInput> inputs = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+            MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
             inputs.add(input);
         }
         BulkMatchInput bulkMatchInput = new BulkMatchInput();
@@ -69,9 +68,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testSimpleMatchAccountMaster() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        DataCloudVersion version = versionEntityMgr.latestApprovedForMajorVersion("2.0");
-        input.setDataCloudVersion(version.getVersion());
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
@@ -81,13 +78,11 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional")
     public void testSimpleRealTimeBulkMatchAccountMaster() {
-        DataCloudVersion version = versionEntityMgr.latestApprovedForMajorVersion("2.0");
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         List<MatchInput> inputs = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
-            MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-            input.setDataCloudVersion(version.getVersion());
+            MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
             inputs.add(input);
         }
         BulkMatchInput bulkMatchInput = new BulkMatchInput();
@@ -126,7 +121,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testMatchEnrichment() {
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
         input.setCustomSelection(testMatchInputService.enrichmentSelection());
         MatchOutput output = realTimeMatchService.match(input);
@@ -138,7 +133,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testIsPublicDomain() {
         Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
@@ -150,7 +145,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testExcludePublicDomain() {
         Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setExcludeUnmatchedWithPublicDomain(true);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);

@@ -109,7 +109,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             List<Object> output = new ArrayList<>();
 
             Map<String, Object> results = internalRecord.getQueryResult();
-            boolean matchedAnyColumn = false;
 
             List<MetadataColumn> metadataColumns = metadataColumnService.getMetadataColumns(columnNames,
                     matchContext.getInput().getDataCloudVersion());
@@ -118,6 +117,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 metadataColumnMap.put(column.getColumnId(), column);
             }
 
+            boolean matchedRecord = internalRecord.isMatched() || (internalRecord.getLatticeAccountId() != null);
+
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
@@ -125,36 +126,26 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 String field = (metadataColumn != null) ? metadataColumn.getColumnId() : column.getColumnName();
 
                 Object value = null;
-                boolean matched = false;
 
                 if (MatchConstants.LID_FIELD.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getLatticeAccountId())) {
                     value = internalRecord.getLatticeAccountId();
-                    matched = (value != null);
                 } else if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
-                    if (!excludeUnmatchedPublicDomain && returnUnmatched) {
-                        matched = true;
-                    }
                     value = true;
                 } else if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)
                         && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
                         && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
-                    if (!excludeUnmatchedPublicDomain && returnUnmatched) {
-                        matched = true;
-                    }
                     value = true;
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);
-                    matched = (value != null);
                 }
 
                 output.add(value);
                 columnMatchCount[i] += (value == null ? 0 : 1);
                 internalRecord.getColumnMatched().add(value != null);
-                matchedAnyColumn = matchedAnyColumn || matched;
             }
 
             // make *_IsMatched columns not null
@@ -174,18 +165,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             internalRecord.setOutput(output);
 
-            if (matchedAnyColumn) {
+            if (matchedRecord) {
                 totalMatched++;
                 internalRecord.setMatched(true);
             } else {
                 internalRecord.setMatched(false);
-                internalRecord.addErrorMessages("The input does not match to any source.");
+                internalRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
             }
 
             internalRecord.setResultsInPartition(null);
             OutputRecord outputRecord = new OutputRecord();
-            if (returnUnmatched || matchedAnyColumn) {
-                if (excludeUnmatchedPublicDomain && !matchedAnyColumn && internalRecord.isPublicDomain()) {
+            if (returnUnmatched || matchedRecord) {
+                if (excludeUnmatchedPublicDomain && !matchedRecord && internalRecord.isPublicDomain()) {
                     log.warn("Excluding the record, because it is using the public domain: " + internalRecord.getParsedDomain());
                 } else {
                     outputRecord.setOutput(internalRecord.getOutput());
