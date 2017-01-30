@@ -61,7 +61,7 @@
         "mem": 2048,
         "port": 9008
     },
-    "propdata": {
+    "datacloudapi": {
         "mem": 2048,
         "port": 9009
     },
