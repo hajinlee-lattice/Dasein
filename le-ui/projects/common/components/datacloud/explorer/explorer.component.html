@@ -61,7 +61,7 @@
             <li ng-if="!vm.category && vm.lookupMode && vm.hasCompanyInfo" class="category company">
                 <div class="box-inner company-info round-box">
                     <ul class="info">
-                        <li><h2>{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
+                        <li><h2 title="{{vm.LookupResponse.companyInfo.LDC_Name}}">{{vm.LookupResponse.companyInfo.LDC_Name}}</h2></li>
                         <li>{{vm.companyInfoFormatted('address')}}</li>
                         <li><a href="tel:+1{{vm.LookupResponse.companyInfo.LE_COMPANY_PHONE}}">{{vm.companyInfoFormatted('phone')}}</a></li>
                         <li><a href="http://{{vm.LookupResponse.companyInfo.LDC_Domain}}">{{vm.LookupResponse.companyInfo.LDC_Domain}}</a></li>
@@ -132,6 +132,9 @@
         </ul>
         
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
+            <div class="subcategory-back" ng-if="vm.category">
+                <span ng-click="vm.category = ''; vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+            </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
                 <div class="twelve columns">
                     <pd-pagination-controls 

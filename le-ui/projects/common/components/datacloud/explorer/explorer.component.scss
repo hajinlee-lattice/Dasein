@@ -253,6 +253,7 @@
                         text-align: left;
                     }
                     h2 {
+                        @include text-ellipsis;
                         font-size: 20px;
                     }
                     .info {
