@@ -15,7 +15,7 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
     @BeforeClass(groups = "manual")
     public void setup() throws Exception {
         super.setup();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null, null);
     }
 
     @Test(groups = "manual")

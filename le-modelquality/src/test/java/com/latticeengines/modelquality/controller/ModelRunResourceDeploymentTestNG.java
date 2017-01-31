@@ -32,7 +32,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
         namedModelRunEntityNames.add("ModelQualityDeploymentTest-Account");
         deleteLocalEntities();
         super.setup();
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, null, null);
     }
 
     @Override
