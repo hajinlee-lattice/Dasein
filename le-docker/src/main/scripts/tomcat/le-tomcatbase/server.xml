@@ -93,7 +93,7 @@
                maxThreads="200" SSLEnabled="true" scheme="https" secure="true"
                clientAuth="false" sslProtocol="TLS"
                keystoreFile="/etc/pki/java/tomcat.jks"
-               keystorePass="welcome"
+               keystorePass="Lattice1"
                connectionTimeout="600000"  />
 
     <!-- Define a SSL/TLS HTTP/1.1 Connector on port 8443 with HTTP/2
