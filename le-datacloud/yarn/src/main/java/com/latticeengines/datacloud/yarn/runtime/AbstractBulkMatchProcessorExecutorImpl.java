@@ -143,7 +143,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
             GenericRecordBuilder builder = new GenericRecordBuilder(processorContext.getOutputSchema());
             List<Schema.Field> fields = processorContext.getOutputSchema().getFields();
-            log.info("Schema fields size=" + processorContext.getOutputSchema().getFields().size() + " data fields size=" +  allValues.size());
             for (int i = 0; i < fields.size(); i++) {
                 Object value = allValues.get(i);
                 if (value instanceof Date) {
