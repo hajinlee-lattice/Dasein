@@ -264,7 +264,7 @@
                         <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
-                              <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"><label>{{stat.Lbl}}</label> <span style="width: {{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt)|number:0}}%;"><span class="{{vm.categoryClass(enrichment.Category)}} background-color" ></span></span>{{stat.Cnt|number}}</li>
+                              <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"><label>{{stat.Lbl}}</label> <span style="width: {{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt)|number:0}}%;"><span class="{{vm.categoryClass(enrichment.Category)}} background-color" ></span></span><em>{{stat.Cnt|number}}</em></li>
                             </ul>
                         </div>
 
