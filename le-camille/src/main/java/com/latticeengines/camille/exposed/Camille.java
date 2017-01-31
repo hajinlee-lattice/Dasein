@@ -1,16 +1,17 @@
 package com.latticeengines.camille.exposed;
 
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
@@ -20,8 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 
 public class Camille {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -172,5 +173,9 @@ public class Camille {
                 create(parent.append(node.getPath()), node.getDocument(), acls);
             }
         }
+    }
+
+    public InterProcessReadWriteLock createLock(String lockPath) {
+        return new InterProcessReadWriteLock(client, lockPath);
     }
 }

@@ -151,4 +151,17 @@ public final class PathBuilder {
                 PathConstants.TENANTS, space.getTenantId(), PathConstants.SPACES, space.getSpaceId(),
                 PathConstants.FEATURE_FLAGS_FILE);
     }
+
+    public static Path buildLocksPath(String podId, String division) {
+        if (StringUtils.isEmpty(division)) {
+            return new Path(PathConstants.PODS, podId, PathConstants.LOCKS);
+        } else {
+            return buildPodDivisionPath(podId, division).append(PathConstants.LOCKS);
+        }
+
+    }
+
+    public static Path buildLockPath(String podId, String division, String lockName) {
+        return buildLocksPath(podId, division).append(lockName);
+    }
 }
