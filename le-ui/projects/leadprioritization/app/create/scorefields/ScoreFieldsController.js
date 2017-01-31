@@ -12,9 +12,12 @@ angular
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
-        standardFieldsList: ['Id', null, 'CompanyName', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Id': true
+        },
+        requiredFieldsFuzzyMatching: {
+            'CompanyName': true
         },
         standardFieldMappings: {},
         additionalFieldMappings: {},
@@ -31,7 +34,7 @@ angular
         vm.requiredFieldsMissing[vm.standardFieldsList[1]] = true;
 
         if (vm.fuzzyMatchEnabled) {
-            vm.requiredFieldsMissing['CompanyName'] = true;
+            angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
         var fieldMappingsMap = {};

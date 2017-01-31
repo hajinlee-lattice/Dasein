@@ -20,10 +20,13 @@ angular
         fieldMappings: FieldDocument.fieldMappings,
         initialized: false,
         NextClicked: false,
-        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
         requiredFieldsMissing: {
             'Event': true,
             'Id': true
+        },
+        requiredFieldsFuzzyMatching: {
+            'CompanyName': true
         },
         ignoredFieldLabel: '-- Unmapped Field --',
         UnmappedFieldsMap: {},
@@ -41,7 +44,7 @@ angular
         vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
 
         if (vm.fuzzyMatchEnabled) {
-            vm.requiredFieldsMissing['CompanyName'] = true;
+            angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
         vm.UnmappedFields.forEach(function(UnmappedField) {
