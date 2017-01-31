@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 
-public class AccountMasterModelRunResourceDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
+public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
-    private static Log log = LogFactory.getLog(AccountMasterModelRunResourceDeploymentTestNG.class);
+    private static Log log = LogFactory.getLog(AccountMasterModelRunResourceByDomainDeploymentTestNG.class);
 
     @Override
     @BeforeClass(groups = "deployment")

@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 
-public class AccountMasterModelRunResourceLocationDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
+public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
     @Override
     @BeforeClass(groups = "deployment")
