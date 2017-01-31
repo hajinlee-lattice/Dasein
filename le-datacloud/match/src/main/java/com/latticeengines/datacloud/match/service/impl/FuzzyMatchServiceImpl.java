@@ -213,6 +213,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 } else {
                     record.log(logEntry.getMessage() + "\n"
                             + StringEscapeUtils.escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
+                    record.getErrorMessages().add(logEntry.getMessage() + " : " + logEntry.getThrowable().getMessage());
+                }
+            }
+            if (logEntry.getLevel().isGreaterOrEqual(Level.ERROR)) {
+                if (logEntry.getThrowable() == null) {
+                    record.getErrorMessages().add(logEntry.getMessage());
+                } else {
+                    record.getErrorMessages().add(logEntry.getMessage() + " : " + logEntry.getThrowable().getMessage());
                 }
             }
         }

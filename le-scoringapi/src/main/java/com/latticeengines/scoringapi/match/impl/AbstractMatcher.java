@@ -104,8 +104,8 @@ public abstract class AbstractMatcher implements Matcher {
             }
 
             String nameLocationStr = "";
-            if (outputRecord.getPreMatchNameLocation() != null) {
-                nameLocationStr = JsonUtils.serialize(outputRecord.getPreMatchNameLocation());
+            if (outputRecord != null && outputRecord.getMatchedNameLocation() != null) {
+                nameLocationStr = JsonUtils.serialize(outputRecord.getMatchedNameLocation());
             }
             String errorMessages = outputRecord.getErrorMessages() == null ? ""
                     : Joiner.on(",").join(outputRecord.getErrorMessages());
@@ -113,7 +113,7 @@ public abstract class AbstractMatcher implements Matcher {
             if (log.isDebugEnabled()) {
                 log.debug(String.format(
                         "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getPreMatchDomain()),
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()),
                         nameLocationStr, errorMessages));
             }
 
@@ -121,7 +121,7 @@ public abstract class AbstractMatcher implements Matcher {
             if (!outputRecord.isMatched()) {
                 warnings.addWarning(
                         new Warning(WarningCode.NO_MATCH, new String[] { JsonUtils.serialize(matchInput.getKeyMap()),
-                                Strings.nullToEmpty(outputRecord.getPreMatchDomain()) + nameLocationStr }));
+                                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
             }
         }
         if (log.isDebugEnabled()) {
@@ -272,7 +272,7 @@ public abstract class AbstractMatcher implements Matcher {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (Boolean.TRUE == isPublicDomain) {
                         warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN,
-                                new String[] { Strings.nullToEmpty(outputRecord.getPreMatchDomain()) }));
+                                new String[] { Strings.nullToEmpty(outputRecord.getMatchedDomain()) }));
                     }
                 }
             }

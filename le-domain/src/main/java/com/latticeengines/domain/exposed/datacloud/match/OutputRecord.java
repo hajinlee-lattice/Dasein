@@ -30,6 +30,18 @@ public class OutputRecord {
     @JsonProperty("PreMatchEmail")
     private String preMatchEmail;
 
+    @JsonProperty("MatchedDomain")
+    private String matchedDomain;
+
+    @JsonProperty("MatchedNameLocation")
+    private NameLocation matchedNameLocation;
+
+    @JsonProperty("MatchedDUNS")
+    private String matchedDuns;
+
+    @JsonProperty("MatchedEmail")
+    private String matchedEmail;
+
     @JsonProperty("Output")
     private List<Object> output;
 
@@ -96,6 +108,38 @@ public class OutputRecord {
 
     public void setPreMatchEmail(String preMatchEmail) {
         this.preMatchEmail = preMatchEmail;
+    }
+
+    public String getMatchedDomain() {
+        return matchedDomain;
+    }
+
+    public void setMatchedDomain(String matchedDomain) {
+        this.matchedDomain = matchedDomain;
+    }
+
+    public NameLocation getMatchedNameLocation() {
+        return matchedNameLocation;
+    }
+
+    public void setMatchedNameLocation(NameLocation matchedNameLocation) {
+        this.matchedNameLocation = matchedNameLocation;
+    }
+
+    public String getMatchedDuns() {
+        return matchedDuns;
+    }
+
+    public void setMatchedDuns(String matchedDuns) {
+        this.matchedDuns = matchedDuns;
+    }
+
+    public String getMatchedEmail() {
+        return matchedEmail;
+    }
+
+    public void setMatchedEmail(String matchedEmail) {
+        this.matchedEmail = matchedEmail;
     }
 
     public List<Object> getOutput() {

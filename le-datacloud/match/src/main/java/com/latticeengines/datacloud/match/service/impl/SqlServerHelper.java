@@ -453,8 +453,23 @@ public class SqlServerHelper implements DbHelper {
 
             if (matched) {
                 record.setMatched(true);
+                setMatchedValues(record);
             }
         }
+    }
+
+    private void setMatchedValues(InternalOutputRecord record) {
+        record.setMatchedDomain((String) record.getQueryResult().get(MatchConstants.DOMAIN_FIELD));
+        String name = (String) record.getQueryResult().get(MatchConstants.NAME_FIELD);
+        String city = (String) record.getQueryResult().get(MatchConstants.CITY_FIELD);
+        String state = (String) record.getQueryResult().get(MatchConstants.STATE_FIELD);
+        String country = (String) record.getQueryResult().get(MatchConstants.COUNTRY_FIELD);
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName(name);
+        nameLocation.setCity(city);
+        nameLocation.setState(state);
+        nameLocation.setCity(country);
+        record.setMatchedNameLocation(nameLocation);
     }
 
     @Override

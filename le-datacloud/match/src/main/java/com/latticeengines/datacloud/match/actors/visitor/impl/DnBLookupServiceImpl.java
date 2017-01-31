@@ -159,10 +159,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
 
             dnbCacheService.addCache(context);
-            List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
-            dnBMatchHistories.add(new DnBMatchHistory(context));
-            writeDnBMatchHistory(dnBMatchHistories);
         }
+
+        List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
+        dnBMatchHistories.add(new DnBMatchHistory(context));
+        writeDnBMatchHistory(dnBMatchHistories);
+
         return context;
     }
 

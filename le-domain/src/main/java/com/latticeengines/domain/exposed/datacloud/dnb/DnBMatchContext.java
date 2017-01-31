@@ -143,7 +143,11 @@ public class DnBMatchContext implements Fact, Dimension {
 
     @MetricField(name = "DnbCode")
     public String getDnbCodeAsString() {
-        return dnbCode.getMessage();
+        if (dnbCode != null) {
+            return dnbCode.getMessage();
+        } else  {
+            return null;
+        }
     }
 
     public DnBReturnCode getDnbCode() {
@@ -212,7 +216,11 @@ public class DnBMatchContext implements Fact, Dimension {
 
     @MetricField(name = "Duration", fieldType = MetricField.FieldType.DOUBLE)
     public Double getDurationAsDouble() {
-        return duration.doubleValue();
+        if (duration != null) {
+            return duration.doubleValue();
+        } else {
+            return null;
+        }
     }
 
     public String getServiceBatchId() {

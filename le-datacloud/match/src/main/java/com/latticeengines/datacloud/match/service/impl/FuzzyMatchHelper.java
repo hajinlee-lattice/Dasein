@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.newrelic.api.agent.Trace;
@@ -199,6 +200,9 @@ public class FuzzyMatchHelper implements DbHelper {
             for (InternalOutputRecord record : context.getInternalResults()) {
                 updateInternalRecordByMatchedAccount(record, context.getColumnSelection(),
                         context.getInput().getDataCloudVersion());
+                if (record.isMatched()) {
+                    setMatchedValues(record);
+                }
             }
         }
         return context;
@@ -283,6 +287,29 @@ public class FuzzyMatchHelper implements DbHelper {
             }
         }
         return decodedAttributes;
+    }
+
+    private void setMatchedValues(InternalOutputRecord record) {
+        Map<String, Object> amAttributes = (record.getLatticeAccount() == null) ? new HashMap<>()
+                : record.getLatticeAccount().getAttributes();
+        amAttributes.put(MatchConstants.LID_FIELD,
+                (record.getLatticeAccount() == null) ? null : record.getLatticeAccount().getId());
+
+        record.setLatticeAccountId((String) amAttributes.get(MatchConstants.LID_FIELD));
+        record.setMatchedDomain((String) amAttributes.get(MatchConstants.AM_DOMAIN_FIELD));
+        String name = (String) amAttributes.get(MatchConstants.AM_NAME_FIELD);
+        String city = (String) amAttributes.get(MatchConstants.AM_CITY_FIELD);
+        String state = (String) amAttributes.get(MatchConstants.AM_STATE_FIELD);
+        String country = (String) amAttributes.get(MatchConstants.AM_COUNTRY_FIELD);
+        String zipCode = (String) amAttributes.get(MatchConstants.AM_ZIPCODE_FIELD);
+        String phone = (String) amAttributes.get(MatchConstants.AM_PHONE_NUM_FIELD);
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName(name);
+        nameLocation.setCity(city);
+        nameLocation.setState(state);
+        nameLocation.setCity(country);
+        record.setMatchedNameLocation(nameLocation);
+        record.setMatchedDuns((String) amAttributes.get(MatchConstants.AM_DUNS_FIELD));
     }
 
 }

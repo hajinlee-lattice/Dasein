@@ -83,7 +83,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
-        boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludeUnmatchedWithPublicDomain());
+        boolean excludeUnmatchedPublicDomain = Boolean.TRUE
+                .equals(matchContext.getInput().getExcludeUnmatchedWithPublicDomain());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -177,17 +178,25 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || matchedRecord) {
                 if (excludeUnmatchedPublicDomain && !matchedRecord && internalRecord.isPublicDomain()) {
-                    log.warn("Excluding the record, because it is using the public domain: " + internalRecord.getParsedDomain());
+                    log.warn("Excluding the record, because it is using the public domain: "
+                            + internalRecord.getParsedDomain());
                 } else {
                     outputRecord.setOutput(internalRecord.getOutput());
                 }
             }
             outputRecord.setInput(internalRecord.getInput());
             outputRecord.setMatched(internalRecord.isMatched());
+
             outputRecord.setPreMatchDomain(internalRecord.getParsedDomain());
             outputRecord.setPreMatchNameLocation(internalRecord.getParsedNameLocation());
             outputRecord.setPreMatchDuns(internalRecord.getParsedDuns());
             outputRecord.setPreMatchEmail(internalRecord.getParsedEmail());
+
+            outputRecord.setMatchedDomain(internalRecord.getMatchedDomain());
+            outputRecord.setMatchedNameLocation(internalRecord.getMatchedNameLocation());
+            outputRecord.setMatchedDuns(internalRecord.getMatchedDuns());
+            outputRecord.setMatchedEmail(internalRecord.getMatchedEmail());
+
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());

@@ -20,6 +20,17 @@ public final class MatchConstants {
     public static final String COUNTRY_CODE_FIELD = "CountryCode";
     public static final String LID_FIELD = "LatticeAccountId";
 
+    // these are the same as column names in AM, if applicable
+    public static final String AM_DOMAIN_FIELD = "Domain";
+    public static final String AM_NAME_FIELD = "LDC_Name";
+    public static final String AM_COUNTRY_FIELD = "LDC_Country";
+    public static final String AM_STATE_FIELD = "LDC_State";
+    public static final String AM_CITY_FIELD = "LDC_City";
+    public static final String AM_ZIPCODE_FIELD = "LDC_ZipCode";
+    public static final String AM_PHONE_NUM_FIELD = "LE_COMPANY_PHONE";
+    public static final String AM_DUNS_FIELD = "LDC_DUNS";
+    public static final String AM_COUNTRY_CODE_FIELD = "CURRENCY_CODE";
+
     static final String MODEL = Predefined.Model.getName();
     static final String DERIVED_COLUMNS = Predefined.DerivedColumns.getName();
     static final String RTS = Predefined.RTS.getName();
