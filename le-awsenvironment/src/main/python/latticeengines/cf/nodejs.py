@@ -34,7 +34,7 @@ def template(environment, stackname, mode, profile, instances, upload=False):
 
     port = 3000 if mode == "EXTERNAL" else 3002
 
-    stack = create_template(profile, instances, port, mode)
+    stack = create_template(profile, instances, port, mode, environment)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -42,8 +42,8 @@ def template(environment, stackname, mode, profile, instances, upload=False):
         print stack.json()
         stack.validate()
 
-def create_template(profile, instances, port, mode):
-    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", use_asgroup=False, instances=instances)
+def create_template(profile, instances, port, mode, env):
+    stack = ECSStack("AWS CloudFormation template for Node.js express server on ECS cluster.", env, use_asgroup=False, instances=instances)
     stack.add_params([PARAM_DOCKER_IMAGE, PARAM_DOCKER_IMAGE_TAG, PARAM_MEM, PARAM_INSTALL_MODE, PARAM_LE_STACK])
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
