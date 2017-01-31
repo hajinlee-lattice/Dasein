@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Component("testMatchInputService")
@@ -28,6 +28,16 @@ public class TestMatchInputService {
 
     public MatchInput prepareSimpleAMMatchInput(Object[][] data) {
         MatchInput input = prepareSimpleRTSMatchInput(data);
+        input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
+        return input;
+    }
+
+    public MatchInput prepareSimpleRTSMatchInput(List<List<Object>> mockData) {
+        return TestMatchInputUtils.prepareSimpleMatchInput(mockData);
+    }
+
+    public MatchInput prepareSimpleAMMatchInput(List<List<Object>> mockData) {
+        MatchInput input = prepareSimpleRTSMatchInput(mockData);
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         return input;
     }

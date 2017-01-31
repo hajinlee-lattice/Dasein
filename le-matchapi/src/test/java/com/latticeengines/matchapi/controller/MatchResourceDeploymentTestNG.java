@@ -31,6 +31,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
+import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
 
 @Component
@@ -78,6 +80,12 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
+    @Autowired
+    private TestMatchInputService testMatchInputService;
+
+    @Autowired
+    private PublicDomainService publicDomainService;
+
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
@@ -85,7 +93,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @Test(groups = "deployment")
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
-        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         output = matchProxy.matchRealTime(input);
@@ -104,11 +112,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     private void testAccountMasterRTSMatch(boolean resolveKeyMap, String domain, boolean isEmail,
             boolean setUnionSelection, String duns) {
         MatchInput input = prepareSimpleMatchInput(resolveKeyMap, domain, isEmail, setUnionSelection, duns);
-        String latestVersion = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
+        String latestVersion = dataCloudVersionEntityMgr.currentApprovedVersion().getVersion();
         input.setDataCloudVersion(latestVersion);
         MatchOutput output = matchProxy.matchRealTime(input);
-        Assert.assertNotNull(output);
-        output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         int idx = 0;
@@ -141,17 +147,17 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(output.getOutputList());
         Assert.assertEquals(output.getOutputList().size(), size);
 
-        int idx = 0;
-
         for (MatchOutput outputRecord : output.getOutputList()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getResult().size() > 0);
-            Assert.assertTrue(outputRecord.getResult().get(0).isMatched());
-            if ("yahoo.com".equals(domains.get(idx % domains.size())) //
-                    || "gmail.com".equals(domains.get(idx % domains.size()))) {
+            if (!publicDomainService.isPublicDomain(outputRecord.getResult().get(0).getPreMatchDomain())) {
+                Assert.assertTrue(outputRecord.getResult().get(0).isMatched(),
+                        outputRecord.getResult().get(0) + " should match as it is not a public domain.");
+            } else {
+                Assert.assertFalse(outputRecord.getResult().get(0).isMatched(),
+                        outputRecord.getResult().get(0) + " should not match as it is a public domain.");
                 Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
             }
-            idx++;
         }
     }
 
@@ -175,16 +181,16 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(output.getResult());
         Assert.assertEquals(output.getResult().size(), size);
 
-        int idx = 0;
-
         for (OutputRecord outputRecord : output.getResult()) {
             Assert.assertNotNull(outputRecord);
             Assert.assertTrue(outputRecord.getOutput().size() > 0);
-            if ("yahoo.com".equals(domains.get(idx % domains.size())) //
-                    || "gmail.com".equals(domains.get(idx % domains.size()))) {
-                Assert.assertFalse(outputRecord.isMatched());
+            if (!publicDomainService.isPublicDomain(outputRecord.getPreMatchDomain())) {
+                Assert.assertTrue(outputRecord.isMatched(),
+                        outputRecord.getPreMatchDomain() + " should match as it is not a public domain.");
             } else {
-                Assert.assertTrue(outputRecord.isMatched());
+                Assert.assertFalse(outputRecord.isMatched(),
+                        outputRecord.getPreMatchDomain() + " should not match as it is a public domain.");
+                Assert.assertTrue(outputRecord.getErrorMessages().size() > 0);
             }
         }
     }
@@ -246,6 +252,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
         }
         input.setData(mockData);
+        input.setDataCloudVersion(dataCloudVersionEntityMgr.currentApprovedVersion().getVersion());
         return input;
     }
 
@@ -365,7 +372,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     public Object[][] allDataCloudVersions() {
         List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
         Set<String> latestVersions = new HashSet<>();
-        for (DataCloudVersion version: versions) {
+        for (DataCloudVersion version : versions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
                 continue;
             }
@@ -377,8 +384,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Object[][] objs = new Object[latestVersions.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
-        for (String latestVersion: latestVersions) {
-            objs[i++] = new Object[]{ latestVersion };
+        for (String latestVersion : latestVersions) {
+            objs[i++] = new Object[] { latestVersion };
         }
         return objs;
     }
@@ -387,7 +394,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     public Object[][] latestDataCloudVersions() {
         List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
         Set<String> latestVersions = new HashSet<>();
-        for (DataCloudVersion version: versions) {
+        for (DataCloudVersion version : versions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
                 continue;
             }
@@ -399,8 +406,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Object[][] objs = new Object[latestVersions.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
-        for (String latestVersion: latestVersions) {
-            objs[i++] = new Object[]{ latestVersion };
+        for (String latestVersion : latestVersions) {
+            objs[i++] = new Object[] { latestVersion };
         }
         return objs;
     }
