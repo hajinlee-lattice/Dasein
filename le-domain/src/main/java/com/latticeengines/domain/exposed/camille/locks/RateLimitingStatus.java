@@ -22,12 +22,4 @@ public class RateLimitingStatus {
         this.history = history;
     }
 
-    private Long sumCounter(String counter) {
-        if (history.containsKey(counter)) {
-            return history.get(counter).entrySet().stream().reduce(0L, (acc, entry) -> acc + entry.getValue(),
-                    (acc1, acc2) -> acc1 + acc2);
-        } else {
-            return 0L;
-        }
-    }
 }

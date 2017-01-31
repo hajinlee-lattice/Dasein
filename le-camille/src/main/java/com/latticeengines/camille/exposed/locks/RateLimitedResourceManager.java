@@ -55,14 +55,14 @@ public class RateLimitedResourceManager {
         if (!definitions.containsKey(resourceName)) {
             log.warn("The resource " + resourceName + " is not registered.");
             return RateLimitedAcquisition.disallowed()
-                    .addRejectionReasons("The resource " + resourceName + " is not registered.");
+                    .addRejectionReason("The resource " + resourceName + " is not registered.");
         }
         RateLimitDefinition definition = definitions.get(resourceName);
         Map<String, List<RateLimitDefinition.Quota>> quotas = definition.getQuotas();
         for (String counter : quantities.keySet()) {
             if (!quotas.containsKey(counter)) {
                 log.error("There is no counter " + counter + " in the definition of " + resourceName);
-                return RateLimitedAcquisition.disallowed().addRejectionReasons(
+                return RateLimitedAcquisition.disallowed().addRejectionReason(
                         "There is no counter " + counter + " in the definition of " + resourceName);
             }
         }
@@ -86,7 +86,7 @@ public class RateLimitedResourceManager {
         } catch (Exception e) {
             log.error("Failed to peek rate limiting status for resource " + resourceName, e);
             return RateLimitedAcquisition.disallowed()
-                    .addRejectionReasons("Failed to peek rate limiting status : " + e.getMessage());
+                    .addRejectionReason("Failed to peek rate limiting status : " + e.getMessage());
         }
 
         Map<String, Map<Long, Long>> history = status.getHistory();
@@ -110,7 +110,7 @@ public class RateLimitedResourceManager {
             return RateLimitedAcquisition.allowed(System.currentTimeMillis());
         } else {
             RateLimitedAcquisition answer = RateLimitedAcquisition.disallowed()
-                    .addRejectionReasons("Quotas will be exceeded if the present acquisition is allowed.");
+                    .addRejectionReason("Quotas will be exceeded if the present acquisition is allowed.");
             exceedingQuotas.forEach(answer::addExceedingQuota);
             return answer;
         }
@@ -122,11 +122,11 @@ public class RateLimitedResourceManager {
         try {
             if (!LockManager.acquireWriteLock(lockName, duration, timeUnit)) {
                 return RateLimitedAcquisition.disallowed()
-                        .addRejectionReasons("Cannot acquire the write lock for resource " + resourceName);
+                        .addRejectionReason("Cannot acquire the write lock for resource " + resourceName);
             }
         } catch (Exception e) {
             log.error("Error when acquiring write lock for " + lockName, e);
-            return RateLimitedAcquisition.disallowed().addRejectionReasons(
+            return RateLimitedAcquisition.disallowed().addRejectionReason(
                     "Error when acquiring the write lock for resource " + resourceName + " : " + e.getMessage());
         }
 
@@ -145,7 +145,7 @@ public class RateLimitedResourceManager {
             } catch (Exception e) {
                 log.error("Failed to peek rate limiting status for resource " + resourceName, e);
                 return RateLimitedAcquisition.disallowed()
-                        .addRejectionReasons("Failed to peek rate limiting status : " + e.getMessage());
+                        .addRejectionReason("Failed to peek rate limiting status : " + e.getMessage());
             }
 
             Map<String, Map<Long, Long>> history = status.getHistory();
@@ -174,7 +174,7 @@ public class RateLimitedResourceManager {
             } catch (Exception e) {
                 log.error("Failed to update rate limiting status for " + resourceName, e);
                 return RateLimitedAcquisition.disallowed()
-                        .addRejectionReasons("Failed to update rate limiting status : " + e.getMessage());
+                        .addRejectionReason("Failed to update rate limiting status : " + e.getMessage());
             }
 
             return RateLimitedAcquisition.allowed(System.currentTimeMillis());

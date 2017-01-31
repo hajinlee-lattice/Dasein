@@ -51,7 +51,7 @@ public class RateLimitedAcquisition {
         this.exceedingQuotas = exceedingQuotas;
     }
 
-    public RateLimitedAcquisition addRejectionReasons(String rejectionReason) {
+    public RateLimitedAcquisition addRejectionReason(String rejectionReason) {
         if (rejectionReasons == null) {
             rejectionReasons = new ArrayList<>();
         }
