@@ -792,7 +792,7 @@ angular.module('common.datacloud.explorer', [
                     address.push(info.LDC_State);
                 }
                 if(info.LDC_ZipCode) {
-                    address.push(info.LDC_ZipCode.substr(0,4) + ',');
+                    address.push(info.LDC_ZipCode.substr(0,5) + ',');
                 }
                 if(info.LE_COUNTRY) {
                     address.push(info.LE_COUNTRY);
@@ -864,7 +864,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.percentage = function(number, total) {
         if (number && total) {
-            return (total / number) * 100;
+            return ((number / total) * 100);
         }
         return 0;
     }
@@ -879,9 +879,18 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
+    vm.cube = [];
     getEnrichmentCube().then(function(result){
-        //console.log(result);
+        vm.cube = result.data;
     });
+
+    vm.cubeStats = function(data) {
+        var stats = data.RowStats,
+            total = stats.Cnt,
+            buckets = stats.Bkts.List;
+
+        return stats;
+    }
 
     vm.init();
 })

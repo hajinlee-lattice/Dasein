@@ -454,6 +454,51 @@
                         display: inline-block;
                     }
                 }
+                .stats {
+                    font-size: 11px;
+                    h5 {
+                        font-size: 9px;
+                        @include flex-container;
+                        label {
+                            @include flex-item(0, 1, auto);
+                            text-align: center;
+                            color: #adadad;
+                            text-transform: uppercase;
+                            &:first-child {
+                                text-align: left;
+                            }
+                            &:last-child {
+                                text-align: right;
+                            }
+                        }
+                    }
+                    ul {
+                        li {
+                            @include flex-container;
+                            white-space: nowrap;
+                            color: #000;
+                            label {
+                                @include flex-item(0, 1, auto);
+                                width: 10px;
+                                overflow: hidden;
+                            }
+                            & > span {
+                                @include flex-item(1, 1, auto);
+                                display: inline-block;
+                                border-left: 1px solid #d0d1d0;
+                                margin: 0 5px;
+                                & > span {
+                                    display: block;
+                                    height: 10px;
+                                    position: relative;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                }
+                            
+                            }
+                        }
+                    }
+                }
                 span.lesser-description {
                     line-height: 1.3em;
                     display: inline-block;
@@ -768,6 +813,9 @@
             @include box-shadow(0,255,224);
             border-color: #33bdb7;
         }
+        &.background-color {
+            background-color: #33bdb7;
+        }
     }
     .category-growth-trends {
         &.color {
@@ -783,6 +831,9 @@
         &.active.active-glow {
             @include box-shadow(0,177,255);
             border-color: #65b7e6;
+        }
+        &.background-color {
+            background-color: #65b7e6;
         }
     }
     .category-intent {
@@ -800,6 +851,9 @@
             @include box-shadow(255,100,100);
             border-color: #f15a5a;
         }
+        &.background-color {
+            background-color: #f15a5a;
+        }
     }
     .category-online-presence {
         &.color {
@@ -815,6 +869,9 @@
         &.active.active-glow {
             @include box-shadow(160,100,255);
             border-color: #8e71b2;
+        }
+        &.background-color {
+            background-color: #8e71b2;
         }
     }
     .category-technology-profile {
@@ -832,6 +889,9 @@
             @include box-shadow(115,255,34);
             border-color: #70bf4a;
         }
+        &.background-color {
+            background-color: #70bf4a;
+        }
     }
     .category-website-keywords {
         &.color {
@@ -848,6 +908,9 @@
             @include box-shadow(253,188,73);
             border-color: #fdbc49;
         }
+        &.background-color {
+            background-color: #fdbc49;
+        }
     }
     .category-website-profile {
         &.color {
@@ -863,6 +926,9 @@
         &.active.active-glow {
             @include box-shadow(50,179,255);
             border-color: #26649b;
+        }
+        &.background-color {
+            background-color: #26649b;
         }
     }
     .enrichments-loading-bar {
