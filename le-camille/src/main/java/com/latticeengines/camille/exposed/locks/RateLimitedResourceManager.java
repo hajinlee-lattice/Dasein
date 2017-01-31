@@ -202,7 +202,7 @@ public class RateLimitedResourceManager {
                 (System.currentTimeMillis() - entry.getKey()) < quota.getTimeUnit().toMillis(quota.getDuration())) //
                 .reduce(0L, (acc, entry) -> acc + entry.getValue(), (acc1, acc2) -> acc1 + acc2);
 
-        return totalHistoryQuantityWithinQuota + inquiredQuantity <= SAFETY_COEFFICIENT * quota.getMaxQuantity();
+        return totalHistoryQuantityWithinQuota + inquiredQuantity <= Math.max(SAFETY_COEFFICIENT * quota.getMaxQuantity(), 1);
     }
 
     private static Map<Long, Long> updateHistory(long inquiredQuantity, RateLimitDefinition.Quota quota,
