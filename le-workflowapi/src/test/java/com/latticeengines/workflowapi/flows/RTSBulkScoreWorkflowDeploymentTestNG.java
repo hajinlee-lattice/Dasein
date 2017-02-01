@@ -17,8 +17,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import au.com.bytecode.opencsv.CSVReader;
-
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -28,6 +26,8 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -44,6 +44,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
+import au.com.bytecode.opencsv.CSVReader;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
@@ -81,8 +82,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     protected Tenant tenant;
 
-    protected com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     protected static CustomerSpace customerSpace;
 
     private String artifactTableDir;
@@ -108,21 +107,26 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
                 applicationId, modelVersion);
         tenant = setupTenant();
         summary = createModel(tenant, modelConfiguration, customerSpace);
+        generateDefaultBucketMetadata(summary, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
     }
 
+    private void generateDefaultBucketMetadata(ModelSummary summary, CustomerSpace customerSpace) {
+        List<BucketMetadata> bucketMetadataList = generateDefaultBucketMetadataList();
+        internalResourceProxy.createABCDBuckets(summary.getId(), customerSpace, bucketMetadataList);
+    }
+
     private void saveAttributeSelection(CustomerSpace customerSpace) {
-        internalResourceRestApiProxy = new com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy(
-                plsApiHostPort);
+
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = checkSelection(customerSpace);
         System.out.println("The deselected attributes are: " + selectedAttributeMap.getDeselectedAttributes());
         System.out.println("The selected attributes are: " + selectedAttributeNameList);
-        internalResourceRestApiProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
+        internalResourceProxy.saveLeadEnrichmentAttributes(customerSpace, selectedAttributeMap);
     }
 
     private LeadEnrichmentAttributesOperationMap checkSelection(CustomerSpace customerSpace) {
-        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceRestApiProxy
+        List<LeadEnrichmentAttribute> enrichmentAttributeList = internalResourceProxy
                 .getLeadEnrichmentAttributes(customerSpace, null, null, false);
         LeadEnrichmentAttributesOperationMap selectedAttributeMap = new LeadEnrichmentAttributesOperationMap();
         List<String> selectedAttributes = new ArrayList<>();
@@ -174,11 +178,11 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         Assert.assertEquals(files.size(), 1);
         Assert.assertNotNull(HdfsUtils.getHdfsFileContents(yarnConfiguration, files.get(0)));
         // assert the ordering of the header
-        try (CSVReader reader = new CSVReader(new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration,
-                files.get(0))))) {
+        try (CSVReader reader = new CSVReader(
+                new InputStreamReader(HdfsUtils.getInputStream(yarnConfiguration, files.get(0))))) {
             String[] header = reader.readNext();
             System.out.println("The header is " + Arrays.toString(header));
-            Assert.assertEquals(header[header.length - 4], "Score");
+            Assert.assertEquals(header[header.length - 5], "Score");
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 1]));
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 2]));
             Assert.assertTrue(headerBelongsToLeadEnrichmentAttributes(header[header.length - 3]));
@@ -245,8 +249,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
         modelSummary.setTrainingTableName(metadataTable.getName());
 
-        ModelSummary retrievedSummary = internalResourceProxy.getModelSummaryFromModelId(
-                modelConfiguration.getModelId(), customerSpace);
+        ModelSummary retrievedSummary = internalResourceProxy
+                .getModelSummaryFromModelId(modelConfiguration.getModelId(), customerSpace);
         if (retrievedSummary != null) {
             internalResourceProxy.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
         }
@@ -265,12 +269,12 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         enhancementsDir = artifactBaseDir + Model.HDFS_ENHANCEMENTS_DIR;
         String inputDataDir = TEST_INPUT_DATA_DIR + AVRO_FILE_SUFFIX;
 
-        URL dataCompositionUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
-                + Model.DATA_COMPOSITION_FILENAME);
+        URL dataCompositionUrl = ClassLoader
+                .getSystemResource(modelConfiguration.getLocalModelPath() + Model.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(modelConfiguration.getModelSummaryJsonLocalpath());
         URL rfpmmlUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath() + Model.PMML_FILENAME);
-        URL scoreDerivationUrl = ClassLoader.getSystemResource(modelConfiguration.getLocalModelPath()
-                + Model.SCORE_DERIVATION_FILENAME);
+        URL scoreDerivationUrl = ClassLoader
+                .getSystemResource(modelConfiguration.getLocalModelPath() + Model.SCORE_DERIVATION_FILENAME);
         URL inputAvroFile = ClassLoader.getSystemResource(LOCAL_DATA_DIR + AVRO_FILE);
 
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
@@ -282,15 +286,15 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         HdfsUtils.mkdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.mkdir(yarnConfiguration, enhancementsDir);
         HdfsUtils.mkdir(yarnConfiguration, inputDataDir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), artifactTableDir
-                + Model.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
+                artifactTableDir + Model.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(),
                 artifactBaseDir + modelConfiguration.getTestModelFolderName() + "_model.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir + Model.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
-                + Model.SCORE_DERIVATION_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), enhancementsDir
-                + Model.DATA_COMPOSITION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(),
+                enhancementsDir + Model.SCORE_DERIVATION_FILENAME);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(),
+                enhancementsDir + Model.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputAvroFile.getFile(), inputDataDir);
     }
 
@@ -357,5 +361,48 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         public String getModelSummaryJsonLocalpath() {
             return modelSummaryJsonLocalpath;
         }
+    }
+
+    private static final Double LIFT_1 = 3.4;
+    private static final Double LIFT_2 = 2.4;
+    private static final Double LIFT_3 = 1.2;
+    private static final Double LIFT_4 = 0.4;
+
+    private static final int NUM_LEADS_BUCKET_1 = 28588;
+    private static final int NUM_LEADS_BUCKET_2 = 14534;
+    private static final int NUM_LEADS_BUCKET_3 = 25206;
+    private static final int NUM_LEADS_BUCKET_4 = 25565;
+
+    public static List<BucketMetadata> generateDefaultBucketMetadataList() {
+        List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
+        BucketMetadata BUCKET_METADATA_A = new BucketMetadata();
+        BucketMetadata BUCKET_METADATA_B = new BucketMetadata();
+        BucketMetadata BUCKET_METADATA_C = new BucketMetadata();
+        BucketMetadata BUCKET_METADATA_D = new BucketMetadata();
+        bucketMetadataList.add(BUCKET_METADATA_A);
+        bucketMetadataList.add(BUCKET_METADATA_B);
+        bucketMetadataList.add(BUCKET_METADATA_C);
+        bucketMetadataList.add(BUCKET_METADATA_D);
+        BUCKET_METADATA_A.setBucketName(BucketName.A);
+        BUCKET_METADATA_A.setNumLeads(NUM_LEADS_BUCKET_1);
+        BUCKET_METADATA_A.setLeftBoundScore(95);
+        BUCKET_METADATA_A.setRightBoundScore(99);
+        BUCKET_METADATA_A.setLift(LIFT_1);
+        BUCKET_METADATA_B.setBucketName(BucketName.B);
+        BUCKET_METADATA_B.setNumLeads(NUM_LEADS_BUCKET_2);
+        BUCKET_METADATA_B.setLeftBoundScore(85);
+        BUCKET_METADATA_B.setRightBoundScore(95);
+        BUCKET_METADATA_B.setLift(LIFT_2);
+        BUCKET_METADATA_C.setBucketName(BucketName.C);
+        BUCKET_METADATA_C.setNumLeads(NUM_LEADS_BUCKET_3);
+        BUCKET_METADATA_C.setLeftBoundScore(50);
+        BUCKET_METADATA_C.setRightBoundScore(85);
+        BUCKET_METADATA_C.setLift(LIFT_3);
+        BUCKET_METADATA_D.setBucketName(BucketName.D);
+        BUCKET_METADATA_D.setNumLeads(NUM_LEADS_BUCKET_4);
+        BUCKET_METADATA_D.setLeftBoundScore(5);
+        BUCKET_METADATA_D.setRightBoundScore(50);
+        BUCKET_METADATA_D.setLift(LIFT_4);
+        return bucketMetadataList;
     }
 }

@@ -106,11 +106,11 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-        plsRest.deleteTenant(customerSpace);
-        HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
-        HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
-        HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
+         plsRest.deleteTenant(customerSpace);
+         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
+         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
+         HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
+         HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
     }
 
     @Test(groups = "deployment")
@@ -210,6 +210,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             plsRest.deleteModelSummary(modelConfiguration.getModelId(), customerSpace);
         }
         plsRest.createModelSummary(modelSummary, customerSpace);
+        plsRest.activateModelSummary(modelSummary.getId());
         retrievedSummary = plsRest.getModelSummaryFromModelId(modelConfiguration.getModelId(), customerSpace);
         assertNotNull(retrievedSummary);
         return modelSummary;
