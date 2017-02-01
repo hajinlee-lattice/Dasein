@@ -35,7 +35,7 @@ public class TestFrameworkUtils {
     public static final String LP3_TENANT_REG_PREFIX = "lp3";
 
     public static final String TENANTID_PREFIX = "LETest";
-    public static final String MODEL_PREFIX = "LEModel";
+    public static final String MODEL_PREFIX = "LETestModel";
 
     public static String usernameForAccessLevel(AccessLevel accessLevel) {
         switch (accessLevel) {
