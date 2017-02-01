@@ -33,6 +33,8 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
     private int numRows;
 
+    private MatchConfiguration configuration;
+
     private Boolean excludeUnmatchedWithPublicDomain;
     private Boolean publicDomainAsNormalDomain;
     private Boolean fetchOnly;
@@ -88,6 +90,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("ExcludeUnmatchedWithPublicDomain")
     public void setExcludeUnmatchedWithPublicDomain(Boolean excludeUnmatchedWithPublicDomain) {
         this.excludeUnmatchedWithPublicDomain = Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
+    }
+
+    @JsonProperty("Configuration")
+    public MatchConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @JsonProperty("Configuration")
+    public void setConfiguration(MatchConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @JsonProperty("FetchOnly")

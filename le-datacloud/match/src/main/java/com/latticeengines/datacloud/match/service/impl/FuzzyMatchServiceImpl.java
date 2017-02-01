@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -47,11 +48,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled) throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration) throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
+                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled, matchConfiguration);
 
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
@@ -59,10 +60,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled) throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration) throws Exception {
         logLevel = setLogLevel(logLevel);
-        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel,
-                useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled);
+        return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
+                useRemoteDnB, logDnBBulkResult, matchDebugEnabled, matchConfiguration);
     }
 
     @Override
@@ -105,8 +106,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     debugValues.add(value);
                     value = matchContext.getConfidenceCode() != null ? matchContext.getConfidenceCode() + "" : "";
                     debugValues.add(value);
-                    value = matchContext.getMatchGrade() != null && matchContext.getMatchGrade().getRawCode() != null ? matchContext
-                            .getMatchGrade().getRawCode() : "";
+                    value = matchContext.getMatchGrade() != null && matchContext.getMatchGrade().getRawCode() != null
+                            ? matchContext.getMatchGrade().getRawCode() : "";
                     debugValues.add(value);
                     value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
                     debugValues.add(value);
@@ -149,8 +150,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
-            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel,
-            boolean useDnBCache, boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled) {
+            String rootOperationUid, String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache,
+            boolean useRemoteDnB, boolean logDnBBulkResult, boolean matchDebugEnabled,
+            MatchConfiguration matchConfiguration) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();
         for (T record : matchRecords) {
@@ -170,6 +172,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 travelContext.setUseRemoteDnB(useRemoteDnB);
                 travelContext.setLogDnBBulkResult(logDnBBulkResult);
                 travelContext.setMatchDebugEnabled(matchDebugEnabled);
+                travelContext.setMatchConfiguration(matchConfiguration);
                 matchFutures.add(askFuzzyMatchAnchor(travelContext));
             }
         }

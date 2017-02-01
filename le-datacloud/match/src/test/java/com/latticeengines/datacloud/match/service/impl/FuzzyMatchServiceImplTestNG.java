@@ -18,6 +18,7 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
@@ -55,9 +56,11 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
             matchRecord.setParsedDuns(VALID_DUNS);
             matchRecord.setParsedDomain(VALID_DOMAIN);
 
+            MatchConfiguration configuration = prepareConfiguration();
+
             service.callMatch(Collections.singletonList(matchRecord), UUID.randomUUID().toString(),
                     dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), "Trilogy", Level.DEBUG, true,
-                    false, false, false);
+                    false, false, false, configuration);
 
             Assert.assertNotNull(matchRecord.getLatticeAccountId(), JsonUtils.serialize(matchRecord));
             Assert.assertEquals(matchRecord.getLatticeAccountId(), EXPECTED_ID_DOMAIN_DUNS);
@@ -87,10 +90,11 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         }
 
         try {
+            MatchConfiguration configuration = prepareConfiguration();
             List<OutputRecord> matchRecords = prepareData(numRequests);
             service.callMatch(matchRecords, UUID.randomUUID().toString(),
                     dataCloudVersionEntityMgr.currentApprovedVersion().getVersion(), MatchGuideBook.DEFAULT_GRAPH,
-                    Level.DEBUG, true, false, false, false);
+                    Level.DEBUG, true, false, false, false, configuration);
 
             boolean hasError = false;
             for (OutputRecord result : matchRecords) {
@@ -127,6 +131,10 @@ public class FuzzyMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGB
         return new Object[][] { { 1000, true }, // 1000 match in batch mode
                 { 100, false }, // 100 match in realtime mode
         };
+    }
+
+    private MatchConfiguration prepareConfiguration() {
+        return MatchConfiguration.builder().build();
     }
 
     private List<OutputRecord> prepareData(int numRecords) {

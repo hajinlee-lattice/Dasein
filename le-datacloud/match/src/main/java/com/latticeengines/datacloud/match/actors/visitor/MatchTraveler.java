@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class MatchTraveler extends Traveler implements Fact, Dimension {
@@ -18,6 +19,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private String dataCloudVersion;
     private String decisionGraph;
     private String lastStop;
+
+    private MatchConfiguration matchConfiguration;
 
     private List<DnBMatchContext> dnBMatchContexts = new ArrayList<>();
 
@@ -52,6 +55,14 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     @MetricField(name = "RootOperationUID")
     public String getRootOperationUid() {
         return super.getRootOperationUid();
+    }
+
+    public MatchConfiguration getMatchConfiguration() {
+        return matchConfiguration;
+    }
+
+    public void setMatchConfiguration(MatchConfiguration matchConfiguration) {
+        this.matchConfiguration = matchConfiguration;
     }
 
     @MetricField(name = "Matched", fieldType = MetricField.FieldType.BOOLEAN)

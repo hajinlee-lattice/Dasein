@@ -54,6 +54,8 @@ public class RateLimitedResourceManager {
 
     public static RateLimitedAcquisition acquire(String resourceName, Map<String, Long> quantities, long duration,
             TimeUnit timeUnit) {
+        localMode.set(false);
+        
         if (!definitions.containsKey(resourceName)) {
             log.warn("The resource " + resourceName + " is not registered.");
             return RateLimitedAcquisition.disallowed()
