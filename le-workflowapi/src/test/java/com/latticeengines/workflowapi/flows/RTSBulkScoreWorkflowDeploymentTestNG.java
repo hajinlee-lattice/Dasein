@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -103,8 +104,9 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         String testModelFolderName = TEST_MODEL_NAME_PREFIX;
         String applicationId = "application_" + "1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
+        String uuid = UUID.randomUUID().toString();
         ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(testModelFolderName,
-                applicationId, modelVersion);
+                applicationId, modelVersion, uuid);
         tenant = setupTenant();
         summary = createModel(tenant, modelConfiguration, customerSpace);
         generateDefaultBucketMetadata(summary, customerSpace);
@@ -310,9 +312,10 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         private String sourceInterpretation;
         private String modelSummaryJsonLocalpath;
 
-        public ScoringTestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion) {
+        public ScoringTestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion,
+                String uuid) {
             this.testModelFolderName = testModelFolderName;
-            this.modelId = "ms__" + testModelFolderName + "_";
+            this.modelId = "ms__" + uuid + "_";
             this.modelName = testModelFolderName;
             this.applicationId = applicationId;
             this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);
