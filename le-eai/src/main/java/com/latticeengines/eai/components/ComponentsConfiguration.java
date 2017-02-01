@@ -20,10 +20,9 @@ public class ComponentsConfiguration {
         SalesforceLoginConfig loginConfig = new SalesforceLoginConfig();
         SalesforceEndpointConfig config = new SalesforceEndpointConfig();
         HttpClient httpClient = new HttpClient();
-
-        httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
         httpClient.setConnectTimeout(60 * 1000);
         httpClient.setTimeout(60 * 60 * 1000);
+        //httpClient.setMaxContentLength(1000*1000*50);
         config.setHttpClient(httpClient);
 
         loginConfig.setClientId(clientId);

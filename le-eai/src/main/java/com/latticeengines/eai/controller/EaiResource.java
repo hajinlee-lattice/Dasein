@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.network.exposed.eai.EaiInterface;
 
@@ -26,17 +25,10 @@ public class EaiResource implements EaiInterface {
     @Autowired
     private EaiService eaiService;
 
-    @RequestMapping(value = "/importjobs", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/jobs", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create an import data job")
-    public AppSubmission createImportDataJob(@RequestBody ImportConfiguration importConfig) {
-        return new AppSubmission(Collections.singletonList(eaiService.extractAndImport(importConfig)));
-    }
-
-    @RequestMapping(value = "/exportjobs", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create an export data job")
-    public AppSubmission createExportDataJob(@RequestBody ExportConfiguration exportConfig) {
-        return new AppSubmission(Collections.singletonList(eaiService.exportDataFromHdfs(exportConfig)));
+    public AppSubmission submitEaiJob(@RequestBody EaiJobConfiguration eaiJobConfig) {
+        return new AppSubmission(Collections.singletonList(eaiService.submitEaiJob(eaiJobConfig)));
     }
 }

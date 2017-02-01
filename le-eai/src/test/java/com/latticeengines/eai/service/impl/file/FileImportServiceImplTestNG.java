@@ -109,9 +109,9 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @DataProvider
     public Object[][] getPropertiesProvider() {
         Map<String, String> metadataFileProperties = getProperties(true);
-        Map<String, String> inlineMetadataProperties = getProperties(false);
+        //Map<String, String> inlineMetadataProperties = getProperties(false);
 
-        return new Object[][] { { metadataFileProperties }, { inlineMetadataProperties } };
+        return new Object[][] { { metadataFileProperties }};
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {

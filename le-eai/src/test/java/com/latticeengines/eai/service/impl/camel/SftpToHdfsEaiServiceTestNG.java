@@ -11,7 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
@@ -33,9 +32,7 @@ public class SftpToHdfsEaiServiceTestNG extends EaiFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testDownloadSftp() throws Exception {
         SftpToHdfsRouteConfiguration camelRouteConfiguration = routeServiceTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig = ImportConfiguration
-                .createForCamelRouteConfiguration(camelRouteConfiguration);
-        ApplicationId appId = eaiService.extractAndImport(importConfig);
+        ApplicationId appId = eaiService.submitEaiJob(camelRouteConfiguration);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);

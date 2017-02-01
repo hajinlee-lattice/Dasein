@@ -124,7 +124,7 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath += "/" + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
 
-        AppSubmission appIds = eaiProxy.createImportDataJob(importConfig);
+        AppSubmission appIds = eaiProxy.submitEaiJob(importConfig);
         assertNotNull(appIds);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appIds.getApplicationIds().get(0),
                 FinalApplicationStatus.SUCCEEDED);
@@ -138,7 +138,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
 
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
         importConfig.getSourceConfigurations().get(0).setSourceCredentialType(SourceCredentialType.SANDBOX);
-        appIds = eaiProxy.createImportDataJob(importConfig);
+
+        appIds = eaiProxy.submitEaiJob(importConfig);
         assertNotNull(appIds);
         status = platformTestBase.waitForStatus(appIds.getApplicationIds().get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);

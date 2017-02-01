@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.impl.ExportStrategy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -29,7 +29,7 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
     private static final Log log = LogFactory.getLog(CSVFileExportStrategyBase.class);
 
     @Autowired
-    private JobService jobService;
+    private EaiYarnService eaiYarnService;
 
     public CSVFileExportStrategyBase() {
         this(ExportFormat.CSV);
@@ -44,7 +44,7 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
         log.info(String.format("Exporting data for table %s with filter %s", table, filter));
         Properties props = getProperties(ctx, table);
 
-        ApplicationId appId = jobService.submitMRJob(CSVExportJob.CSV_EXPORT_JOB_TYPE, props);
+        ApplicationId appId = eaiYarnService.submitMRJob(CSVExportJob.CSV_EXPORT_JOB_TYPE, props);
         ctx.setProperty(ImportProperty.APPID, appId);
     }
 

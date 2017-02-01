@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -37,8 +38,8 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
     }
 
     private void exportData() {
-        ExportConfiguration exportConfig = setupExportConfig();
-        AppSubmission submission = eaiProxy.createExportDataJob(exportConfig);
+        EaiJobConfiguration exportConfig = setupExportConfig();
+        AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
         waitForAppId(submission.getApplicationIds().get(0).toString());
         saveToContext();

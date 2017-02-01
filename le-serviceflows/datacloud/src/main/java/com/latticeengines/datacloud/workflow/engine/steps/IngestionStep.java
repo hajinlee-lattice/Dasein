@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
@@ -148,10 +147,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         progress.setDestination(tmpDestFile.toString());
         CamelRouteConfiguration camelRouteConfig = ingestionProgressService
                 .createCamelRouteConfiguration(progress);
-        ImportConfiguration importConfig = ImportConfiguration
-                .createForCamelRouteConfiguration(camelRouteConfig);
         progress.setDestination(destFile);
-        AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
+        AppSubmission submission = eaiProxy.submitEaiJob(camelRouteConfig);
         String eaiAppId = submission.getApplicationIds().get(0);
         log.info("EAI Service ApplicationId: " + eaiAppId);
         FinalApplicationStatus status = waitForStatus(eaiAppId, WORKFLOW_WAIT_TIME_IN_MILLIS,

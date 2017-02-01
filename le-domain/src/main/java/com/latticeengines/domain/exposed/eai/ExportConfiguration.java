@@ -1,13 +1,9 @@
 package com.latticeengines.domain.exposed.eai;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class ExportConfiguration extends BasePayloadConfiguration {
+public class ExportConfiguration extends EaiJobConfiguration {
 
     private ExportFormat exportFormat;
     private ExportDestination exportDestination;
@@ -15,7 +11,7 @@ public class ExportConfiguration extends BasePayloadConfiguration {
     private String exportInputPath;
     private String exportTargetPath;
     private boolean exportUsingDisplayName = Boolean.TRUE;
-    private Map<String, String> properties = new HashMap<>();
+    
 
     @JsonProperty("export_format")
     public ExportFormat getExportFormat() {
@@ -65,20 +61,6 @@ public class ExportConfiguration extends BasePayloadConfiguration {
     @JsonProperty("tables")
     public void setTable(Table table) {
         this.table = table;
-    }
-
-    @JsonProperty("properties")
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    @JsonProperty("properties")
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
-    public void setProperty(String propertyName, String propertyValue) {
-        properties.put(propertyName, propertyValue);
     }
 
     @JsonProperty("UseDisplayName")

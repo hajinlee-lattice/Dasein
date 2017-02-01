@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -40,8 +41,8 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
     }
 
     private void importData() {
-        ImportConfiguration importConfig = setupImportConfig();
-        AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
+        EaiJobConfiguration importConfig = setupImportConfig();
+        AppSubmission submission = eaiProxy.submitEaiJob(importConfig);
         putStringValueInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
         waitForAppId(submission.getApplicationIds().get(0));
         if (getConfiguration().getSourceType() == SourceType.FILE) {

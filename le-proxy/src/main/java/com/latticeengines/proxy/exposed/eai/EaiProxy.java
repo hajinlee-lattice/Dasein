@@ -1,10 +1,8 @@
 package com.latticeengines.proxy.exposed.eai;
 
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.network.exposed.eai.EaiInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -16,15 +14,8 @@ public class EaiProxy extends MicroserviceRestApiProxy implements EaiInterface {
     }
 
     @Override
-    public AppSubmission createImportDataJob(ImportConfiguration importConfig) {
-        String url = constructUrl("/importjobs");
-        return post("createImportDataJob", url, importConfig, AppSubmission.class);
+    public AppSubmission submitEaiJob(EaiJobConfiguration eaiJobConfig) {
+        String url = constructUrl("/jobs");
+        return post("createEaiJob", url, eaiJobConfig, AppSubmission.class);
     }
-
-    @Override
-    public AppSubmission createExportDataJob(ExportConfiguration exportConfig) {
-        String url = constructUrl("/exportjobs");
-        return post("createExportDataJob", url, exportConfig, AppSubmission.class);
-    }
-
 }

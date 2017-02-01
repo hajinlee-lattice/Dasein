@@ -8,11 +8,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.service.DataExtractionService;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
 
 @Component("eaiService")
@@ -24,25 +27,25 @@ public class EaiServiceImpl implements EaiService {
     private DataExtractionService dataExtractionService;
 
     @Autowired
-    private CamelRouteJobService camelRouteJobService;
+    private EaiYarnService eaiYarnService;
+
+    @Override
+    public ApplicationId submitEaiJob(EaiJobConfiguration eaiJobConfig) {
+        if (eaiJobConfig instanceof ImportConfiguration) {
+            return extractAndImport((ImportConfiguration) eaiJobConfig);
+        } else if (eaiJobConfig instanceof ExportConfiguration) {
+            return exportDataFromHdfs((ExportConfiguration) eaiJobConfig);
+        } else if (eaiJobConfig instanceof CamelRouteConfiguration) {
+            return eaiYarnService.submitSingleYarnContainer(eaiJobConfig);
+        }
+        return null;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId extractAndImport(ImportConfiguration importConfig) {
-        ImportConfiguration.ImportType importType = importConfig.getImportType();
-        if (importType == null) {
-            importType = ImportConfiguration.ImportType.ImportTable;
-        }
-
-        switch (importType) {
-        case CamelRoute:
-            log.info("Directing extractAndImport job to " + camelRouteJobService.getClass().getSimpleName());
-            return camelRouteJobService.submitImportJob(importConfig);
-        case ImportTable:
-        default:
-            log.info("Directing extractAndImport job to " + dataExtractionService.getClass().getSimpleName());
-            return dataExtractionService.submitExtractAndImportJob(importConfig);
-        }
+        log.info("Directing extractAndImport job to " + dataExtractionService.getClass().getSimpleName());
+        return dataExtractionService.submitExtractAndImportJob(importConfig);
     }
 
     @Override
@@ -52,5 +55,4 @@ public class EaiServiceImpl implements EaiService {
         log.info("Starting file based export job.");
         return exportService.submitDataExportJob(exportConfig);
     }
-
 }

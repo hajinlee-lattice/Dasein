@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
@@ -24,8 +23,8 @@ import com.latticeengines.eai.service.impl.camel.HdfsToSnowflakeService;
 import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
 
 @Component("camelRouteProcessor")
-public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
-        implements ItemProcessor<ImportConfiguration, String> {
+public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRouteConfiguration>
+        implements ItemProcessor<CamelRouteConfiguration, String> {
 
     private static final Long timeout = TimeUnit.HOURS.toMillis(48);
     private static final Log log = LogFactory.getLog(CamelRouteProcessor.class);
@@ -40,46 +39,24 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
     private HdfsToSnowflakeService hdfsToSnowflakeService;
 
     @Override
-    public String process(ImportConfiguration importConfig) throws Exception {
-        if (!ImportConfiguration.ImportType.CamelRoute.equals(importConfig.getImportType())
-                && !ImportConfiguration.ImportType.AmazonS3.equals(importConfig.getImportType())) {
-            throw new IllegalArgumentException("An import of type " + importConfig.getImportType() + " was directed to "
-                    + this.getClass().getSimpleName());
-        }
-
-        System.out.println(JsonUtils.serialize(importConfig.getCamelRouteConfiguration()));
-
-        CamelRouteConfiguration camelRouteConfiguration = importConfig.getCamelRouteConfiguration();
-
-        if (ImportConfiguration.ImportType.AmazonS3.equals(importConfig.getImportType())) {
-
-            if (camelRouteConfiguration instanceof HdfsToS3Configuration) {
-                invokeS3Upload((HdfsToS3Configuration) camelRouteConfiguration);
-            } else if (camelRouteConfiguration instanceof HdfsToSnowflakeConfiguration) {
-                invokeSnowflakeExport((HdfsToSnowflakeConfiguration) camelRouteConfiguration);
-            } else {
-                throw new UnsupportedOperationException(
-                        camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
-            }
-
-        } else {
+    public String process(CamelRouteConfiguration camelRouteConfig) throws Exception {
+        log.info(JsonUtils.serialize(camelRouteConfig));
+        if (camelRouteConfig instanceof HdfsToS3Configuration) {
+            invokeS3Upload((HdfsToS3Configuration) camelRouteConfig);
+        } else if (camelRouteConfig instanceof HdfsToSnowflakeConfiguration) {
+            invokeSnowflakeExport((HdfsToSnowflakeConfiguration) camelRouteConfig);
+        }else if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration){
             CamelContext camelContext = new DefaultCamelContext();
-            CamelRouteService<?> camelRouteService;
-
-            if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
-                camelRouteService = sftpToHdfsRouteService;
-            } else {
-                throw new UnsupportedOperationException(
-                        camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
-            }
-
-            RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
+            CamelRouteService<?> camelRouteService= sftpToHdfsRouteService;
+            RouteBuilder route = camelRouteService.generateRoute(camelRouteConfig);
             camelContext.addRoutes(route);
             camelContext.start();
-            waitForRouteToFinish(camelRouteService, camelRouteConfiguration);
+            waitForRouteToFinish(camelRouteService, camelRouteConfig);
             camelContext.stop();
+        }else {
+            throw new UnsupportedOperationException(
+                    camelRouteConfig.getClass().getSimpleName() + " has not been implemented yet.");
         }
-
         return null;
     }
 

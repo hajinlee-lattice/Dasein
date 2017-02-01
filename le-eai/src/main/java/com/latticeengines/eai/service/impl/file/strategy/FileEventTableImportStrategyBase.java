@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.eai.file.runtime.mapreduce.CSVImportJob;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 import com.latticeengines.eai.util.HdfsUriGenerator;
@@ -42,7 +42,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     private static final Log log = LogFactory.getLog(FileEventTableImportStrategyBase.class);
 
     @Autowired
-    private JobService jobService;
+    private EaiYarnService eaiYarnService;
 
     @Autowired
     private VersionManager versionManager;
@@ -52,6 +52,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
+    
+//    @Autowired
+//    private SparkImport sparkImport;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -66,7 +69,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
         Properties props = getProperties(ctx, table, "");
 
-        ApplicationId appId = jobService.submitMRJob(CSVImportJob.CSV_IMPORT_JOB_TYPE, props);
+        ApplicationId appId = eaiYarnService.submitMRJob(CSVImportJob.CSV_IMPORT_JOB_TYPE, props);
+       // ApplicationId appId = sparkImport.launch(props);
         ctx.setProperty(ImportProperty.APPID, appId);
         updateContextProperties(ctx, table);
     }

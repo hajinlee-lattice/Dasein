@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -19,12 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -36,8 +30,8 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("dataExtractionService")
 public class DataExtractionServiceImpl implements DataExtractionService {
@@ -45,25 +39,16 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     private static final Log log = LogFactory.getLog(DataExtractionServiceImpl.class);
 
     @Autowired
-    private JobEntityMgr jobEntityMgr;
+    private EaiMetadataService eaiMetadataService;
 
     @Autowired
-    private JobService jobService;
+    private EaiYarnService eaiYarnService;
 
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private EaiMetadataService eaiMetadataService;
-
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
-        // String metadataUrl = context.getProperty(ImportProperty.METADATAURL,
-        // String.class);
-
-        // if (metadataUrl != null) {
-        // eaiMetadataService.setMetadataUrl(metadataUrl);
-        // }
 
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         String customerSpace = importConfig.getCustomerSpace().toString();
@@ -155,34 +140,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             eaiMetadataService.registerTables(tables, importContext);
             return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
-            EaiJob eaiJob = createJob(importConfig);
-            appId = jobService.submitJob(eaiJob);
-            eaiJob.setId(appId.toString());
-            jobEntityMgr.create(eaiJob);
+            appId = eaiYarnService.submitSingleYarnContainer(importConfig);
         }
         return appId;
-    }
-
-    private EaiJob createJob(ImportConfiguration importConfig) {
-        EaiJob eaiJob = new EaiJob();
-        String customerSpace = importConfig.getCustomerSpace().toString();
-
-        eaiJob.setClient("eaiClient");
-        eaiJob.setCustomer(customerSpace);
-
-        Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getEaiQueueNameForSubmission());
-
-        Properties containerProperties = new Properties();
-        containerProperties.put(ImportProperty.EAICONFIG, importConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "128");
-        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-
-        eaiJob.setAppMasterPropertiesObject(appMasterProperties);
-        eaiJob.setContainerPropertiesObject(containerProperties);
-        return eaiJob;
     }
 
     public String createTargetPath(String customerSpace) {
