@@ -10,10 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.pls.BucketedScore;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.service.BucketedScoreService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -26,6 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.newrelic.api.agent.Trace;
 

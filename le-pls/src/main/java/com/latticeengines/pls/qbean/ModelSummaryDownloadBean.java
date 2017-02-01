@@ -2,9 +2,6 @@ package com.latticeengines.pls.qbean;
 
 import java.util.concurrent.Callable;
 
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
-import com.latticeengines.pls.service.BucketedScoreService;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.mbean.TimeStampContainer;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.impl.FeatureImportanceParser;
 import com.latticeengines.pls.service.impl.ModelSummaryDownloadCallable;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
