@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -116,7 +116,7 @@ public class EnrichmentResource {
             Integer max //
     ) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributes(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max, false);
     }
@@ -144,7 +144,7 @@ public class EnrichmentResource {
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return internalResourceRestApiProxy.getLeadEnrichmentAttributesCount(customerSpace, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, false);
     }

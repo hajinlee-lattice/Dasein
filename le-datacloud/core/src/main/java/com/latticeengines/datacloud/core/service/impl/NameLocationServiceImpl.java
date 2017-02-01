@@ -18,11 +18,11 @@ public class NameLocationServiceImpl implements NameLocationService {
     @Override
     public void normalize(NameLocation nameLocation) {
 
-        String cleanName = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getName());
+        String cleanName = com.latticeengines.common.exposed.util.StringStandardizationUtils.getStandardString(nameLocation.getName());
         String cleanCountry = LocationUtils.getStandardCountry(nameLocation.getCountry());
         String countryCode = countryCodeService.getCountryCode(cleanCountry);
         String cleanState = LocationUtils.getStandardState(cleanCountry, nameLocation.getState());
-        String cleanCity = com.latticeengines.common.exposed.util.StringUtils.getStandardString(nameLocation.getCity());
+        String cleanCity = com.latticeengines.common.exposed.util.StringStandardizationUtils.getStandardString(nameLocation.getCity());
         String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
 
         nameLocation.setName(cleanName);

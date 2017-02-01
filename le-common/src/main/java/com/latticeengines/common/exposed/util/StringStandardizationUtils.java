@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StringUtils {
+public class StringStandardizationUtils {
 
     public static boolean objectIsNullOrEmptyString(Object obj) {
         if (obj == null) {

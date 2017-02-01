@@ -7,7 +7,7 @@ import java.util.TimeZone;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
 import com.latticeengines.datacloud.core.source.Source;
@@ -70,18 +70,18 @@ public class HdfsPathBuilder {
         Path dir = null;
         if (source instanceof IngestedRawSource) {
             dir = constructRawDir(source);
-            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
                 dir = dir.append(version);
             }
         } else if (source instanceof DerivedSource) {
-            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
                 dir = constructSnapshotDir(source, version);
             } else {
                 dir = constructSnapshotRootDir(source);
             }
         } else {
             dir = constructSourceDir(source);
-            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
                 dir = dir.append(version);
             }
         }

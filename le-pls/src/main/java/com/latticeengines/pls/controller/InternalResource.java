@@ -42,7 +42,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -418,7 +418,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringUtils.objectIsNullOrEmptyString(start)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
@@ -439,7 +439,7 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringUtils.objectIsNullOrEmptyString(start)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(start)) {
             lastUpdateTime = dateFormat.parse(start).getTime();
         }
         return postProcessModelSummaryList(modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime,
@@ -600,7 +600,7 @@ public class InternalResource extends InternalResourceBase {
             Boolean considerInternalAttributes) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
         return attributeService.getAttributes(tenant, attributeDisplayNameFilter, categoryEnum,
                 subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
@@ -631,7 +631,7 @@ public class InternalResource extends InternalResourceBase {
     ) {
         checkHeader(request);
         Tenant tenant = manufactureSecurityContextForInternalAccess(tenantId);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum,
                 subcategory, onlySelectedAttributes, Boolean.FALSE);
@@ -934,7 +934,7 @@ public class InternalResource extends InternalResourceBase {
             waitForTenantConsoleInstallation(CustomerSpace.parse(tenant2Id));
 
         } else {
-            if (StringUtils.objectIsNullOrEmptyString(productPrefix)) {
+            if (StringStandardizationUtils.objectIsNullOrEmptyString(productPrefix)) {
                 Camille camille = CamilleEnvironment.getCamille();
                 Path productsPath = PathBuilder
                         .buildCustomerSpacePath(CamilleEnvironment.getPodId(),

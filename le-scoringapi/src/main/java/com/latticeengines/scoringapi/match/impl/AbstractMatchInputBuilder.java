@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.apache.log4j.Level;
 import org.springframework.util.CollectionUtils;
 
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
@@ -239,7 +239,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             Map<String, Object> record) {
         Object value = record.get(field);
 
-        if (StringUtils.objectIsNullOrEmptyString(value)) {
+        if (StringStandardizationUtils.objectIsNullOrEmptyString(value)) {
             return;
         }
         List<String> keyFields = keyMap.get(matchKey);

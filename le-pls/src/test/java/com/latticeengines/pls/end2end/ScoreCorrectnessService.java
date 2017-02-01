@@ -47,7 +47,7 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
@@ -496,7 +496,7 @@ public class ScoreCorrectnessService {
                     idFieldValue = fieldValue;
                 }
             }
-            if (StringUtils.objectIsNullOrEmptyString(idFieldValue)) {
+            if (StringStandardizationUtils.objectIsNullOrEmptyString(idFieldValue)) {
                 log.warn("Skipping this record because missing ID field value " + JsonUtils.serialize(record));
                 continue;
             } else {

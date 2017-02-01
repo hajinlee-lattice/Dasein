@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -491,14 +491,14 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
             String attributeDisplayNameFilter, Category category, boolean considerInternalAttributes)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
                 || considerInternalAttributes) {
             url += "?";
         }
         if (onlySelectedAttr) {
             url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
         }
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
             url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
         }
         if (category != null) {
@@ -563,7 +563,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         boolean foundHGDataSourceInfo = false;
 
         for (String dataSource : countMap.keySet()) {
-            assertFalse(StringUtils.objectIsNullOrEmptyString(dataSource));
+            assertFalse(StringStandardizationUtils.objectIsNullOrEmptyString(dataSource));
             assertNotNull(countMap.get(dataSource));
             assertTrue(countMap.get(dataSource) > 0);
 

@@ -17,7 +17,7 @@ public class StringUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "stringDataProvider")
     public void testStandardizeString(String input, String expectedOutput) {
-        String output = StringUtils.getStandardString(input);
+        String output = StringStandardizationUtils.getStandardString(input);
         Assert.assertEquals(output, expectedOutput);
     }
 }

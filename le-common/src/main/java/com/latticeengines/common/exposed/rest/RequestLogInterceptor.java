@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 
 @Component("requestLogInterceptor")
 public class RequestLogInterceptor extends HandlerInterceptorAdapter {
@@ -72,7 +72,7 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     public static String getRequestIdentifierId(HttpServletRequest request) {
         String requestId = "";
         Object identifier = request.getAttribute(RequestLogInterceptor.IDENTIFIER_KEY);
-        if (!StringUtils.objectIsNullOrEmptyString(identifier)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(identifier)) {
             requestId = String.valueOf(identifier);
         }
         return requestId;

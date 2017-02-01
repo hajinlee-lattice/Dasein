@@ -417,7 +417,7 @@ public class LocationUtils {
             return USA;
         }
         country = country.replaceAll("\\d", "");
-        String phrase = com.latticeengines.common.exposed.util.StringUtils.getStandardString(country);
+        String phrase = com.latticeengines.common.exposed.util.StringStandardizationUtils.getStandardString(country);
         if (StringUtils.isEmpty(phrase)) {
             return USA;
         }
@@ -440,7 +440,7 @@ public class LocationUtils {
             return null;
         }
         country = country.replaceAll("\\d", "");
-        String phrase = com.latticeengines.common.exposed.util.StringUtils.getStandardString(country);
+        String phrase = com.latticeengines.common.exposed.util.StringStandardizationUtils.getStandardString(country);
         if (StringUtils.isEmpty(phrase)) {
             return null;
         }
@@ -467,7 +467,7 @@ public class LocationUtils {
             Map<String, String> stateLookUp = usStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (usStateAbbrToFullNameMap.containsKey(guess)) {
-                return com.latticeengines.common.exposed.util.StringUtils
+                return com.latticeengines.common.exposed.util.StringStandardizationUtils
                         .getStandardString(usStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
@@ -476,13 +476,13 @@ public class LocationUtils {
             Map<String, String> stateLookUp = caStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (caStateAbbrToFullNameMap.containsKey(guess)) {
-                return com.latticeengines.common.exposed.util.StringUtils
+                return com.latticeengines.common.exposed.util.StringStandardizationUtils
                         .getStandardString(caStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
             }
         } else {
-            return com.latticeengines.common.exposed.util.StringUtils.getStandardString(state);
+            return com.latticeengines.common.exposed.util.StringStandardizationUtils.getStandardString(state);
         }
     }
 
@@ -499,7 +499,7 @@ public class LocationUtils {
     public static String getStandardRegion(String standardCountry, String standardState) {
         if (USA.equalsIgnoreCase(standardCountry)) {
             if (StringUtils.isNotEmpty(standardState) && usRegionMap.containsKey(standardState.toUpperCase())) {
-                return com.latticeengines.common.exposed.util.StringUtils
+                return com.latticeengines.common.exposed.util.StringStandardizationUtils
                         .getStandardString(usRegionMap.get(standardState.toUpperCase()));
             } else {
                 return "OTHER";

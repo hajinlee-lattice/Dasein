@@ -32,7 +32,7 @@ public class DatabaseUtils {
 
                 if (customExceptionClazz != null //
                         && customExceptionClazz.isAssignableFrom(exception.getClass())) {
-                    if (StringUtils.objectIsNullOrEmptyString(customExcetionMessageSubstr) //
+                    if (StringStandardizationUtils.objectIsNullOrEmptyString(customExcetionMessageSubstr) //
                             || exception.getMessage().trim().toLowerCase()
                                     .contains(customExcetionMessageSubstr.trim().toLowerCase())) {
                         log.warn(String.format("%s %s", customMessage, operationName));

@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -100,7 +100,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         boolean shouldSkipScoring = false;
 
-        if (!isCalledViaApiConsole || !StringUtils.objectIsNullOrEmptyString(request.getModelId())) {
+        if (!isCalledViaApiConsole || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
             if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
                 throw new ScoringApiException(LedpCode.LEDP_31101);
             }
@@ -125,7 +125,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts,
                         fieldSchemas, request.getRecord(), modelJsonTypeHandler);
                 if (missingEssentialFieldsException != null) {
-                    if (!performFetchOnlyForMatching || StringUtils.objectIsNullOrEmptyString(
+                    if (!performFetchOnlyForMatching || StringStandardizationUtils.objectIsNullOrEmptyString(
                             request.getRecord().get(FieldInterpretation.LatticeAccountID.toString()))) {
                         throw missingEssentialFieldsException;
                     }
@@ -727,7 +727,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         String value = "";
         if (!org.apache.commons.lang.StringUtils.isBlank(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
-            if (!StringUtils.objectIsNullOrEmptyString(id)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(id)) {
                 value = String.valueOf(id);
             }
         }
@@ -794,19 +794,19 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             Object fieldValue = record.get(fieldName);
             if (expectedMatchFields.contains(fieldSchema.interpretation)
-                    && StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                    && StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                 missingMatchFields.add(fieldName);
             }
             if (expectedDomainFields.contains(fieldSchema.interpretation)
-                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                    && !StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasOneOfDomain = true;
             }
 
             if (fieldSchema.interpretation == FieldInterpretation.CompanyName
-                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                    && !StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyName = true;
             } else if (fieldSchema.interpretation == FieldInterpretation.State
-                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                    && !StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyState = true;
             }
         }
@@ -853,7 +853,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     protected String getWarningPrefix(String modelId) {
-        return StringUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
+        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
     }
 
     private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {

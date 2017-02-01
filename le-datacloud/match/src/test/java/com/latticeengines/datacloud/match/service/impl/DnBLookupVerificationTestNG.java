@@ -18,7 +18,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupFetcher;
@@ -217,7 +217,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 country = LocationUtils.getStandardCountry(country);
                 String countryCode = countryCodeService.getCountryCode(country);
                 String name = record.get(0);
-                name = StringUtils.getStandardString(name);
+                name = StringStandardizationUtils.getStandardString(name);
                 String state = null;
                 if (includeState) {
                     state = record.get(FORTUNE1000_STATE);
@@ -226,7 +226,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 String city = null;
                 if (includeCity) {
                     city = record.get(FORTUNE1000_CITY);
-                    city = StringUtils.getStandardString(city);
+                    city = StringStandardizationUtils.getStandardString(city);
                 }
                 if (name != null && countryCode != null) {
                     MatchKeyTuple input = new MatchKeyTuple();
@@ -268,11 +268,11 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                     country = LocationUtils.getStandardCountry(country);
                     String countryCode = countryCodeService.getCountryCode(country);
                     String name = record.get(0);
-                    name = StringUtils.getStandardString(name);
+                    name = StringStandardizationUtils.getStandardString(name);
                     String state = record.get(FORTUNE1000_STATE);
                     state = LocationUtils.getStandardState(country, state);
                     String city = record.get(FORTUNE1000_CITY);
-                    city = StringUtils.getStandardString(city);
+                    city = StringStandardizationUtils.getStandardString(city);
                     if (name != null && countryCode != null) {
                         MatchKeyTuple input = new MatchKeyTuple();
                         input.setCountry(country);

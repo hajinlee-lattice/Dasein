@@ -332,7 +332,7 @@ public abstract class BaseScoring extends CommonBase {
                         }
 
                         requestInfo.put(HAS_WARNING, String.valueOf(!warningList.isEmpty()));
-                        boolean hasError = !com.latticeengines.common.exposed.util.StringUtils
+                        boolean hasError = !com.latticeengines.common.exposed.util.StringStandardizationUtils
                                 .objectIsNullOrEmptyString(error);
                         requestInfo.put(HAS_ERROR, Boolean.toString(hasError));
 

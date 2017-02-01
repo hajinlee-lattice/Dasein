@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
@@ -146,14 +146,14 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     private List<LeadEnrichmentAttribute> getAttributes(boolean onlySelectedAttr, String attributeDisplayNameFilter,
             Category category, boolean considerInternalAttributes) throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
                 || considerInternalAttributes) {
             url += "?";
         }
         if (onlySelectedAttr) {
             url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
         }
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
             url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
         }
         if (category != null) {

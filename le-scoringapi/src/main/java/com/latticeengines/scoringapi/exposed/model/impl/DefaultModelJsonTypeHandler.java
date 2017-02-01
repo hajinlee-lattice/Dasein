@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -107,7 +107,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
             modelEvaluator = initModelEvaluator(is);
 
-            if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }
         } catch (IOException e) {
@@ -128,7 +128,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             }
 
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + SCORE_DERIVATION_FILENAME);
             }
         } catch (IOException e) {
@@ -145,7 +145,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
@@ -187,7 +187,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             path = resolvedHdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
 
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!StringUtils.objectIsNullOrEmptyString(localPathToPersist)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path,
                         localPathToPersist + "metadata-" + DATA_COMPOSITION_FILENAME);
             }
@@ -370,7 +370,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
             boolean shouldThrowExceptionForMismatchedDataTypes) {
         try {
             if (schema.interpretation == FieldInterpretation.Date) {
-                if (!StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                if (!StringStandardizationUtils.objectIsNullOrEmptyString(fieldValue)) {
                     fieldValue = TimeStampConvertUtils.convertToLong(String.valueOf(fieldValue));
                 }
             } else {
@@ -391,7 +391,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     }
 
     private String getWarningPrefix(String modelId) {
-        return StringUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
+        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
     }
 
     protected boolean shouldStopCheckForScoreDerivation(String path) throws IOException {

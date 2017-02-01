@@ -10,7 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -198,7 +198,7 @@ public class AttributePageProcessor {
         Set<String> searchTokens = new HashSet<>();
 
         // tokenize and find set of unique tokens from search string
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
             StringTokenizer st = new StringTokenizer(attributeDisplayNameFilter.trim(), SPACE_DELIM);
             while (st.hasMoreTokens()) {
                 searchTokens.add(st.nextToken().toUpperCase());

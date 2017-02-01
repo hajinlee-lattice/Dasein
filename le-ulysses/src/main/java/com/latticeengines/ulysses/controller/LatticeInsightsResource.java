@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
@@ -140,7 +140,7 @@ public class LatticeInsightsResource {
             Integer max) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
         return attributes;
@@ -170,7 +170,7 @@ public class LatticeInsightsResource {
             Boolean onlySelectedAttributes) {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        Category categoryEnum = (StringUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
+        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, considerInternalAttributes);
     }

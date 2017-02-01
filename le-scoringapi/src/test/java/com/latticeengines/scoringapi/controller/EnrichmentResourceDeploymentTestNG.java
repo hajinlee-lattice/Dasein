@@ -15,7 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -560,19 +560,19 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
             String attributeDisplayNameFilter, Category category, String subcategory, Integer offset, Integer max)
             throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = apiHostPort + "/score/enrichment";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
                 || offset != null || max != null) {
             url += "?";
         }
         if (onlySelectedAttr) {
             url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
         }
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
             url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
         }
         if (category != null) {
             url += "category=" + category.toString() + "&";
-            if (!StringUtils.objectIsNullOrEmptyString(subcategory)) {
+            if (!StringStandardizationUtils.objectIsNullOrEmptyString(subcategory)) {
                 url += "subcategory=" + subcategory + "&";
             }
         }
@@ -606,14 +606,14 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
     private int getLeadEnrichmentAttributeListCount(boolean onlySelectedAttr, String attributeDisplayNameFilter,
             Category category) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
         String url = apiHostPort + "/score/enrichment/count";
-        if (onlySelectedAttr || !StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
                 || category != null) {
             url += "?";
         }
         if (onlySelectedAttr) {
             url += "onlySelectedAttributes=" + onlySelectedAttr + "&";
         }
-        if (!StringUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
+        if (!StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)) {
             url += "attributeDisplayNameFilter=" + attributeDisplayNameFilter + "&";
         }
         if (category != null) {
@@ -664,7 +664,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         boolean foundHGDataSourceInfo = false;
 
         for (String dataSource : countMap.keySet()) {
-            Assert.assertFalse(StringUtils.objectIsNullOrEmptyString(dataSource));
+            Assert.assertFalse(StringStandardizationUtils.objectIsNullOrEmptyString(dataSource));
             Assert.assertNotNull(countMap.get(dataSource));
             Assert.assertTrue(countMap.get(dataSource) > 0);
 
