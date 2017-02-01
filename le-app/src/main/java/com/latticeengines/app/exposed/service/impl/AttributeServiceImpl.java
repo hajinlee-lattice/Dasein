@@ -195,6 +195,7 @@ public class AttributeServiceImpl implements AttributeService {
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .onlySelectedAttributes(isSelected) //
                 .considerInternalAttributes(considerInternalAttributes) //
+                .attributeCustomizationService(attributeCustomizationService) //
                 .build();
 
         List<LeadEnrichmentAttribute> attributes = processor.getPage();

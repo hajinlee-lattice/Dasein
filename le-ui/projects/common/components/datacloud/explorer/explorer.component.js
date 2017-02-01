@@ -93,11 +93,11 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.download_button.items = [{ 
-            href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
+            href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=false&Authorization=' + vm.authToken,
             label: vm.label.button_download,
             icon: 'fa fa-file-o' 
         },{
-            href: '/files/enrichment/lead/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
+            href: '/files/latticeinsights/insights/downloadcsv?onlySelectedAttributes=true&Authorization=' + vm.authToken,
             label: vm.label.button_download_selected,
             icon: 'fa fa-file-o' 
         }
