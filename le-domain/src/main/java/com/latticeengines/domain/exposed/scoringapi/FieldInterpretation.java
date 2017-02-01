@@ -20,7 +20,7 @@ public enum FieldInterpretation {
     CompanyName(FieldType.STRING, "CompanyName"), //
     Industry, //
     DUNS, //
-    LatticeAccountID; //
+    LatticeAccountId; //
 
     private final String fieldName; // Added this field, incase if actual
                                     // fieldName contains spaces, we can

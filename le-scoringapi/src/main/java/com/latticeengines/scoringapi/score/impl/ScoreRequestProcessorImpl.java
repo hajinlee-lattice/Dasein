@@ -126,7 +126,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                         fieldSchemas, request.getRecord(), modelJsonTypeHandler);
                 if (missingEssentialFieldsException != null) {
                     if (!performFetchOnlyForMatching || StringStandardizationUtils.objectIsNullOrEmptyString(
-                            request.getRecord().get(FieldInterpretation.LatticeAccountID.toString()))) {
+                            request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
                         throw missingEssentialFieldsException;
                     }
                 }

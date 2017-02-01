@@ -77,7 +77,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         populateFieldSchema(FieldInterpretation.PhoneNumber);
         populateFieldSchema(FieldInterpretation.PostalCode);
         populateFieldSchema(FieldInterpretation.State);
-        populateFieldSchema(FieldInterpretation.LatticeAccountID);
+        populateFieldSchema(FieldInterpretation.LatticeAccountId);
     }
 
     protected void populateFieldSchema(FieldInterpretation field) {
@@ -345,7 +345,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
         case DUNS:
             interpretedFields.setDuns(fieldName);
             break;
-        case LatticeAccountID:
+        case LatticeAccountId:
             interpretedFields.setLatticeAccountId(fieldName);
             break;
         default:
