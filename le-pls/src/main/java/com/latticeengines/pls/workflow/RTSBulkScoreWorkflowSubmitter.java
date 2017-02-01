@@ -77,7 +77,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (modelSummary != null) {
             skipIdMatch = !modelSummary.isMatch();
         }
-        String modelType = modelSummary.getModelType();
+        String modelType = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
         skipIdMatch = skipIdMatch || ModelType.PMML.getModelType().equals(modelType);
         log.info("Data Cloud Version=" + dataCloudVersion);
 
