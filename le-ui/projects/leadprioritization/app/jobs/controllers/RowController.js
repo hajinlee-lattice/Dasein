@@ -205,11 +205,13 @@ angular
                 $scope.stepsCompletedTimes = jobStatus.completedTimes;
 
                 var stepFailed = jobStatus.stepFailed;
-                if ((stepFailed === "generate_insights" ||
+                if ((stepFailed === "load_data" ||
+                    stepFailed === "generate_insights" ||
                     stepFailed === "create_global_target_market") &&
                     $scope.jobStepsCompletedStates["score_training_set"]) {
                     stepFailed = "score_training_set";
                 }
+
                 if (stepFailed) {
                     $scope.jobStepsRunningStates[stepFailed] = false;
                     $scope.jobStepsCompletedStates[stepFailed] = false;
