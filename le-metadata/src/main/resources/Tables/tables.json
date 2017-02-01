@@ -1,0 +1,20 @@
+{
+  "source_types":
+  [
+    {
+      "name": "Salesforce",
+      "tables":
+      [
+        { "name": "Account" },
+        { "name": "Contact" },
+        { "name": "Lead" },
+        { "name": "Opportunity" },
+        { "name": "OpportunityContactRole" }
+      ]
+    },
+    {
+      "name": "Marketo",
+      "tables": []
+    }
+  ]
+}
