@@ -114,7 +114,7 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
         config.setExportFormat(ExportFormat.CSV);
         config.setExportTargetPath(exportPath);
 
-        AppSubmission submission = eaiProxy.createExportDataJob(config);
+        AppSubmission submission = eaiProxy.submitEaiJob(config);
         while (true) {
             JobStatus status = modelProxy.getJobStatus(submission.getApplicationIds().get(0));
             log.info(String.format("Exporting table %s for tenant %s (Tracking Url: %s)...", table.getName(), summary
