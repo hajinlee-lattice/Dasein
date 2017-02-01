@@ -3,7 +3,9 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -12,26 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeedRaw;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
 public class DnBCacheSeedCleanServiceImplTestNG
-        extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
+        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Log log = LogFactory.getLog(DnBCacheSeedCleanServiceImplTestNG.class);
-
-    private static final String DUNS_NUMBER = "DUNS_NUMBER";
-    private static final String LE_DOMAIN = "LE_DOMAIN";
-    private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
-    private static final String SALES_VOLUME_LOCAL_CURRENCY = "SALES_VOLUME_LOCAL_CURRENCY";
-    private static final String SALES_VOLUME_US_DOLLARS = "SALES_VOLUME_US_DOLLARS";
-    private static final String EMPLOYEES_HERE = "EMPLOYEES_HERE";
-    private static final String EMPLOYEES_TOTAL = "EMPLOYEES_TOTAL";
-    private static final String NUMBER_OF_FAMILY_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
 
     @Autowired
     DnBCacheSeed source;
@@ -40,9 +41,32 @@ public class DnBCacheSeedCleanServiceImplTestNG
     DnBCacheSeedRaw baseSource;
 
     @Autowired
-    private DnBCacheSeedCleanService dnbCacheSeedCleanService;
+    SourceService sourceService;
 
-    @Test(groups = "functional")
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private PipelineTransformationService pipelineTransformationService;
+
+    String targetSourceName = "DnBCacheSeed";
+
+    ObjectMapper om = new ObjectMapper();
+
+    private static final String DUNS_NUMBER = "DUNS_NUMBER";
+    private static final String LE_DOMAIN = "LE_DOMAIN";
+    private static final String LE_PRIMARY_DUNS = "LE_PRIMARY_DUNS";
+    private static final String LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
+    private static final String SALES_VOLUME_LOCAL_CURRENCY = "SALES_VOLUME_LOCAL_CURRENCY";
+    private static final String SALES_VOLUME_US_DOLLARS = "SALES_VOLUME_US_DOLLARS";
+    private static final String EMPLOYEES_HERE = "EMPLOYEES_HERE";
+    private static final String EMPLOYEES_TOTAL = "EMPLOYEES_TOTAL";
+    private static final String NUMBER_OF_FAMILY_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
+    private static final String LE_COUNTRY = "LE_COUNTRY";
+    private static final String COUNTRY_NAME = "COUNTRY_NAME";
+    private static final String LE_PRIMARY_INDUSTRY = "LE_PRIMARY_INDUSTRY";
+
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();
@@ -53,8 +77,70 @@ public class DnBCacheSeedCleanServiceImplTestNG
     }
 
     @Override
-    TransformationService<BasicTransformationConfiguration> getTransformationService() {
-        return dnbCacheSeedCleanService;
+    PipelineTransformationConfiguration createTransformationConfiguration() {
+        try {
+            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+
+            configuration.setName("DnBCacheSeedClean");
+            configuration.setVersion(targetVersion);
+
+            TransformationStepConfig step1 = new TransformationStepConfig();
+            List<String> baseSources = new ArrayList<String>();
+            baseSources.add("DnBCacheSeedRaw");
+            step1.setBaseSources(baseSources);
+            step1.setTransformer("standardizationTransformer");
+            step1.setTargetSource(targetSourceName);
+            String confParamStr1 = getStandardizationTransformerConfig();
+            step1.setConfiguration(confParamStr1);
+
+            // -----------
+            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            steps.add(step1);
+
+            // -----------
+            configuration.setSteps(steps);
+
+            return configuration;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getStandardizationTransformerConfig() throws JsonProcessingException {
+        StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
+        String filterExpression = "DUNS_NUMBER != null && (LE_PRIMARY_DUNS != null || LE_INDUSTRY == null || !(LE_INDUSTRY.equals(\"Nonclassifiable Establishments\")))";
+        conf.setFilterExpression(filterExpression);
+        String[] filterFields = { DUNS_NUMBER, "LE_PRIMARY_DUNS", "LE_INDUSTRY" };
+        conf.setFilterFields(filterFields);
+        String[] domainFields = { LE_DOMAIN };
+        conf.setDomainFields(domainFields);
+        String[] countryFields = { LE_COUNTRY, COUNTRY_NAME };
+        conf.setCountryFields(countryFields);
+        conf.setConsolidateIndustryStrategy(ConsolidateIndustryStrategy.PARSE_NAICS);
+        conf.setAddConsolidatedIndustryField(LE_PRIMARY_INDUSTRY);
+        conf.setNaicsField("LE_NAICS_CODE");
+        conf.setNaicsMapFileName("NaicsIndustryMapping.txt");
+        String[] stringToIntFields = { LE_NUMBER_OF_LOCATIONS, EMPLOYEES_HERE, EMPLOYEES_TOTAL,
+                NUMBER_OF_FAMILY_MEMBERS };
+        conf.setStringToIntFields(stringToIntFields);
+        String[] stringToLongFields = { SALES_VOLUME_LOCAL_CURRENCY, SALES_VOLUME_US_DOLLARS };
+        conf.setStringToLongFields(stringToLongFields);
+        String[] dedupFields = { DUNS_NUMBER, LE_DOMAIN };
+        conf.setDedupFields(dedupFields);
+        String uploadTimestampField = "LE_Last_Upload_Date";
+        conf.setUploadTimestampField(uploadTimestampField);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
+                StandardizationStrategy.DOMAIN, StandardizationStrategy.COUNTRY,
+                StandardizationStrategy.CONSOLIDATE_INDUSTRY, StandardizationStrategy.STRING_TO_INT,
+                StandardizationStrategy.STRING_TO_LONG, StandardizationStrategy.DEDUP,
+                StandardizationStrategy.UPLOAD_TIMESTAMP };
+        conf.setSequence(sequence);
+        return om.writeValueAsString(conf);
+    }
+
+    @Override
+    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+        return pipelineTransformationService;
     }
 
     @Override
@@ -63,8 +149,50 @@ public class DnBCacheSeedCleanServiceImplTestNG
     }
 
     @Override
-    protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructRawDir(source.getBaseSources()[0]).append(baseSourceVersion).toString();
+    String getPathToUploadBaseData() {
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+    }
+
+    @Override
+    String getPathForResult() {
+        Source targetSource = sourceService.findBySourceName(targetSourceName);
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+    }
+
+    @Override
+    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+        log.info("Start to verify records one by one.");
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String duns = String.valueOf(record.get(DUNS_NUMBER));
+            String domain = String.valueOf(record.get(LE_DOMAIN));
+            Integer numberOfLocation = (Integer) record.get(LE_NUMBER_OF_LOCATIONS);
+            Long salesVolumnLocalCurrency = (Long) record.get(SALES_VOLUME_LOCAL_CURRENCY);
+            Long salesVolumnUSDollars = (Long) record.get(SALES_VOLUME_US_DOLLARS);
+            Integer employeeHere = (Integer) record.get(EMPLOYEES_HERE);
+            Integer employeeTotal = (Integer) record.get(EMPLOYEES_TOTAL);
+            Integer numberOfFamilyMembers = (Integer) record.get(NUMBER_OF_FAMILY_MEMBERS);
+            String leCountry = String.valueOf(record.get(LE_COUNTRY));
+            String countryName = String.valueOf(record.get(COUNTRY_NAME));
+            String lePrimaryIndustry = String.valueOf(record.get(LE_PRIMARY_INDUSTRY));
+            String lePrimaryDuns = String.valueOf(record.get(LE_PRIMARY_DUNS));
+            log.info(DUNS_NUMBER + "=" + duns + " " + LE_DOMAIN + "=" + domain + " " + LE_NUMBER_OF_LOCATIONS + "="
+                    + numberOfLocation + " " + SALES_VOLUME_LOCAL_CURRENCY + "=" + salesVolumnLocalCurrency + " "
+                    + SALES_VOLUME_US_DOLLARS + "=" + salesVolumnUSDollars + " " + EMPLOYEES_HERE + "=" + employeeHere
+                    + " " + EMPLOYEES_TOTAL + "=" + employeeTotal + " " + NUMBER_OF_FAMILY_MEMBERS + "="
+                    + numberOfFamilyMembers + " " + LE_COUNTRY + "=" + leCountry + " " + COUNTRY_NAME + "="
+                    + countryName + " " + LE_PRIMARY_INDUSTRY + "=" + lePrimaryIndustry + " " + LE_PRIMARY_DUNS + "="
+                    + lePrimaryDuns);
+            Assert.assertTrue(duns.equals("01") && domain.equals("google.com") && numberOfLocation.equals(10)
+                    && salesVolumnLocalCurrency.equals(100L) && salesVolumnUSDollars.equals(1000L)
+                    && employeeHere.equals(10000) && employeeTotal.equals(100000)
+                    && numberOfFamilyMembers.equals(1000000) && leCountry.equals("USA") && countryName.equals("USA")
+                    && lePrimaryIndustry.equals("Biotechnology") && lePrimaryDuns.equals("01"));
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 1);
     }
 
     @Override
@@ -88,43 +216,4 @@ public class DnBCacheSeedCleanServiceImplTestNG
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
-    @Override
-    BasicTransformationConfiguration createTransformationConfiguration() {
-        BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
-        configuration.setVersion(targetVersion);
-        return configuration;
-    }
-
-    @Override
-    protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(source, targetVersion).toString();
-    }
-
-    @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        log.info("Start to verify records one by one.");
-        int rowNum = 0;
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            String duns = String.valueOf(record.get(DUNS_NUMBER));
-            String domain = String.valueOf(record.get(LE_DOMAIN));
-            Integer numberOfLocation = (Integer) record.get(LE_NUMBER_OF_LOCATIONS);
-            Long salesVolumnLocalCurrency = (Long) record.get(SALES_VOLUME_LOCAL_CURRENCY);
-            Long salesVolumnUSDollars = (Long) record.get(SALES_VOLUME_US_DOLLARS);
-            Integer employeeHere = (Integer) record.get(EMPLOYEES_HERE);
-            Integer employeeTotal = (Integer) record.get(EMPLOYEES_TOTAL);
-            Integer numberOfFamilyMembers = (Integer) record.get(NUMBER_OF_FAMILY_MEMBERS);
-            log.info(DUNS_NUMBER + "=" + duns + " " + LE_DOMAIN + "=" + domain + " " + LE_NUMBER_OF_LOCATIONS + "="
-                    + numberOfLocation + " " + SALES_VOLUME_LOCAL_CURRENCY + "=" + salesVolumnLocalCurrency + " "
-                    + SALES_VOLUME_US_DOLLARS + "=" + salesVolumnUSDollars + " " + EMPLOYEES_HERE + "=" + employeeHere
-                    + " " + EMPLOYEES_TOTAL + "=" + employeeTotal + " " + NUMBER_OF_FAMILY_MEMBERS + "="
-                    + numberOfFamilyMembers);
-            Assert.assertTrue(duns.equals("01") && domain.equals("google.com") && numberOfLocation.equals(10)
-                    && salesVolumnLocalCurrency.equals(100L) && salesVolumnUSDollars.equals(1000L)
-                    && employeeHere.equals(10000) && employeeTotal.equals(100000)
-                    && numberOfFamilyMembers.equals(1000000));
-            rowNum++;
-        }
-        Assert.assertEquals(rowNum, 1);
-    }
 }

@@ -235,10 +235,6 @@ public class OrbCacheSeedRebuildServiceTestNG
         conf.setAddNullFields(addNullFields);
         StandardizationTransformerConfig.FieldType[] addNullFieldTypes = { FieldType.STRING };
         conf.setAddNullFieldTypes(addNullFieldTypes);
-        /*
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.RENAME,
-                StandardizationStrategy.RETAIN, StandardizationStrategy.ADD_NULL_FIELD };
-                */
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
                 StandardizationStrategy.RENAME, StandardizationStrategy.RETAIN,
                 StandardizationStrategy.ADD_NULL_FIELD };

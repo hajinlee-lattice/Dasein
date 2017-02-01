@@ -2,6 +2,9 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.common.exposed.util.LocationUtils;
 
 import cascading.flow.FlowProcess;
@@ -14,6 +17,9 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class CountryStandardizationFunction extends BaseOperation implements Function {
+
+    private static final Log log = LogFactory.getLog(CountryStandardizationFunction.class);
+
     private Map<String, String> standardCountries;
     private String countryField;
 
@@ -30,6 +36,8 @@ public class CountryStandardizationFunction extends BaseOperation implements Fun
         country = LocationUtils.getStandardCountryDefaultNull(country);
         if (standardCountries.containsKey(country)) {
             country = standardCountries.get(country);
+        } else {
+            log.warn(String.format("Fail to standardize country %s", country));
         }
         functionCall.getOutputCollector().add(new Tuple(country));
     }
