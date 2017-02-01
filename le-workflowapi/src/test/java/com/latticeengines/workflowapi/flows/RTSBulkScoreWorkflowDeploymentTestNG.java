@@ -44,6 +44,7 @@ import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -315,7 +316,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         public ScoringTestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion,
                 String uuid) {
             this.testModelFolderName = testModelFolderName;
-            this.modelId = "ms__" + uuid + "_";
+            this.modelId = TestFrameworkUtils.MODEL_PREFIX + uuid + "_";
             this.modelName = testModelFolderName;
             this.applicationId = applicationId;
             this.parsedApplicationId = applicationId.substring(applicationId.indexOf("_") + 1);

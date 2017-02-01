@@ -35,23 +35,24 @@ public class TestFrameworkUtils {
     public static final String LP3_TENANT_REG_PREFIX = "lp3";
 
     public static final String TENANTID_PREFIX = "LETest";
+    public static final String MODEL_PREFIX = "LEModel";
 
     public static String usernameForAccessLevel(AccessLevel accessLevel) {
         switch (accessLevel) {
-            case SUPER_ADMIN:
-                return TestFrameworkUtils.SUPER_ADMIN_USERNAME;
-            case INTERNAL_ADMIN:
-                return TestFrameworkUtils.INTERNAL_ADMIN_USERNAME;
-            case INTERNAL_USER:
-                return TestFrameworkUtils.INTERNAL_USER_USERNAME;
-            case EXTERNAL_ADMIN:
-                return TestFrameworkUtils.EXTERNAL_ADMIN_USERNAME;
-            case EXTERNAL_USER:
-                return TestFrameworkUtils.EXTERNAL_USER_USERNAME;
-            case THIRD_PARTY_USER:
-                return TestFrameworkUtils.THIRD_PARTY_USER_USERNAME;
-            default:
-                throw new IllegalArgumentException("Unknown access level!");
+        case SUPER_ADMIN:
+            return TestFrameworkUtils.SUPER_ADMIN_USERNAME;
+        case INTERNAL_ADMIN:
+            return TestFrameworkUtils.INTERNAL_ADMIN_USERNAME;
+        case INTERNAL_USER:
+            return TestFrameworkUtils.INTERNAL_USER_USERNAME;
+        case EXTERNAL_ADMIN:
+            return TestFrameworkUtils.EXTERNAL_ADMIN_USERNAME;
+        case EXTERNAL_USER:
+            return TestFrameworkUtils.EXTERNAL_USER_USERNAME;
+        case THIRD_PARTY_USER:
+            return TestFrameworkUtils.THIRD_PARTY_USER_USERNAME;
+        default:
+            throw new IllegalArgumentException("Unknown access level!");
         }
     }
 
