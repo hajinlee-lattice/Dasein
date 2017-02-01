@@ -45,9 +45,6 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format(
                 "Submitting rts bulk score workflow for modelId %s and tableToScore %s for customer %s and source %s",
                 modelId, tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
-        RTSBulkScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore,
-                sourceDisplayName, enableLeadEnrichment, enableDebug);
-
         if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
         }
@@ -55,6 +52,9 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
+
+        RTSBulkScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore,
+                sourceDisplayName, enableLeadEnrichment, enableDebug);
 
         return workflowJobService.submit(configuration);
     }
