@@ -45,6 +45,15 @@ public class AccountMasterLookupRebuildFlow
                 new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD),
                 new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED));
 
+        Node accountMasterSeedSecondaryDomainCleaned = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
+                orbCacheSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD),
+                JoinType.LEFT);
+        accountMasterSeedSecondaryDomainCleaned = accountMasterSeedSecondaryDomainCleaned.filter(
+                DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD + " == null",
+                new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD));
+        accountMasterSeedSecondaryDomainCleaned = accountMasterSeedSecondaryDomainCleaned
+                .retain(new FieldList(accountMasterSeed.getFieldNames()));
+
         Node accountMasterSeedWithSecondaryDomain1 = accountMasterSeed.join(new FieldList(DOMAIN_FIELD),
                 orbCacheSeedSecondaryDomainMapping, new FieldList(DOMAIN_MAPPING_PRIMARY_DOMAIN_FIELD_RENAMED),
                 JoinType.INNER);
@@ -60,14 +69,15 @@ public class AccountMasterLookupRebuildFlow
                 .rename(new FieldList(DOMAIN_MAPPING_SECONDARY_DOMAIN_FIELD), new FieldList(DOMAIN_FIELD));
 
         accountMasterSeedWithSecondaryDomain = accountMasterSeedWithSecondaryDomain
-                .retain(new FieldList(accountMasterSeed.getFieldNames()));
-        accountMasterSeed = accountMasterSeed.merge(accountMasterSeedWithSecondaryDomain);
+                .retain(new FieldList(accountMasterSeedSecondaryDomainCleaned.getFieldNames()));
+        Node accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain = accountMasterSeedSecondaryDomainCleaned
+                .merge(accountMasterSeedWithSecondaryDomain);
 
-        Node searchByDuns = addSearchByDuns(accountMasterSeed);
+        Node searchByDuns = addSearchByDuns(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
 
-        Node searchByDomain = addSearchByDomainNode(accountMasterSeed);
+        Node searchByDomain = addSearchByDomainNode(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
 
-        Node searchByBoth = addSearchByBothNode(accountMasterSeed);
+        Node searchByBoth = addSearchByBothNode(accountMasterSeedSecondaryDomainCleanedWithSecondaryDomain);
         return searchByDuns.merge(searchByDomain).merge(searchByBoth);
     }
 
