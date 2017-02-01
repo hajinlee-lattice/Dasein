@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public class OrbCacheSeedRebuildServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(OrbCacheSeedRebuildServiceTestNG.class);
 
     @Autowired

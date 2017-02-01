@@ -52,6 +52,6 @@ public class SeedMergeFieldMapping {
     }
 
     public enum ColumnType {
-        DOMAIN, DUNS, IS_PRIMARY_DOMAIN, IS_PRIMARY_LOCATION, NUMBER_OF_LOCATION, OTHER
+        DOMAIN, DUNS, IS_PRIMARY_DOMAIN, IS_PRIMARY_LOCATION, NUMBER_OF_LOCATION, DU_DUNS, OTHER
     }
 }

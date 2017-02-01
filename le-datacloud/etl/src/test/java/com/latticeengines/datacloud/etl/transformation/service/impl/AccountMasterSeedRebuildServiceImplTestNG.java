@@ -13,8 +13,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.AccountMasterIntermediateSeed;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
+import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
 import com.latticeengines.datacloud.core.source.impl.AlexaMostRecent;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -31,7 +31,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
     PipelineSource source;
 
     @Autowired
-    AccountMasterIntermediateSeed baseSource;
+    AccountMasterSeedMerged baseSource;
 
     @Autowired
     AlexaMostRecent baseSource2;
@@ -55,7 +55,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + accountMasterSeedSource.getSourceName(),
+        uploadBaseSourceFile(baseSource, "AccountMasterIntermediateSeed_TestAccountMasterSeed",
                 "2017-01-09_19-12-43_UTC");
         uploadBaseSourceFile(baseSource2,
                 baseSource2.getSourceName() + "_Test" + accountMasterSeedSource.getSourceName(),
@@ -79,7 +79,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion).toString();
     }
 
     @Override
@@ -177,7 +177,7 @@ public class AccountMasterSeedRebuildServiceImplTestNG
     protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSource, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override

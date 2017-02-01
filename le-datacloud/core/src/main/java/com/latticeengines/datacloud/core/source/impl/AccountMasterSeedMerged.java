@@ -7,8 +7,8 @@ import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
 import com.latticeengines.datacloud.core.source.Source;
 
-@Component("accountMasterIntermediateSeed")
-public class AccountMasterIntermediateSeed implements DerivedSource {
+@Component("accountMasterSeedMerged")
+public class AccountMasterSeedMerged implements DerivedSource {
 
     private static final long serialVersionUID = -3119903346347156027L;
 
@@ -30,7 +30,7 @@ public class AccountMasterIntermediateSeed implements DerivedSource {
 
     @Override
     public String getSourceName() {
-        return "AccountMasterIntermediateSeed";
+        return "AccountMasterSeedMerged";
     }
 
     @Override
@@ -66,8 +66,4 @@ public class AccountMasterIntermediateSeed implements DerivedSource {
         return "DUNS";
     }
 
-    public String[] getRetainFields() {
-        return new String[] { "LatticeID", "DUNS", "Domain", "Name", "Street", "City", "State", "Country", "ZipCode",
-                "LE_IS_PRIMARY_DOMAIN", "LE_IS_PRIMARY_LOCATION", "LE_NUMBER_OF_LOCATIONS" };
-    }
 }

@@ -13,11 +13,11 @@ public class AccountMasterSeed implements DerivedSource {
     private static final long serialVersionUID = -3119903346347156027L;
 
     @Autowired
-    AccountMasterIntermediateSeed accountMasterIntermediateSeed;
+    AccountMasterSeedMerged accountMasterSeedMerged;
 
     @Override
     public Source[] getBaseSources() {
-        return new Source[] { accountMasterIntermediateSeed };
+        return new Source[] { accountMasterSeedMerged };
     }
 
     @Override
