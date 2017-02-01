@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -77,11 +76,9 @@ public class S3ExportServiceImpl extends ExportService {
 
     private ApplicationId submitS3ExportJob(ExportContext context, ExportFormat format) {
         HdfsToS3Configuration routeConfiguration = getRouteConfiguration(context, format);
-        ImportConfiguration importConfiguration = ImportConfiguration
-                .createForAmazonS3Configuration(routeConfiguration);
-        importConfiguration
+        routeConfiguration
                 .setCustomerSpace(CustomerSpace.parse(context.getProperty(ExportProperty.CUSTOMER, String.class)));
-        return eaiService.extractAndImport(importConfiguration);
+        return eaiService.submitEaiJob(routeConfiguration);
     }
 
     private HdfsToS3Configuration getRouteConfiguration(ExportContext context, ExportFormat format) {
