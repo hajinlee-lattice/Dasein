@@ -29,6 +29,7 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -97,7 +98,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         matchInput.setMatchDebugEnabled(processorContext.getJobConfiguration().getMatchInput().isMatchDebugEnabled());
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
         matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().getLogDnBBulkResult());
-
+        MatchConfiguration matchConfig = MatchConfiguration.builder().timeout(processorContext.getRecordTimeOut())
+                .useRemoteDnB(processorContext.isUseRemoteDnB()).build();
+        matchInput.setConfiguration(matchConfig);
         return matchInput;
     }
 

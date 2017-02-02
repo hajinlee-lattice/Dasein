@@ -115,6 +115,8 @@ public class ProcessorContext {
 
     private boolean matchDebugEnabled;
 
+    private long recordTimeOut;
+
     public DataCloudJobConfiguration getJobConfiguration() {
         return jobConfiguration;
     }
@@ -223,6 +225,10 @@ public class ProcessorContext {
         return timeOut;
     }
 
+    public long getRecordTimeOut() {
+        return recordTimeOut;
+    }
+
     public boolean isUseRemoteDnB() {
         return useRemoteDnB;
     }
@@ -275,6 +281,7 @@ public class ProcessorContext {
         keyMap = jobConfiguration.getMatchInput().getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
         timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(30));
+        this.recordTimeOut = timeOut;
         if (useRemoteDnB) {
             timeOut = timeOut * 2;
         }

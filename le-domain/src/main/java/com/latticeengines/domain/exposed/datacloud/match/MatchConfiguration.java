@@ -15,6 +15,9 @@ public class MatchConfiguration {
     // boolean flags
     // ====================
 
+    @JsonProperty("requestSource")
+    private String requestSource;   // scoring|modeling
+
     // allowed to be null;
     @JsonProperty("UseRemoteDnB")
     private Boolean useRemoteDnB;
@@ -34,6 +37,14 @@ public class MatchConfiguration {
     private void setUseRemoteDnB(Boolean useRemoteDnB) {
         this.useRemoteDnB = useRemoteDnB;
     }
+    
+    public String getRequestSource() {
+        return requestSource;
+    }
+
+    private void setRequestSource(String requestSource) {
+        this.requestSource = requestSource;
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -48,9 +59,9 @@ public class MatchConfiguration {
     public static class Builder {
 
         private Long timeout;
-
         private Boolean useRemoteDnB;
-
+        private String requestSource;
+        
         private Builder() {
         }
 
@@ -64,10 +75,16 @@ public class MatchConfiguration {
             return this;
         }
 
+        public Builder useRemoteDnB(String requestSource) {
+            this.requestSource = requestSource;
+            return this;
+        }
+
         public MatchConfiguration build() {
             MatchConfiguration configuration = new MatchConfiguration();
             configuration.setTimeout(timeout);
             configuration.setUseRemoteDnB(useRemoteDnB);
+            configuration.setRequestSource(requestSource);
             return configuration;
         }
 

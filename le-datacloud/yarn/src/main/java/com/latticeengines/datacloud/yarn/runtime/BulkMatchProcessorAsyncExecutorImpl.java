@@ -8,12 +8,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import scala.concurrent.Future;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.impl.InternalOutputRecord;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-
-import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -135,6 +136,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         combinedContext = matchExecutor.executeMatchResult(combinedContext);
         log.info("Returned " + combinedContext.getOutput().getResult().size() + " of record results.");
         processorContext.getRowsProcessed().addAndGet(internalCompletedRecords.size());
+        checkMatchCode(processorContext, combinedContext);
 
         processMatchOutput(processorContext, combinedContext.getOutput());
         int rows = processorContext.getRowsProcessed().get();
@@ -143,6 +145,15 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
         completedFutures.clear();
         internalCompletedRecords.clear();
+    }
+
+    private void checkMatchCode(ProcessorContext processorContext, MatchContext combinedContext) {
+        for (InternalOutputRecord outputRecord : combinedContext.getInternalResults()) {
+            if (DnBReturnCode.UNMATCH_TIMEOUT.equals(outputRecord.getDnbCode())) {
+                throw new RuntimeException(String.format("Did not finish matching in %.2f minutes due to DnB limits, please try later!",
+                        processorContext.getRecordTimeOut() / 60000.0));
+            }
+        }
     }
 
     private void getCompletedRecords(ProcessorContext processorContext, List<InternalOutputRecord> internalRecords,

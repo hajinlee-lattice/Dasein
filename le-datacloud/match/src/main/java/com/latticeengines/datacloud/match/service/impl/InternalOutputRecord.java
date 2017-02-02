@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -26,6 +27,7 @@ public class InternalOutputRecord extends OutputRecord {
     private String originalContextId;
 
     private List<String> debugValues;
+    private DnBReturnCode dnbCode;
 
     public String getParsedDomain() {
         return parsedDomain;
@@ -146,4 +148,13 @@ public class InternalOutputRecord extends OutputRecord {
     public void setDebugValues(List<String> debugValues) {
         this.debugValues = debugValues;
     }
+
+    public void setDnbCode(DnBReturnCode dnbCode) {
+        this.dnbCode = dnbCode;
+    }
+
+    public DnBReturnCode getDnbCode() {
+        return dnbCode;
+    }
+    
 }
