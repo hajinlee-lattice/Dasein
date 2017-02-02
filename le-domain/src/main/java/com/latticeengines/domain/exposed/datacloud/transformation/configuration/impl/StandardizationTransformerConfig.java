@@ -13,7 +13,10 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[] countryFields;
 
     @JsonProperty("StateFields")
-    private String[] stateFields;
+    private String[] stateFields;   // Country standardization must finish before state standardization; Will use first country field as standard country to standardize state
+
+    @JsonProperty("StringFields")
+    private String[] stringFields;
 
     @JsonProperty("StringToIntFields")
     private String[] stringToIntFields;
@@ -79,7 +82,7 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String naicsMapFileName;
 
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY
+        DOMAIN, COUNTRY, STATE, STRING, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY
     }
 
     public enum FieldType {
@@ -112,6 +115,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setStateFields(String[] stateFields) {
         this.stateFields = stateFields;
+    }
+
+    public String[] getStringFields() {
+        return stringFields;
+    }
+
+    public void setStringFields(String[] stringFields) {
+        this.stringFields = stringFields;
     }
 
     public String[] getStringToIntFields() {

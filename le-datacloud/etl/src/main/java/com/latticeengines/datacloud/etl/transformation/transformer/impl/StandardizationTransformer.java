@@ -220,6 +220,35 @@ public class StandardizationTransformer
                     return false;
                 }
                 break;
+            case STATE:
+                if (config.getCountryFields() == null || config.getCountryFields().length == 0
+                        || StringUtils.isEmpty(config.getCountryFields()[0])) {
+                    log.error("Must provide country field which has standard country information");
+                    return false;
+                }
+                if (config.getStateFields() == null || config.getStateFields().length == 0) {
+                    log.error("State fields are required for state standardization");
+                    return false;
+                }
+                for (String stateField : config.getStateFields()) {
+                    if (StringUtils.isEmpty(stateField)) {
+                        log.error("Empty string or null is not allowed in state fields");
+                        return false;
+                    }
+                }
+                break;
+            case STRING:
+                if (config.getStringFields() == null || config.getStringFields().length == 0) {
+                    log.error("String fields are required for string standardization");
+                    return false;
+                }
+                for (String stringField : config.getStringFields()) {
+                    if (StringUtils.isEmpty(stringField)) {
+                        log.error("Empty string or null is not allowed in string fields");
+                        return false;
+                    }
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -266,6 +295,8 @@ public class StandardizationTransformer
         parameters.setNaicsField(config.getNaicsField());
         parameters.setIndustryMapFileName(config.getIndustryMapFileName());
         parameters.setNaicsMapFileName(config.getNaicsMapFileName());
+        parameters.setStateFields(config.getStateFields());
+        parameters.setStringFields(config.getStringFields());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

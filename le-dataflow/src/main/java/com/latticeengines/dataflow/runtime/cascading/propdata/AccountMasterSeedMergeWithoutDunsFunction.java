@@ -17,6 +17,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class AccountMasterSeedMergeWithoutDunsFunction extends BaseOperation implements Function {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(AccountMasterSeedMergeWithoutDunsFunction.class);
 
     private static final long serialVersionUID = -4930114585520783490L;

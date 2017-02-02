@@ -20,6 +20,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("StateFields")
     private String[] stateFields;
 
+    @JsonProperty("StringFields")
+    private String[] stringFields;
+
     @JsonProperty("StringToIntFields")
     private String[] stringToIntFields;
 
@@ -108,6 +111,14 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setStateFields(String[] stateFields) {
         this.stateFields = stateFields;
+    }
+
+    public String[] getStringFields() {
+        return stringFields;
+    }
+
+    public void setStringFields(String[] stringFields) {
+        this.stringFields = stringFields;
     }
 
     public String[] getStringToIntFields() {

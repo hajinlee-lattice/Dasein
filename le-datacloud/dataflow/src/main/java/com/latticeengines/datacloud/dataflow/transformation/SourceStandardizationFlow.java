@@ -20,12 +20,16 @@ import com.latticeengines.dataflow.runtime.cascading.ConsolidateIndustryFromNaic
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.StateStandardizationFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.StringStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
 
 @Component("sourceStandardizationFlow")
 public class SourceStandardizationFlow
@@ -88,6 +92,12 @@ public class SourceStandardizationFlow
                         parameters.getIndustryMapFileName(), parameters.getNaicsField(),
                         parameters.getNaicsMapFileName());
                 break;
+            case STRING:
+                source = standardizeString(source, parameters.getStringFields());
+                break;
+            case STATE:
+                source = standardizeState(source, parameters.getCountryFields(), parameters.getStateFields());
+                break;
             default:
                 break;
             }
@@ -96,6 +106,31 @@ public class SourceStandardizationFlow
         return source;
     }
     
+    private Node standardizeState(Node source, String[] countryFields, String[] stateFields) {
+        if (countryFields != null && countryFields.length > 0 && stateFields != null && stateFields.length > 0) {
+            String countryField = countryFields[0];
+            for (String stateField : stateFields) {
+                source = source.apply(
+                        new StateStandardizationFunction(
+                                new Fields(source.getFieldNames().toArray(new String[source.getFieldNames().size()])),
+                                countryField, stateField),
+                        new FieldList(source.getFieldNames()), source.getSchema(),
+                        new FieldList(source.getFieldNames()), Fields.RESULTS);
+            }
+        }
+        return source;
+    }
+
+    private Node standardizeString(Node source, String[] stringFields) {
+        if (stringFields != null && stringFields.length > 0) {
+            for (String stringField : stringFields) {
+                source = source.apply(new StringStandardizationFunction(stringField), new FieldList(stringField),
+                        new FieldMetadata(stringField, String.class));
+            }
+        }
+        return source;
+    }
+
     private Node consolidateIndustry(Node source, String addConsolidatedIndustryField,
             StandardizationTransformerConfig.ConsolidateIndustryStrategy strategy, String industryField,
             String industryMapFileName, String naicsField, String naicsMapFileName) {

@@ -15,8 +15,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-@SuppressWarnings({ "rawtypes", "serial" })
+@SuppressWarnings({ "rawtypes"})
 public class CountryStandardizationFunction extends BaseOperation implements Function {
+
+    private static final long serialVersionUID = -2044488912062585735L;
 
     private static final Log log = LogFactory.getLog(CountryStandardizationFunction.class);
 

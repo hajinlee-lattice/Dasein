@@ -1,10 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -24,16 +22,15 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
-public class IndustryConsolidationServiceTestNG
+public class LocationStandardizationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(IndustryConsolidationServiceTestNG.class);
+    private static final Log log = LogFactory.getLog(LocationStandardizationServiceTestNG.class);
 
-    GeneralSource source = new GeneralSource("ConsolidateIndustry");
+    GeneralSource source = new GeneralSource("LocationStandardization");
 
-    GeneralSource baseSource = new GeneralSource("ConsolidateIndustry_Test");
+    GeneralSource baseSource = new GeneralSource("LocationStandardization_Test");
 
     @Autowired
     SourceService sourceService;
@@ -44,13 +41,13 @@ public class IndustryConsolidationServiceTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    String targetSourceName = "ConsolidateIndustry";
+    String targetSourceName = "LocationStandardization";
 
     ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
-        uploadBaseSourceFile(baseSource, "ConsolidateIndustry_Test", baseSourceVersion);
+        uploadBaseSourceFile(baseSource, "LocationStandardization_Test", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -62,32 +59,21 @@ public class IndustryConsolidationServiceTestNG
     PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("IndustryConsolidation");
+            configuration.setName("LocationStandardization");
             configuration.setVersion(targetVersion);
 
-            // Map industry
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
-            baseSources.add("ConsolidateIndustry_Test");
+            baseSources.add("LocationStandardization_Test");
             step1.setBaseSources(baseSources);
             step1.setTransformer("standardizationTransformer");
-            String confParamStr1 = getIndustryMappingConfig();
+            step1.setTargetSource(targetSourceName);
+            String confParamStr1 = getLocationStandardizationConfig();
             step1.setConfiguration(confParamStr1);
-
-            // Parse Naics
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<Integer>();
-            inputSteps.add(0);
-            step2.setInputSteps(inputSteps);
-            step2.setTransformer("standardizationTransformer");
-            step2.setTargetSource(targetSourceName);
-            String confParamStr2 = getNaicsMappingConfig();
-            step2.setConfiguration(confParamStr2);
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
-            steps.add(step2);
 
             // -----------
             configuration.setSteps(steps);
@@ -98,26 +84,16 @@ public class IndustryConsolidationServiceTestNG
         }
     }
 
-    private String getIndustryMappingConfig() throws JsonProcessingException {
+    private String getLocationStandardizationConfig() throws JsonProcessingException {
         StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
-        conf.setConsolidateIndustryStrategy(ConsolidateIndustryStrategy.MAP_INDUSTRY);
-        conf.setAddConsolidatedIndustryField("ConsolidatedIndustryFromIndustry");
-        conf.setIndustryField("Industry");
-        conf.setIndustryMapFileName("OrbIndustryMapping.txt");
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = {
-                StandardizationStrategy.CONSOLIDATE_INDUSTRY };
-        conf.setSequence(sequence);
-        return om.writeValueAsString(conf);
-    }
-
-    private String getNaicsMappingConfig() throws JsonProcessingException {
-        StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
-        conf.setConsolidateIndustryStrategy(ConsolidateIndustryStrategy.PARSE_NAICS);
-        conf.setAddConsolidatedIndustryField("ConsolidatedIndustryFromNaics");
-        conf.setNaicsField("Naics");
-        conf.setNaicsMapFileName("NaicsIndustryMapping.txt");
-        StandardizationTransformerConfig.StandardizationStrategy[] sequence = {
-                StandardizationStrategy.CONSOLIDATE_INDUSTRY };
+        String[] countryFields = { "Country" };
+        conf.setCountryFields(countryFields);
+        String[] stateFields = { "State" };
+        conf.setStateFields(stateFields);
+        String[] zipcodeFields = { "ZipCode" };
+        conf.setStringFields(zipcodeFields);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
+                StandardizationStrategy.STATE, StandardizationStrategy.STRING };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
@@ -144,39 +120,29 @@ public class IndustryConsolidationServiceTestNG
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
-    @SuppressWarnings("serial")
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        Map<String, String> expectedIndustryMap = new HashMap<String, String>() {
-            {
-                put("Accounting", "Accounting");
-                put("Aviation & Aerospace", "Defense, Aviation & Aeorospace");
-                put("Business Supplies and Equipment", "Financial Services");
-                put("Electrical/Electronic Manufacturing", "Manufacturing - Computer and Electronic");
-                put("null", "null");
-            }
-        };
-        Map<String, String> expectedNaicsMap = new HashMap<String, String>() {
-            {
-                put("561613", "Business Services");
-                put("238220", "Construction");
-                put("811111", "Consumer Services");
-                put("424990", "Wholesale");
-                put("null", "null");
-            }
-        };
+        Object[][] data = { { "Name1", "USA", "CALIFORNIA", "94404" },
+                { "Name2", "UNITED KINGDOM", "SCOTLAND", "null" }, { "Name3", "null", "SCOTLAND", "null" },
+                { "Name4", "USA", "null", "null" } };
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String industry = String.valueOf(record.get("Industry"));
-            String naics = String.valueOf(record.get("Naics"));
-            String consolidatedIndustryFromIndustry = String.valueOf(record.get("ConsolidatedIndustryFromIndustry"));
-            String consolidatedIndustryFromNaics = String.valueOf(record.get("ConsolidatedIndustryFromNaics"));
-            Assert.assertEquals(expectedIndustryMap.get(industry), consolidatedIndustryFromIndustry);
-            Assert.assertEquals(expectedNaicsMap.get(naics), consolidatedIndustryFromNaics);
+            String name = String.valueOf(record.get("Name"));
+            String country = String.valueOf(record.get("Country"));
+            String state = String.valueOf(record.get("State"));
+            String zipcode = String.valueOf(record.get("ZipCode"));
+            boolean flag = false;
+            for (Object[] d : data) {
+                if (name.equals(d[0]) && country.equals(d[1]) && state.equals(d[2]) && zipcode.equals(d[3])) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 5);
+        Assert.assertEquals(rowNum, 4);
     }
 }
