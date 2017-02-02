@@ -5,13 +5,16 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String DIMENSION_COLUMN_PREPOSTFIX = "_";
     public static final String LBL_ORDER_POST = ">";
+    public static final String LBL_ORDER_PRE_ENCODED_YES = "[EY";
+    public static final String LBL_ORDER_PRE_ENCODED_NO = "[EN";
     public static final String LBL_ORDER_PRE_NUMERIC = "[N";
     public static final String LBL_ORDER_PRE_BOOLEAN = "[B";
+    public static final String LBL_ORDER_PRE_OBJECT = "[O";
     public static final String COUNT_KEY = "_COUNT_";
     public static final String GROUP_TOTAL_KEY = "_GroupTotal_";
     public static final String MIN_MAX_KEY = "_MinMax_";
@@ -28,12 +31,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     private Map<String, CategoricalDimension> requiredDimensions;
 
-    private List<ColumnMetadata> columnMetadatas;
-
     private Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
 
     private Map<String, Long> rootIdsForNonRequiredDimensions;
-    
+
+    private Map<FundamentalType, List<String>> typeFieldMap;
+
+    private List<String> encodedColumns;
+
     private int maxBucketCount = 5;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
@@ -84,12 +89,12 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
         this.requiredDimensions = requiredDimensions;
     }
 
-    public List<ColumnMetadata> getColumnMetadatas() {
-        return columnMetadatas;
+    public Map<FundamentalType, List<String>> getTypeFieldMap() {
+        return typeFieldMap;
     }
 
-    public void setColumnMetadatas(List<ColumnMetadata> columnMetadatas) {
-        this.columnMetadatas = columnMetadatas;
+    public void setTypeFieldMap(Map<FundamentalType, List<String>> typeFieldMap) {
+        this.typeFieldMap = typeFieldMap;
     }
 
     public Map<String, Map<String, CategoricalAttribute>> getRequiredDimensionsValuesMap() {
@@ -115,6 +120,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setMaxBucketCount(int maxBucketCount) {
         this.maxBucketCount = maxBucketCount;
+    }
+
+    public List<String> getEncodedColumns() {
+        return encodedColumns;
+    }
+
+    public void setEncodedColumns(List<String> encodedColumns) {
+        this.encodedColumns = encodedColumns;
     }
 
 }

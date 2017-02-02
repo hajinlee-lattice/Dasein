@@ -338,6 +338,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setIsPremium(isPremium());
         metadata.setMatchDestination(getMatchDestination());
+        metadata.setDecodeStrategy(getDecodeStrategy());
 
         if (approvedUsages != null) {
             if (approvedUsages.contains(ApprovedUsage.MODEL)

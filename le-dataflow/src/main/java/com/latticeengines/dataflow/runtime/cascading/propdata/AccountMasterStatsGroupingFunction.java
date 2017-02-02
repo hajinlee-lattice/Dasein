@@ -1,6 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,7 +13,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -23,6 +27,10 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class AccountMasterStatsGroupingFunction extends BaseOperation implements Buffer {
+    private static final String ENCODED_NO = "NO";
+
+    private static final String ENCODED_YES = "YES";
+
     private static final Log log = LogFactory.getLog(AccountMasterStatsGroupingFunction.class);
 
     protected Map<String, Integer> namePositionMap;
@@ -41,10 +49,16 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
 
     private String[] attrFields;
 
-    public String lblOrderPost;
-    public String lblOrderPreNumeric;
-    public String lblOrderPreBoolean;
-    public String countKey;
+    private String lblOrderPost;
+    private String lblOrderPreEncodedYes;
+    private String lblOrderPreEncodedNo;
+    private String lblOrderPreNumeric;
+    private String lblOrderPreBoolean;
+    private String lblOrderPreObject;
+    private String countKey;
+    private Map<FundamentalType, List<String>> typeFieldMap;
+    private List<String> encodedColumns;
+    private List<Integer> encodedColumnsPos;
 
     private ObjectMapper om = new ObjectMapper();
 
@@ -57,9 +71,14 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
         minMaxKey = parameterObject.minMaxKey;
         maxBucketCount = parameterObject.maxBucketCount;
         lblOrderPost = parameterObject.lblOrderPost;
+        lblOrderPreEncodedYes = parameterObject.lblOrderPreEncodedYes;
+        lblOrderPreEncodedNo = parameterObject.lblOrderPreEncodedNo;
         lblOrderPreNumeric = parameterObject.lblOrderPreNumeric;
         lblOrderPreBoolean = parameterObject.lblOrderPreBoolean;
+        lblOrderPreObject = parameterObject.lblOrderPreObject;
         countKey = parameterObject.countKey;
+        typeFieldMap = parameterObject.typeFieldMap;
+        encodedColumns = parameterObject.encodedColumns;
 
         attrFields = parameterObject.attrFields;
 
@@ -79,6 +98,11 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
             }
             attrIdMap.put(parameterObject.attrs[i], attrId);
         }
+
+        encodedColumnsPos = new ArrayList<>();
+        for (String enCol : encodedColumns) {
+            encodedColumnsPos.add(namePositionMap.get(enCol));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -93,33 +117,59 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
         Map<String, Map<String, Long>> attributeValueBuckets = new HashMap<>();
         Map<String, List<String>> bucketLblOrderMap = new HashMap<>();
         Map<String, List<Object>> bucketOrderMap = new HashMap<>();
+        Map<String, Map<String, Long[]>> binaryCodedBuckets = new HashMap<>();
 
         long totalCount = countAttrsForArgument(arguments, attrCount, //
-                attributeValueBuckets, bucketLblOrderMap, bucketOrderMap);
+                attributeValueBuckets, bucketLblOrderMap, //
+                bucketOrderMap, binaryCodedBuckets);
 
         for (int i = 0; i < attrCount.length - dimensionIdFieldNames.length - 1; i++) {
-            Map<String, Long> stats = new HashMap<>();
-            stats.put(countKey, attrCount[i]);
-            if (attributeValueBuckets.get(attrFields[i]) != null) {
+            Map<String, Long[]> stats = new HashMap<>();
+            stats.put(countKey, new Long[] { attrCount[i] });
+
+            if (encodedColumnsPos.contains(i)) {
+                if (binaryCodedBuckets.get(attrFields[i]) != null //
+                        && binaryCodedBuckets.get(attrFields[i]).size() > 0) {
+                    stats.put(lblOrderPreEncodedYes + 0 + lblOrderPost + ENCODED_YES,
+                            binaryCodedBuckets.get(attrFields[i]).get(ENCODED_YES));
+                    stats.put(lblOrderPreEncodedNo + 1 + lblOrderPost + ENCODED_NO,
+                            binaryCodedBuckets.get(attrFields[i]).get(ENCODED_NO));
+                }
+            } else if (attributeValueBuckets.get(attrFields[i]) != null) {
                 Map<String, Long> valueBuckets = attributeValueBuckets.get(attrFields[i]);
                 if (bucketLblOrderMap.get(attrFields[i]) != null) {
                     List<String> lblOrder = bucketLblOrderMap.get(attrFields[i]);
                     int order = 0;
                     for (String lbl : lblOrder) {
                         if (valueBuckets.get(lbl) != null) {
-                            stats.put(lblOrderPreNumeric + (order++) + lblOrderPost + lbl, valueBuckets.get(lbl));
+                            stats.put(lblOrderPreNumeric + (order++) + lblOrderPost + lbl,
+                                    new Long[] { valueBuckets.get(lbl) });
                         }
                     }
-                } else if (valueBuckets.containsKey(Boolean.TRUE.toString())
-                        || valueBuckets.containsKey(Boolean.FALSE.toString())) {
+                } else if (valueBuckets != null && (valueBuckets.containsKey(Boolean.TRUE.toString())
+                        || valueBuckets.containsKey(Boolean.FALSE.toString()))) {
                     int pos = 0;
                     if (valueBuckets.get(Boolean.FALSE.toString()) != null) {
                         stats.put(lblOrderPreBoolean + (pos++) + lblOrderPost + Boolean.FALSE.toString(),
-                                valueBuckets.get(Boolean.FALSE.toString()));
+                                new Long[] { valueBuckets.get(Boolean.FALSE.toString()) });
                     }
                     if (valueBuckets.get(Boolean.TRUE.toString()) != null) {
                         stats.put(lblOrderPreBoolean + (pos++) + lblOrderPost + Boolean.TRUE.toString(),
-                                valueBuckets.get(Boolean.TRUE.toString()));
+                                new Long[] { valueBuckets.get(Boolean.TRUE.toString()) });
+                    }
+                } else if (valueBuckets != null && valueBuckets.size() > 0) {
+                    int pos = 0;
+                    List<String> lblList = new ArrayList<>();
+                    for (String lbl : valueBuckets.keySet()) {
+                        lblList.add(lbl);
+                    }
+                    Collections.sort(lblList);
+
+                    for (String lbl : lblList) {
+                        stats.put(
+                                lblOrderPreObject + //
+                                        (pos++) + lblOrderPost + lbl, //
+                                new Long[] { valueBuckets.get(lbl) });
                     }
                 }
             }
@@ -151,7 +201,7 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
 
     private long countAttrsForArgument(Iterator<TupleEntry> argumentsInGroup, long[] attrCount,
             Map<String, Map<String, Long>> attributeValueBuckets, Map<String, List<String>> bucketLblOrderMap,
-            Map<String, List<Object>> bucketOrderMap) {
+            Map<String, List<Object>> bucketOrderMap, Map<String, Map<String, Long[]>> binaryCodedBuckets) {
         int totalCount = 0;
 
         while (argumentsInGroup.hasNext()) {
@@ -193,6 +243,76 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
                         if (minMaxInfo != null && minMaxInfo.get(fieldName) != null)
                             parseNumericValForMinMax(attributeValueBuckets, obj, fieldName, bucketLblOrderMap,
                                     minMaxInfo.get(fieldName), bucketOrderMap);
+                    } else {
+                        List<String> booleanFields = typeFieldMap.get(FundamentalType.BOOLEAN);
+                        if (booleanFields.contains(fieldName)) {
+                            String objVal = (String) obj;
+                            if (!attributeValueBuckets.containsKey(fieldName)) {
+                                attributeValueBuckets.put(fieldName, new HashMap<String, Long>());
+                            }
+
+                            Map<String, Long> fieldBucketMap = attributeValueBuckets.get(fieldName);
+                            if (!fieldBucketMap.containsKey(objVal)) {
+                                fieldBucketMap.put(objVal, 0L);
+                            }
+
+                            Long bucketCount = fieldBucketMap.get(objVal);
+                            fieldBucketMap.put(objVal, ++bucketCount);
+                        } else if (encodedColumnsPos.contains(i)) {
+                            try {
+                                boolean[] decodedBooleanArray = BitCodecUtils.decodeAll((String) obj);
+
+                                if (binaryCodedBuckets.get(fieldName) == null) {
+                                    Map<String, Long[]> map = new HashMap<>();
+                                    binaryCodedBuckets.put(fieldName, map);
+                                    Long[] yesCountArray = new Long[decodedBooleanArray.length];
+                                    Long[] noCountArray = new Long[decodedBooleanArray.length];
+
+                                    map.put(ENCODED_YES, yesCountArray);
+                                    map.put(ENCODED_NO, noCountArray);
+
+                                    for (int k = 0; k < decodedBooleanArray.length; k++) {
+                                        yesCountArray[k] = 0L;
+                                        noCountArray[k] = 0L;
+                                    }
+                                }
+
+                                Long[] yesCountArray = binaryCodedBuckets.get(fieldName).get(ENCODED_YES);
+                                Long[] noCountArray = binaryCodedBuckets.get(fieldName).get(ENCODED_NO);
+                                if (yesCountArray.length < decodedBooleanArray.length) {
+                                    Long[] yesCountArrayNew = new Long[decodedBooleanArray.length];
+                                    Long[] noCountArrayNew = new Long[decodedBooleanArray.length];
+
+                                    for (int k = 0; k < decodedBooleanArray.length; k++) {
+                                        yesCountArrayNew[k] = 0L;
+                                        noCountArrayNew[k] = 0L;
+                                    }
+
+                                    for (int k = 0; k < yesCountArray.length; k++) {
+                                        yesCountArrayNew[k] = yesCountArray[k];
+                                        noCountArrayNew[k] = noCountArray[k];
+                                    }
+
+                                    binaryCodedBuckets.get(fieldName).put(ENCODED_YES, yesCountArrayNew);
+                                    binaryCodedBuckets.get(fieldName).put(ENCODED_NO, noCountArrayNew);
+
+                                    yesCountArray = yesCountArrayNew;
+                                    noCountArray = noCountArrayNew;
+                                }
+
+                                int pos = 0;
+                                for (boolean flag : decodedBooleanArray) {
+                                    if (flag) {
+                                        yesCountArray[pos] = yesCountArray[pos] + 1;
+                                    } else {
+                                        noCountArray[pos] = noCountArray[pos] + 1;
+                                    }
+                                    pos++;
+                                }
+                            } catch (IOException e) {
+                                log.error(e.getMessage(), e);
+                            }
+                        }
                     }
 
                     Integer attrId = attrIdMap.get(fields.get(i));
@@ -436,13 +556,20 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
         public String[] dimensionIdFieldNames;
         public int maxBucketCount;
         public String lblOrderPost;
+        public String lblOrderPreEncodedYes;
+        public String lblOrderPreEncodedNo;
         public String lblOrderPreNumeric;
         public String lblOrderPreBoolean;
+        public String lblOrderPreObject;
         public String countKey;
+        private Map<FundamentalType, List<String>> typeFieldMap;
+        private List<String> encodedColumns;
 
         public Params(String minMaxKey, String[] attrs, Integer[] attrIds, Fields fieldDeclaration, String[] attrFields,
                 String totalField, String[] dimensionIdFieldNames, int maxBucketCount, String lblOrderPost,
-                String lblOrderPreNumeric, String lblOrderPreBoolean, String countKey) {
+                String lblOrderPreEncodedYes, String lblOrderPreEncodedNo, String lblOrderPreNumeric,
+                String lblOrderPreBoolean, String lblOrderPreObject, String countKey,
+                Map<FundamentalType, List<String>> typeFieldMap, List<String> encodedColumns) {
             super();
             this.minMaxKey = minMaxKey;
             this.attrs = attrs;
@@ -453,9 +580,14 @@ public class AccountMasterStatsGroupingFunction extends BaseOperation implements
             this.dimensionIdFieldNames = dimensionIdFieldNames;
             this.maxBucketCount = maxBucketCount;
             this.lblOrderPost = lblOrderPost;
+            this.lblOrderPreEncodedYes = lblOrderPreEncodedYes;
+            this.lblOrderPreEncodedNo = lblOrderPreEncodedNo;
             this.lblOrderPreNumeric = lblOrderPreNumeric;
             this.lblOrderPreBoolean = lblOrderPreBoolean;
+            this.lblOrderPreObject = lblOrderPreObject;
             this.countKey = countKey;
+            this.typeFieldMap = typeFieldMap;
+            this.encodedColumns = encodedColumns;
         }
     }
 }

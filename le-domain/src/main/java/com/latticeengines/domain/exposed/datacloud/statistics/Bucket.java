@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bucket {
@@ -8,6 +10,10 @@ public class Bucket {
 
     @JsonProperty("Cnt")
     private Long count;
+
+    @JsonProperty("En")
+    @JsonInclude(Include.NON_NULL)
+    private Long[] encodedCountList;
 
     public String getBucketLabel() {
         return bucketLabel;
@@ -23,5 +29,13 @@ public class Bucket {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+
+    public Long[] getEncodedCountList() {
+        return encodedCountList;
+    }
+
+    public void setEncodedCountList(Long[] encodedCountList) {
+        this.encodedCountList = encodedCountList;
     }
 }

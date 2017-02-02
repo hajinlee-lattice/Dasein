@@ -36,8 +36,11 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
     private String groupTotalKey;
     private String dimensionColumnPrepostfix;
     public String lblOrderPost;
+    private String lblOrderPreEncodedYes;
+    private String lblOrderPreEncodedNo;
     public String lblOrderPreNumeric;
     public String lblOrderPreBoolean;
+    private String lblOrderPreObject;
     public String countKey;
 
     public AccountMasterStatsReportFunction(Params parameterObject) {
@@ -47,8 +50,11 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
         this.rootIdsForNonRequiredDimensions = parameterObject.rootIdsForNonRequiredDimensions;
         this.dimensionColumnPrepostfix = parameterObject.dimensionColumnPrepostfix;
         this.lblOrderPost = parameterObject.lblOrderPost;
+        this.lblOrderPreEncodedYes = parameterObject.lblOrderPreEncodedYes;
+        this.lblOrderPreEncodedNo = parameterObject.lblOrderPreEncodedNo;
         this.lblOrderPreNumeric = parameterObject.lblOrderPreNumeric;
         this.lblOrderPreBoolean = parameterObject.lblOrderPreBoolean;
+        this.lblOrderPreObject = parameterObject.lblOrderPreObject;
         this.countKey = parameterObject.countKey;
 
         int idx = 0;
@@ -96,13 +102,13 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
             }
 
             if (value != null) {
-                Map<String, Long> statsMap = JsonUtils.convertMap(JsonUtils.deserialize(value.toString(), Map.class),
-                        String.class, Long.class);
-                Long valueInt = statsMap.get(countKey);
+                Map<String, Long[]> statsMap = JsonUtils.convertMap(JsonUtils.deserialize(value.toString(), Map.class),
+                        String.class, Long[].class);
+                Long[] valueInt = statsMap.get(countKey);
 
                 AttributeStatistics stats = new AttributeStatistics();
                 AttributeStatsDetails rowBasedStatistics = new AttributeStatsDetails();
-                rowBasedStatistics.setNonNullCount(valueInt);
+                rowBasedStatistics.setNonNullCount(valueInt[0]);
                 Buckets buckets = new Buckets();
                 buckets.setType(BucketType.Numerical);
                 Bucket[] bucketArray = null;
@@ -119,7 +125,7 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
 
                         Bucket bucket = new Bucket();
                         bucket.setBucketLabel(lbl);
-                        bucket.setCount(statsMap.get(key));
+                        bucket.setCount(statsMap.get(key)[0]);
                         bucketArray[Integer.parseInt(posPart)] = bucket;
                     } else if (key.startsWith(lblOrderPreBoolean)) {
                         String posPart = key.substring(lblOrderPreBoolean.length(), key.indexOf(lblOrderPost));
@@ -127,7 +133,34 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
 
                         Bucket bucket = new Bucket();
                         bucket.setBucketLabel(lbl);
-                        bucket.setCount(statsMap.get(key));
+                        bucket.setCount(statsMap.get(key)[0]);
+                        bucketArray[Integer.parseInt(posPart)] = bucket;
+                        buckets.setType(BucketType.Boolean);
+                    } else if (key.startsWith(lblOrderPreObject)) {
+                        String posPart = key.substring(lblOrderPreObject.length(), key.indexOf(lblOrderPost));
+                        String lbl = key.substring(key.indexOf(lblOrderPost) + 1);
+
+                        Bucket bucket = new Bucket();
+                        bucket.setBucketLabel(lbl);
+                        bucket.setCount(statsMap.get(key)[0]);
+                        bucketArray[Integer.parseInt(posPart)] = bucket;
+                        buckets.setType(BucketType.Boolean);
+                    } else if (key.startsWith(lblOrderPreEncodedYes)) {
+                        String posPart = key.substring(lblOrderPreEncodedYes.length(), key.indexOf(lblOrderPost));
+                        String lbl = key.substring(key.indexOf(lblOrderPost) + 1);
+
+                        Bucket bucket = new Bucket();
+                        bucket.setBucketLabel(lbl);
+                        bucket.setEncodedCountList(statsMap.get(key));
+                        bucketArray[Integer.parseInt(posPart)] = bucket;
+                        buckets.setType(BucketType.Boolean);
+                    } else if (key.startsWith(lblOrderPreEncodedNo)) {
+                        String posPart = key.substring(lblOrderPreEncodedNo.length(), key.indexOf(lblOrderPost));
+                        String lbl = key.substring(key.indexOf(lblOrderPost) + 1);
+
+                        Bucket bucket = new Bucket();
+                        bucket.setBucketLabel(lbl);
+                        bucket.setEncodedCountList(statsMap.get(key));
                         bucketArray[Integer.parseInt(posPart)] = bucket;
                         buckets.setType(BucketType.Boolean);
                     }
@@ -143,9 +176,7 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
             }
         }
 
-        try
-
-        {
+        try {
             for (String key : leafSchemaNewColumnNames) {
                 String key1 = dimensionColumnPrepostfix + key + dimensionColumnPrepostfix;
                 int pos1 = functionCall.getDeclaredFields().getPos(key);
@@ -169,14 +200,18 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
         public Map<String, Long> rootIdsForNonRequiredDimensions;
         public String dimensionColumnPrepostfix;
         public String lblOrderPost;
+        public String lblOrderPreEncodedYes;
+        public String lblOrderPreEncodedNo;
         public String lblOrderPreNumeric;
         public String lblOrderPreBoolean;
+        public String lblOrderPreObject;
         public String countKey;
 
         public Params(Fields fieldDeclaration, List<FieldMetadata> leafSchemaNewColumns, String cubeColumnName,
                 String groupTotalKey, Map<String, Long> rootIdsForNonRequiredDimensions,
-                String dimensionColumnPrepostfix, String lblOrderPost, String lblOrderPreNumeric,
-                String lblOrderPreBoolean, String countKey) {
+                String dimensionColumnPrepostfix, String lblOrderPost, String lblOrderPreEncodedYes,
+                String lblOrderPreEncodedNo, String lblOrderPreNumeric, String lblOrderPreBoolean,
+                String lblOrderPreObject, String countKey) {
             super();
             this.fieldDeclaration = fieldDeclaration;
             this.leafSchemaNewColumns = leafSchemaNewColumns;
@@ -185,8 +220,11 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
             this.rootIdsForNonRequiredDimensions = rootIdsForNonRequiredDimensions;
             this.dimensionColumnPrepostfix = dimensionColumnPrepostfix;
             this.lblOrderPost = lblOrderPost;
+            this.lblOrderPreEncodedYes = lblOrderPreEncodedYes;
+            this.lblOrderPreEncodedNo = lblOrderPreEncodedNo;
             this.lblOrderPreNumeric = lblOrderPreNumeric;
             this.lblOrderPreBoolean = lblOrderPreBoolean;
+            this.lblOrderPreObject = lblOrderPreObject;
             this.countKey = countKey;
         }
     }

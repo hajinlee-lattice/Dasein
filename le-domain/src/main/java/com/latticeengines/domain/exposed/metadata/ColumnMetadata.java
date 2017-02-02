@@ -28,6 +28,7 @@ public class ColumnMetadata {
     private String discretizationStrategy;
     private String matchDestination;
     private boolean isPremium;
+    private String decodeStrategy;
 
     @JsonProperty("CanModel")
     private boolean canModel;
@@ -347,6 +348,14 @@ public class ColumnMetadata {
             tokens.add(tag.getName());
         }
         this.tags = StringUtils.join(tokens, ",");
+    }
+
+    public String getDecodeStrategy() {
+        return decodeStrategy;
+    }
+
+    public void setDecodeStrategy(String decodeStrategy) {
+        this.decodeStrategy = decodeStrategy;
     }
 
 }

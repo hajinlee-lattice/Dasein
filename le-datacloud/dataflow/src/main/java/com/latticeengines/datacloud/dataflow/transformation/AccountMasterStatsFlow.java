@@ -110,6 +110,7 @@ public class AccountMasterStatsFlow
         fms.add(new FieldMetadata(getTotalKey(), Long.class));
         FieldMetadata minMaxKeyMeta = new FieldMetadata(getMinMaxKey(), String.class);
         fms.add(minMaxKeyMeta);
+
         node = createGroupingNode(parameters, node, leafSchemaAllOutputColumns, dimensionIdFieldNames, fms);
 
         fms = node.getSchema();
@@ -213,10 +214,16 @@ public class AccountMasterStatsFlow
         AccountMasterStatsGroupingFunction.Params functionParams = new AccountMasterStatsGroupingFunction.Params(
                 getMinMaxKey(), attrList.toArray(new String[attrList.size()]),
                 attrIdList.toArray(new Integer[attrIdList.size()]), allLeafFields,
-                attrList.toArray(new String[attrList.size()]), getTotalKey(), dimensionIdFieldNames,
-                parameters.getMaxBucketCount(), AccountMasterStatsParameters.LBL_ORDER_POST,
-                AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN,
-                AccountMasterStatsParameters.COUNT_KEY);
+                attrList.toArray(new String[attrList.size()]), getTotalKey(), //
+                dimensionIdFieldNames, parameters.getMaxBucketCount(), //
+                AccountMasterStatsParameters.LBL_ORDER_POST, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_NO, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
+                AccountMasterStatsParameters.COUNT_KEY, //
+                parameters.getTypeFieldMap(), parameters.getEncodedColumns());
         AccountMasterStatsGroupingFunction buffer = new AccountMasterStatsGroupingFunction(functionParams);
 
         Node grouped = accountMaster.groupByAndBuffer(new FieldList(dimensionIdFieldNames), //
@@ -261,9 +268,15 @@ public class AccountMasterStatsFlow
         Fields fieldDeclaration = new Fields(fields);
 
         AccountMasterStatsReportFunction.Params functionParam = new AccountMasterStatsReportFunction.Params(
-                fieldDeclaration, newColumns, cubeColumnName, getTotalKey(), rootIdsForNonRequiredDimensions,
-                AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, AccountMasterStatsParameters.LBL_ORDER_POST,
-                AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN,
+                fieldDeclaration, newColumns, cubeColumnName, //
+                getTotalKey(), rootIdsForNonRequiredDimensions, //
+                AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX, //
+                AccountMasterStatsParameters.LBL_ORDER_POST, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_YES, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_ENCODED_NO, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_NUMERIC, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_BOOLEAN, //
+                AccountMasterStatsParameters.LBL_ORDER_PRE_OBJECT, //
                 AccountMasterStatsParameters.COUNT_KEY);
 
         AccountMasterStatsReportFunction reportGenerationFunction = new AccountMasterStatsReportFunction(functionParam);
