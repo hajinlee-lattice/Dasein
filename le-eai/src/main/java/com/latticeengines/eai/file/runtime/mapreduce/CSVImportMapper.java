@@ -278,8 +278,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         } catch (Exception e) {
             fieldMalFormed = true;
             LOG.warn(e.getMessage());
-            throw new RuntimeException(String.format("Cannot parse %s as Date or Timestamp for column %s.",
-                    fieldCsvValue, attr.getDisplayName()));
+            throw new RuntimeException(String.format("Cannot parse %s as %s for column %s.", fieldCsvValue,
+                    attr.getPhysicalDataType(), attr.getDisplayName()));
         }
     }
 
