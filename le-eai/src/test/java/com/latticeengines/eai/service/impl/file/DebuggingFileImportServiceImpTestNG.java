@@ -64,7 +64,7 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/table.json");
     }
 
-    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = true)
+    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = false)
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
         ImportContext ctx = new ImportContext(yarnConfiguration);
