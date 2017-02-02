@@ -47,13 +47,6 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         accountMgrs = new HashMap<>();
     }
 
-
-    @Override
-    public List<LatticeAccount> batchLookup(AccountLookupRequest request) {
-        List<String> accountIds = batchLookupIds(request);
-        return batchFetchAccounts(accountIds, request.getVersion());
-    }
-
     @Override
     public List<String> batchLookupIds(AccountLookupRequest request) {
         String version = request.getVersion();
@@ -76,10 +69,31 @@ public class AccountLookupServiceImpl implements AccountLookupService {
     }
 
     @Override
-    public AccountLookupEntryMgr getLookupMgr(String version) {
+    public void updateLookupEntry(AccountLookupEntry lookupEntry, String dataCloudVersion) {
+        AccountLookupEntryMgr lookupMgr = getLookupMgr(dataCloudVersion);
+        String lookupId = lookupEntry.getId();
+        if (StringUtils.isEmpty(lookupId)) {
+            throw new RuntimeException("Must provide Id in the lookup entity to be updated.");
+        }
+        String accountId = lookupEntry.getLatticeAccountId();
+        if (StringUtils.isEmpty(accountId)) {
+            throw new RuntimeException("Must provide LatticeAccountId in the lookup entity to be updated.");
+        }
+        AccountLookupEntry lookupEntryInDynamo =  lookupMgr.findByKey(lookupId);
+        if (lookupEntryInDynamo != null) {
+            lookupMgr.update(lookupEntry);
+            log.info("Updated lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
+        } else {
+            lookupMgr.create(lookupEntry);
+            log.info("Created lookup from " + lookupId + " to " + lookupEntry.getLatticeAccountId());
+        }
+    }
+
+    private AccountLookupEntryMgr getLookupMgr(String version) {
         AccountLookupEntryMgr lookupMgr = lookupMgrs.get(version);
-        if (lookupMgr == null)
+        if (lookupMgr == null) {
             lookupMgr = getLookupMgrSync(version);
+        }
         return lookupMgr;
     }
 
@@ -105,8 +119,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
         return lookupMgr;
     }
 
-    @Override
-    public LatticeAccountMgr getAccountMgr(String version) {
+    private LatticeAccountMgr getAccountMgr(String version) {
         LatticeAccountMgr accountMgr = accountMgrs.get(version);
 
         if (accountMgr == null)

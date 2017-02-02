@@ -630,12 +630,16 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
         updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToBytes(record)));
 
-        if (tableIndex != null) {
-            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getHashKeyAttr())
-                    .put(record.get(tableIndex.getHashKeyField()).toString()));
-            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getRangeKeyAttr())
-                    .put(record.get(tableIndex.getRangeKeyField()).toString()));
-        }
+        // keys cannot be updated
+//        if (tableIndex != null) {
+//            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getHashKeyAttr())
+//                    .put(record.get(tableIndex.getHashKeyField()).toString()));
+//            Object rangeKeyValue = record.get(tableIndex.getRangeKeyField());
+//            if (rangeKeyValue != null) {
+//                updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getRangeKeyAttr())
+//                        .put(rangeKeyValue.toString()));
+//            }
+//        }
 
         return updateItemSpec;
     }

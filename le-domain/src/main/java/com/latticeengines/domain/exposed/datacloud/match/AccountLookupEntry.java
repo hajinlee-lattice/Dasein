@@ -8,6 +8,7 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
@@ -20,6 +21,7 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
     private static final String DUNS = "duns";
 
     private static final String LATTICE_ACCOUNT_ID = "latticeAccountId";
+    private static final String PATCHED = "Patched";
 
     public static final String LATTICE_ACCOUNT_ID_HDFS = "LatticeID";
     private static final String KEY_HDFS = "Key";
@@ -35,6 +37,10 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
 
     @Id
     String id = null;
+
+    @DynamoAttribute(PATCHED)
+    @JsonProperty(PATCHED)
+    private boolean patched;
 
     @JsonProperty(DOMAIN)
     private String domain = UNKNOWN;
@@ -77,6 +83,14 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
     public void setDuns(String duns) {
         this.duns = duns;
         this.id = buildId(domain, duns);
+    }
+
+    public boolean isPatched() {
+        return patched;
+    }
+
+    public void setPatched(boolean patched) {
+        this.patched = patched;
     }
 
     public static String buildId(String domain, String duns) {
