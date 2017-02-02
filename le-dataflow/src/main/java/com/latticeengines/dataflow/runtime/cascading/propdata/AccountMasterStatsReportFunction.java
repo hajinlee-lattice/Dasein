@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
@@ -39,8 +39,6 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
     public String lblOrderPreNumeric;
     public String lblOrderPreBoolean;
     public String countKey;
-
-    private ObjectMapper om = new ObjectMapper();
 
     public AccountMasterStatsReportFunction(Params parameterObject) {
         super(parameterObject.fieldDeclaration);
@@ -156,7 +154,7 @@ public class AccountMasterStatsReportFunction extends BaseOperation implements F
                             : rootIdsForNonRequiredDimensions.get(key));
                 }
             }
-            result.set(cubeColumnPos, om.writeValueAsString(cube));
+            result.set(cubeColumnPos, AMStatsUtils.compressAndEncode(cube));
             functionCall.getOutputCollector().add(result);
         } catch (IOException e) {
             e.printStackTrace();
