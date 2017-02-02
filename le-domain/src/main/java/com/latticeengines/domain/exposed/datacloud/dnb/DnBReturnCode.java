@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 public enum DnBReturnCode {
     OK("Ok"),
     UNMATCH("No matched result found"),
+    UNMATCH_TIMEOUT("No matched result found because of timeout"),
     DISCARD("Matched result is discarded"),
     IN_PROGRESS("Batch match is in progress"),
     UNAUTHORIZED("Unauthorized to call API"),

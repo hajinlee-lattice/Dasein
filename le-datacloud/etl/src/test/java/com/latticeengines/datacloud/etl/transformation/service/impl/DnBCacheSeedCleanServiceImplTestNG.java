@@ -62,8 +62,6 @@ public class DnBCacheSeedCleanServiceImplTestNG
     private static final String EMPLOYEES_HERE = "EMPLOYEES_HERE";
     private static final String EMPLOYEES_TOTAL = "EMPLOYEES_TOTAL";
     private static final String NUMBER_OF_FAMILY_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
-    private static final String LE_COUNTRY = "LE_COUNTRY";
-    private static final String COUNTRY_NAME = "COUNTRY_NAME";
     private static final String LE_PRIMARY_INDUSTRY = "LE_PRIMARY_INDUSTRY";
 
     @Test(groups = "functional", enabled = true)
@@ -114,8 +112,6 @@ public class DnBCacheSeedCleanServiceImplTestNG
         conf.setFilterFields(filterFields);
         String[] domainFields = { LE_DOMAIN };
         conf.setDomainFields(domainFields);
-        String[] countryFields = { LE_COUNTRY, COUNTRY_NAME };
-        conf.setCountryFields(countryFields);
         conf.setConsolidateIndustryStrategy(ConsolidateIndustryStrategy.PARSE_NAICS);
         conf.setAddConsolidatedIndustryField(LE_PRIMARY_INDUSTRY);
         conf.setNaicsField("LE_NAICS_CODE");
@@ -130,8 +126,8 @@ public class DnBCacheSeedCleanServiceImplTestNG
         String uploadTimestampField = "LE_Last_Upload_Date";
         conf.setUploadTimestampField(uploadTimestampField);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.FILTER,
-                StandardizationStrategy.DOMAIN, StandardizationStrategy.COUNTRY,
-                StandardizationStrategy.CONSOLIDATE_INDUSTRY, StandardizationStrategy.STRING_TO_INT,
+                StandardizationStrategy.DOMAIN, StandardizationStrategy.CONSOLIDATE_INDUSTRY,
+                StandardizationStrategy.STRING_TO_INT,
                 StandardizationStrategy.STRING_TO_LONG, StandardizationStrategy.DEDUP,
                 StandardizationStrategy.UPLOAD_TIMESTAMP };
         conf.setSequence(sequence);
@@ -174,21 +170,18 @@ public class DnBCacheSeedCleanServiceImplTestNG
             Integer employeeHere = (Integer) record.get(EMPLOYEES_HERE);
             Integer employeeTotal = (Integer) record.get(EMPLOYEES_TOTAL);
             Integer numberOfFamilyMembers = (Integer) record.get(NUMBER_OF_FAMILY_MEMBERS);
-            String leCountry = String.valueOf(record.get(LE_COUNTRY));
-            String countryName = String.valueOf(record.get(COUNTRY_NAME));
             String lePrimaryIndustry = String.valueOf(record.get(LE_PRIMARY_INDUSTRY));
             String lePrimaryDuns = String.valueOf(record.get(LE_PRIMARY_DUNS));
             log.info(DUNS_NUMBER + "=" + duns + " " + LE_DOMAIN + "=" + domain + " " + LE_NUMBER_OF_LOCATIONS + "="
                     + numberOfLocation + " " + SALES_VOLUME_LOCAL_CURRENCY + "=" + salesVolumnLocalCurrency + " "
                     + SALES_VOLUME_US_DOLLARS + "=" + salesVolumnUSDollars + " " + EMPLOYEES_HERE + "=" + employeeHere
                     + " " + EMPLOYEES_TOTAL + "=" + employeeTotal + " " + NUMBER_OF_FAMILY_MEMBERS + "="
-                    + numberOfFamilyMembers + " " + LE_COUNTRY + "=" + leCountry + " " + COUNTRY_NAME + "="
-                    + countryName + " " + LE_PRIMARY_INDUSTRY + "=" + lePrimaryIndustry + " " + LE_PRIMARY_DUNS + "="
-                    + lePrimaryDuns);
+                    + numberOfFamilyMembers + " " + " " + LE_PRIMARY_INDUSTRY + "=" + lePrimaryIndustry + " "
+                    + LE_PRIMARY_DUNS + "=" + lePrimaryDuns);
             Assert.assertTrue(duns.equals("01") && domain.equals("google.com") && numberOfLocation.equals(10)
                     && salesVolumnLocalCurrency.equals(100L) && salesVolumnUSDollars.equals(1000L)
                     && employeeHere.equals(10000) && employeeTotal.equals(100000)
-                    && numberOfFamilyMembers.equals(1000000) && leCountry.equals("USA") && countryName.equals("USA")
+                    && numberOfFamilyMembers.equals(1000000) 
                     && lePrimaryIndustry.equals("Biotechnology") && lePrimaryDuns.equals("01"));
             rowNum++;
         }
