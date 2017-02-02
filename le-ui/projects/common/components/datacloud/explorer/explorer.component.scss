@@ -581,14 +581,13 @@
                                 bottom: 0;
                                 left: auto;
                                 right: 0;
-                                background-color: #fff;
+                                background-color: inherit;
                                 padding: 3px 5px;
                             }
                             &.enabled {
                                 background-color: #fafafa;
-                                span {
-                                    padding: 0;
-                                    padding-left: 20px;
+                                &:after {
+                                    border-left: 1px solid #bbbbbb;
                                 }
                             }
                             .highlightOptions {
@@ -612,6 +611,31 @@
                                         padding: 8px 0;
                                         margin-top: 9px;
                                     }
+                                }
+                            }
+                            .highlight-icon {
+                                position: relative;
+                                padding-left: 16px;
+                                &:after {
+                                    @include font-awesome-inline("\f013");
+                                    display: block;
+                                    position: absolute;
+                                    top: 50%;
+                                    left: 0;
+                                    transform: translateY(-50%);
+                                }
+                                &.enable:after {
+                                    @include font-awesome-inline("\f00c");
+                                    color: #0f9e4d;
+                                }
+                                &.disable:after {
+                                    @include font-awesome-inline("\f111");
+                                    font-size: 5px;
+                                    margin-left: 3px;
+                                }
+                                &.highlight:after {
+                                    @include font-awesome-inline("\f005");
+                                    color: #f78b3a;
                                 }
                             }
                         }

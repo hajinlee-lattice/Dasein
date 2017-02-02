@@ -278,13 +278,11 @@
                             </li>
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
                                 <button class="button" 
-                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open}" 
+                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': vm.highlightOptionsInitState(enrichment).enabled}" 
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
-                                    <span>{{openHighlighter[enrichment.FieldName].state || 'Highlight'}}</span>
+                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || vm.highlightOptionsInitState(enrichment).type}}">{{openHighlighter[enrichment.FieldName].state.label || vm.highlightOptionsInitState(enrichment).label || 'Set'}}</span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
-                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'highlighted'">Highlight</li>
-                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'Enabled for sales team'">Enbable for sales team</li>
-                                        <li ng-click="openHighlighter[enrichment.FieldName].state = 'Disbled for sales team'">Disable for sales team</li>
+                                        <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlag(type, enrichment)">{{label}}</li>
                                         <li class="note">Either selection will clear highlights</li>
                                     </ul>
                                 </button>

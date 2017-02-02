@@ -10,6 +10,7 @@ angular.module('common.datacloud')
         this.selectedCount = null;
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
+        this.cube = null;
         this.metadata = {
             current: 1,
             toggle: {
@@ -208,12 +209,21 @@ angular.module('common.datacloud')
         this.topAttributes[category] = items;
     }
 
-    this.getCube = function(){
+    this.getCube = function() {
         var deferred = $q.defer();
-        DataCloudService.getCube().then(function(response){
-            deferred.resolve(response);
-        });
+        if (this.cube) {
+            deferred.resolve(this.cube);
+        } else {
+            DataCloudService.getCube().then(function(response){
+                DataCloudStore.setCube(response);
+                deferred.resolve(response);
+            });
+        }
         return deferred.promise;
+    }
+
+    this.setCube = function(items) {
+        this.cube = items;
     }
 })
 .service('DataCloudService', function($q, $http){
@@ -363,4 +373,21 @@ angular.module('common.datacloud')
         });
         return deferred.promise;
     }
+
+    this.setFlag = function(opts, flags){
+        var deferred = $q.defer(),
+            opts = opts || {},
+            fieldName = opts.fieldName || '',
+            useCase = opts.useCase || 'CompanyProfile',
+            flags = flags || {}; // json
+        $http({
+            method: 'POST',
+            url: '/pls/attributes/flags/' + fieldName + '/' + useCase,
+            data: flags
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
 });

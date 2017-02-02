@@ -20,6 +20,7 @@
             position: relative;
             height: 73px;
             min-width: 237px;
+            cursor: pointer;
             .tab-container {
                 margin: 0;
                 padding: 14px 20px;
@@ -32,9 +33,6 @@
                 right: 0;
                 bottom: 0;
                 z-index: 2;
-            }
-            &[ui-sref] {
-                cursor: pointer;
             }
             &:last-child {
                 border-right: 0;
