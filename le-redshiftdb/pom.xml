@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-redshiftdb</artifactId>
+    <name>le-${component-name}</name>
+    <description>LE DB</description>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>3.2.0-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <properties>
+        <component-name>redshiftdb</component-name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazon.redshift</groupId>
+            <artifactId>redshift-jdbc42</artifactId>
+            <version>1.2.1.1001</version>
+        </dependency>
+    </dependencies>
+
+</project>

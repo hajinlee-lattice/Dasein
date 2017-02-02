@@ -127,6 +127,14 @@ public class AvroUtils {
         }
     }
 
+    public static Schema getSchema(File file) {
+        try (FileReader<GenericRecord> reader = new DataFileReader<>(file, new GenericDatumReader<>())) {
+            return reader.getSchema();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static Schema getSchemaFromGlob(Configuration config, String path) {
         List<String> matches = null;
         try {

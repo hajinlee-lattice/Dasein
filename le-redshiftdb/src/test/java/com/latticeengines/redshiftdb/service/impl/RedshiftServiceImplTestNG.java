@@ -1,0 +1,113 @@
+package com.latticeengines.redshiftdb.service.impl;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.avro.Schema;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
+import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
+
+@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
+@ContextConfiguration(locations = {"classpath:test-redshiftdb-context.xml"})
+public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests {
+
+    private static final String TABLE_NAME = "RedshiftServiceImplTestNG_EventTable";
+
+    @Autowired
+    private RedshiftService redshiftService;
+
+    @Autowired
+    private S3Service s3Service;
+
+    @Autowired
+    @Qualifier("redshiftJdbcTemplate")
+    private JdbcTemplate redshiftJdbcTemplate;
+
+    @Value("${aws.test.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    private String avroPrefix;
+    private String jsonPathPrefix;
+    private Schema schema;
+
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        avroPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.avro";
+        jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.jsonpath";
+        cleanupS3();
+        cleanupRedshift();
+    }
+
+    @AfterClass(groups = "functional")
+    public void tearDown() {
+        cleanupS3();
+        cleanupRedshift();
+    }
+
+    private void cleanupS3() {
+        s3Service.cleanupPrefix(s3Bucket, jsonPathPrefix);
+        s3Service.cleanupPrefix(s3Bucket, avroPrefix);
+    }
+
+    private void cleanupRedshift() {
+        redshiftService.dropTable(TABLE_NAME);
+    }
+
+    @Test(groups = "functional")
+    public void loadDataToS3() throws URISyntaxException {
+        InputStream avroStream = ClassLoader.getSystemResourceAsStream("avro/EventTable.avro");
+        schema = AvroUtils.getSchema(new File(ClassLoader.getSystemResource("avro/EventTable.avro").toURI()));
+        s3Service.uploadInputStream(s3Bucket, avroPrefix, avroStream, true);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            RedshiftUtils.generateJsonPathsFile(schema, outputStream);
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray())) {
+                s3Service.uploadInputStream(s3Bucket, jsonPathPrefix, inputStream, true);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "loadDataToS3")
+    public void loadDataToRedshift() {
+        redshiftService.createTable(TABLE_NAME, schema);
+        redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
+    public void queryTable() {
+        List<Map<String, Object>> result = redshiftJdbcTemplate.queryForList(String.format("SELECT * FROM %s LIMIT 10",
+                TABLE_NAME));
+        assertEquals(result.size(), 10);
+        for (Map<String, Object> row : result) {
+            assertNotNull(row.get("Id"));
+        }
+    }
+}

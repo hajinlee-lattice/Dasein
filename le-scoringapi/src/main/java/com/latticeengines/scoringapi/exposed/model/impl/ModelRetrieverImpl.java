@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
@@ -508,7 +509,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
             is = fs.open(new Path(modelJsonPath));
             ObjectMapper om = new ObjectMapper();
-            JsonNode node = om.readValue(is, JsonNode.class);
+            JsonNode node = om.readValue((InputStream)is, JsonNode.class);
             node = node.get(MODEL_KEY);
             node = node.get(MODEL_TYPE_KEY);
             String type = node.textValue();

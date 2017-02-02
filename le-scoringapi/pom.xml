@@ -31,7 +31,6 @@
         <le.hadoop.version>3.2.0-SNAPSHOT</le.hadoop.version>
         <guava.version>19.0</guava.version>
         <jpmml.version>1.2.14</jpmml.version>
-        <jackson.version>2.4.1</jackson.version>
     </properties>
 
     <build>
@@ -340,18 +339,6 @@
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>1.2.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
