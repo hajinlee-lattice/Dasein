@@ -98,7 +98,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath = dataExtractionService.createTargetPath(customer) + "/"
