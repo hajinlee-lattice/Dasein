@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.eai.route;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 
-public class HdfsToS3Configuration extends CamelRouteConfiguration {
+public class HdfsToS3Configuration extends ExportConfiguration {
 
     @JsonProperty("s3_bucket")
     private String s3Bucket;
@@ -18,9 +19,6 @@ public class HdfsToS3Configuration extends CamelRouteConfiguration {
     // small files are easier to track progress, and better for loading to snowflake
     @JsonProperty("split_size")
     private Long splitSize;
-
-    @JsonProperty("hdfs_path")
-    private String hdfsPath; // the avro glob pattern in hdfs
 
     @JsonProperty("target_filename")
     private String targetFilename; // the file name to be used in s3, may be suffixed by partition number if splitted.
@@ -47,14 +45,6 @@ public class HdfsToS3Configuration extends CamelRouteConfiguration {
 
     public void setS3Region(String s3Region) {
         this.s3Region = s3Region;
-    }
-
-    public String getHdfsPath() {
-        return hdfsPath;
-    }
-
-    public void setHdfsPath(String hdfsPath) {
-        this.hdfsPath = hdfsPath;
     }
 
     public String getTargetFilename() {

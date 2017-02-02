@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -59,13 +58,13 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
         HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
         // change file name
-        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/Lead.csv");
+        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/outputRvDomainsvLeftv2.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
         // change metadata json
-        metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
+        metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/table.json");
     }
 
-    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = false)
+    @Test(groups = "functional", dataProvider = "getPropertiesProvider", enabled = true)
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
         ImportContext ctx = new ImportContext(yarnConfiguration);
@@ -112,19 +111,19 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
         Map<String, String> props = new HashMap<>();
-        if (useMetadataFile) {
-            props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
-        } else {
-            String contents;
-            try {
-                contents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            props.put(ImportProperty.METADATA, contents);
-        }
+//        if (useMetadataFile) {
+//            props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
+//        } else {
+//            String contents;
+//            try {
+//                contents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            props.put(ImportProperty.METADATA, contents);
+//        }
         // change file name
-        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/Lead.csv");
+        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/outputRvDomainsvLeftv2.csv");
         return props;
     }
 }

@@ -14,12 +14,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.service.CamelRouteService;
-import com.latticeengines.eai.service.impl.camel.HdfsToS3RouteService;
-import com.latticeengines.eai.service.impl.camel.HdfsToSnowflakeService;
 import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
 
 @Component("camelRouteProcessor")
@@ -32,20 +28,11 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRoute
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
-    @Autowired
-    private HdfsToS3RouteService hdfsToS3RouteService;
-
-    @Autowired
-    private HdfsToSnowflakeService hdfsToSnowflakeService;
 
     @Override
     public String process(CamelRouteConfiguration camelRouteConfig) throws Exception {
         log.info(JsonUtils.serialize(camelRouteConfig));
-        if (camelRouteConfig instanceof HdfsToS3Configuration) {
-            invokeS3Upload((HdfsToS3Configuration) camelRouteConfig);
-        } else if (camelRouteConfig instanceof HdfsToSnowflakeConfiguration) {
-            invokeSnowflakeExport((HdfsToSnowflakeConfiguration) camelRouteConfig);
-        }else if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration){
+         if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration){
             CamelContext camelContext = new DefaultCamelContext();
             CamelRouteService<?> camelRouteService= sftpToHdfsRouteService;
             RouteBuilder route = camelRouteService.generateRoute(camelRouteConfig);
@@ -58,22 +45,6 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRoute
                     camelRouteConfig.getClass().getSimpleName() + " has not been implemented yet.");
         }
         return null;
-    }
-
-    private void invokeS3Upload(HdfsToS3Configuration configuration) {
-        hdfsToS3RouteService.downloadToLocal(configuration);
-        setProgress(0.30f);
-        hdfsToS3RouteService.upload(configuration);
-        setProgress(0.99f);
-    }
-
-    private void invokeSnowflakeExport(HdfsToSnowflakeConfiguration configuration) {
-        hdfsToSnowflakeService.uploadToS3(configuration);
-        setProgress(0.6f);
-        hdfsToSnowflakeService.copyToSnowflake(configuration);
-        setProgress(0.85f);
-        hdfsToSnowflakeService.cleanupS3(configuration);
-        setProgress(0.95f);
     }
 
     private void waitForRouteToFinish(CamelRouteService<?> camelRouteService,

@@ -143,7 +143,7 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
         importConfig.setCustomerSpace(CustomerSpace.parse(customer));
         importConfig.addSourceConfiguration(marketoImportConfig);
 
-        ApplicationId appId = eaiService.extractAndImport(importConfig);
+        ApplicationId appId = eaiService.extractAndImportToHdfs(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);

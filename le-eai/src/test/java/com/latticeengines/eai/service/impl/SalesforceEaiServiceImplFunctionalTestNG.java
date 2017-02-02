@@ -98,13 +98,13 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath = dataExtractionService.createTargetPath(customer) + "/"
                 + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
         importConfig.setProperty(ImportProperty.METADATAURL, mockMetadataUrl);
-        ApplicationId appId = eaiService.extractAndImport(importConfig);
+        ApplicationId appId = eaiService.extractAndImportToHdfs(importConfig);
 
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.eai.route;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 
-public class HdfsToSnowflakeConfiguration extends CamelRouteConfiguration {
+public class HdfsToSnowflakeConfiguration extends ExportConfiguration {
 
     @JsonProperty("db")
     private String db;
@@ -15,9 +16,6 @@ public class HdfsToSnowflakeConfiguration extends CamelRouteConfiguration {
 
     @JsonProperty("append")
     private boolean append = false;
-
-    @JsonProperty("hdfs_glob")
-    private String hdfsGlob; // the avro glob pattern in hdfs
 
     public String getDb() {
         return db;
@@ -49,13 +47,5 @@ public class HdfsToSnowflakeConfiguration extends CamelRouteConfiguration {
 
     public void setAppend(boolean append) {
         this.append = append;
-    }
-
-    public String getHdfsGlob() {
-        return hdfsGlob;
-    }
-
-    public void setHdfsGlob(String hdfsGlob) {
-        this.hdfsGlob = hdfsGlob;
     }
 }

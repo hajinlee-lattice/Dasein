@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -33,7 +33,7 @@ public class DynamoExportServiceImpl extends ExportService {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private JobService jobService;
+    private EaiYarnService eaiYarnService;
 
     protected DynamoExportServiceImpl() {
         super(ExportDestination.DYNAMO);
@@ -81,15 +81,8 @@ public class DynamoExportServiceImpl extends ExportService {
                 context.getProperty(ExportProperty.INPUT_FILE_PATH, String.class)));
         Properties props = getProperties(context, table);
 
-        ApplicationId appId = jobService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
+        ApplicationId appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
         context.setProperty(ImportProperty.APPID, appId);
-    }
-
-    @Override
-    public ApplicationId submitDataExportJob(ExportConfiguration exportConfig) {
-        ExportContext exportContext = new ExportContext(yarnConfiguration);
-        exportDataFromHdfs(exportConfig, exportContext);
-        return exportContext.getProperty(ImportProperty.APPID, ApplicationId.class);
     }
 
     private Properties getProperties(ExportContext ctx, Table table) {

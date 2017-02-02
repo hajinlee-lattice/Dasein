@@ -3,6 +3,7 @@ package com.latticeengines.eai.yarn.runtime;
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
+
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 
 public class EaiProcessorUnitTestNG {

@@ -8,18 +8,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
-import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
-import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
+import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ @JsonSubTypes.Type(value = ImportConfiguration.class, name = "ImportConfiguration"),
         @JsonSubTypes.Type(value = ExportConfiguration.class, name = "ExportConfiguration"),
-        @JsonSubTypes.Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration"),
-        @JsonSubTypes.Type(value = HdfsToS3Configuration.class, name = "HdfsToS3Configuration"),
-        @JsonSubTypes.Type(value = HdfsToSnowflakeConfiguration.class, name = "HdfsToSnowflakeConfiguration") })
+        @JsonSubTypes.Type(value = CamelRouteConfiguration.class, name = "CamelRouteConfiguration"), })
 public class EaiJobConfiguration extends BasePayloadConfiguration {
 
+    @JsonProperty("properties")
     protected Map<String, String> properties = new HashMap<>();
 
     @JsonIgnore
@@ -27,12 +24,10 @@ public class EaiJobConfiguration extends BasePayloadConfiguration {
         return properties.get(key);
     }
 
-    @JsonProperty("properties")
     public Map<String, String> getProperties() {
         return properties;
     }
 
-    @JsonProperty("properties")
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }

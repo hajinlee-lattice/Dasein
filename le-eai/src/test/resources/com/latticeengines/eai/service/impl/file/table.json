@@ -1,0 +1,331 @@
+{
+  "name": "SourceFile_file_1482179486110_csv",
+  "attributes": [
+    {
+      "name": "Id",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "ALPHA",
+        "AllowedDisplayNames": [
+          "ACCOUNT ID",
+          "ID",
+          "ACCOUNT"
+        ],
+        "InterfaceName": "Id",
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Id",
+      "source_logical_type": "string",
+      "logical_type": "Id",
+      "enum_values": ""
+    },
+    {
+      "name": "Website",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "Category": "Lead Information",
+        "FundamentalType": "alpha",
+        "StatisticalType": "nominal",
+        "AllowedDisplayNames": [
+          "WEBSITE"
+        ],
+        "InterfaceName": "Website",
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Website",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Event",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "boolean",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "boolean",
+        "AllowedDisplayNames": [
+          "P1_EVENT",
+          "EVENT",
+          "WON"
+        ],
+        "InterfaceName": "Event",
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Event",
+      "source_logical_type": "boolean",
+      "logical_type": "Event",
+      "enum_values": ""
+    },
+    {
+      "name": "CompanyName",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "Category": "Lead Information",
+        "FundamentalType": "alpha",
+        "AllowedDisplayNames": [
+          "ACCOUNT NAME",
+          "COMPANY NAME"
+        ],
+        "InterfaceName": "CompanyName",
+        "ApprovedUsage": [
+          "Model"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "CompanyName",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "City",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "Category": "Lead Information",
+        "FundamentalType": "alpha",
+        "AllowedDisplayNames": [
+          "BILLING CITY",
+          "CITY"
+        ],
+        "InterfaceName": "City",
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "City",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "State",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "Category": "Lead Information",
+        "FundamentalType": "alpha",
+        "AllowedDisplayNames": [
+          "BILLING PROVINCE",
+          "STATE",
+          "BILLING STATE"
+        ],
+        "InterfaceName": "State",
+        "ApprovedUsage": [
+          "Model"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "State",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Country",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "Category": "Lead Information",
+        "FundamentalType": "alpha",
+        "AllowedDisplayNames": [
+          "BILLING COUNTRY",
+          "COUNTRY"
+        ],
+        "InterfaceName": "Country",
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Country",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "LOB",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "alpha",
+        "Category": "Lead Information",
+        "StatisticalType": "nominal",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "LOB",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "Division",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "alpha",
+        "Category": "Lead Information",
+        "StatisticalType": "nominal",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "Division",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "InternationalOffices",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "string",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "alpha",
+        "Category": "Lead Information",
+        "StatisticalType": "nominal",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "InternationalOffices",
+      "source_logical_type": "string",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "RiskLevel",
+      "length": null,
+      "nullable": true,
+      "physicalDataType": "double",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "Tags": [
+          "Internal"
+        ],
+        "FundamentalType": "numeric",
+        "Category": "Lead Information",
+        "StatisticalType": "ratio",
+        "ApprovedUsage": [
+          "ModelAndAllInsights"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "RiskLevel",
+      "source_logical_type": "double",
+      "logical_type": null,
+      "enum_values": ""
+    },
+    {
+      "name": "InternalId",
+      "length": null,
+      "nullable": false,
+      "physicalDataType": "long",
+      "precision": null,
+      "scale": null,
+      "properties": {
+        "ApprovedUsage": [
+          "None"
+        ]
+      },
+      "validatorWrappers": [],
+      "display_name": "InternalId",
+      "source_logical_type": "",
+      "logical_type": "InternalId",
+      "enum_values": ""
+    }
+  ],
+  "extracts": [],
+  "interpretation": "SalesforceAccount",
+  "display_name": "SalesforceAccount",
+  "primary_key": {
+    "name": "Id",
+    "attributes": [
+      "Id"
+    ],
+    "attributesAsStr": "Id",
+    "display_name": "Id"
+  },
+  "last_modified_key": null,
+  "marked_for_purge": false,
+  "data_rules": [],
+  "extracts_directory": null
+}

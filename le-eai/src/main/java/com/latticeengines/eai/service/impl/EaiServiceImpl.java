@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
+import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.service.DataExtractionService;
@@ -29,10 +32,13 @@ public class EaiServiceImpl implements EaiService {
     @Autowired
     private EaiYarnService eaiYarnService;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     @Override
     public ApplicationId submitEaiJob(EaiJobConfiguration eaiJobConfig) {
         if (eaiJobConfig instanceof ImportConfiguration) {
-            return extractAndImport((ImportConfiguration) eaiJobConfig);
+            return extractAndImportToHdfs((ImportConfiguration) eaiJobConfig);
         } else if (eaiJobConfig instanceof ExportConfiguration) {
             return exportDataFromHdfs((ExportConfiguration) eaiJobConfig);
         } else if (eaiJobConfig instanceof CamelRouteConfiguration) {
@@ -43,7 +49,7 @@ public class EaiServiceImpl implements EaiService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId extractAndImport(ImportConfiguration importConfig) {
+    public ApplicationId extractAndImportToHdfs(ImportConfiguration importConfig) {
         log.info("Directing extractAndImport job to " + dataExtractionService.getClass().getSimpleName());
         return dataExtractionService.submitExtractAndImportJob(importConfig);
     }
@@ -52,7 +58,9 @@ public class EaiServiceImpl implements EaiService {
     public ApplicationId exportDataFromHdfs(ExportConfiguration exportConfig) {
         ExportDestination exportDest = exportConfig.getExportDestination();
         ExportService exportService = ExportService.getExportService(exportDest);
-        log.info("Starting file based export job.");
-        return exportService.submitDataExportJob(exportConfig);
+        log.info("Starting export job.");
+        ExportContext exportContext = new ExportContext(yarnConfiguration);
+        exportService.exportDataFromHdfs(exportConfig, exportContext);
+        return exportContext.getProperty(ImportProperty.APPID, ApplicationId.class);
     }
 }

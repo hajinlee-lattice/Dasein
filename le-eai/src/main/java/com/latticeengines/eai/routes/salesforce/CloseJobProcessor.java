@@ -9,7 +9,7 @@ public class CloseJobProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         JobInfo jobInfo = (JobInfo) exchange.getProperty(SalesforceImportProperty.JOBINFO);
-        exchange.getContext().createProducerTemplate().requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
+        jobInfo  = exchange.getContext().createProducerTemplate().requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
     }
 
 }

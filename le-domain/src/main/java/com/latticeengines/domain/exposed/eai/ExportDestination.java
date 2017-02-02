@@ -7,6 +7,7 @@ public enum ExportDestination {
     MARKETO, //
     SALESFORCE, //
     S3, //
-    DYNAMO
+    DYNAMO, // 
+    Snowflake
 
 }

@@ -1,8 +1,15 @@
 package com.latticeengines.domain.exposed.eai;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
+import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
+@JsonSubTypes({ @JsonSubTypes.Type(value = HdfsToS3Configuration.class, name = "HdfsToS3Configuration"),
+        @JsonSubTypes.Type(value = HdfsToSnowflakeConfiguration.class, name = "HdfsToSnowflakeConfiguration") })
 public class ExportConfiguration extends EaiJobConfiguration {
 
     private ExportFormat exportFormat;
@@ -11,7 +18,6 @@ public class ExportConfiguration extends EaiJobConfiguration {
     private String exportInputPath;
     private String exportTargetPath;
     private boolean exportUsingDisplayName = Boolean.TRUE;
-    
 
     @JsonProperty("export_format")
     public ExportFormat getExportFormat() {

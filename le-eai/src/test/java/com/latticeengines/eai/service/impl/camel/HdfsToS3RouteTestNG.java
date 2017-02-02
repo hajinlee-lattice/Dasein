@@ -18,6 +18,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.route.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 
 @Component("hdfsToS3RouteTestNG")
 public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
@@ -29,7 +30,7 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
     private static final String FILENAME = "camel.avro";
 
     @Autowired
-    private HdfsToS3RouteService routeService;
+    private HdfsToS3ExportService routeService;
 
     @Autowired
     private S3Service s3Service;
@@ -75,7 +76,7 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
         HdfsToS3Configuration configuration = new HdfsToS3Configuration();
         configuration.setS3Bucket(s3Bucket);
         configuration.setS3Prefix(s3Prefix);
-        configuration.setHdfsPath(HDFS_DIR + "/*.avro");
+        configuration.setExportInputPath(HDFS_DIR + "/*.avro");
         configuration.setTargetFilename(FILENAME);
         configuration.setSplitSize(10L * 1024 * 1024);
         return configuration;

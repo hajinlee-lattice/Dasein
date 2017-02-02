@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
+import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 
@@ -20,6 +21,9 @@ public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfigurati
 
     @Autowired
     private ImportTableProcessor importTableProcessor;
+    
+    @Autowired
+    private ExportProcessor exportProcessor;
 
     @Autowired
     private CamelRouteProcessor camelRouteProcessor;
@@ -29,6 +33,8 @@ public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfigurati
         if (eaiJobConfig instanceof ImportConfiguration) {
             log.info("Directing import job to " + importTableProcessor.getClass().getSimpleName());
             return importTableProcessor.process((ImportConfiguration)eaiJobConfig);
+        } else if (eaiJobConfig instanceof ExportConfiguration) {
+            return exportProcessor.process((ExportConfiguration) eaiJobConfig);
         } else if (eaiJobConfig instanceof CamelRouteConfiguration) {
             log.info("Directing import job to " + camelRouteProcessor.getClass().getSimpleName());
             return camelRouteProcessor.process((CamelRouteConfiguration)eaiJobConfig);

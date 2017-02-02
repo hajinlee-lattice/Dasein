@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.route.HdfsToSnowflakeConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.service.impl.snowflake.HdfsToSnowflakeService;
 import com.latticeengines.snowflakedb.exposed.service.SnowflakeService;
 import com.latticeengines.snowflakedb.exposed.util.SnowflakeUtils;
 
@@ -34,7 +35,7 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
     private static final String TEST_TABLE = "CAMEL_TEST";
 
     @Autowired
-    private HdfsToSnowflakeService routeService;
+    private HdfsToSnowflakeService hdfsToSnowflakeService;
 
     @Value("${common.le.stack}")
     private String leStack;
@@ -59,7 +60,7 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
     public void setup() throws Exception {
         testDB = leEnvironment + "_" + leStack + "_" + TEST_DB;
         testTable = leStack + "_" + TEST_TABLE;
-        routeService.setS3Bucket(s3Bucket);
+        hdfsToSnowflakeService.setS3Bucket(s3Bucket);
         snowflakeService.createDatabase(testDB, s3Bucket);
         cleanup();
         InputStream avroStream = ClassLoader
@@ -75,9 +76,9 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "aws")
     public void testUploadToSnowflake() throws Exception {
-        HdfsToSnowflakeConfiguration configuration = getRouteConfiguration();
-        routeService.uploadToS3(configuration);
-        routeService.copyToSnowflake(configuration);
+        HdfsToSnowflakeConfiguration configuration = getExportConfiguration();
+        hdfsToSnowflakeService.uploadToS3(configuration);
+        hdfsToSnowflakeService.copyToSnowflake(configuration);
         // routeService.cleanupS3(configuration);
         verify(configuration);
     }
@@ -97,8 +98,8 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
 
     private void cleanup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, HDFS_DIR);
-        HdfsToSnowflakeConfiguration configuration = getRouteConfiguration();
-        routeService.cleanupS3(configuration);
+        HdfsToSnowflakeConfiguration configuration = getExportConfiguration();
+        hdfsToSnowflakeService.cleanupS3(configuration);
         String db = configuration.getDb();
         String table = configuration.getTableName();
         String sql = String.format("DROP TABLE IF EXISTS %s",
@@ -109,9 +110,9 @@ public class HdfsToSnowflakeTestNG extends EaiFunctionalTestNGBase {
         FileUtils.deleteQuietly(new File("tmp"));
     }
 
-    private HdfsToSnowflakeConfiguration getRouteConfiguration() {
+    private HdfsToSnowflakeConfiguration getExportConfiguration() {
         HdfsToSnowflakeConfiguration configuration = new HdfsToSnowflakeConfiguration();
-        configuration.setHdfsGlob(HDFS_DIR + "/*.avro");
+        configuration.setExportInputPath(HDFS_DIR + "/*.avro");
         configuration.setDb(testDB);
         configuration.setTableName(testTable);
         return configuration;

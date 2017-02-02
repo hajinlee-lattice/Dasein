@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
-
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang.StringUtils;
