@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.Transformation
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterStatisticsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 
-public class AccountMasterStatisticsCalculationServiceImplTestNG
+public class AccountMasterStatsDeploymentTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     @Autowired
     PipelineSource source;
@@ -43,9 +43,9 @@ public class AccountMasterStatisticsCalculationServiceImplTestNG
     private PipelineTransformationService pipelineTransformationService;
 
     String targetSourceName = "AccountMasterStats";
-    String targetVersion;
+    String targetVersion = "2017-01-30_19-12-43_UTC";
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + targetSourceName,
                 "2017-01-30_19-12-43_UTC");
