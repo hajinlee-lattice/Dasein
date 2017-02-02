@@ -11,7 +11,7 @@ public class PhoneNumberUtils {
     private static final Log log = LogFactory.getLog(PhoneNumberUtils.class);
 
     public static String getStandardPhoneNumber(String phoneNumber, String countryCode) {
-        phoneNumber = StringStandardizationUtils.getStandardString(phoneNumber);
+        phoneNumber = new LocationStringStandardizationUtils().getStandardString(phoneNumber);
         if (org.apache.commons.lang.StringUtils.isEmpty(phoneNumber)) {
             return null;
         }

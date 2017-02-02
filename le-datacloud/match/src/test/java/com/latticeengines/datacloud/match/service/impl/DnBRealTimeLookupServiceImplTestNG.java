@@ -105,7 +105,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         Assert.assertTrue(flag);
     }
 
-    @Test(groups = "dnb", dataProvider = "emailInputData", enabled = true, priority = 2)
+    @Test(groups = "dnb", dataProvider = "emailInputData", enabled = false, priority = 2)
     public void testRealTimeEmailLookupService(String email, DnBReturnCode dnbCode, String duns) {
         DnBMatchContext context = new DnBMatchContext();
         context.setInputEmail(email);
