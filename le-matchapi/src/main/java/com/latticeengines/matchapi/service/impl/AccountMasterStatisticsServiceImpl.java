@@ -118,7 +118,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
             expandEncodedAttributes(cube);
-            populateDummyBuckets(cube);
+            // populateDummyBuckets(cube);
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
             return cube;
@@ -335,24 +335,30 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             int idx) {
         if (encodedValueCountInfo.getRowBasedStatistics() != null) {
             AttributeStatsDetails st = encodedValueCountInfo.getRowBasedStatistics();
-            populateDecodedBuckets(decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx);
+            populateDecodedBuckets(decodedInfo.getRowBasedStatistics(),
+                    decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx);
         }
         if (encodedValueCountInfo.getUniqueLocationBasedStatistics() != null) {
             AttributeStatsDetails st = encodedValueCountInfo.getUniqueLocationBasedStatistics();
-            populateDecodedBuckets(decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx);
+            populateDecodedBuckets(decodedInfo.getUniqueLocationBasedStatistics(),
+                    decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx);
         }
     }
 
-    private void populateDecodedBuckets(Buckets decodedBuckets, Buckets encodedBuckets, int idx) {
+    private void populateDecodedBuckets(AttributeStatsDetails attributeStatsDetails, Buckets decodedBuckets,
+            Buckets encodedBuckets, int idx) {
         if (encodedBuckets != null && encodedBuckets.getBucketList() != null
                 && encodedBuckets.getBucketList().size() > 0) {
             int loopId = 0;
+            Long total = 0L;
             for (Bucket bucket : encodedBuckets.getBucketList()) {
                 if (bucket.getEncodedCountList() != null && bucket.getEncodedCountList().length > idx) {
                     decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
+                    total += bucket.getEncodedCountList()[idx];
                 }
                 loopId++;
             }
+            attributeStatsDetails.setNonNullCount(total);
         }
     }
 
