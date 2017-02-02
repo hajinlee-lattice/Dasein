@@ -15,9 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsGroupingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsLeafFunction;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsReportFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AccountMasterStatsMinMaxBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DimensionExpandFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
@@ -32,9 +31,10 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 import cascading.tuple.Fields;
 
-@Component("sourceStatisticsFlow")
-public class SourceStatisticsFlow
+@Component("accountMasterStatsMinMaxFlow")
+public class AccountMasterStatsMinMaxFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, AccountMasterStatsParameters> {
+    private static final String RENAMED_PREFIX = "_RENAMED_";
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
@@ -94,13 +94,13 @@ public class SourceStatisticsFlow
         node = createDimensionBasedExpandNodes(requiredDimensionsValuesMap, node, dimensionDefinitionMap,
                 leafSchemaAllOutputColumns, groupByFields, dimensionIdFieldNames);
 
+        leafSchemaAllOutputColumns.add(new FieldMetadata(getMinMaxKey(), String.class));
+
         List<FieldMetadata> fms = new ArrayList<>();
         fms.addAll(resultSchema(leafSchemaAllOutputColumns));
-        fms.add(new FieldMetadata(getTotalKey(), Long.class));
 
-        node = createGroupingNode(node, leafSchemaAllOutputColumns, dimensionIdFieldNames, fms);
-
-        node = createReportGenerationNode(parameters, dimensionIdFieldNames, fms, node);
+        node.renamePipe("leafRecordsNode");
+        node = createGroupingAndMinMaxAssessNode(node, leafSchemaAllOutputColumns, dimensionIdFieldNames);
 
         return node;
     }
@@ -118,6 +118,52 @@ public class SourceStatisticsFlow
         accountMaster = accountMaster.apply(leafCreationFunction, applyToFieldList, leafSchemaNewColumns,
                 outputFieldList);
         return accountMaster;
+    }
+
+    private Node createGroupingAndMinMaxAssessNode(Node node, List<FieldMetadata> finalLeafSchema,
+            String[] dimensionIdFieldNames) {
+        Fields minMaxResultFields = new Fields();
+
+        List<FieldMetadata> fms = new ArrayList<>();
+
+        for (FieldMetadata fieldMeta : finalLeafSchema) {
+            boolean shouldRetain = false;
+            for (String dimensionId : dimensionIdFieldNames) {
+                if (fieldMeta.getFieldName().equals(dimensionId)) {
+                    shouldRetain = true;
+                    break;
+                }
+            }
+
+            if (!shouldRetain) {
+                if (fieldMeta.getFieldName().equals(getMinMaxKey())) {
+                    shouldRetain = true;
+                }
+            }
+
+            if (shouldRetain) {
+                minMaxResultFields = minMaxResultFields
+                        .append(new Fields(fieldMeta.getFieldName(), fieldMeta.getJavaType()));
+                fms.add(fieldMeta);
+            }
+        }
+
+        AccountMasterStatsMinMaxBuffer.Params functionParams = new AccountMasterStatsMinMaxBuffer.Params(
+                minMaxResultFields, getMinMaxKey());
+        AccountMasterStatsMinMaxBuffer buffer = new AccountMasterStatsMinMaxBuffer(functionParams);
+
+        Node minMaxNode = node.groupByAndBuffer(new FieldList(dimensionIdFieldNames), //
+                buffer, fms);
+
+        String[] renamedDimensionFieldNames = new String[dimensionIdFieldNames.length];
+        int i = 0;
+        for (String id : dimensionIdFieldNames) {
+            renamedDimensionFieldNames[i++] = RENAMED_PREFIX + id;
+        }
+
+        minMaxNode = minMaxNode.rename(new FieldList(dimensionIdFieldNames), new FieldList(renamedDimensionFieldNames));
+
+        return minMaxNode;
     }
 
     protected Node createDimensionBasedExpandNodes(
@@ -158,74 +204,6 @@ public class SourceStatisticsFlow
         return accountMaster;
     }
 
-    protected Node createGroupingNode(Node accountMaster, List<FieldMetadata> finalLeafSchema,
-            String[] dimensionIdFieldNames, List<FieldMetadata> fms) {
-        List<String> attrList = new ArrayList<>();
-        List<Integer> attrIdList = new ArrayList<>();
-
-        findAttributeIds(finalLeafSchema, attrList, attrIdList);
-
-        Fields allLeafFields = new Fields();
-        for (FieldMetadata fieldMeta : finalLeafSchema) {
-            allLeafFields = allLeafFields.append(new Fields(fieldMeta.getFieldName(), String.class));
-        }
-
-        allLeafFields = allLeafFields.append(new Fields(getTotalKey(), Long.class));
-
-        AccountMasterStatsGroupingFunction.Params functionParams = new AccountMasterStatsGroupingFunction.Params(
-                attrList.toArray(new String[attrList.size()]), attrIdList.toArray(new Integer[attrIdList.size()]),
-                allLeafFields, attrList.toArray(new String[attrList.size()]), getTotalKey(), dimensionIdFieldNames);
-        AccountMasterStatsGroupingFunction buffer = new AccountMasterStatsGroupingFunction(functionParams);
-
-        Node grouped = accountMaster.groupByAndBuffer(new FieldList(dimensionIdFieldNames), //
-                buffer, fms);
-        return grouped;
-    }
-
-    protected Node createReportGenerationNode(AccountMasterStatsParameters parameters, String[] dimensionIdFieldNames,
-            List<FieldMetadata> fms, Node grouped) {
-        List<FieldMetadata> newColumns = getFinalReportColumns(parameters.getFinalDimensionColumns(),
-                parameters.getCubeColumnName());
-
-        List<FieldMetadata> fms1 = new ArrayList<>();
-        fms1.addAll(newColumns);
-
-        Node report = generateFinalReport(grouped, //
-                getFieldList(fms), newColumns, //
-                getFieldList(fms1), Fields.RESULTS, parameters.getCubeColumnName(),
-                parameters.getRootIdsForNonRequiredDimensions());
-        return report;
-    }
-
-    private List<FieldMetadata> getFinalReportColumns(List<String> finalDimensionsList, String encodedCubeColumnName) {
-        List<FieldMetadata> finalReportColumns = new ArrayList<>();
-
-        for (String dimensionKey : finalDimensionsList) {
-            finalReportColumns.add(new FieldMetadata(dimensionKey, Long.class));
-        }
-
-        finalReportColumns.add(new FieldMetadata(encodedCubeColumnName, String.class));
-        finalReportColumns.add(new FieldMetadata("PID", Long.class));
-        return finalReportColumns;
-    }
-
-    private Node generateFinalReport(Node grouped, FieldList applyToFieldList, List<FieldMetadata> newColumns,
-            FieldList outputFieldList, Fields overrideFieldStrategy, String cubeColumnName,
-            Map<String, Long> rootIdsForNonRequiredDimensions) {
-
-        String[] fields = outputFieldList.getFields();
-
-        Fields fieldDeclaration = new Fields(fields);
-
-        AccountMasterStatsReportFunction.Params functionParam = new AccountMasterStatsReportFunction.Params(
-                fieldDeclaration, newColumns, cubeColumnName, getTotalKey(), rootIdsForNonRequiredDimensions,
-                AccountMasterStatsParameters.DIMENSION_COLUMN_PREPOSTFIX);
-
-        AccountMasterStatsReportFunction reportGenerationFunction = new AccountMasterStatsReportFunction(functionParam);
-        return grouped.apply(reportGenerationFunction, applyToFieldList, newColumns, outputFieldList,
-                overrideFieldStrategy);
-    }
-
     private List<FieldMetadata> resultSchema(List<FieldMetadata> leafSchemaAllOutputColumns) {
         List<FieldMetadata> resultSchema = new ArrayList<>();
 
@@ -236,15 +214,6 @@ public class SourceStatisticsFlow
         }
 
         return resultSchema;
-    }
-
-    private void findAttributeIds(List<FieldMetadata> finalLeafSchema, List<String> attrList,
-            List<Integer> attrIdList) {
-        int pos = 0;
-        for (FieldMetadata field : finalLeafSchema) {
-            attrList.add(field.getFieldName());
-            attrIdList.add(pos++);
-        }
     }
 
     private FieldList getFieldList(List<FieldMetadata> fieldMetadataList) {
@@ -303,7 +272,10 @@ public class SourceStatisticsFlow
     }
 
     public String getTotalKey() {
-        return "_GroupTotal_";
+        return AccountMasterStatsParameters.GROUP_TOTAL_KEY;
     }
 
+    public String getMinMaxKey() {
+        return AccountMasterStatsParameters.MIN_MAX_KEY;
+    }
 }

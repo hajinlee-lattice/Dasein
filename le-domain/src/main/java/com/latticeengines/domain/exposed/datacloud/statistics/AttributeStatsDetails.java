@@ -8,16 +8,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttributeStatsDetails {
     @JsonProperty("Cnt")
-    private int nonNullCount;
+    private Long nonNullCount;
 
     @JsonProperty("Bkts")
     private Buckets buckets;
 
-    public int getNonNullCount() {
+    public Long getNonNullCount() {
         return nonNullCount;
     }
 
-    public void setNonNullCount(int nonNullCount) {
+    public void setNonNullCount(Long nonNullCount) {
         this.nonNullCount = nonNullCount;
     }
 

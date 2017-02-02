@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
@@ -24,7 +26,7 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
 
     private static final Log log = LogFactory.getLog(AMStatisticsResourceDeploymentTestNG.class);
 
-    @Test(groups = { "deployment" }, enabled = false)
+    @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopAttrTree() {
         TopNAttributeTree topNAttributeTree = amStatsProxy.getTopAttrTree();
         Assert.assertNotNull(topNAttributeTree);
@@ -42,9 +44,10 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         }
     }
 
-    @Test(groups = { "deployment" }, enabled = false)
+    @Test(groups = { "deployment" }, enabled = true)
     public void testGetTopCube() {
-        AccountMasterCube cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL));
+        AccountMasterFactQuery query = createQuery(CategoricalAttribute.ALL, CategoricalAttribute.ALL);
+        AccountMasterCube cube = amStatsProxy.getCube(query);
         Assert.assertNotNull(cube);
         Assert.assertNotNull(cube.getStatistics());
         Assert.assertTrue(cube.getStatistics().size() > 0);

@@ -7,7 +7,7 @@ public class Bucket {
     private String bucketLabel;
 
     @JsonProperty("Cnt")
-    private Integer count;
+    private Long count;
 
     public String getBucketLabel() {
         return bucketLabel;
@@ -17,11 +17,11 @@ public class Bucket {
         this.bucketLabel = bucketLabel;
     }
 
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 }

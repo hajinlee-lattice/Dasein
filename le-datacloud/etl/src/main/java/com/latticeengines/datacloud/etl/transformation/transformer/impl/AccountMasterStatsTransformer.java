@@ -16,20 +16,20 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.proxy.exposed.matchapi.DimensionAttributeProxy;
 
-@Component("statisticsDataTransformer")
-public class StatisticsDataTransformer
+@Component("accountMasterStatsTransformer")
+public class AccountMasterStatsTransformer
         extends AbstractDataflowTransformer<AccountMasterStatisticsConfig, AccountMasterStatsParameters> {
     @Autowired
     private DimensionAttributeProxy dimensionAttributeProxy;
 
     @Override
     public String getName() {
-        return "statisticsDataTransformer";
+        return "accountMasterStatsTransformer";
     }
 
     @Override
     protected String getDataFlowBeanName() {
-        return "sourceStatisticsFlow";
+        return "accountMasterStatsFlow";
     }
 
     @Override

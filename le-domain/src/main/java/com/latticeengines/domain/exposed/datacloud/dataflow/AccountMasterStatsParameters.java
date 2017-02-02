@@ -9,6 +9,12 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String DIMENSION_COLUMN_PREPOSTFIX = "_";
+    public static final String LBL_ORDER_POST = ">";
+    public static final String LBL_ORDER_PRE_NUMERIC = "[N";
+    public static final String LBL_ORDER_PRE_BOOLEAN = "[B";
+    public static final String COUNT_KEY = "_COUNT_";
+    public static final String GROUP_TOTAL_KEY = "_GroupTotal_";
+    public static final String MIN_MAX_KEY = "_MinMax_";
 
     private Map<String, List<String>> dimensionDefinitionMap;
 
@@ -27,6 +33,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     private Map<String, Map<String, CategoricalAttribute>> requiredDimensionsValuesMap;
 
     private Map<String, Long> rootIdsForNonRequiredDimensions;
+    
+    private int maxBucketCount = 5;
 
     public Map<String, List<String>> getDimensionDefinitionMap() {
         return dimensionDefinitionMap;
@@ -99,6 +107,14 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
 
     public void setRootIdsForNonRequiredDimensions(Map<String, Long> rootIdsForNonRequiredDimensions) {
         this.rootIdsForNonRequiredDimensions = rootIdsForNonRequiredDimensions;
+    }
+
+    public int getMaxBucketCount() {
+        return maxBucketCount;
+    }
+
+    public void setMaxBucketCount(int maxBucketCount) {
+        this.maxBucketCount = maxBucketCount;
     }
 
 }

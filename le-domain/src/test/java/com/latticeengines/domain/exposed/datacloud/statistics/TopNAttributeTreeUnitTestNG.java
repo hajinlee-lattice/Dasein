@@ -14,13 +14,13 @@ public class TopNAttributeTreeUnitTestNG {
     public void testDeSer() {
         TopNAttributeTree tree = new TopNAttributeTree();
         TopNAttributes tAttrs = new TopNAttributes();
-        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr1", 1));
-        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr2", 2));
+        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr1", 1L));
+        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr2", 2L));
         tree.put(Category.FIRMOGRAPHICS, tAttrs);
 
         tAttrs = new TopNAttributes();
-        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr3", 3));
-        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr4", 4));
+        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr3", 3L));
+        tAttrs.addTopAttribute("Other", new TopNAttributes.TopAttribute("attr4", 4L));
         tree.put(Category.GROWTH_TRENDS, tAttrs);
 
         String serialized = JsonUtils.serialize(tree);

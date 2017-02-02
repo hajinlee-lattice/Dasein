@@ -160,7 +160,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         Collections.sort(sortedStatistics, new Comparator<Entry<String, AttributeStatistics>>() {
             // Descending order
             public int compare(Entry<String, AttributeStatistics> s1, Entry<String, AttributeStatistics> s2) {
-                int valueS1, valueS2;
+                long valueS1, valueS2;
                 if (isLocationBased) {
                     valueS1 = s1.getValue().getUniqueLocationBasedStatistics().getNonNullCount();
                     valueS2 = s2.getValue().getUniqueLocationBasedStatistics().getNonNullCount();

@@ -52,14 +52,14 @@ public class TopNAttributes {
         private String attribute;
 
         @JsonProperty("NonNullCount")
-        private Integer nonNullCount;
+        private Long nonNullCount;
 
         // dummy constructor for jackson
         @SuppressWarnings("unused")
         private TopAttribute() {
         }
 
-        public TopAttribute(String attribute, Integer nonNullCount) {
+        public TopAttribute(String attribute, Long nonNullCount) {
             this.attribute = attribute;
             this.nonNullCount = nonNullCount;
         }
@@ -72,11 +72,11 @@ public class TopNAttributes {
             this.attribute = attribute;
         }
 
-        public Integer getNonNullCount() {
+        public Long getNonNullCount() {
             return nonNullCount;
         }
 
-        public void setNonNullCount(Integer nonNullCount) {
+        public void setNonNullCount(Long nonNullCount) {
             this.nonNullCount = nonNullCount;
         }
     }

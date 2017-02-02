@@ -42,11 +42,14 @@ public class AccountMasterStatisticsCalculationServiceImplTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    String targetSourceName = "MatchResult";
+    String targetSourceName = "AccountMasterStats";
     String targetVersion;
 
-    @Test(groups = "functional", enabled=false)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
+        uploadBaseSourceFile(baseSource, baseSource.getSourceName() + "_Test" + targetSourceName,
+                "2017-01-30_19-12-43_UTC");
+
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
@@ -80,29 +83,54 @@ public class AccountMasterStatisticsCalculationServiceImplTestNG
         baseSources.add("AccountMaster");
         step1.setBaseSources(baseSources);
         step1.setTransformer("sourceDeduper");
+        step1.setTargetSource("AccountMasterDeduped");
         String deduperConfig = getDeduperConfig();
         step1.setConfiguration(deduperConfig);
 
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        List<Integer> inputSteps = new ArrayList<Integer>();
-        inputSteps.add(0);
-        step2.setInputSteps(inputSteps);
-        step2.setTargetSource("AMStatsResult");
-        step2.setTransformer("statisticsDataTransformer");
+        ///////////////////
 
-        AccountMasterStatisticsConfig confParam = getAccountMasterStatsParameters();
-        String confParamStr = null;
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        List<Integer> inputSteps2 = new ArrayList<Integer>();
+        inputSteps2.add(0);
+        step2.setInputSteps(inputSteps2);
+        step2.setTransformer("accountMasterStatsMinMaxTransformer");
+
+        AccountMasterStatisticsConfig confParam2 = getAccountMasterStatsParameters();
+        String confParamStr2 = null;
         try {
-            confParamStr = om.writeValueAsString(confParam);
+            confParamStr2 = om.writeValueAsString(confParam2);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
 
-        step2.setConfiguration(confParamStr);
+        step2.setConfiguration(confParamStr2);
+
+        /////////////////
+
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        List<Integer> inputSteps3 = new ArrayList<Integer>();
+        inputSteps3.add(0);
+        inputSteps3.add(1);
+        step3.setInputSteps(inputSteps3);
+        step3.setTargetSource(targetSourceName);
+        step3.setTransformer("accountMasterStatsTransformer");
+
+        AccountMasterStatisticsConfig confParam3 = getAccountMasterStatsParameters();
+        String confParamStr3 = null;
+        try {
+            confParamStr3 = om.writeValueAsString(confParam3);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        step3.setConfiguration(confParamStr3);
+
+        //////////////////
 
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step1);
         steps.add(step2);
+        steps.add(step3);
 
         configuration.setSteps(steps);
 
