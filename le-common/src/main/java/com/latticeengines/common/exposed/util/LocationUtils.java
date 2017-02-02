@@ -24,7 +24,7 @@ public class LocationUtils {
     public static final String CANADA = "CANADA";
 
     static {
-        Object[][] countrySynonData = new Object[][]{ //
+        Object[][] countrySynonData = new Object[][] { //
                 { USA, new String[] { "USA", "U S A", "US", "U S", "UNITED STATES", "UNITEDSTATES",
                         "UNITED STATES AMERICA", "AMERICA", "AMERICAN", "UNITED STATES AMERICA USA",
                         "UNITED STATES USA", "ESTADOS UNIDOS" } }, //
@@ -394,7 +394,7 @@ public class LocationUtils {
 
     private static Map<String, String> dataToMap(Object[][] data, boolean reverse) {
         Map<String, String> toReturn = new HashMap<>();
-        for (Object[] entry: data) {
+        for (Object[] entry : data) {
             if (entry[1] instanceof String[]) {
                 String value = (String) entry[0];
                 for (String key : (String[]) entry[1]) {
@@ -417,13 +417,14 @@ public class LocationUtils {
             return USA;
         }
         country = country.replaceAll("\\d", "");
-        String phrase = new LocationStringStandardizationUtils().getStandardString(country);
+        String phrase = LocationStringStandardizationUtils.getStandardString(country);
         if (StringUtils.isEmpty(phrase)) {
             return USA;
         }
-        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replace(" ISLND ", " IS ").replace(" ISLNDS ", " IS ")
-                .replaceAll(" ISLAND$", " IS").replaceAll(" ISLANDS$", " IS").replaceAll(" ISLND$", " IS").replaceAll(" ISLNDS$", " IS")
-                .replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ").replaceAll("^ISLND ", "IS ").replaceAll("^ISLNDS ", "IS ");
+        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replace(" ISLND ", " IS ")
+                .replace(" ISLNDS ", " IS ").replaceAll(" ISLAND$", " IS").replaceAll(" ISLANDS$", " IS")
+                .replaceAll(" ISLND$", " IS").replaceAll(" ISLNDS$", " IS").replaceAll("^ISLAND ", "IS ")
+                .replaceAll("^ISLANDS ", "IS ").replaceAll("^ISLND ", "IS ").replaceAll("^ISLNDS ", "IS ");
         phrase = phrase.replace(" SAINT ", " ST ").replaceAll(" SAINT$", " ST").replaceAll("^SAINT ", "ST ");
         phrase = phrase.replace(" OF ", " ").replaceAll(" OF$", "").replaceAll("^OF ", "");
         phrase = phrase.replace(" AND ", " ");
@@ -440,13 +441,14 @@ public class LocationUtils {
             return null;
         }
         country = country.replaceAll("\\d", "");
-        String phrase = new LocationStringStandardizationUtils().getStandardString(country);
+        String phrase = LocationStringStandardizationUtils.getStandardString(country);
         if (StringUtils.isEmpty(phrase)) {
             return null;
         }
-        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replace(" ISLND ", " IS ").replace(" ISLNDS ", " IS ")
-                .replaceAll(" ISLAND$", " IS").replaceAll(" ISLANDS$", " IS").replaceAll(" ISLND$", " IS").replaceAll(" ISLNDS$", " IS")
-                .replaceAll("^ISLAND ", "IS ").replaceAll("^ISLANDS ", "IS ").replaceAll("^ISLND ", "IS ").replaceAll("^ISLNDS ", "IS ");
+        phrase = phrase.replace(" ISLAND ", " IS ").replace(" ISLANDS ", " IS ").replace(" ISLND ", " IS ")
+                .replace(" ISLNDS ", " IS ").replaceAll(" ISLAND$", " IS").replaceAll(" ISLANDS$", " IS")
+                .replaceAll(" ISLND$", " IS").replaceAll(" ISLNDS$", " IS").replaceAll("^ISLAND ", "IS ")
+                .replaceAll("^ISLANDS ", "IS ").replaceAll("^ISLND ", "IS ").replaceAll("^ISLNDS ", "IS ");
         phrase = phrase.replace(" SAINT ", " ST ").replaceAll(" SAINT$", " ST").replaceAll("^SAINT ", "ST ");
         phrase = phrase.replace(" OF ", " ").replaceAll(" OF$", "").replaceAll("^OF ", "");
         phrase = phrase.replace(" AND ", " ");
@@ -467,7 +469,7 @@ public class LocationUtils {
             Map<String, String> stateLookUp = usStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (usStateAbbrToFullNameMap.containsKey(guess)) {
-                return new LocationStringStandardizationUtils().getStandardString(usStateAbbrToFullNameMap.get(guess));
+                return LocationStringStandardizationUtils.getStandardString(usStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
             }
@@ -475,12 +477,12 @@ public class LocationUtils {
             Map<String, String> stateLookUp = caStateSynonMap;
             String guess = getStateFromMap(state, stateLookUp);
             if (caStateAbbrToFullNameMap.containsKey(guess)) {
-                return new LocationStringStandardizationUtils().getStandardString(caStateAbbrToFullNameMap.get(guess));
+                return LocationStringStandardizationUtils.getStandardString(caStateAbbrToFullNameMap.get(guess));
             } else {
                 return null;
             }
         } else {
-            return new LocationStringStandardizationUtils().getStandardString(state);
+            return LocationStringStandardizationUtils.getStandardString(state);
         }
     }
 
@@ -497,7 +499,7 @@ public class LocationUtils {
     public static String getStandardRegion(String standardCountry, String standardState) {
         if (USA.equalsIgnoreCase(standardCountry)) {
             if (StringUtils.isNotEmpty(standardState) && usRegionMap.containsKey(standardState.toUpperCase())) {
-                return new LocationStringStandardizationUtils()
+                return LocationStringStandardizationUtils
                         .getStandardString(usRegionMap.get(standardState.toUpperCase()));
             } else {
                 return "OTHER";
@@ -513,8 +515,7 @@ public class LocationUtils {
         while (nTerms > 0) {
             String[] terms = getNTerms(phrases, nTerms);
             String guess = getStandardStateFromPhrases(terms, stateLookUp);
-            if (guess != null)
-            {
+            if (guess != null) {
                 return guess;
             }
             nTerms--;
@@ -522,49 +523,37 @@ public class LocationUtils {
         return null;
     }
 
-    private static String[] getNTerms(String[] tokens, int n)
-    {
-        if (tokens.length >= n)
-        {
+    private static String[] getNTerms(String[] tokens, int n) {
+        if (tokens.length >= n) {
             String[] terms = new String[tokens.length - n + 1];
-            for (int i = 0; i < tokens.length - n + 1; i++)
-            {
+            for (int i = 0; i < tokens.length - n + 1; i++) {
                 String[] termTokens = new String[n];
                 System.arraycopy(tokens, i, termTokens, 0, n);
                 terms[i] = StringUtils.join(termTokens, " ");
             }
             return terms;
-        }
-        else
-        {
-            return new String[]{};
+        } else {
+            return new String[] {};
         }
     }
 
-    private static String getStandardStateFromPhrases(String[] phrases, Map<String, String> stateLookUp)
-    {
+    private static String getStandardStateFromPhrases(String[] phrases, Map<String, String> stateLookUp) {
         List<String> phraseList = new ArrayList<>(Arrays.asList(phrases));
         Collections.reverse(phraseList);
-        for (String phrase : phraseList)
-        {
+        for (String phrase : phraseList) {
             String guess = getStandardStateFromPhrase(phrase, stateLookUp);
-            if (guess != null)
-            {
+            if (guess != null) {
                 return guess;
             }
         }
         return null;
     }
 
-    private static String getStandardStateFromPhrase(String phrase, Map<String, String> stateLookUp)
-    {
+    private static String getStandardStateFromPhrase(String phrase, Map<String, String> stateLookUp) {
         phrase = phrase.trim();
-        if (stateLookUp.containsKey(phrase))
-        {
+        if (stateLookUp.containsKey(phrase)) {
             return stateLookUp.get(phrase);
-        }
-        else
-        {
+        } else {
             return null;
         }
     }

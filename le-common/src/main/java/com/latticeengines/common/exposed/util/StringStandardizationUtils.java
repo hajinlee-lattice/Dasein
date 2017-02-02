@@ -16,6 +16,7 @@ public class StringStandardizationUtils {
     private Character[] removed = {};
     private Character[] replacedBySpace = {};
     private String[][] replaced = {};
+    private static StringStandardizationUtils singletonUtil = new StringStandardizationUtils();
 
     public static boolean objectIsNullOrEmptyString(Object obj) {
         if (obj == null) {
@@ -26,7 +27,11 @@ public class StringStandardizationUtils {
         }
     }
 
-    public String getStandardString(String str) {
+    public static String getStandardString(String str) {
+        return singletonUtil.getStandardStringInternal(str);
+    }
+
+    protected String getStandardStringInternal(String str) {
         try {
             if (StringUtils.isEmpty(str)) {
                 return null;

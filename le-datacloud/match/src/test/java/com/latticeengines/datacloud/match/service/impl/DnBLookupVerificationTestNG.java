@@ -204,8 +204,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     private void prepareFortune1000InputData(String fileName, boolean includeState, boolean includeCity) {
         try {
-            contextsRealtime = new HashMap<String, DnBMatchContext>();
-            contextsBulk = new HashMap<String, DnBMatchContext>();
+            contextsRealtime = new HashMap<>();
+            contextsBulk = new HashMap<>();
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + fileName);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
@@ -217,7 +217,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 country = LocationUtils.getStandardCountry(country);
                 String countryCode = countryCodeService.getCountryCode(country);
                 String name = record.get(0);
-                name = new NameStringStandardizationUtils().getStandardString(name);
+                name = NameStringStandardizationUtils.getStandardString(name);
                 String state = null;
                 if (includeState) {
                     state = record.get(FORTUNE1000_STATE);
@@ -226,7 +226,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 String city = null;
                 if (includeCity) {
                     city = record.get(FORTUNE1000_CITY);
-                    city = new NameStringStandardizationUtils().getStandardString(city);
+                    city = NameStringStandardizationUtils.getStandardString(city);
                 }
                 if (name != null && countryCode != null) {
                     MatchKeyTuple input = new MatchKeyTuple();
@@ -255,7 +255,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     private void prepareFortune1000LargeInputData() {
         try {
-            contextsBulk = new HashMap<String, DnBMatchContext>();
+            contextsBulk = new HashMap<>();
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + FORTUNE1000_FILENAME);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
@@ -268,11 +268,11 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                     country = LocationUtils.getStandardCountry(country);
                     String countryCode = countryCodeService.getCountryCode(country);
                     String name = record.get(0);
-                    name = new NameStringStandardizationUtils().getStandardString(name);
+                    name = NameStringStandardizationUtils.getStandardString(name);
                     String state = record.get(FORTUNE1000_STATE);
                     state = LocationUtils.getStandardState(country, state);
                     String city = record.get(FORTUNE1000_CITY);
-                    city = new NameStringStandardizationUtils().getStandardString(city);
+                    city = NameStringStandardizationUtils.getStandardString(city);
                     if (name != null && countryCode != null) {
                         MatchKeyTuple input = new MatchKeyTuple();
                         input.setCountry(country);

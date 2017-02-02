@@ -17,21 +17,26 @@ public class NameStringStandardizationUtils extends StringStandardizationUtils {
     private Character[] replacedBySpace = { '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',', '(', ')', '{', '}', '[',
             ']', '.', '"' };
     String[][] replaced = { { "&", "AND" } };
+    private static NameStringStandardizationUtils singletonUtil = new NameStringStandardizationUtils();
+
+    public static String getStandardString(String str) {
+        return singletonUtil.getStandardStringInternal(str);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToRemove() {
-        return new ArrayList<Character>(Arrays.asList(removed));
+        return new ArrayList<>(Arrays.asList(removed));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToReplaceWithWhiteSpace() {
-        return new ArrayList<Character>(Arrays.asList(replacedBySpace));
+        return new ArrayList<>(Arrays.asList(replacedBySpace));
     }
 
     protected Map<String, String> getCharactersToReplaceWithWord() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (String[] entry : replaced) {
             map.put(entry[0], entry[1]);
         }

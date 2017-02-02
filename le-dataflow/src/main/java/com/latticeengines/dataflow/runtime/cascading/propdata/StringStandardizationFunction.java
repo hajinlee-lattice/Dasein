@@ -26,7 +26,7 @@ public class StringStandardizationFunction extends BaseOperation implements Func
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         String str = arguments.getString(stringField);
-        str = new StringStandardizationUtils().getStandardString(str);
+        str = StringStandardizationUtils.getStandardString(str);
         functionCall.getOutputCollector().add(new Tuple(str));
     }
 }

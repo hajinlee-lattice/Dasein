@@ -17,22 +17,27 @@ public class LocationStringStandardizationUtils extends StringStandardizationUti
     private Character[] replacedBySpace = { '&', '-', '_', '|', '\\', '/', '\t', '?', ';', ':', ',', '(', ')', '{', '}',
             '[', ']', '.', '"' };
     private String[][] replaced = {};
+    private static LocationStringStandardizationUtils singletonUtil = new LocationStringStandardizationUtils();
+
+    public static String getStandardString(String str) {
+        return singletonUtil.getStandardStringInternal(str);
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToRemove() {
-        return new ArrayList<Character>(Arrays.asList(removed));
+        return new ArrayList<>(Arrays.asList(removed));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected List<Character> getCharactersToReplaceWithWhiteSpace() {
-        return new ArrayList<Character>(Arrays.asList(replacedBySpace));
+        return new ArrayList<>(Arrays.asList(replacedBySpace));
     }
 
     @Override
     protected Map<String, String> getCharactersToReplaceWithWord() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (String[] entry : replaced) {
             map.put(entry[0], entry[1]);
         }

@@ -20,13 +20,13 @@ public class NameLocationServiceImpl implements NameLocationService {
     @Override
     public void normalize(NameLocation nameLocation) {
 
-        String cleanName = new NameStringStandardizationUtils().getStandardString(nameLocation.getName());
+        String cleanName = NameStringStandardizationUtils.getStandardString(nameLocation.getName());
         String cleanCountry = LocationUtils.getStandardCountry(nameLocation.getCountry());
         String countryCode = countryCodeService.getCountryCode(cleanCountry);
         String cleanState = LocationUtils.getStandardState(cleanCountry, nameLocation.getState());
-        String cleanCity = new NameStringStandardizationUtils().getStandardString(nameLocation.getCity());
+        String cleanCity = NameStringStandardizationUtils.getStandardString(nameLocation.getCity());
         String cleanPhoneNumber = PhoneNumberUtils.getStandardPhoneNumber(nameLocation.getPhoneNumber(), countryCode);
-        String cleanZipCode = new StringStandardizationUtils().getStandardString(nameLocation.getZipcode());
+        String cleanZipCode = StringStandardizationUtils.getStandardString(nameLocation.getZipcode());
 
         nameLocation.setName(cleanName);
         nameLocation.setState(cleanState);

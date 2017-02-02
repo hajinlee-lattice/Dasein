@@ -32,19 +32,19 @@ public class StringStandardizationUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "locationStringDataProvider")
     public void testLocationStringStandardizeString(String input, String expectedOutput) {
-        String output = new LocationStringStandardizationUtils().getStandardString(input);
+        String output = LocationStringStandardizationUtils.getStandardString(input);
         Assert.assertEquals(output, expectedOutput);
     }
 
     @Test(groups = "unit", dataProvider = "nameStringDataProvider")
     public void testNameStringStandardizeString(String input, String expectedOutput) {
-        String output = new NameStringStandardizationUtils().getStandardString(input);
+        String output = NameStringStandardizationUtils.getStandardString(input);
         Assert.assertEquals(output, expectedOutput);
     }
 
     @Test(groups = "unit", dataProvider = "commonStringDataProvider")
     public void testCommonStringStandardizeString(String input, String expectedOutput) {
-        String output = new StringStandardizationUtils().getStandardString(input);
+        String output = StringStandardizationUtils.getStandardString(input);
         Assert.assertEquals(output, expectedOutput);
     }
 }
