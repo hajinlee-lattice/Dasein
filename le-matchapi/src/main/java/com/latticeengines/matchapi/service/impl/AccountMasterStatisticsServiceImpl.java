@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AMStatsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.AccountMasterFactEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatistics;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStatsDetails;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
@@ -316,10 +318,63 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
         for (String encodedColumnName : codeBookInfo.keySet()) {
             if (cube.getStatistics().containsKey(encodedColumnName)) {
                 AttributeStatistics encodedValueCountInfo = cube.getStatistics().get(encodedColumnName);
+                String serializedTemplate = createTemplateInfoWithoutCodedInfo(encodedValueCountInfo);
 
+                int idx = 0;
                 for (String attrName : codeBookInfo.get(encodedColumnName)) {
-                    cube.getStatistics().put(attrName, encodedValueCountInfo);
+                    AttributeStatistics decodedInfo = JsonUtils.deserialize(serializedTemplate,
+                            AttributeStatistics.class);
+                    populateDecodedBucketInfo(decodedInfo, encodedValueCountInfo, idx++);
+                    cube.getStatistics().put(attrName, decodedInfo);
                 }
+            }
+        }
+    }
+
+    private void populateDecodedBucketInfo(AttributeStatistics decodedInfo, AttributeStatistics encodedValueCountInfo,
+            int idx) {
+        if (encodedValueCountInfo.getRowBasedStatistics() != null) {
+            AttributeStatsDetails st = encodedValueCountInfo.getRowBasedStatistics();
+            populateDecodedBuckets(decodedInfo.getRowBasedStatistics().getBuckets(), st.getBuckets(), idx);
+        }
+        if (encodedValueCountInfo.getUniqueLocationBasedStatistics() != null) {
+            AttributeStatsDetails st = encodedValueCountInfo.getUniqueLocationBasedStatistics();
+            populateDecodedBuckets(decodedInfo.getUniqueLocationBasedStatistics().getBuckets(), st.getBuckets(), idx);
+        }
+    }
+
+    private void populateDecodedBuckets(Buckets decodedBuckets, Buckets encodedBuckets, int idx) {
+        if (encodedBuckets != null && encodedBuckets.getBucketList() != null
+                && encodedBuckets.getBucketList().size() > 0) {
+            int loopId = 0;
+            for (Bucket bucket : encodedBuckets.getBucketList()) {
+                if (bucket.getEncodedCountList() != null && bucket.getEncodedCountList().length > idx) {
+                    decodedBuckets.getBucketList().get(loopId).setCount(bucket.getEncodedCountList()[idx]);
+                }
+                loopId++;
+            }
+        }
+    }
+
+    private String createTemplateInfoWithoutCodedInfo(AttributeStatistics encodedValueCountInfo) {
+        AttributeStatistics templateInfoWithoutCodedInfo = JsonUtils
+                .deserialize(JsonUtils.serialize(encodedValueCountInfo), AttributeStatistics.class);
+        if (templateInfoWithoutCodedInfo.getRowBasedStatistics() != null) {
+            AttributeStatsDetails st = templateInfoWithoutCodedInfo.getRowBasedStatistics();
+            cleanEncodedDataFromBuckets(st);
+        }
+        if (templateInfoWithoutCodedInfo.getUniqueLocationBasedStatistics() != null) {
+            AttributeStatsDetails st = templateInfoWithoutCodedInfo.getUniqueLocationBasedStatistics();
+            cleanEncodedDataFromBuckets(st);
+        }
+        return JsonUtils.serialize(templateInfoWithoutCodedInfo);
+    }
+
+    private void cleanEncodedDataFromBuckets(AttributeStatsDetails st) {
+        if (st.getBuckets() != null && st.getBuckets().getBucketList() != null
+                && st.getBuckets().getBucketList().size() > 0) {
+            for (Bucket bucket : st.getBuckets().getBucketList()) {
+                bucket.setEncodedCountList(null);
             }
         }
     }
