@@ -55,27 +55,13 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
 
             Assert.assertEquals(count, 83);
             assertCachePositiveWithDuns();
-            assertCacheNegativeWithDuns();
         } catch (Exception ex) {
             log.error("Exception!", ex);
             Assert.fail("Test failed! due to=" + ex.getMessage());
         }
     }
 
-    private void assertCacheNegativeWithDuns() {
-        DnBMatchContext context = new DnBMatchContext();
-        NameLocation nameLocation = new NameLocation();
-        nameLocation.setName("Miaochafong");
-        context.setInputNameLocation(nameLocation);
-
-        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
-        DnBCache whiteCache = dnbCacheService.lookupCache(context);
-        Assert.assertTrue(whiteCache == null);
-
-    }
-
     private void assertCachePositiveWithDuns() {
-
         DnBMatchContext context = new DnBMatchContext();
         NameLocation nameLocation = new NameLocation();
         nameLocation.setName("R. W. Notary");
@@ -105,6 +91,49 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
         fieldMap.put("PhoneNumber", "phoneNumber");
         fieldMap.put("ZipCode", "zipcode");
         config.setFieldMap(fieldMap);
+    }
+    
+    @Test(groups = "deployment", enabled = true)
+    public void startLoadWithoutDuns() {
+        try {
+            HdfsPodContext.changeHdfsPodId(podId);
+            uploadTestAVro(avroDir, AM_CACHE_FILE);
+            CacheLoaderConfig config = new CacheLoaderConfig();
+            config.setDirPath(avroDir);
+            getFieldMap(config);
+            config.setDunsField("DUNS");
+            config.setConfidenceCode(4);
+            config.setMatchGrade("AAZ");
+            config.setIsWhiteCache(false);
+            long count = ((AvroCacheLoaderServiceImpl) cacheLoaderService).startLoad(avroDir, config);
+
+            Assert.assertEquals(count, 17);
+            assertCachePositiveWithoutDuns();
+        } catch (Exception ex) {
+            log.error("Exception!", ex);
+            Assert.fail("Test failed! due to=" + ex.getMessage());
+        }
+    }
+
+    private void assertCachePositiveWithoutDuns() {
+
+        DnBMatchContext context = new DnBMatchContext();
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName("Angeles Grocery");
+        nameLocation.setCity("Jersey City");
+        nameLocation.setState("New Jersey");
+        nameLocation.setCountry("USA");
+        nameLocation.setZipcode(null);
+        nameLocation.setPhoneNumber(null);
+        nameLocationService.normalize(nameLocation);
+        context.setInputNameLocation(nameLocation);
+        context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
+        DnBCache blackCache = dnbCacheService.lookupCache(context);
+
+        Assert.assertTrue(blackCache != null);
+        Assert.assertNull(blackCache.getDuns());
+        Assert.assertNull(blackCache.getConfidenceCode());
+        Assert.assertNull(blackCache.getMatchGrade());
     }
 
     private void uploadTestAVro(String avroDir, String fileName) {

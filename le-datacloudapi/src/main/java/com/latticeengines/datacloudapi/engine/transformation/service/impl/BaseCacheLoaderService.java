@@ -33,9 +33,9 @@ import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloudapi.engine.transformation.service.CacheLoaderConfig;
 import com.latticeengines.datacloudapi.engine.transformation.service.CacheLoaderService;
-import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
@@ -103,7 +103,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
         } catch (Exception ex) {
             log.error("Failed to load cache!", ex);
             throw new RuntimeException(ex);
-        } 
+        }
     }
 
     protected long startLoad(String dirPath, CacheLoaderConfig config) throws Exception {
@@ -239,20 +239,20 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     private DnBMatchContext createMatchContext(E record, CacheLoaderConfig config) {
         String dunsField = getDunsField(config);
         Object duns = getFieldValue(record, dunsField);
-        if (duns == null && !config.isCallMatch()) {
+        if (duns == null && config.isWhiteCache()) {
             return null;
         }
-        if (duns != null && config.isCallMatch()) {
+        if (duns != null && !config.isWhiteCache()) {
             return null;
         }
         String dunsStr = null;
-        if (!config.isCallMatch()) {
+        if (config.isWhiteCache()) {
             dunsStr = duns.toString();
         }
-        if (StringUtils.isEmpty(dunsStr) && !config.isCallMatch()) {
+        if (StringUtils.isEmpty(dunsStr) && config.isWhiteCache()) {
             return null;
         }
-        if (!StringUtils.isEmpty(dunsStr) && config.isCallMatch()) {
+        if (!StringUtils.isEmpty(dunsStr) && !config.isWhiteCache()) {
             return null;
         }
         DnBMatchContext matchContext = new DnBMatchContext();
@@ -287,7 +287,11 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             matchContext.setMatchGrade(defaultMatchGrade);
         }
         matchContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.BATCH);
-        matchContext.setDnbCode(DnBReturnCode.OK);
+        if (config.isWhiteCache()) {
+            matchContext.setDnbCode(DnBReturnCode.OK);
+        } else {
+            matchContext.setDnbCode(DnBReturnCode.UNMATCH);
+        }
     }
 
     private void setFieldValues(E record, NameLocation nameLocation, CacheLoaderConfig config) {

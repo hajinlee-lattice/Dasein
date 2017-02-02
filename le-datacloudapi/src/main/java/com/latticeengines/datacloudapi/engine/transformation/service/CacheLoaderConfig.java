@@ -21,8 +21,10 @@ public class CacheLoaderConfig {
     @JsonProperty("matchGrade")
     private String matchGrade;
     
-    private boolean isCallMatch;
-    private boolean isBatchMode;
+    @JsonProperty("isWhiteCache")
+    private boolean isWhiteCache = true;
+    
+    @JsonProperty("dataCloudVersion")
     private String dataCloudVersion;
 
     public String getVersion() {
@@ -83,12 +85,12 @@ public class CacheLoaderConfig {
     
     
 
-    public boolean isCallMatch() {
-        return isCallMatch;
+    public boolean isWhiteCache() {
+        return isWhiteCache;
     }
 
-    public void setCallMatch(boolean isCallMatch) {
-        this.isCallMatch = isCallMatch;
+    public void setIsWhiteCache(boolean isWhiteCache) {
+        this.isWhiteCache = isWhiteCache;
     }
     
     
@@ -100,21 +102,14 @@ public class CacheLoaderConfig {
         this.dataCloudVersion = dataCloudVersion;
     }
 
-
-    public boolean isBatchMode() {
-        return isBatchMode;
-    }
-
-    public void setBatchMode(boolean isBatchMode) {
-        this.isBatchMode = isBatchMode;
-    }
-
     @Override
     public String toString() {
         return "CacheLoaderConfig [sourceName=" + sourceName + ", version=" + version + ", dirPath=" + dirPath
                 + ", fieldMap=" + fieldMap + ", dunsField=" + dunsField + ", confidenceCode=" + confidenceCode
-                + ", matchGrade=" + matchGrade + ", isCallMatch=" + isCallMatch + ", dataCloudVersion="
+                + ", matchGrade=" + matchGrade + ", isWhiteCache=" + isWhiteCache + ", dataCloudVersion="
                 + dataCloudVersion + "]";
     }
+
+
 
 }
