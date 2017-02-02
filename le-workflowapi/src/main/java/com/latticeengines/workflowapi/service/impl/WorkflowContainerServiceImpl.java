@@ -198,7 +198,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         Map<String, String> inputProperties = workflowJob.getInputContext();
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
         job.setInputs(inputProperties);
-        job.setId(workflowJob.getPid());
+        job.setId(workflowJob.getWorkflowId());
         if (workflowJob.getStartTimeInMillis() != null) {
             job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
         }
