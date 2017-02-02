@@ -46,10 +46,10 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Apple", null, "CA", null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
 
             // oversea head quarter
-            { null, "Royal Dutch Shell", null, null, "Netherlands", null, "ROYAL DUTCH SHELL plc", "ZUID-HOLLAND", "NETHERLANDS", ">10,000", "0 - 1M" },
+            { null, "Royal Dutch Shell", null, null, "Netherlands", null, "ROYAL DUTCH SHELL plc", "ZUID-HOLLAND", "NETHERLANDS", ">10,000", "0-1M" },
 
             // us head quarter, oversea domestic ultimate
-            { null, "Google UK", null, null, "UK", "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "ENGLAND", "1001 - 2500", "1 - 5B" },
+            { null, "Google UK", null, null, "UK", "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
 
             //TODO: cases that should pass but cannot pass now
             // { "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA", "1", "1", "1", "1", "1", "1" }
