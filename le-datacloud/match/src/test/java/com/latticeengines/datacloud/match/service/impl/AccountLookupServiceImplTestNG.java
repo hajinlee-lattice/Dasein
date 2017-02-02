@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
@@ -16,35 +15,30 @@ public class AccountLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Autowired
     private AccountLookupService accountLookupService;
 
-    @Autowired
-    private DataCloudVersionEntityMgr versionEntityMgr;
-
     @Value("${common.le.stack}")
     private String leStack;
 
     @Test(groups = "functional")
     public void testUpdateLookup() {
-        String domain = leStack + "_testdomain";
+        String domain = leStack + "_testdomain.com";
         String duns = leStack + "_testduns";
-        String accountId1 = "TestLatticeAccountId_1";
-        String accountId2 = "TestLatticeAccountId_2";
-
-        String dataCloudVersion = versionEntityMgr.currentApprovedVersion().getVersion();
+        String accountId1 = leStack + "_TestLatticeAccountId_1";
+        String accountId2 = leStack + "_TestLatticeAccountId_2";
 
         AccountLookupEntry lookupEntry = new AccountLookupEntry();
         lookupEntry.setDomain(domain);
         lookupEntry.setDuns(duns);
         lookupEntry.setPatched(true);
         lookupEntry.setLatticeAccountId(accountId1);
-        accountLookupService.updateLookupEntry(lookupEntry, dataCloudVersion);
+        accountLookupService.updateLookupEntry(lookupEntry, currentDataCloudVersion);
 
-        AccountLookupRequest request = new AccountLookupRequest(dataCloudVersion);
+        AccountLookupRequest request = new AccountLookupRequest(currentDataCloudVersion);
         request.addId(lookupEntry.getId());
         String id = accountLookupService.batchLookupIds(request).get(0);
         Assert.assertEquals(id, accountId1);
 
         lookupEntry.setLatticeAccountId(accountId2);
-        accountLookupService.updateLookupEntry(lookupEntry, dataCloudVersion);
+        accountLookupService.updateLookupEntry(lookupEntry, currentDataCloudVersion);
 
         id = accountLookupService.batchLookupIds(request).get(0);
         Assert.assertEquals(id, accountId2);

@@ -346,7 +346,7 @@ public enum LedpCode {
     LEDP_24003("PLS operation exception: {0}"), //
     LEDP_24004("ZK operation exception: {0}"), //
 
-    // le-propdata
+    // le-datacloud
     LEDP_25000("Can not create new derived entitlement package {0}."), //
     LEDP_25001("Derived entitlement resource error."), //
     LEDP_25002("Source entitlement resource error."), //
@@ -377,6 +377,10 @@ public enum LedpCode {
     LEDP_25027("Fail to get token from DnB authentication service"), //
     LEDP_25028("Cannot find the root attribute for dimension {0}:{1}"), //
     LEDP_25029("Cannot find the attribute id for query [ {0} ]: {1}"), //
+    LEDP_25030("To patch, must provide target lattice account id."), //
+    LEDP_25031("The target lattice account id {0} is not valid."), //
+    LEDP_25032("Must provide sufficiently many match keys."), //
+    LEDP_25033("Patching domain and location (without Name) is not supported."), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

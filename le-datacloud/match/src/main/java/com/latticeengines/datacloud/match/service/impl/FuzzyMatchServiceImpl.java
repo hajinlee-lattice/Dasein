@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +23,7 @@ import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
@@ -83,6 +83,24 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchRecord.setLatticeAccountId(result);
                 if (StringUtils.isNotEmpty(result)) {
                     matchRecord.setMatched(true);
+                }
+                if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {
+                    matchRecord.setMatchedDuns(traveler.getMatchKeyTuple().getDuns());
+                } else {
+                    // might be the case of low quality duns
+                    List<DnBMatchContext> dnBMatchContexts = traveler.getDnBMatchContexts();
+                    List<String> possibleDuns = new ArrayList<>();
+                    if (dnBMatchContexts != null && !dnBMatchContexts.isEmpty()) {
+                        for (DnBMatchContext dnBMatchContext: dnBMatchContexts) {
+                            String duns = dnBMatchContext.getDuns();
+                            if (StringUtils.isNotEmpty(duns)) {
+                                possibleDuns.add(duns);
+                            }
+                        }
+                    }
+                    if (!possibleDuns.isEmpty()) {
+                        matchRecord.setMatchedDuns(StringUtils.join(possibleDuns, ","));
+                    }
                 }
                 setDebugValues(traveler, matchRecord);
                 traveler.setBatchMode(actorSystem.isBatchMode());

@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -53,9 +54,15 @@ public class DataCloudMatchFunctionalTestNGBase extends AbstractTestNGSpringCont
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
 
+    @Autowired
+    protected DataCloudVersionEntityMgr versionEntityMgr;
+
+    protected String currentDataCloudVersion;
+
     @PostConstruct
     private void postConstruct() {
         metricService.disable();
+        currentDataCloudVersion = versionEntityMgr.currentApprovedVersion().getVersion();
     }
 
     protected MatchClient getMatchClient() {

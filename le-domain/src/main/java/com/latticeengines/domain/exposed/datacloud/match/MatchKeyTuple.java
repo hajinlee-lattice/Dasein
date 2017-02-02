@@ -2,21 +2,48 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchKeyTuple implements Fact {
+
+    @JsonProperty("Domain")
     private String domain;
+
+    @JsonProperty("Name")
     private String name;
+
+    @JsonProperty("City")
     private String city;
+
+    @JsonProperty("State")
     private String state;
+
+    @JsonProperty("Country")
     private String country;
+
+    @JsonIgnore
     private String countryCode;
+
+    @JsonProperty("ZipCode")
     private String zipcode;
+
+    @JsonProperty("PhoneNumber")
     private String phoneNumber;
+
+    @JsonProperty("DUNS")
     private String duns;
+
+    @JsonProperty("Email")
     private String email;
 
+    @JsonIgnore
     private String serializedFormat;
 
     @MetricField(name = MatchConstants.DOMAIN_FIELD)
@@ -117,6 +144,34 @@ public class MatchKeyTuple implements Fact {
     public void setEmail(String email) {
         this.email = email;
         constructSerializedFormat();
+    }
+
+    public boolean hasDomain() {
+        return StringUtils.isNotEmpty(domain);
+    }
+
+    public boolean hasName() {
+        return StringUtils.isNotEmpty(name);
+    }
+
+    public boolean hasCity() {
+        return StringUtils.isNotEmpty(city);
+    }
+
+    public boolean hasState() {
+        return StringUtils.isNotEmpty(state);
+    }
+
+    public boolean hasCountry() {
+        return StringUtils.isNotEmpty(country);
+    }
+
+    public boolean hasZipCode() {
+        return StringUtils.isNotEmpty(zipcode);
+    }
+
+    public boolean hasLocation() {
+        return hasCity() || hasState() || hasCountry() || hasZipCode();
     }
 
     @Override
