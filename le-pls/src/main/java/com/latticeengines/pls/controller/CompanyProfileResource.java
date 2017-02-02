@@ -54,7 +54,9 @@ public class CompanyProfileResource {
 
         while (parameterNames.hasMoreElements()) {
             String parameterName = parameterNames.nextElement();
-            parameters.put(parameterName, request.getParameter(parameterName));
+            if (!"enforceFuzzyMatch".equals(parameterName)) {
+                parameters.put(parameterName, request.getParameter(parameterName));
+            }
         }
         return parameters;
     }
