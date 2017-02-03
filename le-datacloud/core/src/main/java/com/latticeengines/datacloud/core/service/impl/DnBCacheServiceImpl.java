@@ -76,8 +76,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         DnBCache cache = null;
         if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
             cache = initCacheEntity(context, false);
+            cache.setWhiteCache(true);
         } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
             cache = initCacheEntity(context, true);
+            cache.setWhiteCache(false);
         } else {
             return null;
         }
@@ -96,8 +98,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             DnBCache cache = null;
             if (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD) {
                 cache = initCacheEntity(context, false);
+                cache.setWhiteCache(true);
             } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
                 cache = initCacheEntity(context, true);
+                cache.setWhiteCache(false);
             } else {
                 continue;
             }
