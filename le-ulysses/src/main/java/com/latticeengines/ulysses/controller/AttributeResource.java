@@ -1,9 +1,11 @@
 package com.latticeengines.ulysses.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,7 +22,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/attributes")
 public class AttributeResource {
-    private static final Log log = LogFactory.getLog(AttributeResource.class);
 
     @Autowired
     private AttributeService attributeService;
@@ -34,8 +35,23 @@ public class AttributeResource {
 
     @RequestMapping(value = "/primary/validation-expression", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Validation Expression with different business rules, to invoke Scoring API / Company Profile API / enforcing Model Mapping ")
-    public String getSimplifiedValidationExpression() {
-        return "((Website||Email||CompanyName)&&(Id))";
+    @ApiOperation(value = "Validation Expression with different business rules,"
+            + " to invoke Scoring API / Company Profile API / enforcing " + "Model Mapping", response = String.class)
+    public void getSimplifiedValidationExpression(HttpServletResponse response) {
+
+        String result = "((Website||Email||CompanyName)&&(Id))";
+        writePlainTextToResponse(response, result);
+    }
+
+    private void writePlainTextToResponse(HttpServletResponse response, String result) {
+        try {
+            OutputStream os = response.getOutputStream();
+            response.setContentType("text/plain");
+            os.write(result.getBytes());
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
