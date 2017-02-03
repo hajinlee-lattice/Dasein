@@ -732,7 +732,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
    }
 
     private List<GenericRecord> extractRecords(Item item) {
-        List<GenericRecord> records = new ArrayList<GenericRecord>();
+        List<GenericRecord> records = new ArrayList<>();
         extractRecords(item, records);
         return records;
     }

@@ -32,10 +32,9 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"boolean\",\"null\"]}"
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}"
                     + "]}",
-            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, DOMAIN, DUNS, PATCHED);
+            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, DOMAIN, DUNS);
 
     @Id
     String id = null;
@@ -125,7 +124,6 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         builder.set(LATTICE_ACCOUNT_ID, getLatticeAccountId());
         builder.set(DOMAIN, getDomain());
         builder.set(DUNS, getDuns());
-        builder.set(PATCHED, Boolean.TRUE.equals(getPatched()));
         return builder.build();
     }
 
@@ -134,7 +132,6 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         setLatticeAccountId(record.get(LATTICE_ACCOUNT_ID) == null ? null : record.get(LATTICE_ACCOUNT_ID).toString());
         setDomain(record.get(DOMAIN) == null ? null : record.get(DOMAIN).toString());
         setDuns(record.get(DUNS) == null ? null : record.get(DUNS).toString());
-        setPatched(record.get(PATCHED) == null ? null : Boolean.valueOf(String.valueOf(record.get(PATCHED))));
         return this;
     }
 
