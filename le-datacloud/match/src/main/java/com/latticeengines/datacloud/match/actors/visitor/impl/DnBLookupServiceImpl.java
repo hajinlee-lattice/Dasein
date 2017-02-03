@@ -159,7 +159,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             }
 
             DnBCache dnBCache = dnbCacheService.addCache(context);
-            context.setCacheId(dnBCache.getId());
+            if (dnBCache != null) {
+                context.setCacheId(dnBCache.getId());
+            }
         }
 
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
