@@ -49,6 +49,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(ModelCopyResourceDeploymentTestNG.class);
+    private static final String ORIGINAL_MODELID = "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -85,16 +86,29 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private String outputFileName = "nonLatinInRows.csv";
 
-    @Test(groups = "deployment", dataProvider = "dataProvider")
+    @Test(groups = "deployment", dataProvider = "dataProvider", timeOut = 900000)
     public void test(boolean scrTenantIsEncrypted, boolean dstTenantIsEncrypted) throws Exception {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
         cleanup();
         setupHdfs();
-        log.info("Wait for 180 seconds to download model summary");
-        Thread.sleep(180000L);
+        setupSecurityContext(tenant1);
+        log.info("Wait for 900 seconds to download model summary");
+        waitToDownloadModel(ORIGINAL_MODELID);
         setupTables();
         testModelCopy();
         cleanup();
+    }
+
+    private void waitToDownloadModel(String modelId) throws InterruptedException {
+        while (true) {
+            ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+            if (modelSummary == null) {
+                Thread.sleep(1000L);
+                log.info("model is null");
+            } else {
+                break;
+            }
+        }
     }
 
     public void cleanup() throws IOException {
@@ -104,7 +118,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2.getId())).toString());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant1.getId());
         HdfsUtils.rmdir(yarnConfiguration, customerBase + tenant2.getId());
-        ModelSummary model = modelSummaryEntityMgr.getByModelId("ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
+        ModelSummary model = modelSummaryEntityMgr.getByModelId(ORIGINAL_MODELID);
         if (model != null) {
             modelSummaryEntityMgr.delete(model);
         }
@@ -156,8 +170,6 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         eventTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
         metadataProxy.createTable(tenant1.getId(), eventTable.getName(), eventTable);
 
-        setupSecurityContext(tenant1);
-
         String outputPath = PathBuilder
                 .buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId())).toString() + "/"
                 + outputFileName;
@@ -189,11 +201,11 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void testModelCopy() throws Exception {
 
-        modelCopyService.copyModel(tenant2.getId(), "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork");
+        modelCopyService.copyModel(tenant2.getId(), ORIGINAL_MODELID);
 
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenant2.getId());
-        log.info("Wait for 180 seconds to download model summary");
-        Thread.sleep(180000L);
+        // log.info("Wait for 900 seconds to download model summary");
+        // Thread.sleep(900000L);
 
         setupSecurityContext(tenant2);
 
@@ -238,6 +250,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
         json = objectMapper.readTree(contents);
         assertEquals(json.get("Summary").get("ModelID").asText(), modelId);
+
+        waitToDownloadModel(modelId);
 
         ModelSummary summary = modelSummaryService.getModelSummaryByModelId(modelId);
         assertNotNull(summary);
