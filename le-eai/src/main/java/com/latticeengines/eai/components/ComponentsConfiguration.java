@@ -23,7 +23,7 @@ public class ComponentsConfiguration {
         SalesforceHttpClient httpClient = new SalesforceHttpClient(new SslContextFactory());
         httpClient.setConnectTimeout(60 * 1000);
         httpClient.setTimeout(60 * 60 * 1000);
-        httpClient.setMaxContentLength(1000 * 1000 * 50);
+        httpClient.setMaxContentLength(5 * 1000 * 1000 * 1000);
         config.setHttpClient(httpClient);
 
         loginConfig.setClientId(clientId);
