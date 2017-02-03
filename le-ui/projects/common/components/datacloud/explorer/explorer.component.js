@@ -58,6 +58,7 @@ angular.module('common.datacloud.explorer', [
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
         count: (EnrichmentAccountLookup ? Object.keys(EnrichmentAccountLookup).length : EnrichmentCount.data),
         show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES),
+        show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         enabledManualSave: false,
         enrichments_loaded: false,
         enrichments_completed: false,
@@ -88,7 +89,6 @@ angular.module('common.datacloud.explorer', [
         category: $stateParams.category,
         subcategory: $stateParams.subcategory
     });
-
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
@@ -362,6 +362,8 @@ angular.module('common.datacloud.explorer', [
                 item.AttributeValue = vm.lookupFiltered[item.FieldName];
             }
 
+            item.HighlightState = highlightOptionsInitState(item);
+
             obj[category][subcategory].push(index);
         });
 
@@ -375,6 +377,40 @@ angular.module('common.datacloud.explorer', [
             getTopAttributes();
         }
     }
+
+    vm.highlightTypes = {
+        enabled: 'Enabled for Sales Team',
+        disabled: 'Disabled for Sales Team',
+        highlighted: 'Highlight for Sales Team'
+    }
+
+    var highlightOptionsInitState = function(enrichment) {
+        var ret = {type: '', label: '', enabled: false};
+
+        if(!enrichment.AttributeFlagsMap || !enrichment.AttributeFlagsMap.CompanyProfile) {
+            ret.label = 'Set';
+            ret.enabled = false;
+            return ret;
+        }
+        
+        ret.enabled = !enrichment.AttributeFlagsMap.CompanyProfile.hidden;
+
+        if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === true) {
+            ret.type = 'disabled';
+        }
+        if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === false) {
+            ret.type = 'enabled';
+        }
+        if(enrichment.AttributeFlagsMap.CompanyProfile.highlighted === true) {
+            ret.type = 'highlighted';
+        }
+        if(ret.type) {
+            ret.label = vm.highlightTypes[ret.type];
+        }
+
+        return ret;
+    }
+
 
     vm.filterLookupFiltered = function(item, type) {
         if (type === 'PERCENTAGE' && item != undefined) {
@@ -902,60 +938,31 @@ angular.module('common.datacloud.explorer', [
         return deferred.promise;
     }
 
-    vm.highlightTypes = {
-        enable: 'Enabled for Sales Team',
-        disable: 'Disabled for Sales Team',
-        highlight: 'Highlight for Sales Team'
-    }
-
-    vm.highlightOptionsInitState = function(enrichment) {
-        var ret = {};
-        ret.type = '';
-        ret.label = '';
-
-        if(!enrichment.AttributeFlagsMap || !enrichment.AttributeFlagsMap.CompanyProfile) {
-            ret.label = 'Set';
-            ret.enabled = false;
-            return ret;
-        }
-        
-        ret.enabled = enrichment.AttributeFlagsMap.CompanyProfile.hidden !== false;
-
-        if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === false) {
-            ret.type = 'disable';
-        }
-        if(enrichment.AttributeFlagsMap.CompanyProfile.hidden === true) {
-            ret.type = 'enable';
-        }
-        if(enrichment.AttributeFlagsMap.CompanyProfile.highlighted === true) {
-            ret.type = 'highlighted';
-        }
-        if(ret.type) {
-            ret.label = vm.highlightTypes[ret.type];
-        }
-
-        return ret;
-    }
-
     vm.setFlag = function(type, enrichment) {
         var flags = {
                 "@type": "companyProfileAttributeFlags",
                 "hidden": true,
                 "highlighted": false
             },
-            label = vm.highlightTypes[type] || 'unknown type';
+            label = vm.highlightTypes[type] || 'unknown type',
+            enabled = false;
 
-        if(type === 'enable') {
-            flags.hidden = false;
-        } else if(type === 'disable') {
-            flags.hidden = true;
-            flags.highlighted = false;
-        } else if(type === 'highlight') {
+        if(type === 'highlighted') {
             flags.hidden = false;
             flags.highlighted = true;
+            enabled = true;
+        } else if(type === 'enabled') {
+            flags.hidden = false;
+            enabled = true;
+        } else if(type === 'disabled') {
+            flags.hidden = true;
+            flags.highlighted = false;
+            enabled = false;
         }
-        setFlag({fieldName: enrichment.FieldName}, flags);
-        return {type: type, label: label};
+        
+        setFlag({fieldName: enrichment.FieldName}, flags).then(function(){
+            enrichment.HighlightState = {type: type, label: label, enabled: enabled};
+        });
     }
 
     vm.init();

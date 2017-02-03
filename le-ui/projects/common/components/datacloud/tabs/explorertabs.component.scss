@@ -9,7 +9,6 @@
     & > ul {
         @include flex-container;
         @include flex-item(1 1 auto);
-        border-right: 1px solid #d0d1d0;
         border-left: 1px solid #d0d1d0;
         max-width: 1200px;
         margin: 0 auto;
@@ -20,6 +19,7 @@
             position: relative;
             height: 73px;
             min-width: 237px;
+            max-width: 300px;
             cursor: pointer;
             .tab-container {
                 margin: 0;
@@ -35,7 +35,7 @@
                 z-index: 2;
             }
             &:last-child {
-                border-right: 0;
+                border-right: 1px solid #d0d1d0;
             }
             &.active {
                 background: #fafafa;

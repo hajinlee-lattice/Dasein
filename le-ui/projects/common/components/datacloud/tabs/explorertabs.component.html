@@ -36,6 +36,7 @@
             </div>
         </li>
         <li class="tab-team"
+            ng-if="vm.show_lattice_insights"
             ng-click="vm.setStateParams('team')"
             ng-class="{ 'active': vm.section == 'team' }">
             <div class="tab-container">

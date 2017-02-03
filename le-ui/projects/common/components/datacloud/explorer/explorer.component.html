@@ -261,7 +261,7 @@
                         <span class="lesser-description" ng-if="vm.lookupMode">
                             {{ enrichment.Description }}
                         </span>
-                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List">
+                        <div class="stats" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.section != 'lookup'">
                             <h5><label>Attribute range</label><label>Records</label></h5>
                             <ul>
                               <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List"><label>{{stat.Lbl}}</label> <span style="width: {{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt)|number:0}}%;"><span class="{{vm.categoryClass(enrichment.Category)}} background-color" ></span></span><em>{{stat.Cnt|number}}</em></li>
@@ -278,9 +278,9 @@
                             </li>
                             <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="openHighlighter[enrichment.FieldName] = {}">
                                 <button class="button" 
-                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': vm.highlightOptionsInitState(enrichment).enabled}" 
+                                        ng-class="{'selected': openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}" 
                                         ng-click="openHighlighter[enrichment.FieldName].open = !openHighlighter[enrichment.FieldName].open">
-                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || vm.highlightOptionsInitState(enrichment).type}}">{{openHighlighter[enrichment.FieldName].state.label || vm.highlightOptionsInitState(enrichment).label || 'Set'}}</span>
+                                    <span class="highlight-icon {{openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">{{openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}</span>
                                     <ul ng-class="{open: openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
                                         <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-click="openHighlighter[enrichment.FieldName].state = vm.setFlag(type, enrichment)">{{label}}</li>
                                         <li class="note">Either selection will clear highlights</li>

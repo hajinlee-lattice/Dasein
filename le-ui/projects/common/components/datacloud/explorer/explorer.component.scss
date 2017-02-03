@@ -624,16 +624,16 @@
                                     left: 0;
                                     transform: translateY(-50%);
                                 }
-                                &.enable:after {
+                                &.enabled:after {
                                     @include font-awesome-inline("\f00c");
                                     color: #0f9e4d;
                                 }
-                                &.disable:after {
+                                &.disabled:after {
                                     @include font-awesome-inline("\f111");
                                     font-size: 5px;
                                     margin-left: 3px;
                                 }
-                                &.highlight:after {
+                                &.highlighted:after {
                                     @include font-awesome-inline("\f005");
                                     color: #f78b3a;
                                 }

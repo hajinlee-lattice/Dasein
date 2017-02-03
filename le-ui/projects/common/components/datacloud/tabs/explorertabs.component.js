@@ -2,14 +2,16 @@ angular.module('common.datacloud.explorertabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
 .controller('ExplorerTabsController', function ($state, $stateParams, $scope,
-    BrowserStorageUtility, ResourceUtility, DataCloudStore) {
+    FeatureFlagService, BrowserStorageUtility, ResourceUtility, DataCloudStore) {
 
-    var vm = this;
+    var vm = this,
+        flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         DataCloudStore: DataCloudStore,
         stateParams: $stateParams,
-        section: $stateParams.section
+        section: $stateParams.section,
+        show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS)
     });
 
     vm.setStateParams = function(section) {
