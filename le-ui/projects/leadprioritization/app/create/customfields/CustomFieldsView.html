@@ -136,8 +136,8 @@
 								<select class="form-control"
 										ng-model="selectedOption"
 										ng-change="vm.changeMappingOption(fieldMapping, selectedOption)"
-										ng-init="options = (vm.UnmappedFieldsMap[fieldMapping.userField] && !fieldMapping.mappedToLatticeField) ? vm.mappingOptionsReserved : vm.mappingOptions; selectedOption = (fieldMapping.mappedToLatticeField) ? options[1] : options[0]"
-										ng-options="mappingOption as mappingOption.name for mappingOption in ::options">
+										ng-init="selectedOption = (fieldMapping.mappedToLatticeField) ? vm.mappingOptions[1] : vm.mappingOptions[0]"
+										ng-options="mappingOption as mappingOption.name for mappingOption in ::vm.mappingOptions">
 								</select>
 							</td>
 
