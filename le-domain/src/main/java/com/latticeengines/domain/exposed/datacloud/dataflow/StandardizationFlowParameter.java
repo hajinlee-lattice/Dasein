@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.FieldType;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
@@ -85,6 +86,18 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     
     @JsonProperty("NaicsMapFileName")
     private String naicsMapFileName;
+
+    @JsonProperty("AddConsolidatedRangeFields")
+    private String[] addConsolidatedRangeFields;
+
+    @JsonProperty("ConsolidateRangeStrategies")
+    private ConsolidateRangeStrategy[] consolidateRangeStrategies;
+
+    @JsonProperty("RangeInputFields")
+    private String[] rangeInputFields;
+
+    @JsonProperty("RangeMapFileNames")
+    private String[] rangeMapFileNames;
 
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
@@ -303,6 +316,38 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setNaicsMapFileName(String naicsMapFileName) {
         this.naicsMapFileName = naicsMapFileName;
+    }
+
+    public String[] getAddConsolidatedRangeFields() {
+        return addConsolidatedRangeFields;
+    }
+
+    public void setAddConsolidatedRangeFields(String[] addConsolidatedRangeFields) {
+        this.addConsolidatedRangeFields = addConsolidatedRangeFields;
+    }
+
+    public ConsolidateRangeStrategy[] getConsolidateRangeStrategies() {
+        return consolidateRangeStrategies;
+    }
+
+    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+        this.consolidateRangeStrategies = consolidateRangeStrategies;
+    }
+
+    public String[] getRangeInputFields() {
+        return rangeInputFields;
+    }
+
+    public void setRangeInputFields(String[] rangeInputFields) {
+        this.rangeInputFields = rangeInputFields;
+    }
+
+    public String[] getRangeMapFileNames() {
+        return rangeMapFileNames;
+    }
+
+    public void setRangeMapFileNames(String[] rangeMapFileNames) {
+        this.rangeMapFileNames = rangeMapFileNames;
     }
 
 }

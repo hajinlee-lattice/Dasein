@@ -23,10 +23,12 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunct
 import com.latticeengines.dataflow.runtime.cascading.propdata.StateStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StringStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ValueToRangeMappingFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
@@ -92,6 +94,11 @@ public class SourceStandardizationFlow
                         parameters.getIndustryMapFileName(), parameters.getNaicsField(),
                         parameters.getNaicsMapFileName());
                 break;
+            case CONSOLIDATE_RANGE:
+                source = consolidateRange(source, parameters.getAddConsolidatedRangeFields(),
+                        parameters.getConsolidateRangeStrategies(), parameters.getRangeInputFields(),
+                        parameters.getRangeMapFileNames());
+                break;
             case STRING:
                 source = standardizeString(source, parameters.getStringFields());
                 break;
@@ -131,50 +138,108 @@ public class SourceStandardizationFlow
         return source;
     }
 
+    private Node consolidateRange(Node source, String[] addConsolidatedRangeFields,
+            ConsolidateRangeStrategy[] strategies, String[] rangeInputFields, String[] rangeMapFileNames) {
+        if (addConsolidatedRangeFields != null && strategies != null && rangeInputFields != null && rangeMapFileNames != null
+                && addConsolidatedRangeFields.length == strategies.length && strategies.length == rangeInputFields.length
+                && rangeInputFields.length == rangeMapFileNames.length) {
+            for (int i = 0; i < addConsolidatedRangeFields.length; i++) {
+                String addConsolidatedRangeField = addConsolidatedRangeFields[i];
+                ConsolidateRangeStrategy strategy = strategies[i];
+                String rangeInputField = rangeInputFields[i];
+                String fileName = rangeMapFileNames[i];
+                switch (strategy) {
+                case MAP_RANGE:
+                    Map<Serializable, Serializable> rangeMap = new HashMap<>();
+                    InputStream is = Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream("etl/" + fileName);
+                    if (is == null) {
+                        throw new RuntimeException("Cannot find resource " + fileName);
+                    }
+                    Scanner scanner = new Scanner(is);
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        String[] pair = line.split("\\|");
+                        rangeMap.put(pair[0], pair[1]);
+                    }
+                    scanner.close();
+                    source = source.apply(new MappingFunction(rangeInputField, addConsolidatedRangeField, rangeMap),
+                            new FieldList(rangeInputField), new FieldMetadata(addConsolidatedRangeField, String.class));
+                    break;
+                case MAP_VALUE:
+                    List<String[]> rangeValueMap = new ArrayList<>();
+                    is = Thread.currentThread().getContextClassLoader().getResourceAsStream("etl/" + fileName);
+                    if (is == null) {
+                        throw new RuntimeException("Cannot find resource " + fileName);
+                    }
+                    scanner = new Scanner(is);
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        String[] pair = line.split("\\|");
+                        rangeValueMap.add(pair);
+                    }
+                    scanner.close();
+                    source = source.apply(
+                            new ValueToRangeMappingFunction(rangeInputField, addConsolidatedRangeField, rangeValueMap),
+                            new FieldList(rangeInputField), new FieldMetadata(addConsolidatedRangeField, String.class));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            String.format("ConsolidateRangeStrategy %s is not supported", strategy.name()));
+                }
+            }
+        }
+        return source;
+    }
+
     private Node consolidateIndustry(Node source, String addConsolidatedIndustryField,
             StandardizationTransformerConfig.ConsolidateIndustryStrategy strategy, String industryField,
             String industryMapFileName, String naicsField, String naicsMapFileName) {
-        switch (strategy) {
-        case MAP_INDUSTRY:
-            Map<Serializable, Serializable> industryMap = new HashMap<>();
-            InputStream is = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream("etl/" + industryMapFileName);
-            if (is == null) {
-                throw new RuntimeException("Cannot find resource " + industryMapFileName);
-            }
-            Scanner scanner = new Scanner(is);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] pair = line.split("\\|");
-                industryMap.put(pair[0], pair[1]);
-            }
-            scanner.close();
-            source = source.apply(new MappingFunction(industryField, addConsolidatedIndustryField, industryMap),
-                    new FieldList(industryField), new FieldMetadata(addConsolidatedIndustryField, String.class));
-            break;
-        case PARSE_NAICS:
-            Map<Integer, Map<Serializable, Serializable>> naicsMap = new TreeMap<>(Collections.reverseOrder());
-            is = Thread.currentThread().getContextClassLoader().getResourceAsStream("etl/" + naicsMapFileName);
-            if (is == null) {
-                throw new RuntimeException("Cannot find resource " + naicsMapFileName);
-            }
-            scanner = new Scanner(is);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                String[] pair = line.split("\\|");
-                if (!naicsMap.containsKey(pair[0].length())) {
-                    naicsMap.put(pair[0].length(), new HashMap<>());
+        if (StringUtils.isNotEmpty(addConsolidatedIndustryField) && strategy != null
+                && (StringUtils.isNotEmpty(industryField) && StringUtils.isNotEmpty(industryMapFileName))
+                || (StringUtils.isNotEmpty(naicsField) && StringUtils.isNotEmpty(naicsMapFileName))) {
+            switch (strategy) {
+            case MAP_INDUSTRY:
+                Map<Serializable, Serializable> industryMap = new HashMap<>();
+                InputStream is = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("etl/" + industryMapFileName);
+                if (is == null) {
+                    throw new RuntimeException("Cannot find resource " + industryMapFileName);
                 }
-                naicsMap.get(pair[0].length()).put(pair[0], pair[1]);
+                Scanner scanner = new Scanner(is);
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    String[] pair = line.split("\\|");
+                    industryMap.put(pair[0], pair[1]);
+                }
+                scanner.close();
+                source = source.apply(new MappingFunction(industryField, addConsolidatedIndustryField, industryMap),
+                        new FieldList(industryField), new FieldMetadata(addConsolidatedIndustryField, String.class));
+                break;
+            case PARSE_NAICS:
+                Map<Integer, Map<Serializable, Serializable>> naicsMap = new TreeMap<>(Collections.reverseOrder());
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream("etl/" + naicsMapFileName);
+                if (is == null) {
+                    throw new RuntimeException("Cannot find resource " + naicsMapFileName);
+                }
+                scanner = new Scanner(is);
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    String[] pair = line.split("\\|");
+                    if (!naicsMap.containsKey(pair[0].length())) {
+                        naicsMap.put(pair[0].length(), new HashMap<>());
+                    }
+                    naicsMap.get(pair[0].length()).put(pair[0], pair[1]);
+                }
+                scanner.close();
+                source = source.apply(
+                        new ConsolidateIndustryFromNaicsFunction(naicsField, addConsolidatedIndustryField, naicsMap),
+                        new FieldList(naicsField), new FieldMetadata(addConsolidatedIndustryField, String.class));
+                break;
+            default:
+                throw new RuntimeException(
+                        String.format("ConsolidateIndustryStrategy %s is not supported", strategy.name()));
             }
-            scanner.close();
-            source = source.apply(
-                    new ConsolidateIndustryFromNaicsFunction(naicsField, addConsolidatedIndustryField, naicsMap),
-                    new FieldList(naicsField), new FieldMetadata(addConsolidatedIndustryField, String.class));
-            break;
-        default:
-            throw new RuntimeException(
-                    String.format("ConsolidateIndustryStrategy %s is not supported", strategy.name()));
         }
         return source;
     }

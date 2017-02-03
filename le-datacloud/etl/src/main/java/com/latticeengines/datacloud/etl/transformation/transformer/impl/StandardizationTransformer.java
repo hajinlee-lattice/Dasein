@@ -249,6 +249,48 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case CONSOLIDATE_RANGE:
+                if (config.getAddConsolidatedRangeFields() == null || config.getRangeInputFields() == null
+                        || config.getConsolidateRangeStrategies() == null || config.getRangeMapFileNames() == null) {
+                    log.error(
+                            "AddConsolidatedRangeFields, RangeFields, ConsolidateRangeStrategies and RangeMapFileNames are required for range standardization");
+                    return false;
+                }
+                if (!(config.getAddConsolidatedRangeFields().length > 0
+                        && config.getAddConsolidatedRangeFields().length == config.getRangeInputFields().length
+                        && config.getAddConsolidatedRangeFields().length == config
+                                .getConsolidateRangeStrategies().length
+                        && config.getAddConsolidatedRangeFields().length == config.getRangeMapFileNames().length)) {
+                    log.error(
+                            "Number of AddConsolidatedRangeFields, RangeFields, ConsolidateRangeStrategies and RangeMapFileNames should be the same and larger than 0");
+                    return false;
+                }
+                for (String addConsolidatedRangeField : config.getAddConsolidatedRangeFields()) {
+                    if (StringUtils.isEmpty(addConsolidatedRangeField)) {
+                        log.error("Empty string or null is not allowed in AddConsolidatedRangeField");
+                        return false;
+                    }
+                }
+                for (String rangeField : config.getRangeInputFields()) {
+                    if (StringUtils.isEmpty(rangeField)) {
+                        log.error("Empty string or null is not allowed in RangeField");
+                        return false;
+                    }
+                }
+                for (StandardizationTransformerConfig.ConsolidateRangeStrategy rangeStrategy : config
+                        .getConsolidateRangeStrategies()) {
+                    if (rangeStrategy == null) {
+                        log.error("Null is not allowed in ConsolidateRangeStrategy");
+                        return false;
+                    }
+                }
+                for (String fileName : config.getRangeMapFileNames()) {
+                    if (StringUtils.isEmpty(fileName)) {
+                        log.error("Empty string or null is not allowed in RangeMapFileName");
+                        return false;
+                    }
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -297,6 +339,10 @@ public class StandardizationTransformer
         parameters.setNaicsMapFileName(config.getNaicsMapFileName());
         parameters.setStateFields(config.getStateFields());
         parameters.setStringFields(config.getStringFields());
+        parameters.setAddConsolidatedRangeFields(config.getAddConsolidatedRangeFields());
+        parameters.setRangeInputFields(config.getRangeInputFields());
+        parameters.setConsolidateRangeStrategies(config.getConsolidateRangeStrategies());
+        parameters.setRangeMapFileNames(config.getRangeMapFileNames());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

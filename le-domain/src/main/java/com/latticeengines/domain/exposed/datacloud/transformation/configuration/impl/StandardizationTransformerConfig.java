@@ -81,8 +81,20 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("NaicsMapFileName")
     private String naicsMapFileName;
 
+    @JsonProperty("AddConsolidatedRangeFields")
+    private String[] addConsolidatedRangeFields;
+
+    @JsonProperty("ConsolidateRangeStrategies")
+    private ConsolidateRangeStrategy[] consolidateRangeStrategies;
+
+    @JsonProperty("RangeInputFields")
+    private String[] rangeInputFields;
+
+    @JsonProperty("RangeMapFileNames")
+    private String[] rangeMapFileNames;
+
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY
+        DOMAIN, COUNTRY, STATE, STRING, STRING_TO_INT, STRING_TO_LONG, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, ADD_NULL_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
     }
 
     public enum FieldType {
@@ -91,6 +103,10 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     
     public enum ConsolidateIndustryStrategy {
         MAP_INDUSTRY, PARSE_NAICS
+    }
+
+    public enum ConsolidateRangeStrategy {
+        MAP_RANGE, MAP_VALUE
     }
 
     public String[] getDomainFields() {
@@ -299,6 +315,38 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setNaicsMapFileName(String naicsMapFileName) {
         this.naicsMapFileName = naicsMapFileName;
+    }
+
+    public String[] getAddConsolidatedRangeFields() {
+        return addConsolidatedRangeFields;
+    }
+
+    public void setAddConsolidatedRangeFields(String[] addConsolidatedRangeFields) {
+        this.addConsolidatedRangeFields = addConsolidatedRangeFields;
+    }
+
+    public ConsolidateRangeStrategy[] getConsolidateRangeStrategies() {
+        return consolidateRangeStrategies;
+    }
+
+    public void setConsolidateRangeStrategies(ConsolidateRangeStrategy[] consolidateRangeStrategies) {
+        this.consolidateRangeStrategies = consolidateRangeStrategies;
+    }
+
+    public String[] getRangeInputFields() {
+        return rangeInputFields;
+    }
+
+    public void setRangeInputFields(String[] rangeInputFields) {
+        this.rangeInputFields = rangeInputFields;
+    }
+
+    public String[] getRangeMapFileNames() {
+        return rangeMapFileNames;
+    }
+
+    public void setRangeMapFileNames(String[] rangeMapFileNames) {
+        this.rangeMapFileNames = rangeMapFileNames;
     }
     
     
