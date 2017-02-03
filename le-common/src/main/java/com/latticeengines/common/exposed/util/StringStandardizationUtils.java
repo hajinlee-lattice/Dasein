@@ -52,10 +52,12 @@ public class StringStandardizationUtils {
             for (Map.Entry<String, String> entry : replaced.entrySet()) {   // Replace specific characters with words
                 res = res.replaceAll(entry.getKey(), " " + entry.getValue() + " ");
             }
-            res = res.trim(); // Remove leading and trailing spaces
-            while (res.indexOf("  ") >= 0) {    // Replace multiple connected spaces with single space
+            res = res.trim().replaceAll("( )+", " "); // Remove leading and trailing spaces; Replace multiple connected spaces with single space
+            /*
+            while (res.indexOf("  ") >= 0) {    
                 res = res.replace("  ", " ");
             }
+            */
             return res;
         } catch (Exception ex) {
             ex.printStackTrace();

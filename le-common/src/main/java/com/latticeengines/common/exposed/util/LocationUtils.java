@@ -209,7 +209,7 @@ public class LocationUtils {
         Object[][] usStateSynonData = new Object[][] { //
                 { "AL", new String[] { "AL", "A L", "ALABAMA", "ALA" } }, //
                 { "AK", new String[] { "AK", "A K", "ALASKA" } }, //
-                { "AS", new String[] { "AS", "A S", "AMERICAN SAMOA" } }, //
+                { "AS", new String[] { "AS", "A S", "AMERICAN SAMOA", "AMERICANSAMOA" } }, //
                 { "AZ", new String[] { "AZ", "A Z", "ARIZONA", "ARIZ" } }, //
                 { "AR", new String[] { "AR", "A R", "ARKANSAS", "ARK" } }, //
                 { "CA", new String[] { "CA", "C A", "CF", "C F", "CAL", "CALI", "CALIFORNIA", "CALIF" } }, //
@@ -217,7 +217,8 @@ public class LocationUtils {
                 { "CT", new String[] { "CT", "C T", "CONNECTICUT", "CONN" } }, //
                 { "DE", new String[] { "DE", "D E", "DL", "D L", "DELAWARE", "DEL" } }, //
                 { "DC", new String[] { "DC", "D C", "DIST OF COLUMBIA", "DISTRICT OF COLUMBIA", "WASHINGTON D C",
-                        "WASHINGTON DC", "WASH DC", "WASH D C" } }, //
+                        "WASHINGTON DC", "WASH DC", "WASH D C", "DISTOFCOLUMBIA", "DISTRICTOFCOLUMBIA", "WASHINGTONDC",
+                        "WASHDC" } }, //
                 { "FL", new String[] { "FL", "F L", "FLORIDA", "FLA" } }, //
                 { "GA", new String[] { "GA", "G A", "GEORGIA" } }, //
                 { "GU", new String[] { "GU", "G U", "GUAM" } }, //
@@ -231,7 +232,7 @@ public class LocationUtils {
                 { "LA", new String[] { "LA", "L A", "LOUISIANA" } }, //
                 { "ME", new String[] { "ME", "M E", "MAINE" } }, //
                 { "MD", new String[] { "MD", "M D", "MARYLAND" } }, //
-                { "MH", new String[] { "MH", "M H", "MARSHALL ISLANDS", "MARSHALL" } }, //
+                { "MH", new String[] { "MH", "M H", "MARSHALL ISLANDS", "MARSHALL", "MARSHALLISLANDS" } }, //
                 { "MA", new String[] { "MA", "M A", "MASSACHUSETTS", "MASS" } }, //
                 { "MI", new String[] { "MI", "M I", "MC", "M C", "MICHIGAN", "MICH" } }, //
                 { "FM", new String[] { "FM", "F M", "MICRONESIA" } }, //
@@ -241,30 +242,30 @@ public class LocationUtils {
                 { "MT", new String[] { "MT", "M T", "MONTANA", "MONT" } }, //
                 { "NE", new String[] { "NE", "N E", "NB", "N B", "NEBRASKA", "NEBR", "NEB" } }, //
                 { "NV", new String[] { "NV", "N V", "NEVADA", "NEV" } }, //
-                { "NH", new String[] { "NH", "N H", "NEW HAMPSHIRE" } }, //
-                { "NJ", new String[] { "NJ", "N J", "NEW JERSEY" } }, //
-                { "NM", new String[] { "NM", "N M", "NEW MEXICO" } }, //
-                { "NY", new String[] { "NY", "N Y", "NEW YORK" } }, //
-                { "NC", new String[] { "NC", "N C", "NORTH CAROLINA" } }, //
-                { "ND", new String[] { "ND", "N D", "NORTH DAKOTA" } }, //
-                { "MP", new String[] { "MP", "M P", "NORTHERN MARIANAS", "MARIANAS" } }, //
+                { "NH", new String[] { "NH", "N H", "NEW HAMPSHIRE", "NEWHAMPSHIRE" } }, //
+                { "NJ", new String[] { "NJ", "N J", "NEW JERSEY", "NEWJERSEY" } }, //
+                { "NM", new String[] { "NM", "N M", "NEW MEXICO", "NEWMEXICO" } }, //
+                { "NY", new String[] { "NY", "N Y", "NEW YORK", "NEWYORK" } }, //
+                { "NC", new String[] { "NC", "N C", "NORTH CAROLINA", "NORTHCAROLINA" } }, //
+                { "ND", new String[] { "ND", "N D", "NORTH DAKOTA", "NORTHDAKOTA" } }, //
+                { "MP", new String[] { "MP", "M P", "NORTHERN MARIANAS", "MARIANAS", "NORTHERNMARIANAS" } }, //
                 { "OH", new String[] { "OH", "O H", "OHIO" } }, //
                 { "OK", new String[] { "OK", "O K", "OKLAHOMA", "OKLA" } }, //
                 { "OR", new String[] { "OR", "O R", "OREGON", "ORE", "OREG" } }, //
                 { "PW", new String[] { "PW", "P W", "PALAU" } }, //
                 { "PA", new String[] { "PA", "P A", "PENNSYLVANIA" } }, //
-                { "PR", new String[] { "PR", "P R", "PUERTO RICO" } }, //
-                { "RI", new String[] { "RI", "R I", "RHODE ISLAND" } }, //
-                { "SC", new String[] { "SC", "S C", "SOUTH CAROLINA" } }, //
-                { "SD", new String[] { "SD", "S D", "SOUTH DAKOTA" } }, //
+                { "PR", new String[] { "PR", "P R", "PUERTO RICO", "PUERTORICO" } }, //
+                { "RI", new String[] { "RI", "R I", "RHODE ISLAND", "RHODEISLAND" } }, //
+                { "SC", new String[] { "SC", "S C", "SOUTH CAROLINA", "SOUTHCAROLINA" } }, //
+                { "SD", new String[] { "SD", "S D", "SOUTH DAKOTA", "SOUTHDAKOTA" } }, //
                 { "TN", new String[] { "TN", "T N", "TENNESSEE", "TENN" } }, //
                 { "TX", new String[] { "TX", "T X", "TEXAS", "TEX" } }, //
                 { "UT", new String[] { "UT", "U T", "UTAH" } }, //
                 { "VT", new String[] { "VT", "V T", "VERMONT" } }, //
                 { "VA", new String[] { "VA", "V A", "VIRGINIA" } }, //
-                { "VI", new String[] { "VI", "V I", "VIRGIN ISLANDS" } }, //
+                { "VI", new String[] { "VI", "V I", "VIRGIN ISLANDS", "VIRGINISLANDS" } }, //
                 { "WA", new String[] { "WA", "W A", "WN", "W N", "WASHINGTON", "WASH" } }, //
-                { "WV", new String[] { "WV", "W V", "WEST VIRGINIA", "WVA" } }, //
+                { "WV", new String[] { "WV", "W V", "WEST VIRGINIA", "WVA", "WESTVIRGINIA" } }, //
                 { "WI", new String[] { "WI", "W I", "WS", "W S", "WISCONSIN", "WIS", "WISC" } }, //
                 { "WY", new String[] { "WY", "W Y", "WYOMING", "WYO" } } //
         };
@@ -332,18 +333,21 @@ public class LocationUtils {
 
         Object[][] caStateSynonData = new Object[][] { //
                 { "AB", new String[] { "AB", "A B", "ALBERTA" } }, //
-                { "BC", new String[] { "BC", "B C", "BRITISH COLUMBIA", "COLOMBIE-BRITANNIQUE" } }, //
+                { "BC", new String[] { "BC", "B C", "BRITISH COLUMBIA", "COLOMBIE-BRITANNIQUE", "BRITISHCOLUMBIA" } }, //
                 { "MB", new String[] { "MB", "M B", "MANITOBA" } }, //
-                { "NB", new String[] { "NB", "N B", "NEW BRUNSWICK", "NOUVEAU-BRUNSWICK" } }, //
-                { "NL", new String[] { "NL", "N L", "NEWFOUNDLAND AND LABRADOR", "TERRE-NEUVE-ET-LABRADOR" } }, //
-                { "NS", new String[] { "NS", "N S", "NOVA SCOTIA", "NOUVELLE-ÉCOSSE" } }, //
-                { "NT", new String[] { "NT", "N T", "NORTHWEST TERRITORIES", "TERRITOIRES DU NORD-OUEST" } }, //
+                { "NB", new String[] { "NB", "N B", "NEW BRUNSWICK", "NOUVEAU-BRUNSWICK", "NEWBRUNSWICK" } }, //
+                { "NL", new String[] { "NL", "N L", "NEWFOUNDLAND AND LABRADOR", "TERRE-NEUVE-ET-LABRADOR",
+                        "NEWFOUNDLANDANDLABRADOR" } }, //
+                { "NS", new String[] { "NS", "N S", "NOVA SCOTIA", "NOUVELLE-ÉCOSSE", "NOVASCOTIA" } }, //
+                { "NT", new String[] { "NT", "N T", "NORTHWEST TERRITORIES", "TERRITOIRES DU NORD-OUEST",
+                        "NORTHWESTTERRITORIES", "TERRITOIRESDUNORD-OUEST" } }, //
                 { "NU", new String[] { "NU", "N U", "NUNAVUT" } }, //
                 { "ON", new String[] { "ON", "O N", "ONTARIO" } }, //
-                { "PE", new String[] { "PE", "P E", "PRINCE EDWARD ISLAND", "ÎLE-DU-PRINCE-ÉDOUARD" } }, //
+                { "PE", new String[] { "PE", "P E", "PRINCE EDWARD ISLAND", "ÎLE-DU-PRINCE-ÉDOUARD",
+                        "PRINCEEDWARDISLAND" } }, //
                 { "QC", new String[] { "QC", "Q C", "QUEBEC", "QUéBEC", "QUÉBEC" } }, //
                 { "SK", new String[] { "SK", "S K", "SASKATCHEWAN" } }, //
-                { "YT", new String[] { "YT", "Y T", "YUKON", "YUKON TERRITORY" } }, //
+                { "YT", new String[] { "YT", "Y T", "YUKON", "YUKON TERRITORY", "YUKONTERRITORY" } }, //
         };
 
         String[][] caStateAbbrData = new String[][] { //
@@ -550,7 +554,8 @@ public class LocationUtils {
     }
 
     private static String getStandardStateFromPhrase(String phrase, Map<String, String> stateLookUp) {
-        phrase = phrase.trim();
+        // phrase = phrase.trim();
+        phrase = phrase.replaceAll(" ", "");
         if (stateLookUp.containsKey(phrase)) {
             return stateLookUp.get(phrase);
         } else {

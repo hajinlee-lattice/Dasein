@@ -11,14 +11,14 @@ public class StringStandardizationUtilsUnitTestNG {
         return new Object[][] { //
                 { "U.S.A  ", "U S A" }, //
                 { "The United - States", "THE UNITED STATES" }, //
-                { "United States of America (the)", "UNITED STATES OF AMERICA THE" }, //
+                { "United States    of    America (the)", "UNITED STATES OF AMERICA THE" }, //
         };
     }
 
     @DataProvider(name = "nameStringDataProvider")
     Object[][] nameStringDataProvider() {
         return new Object[][] { //
-                { "\"CarMax, Inc's\"", "CARMAX INC'S" }, //
+                { "\"CarMax,    Inc's\"", "CARMAX INC'S" }, //
                 { "   CarMax, %@# & Inc.   ", "CARMAX AND INC" }, //
         };
     }
