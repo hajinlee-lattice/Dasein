@@ -90,12 +90,14 @@ public class SingleRecordMatcher extends AbstractMatcher {
             // call regular match (without enrichment) if modelSummary is not
             // null
             if (modelSummary != null) {
+                // IMP - make sure to not use performFetchOnlyForMatching for
+                // RTS based lookup
                 Map<String, Map<String, Object>> matchResult = //
                         buildAndExecuteMatch(space, interpreted, //
                                 fieldSchemas, record, //
                                 modelSummary, false, //
                                 null, false, currentDataCloudVersion, //
-                                performFetchOnlyForMatching, requestId, isDebugMode, //
+                                false, requestId, isDebugMode, //
                                 matchLogs, matchErrorLogs);
                 result.putAll(matchResult);
             }
@@ -181,7 +183,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                 skipPredefinedSelection, overrideDataCloudVersion, //
                 performFetchOnlyForMatching, requestId, isDebugMode, enforceFuzzyMatch, skipDnBCache);
 
-        MatchOutput matchOutput = callMatch(matchInput);
+        MatchOutput matchOutput = callMatch(matchInput, isDebugMode);
 
         getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput, matchLogs, matchErrorLogs);
 
@@ -196,12 +198,12 @@ public class SingleRecordMatcher extends AbstractMatcher {
         return resultMap;
     }
 
-    private MatchOutput callMatch(MatchInput matchInput) {
-        logInDebugMode("matchInput:", matchInput);
+    private MatchOutput callMatch(MatchInput matchInput, boolean isDebugMode) {
+        log("matchInput:", matchInput, isDebugMode);
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        logInDebugMode("matchOutput:", matchOutput);
+        log("matchOutput:", matchOutput, isDebugMode);
 
         return matchOutput;
     }

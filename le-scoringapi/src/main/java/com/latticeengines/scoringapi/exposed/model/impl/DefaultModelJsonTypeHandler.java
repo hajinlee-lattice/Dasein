@@ -300,6 +300,11 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
+    
+    @Override
+    public Map<String, FieldSchema> getDefaultFieldSchemaForMatch() {
+        return defaultFieldSchemaForMatch;
+    }
 
     protected boolean shouldThrowExceptionForMismatchedDataTypes() {
         return false;

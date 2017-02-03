@@ -782,13 +782,17 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         boolean hasCompanyName = false;
         boolean hasCompanyState = false;
 
-        for (String fieldName : fieldSchemas.keySet()) {
-            FieldSchema fieldSchema = fieldSchemas.get(fieldName);
+        Map<String, FieldSchema> combinedFieldSchema = new HashMap<>();
+        combinedFieldSchema.putAll(modelJsonTypeHandler.getDefaultFieldSchemaForMatch());
+        combinedFieldSchema.putAll(fieldSchemas);
+
+        for (String fieldName : combinedFieldSchema.keySet()) {
+            FieldSchema fieldSchema = combinedFieldSchema.get(fieldName);
 
             if (fieldSchema.source != FieldSource.REQUEST) {
                 continue;
             }
-            if (!record.containsKey(fieldName)) {
+            if (!record.containsKey(fieldName) && fieldSchemas.containsKey(fieldName)) {
                 missingFields.add(fieldName);
             }
 
@@ -853,7 +857,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     protected String getWarningPrefix(String modelId) {
-        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? "" : "[For ModelId - " + modelId + "] => ";
+        return StringStandardizationUtils.objectIsNullOrEmptyString(modelId) ? ""
+                : "[For ModelId - " + modelId + "] => ";
     }
 
     private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts) {

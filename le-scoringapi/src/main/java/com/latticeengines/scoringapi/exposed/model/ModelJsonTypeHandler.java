@@ -43,4 +43,6 @@ public interface ModelJsonTypeHandler {
 
     SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(String recordId,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String modelId);
+
+    Map<String, FieldSchema> getDefaultFieldSchemaForMatch();
 }

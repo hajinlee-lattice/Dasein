@@ -129,9 +129,11 @@ public abstract class AbstractMatcher implements Matcher {
         }
     }
 
-    protected void logInDebugMode(String objectType, Object obj) {
+    protected void log(String objectType, Object obj, boolean isDebugMode) {
         if (log.isDebugEnabled()) {
             log.debug(objectType + JsonUtils.serialize(obj));
+        } else if (isDebugMode) {
+            log.info(objectType + JsonUtils.serialize(obj));
         }
     }
 

@@ -100,7 +100,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 continue;
             }
 
-            BulkMatchOutput matchOutput = executeMatch(pair.getKey());
+            BulkMatchOutput matchOutput = executeMatch(pair.getKey(), isDebugMode);
 
             postProcessMatchOutput(pair, matchOutput, results, uniqueFieldSchemasMap, matchLogMap, matchErrorLogMap);
         }
@@ -172,8 +172,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 matchInput, tupleResult);
     }
 
-    private BulkMatchOutput executeMatch(BulkMatchInput matchInput) {
-        logInDebugMode("matchInput:", matchInput);
+    private BulkMatchOutput executeMatch(BulkMatchInput matchInput, boolean isDebugMode) {
+        log("matchInput:", matchInput, isDebugMode);
 
         if (log.isInfoEnabled()) {
             log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
@@ -181,7 +181,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
         BulkMatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        logInDebugMode("matchOutput:", matchOutput);
+        log("matchOutput:", matchOutput, isDebugMode);
 
         if (log.isInfoEnabled()) {
             log.info("Completed match for " + matchInput.getInputList().size() + " match inputs");
@@ -263,11 +263,13 @@ public class BulkRecordMatcher extends AbstractMatcher {
             // call regular match (without enrichment) if modelSummary is not
             // null
             if (modelSummary != null) {
+                // IMP - make sure to not use performFetchOnlyForMatching for
+                // RTS based lookup
                 MatchInput matchOnlyInput = buildMatchInput(space, //
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
                         modelSummary, null, false, currentDataCloudVersion, //
-                        performFetchOnlyForMatching, requestId, isDebugMode, false, false);
+                        false, requestId, isDebugMode, false, false);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, recordModelTuple, matchOnlyInput);
             }
