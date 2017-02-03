@@ -3,7 +3,7 @@ package com.latticeengines.modelquality.service.impl;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;

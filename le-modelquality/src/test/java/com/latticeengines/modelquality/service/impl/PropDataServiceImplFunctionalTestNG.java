@@ -5,8 +5,8 @@ import static org.mockito.Mockito.spy;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.PropData;

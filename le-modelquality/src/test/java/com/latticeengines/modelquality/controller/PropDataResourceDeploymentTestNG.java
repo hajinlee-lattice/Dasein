@@ -2,8 +2,8 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
