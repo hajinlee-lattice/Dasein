@@ -18,6 +18,7 @@ angular
         ],
         ignoredFields: FieldDocument.ignoredFields = [],
         fieldMappings: FieldDocument.fieldMappings,
+        fileHeadersSet: {},
         initialized: false,
         NextClicked: false,
         standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
@@ -39,6 +40,9 @@ angular
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
+        FieldDocument.fieldMappings.forEach(function(field) {
+            return vm.fileHeadersSet[field.userField] = field.userField;
+        });
 
         vm.standardFieldsList[2] = (vm.schema === 'SalesforceLead') ? 'Email' : 'Website';
         vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
@@ -169,8 +173,9 @@ angular
 
         for (var standardField in vm.standardFieldMappings) {
             var stdFieldMapping = vm.standardFieldMappings[standardField];
+            var userField = stdFieldMapping.userField;
 
-            if (stdFieldMapping.userField && stdFieldMapping.userField !== vm.ignoredFieldLabel) {
+            if (userField && userField !== vm.ignoredFieldLabel) {
 
                 // clear any lattice field that has been remapped
                 if (stdFieldMapping.mappedField) {
@@ -182,12 +187,17 @@ angular
                 }
 
                 // update user fields that has been mapped
-                var userMapping = userFieldMappingsMap[stdFieldMapping.userField];
+                var userMapping = userFieldMappingsMap[userField];
                 if (userMapping) {
                     userMapping.mappedField = stdFieldMapping.mappedField;
                     userMapping.fieldType = stdFieldMapping.fieldType;
                     userMapping.mappedToLatticeField = true;
                 }
+            } else if (userField && userField === vm.ignoredFieldLabel && vm.fileHeadersSet[standardField]) {
+                // if a userfield is reserved, and was unmapped, set as custom predictor
+                var mappedFieldMapping = mappedFieldMappingsMap[standardField]
+                mappedFieldMapping.mappedField = standardField;
+                mappedFieldMapping.mappedToLatticeField = false;
             }
         }
     };
