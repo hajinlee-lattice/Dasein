@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributeTree;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -51,6 +52,16 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         Assert.assertTrue(cube.getStatistics().size() > 0);
         for (String attribute : cube.getStatistics().keySet()) {
             Assert.assertNotNull(cube.getStatistics().get(attribute));
+            Assert.assertTrue(cube.getStatistics().get(attribute).getRowBasedStatistics() != null
+                    || cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null);
+
+            if (cube.getStatistics().get(attribute).getRowBasedStatistics() != null) {
+                checkBuckets(cube.getStatistics().get(attribute).getRowBasedStatistics().getBuckets().getBucketList());
+            }
+            if (cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics() != null) {
+                checkBuckets(cube.getStatistics().get(attribute).getUniqueLocationBasedStatistics().getBuckets()
+                        .getBucketList());
+            }
         }
 
         cube = amStatsProxy.getCube(createQuery(CategoricalAttribute.ALL, null));
@@ -67,6 +78,16 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
         Assert.assertTrue(cube.getStatistics().size() > 0);
         for (String attribute : cube.getStatistics().keySet()) {
             Assert.assertNotNull(cube.getStatistics().get(attribute));
+        }
+    }
+
+    private void checkBuckets(List<Bucket> bucketList) {
+        for (Bucket bucket : bucketList) {
+            Assert.assertNotNull(bucket);
+            Assert.assertNotNull(bucket.getBucketLabel());
+            Assert.assertNotNull(bucket.getCount());
+            // this should be null
+            Assert.assertNull(bucket.getEncodedCountList());
         }
     }
 

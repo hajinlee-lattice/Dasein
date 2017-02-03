@@ -15,7 +15,7 @@ public class AccountMasterCube {
     private Map<String, AttributeStatistics> statistics;
 
     @JsonProperty("Cnt")
-    private long nonNullCount;
+    private Long nonNullCount;
 
     @JsonProperty("EnrichmentAttributes")
     private List<LeadEnrichmentAttribute> enrichmentAttributes;
@@ -28,11 +28,11 @@ public class AccountMasterCube {
         this.statistics = statistics;
     }
 
-    public long getNonNullCount() {
+    public Long getNonNullCount() {
         return nonNullCount;
     }
 
-    public void setNonNullCount(long nonNullCount) {
+    public void setNonNullCount(Long nonNullCount) {
         this.nonNullCount = nonNullCount;
     }
 

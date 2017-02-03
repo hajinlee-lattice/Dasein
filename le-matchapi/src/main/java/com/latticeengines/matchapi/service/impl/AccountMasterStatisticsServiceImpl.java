@@ -118,7 +118,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
             AccountMasterCube cube = AMStatsUtils.decompressAndDecode(accountMasterFact.getEncodedCube(),
                     AccountMasterCube.class);
             expandEncodedAttributes(cube);
-            // populateDummyBuckets(cube);
+            populateDummyBuckets(cube);
             cube = filterAttributes(cube, query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_CATEGORY),
                     query.getCategoryQry().getQualifiers().get(DataCloudConstants.ATTR_SUB_CATEGORY));
             return cube;
