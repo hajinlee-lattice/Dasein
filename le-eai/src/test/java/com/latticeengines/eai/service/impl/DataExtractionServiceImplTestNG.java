@@ -224,7 +224,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         checkExtractsDirectoryExists(targetPath, Arrays.<String> asList(new String[] { "Account" }));
     }
 
-    @SuppressWarnings("deprecation")
     @Test(groups = "functional")
     public void interceptExceptionTest() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
