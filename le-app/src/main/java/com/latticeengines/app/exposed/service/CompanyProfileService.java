@@ -1,11 +1,10 @@
 package com.latticeengines.app.exposed.service;
 
-import java.util.Map;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 
 public interface CompanyProfileService {
 
-    CompanyProfile getProfile(CustomerSpace customerSpace, Map<String, String> fields, boolean enforceFuzzyMatch);
+    CompanyProfile getProfile(CustomerSpace customerSpace, CompanyProfileRequest request, boolean enforceFuzzyMatch);
 }

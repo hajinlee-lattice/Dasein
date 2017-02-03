@@ -49,7 +49,13 @@ public class AttributeCustomizationEntityMgrImpl extends BaseEntityMgrImpl<Attri
         Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         customization.setTenant(tenant);
         customization.setPid(null);
-        super.createOrUpdate(customization);
-    }
 
+        AttributeCustomization existing = find(customization.getName(), customization.getUseCase());
+        if (existing == null) {
+            super.create(customization);
+        } else {
+            existing.setFlags(customization.getFlags());
+            super.update(existing);
+        }
+    }
 }

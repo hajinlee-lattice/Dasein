@@ -3,14 +3,13 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -21,22 +20,22 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
     }
 
     @Test(groups = "deployment")
-    public void testGetCompanyProfileUsingOAuth() {
-        String url = getRestAPIHostPort() + "/ulysses/companyprofiles/?enforceFuzzyMatch=true";
-        Map<String, String> map = new HashMap<>();
-        map.put("Email", "someuser@google.com");
-        CompanyProfile profile = restTemplate.postForObject(url, map, CompanyProfile.class);
+    public void testGetCompanyProfile() {
+        String url = getRestAPIHostPort() + "/pls/companyprofiles/?enforceFuzzyMatch=true";
+        CompanyProfileRequest request = new CompanyProfileRequest();
+        request.getRecord().put("Email", "someuser@google.com");
+        CompanyProfile profile = restTemplate.postForObject(url, request, CompanyProfile.class);
         assertNotNull(profile);
     }
 
     @Test(groups = "deployment")
     public void testNotAuthorized() {
-        String url = getRestAPIHostPort() + "/ulysses/companyprofiles/";
+        String url = getRestAPIHostPort() + "/pls/companyprofiles/";
         boolean thrown = false;
-        Map<String, String> map = new HashMap<>();
-        map.put("Email", "someuser@google.com");
+        CompanyProfileRequest request = new CompanyProfileRequest();
+        request.getRecord().put("Email", "someuser@google.com");
         try {
-            restTemplate.postForObject(url, map, CompanyProfile.class);
+            new RestTemplate().postForObject(url, request, CompanyProfile.class);
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("401"));
             thrown = true;

@@ -1,7 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.app.exposed.service.CompanyProfileService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -35,11 +34,11 @@ public class CompanyProfileResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve a company profile")
     public CompanyProfile getCompanyProfile( //
-            @RequestBody Map<String, String> attributes, //
+            @RequestBody CompanyProfileRequest request, //
             @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true")//
             boolean enforceFuzzyMatch) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
-        log.info(String.format("Retrieving company profile for %s, attributes = [%s]", space, attributes));
-        return companyProfileService.getProfile(space, attributes, enforceFuzzyMatch);
+        log.info(String.format("Retrieving company profile for %s, request = [%s]", space, request));
+        return companyProfileService.getProfile(space, request, enforceFuzzyMatch);
     }
 }

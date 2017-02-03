@@ -1,16 +1,15 @@
 package com.latticeengines.ulysses.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.CompanyProfileAttributeFlags;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTestNGBase {
@@ -123,11 +123,13 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
 
     @Test(groups = "deployment", dependsOnMethods = "customizeAttributes")
     public void retrieveCompanyProfile() {
-        Map<String, String> map = new HashMap<>();
-        map.put("Email", "someuser@google.com");
+        CompanyProfileRequest request = new CompanyProfileRequest();
+        request.getRecord().put("Email", "someuser@google.com");
         CompanyProfile profile = getOAuth2RestTemplate().postForObject(
-                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/", map, CompanyProfile.class);
+                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/", request, CompanyProfile.class);
         assertNotNull(profile);
+        assertNotEquals(profile.getMatchLogs().size(), 0);
+        assertNotNull(profile.getTimestamp());
 
         for (LeadEnrichmentAttribute attribute : attributes) {
             boolean found = false;

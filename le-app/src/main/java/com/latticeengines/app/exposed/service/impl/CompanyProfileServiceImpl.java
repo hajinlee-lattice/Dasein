@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
+import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.mysql.jdbc.StringUtils;
@@ -35,12 +37,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private String dataCloudVersion;
 
     @Override
-    public CompanyProfile getProfile(CustomerSpace customerSpace, Map<String, String> values, boolean enforceFuzzyMatch) {
+    public CompanyProfile getProfile(CustomerSpace customerSpace, CompanyProfileRequest request,
+            boolean enforceFuzzyMatch) {
         MatchInput matchInput = new MatchInput();
 
         List<List<Object>> data = new ArrayList<>();
         List<String> fields = new ArrayList<>();
-        for (Map.Entry<String, String> entry : values.entrySet()) {
+        for (Map.Entry<String, Object> entry : request.getRecord().entrySet()) {
             FieldInterpretation interpretation = getFieldInterpretation(entry.getKey());
             List<Object> datum = new ArrayList<>();
             fields.add(interpretation.name());
@@ -58,6 +61,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
         matchInput.setUseRemoteDnB(enforceFuzzyMatch);
         matchInput.setDataCloudVersion(dataCloudVersion);
+        matchInput.setLogLevel(Level.DEBUG);
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
@@ -80,6 +84,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         for (int i = 0; i < outputRecords.size(); i++) {
             profile.getAttributes().put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
         }
+        profile.setTimestamp(matchOutput.getFinishedAt().toString());
+        profile.setMatchLogs(matchOutput.getResult().get(0).getMatchLogs());
+        profile.setMatchErrorMessages(matchOutput.getResult().get(0).getErrorMessages());
+
         return profile;
     }
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.app.service.impl;
+package com.latticeengines.app.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -59,6 +59,16 @@ public class AttributeEntityMgrImplTestNG extends AppTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "save")
+    public void update() {
+        AttributeCustomization customization = new AttributeCustomization();
+        customization.setName(ATTRIBUTE_NAME);
+        customization.setUseCase(AttributeUseCase.CompanyProfile);
+        customization.setFlags(new CompanyProfileAttributeFlags(false, true));
+        saved = customization.getFlags();
+        attributeCustomizationEntityMgr.createOrUpdate(customization);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "update")
     public void retrieve() {
         AttributeCustomization customization = attributeCustomizationEntityMgr.find(ATTRIBUTE_NAME,
                 AttributeUseCase.CompanyProfile);
