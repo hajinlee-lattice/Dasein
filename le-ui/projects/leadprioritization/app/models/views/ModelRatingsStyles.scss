@@ -15,62 +15,7 @@
 		color: #222222;
 		background: url('/assets/images/ico-ratings-published.png') 34% center no-repeat;
 	}
-	.ratings-chart {
-		position: relative;
-		&:after {
-			display: table;
-			clear: both;
-			content: "";	
-		}
-		.data {
-			position: absolute;
-			bottom: 8px;
-			left: 19px;
-			display: flex;
-			align-items: flex-end;
-			z-index: 2;	
-			li {
-				bottom: 0;
-				width: 32.23px;
-				margin-right: 1px;
-				margin-left: 1px;
-				&.bucket-one {
-	  				background-color: rgba(112,187,86,0.5);
-					border-top: rgba(112,187,86,1.0) solid 3px;
-				}
-				&.bucket-two {
-	  				background-color: rgba(255, 185, 61, 0.5);
-					border-top: rgba(255, 185, 61, 1.0) solid 3px;
-				}
-				&.bucket-three {
-	  				background-color: rgba(245,108,53,0.5);
-					border-top: rgba(245,108,53,1.0) solid 3px;
-				}
-				&.bucket-four {
-	  				background-color: rgba(214,43,48,0.5);
-					border-top: rgba(214,43,48,1.0) solid 3px;
-				}
-				&.bucket-five {
-	  				background-color: rgba(73,73,73,0.5);
-					border-top: rgba(73,73,73,1.0) solid 3px;
-				}
-				&.bucket-six {
-	  				background-color: rgba(73,73,73,0.5);
-					border-top: rgba(73,73,73,1.0) solid 3px;
-				}
-			}
-		}
-	}
 }
-.bucket {
-	position: absolute;
-	width: 80px;
-	height: 134px;
-	left: 200px;
-	bottom: 0;
-	border-left: #000 solid 1px;
-}
-
 .chart-header {
 	&:after {
 		display: table;
@@ -86,33 +31,68 @@
 		}
 	}
 }
-
-.bar-chart {
+.ratings-chart {
+	position: relative;
 	margin: 26px 0 34px;
 	&:after {
 		display: table;
 		clear: both;
-		content: "";
+		content: "";	
+	}
+	.data {
+		position: absolute;
+		bottom: 8px;
+		left: 19px;
+		display: flex;
+		align-items: flex-end;
+		width: 99%;
+		li {
+			bottom: 0;
+			margin-right: 1px;
+			width: 2.96%; /* 95 tick marks/32 bars */
+			background-color: #bbb;
+			border-top: #a7a7a7 solid 3px;
+		}
 	}
 }
-
+.bar-colors {
+	mix-blend-mode: color;
+	.overlay {
+		position: absolute;
+		right: 8px;
+		&:nth-child(1) {
+			background-color: rgba(112,187,86,1);
+		}
+		&:nth-child(2) {
+			background-color: rgba(255,185,61,1);
+		}
+		&:nth-child(3) {
+			background-color: rgba(245,108,53,1);
+		}
+		&:nth-child(4) {
+			background-color: rgba(214,43,48,1);
+		}
+		&:nth-child(5) {
+			background-color: rgba(73,73,73,1);
+		}
+	}
+}
 .sliders-container {
 	width: 18px;
 	background: #e8e8e8;
 	border: #dedada solid 1px;
 	float: right;
-	z-index: 3;
+	z-index: 4;
 }
 .slider {
-	border-left: #1c3d59 solid 1px;
-	width: 1px;
+	border-right: #1c3d59 solid 1px;
 	position: absolute;
-	z-index: 4;
-	right: 8px;
+	left: 100%;
+	z-index: 5;
 	.handle {
 		position: absolute;
 		bottom: -5px;
-		left: -6px;
+		right: -6px;
 		width: 12px;
 		height: 15px;
 		border-radius: 1px;
@@ -126,24 +106,36 @@
 		}
 	}
 }
-
 .horizontal-axis {
 	position: absolute;
-	bottom: 0;
-	left: 20px;
 	display: flex;
+	align-items: stretch;
+	bottom: -6px;
+	left: 20px;
+	width: 97%;
 	li {
-		width: 1px;
+		flex-grow: 1;
 		height: 6px;
-		margin: 0 11.42% 0 0;
 		border-left: #d7d7d7 solid 1px;
 		font-size: 15px;
-		&::selection {
-			background: transparent;
-		}
+		position: relative;
 		span {
-			margin: 0 0 -10px -4px;
+			position: absolute;
+			bottom: -22px;
+			left: -9px;
 		}
+		&:last-child span {
+			left: -5px;
+		}
+		&.mark, &.mid {
+			border-width: 2px;
+		}
+		&.mark {
+			height: 11px;
+		}
+		&.mid {
+			height: 8px;
+		}		
 	}
 }
 .vertical-axis {
@@ -152,6 +144,8 @@
 	display: flex;
 	flex-direction: column-reverse;
 	justify-content: space-between;
+	z-index: 1;
+	position: absolute;
 	li {
 		position: relative;
 		border-top: #e8e8e8 solid 1px;
@@ -160,7 +154,7 @@
 		}
 		span {
 			position: absolute;
-			left: -18px;
+			left: -26px;
 			top: -12px;
 		}
 	}
@@ -172,27 +166,9 @@
 	display: 					flex;
 	-webkit-flex-direction: 	row;
     flex-direction: 			row;
-    -webkit-flex-wrap: 			nowrap;
-    flex-wrap: 					nowrap;
     -webkit-justify-content: 	center;
     justify-content: 			center;
-    -webkit-align-items: 		stretch;
-    align-items: 				stretch;
-    -webkit-align-content: 		stretch;
-    align-content:				stretch;
     li {
-    	display: inline-block;
-	    -webkit-order:			0;
-	    		order:			0;
-	    -webkit-flex-grow:		0;
-	    		flex-grow: 		0;
-	    -webkit-flex-shrink:	1;
-	    		flex-shrink:	1;
-	    -webkit-flex-basis:		auto;
-	    		flex-basis:		auto;
-	    -webkit-align-self:		auto;
-	    		align-self:		auto;
-
 	   	width: 14%;
 	   	padding: 6px 18px;
     	margin: 10px;
@@ -285,9 +261,14 @@
 
 .history-list {
     li {
-        margin-bottom: 20px;
-        padding-bottom: 20px;
-        border-bottom: solid 1px #eeecec;
+    	border-top: solid 1px #eeecec;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+    & > li:first-child {
+    	padding-top: 0;
+    	margin-top: 0;
+    	border-top: none;
     }
 }
 

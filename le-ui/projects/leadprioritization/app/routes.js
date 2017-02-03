@@ -253,11 +253,11 @@ angular
                 },
                 "main@": {
                     resolve: {
-                        ABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                        MostRecentConfiguration: function($q, $stateParams, ModelRatingsService) {
                             var deferred = $q.defer(),
                                 id = $stateParams.modelId;
 
-                            ModelRatingsService.GetABCDBuckets(id).then(function(result) {
+                            ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
                                 deferred.resolve(result);
                             });
 
@@ -292,7 +292,19 @@ angular
                     template: ''
                 },
                 "main@": {
-                    controller: 'ModelRatingsController',
+                    resolve: {
+                        HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                            var deferred = $q.defer(),
+                                id = $stateParams.modelId;
+
+                            ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: 'ModelRatingsHistoryController',
                     controllerAs: 'vm',
                     templateUrl: 'app/models/views/ModelRatingsHistoryView.html'
                 }

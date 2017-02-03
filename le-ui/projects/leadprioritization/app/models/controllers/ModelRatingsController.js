@@ -2,7 +2,7 @@ angular.module('lp.models.ratings', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
 .controller('ModelRatingsController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, ABCDBuckets, BucketSummary) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, MostRecentConfiguration, BucketSummary) {
 
     var vm = this;
     angular.extend(vm, {
@@ -13,8 +13,8 @@ angular.module('lp.models.ratings', [
         saveInProgress: false,
         showSaveBucketsError: false,
         ResourceUtility: ResourceUtility,
-        buckets: ABCDBuckets.Result,
-        summary: BucketSummary.Result
+        currentConfiguration: MostRecentConfiguration,
+        summary: BucketSummary
     });
 
     vm.init = function() {
@@ -22,9 +22,10 @@ angular.module('lp.models.ratings', [
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
         $scope.Math = window.Math;
-        renderChart();
 
-        console.log(vm.buckets, vm.summary);
+        console.log(vm.currentConfiguration);
+
+        renderChart();
     }
 
     vm.publishConfiguration = function() {
@@ -44,7 +45,7 @@ angular.module('lp.models.ratings', [
     function renderChart(){
         
         // Define height of chart
-        vm.chartContainerHeight = Math.round(10*vm.summary.bar_lifts[0] + 10);
+        vm.chartContainerHeight = Math.round(12*vm.summary.bar_lifts[0] + 10);
 
         // Define height of dugout
         vm.dugoutHeight = vm.chartContainerHeight - 8;
@@ -58,10 +59,10 @@ angular.module('lp.models.ratings', [
             }
             return max;
         }
-        var maxLift = getMaxLift(vm.buckets, "lift");
+        var maxLift = getMaxLift(vm.currentConfiguration, "lift");
         
         // Create vertical axis based on maxLift
-        vm.yAxisNumber = maxLift.lift;
+        vm.yAxisNumber = Math.round(maxLift.lift);
         vm.getNumber = function(num) {return new Array(num);}
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
 
@@ -69,29 +70,32 @@ angular.module('lp.models.ratings', [
 
     }
     function handleSliders(){
-        // Sliders
-        var ele = document.getElementsByClassName("handle")[0];
-        //ele.onmousedown = eleMouseDown;
-        if (ele) {
-            ele.addEventListener("mousedown" , eleMouseDown , false);
-        };
-
-        function eleMouseDown () {
-            stateMouseDown = true;
-            document.addEventListener ("mousemove" , eleMouseMove , false);
-        }
-
-        function eleMouseMove (ev) {
-            var pX = ev.pageX;
-            ele.style.left = pX + "px";
-            document.addEventListener ("mouseup" , eleMouseUp , false);
-        }
-
-        function eleMouseUp () {
-            document.removeEventListener ("mousemove" , eleMouseMove , false);
-            document.removeEventListener ("mouseup" , eleMouseUp , false);
-        }
+                        
     };
 
     vm.init();
+})
+.controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
+    ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets) {
+
+    var vm = this;
+    angular.extend(vm, {
+        modelId: $stateParams.modelId,
+        tenantName: $stateParams.tenantName,
+        data: ModelStore.data,
+        ResourceUtility: ResourceUtility,
+        historicalBuckets: HistoricalABCDBuckets
+    });
+
+    vm.init = function() {
+        $scope.data = ModelStore.data;
+        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+
+        console.log(vm.historicalBuckets);
+
+        $scope.Math = window.Math;
+    };
+
+    vm.init();
+
 });
