@@ -102,11 +102,15 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         JobInfo jobInfo = setupJob(template, table);
-        String query = createQuery(table, filter);
-        Map<String, Object> headers = new HashMap<String, Object>();
-        headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
-        setHeaders(headers, table, ctx);
-        template.sendBodyAndHeaders("direct:createBatchQuery", jobInfo, headers);
+        try {
+            String query = createQuery(table, filter);
+            Map<String, Object> headers = new HashMap<String, Object>();
+            headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
+            setHeaders(headers, table, ctx);
+            template.sendBodyAndHeaders("direct:createBatchQuery", jobInfo, headers);
+        } finally {
+            template.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
+        }
     }
 
     @Override

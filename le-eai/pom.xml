@@ -9,7 +9,7 @@
 
     <properties>
         <component-name>eai</component-name>
-        <camel.version>2.15.3</camel.version>
+        <camel.version>2.18.2</camel.version>
         <le.common.version>3.2.0-SNAPSHOT</le.common.version>
         <le.domain.version>3.2.0-SNAPSHOT</le.domain.version>
         <le.dataplatform.version>3.2.0-SNAPSHOT</le.dataplatform.version>

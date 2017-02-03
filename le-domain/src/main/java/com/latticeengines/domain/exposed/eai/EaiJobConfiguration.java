@@ -6,14 +6,15 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
-@JsonSubTypes({ @JsonSubTypes.Type(value = ImportConfiguration.class, name = "ImportConfiguration"),
-        @JsonSubTypes.Type(value = ExportConfiguration.class, name = "ExportConfiguration"),
-        @JsonSubTypes.Type(value = CamelRouteConfiguration.class, name = "CamelRouteConfiguration"), })
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonSubTypes({ @Type(value = ImportConfiguration.class, name = "ImportConfiguration"),
+        @Type(value = ExportConfiguration.class, name = "ExportConfiguration"),
+        @Type(value = CamelRouteConfiguration.class, name = "CamelRouteConfiguration"), })
 public class EaiJobConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty("properties")

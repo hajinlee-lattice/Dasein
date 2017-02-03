@@ -10,6 +10,7 @@ public class CloseJobProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         JobInfo jobInfo = (JobInfo) exchange.getProperty(SalesforceImportProperty.JOBINFO);
         jobInfo  = exchange.getContext().createProducerTemplate().requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
+        //System.out.println(jobInfo.getId() + " " + jobInfo.getObject() + " closed");
     }
 
 }

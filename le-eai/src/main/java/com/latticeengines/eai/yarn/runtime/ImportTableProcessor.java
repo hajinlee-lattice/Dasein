@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.salesforce.SalesforceComponent;
+import org.apache.camel.component.salesforce.SalesforceHttpClient;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.eclipse.jetty.client.HttpClient;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +125,7 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
         loginConfig.setPassword(password);
         loginConfig.setLoginUrl(crmCredential.getUrl());
         HttpClientConfig httpClientConfig = eaiZKService.getHttpClientConfig(customerSpace);
-        HttpClient httpClient = salesforce.getConfig().getHttpClient();
+        SalesforceHttpClient httpClient = salesforce.getConfig().getHttpClient();
         httpClient.setConnectTimeout(httpClientConfig.getConnectTimeout());
         httpClient.setTimeout(httpClientConfig.getImportTimeout());
 

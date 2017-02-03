@@ -2,12 +2,12 @@ package com.latticeengines.domain.exposed.eai.route;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration"), })
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonSubTypes({ @Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration"), })
 public class CamelRouteConfiguration extends EaiJobConfiguration {
 
     private String className;
