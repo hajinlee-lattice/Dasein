@@ -8,6 +8,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 
+import java.util.Map;
+
 public final class FabricEntityFactory {
 
     private static final Log log = LogFactory.getLog(FabricEntityFactory.class);
@@ -42,6 +44,17 @@ public final class FabricEntityFactory {
             } catch (Exception e) {
                 log.error("Failed to convert entity to generic record", e);
                 return null;
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> void setTags(T entity, Map<String, Object> tags) {
+        if (tags != null && entity instanceof FabricEntity<?>) {
+            for (Map.Entry<String, Object> entry: tags.entrySet()) {
+                if (entry.getValue() != null) {
+                    ((FabricEntity<?>) entity).setTag(entry.getKey(), entry.getValue());
+                }
             }
         }
     }

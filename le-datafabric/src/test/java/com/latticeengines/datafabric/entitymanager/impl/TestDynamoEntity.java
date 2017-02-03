@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.persistence.Id;
 
+import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
-public class TestDynamoEntity implements FabricEntity<TestDynamoEntity> {
+public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> implements FabricEntity<TestDynamoEntity> {
 
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
     private static final String JSON_ATTRIBUTES = "json_attributes";

@@ -21,6 +21,7 @@ import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.JsonEncoder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -79,42 +80,42 @@ public class RedisDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public void createRecord(String id, GenericRecord record) {
+    public void createRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
-        createRecordInternal(pipeline, id, record);
+        createRecordInternal(pipeline, id, (pair == null) ? null : pair.getLeft());
         flushPipeline(pipeline);
         jedisPool.returnResource(jedis);
     }
 
     @Override
-    public void updateRecord(String id, GenericRecord record) {
+    public void updateRecord(String id, Pair<GenericRecord, Map<String, Object>> record) {
         createRecord(id, record);
     }
 
     @Override
-    public void createRecords(Map<String, GenericRecord> records) {
+    public void createRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> records) {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
-        for (Map.Entry<String, GenericRecord> entry : records.entrySet())
-            createRecordInternal(pipeline, entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Pair<GenericRecord, Map<String, Object>>> entry : records.entrySet())
+            createRecordInternal(pipeline, entry.getKey(), (entry.getValue() == null) ? null : entry.getValue().getLeft());
         flushPipeline(pipeline);
         jedisPool.returnResource(jedis);
     }
 
     @Override
-    public GenericRecord findRecord(String id) {
+    public Pair<GenericRecord, Map<String, Object>> findRecord(String id) {
         Jedis jedis = jedisPool.getResource();
         String key = buildKey(id);
         String jsonRecord = jedis.get(key);
         GenericRecord record = jsonToAvro(jsonRecord);
         jedisPool.returnResource(jedis);
-        return record;
+        return (record == null) ? null : Pair.of(record, null);
     }
 
     @Override
-    public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
-        Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+    public Map<String, Pair<GenericRecord, Map<String, Object>>> batchFindRecord(List<String> idList) {
+        Map<String, Pair<GenericRecord, Map<String, Object>>> records = new HashMap<>();
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
         for (String id : idList) {
@@ -125,14 +126,14 @@ public class RedisDataStoreImpl implements FabricDataStore {
             String id = idList.get(i);
             GenericRecord record = jsonToAvro((String) results.get(i));
             if (record != null) {
-                records.put(id, record);
+                records.put(id, Pair.of(record, null));
             }
         }
         return records;
     }
 
     @Override
-    public List<GenericRecord> findRecords(Map<String, String> properties) {
+    public List<Pair<GenericRecord, Map<String, Object>>> findRecords(Map<String, String> properties) {
         Jedis jedis = jedisPool.getResource();
 
         String index = buildQuery(properties);
@@ -143,11 +144,11 @@ public class RedisDataStoreImpl implements FabricDataStore {
         }
         List<Object> results = pipeline.syncAndReturnAll();
 
-        List<GenericRecord> records = new ArrayList<GenericRecord>();
+        List<Pair<GenericRecord, Map<String, Object>>> records = new ArrayList<>();
         for (Object obj : results) {
             GenericRecord record = jsonToAvro((String) obj);
             if (record != null) {
-                records.add(record);
+                records.add(Pair.of(record, null));
             }
         }
         jedisPool.returnResource(jedis);

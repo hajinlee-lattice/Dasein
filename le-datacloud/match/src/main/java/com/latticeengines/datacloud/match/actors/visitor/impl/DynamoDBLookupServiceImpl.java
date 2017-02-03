@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -160,8 +161,8 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                 for (String dataCloudVersion : lookupReqWithVersion.keySet()) {
                     try {
                         Long startTime = System.currentTimeMillis();
-                        List<String> results = accountLookupService
-                                .batchLookupIds(lookupReqWithVersion.get(dataCloudVersion));
+                        List<AccountLookupEntry> results = accountLookupService
+                                .batchLookup(lookupReqWithVersion.get(dataCloudVersion));
                         List<String> reqIds = reqIdsWithVersion.get(dataCloudVersion);
                         log.info(String.format(
                                 "Fetched results from Dynamo for %d async requests (DataCloudVersion=%s) Duration=%d",
@@ -176,8 +177,8 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     reqIds.size(), results.size()));
                         }
                         for (int i = 0; i < results.size(); i++) {
-                            String result = results.get(i);
-                            if (StringUtils.isNotEmpty(result)) {
+                            AccountLookupEntry result = results.get(i);
+                            if (result != null && StringUtils.isNotEmpty(result.getLatticeAccountId())) {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Got result from lookup for Lookup key=" + reqIds.get(i)
                                             + " Lattice Account Id=" + result);

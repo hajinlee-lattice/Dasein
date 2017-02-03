@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datafabric;
 
+import java.util.Map;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 
@@ -11,10 +13,14 @@ public interface FabricEntity<T> extends HasId<String> {
 
     Schema getSchema(String recordType);
 
-    //TODO: can change to static method in Java 8
     T fromFabricAvroRecord(GenericRecord record);
 
-    //TODO: can change to static method in Java 8
     T fromHdfsAvroRecord(GenericRecord record);
+
+    <U> U getTag(String tagName, Class<U> tagClass);
+
+    void setTag(String tagName, Object value);
+
+    Map<String, Object> getTags();
 
 }

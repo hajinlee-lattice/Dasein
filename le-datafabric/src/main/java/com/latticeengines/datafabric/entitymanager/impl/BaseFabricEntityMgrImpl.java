@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,8 +157,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        GenericRecord record = entityToRecord(entity);
-        dataStore.createRecord(entity.getId(), record);
+        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        dataStore.createRecord(entity.getId(), pair);
     }
 
     @Override
@@ -166,10 +167,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             return;
         }
 
-        Map<String, GenericRecord> records = new HashMap<>();
+        Map<String, Pair<GenericRecord, Map<String, Object>>> records = new HashMap<>();
         for (T entity : entities) {
-            GenericRecord record = entityToRecord(entity);
-            records.put(entity.getId(), record);
+            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+            records.put(entity.getId(), pair);
         }
         dataStore.createRecords(records);
     }
@@ -179,8 +180,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        GenericRecord record = entityToRecord(entity);
-        dataStore.updateRecord(entity.getId(), record);
+        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        dataStore.updateRecord(entity.getId(), pair);
     }
 
     @Override
@@ -188,17 +189,14 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        GenericRecord record = entityToRecord(entity);
+        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        GenericRecord record = (pair == null) ? null : pair.getLeft();
         dataStore.deleteRecord(entity.getId(), record);
     }
 
     @Override
     public T findByKey(T entity) {
-        if (disabled) {
-            return null;
-        }
-        GenericRecord record = dataStore.findRecord(entity.getId());
-        return (record == null) ? null : recordToEntity(record);
+        return findByKey(entity.getId());
     }
 
     @Override
@@ -206,8 +204,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return null;
         }
-        GenericRecord record = dataStore.findRecord(id);
-        return (record == null) ? null : recordToEntity(record);
+        return pairToEntity(dataStore.findRecord(id));
     }
 
     @Override
@@ -217,12 +214,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         }
 
         List<String> uniqueIds = dedupIds(ids);
-        Map<String, GenericRecord> records = new HashMap<>();
-        records = dataStore.batchFindRecord(uniqueIds);
+        Map<String, Pair<GenericRecord, Map<String, Object>>> pairs = dataStore.batchFindRecord(uniqueIds);
         List<T> entities = new ArrayList<>();
         for (String id : ids) {
-            GenericRecord record = StringUtils.isEmpty(id) ? null : records.get(id);
-            entities.add((record == null) ? null : recordToEntity(record));
+            Pair<GenericRecord, Map<String, Object>> pair = StringUtils.isEmpty(id) ? null : pairs.get(id);
+            entities.add(pairToEntity(pair));
         }
         return entities;
     }
@@ -231,10 +227,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public List<T> findByProperties(Map<String, String> properties) {
         if (disabled)
             return null;
-        List<GenericRecord> records = dataStore.findRecords(properties);
+        List<Pair<GenericRecord, Map<String, Object>>> pairs = dataStore.findRecords(properties);
         List<T> entities = new ArrayList<T>();
-        for (GenericRecord record : records) {
-            entities.add(recordToEntity(record));
+        for (Pair<GenericRecord, Map<String, Object>> pair : pairs) {
+            entities.add(pairToEntity(pair));
         }
         return entities;
     }
@@ -244,7 +240,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled || (entity == null))
             return;
         try {
-            GenericRecord record = entityToRecord(entity);
+            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+            GenericRecord record = (pair == null) ? null : pair.getLeft();
             producer.send(recordType, entity.getId(), record);
         } catch (Exception e) {
             log.info("Publish entity failed " + recordType + " " + entity.getId(), e);
@@ -256,7 +253,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled || (entity == null))
             return;
         try {
-            GenericRecord record = entityToRecord(entity);
+            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+            GenericRecord record = (pair == null) ? null : pair.getLeft();
             producer.send(recordKey, record);
         } catch (Exception e) {
             log.info("Publish entity failed " + recordType + " " + entity.getId());
@@ -297,22 +295,30 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         return disabled;
     }
 
-    private GenericRecord entityToRecord(T entity) {
-
+    private Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
         try {
             if (entity instanceof FabricEntity) {
-                return ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
+                GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
+                Map<String, Object> tags = ((FabricEntity<?>) entity).getTags();
+                return Pair.of(record, tags);
             }
             log.info("Create Entity " + entity + "Schema " + schema.toString());
-            return AvroReflectionUtils.toGenericRecord(entity, schema);
+            return Pair.of(AvroReflectionUtils.toGenericRecord(entity, schema), null);
         } catch (Exception e) {
             log.error("Failed to convert entity to generic record", e);
             return null;
         }
     }
 
-    private T recordToEntity(GenericRecord record) {
-        return FabricEntityFactory.fromFabricAvroRecord(record, entityClass, schema);
+    private T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair) {
+        if (pair == null || pair.getLeft() == null) {
+            return null;
+        }
+        GenericRecord record = pair.getLeft();
+        Map<String, Object> tags = pair.getRight();
+        T entity = FabricEntityFactory.fromFabricAvroRecord(record, entityClass, schema);
+        FabricEntityFactory.setTags(entity, tags);
+        return entity;
     }
 
     @SuppressWarnings("unchecked")
@@ -348,7 +354,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             if (!type.equals(recordType)) {
                 return;
             }
-            T entity = recordToEntity(record);
+            T entity = pairToEntity(Pair.of(record, null));
             processor.process(entity);
         }
     }

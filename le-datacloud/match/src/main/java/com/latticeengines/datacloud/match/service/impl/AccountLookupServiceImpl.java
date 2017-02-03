@@ -63,6 +63,13 @@ public class AccountLookupServiceImpl implements AccountLookupService {
     }
 
     @Override
+    public List<AccountLookupEntry> batchLookup(AccountLookupRequest request) {
+        String version = request.getVersion();
+        AccountLookupEntryMgr lookupMgr = getLookupMgr(version);
+        return lookupMgr.batchFindByKey(request.getIds());
+    }
+
+    @Override
     public List<LatticeAccount> batchFetchAccounts(List<String> accountIds, String dataCloudVersion) {
         LatticeAccountMgr accountMgr = getAccountMgr(dataCloudVersion);
         return accountMgr.batchFindByKey(accountIds);

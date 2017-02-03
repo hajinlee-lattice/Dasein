@@ -27,6 +27,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xerial.snappy.Snappy;
@@ -91,9 +92,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         this.tableIndex = DynamoUtil.getIndex(keyProp);
 
         if (tableIndex == null) {
-             tableIndex = new DynamoIndex();
-             tableIndex.setHashKeyAttr(ID);
-             tableIndex.setHashKeyField(ID);
+            tableIndex = new DynamoIndex();
+            tableIndex.setHashKeyAttr(ID);
+            tableIndex.setHashKeyField(ID);
         }
 
         String attrProp = schema.getProp(DynamoUtil.ATTRIBUTES);
@@ -118,24 +119,28 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public void createRecord(String id, GenericRecord record) {
-
+    public void createRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
         if (isTimeSeriesStore()) {
             Map<String, GenericRecord> records = new HashMap<>();
+            GenericRecord record = (pair == null) ? null : pair.getLeft();
             records.put(id, record);
             updateBuckets(records);
         } else {
-            writeRecord(id, record);
+            writeRecord(id, pair);
         }
     }
 
     @Override
-    public void createRecords(Map<String, GenericRecord> records) {
-
+    public void createRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> pairs) {
         if (isTimeSeriesStore()) {
+            Map<String, GenericRecord> records = new HashMap<>();
+            pairs.entrySet().forEach(entry -> {
+                Pair<GenericRecord, Map<String, Object>> pair = entry.getValue();
+                records.put(entry.getKey(), (pair == null) ? null : pair.getLeft());
+            });
             updateBuckets(records);
         } else {
-            writeRecords(records);
+            writeRecords(pairs);
         }
     }
 
@@ -145,8 +150,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         deleteRecordByKey(dk);
     }
 
-    public void deleteRecords(Map<String,String> properties) {
-        DynamoKey dk= constructDynamoKey(properties);
+    public void deleteRecords(Map<String, String> properties) {
+        DynamoKey dk = constructDynamoKey(properties);
         if (dk == null) {
             return;
         }
@@ -154,14 +159,14 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public void updateRecord(String id, GenericRecord record) {
+    public void updateRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
 
         if (isTimeSeriesStore()) {
             log.info("Timeseries update is not supported");
             return;
         }
 
-        UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, record);
+        UpdateItemSpec updateItemSpec = buildUpdateItemSpec(id, pair);
         if (updateItemSpec == null) {
             return;
         }
@@ -176,7 +181,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public GenericRecord findRecord(String id) {
+    public Pair<GenericRecord, Map<String, Object>> findRecord(String id) {
 
         DynamoKey dk = constructDynamoKey(id);
 
@@ -185,7 +190,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             return null;
         }
 
-        GenericRecord record = null;
+        Pair<GenericRecord, Map<String, Object>> pair = null;
 
         if (!isTimeSeriesStore()) {
             Item item = null;
@@ -199,23 +204,21 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 log.error("Unable to find record " + tableName + " id " + id, e);
             }
             if (item != null) {
-                List<GenericRecord> records;
-                records = extractRecords(item);
-                record = records.get(0);
+                List<Pair<GenericRecord, Map<String, Object>>> pairs = extractRecords(item);
+                pair = pairs.get(0);
             }
         } else {
-            List<GenericRecord> records = findRecords(dk);
-            record = records.get(0);
+            List<Pair<GenericRecord, Map<String, Object>>> pairs = findRecords(dk);
+            pair = pairs.get(0);
         }
-        return record;
+        return pair;
     }
 
     @Override
-    public List<GenericRecord> findRecords(Map<String, String> properties) {
+    public List<Pair<GenericRecord, Map<String, Object>>> findRecords(Map<String, String> properties) {
         DynamoKey dk = constructDynamoKey(properties);
         return findRecords(dk);
     }
-
 
     private ItemCollection<QueryOutcome> queryByKey(DynamoKey dk) {
         ItemCollection<QueryOutcome> items = null;
@@ -242,36 +245,38 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     }
 
-    private List<GenericRecord> findRecords(DynamoKey dk) {
+    private List<Pair<GenericRecord, Map<String, Object>>> findRecords(DynamoKey dk) {
 
         ItemCollection<QueryOutcome> items = queryByKey(dk);
         if (items == null) {
             return null;
         }
 
-        List<GenericRecord> records = new ArrayList<GenericRecord>();
+        List<Pair<GenericRecord, Map<String, Object>>> pairs = new ArrayList<>();
         Iterator<Item> iterator = items.iterator();
         while (iterator.hasNext()) {
             Item item = iterator.next();
-            extractRecords(item, records);
+            extractRecords(item, pairs);
         }
 
         String stampKey = dk.getStampKey();
         if (stampKey != null) {
-            List<GenericRecord> filtered = new ArrayList<GenericRecord>();
-            for (GenericRecord record : records) {
-                DynamoKey key = constructDynamoKey(record);
-                if (key.getStampKey().equals(stampKey)) {
-                    filtered.add(record);
-                    break;
+            List<Pair<GenericRecord, Map<String, Object>>> filtered = new ArrayList<>();
+            for (Pair<GenericRecord, Map<String, Object>> pair : pairs) {
+                if (pair != null) {
+                    GenericRecord record = pair.getLeft();
+                    DynamoKey key = constructDynamoKey(record);
+                    if (key.getStampKey().equals(stampKey)) {
+                        filtered.add(pair);
+                        break;
+                    }
                 }
             }
-            records = filtered;
+            pairs = filtered;
         }
 
-        return records;
+        return pairs;
     }
-
 
     private void deleteRecordByKey(DynamoKey dk) {
         PrimaryKey pk = dk.getPrimaryKey();
@@ -284,7 +289,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             } else if (bucketKey != null) {
                 deleteBucket(pk, bucketKey);
             } else {
-               table.deleteItem(pk);
+                table.deleteItem(pk);
             }
         } catch (NoSuchMethodError e) {
             throw new RuntimeException(ERRORMESSAGE, e);
@@ -321,20 +326,19 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     private void updateBuckets(Map<String, GenericRecord> records) {
-        Map<String, Map<String, Map<String, Set<ByteBuffer>>>> buckets =
-            new HashMap<String, Map<String, Map<String, Set<ByteBuffer>>>>();
+        Map<String, Map<String, Map<String, Set<ByteBuffer>>>> buckets = new HashMap<>();
         for (Map.Entry<String, GenericRecord> entry : records.entrySet()) {
             GenericRecord record = entry.getValue();
             DynamoKey dk = constructDynamoKey(record);
-            Set<ByteBuffer> bucket = null;
+            Set<ByteBuffer> bucket;
             Map<String, Map<String, Set<ByteBuffer>>> rangeBuckets = buckets.get(dk.getHashKey());
             if (rangeBuckets == null) {
-                rangeBuckets = new HashMap<String, Map<String, Set<ByteBuffer>>>();
+                rangeBuckets = new HashMap<>();
                 buckets.put(dk.getHashKey(), rangeBuckets);
             }
             Map<String, Set<ByteBuffer>> attrBuckets = rangeBuckets.get(dk.getRangeKey());
             if (attrBuckets == null) {
-                attrBuckets = new HashMap<String, Set<ByteBuffer>>();
+                attrBuckets = new HashMap<>();
                 rangeBuckets.put(dk.getRangeKey(), attrBuckets);
             }
 
@@ -342,7 +346,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             if (bucket == null) {
                 bucket = findBucket(dk);
                 if (bucket == null) {
-                    bucket = new HashSet<ByteBuffer>();
+                    bucket = new HashSet<>();
                 }
                 attrBuckets.put(dk.getBucketKey(), bucket);
             }
@@ -357,7 +361,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             Map<String, Map<String, Set<ByteBuffer>>> rangeBuckets = hashEntry.getValue();
             for (Map.Entry<String, Map<String, Set<ByteBuffer>>> rangeEntry : rangeBuckets.entrySet()) {
                 String rangeKey = rangeEntry.getKey();
-                UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(new PrimaryKey(hashAttr, hashKey, rangeAttr, rangeKey));
+                UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                        .withPrimaryKey(new PrimaryKey(hashAttr, hashKey, rangeAttr, rangeKey));
                 Map<String, Set<ByteBuffer>> attrBuckets = rangeEntry.getValue();
                 for (Map.Entry<String, Set<ByteBuffer>> attrBucketEntry : attrBuckets.entrySet()) {
                     String bucketKey = attrBucketEntry.getKey();
@@ -369,8 +374,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         }
     }
 
-    private void writeRecord(String id, GenericRecord record) {
-        Item item = buildItem(id, record);
+    private void writeRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
+        Item item = buildItem(id, pair);
         try {
             table.putItem(item);
         } catch (NoSuchMethodError e) {
@@ -380,10 +385,10 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         }
     }
 
-    private void writeRecords(Map<String, GenericRecord> records) {
+    private void writeRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> pairs) {
         TableWriteItems writeItems = new TableWriteItems(tableName);
 
-        for (Map.Entry<String, GenericRecord> entry : records.entrySet()) {
+        for (Map.Entry<String, Pair<GenericRecord, Map<String, Object>>> entry : pairs.entrySet()) {
             Item item = buildItem(entry.getKey(), entry.getValue());
             writeItems = writeItems.addItemToPut(item);
         }
@@ -433,14 +438,14 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     @Override
-    public Map<String, GenericRecord> batchFindRecord(List<String> idList) {
+    public Map<String, Pair<GenericRecord, Map<String, Object>>> batchFindRecord(List<String> idList) {
 
         if (isTimeSeriesStore()) {
             log.info("Batch find records is not supported for time series store");
             return null;
         }
 
-        Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+        Map<String, Pair<GenericRecord, Map<String, Object>>> records = new HashMap<>();
 
         if (CollectionUtils.isEmpty(idList)) {
             return records;
@@ -474,14 +479,14 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return records;
     }
 
-    private void batchFindRecord(List<String> idList, Map<String, GenericRecord> records) {
+    private void batchFindRecord(List<String> idList, Map<String, Pair<GenericRecord, Map<String, Object>>> pairs) {
         TableKeysAndAttributes keys = new TableKeysAndAttributes(tableName);
 
         for (String id : idList) {
             if (id == null)
                 continue;
             DynamoKey dk = constructDynamoKey(id);
-            if (dk ==  null) {
+            if (dk == null) {
                 continue;
             }
             keys = keys.addPrimaryKey(dk.getPrimaryKey());
@@ -501,9 +506,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             do {
                 List<Item> items = outcome.getTableItems().get(tableName);
                 for (Item item : items) {
-                    List<GenericRecord> recordsFromItem = extractRecords(item);
-                    for (GenericRecord record : recordsFromItem) {
-                        records.put(item.getString(ID), record);
+                    List<Pair<GenericRecord, Map<String, Object>>> recordsFromItem = extractRecords(item);
+                    for (Pair<GenericRecord, Map<String, Object>> pair : recordsFromItem) {
+                        pairs.put(item.getString(ID), pair);
                     }
                 }
 
@@ -596,10 +601,9 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return avroInstance;
     }
 
-    private Item buildItem(String id, GenericRecord record) {
-
+    private Item buildItem(String id, Pair<GenericRecord, Map<String, Object>> pair) {
         Map<String, Object> attrMap = new HashMap<>();
-
+        GenericRecord record = pair.getLeft();
         Object hashKeyValue = record.get(tableIndex.getHashKeyField());
         if (hashKeyValue == null) {
             attrMap.put(ID, id);
@@ -618,39 +622,46 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             }
         }
 
+        // build tags
+        Map<String, Object> tags = pair.getRight();
+        if (tags != null && !tags.isEmpty()) {
+            tags.entrySet().stream().filter(entry -> !(entry.getValue() == null))
+                    .forEach(entry -> attrMap.put(entry.getKey(), entry.getValue()));
+        }
+
         return Item.fromMap(attrMap);
     }
 
-    private UpdateItemSpec buildUpdateItemSpec(String id, GenericRecord record) {
+    private UpdateItemSpec buildUpdateItemSpec(String id, Pair<GenericRecord, Map<String, Object>> pair) {
 
+        GenericRecord record = pair.getLeft();
         DynamoKey dk = constructDynamoKey(id, record);
-
-
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(dk.getPrimaryKey());
-
         updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(BLOB).put(avroToBytes(record)));
 
-        // keys cannot be updated
-//        if (tableIndex != null) {
-//            updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getHashKeyAttr())
-//                    .put(record.get(tableIndex.getHashKeyField()).toString()));
-//            Object rangeKeyValue = record.get(tableIndex.getRangeKeyField());
-//            if (rangeKeyValue != null) {
-//                updateItemSpec = updateItemSpec.addAttributeUpdate(new AttributeUpdate(tableIndex.getRangeKeyAttr())
-//                        .put(rangeKeyValue.toString()));
-//            }
-//        }
+        // update tags
+        Map<String, Object> tags = pair.getRight();
+        if (tags != null && !tags.isEmpty()) {
+            for (Map.Entry<String, Object> entry: tags.entrySet()) {
+                if (entry.getValue() != null) {
+                    updateItemSpec.addAttributeUpdate(new AttributeUpdate(entry.getKey()).put(entry.getValue()));
+                } else {
+                    updateItemSpec.addAttributeUpdate(new AttributeUpdate(entry.getKey()).delete());
+                }
+            }
+        }
 
         return updateItemSpec;
     }
 
     private DynamoKey constructDynamoKey(String id, GenericRecord record) {
         DynamoKey dk = constructDynamoKey(record);
-        if (dk == null ) {
+        if (dk == null) {
             return constructDynamoKey(id);
         }
         return dk;
     }
+
     private DynamoKey constructDynamoKey(String id) {
 
         String[] ids = new String[4];
@@ -726,36 +737,55 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return new DynamoKey(hashKeyAttr, rangeKeyAttr, ids);
     }
 
-
-   private boolean isTimeSeriesStore() {
-       return (tableIndex.getBucketKeyField() != null);
-   }
-
-    private List<GenericRecord> extractRecords(Item item) {
-        List<GenericRecord> records = new ArrayList<>();
-        extractRecords(item, records);
-        return records;
+    private boolean isTimeSeriesStore() {
+        return (tableIndex.getBucketKeyField() != null);
     }
 
+    private List<Pair<GenericRecord, Map<String, Object>>> extractRecords(Item item) {
+        List<Pair<GenericRecord, Map<String, Object>>> pairs = new ArrayList<>();
+        extractRecords(item, pairs);
+        return pairs;
+    }
 
-    private void extractRecords(Item item, List<GenericRecord> records) {
+    private void extractRecords(Item item, List<Pair<GenericRecord, Map<String, Object>>> pairs) {
         if (isTimeSeriesStore()) {
-            for (Map.Entry<String,Object> entry : item.attributes()) {
+            for (Map.Entry<String, Object> entry : item.attributes()) {
                 if (isBucketAttr(entry.getKey())) {
                     try {
                         Set<ByteBuffer> stampSet = item.getByteBufferSet(entry.getKey());
                         for (ByteBuffer stamp : stampSet) {
                             GenericRecord record = bytesToAvro(stamp);
-                            records.add(record);
+                            Map<String, Object> tags = new HashMap<>();
+                            for (Map.Entry<String, Object> attr : item.attributes()) {
+                                if (attr.getValue() != null && !BLOB.equals(attr.getValue())
+                                        && !ID.equals(attr.getValue())) {
+                                    tags.put(attr.getKey(), attr.getValue());
+                                }
+                            }
+                            if (record != null) {
+                                pairs.add(Pair.of(record, tags));
+                            } else {
+                                pairs.add(null);
+                            }
                         }
                     } catch (Exception e) {
                         log.error("Invalid time stamp records", e);
                     }
                 }
-             }
+            }
         } else {
-             GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
-             records.add(record);
+            GenericRecord record = bytesToAvro(item.getByteBuffer(BLOB));
+            Map<String, Object> tags = new HashMap<>();
+            for (Map.Entry<String, Object> attr : item.attributes()) {
+                if (attr.getValue() != null && !BLOB.equals(attr.getValue()) && !ID.equals(attr.getValue())) {
+                    tags.put(attr.getKey(), attr.getValue());
+                }
+            }
+            if (record != null) {
+                pairs.add(Pair.of(record, tags));
+            } else {
+                pairs.add(null);
+            }
         }
     }
 
@@ -852,6 +882,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 }
             }
             return id;
-       }
-   }
+        }
+    }
 }

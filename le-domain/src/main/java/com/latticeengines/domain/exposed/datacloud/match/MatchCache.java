@@ -13,9 +13,10 @@ import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
-public abstract class MatchCache<T> implements FabricEntity<T> {
+public abstract class MatchCache<T> extends BaseFabricEntity<T> implements FabricEntity<T> {
 
     public abstract T getInstance();
 
@@ -33,10 +34,9 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"%s\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"long\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"boolean\",\"null\"]}"
+                    + "{\"name\":\"%s\",\"type\":[\"long\",\"null\"]}"
                     + "]}",
-            RECORD_TYPE_TOKEN, MatchCache.class.getSimpleName(), KEY, CACHE_CONTEXT, TIMESTAMP, PATCHED);
+            RECORD_TYPE_TOKEN, MatchCache.class.getSimpleName(), KEY, CACHE_CONTEXT, TIMESTAMP);
 
     @Id
     @JsonProperty(KEY)
@@ -72,7 +72,6 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
             throw new RuntimeException("Failed to serialize json attributes", e);
         }
         builder.set(TIMESTAMP, getTimestamp());
-        builder.set(PATCHED, Boolean.TRUE.equals(getPatched()));
         return builder.build();
     }
 
@@ -87,9 +86,6 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
         }
         if (record.get(TIMESTAMP) != null) {
             setTimestamp(Long.valueOf(String.valueOf(record.get(TIMESTAMP))));
-        }
-        if (record.get(PATCHED) != null) {
-            setPatched(Boolean.valueOf(String.valueOf(record.get(PATCHED))));
         }
         return getInstance();
     }
@@ -150,11 +146,17 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
         this.keyTokenValues = keyTokenValues;
     }
 
+    @JsonProperty(TIMESTAMP)
     public abstract Long getTimestamp();
 
     public abstract void setTimestamp(Long timestamp);
 
-    public abstract Boolean getPatched();
+    @JsonProperty(PATCHED)
+    public Boolean getPatched() {
+        return getTag(PATCHED, Boolean.class);
+    }
 
-    public abstract void setPatched(Boolean patched);
+    public void setPatched(Boolean patched) {
+        setTag(PATCHED, patched);
+    }
 }

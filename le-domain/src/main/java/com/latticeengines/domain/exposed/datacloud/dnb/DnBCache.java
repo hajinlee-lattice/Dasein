@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.datacloud.match.MatchCache;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
@@ -38,12 +37,7 @@ public class DnBCache extends MatchCache<DnBCache> {
     private boolean whiteCache;
 
     @DynamoAttribute(TIMESTAMP)
-    @JsonProperty(TIMESTAMP)
     private Long timestamp;
-
-    @DynamoAttribute(PATCHED)
-    @JsonProperty(PATCHED)
-    private Boolean patched;
 
     @Override
     public DnBCache getInstance() {
@@ -166,14 +160,6 @@ public class DnBCache extends MatchCache<DnBCache> {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public Boolean getPatched() {
-        return patched;
-    }
-
-    public void setPatched(Boolean patched) {
-        this.patched = patched;
     }
 
 }

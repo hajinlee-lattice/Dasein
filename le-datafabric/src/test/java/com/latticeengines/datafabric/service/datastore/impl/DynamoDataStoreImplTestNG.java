@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -75,14 +76,14 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
             builder.set("ID", tuple[0]);
             builder.set("Value", tuple[1]);
             GenericRecord record = builder.build();
-            dataStore.createRecord((String) tuple[0], record);
+            dataStore.createRecord((String) tuple[0], Pair.of(record, null));
             ids.add((String) tuple[0]);
         }
 
-        Map<String, GenericRecord> records = dataStore.batchFindRecord(ids);
+        Map<String, Pair<GenericRecord, Map<String, Object>>> records = dataStore.batchFindRecord(ids);
         Assert.assertEquals(records.size(), data.length);
 
-        GenericRecord record = dataStore.findRecord("1");
+        GenericRecord record = dataStore.findRecord("1").getLeft();
         Assert.assertEquals(record.get("Value").toString(), "value1");
     }
 

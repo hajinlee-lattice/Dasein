@@ -8,10 +8,11 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
+import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
-public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
+public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
+        implements FabricEntity<AccountLookupEntry> {
 
     private static final String DOMAIN_TOKEN = "_DOMAIN_";
     private static final String DUNS_TOKEN = "_DUNS_";
@@ -32,16 +33,11 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}"
-                    + "]}",
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
             RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, DOMAIN, DUNS);
 
     @Id
     String id = null;
-
-    @DynamoAttribute(PATCHED)
-    @JsonProperty(PATCHED)
-    private Boolean patched;
 
     @JsonProperty(DOMAIN)
     private String domain = UNKNOWN;
@@ -86,12 +82,12 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         this.id = buildId(domain, duns);
     }
 
-    public Boolean getPatched() {
-        return patched;
+    public boolean isPatched() {
+        return Boolean.TRUE.equals(getTag(PATCHED, Boolean.class));
     }
 
     public void setPatched(Boolean patched) {
-        this.patched = patched;
+        setTag(PATCHED, patched);
     }
 
     public static String buildId(String domain, String duns) {

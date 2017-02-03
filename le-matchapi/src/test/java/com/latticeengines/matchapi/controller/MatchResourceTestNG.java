@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -86,18 +87,17 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
                 { 2, null, "chevron Corporation", "San Ramon", "California", null },
                 { 3, null, "chevron corporation", null, null, null },
                 { 4, null, "Chevron Corporation", null, null, "USA" },
-                { 5, null, "Royal Dutch Shell plc", "The Hague", "South Holland", "Netherlands" },
-                { 6, null, "Royal Dutch Shell plc", "The Hague", "South Holland", null }
+                { 5, null, "Royal Dutch Shell plc", null, "South Holland", "Netherlands" }
         };
 
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setUseRemoteDnB(false);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(2));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
     }
 
-    @Test(groups = { "functional" }, dataProvider = "cachedMatchGoodDataProvider")
+    @Test(groups = { "functional" }, dataProvider = "cachedMatchGoodDataProvider", dependsOnMethods = "testLocationEnrichment")
     public void testCachedLocationMatchGood(String name, String city, String state, String country) {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 
@@ -128,6 +128,8 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
         input.setPredefinedSelection(null);
+        input.setLogLevel(Level.DEBUG);
+        input.setUseRemoteDnB(true);
         input.setCustomSelection(testMatchInputService.enrichmentSelection());
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
@@ -147,8 +149,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
                 { "chevron Corporation", "San Ramon", "California", null },
                 { "chevron corporation", null, null, null },
                 { "Chevron Corporation", null, null, "USA" },
-                //TODO: cannot match to shell by AM now.
-                // { "Royal Dutch Shell plc", "The Hague", "South Holland", "Netherlands" }
+                { "Royal Dutch Shell plc", null, "South Holland", "Netherlands" }
         };
     }
 

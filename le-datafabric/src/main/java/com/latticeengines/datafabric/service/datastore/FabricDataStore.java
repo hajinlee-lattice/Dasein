@@ -4,20 +4,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 
 public interface FabricDataStore {
 
-    void createRecord(String id, GenericRecord record);
+    void createRecord(String id, Pair<GenericRecord, Map<String, Object>> pair);
 
-    void updateRecord(String id, GenericRecord record);
+    void updateRecord(String id, Pair<GenericRecord, Map<String, Object>> pair);
 
-    void createRecords(Map<String, GenericRecord> records);
+    void createRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> pairs);
 
-    GenericRecord findRecord(String id);
+    Pair<GenericRecord, Map<String, Object>> findRecord(String id);
 
-    Map<String, GenericRecord> batchFindRecord(List<String> idList);
+    Map<String, Pair<GenericRecord, Map<String, Object>>> batchFindRecord(List<String> idList);
 
-    List<GenericRecord> findRecords(Map<String, String> properties);
+    List<Pair<GenericRecord, Map<String, Object>>> findRecords(Map<String, String> properties);
 
     void deleteRecord(String id, GenericRecord record);
 

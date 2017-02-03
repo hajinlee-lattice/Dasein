@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -100,7 +101,15 @@ public class RedisSinkTask extends SinkTask {
                 avroRecords.put(id, valueRec);
             }
             if (dataStore != null) {
-                dataStore.createRecords(avroRecords);
+                Map<String, Pair<GenericRecord, Map<String, Object>>> pairs = new HashMap<>();
+                for (Map.Entry<String, GenericRecord> entry: avroRecords.entrySet()) {
+                    if (entry.getValue() == null) {
+                        pairs.put(entry.getKey(), null);
+                    } else {
+                        pairs.put(entry.getKey(), Pair.of(entry.getValue(), null));
+                    }
+                }
+                dataStore.createRecords(pairs);
             }
         } catch (Exception e) {
             throw new ConnectException(e);

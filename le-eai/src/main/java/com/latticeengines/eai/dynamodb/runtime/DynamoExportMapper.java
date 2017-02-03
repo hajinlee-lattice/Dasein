@@ -9,6 +9,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.NullWritable;
@@ -39,7 +40,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     private String repo;
     private DynamoDataStoreImpl dataStore;
     private Class<?> entityClass;
-    private Map<String, GenericRecord> recordBuffer = new HashMap<>();
+    private Map<String, Pair<GenericRecord, Map<String, Object>>> recordBuffer = new HashMap<>();
     private AmazonDynamoDBClient client;
 
     @Override
@@ -129,7 +130,8 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     private void loadToBuffer(GenericRecord record) {
         FabricEntity<?> entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
         GenericRecord mbusRecord = entity.toFabricAvroRecord(recordType);
-        recordBuffer.put(entity.getId(), mbusRecord);
+        Map<String, Object> tags = entity.getTags();
+        recordBuffer.put(entity.getId(), Pair.of(mbusRecord, tags));
     }
 
     private void commitBuffer(Counter whiteCounter, Counter blackCounter) {
