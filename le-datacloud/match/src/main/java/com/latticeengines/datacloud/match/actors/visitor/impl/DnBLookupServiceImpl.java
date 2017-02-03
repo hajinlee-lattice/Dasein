@@ -113,6 +113,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
         context.setInputNameLocation(matchKeyTuple);
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         MatchTraveler traveler = request.getMatchTravelerContext();
+        boolean readyToReturn = false;
         if (traveler.isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
@@ -128,7 +129,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                     context.getLookupRequestId(), context.getDnbCode().getMessage(),
                                     context.getDuration()));
                         }
-                        return context;
+                        readyToReturn = true;
                     } else {
                         log.info("Remove invalid white cache: Id= " + cache.getId() + " DUNS=" + cache.getDuns());
                         dnbCacheService.removeCache(cache);
@@ -142,12 +143,12 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                                 context.getLookupRequestId(), context.getDnbCode().getMessage(),
                                 context.getDuration()));
                     }
-                    return context;
+                    readyToReturn = true;
                 }
 
             }
         }
-        if (traveler.isUseRemoteDnB()) {
+        if (!readyToReturn && traveler.isUseRemoteDnB()) {
             Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
             Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
 
@@ -162,11 +163,14 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
             if (dnBCache != null) {
                 context.setCacheId(dnBCache.getId());
             }
+            readyToReturn = true;
         }
 
-        List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
-        dnBMatchHistories.add(new DnBMatchHistory(context));
-        writeDnBMatchHistory(dnBMatchHistories);
+        if (readyToReturn) {
+            List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
+            dnBMatchHistories.add(new DnBMatchHistory(context));
+            writeDnBMatchHistory(dnBMatchHistories);
+        }
 
         return context;
     }
