@@ -4,6 +4,12 @@ angular
     $scope, $state, $stateParams, $timeout, $anchorScroll, ResourceUtility, FeatureFlagService,
     ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
 ) {
+    var _mappingOptions = [
+        { id: 0, name: "Custom Predictor" },
+        { id: 1, name: "Standard Field" },
+        { id: 2, name: "Ignore this field" }
+    ];
+
     var vm = this;
 
     angular.extend(vm, {
@@ -11,11 +17,8 @@ angular
         ResourceUtility: ResourceUtility,
         csvFileName: $stateParams.csvFileName,
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
-        mappingOptions: [
-            { id: 0, name: "Custom Predictor" },
-            { id: 1, name: "Standard Field" },
-            { id: 2, name: "Ignore this field" }
-        ],
+        mappingOptions: _mappingOptions.slice(),
+        mappingOptionsReserved: Array.prototype.concat(_mappingOptions.slice(0,1), _mappingOptions.slice(2)),
         ignoredFields: FieldDocument.ignoredFields = [],
         fieldMappings: FieldDocument.fieldMappings,
         fileHeadersSet: {},
@@ -40,6 +43,7 @@ angular
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
         vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
+
         FieldDocument.fieldMappings.forEach(function(field) {
             return vm.fileHeadersSet[field.userField] = field.userField;
         });
@@ -51,8 +55,8 @@ angular
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
-        vm.UnmappedFields.forEach(function(UnmappedField) {
-            vm.UnmappedFieldsMap[UnmappedField.name] = UnmappedField;
+        vm.UnmappedFields.forEach(function(field) {
+            vm.UnmappedFieldsMap[field.name] = field;
         });
 
         var fieldMappingsMap = {};
