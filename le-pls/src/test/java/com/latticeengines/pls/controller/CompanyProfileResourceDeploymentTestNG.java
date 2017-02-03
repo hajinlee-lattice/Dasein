@@ -3,7 +3,9 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertNotNull;
 
-import org.springframework.web.client.RestTemplate;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -19,19 +21,22 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
     }
 
     @Test(groups = "deployment")
-    public void testGetCompanyProfile() {
-        String url = getRestAPIHostPort() + "/pls/companyprofiles/?Email=someuser@google.com";
-        CompanyProfile profile = restTemplate.getForObject(url, CompanyProfile.class);
+    public void testGetCompanyProfileUsingOAuth() {
+        String url = getRestAPIHostPort() + "/ulysses/companyprofiles/?enforceFuzzyMatch=true";
+        Map<String, String> map = new HashMap<>();
+        map.put("Email", "someuser@google.com");
+        CompanyProfile profile = restTemplate.postForObject(url, map, CompanyProfile.class);
         assertNotNull(profile);
     }
 
     @Test(groups = "deployment")
     public void testNotAuthorized() {
-        String url = getRestAPIHostPort() + "/pls/companyprofiles/?Email=someuser@google.com";
+        String url = getRestAPIHostPort() + "/ulysses/companyprofiles/";
         boolean thrown = false;
-        RestTemplate restTemplate = new RestTemplate();
+        Map<String, String> map = new HashMap<>();
+        map.put("Email", "someuser@google.com");
         try {
-            restTemplate.getForObject(url, CompanyProfile.class);
+            restTemplate.postForObject(url, map, CompanyProfile.class);
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("401"));
             thrown = true;

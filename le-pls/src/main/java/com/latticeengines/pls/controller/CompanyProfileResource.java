@@ -1,14 +1,11 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,31 +31,15 @@ public class CompanyProfileResource {
     @Autowired
     private CompanyProfileService companyProfileService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a company profile")
     public CompanyProfile getCompanyProfile( //
-            HttpServletRequest request, //
+            @RequestBody Map<String, String> attributes, //
             @RequestParam(value = "enforceFuzzyMatch", required = false, defaultValue = "true")//
             boolean enforceFuzzyMatch) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
-        Map<String, String> attributes = getAccountAttributes(request);
         log.info(String.format("Retrieving company profile for %s, attributes = [%s]", space, attributes));
         return companyProfileService.getProfile(space, attributes, enforceFuzzyMatch);
     }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, String> getAccountAttributes(HttpServletRequest request) {
-        Enumeration<String> parameterNames = request.getParameterNames();
-        Map<String, String> parameters = new HashMap<>();
-
-        while (parameterNames.hasMoreElements()) {
-            String parameterName = parameterNames.nextElement();
-            if (!"enforceFuzzyMatch".equals(parameterName)) {
-                parameters.put(parameterName, request.getParameter(parameterName));
-            }
-        }
-        return parameters;
-    }
-
 }
