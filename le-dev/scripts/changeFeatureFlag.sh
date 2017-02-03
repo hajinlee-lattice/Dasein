@@ -57,25 +57,26 @@ def updateFeatureFlag(contract, env, newfeatureFlags, zk):
 def doubleCheckFeatureFlags(zk, znode, existingFeatureFlags, newfeatureFlags):
     combinedFeatureFlagsContents = findBetween(zk.get(znode)[0], '{', '}')
     combinedFeatureFlagsContentsList = combinedFeatureFlagsContents.split(',')
-    
+
     combinedDic = {}
     for combinedFeatureFlagsContent in combinedFeatureFlagsContentsList:
-        flag = combinedFeatureFlagsContent.split(':')[0]
-        value = combinedFeatureFlagsContent.split(':')[1]
+        flag = combinedFeatureFlagsContent.split(':')[0].strip()
+        value = combinedFeatureFlagsContent.split(':')[1].strip()
         combinedDic[flag] = value
-        
+
     existingContents = findBetween(existingFeatureFlags, '{', '}')
-    existingContentsList = existingContents.split(',')
-    for existingContent in existingContentsList:
-        flag = existingContent.split(':')[0]
-        if not combinedDic.has_key(flag):
-            print "Error! The ", flag, " is not in the combined value!"
-            sys.exit()
-    
+    if existingContents:
+        existingContentsList = existingContents.split(',')
+        for existingContent in existingContentsList:
+            flag = existingContent.split(':')[0].strip()
+            if not combinedDic.has_key(flag):
+                print "Error! The ", flag, " is not in the combined value!"
+                sys.exit()
+
     newfeatureFlagsContentsList = newfeatureFlags.split(',')
     for newfeatureFlagsContent in newfeatureFlagsContentsList:
         flag = '"' + newfeatureFlagsContent.split(':')[0] + '"'
-        value = newfeatureFlagsContent.split(':')[1]
+        value = newfeatureFlagsContent.split(':')[1].strip()
         if not combinedDic.has_key(flag):
             print "Error! The ", flag, " is not in the combined value!"
             sys.exit()
