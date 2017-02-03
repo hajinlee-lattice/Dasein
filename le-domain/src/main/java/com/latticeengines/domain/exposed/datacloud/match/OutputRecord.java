@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,6 +31,9 @@ public class OutputRecord {
     @JsonProperty("PreMatchEmail")
     private String preMatchEmail;
 
+    @JsonProperty("LatticeAccountId")
+    private String matchedLatticeAccountId;
+
     @JsonProperty("MatchedDomain")
     private String matchedDomain;
 
@@ -53,6 +57,9 @@ public class OutputRecord {
 
     @JsonProperty("DebugValues")
     private List<String> debugValues;
+
+    @JsonIgnore
+    private List<String> dnbCacheIds;
 
     public Integer getRowNumber() {
         return rowNumber;
@@ -104,6 +111,14 @@ public class OutputRecord {
 
     public String getPreMatchEmail() {
         return preMatchEmail;
+    }
+
+    public String getMatchedLatticeAccountId() {
+        return matchedLatticeAccountId;
+    }
+
+    public void setMatchedLatticeAccountId(String matchedLatticeAccountId) {
+        this.matchedLatticeAccountId = matchedLatticeAccountId;
     }
 
     public void setPreMatchEmail(String preMatchEmail) {
@@ -179,6 +194,14 @@ public class OutputRecord {
 
     public void setDebugValues(List<String> debugValues) {
         this.debugValues = debugValues;
+    }
+
+    public List<String> getDnbCacheIds() {
+        return dnbCacheIds;
+    }
+
+    public void setDnbCacheIds(List<String> dnbCacheIds) {
+        this.dnbCacheIds = dnbCacheIds;
     }
 
     public void log(String log) {

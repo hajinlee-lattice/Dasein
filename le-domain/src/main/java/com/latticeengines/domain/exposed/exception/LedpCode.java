@@ -381,6 +381,9 @@ public enum LedpCode {
     LEDP_25031("The target lattice account id {0} is not valid."), //
     LEDP_25032("Must provide sufficiently many match keys."), //
     LEDP_25033("Patching domain and location (without Name) is not supported."), //
+    LEDP_25034("The specified input can already match to lattice account id {0}, no need to patch."), //
+    LEDP_25035("Cannot correctly parse the input domain {0}. Please remove this domain from your input."), //
+    LEDP_25036("Cannot find a unique DUNS for the input. The matched DUNS is: {0}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

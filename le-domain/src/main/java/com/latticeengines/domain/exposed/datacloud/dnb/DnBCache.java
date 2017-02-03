@@ -3,9 +3,11 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.datacloud.match.MatchCache;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 
 public class DnBCache extends MatchCache<DnBCache> {
 
@@ -35,14 +37,20 @@ public class DnBCache extends MatchCache<DnBCache> {
     // Identify it is white cache or black cache
     private boolean whiteCache;
 
+    @DynamoAttribute(TIMESTAMP)
+    @JsonProperty(TIMESTAMP)
+    private Long timestamp;
+
+    @DynamoAttribute(PATCHED)
+    @JsonProperty(PATCHED)
+    private Boolean patched;
+
     @Override
     public DnBCache getInstance() {
         return this;
     }
 
-    public DnBCache() {
-
-    }
+    public DnBCache() {}
 
     // For cache lookup and black cache write
     public DnBCache(NameLocation nameLocation) {
@@ -150,6 +158,22 @@ public class DnBCache extends MatchCache<DnBCache> {
 
     public void setWhiteCache(boolean whiteCache) {
         this.whiteCache = whiteCache;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Boolean getPatched() {
+        return patched;
+    }
+
+    public void setPatched(Boolean patched) {
+        this.patched = patched;
     }
 
 }

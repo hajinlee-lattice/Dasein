@@ -22,12 +22,14 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
+import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -45,14 +47,19 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Autowired
     private MatchActorSystem actorSystem;
 
+    @Autowired
+    private DnBCacheService dnBCacheService;
+
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration) throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration)
+            throws Exception {
         checkRecordType(matchRecords);
         logLevel = setLogLevel(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion,
-                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled, matchConfiguration);
+                decisionGraph, logLevel, useDnBCache, useRemoteDnB, logDnBBulkResult, matchDebugEnabled,
+                matchConfiguration);
 
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
@@ -60,7 +67,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> List<Future<Object>> callMatchAsync(List<T> matchRecords, String rootOperationUid,
             String dataCloudVersion, String decisionGraph, Level logLevel, boolean useDnBCache, boolean useRemoteDnB,
-            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration) throws Exception {
+            boolean logDnBBulkResult, boolean matchDebugEnabled, MatchConfiguration matchConfiguration)
+            throws Exception {
         logLevel = setLogLevel(logLevel);
         return callMatchInternal(matchRecords, rootOperationUid, dataCloudVersion, decisionGraph, logLevel, useDnBCache,
                 useRemoteDnB, logDnBBulkResult, matchDebugEnabled, matchConfiguration);
@@ -86,20 +94,32 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 }
                 if (StringUtils.isNotEmpty(traveler.getMatchKeyTuple().getDuns())) {
                     matchRecord.setMatchedDuns(traveler.getMatchKeyTuple().getDuns());
-                } else {
+                } else if (Level.DEBUG.equals(logLevel)) {
                     // might be the case of low quality duns
+
                     List<DnBMatchContext> dnBMatchContexts = traveler.getDnBMatchContexts();
                     List<String> possibleDuns = new ArrayList<>();
+                    List<String> dnbCacheIds = new ArrayList<>();
+
                     if (dnBMatchContexts != null && !dnBMatchContexts.isEmpty()) {
-                        for (DnBMatchContext dnBMatchContext: dnBMatchContexts) {
-                            String duns = dnBMatchContext.getDuns();
-                            if (StringUtils.isNotEmpty(duns)) {
-                                possibleDuns.add(duns);
+                        for (DnBMatchContext dnBMatchContext : dnBMatchContexts) {
+                            String cacheId = dnBMatchContext.getCacheId();
+                            if (cacheId != null) {
+                                DnBCache dnBCache = dnBCacheService.getCacheMgr().findByKey(cacheId);
+                                if (dnBCache != null && dnBCache.getCacheContext() != null
+                                        && dnBCache.getCacheContext().get("Duns") != null) {
+                                    String duns = (String) dnBCache.getCacheContext().get("Duns");
+                                    if (StringUtils.isNotEmpty(duns)) {
+                                        possibleDuns.add(duns);
+                                        dnbCacheIds.add(cacheId);
+                                    }
+                                }
                             }
                         }
                     }
                     if (!possibleDuns.isEmpty()) {
                         matchRecord.setMatchedDuns(StringUtils.join(possibleDuns, ","));
+                        matchRecord.setDnbCacheIds(dnbCacheIds);
                     }
                 }
                 setDnbReturnCode(traveler, matchRecord);

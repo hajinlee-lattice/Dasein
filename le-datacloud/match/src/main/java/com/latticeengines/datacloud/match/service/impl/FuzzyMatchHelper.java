@@ -309,6 +309,8 @@ public class FuzzyMatchHelper implements DbHelper {
         nameLocation.setCity(city);
         nameLocation.setState(state);
         nameLocation.setCity(country);
+        nameLocation.setZipcode(zipCode);
+        nameLocation.setPhoneNumber(phone);
         record.setMatchedNameLocation(nameLocation);
         record.setMatchedDuns((String) amAttributes.get(MatchConstants.AM_DUNS_FIELD));
     }

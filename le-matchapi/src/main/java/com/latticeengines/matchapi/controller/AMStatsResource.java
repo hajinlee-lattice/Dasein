@@ -22,7 +22,7 @@ import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "match", description = "REST resource for account master statistics")
+@Api(value = "amstats", description = "REST resource for account master statistics")
 @RestController
 @RequestMapping("/amstats")
 public class AMStatsResource {

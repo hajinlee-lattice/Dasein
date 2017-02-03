@@ -31,16 +31,18 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
     private static final String SCHEMA_TEMPLATE = String.format(
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"domain\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"duns\",\"type\":[\"string\",\"null\"]}" + "]}",
-            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID);
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
+                    + "{\"name\":\"%s\",\"type\":[\"boolean\",\"null\"]}"
+                    + "]}",
+            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, DOMAIN, DUNS, PATCHED);
 
     @Id
     String id = null;
 
     @DynamoAttribute(PATCHED)
     @JsonProperty(PATCHED)
-    private boolean patched;
+    private Boolean patched;
 
     @JsonProperty(DOMAIN)
     private String domain = UNKNOWN;
@@ -85,11 +87,11 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         this.id = buildId(domain, duns);
     }
 
-    public boolean isPatched() {
+    public Boolean getPatched() {
         return patched;
     }
 
-    public void setPatched(boolean patched) {
+    public void setPatched(Boolean patched) {
         this.patched = patched;
     }
 
@@ -123,6 +125,7 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         builder.set(LATTICE_ACCOUNT_ID, getLatticeAccountId());
         builder.set(DOMAIN, getDomain());
         builder.set(DUNS, getDuns());
+        builder.set(PATCHED, Boolean.TRUE.equals(getPatched()));
         return builder.build();
     }
 
@@ -131,6 +134,7 @@ public class AccountLookupEntry implements FabricEntity<AccountLookupEntry> {
         setLatticeAccountId(record.get(LATTICE_ACCOUNT_ID) == null ? null : record.get(LATTICE_ACCOUNT_ID).toString());
         setDomain(record.get(DOMAIN) == null ? null : record.get(DOMAIN).toString());
         setDuns(record.get(DUNS) == null ? null : record.get(DUNS).toString());
+        setPatched(record.get(PATCHED) == null ? null : Boolean.valueOf(String.valueOf(record.get(PATCHED))));
         return this;
     }
 

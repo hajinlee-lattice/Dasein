@@ -36,6 +36,17 @@ public class NameLocation implements Fact {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
+    public static NameLocation fromMatchKeyTuple(MatchKeyTuple keyTuple) {
+        NameLocation nameLocation = new NameLocation();
+        nameLocation.setName(keyTuple.getName());
+        nameLocation.setCity(keyTuple.getCity());
+        nameLocation.setState(keyTuple.getState());
+        nameLocation.setCountry(keyTuple.getCountry());
+        nameLocation.setZipcode(keyTuple.getZipcode());
+        nameLocation.setPhoneNumber(keyTuple.getPhoneNumber());
+        return nameLocation;
+    }
+
     @MetricField(name = "Name")
     public String getName() {
         return name;

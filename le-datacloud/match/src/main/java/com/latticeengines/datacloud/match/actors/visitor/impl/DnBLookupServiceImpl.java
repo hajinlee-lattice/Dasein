@@ -158,7 +158,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase {
                 throw new RuntimeException(e);
             }
 
-            dnbCacheService.addCache(context);
+            DnBCache dnBCache = dnbCacheService.addCache(context);
+            context.setCacheId(dnBCache.getId());
         }
 
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();

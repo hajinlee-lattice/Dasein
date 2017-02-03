@@ -121,7 +121,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     public void createRecord(String id, GenericRecord record) {
 
         if (isTimeSeriesStore()) {
-            Map<String, GenericRecord> records = new HashMap<String, GenericRecord>();
+            Map<String, GenericRecord> records = new HashMap<>();
             records.put(id, record);
             updateBuckets(records);
         } else {

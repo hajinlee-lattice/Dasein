@@ -13,7 +13,6 @@ import org.apache.avro.util.Utf8;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datafabric.DynamoAttribute;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public abstract class MatchCache<T> implements FabricEntity<T> {
@@ -22,7 +21,8 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
 
     private static final String KEY = "Key";
     private static final String CACHE_CONTEXT = "CacheContext";
-    private static final String TIMESTAMP = "Timestamp";
+    protected static final String TIMESTAMP = "Timestamp";
+    protected static final String PATCHED = "Patched";
     private static final String UNKNOWN = "NULL";
 
     private Map<String, String> keyTokenValues = new TreeMap<String, String>();
@@ -32,8 +32,11 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
     private static final String SCHEMA_TEMPLATE = String.format(
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"%s\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
-                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
-            RECORD_TYPE_TOKEN, MatchCache.class.getSimpleName(), KEY, CACHE_CONTEXT);
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
+                    + "{\"name\":\"%s\",\"type\":[\"long\",\"null\"]},"
+                    + "{\"name\":\"%s\",\"type\":[\"boolean\",\"null\"]}"
+                    + "]}",
+            RECORD_TYPE_TOKEN, MatchCache.class.getSimpleName(), KEY, CACHE_CONTEXT, TIMESTAMP, PATCHED);
 
     @Id
     @JsonProperty(KEY)
@@ -41,10 +44,6 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
 
     @JsonProperty(CACHE_CONTEXT)
     private Map<String, Object> cacheContext;
-
-    @DynamoAttribute(TIMESTAMP)
-    @JsonProperty(TIMESTAMP)
-    private Long timestamp;
 
     public String buildId() {
         StringBuilder sb = new StringBuilder();
@@ -72,6 +71,8 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize json attributes", e);
         }
+        builder.set(TIMESTAMP, getTimestamp());
+        builder.set(PATCHED, Boolean.TRUE.equals(getPatched()));
         return builder.build();
     }
 
@@ -83,6 +84,12 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
             String serializedContext = record.get(CACHE_CONTEXT).toString();
             Map<String, Object> mapAttributes = JsonUtils.deserialize(serializedContext, Map.class);
             setCacheContext(mapAttributes);
+        }
+        if (record.get(TIMESTAMP) != null) {
+            setTimestamp(Long.valueOf(String.valueOf(record.get(TIMESTAMP))));
+        }
+        if (record.get(PATCHED) != null) {
+            setPatched(Boolean.valueOf(String.valueOf(record.get(PATCHED))));
         }
         return getInstance();
     }
@@ -143,13 +150,11 @@ public abstract class MatchCache<T> implements FabricEntity<T> {
         this.keyTokenValues = keyTokenValues;
     }
 
-    public Long getTimestamp() {
-        return timestamp;
-    }
+    public abstract Long getTimestamp();
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
+    public abstract void setTimestamp(Long timestamp);
 
+    public abstract Boolean getPatched();
 
+    public abstract void setPatched(Boolean patched);
 }

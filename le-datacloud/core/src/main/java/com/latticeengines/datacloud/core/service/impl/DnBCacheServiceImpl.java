@@ -79,7 +79,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         } else if (context.getDnbCode() == DnBReturnCode.UNMATCH) {
             cache = initCacheEntity(context, true);
         } else {
-            return cache;
+            return null;
+        }
+        if (context.getPatched() != null) {
+            cache.setPatched(context.getPatched());
         }
         getCacheMgr().create(cache);
         log.info(String.format("Added Id = %s to %s cache", cache.getId(), cache.isWhiteCache() ? "white" : "black"));
@@ -97,6 +100,9 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 cache = initCacheEntity(context, true);
             } else {
                 continue;
+            }
+            if (context.getPatched() != null) {
+                cache.setPatched(context.getPatched());
             }
             caches.add(cache);
             log.info(String.format("Added Id = %s to %s cache", cache.getId(),
@@ -164,6 +170,5 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                     "DnBCache.CacheType " + context.getMatchStrategy().name() + " is supported in DnB cache lookup");
         }
     }
-
 
 }

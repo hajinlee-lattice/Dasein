@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.DnBMatchResultValidator;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -71,7 +71,7 @@ public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
     public boolean validate(DnBMatchContext res) {
 
-        if (res.getDnbCode() != DnBReturnCode.OK) {
+        if (res.getDnbCode() != DnBReturnCode.OK || Boolean.TRUE.equals(res.getPatched())) {
             return true;
         }
 

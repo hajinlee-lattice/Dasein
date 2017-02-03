@@ -9,6 +9,8 @@ public interface DataCloudVersionEntityMgr {
 
     DataCloudVersion currentApprovedVersion();
 
+    String currentApprovedVersionAsString();
+
     DataCloudVersion latestApprovedForMajorVersion(String majorVersion);
 
     DataCloudVersion findVersion(String version);

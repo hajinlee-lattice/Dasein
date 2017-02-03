@@ -35,6 +35,12 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public String currentApprovedVersionAsString() {
+        return latestApprovedForMajorVersion(latestMajorVersion).getVersion();
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public DataCloudVersion latestApprovedForMajorVersion(String version) {
         String majorVersion = parseMajorVersion(version);
         DataCloudVersion dataCloudVersion = dataCloudVersionDao

@@ -40,6 +40,8 @@ public class DnBMatchContext implements Fact, Dimension {
 
     private boolean logDnBBulkResult;
 
+    private Boolean patched;
+
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
         matchedNameLocation = new NameLocation();
@@ -64,6 +66,7 @@ public class DnBMatchContext implements Fact, Dimension {
             cacheId = cache.getId();
             matchedNameLocation = cache.getMatchedNameLocation();
             hitWhiteCache = true;
+            patched = cache.getPatched();
         } else {
             duns = null;
             dnbCode = DnBReturnCode.UNMATCH;
@@ -237,6 +240,15 @@ public class DnBMatchContext implements Fact, Dimension {
 
     public void setLogDnBBulkResult(boolean logDnBBulkResult) {
         this.logDnBBulkResult = logDnBBulkResult;
+    }
+
+    @MetricField(name = "Patched", fieldType = MetricField.FieldType.BOOLEAN)
+    public Boolean getPatched() {
+        return patched;
+    }
+
+    public void setPatched(Boolean patched) {
+        this.patched = patched;
     }
 
     public enum DnBMatchStrategy {
