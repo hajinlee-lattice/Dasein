@@ -107,9 +107,11 @@ angular
                 $scope.jobRowExpanded = true;
                 $scope.expanded[job.id] = true;
 
-                JobsStore.getJob($scope.job.id).then(function(result) {
-                    updateStatesBasedOnJobStatus(result);
-                });
+                if ($scope.job.id != null) {
+                    JobsStore.getJob($scope.job.id).then(function(result) {
+                        updateStatesBasedOnJobStatus(result);
+                    });
+                }
             };
 
             // Use this in JobStatusRow.html

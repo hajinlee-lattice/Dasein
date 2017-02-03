@@ -74,10 +74,10 @@
             </span>
             
             <span ng-if="state != 'model'" style="position: absolute; right: 1em;">
-                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.status != 'Pending' && job.id != null">
+                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && job.status != 'Pending'">
                     <span><i class="fa fa-angle-double-down fa-lg"></i></span>
                 </a>
-                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && job.status != 'Pending' && job.id != null">
+                <a href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && job.status != 'Pending'">
                     <span><i class="fa fa-angle-double-up fa-lg"></i></span>
                 </a>
             </span>
