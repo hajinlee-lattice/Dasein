@@ -7,8 +7,10 @@ import static org.testng.AssertJUnit.assertFalse;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.testng.Assert;
@@ -121,8 +123,10 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
 
     @Test(groups = "deployment", dependsOnMethods = "customizeAttributes")
     public void retrieveCompanyProfile() {
-        CompanyProfile profile = getOAuth2RestTemplate().getForObject(
-                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/?Email=someuser@google.com", CompanyProfile.class);
+        Map<String, String> map = new HashMap<>();
+        map.put("Email", "someuser@google.com");
+        CompanyProfile profile = getOAuth2RestTemplate().postForObject(
+                getUlyssesRestAPIPort() + "/ulysses/companyprofiles/", map, CompanyProfile.class);
         assertNotNull(profile);
 
         for (LeadEnrichmentAttribute attribute : attributes) {
@@ -146,8 +150,8 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     private List<LeadEnrichmentAttribute> getAttributes(boolean onlySelectedAttr, String attributeDisplayNameFilter,
             Category category, boolean considerInternalAttributes) throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights";
-        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter) || category != null
-                || considerInternalAttributes) {
+        if (onlySelectedAttr || !StringStandardizationUtils.objectIsNullOrEmptyString(attributeDisplayNameFilter)
+                || category != null || considerInternalAttributes) {
             url += "?";
         }
         if (onlySelectedAttr) {
