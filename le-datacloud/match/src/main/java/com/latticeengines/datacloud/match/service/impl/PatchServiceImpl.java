@@ -155,29 +155,42 @@ public class PatchServiceImpl implements PatchService {
         List<String> dnbCacheIds = outputRecord.getDnbCacheIds();
         String prematchedDomain = outputRecord.getPreMatchDomain();
 
-        if (StringUtils.isEmpty(matchedDuns)) {
-            if (matchLogs != null) {
-                log.info("Match Logs: \n" + StringUtils.join(matchLogs, "\n"));
+        String duns = null;
+        if (StringUtils.isNotEmpty(matchedDuns)) {
+            String[] tokens = matchedDuns.split(",");
+            if (tokens.length == 1) {
+                duns = tokens[0];
             }
-            throw new LedpException(LedpCode.LEDP_25036, new String[] { String.valueOf(matchedDuns) });
         }
-        String[] tokens = matchedDuns.split(",");
-        if (tokens.length != 1 || dnbCacheIds.size() != 1) {
+
+        if (StringUtils.isEmpty(duns) && dnbCacheIds != null && dnbCacheIds.size() == 1) {
+            String dnbCacheId = dnbCacheIds.get(0);
+            DnBCache dnBCache = dnBCacheService.getCacheMgr().findByKey(dnbCacheId);
+            if (dnBCache.getCacheContext() == null || !dnBCache.getCacheContext().containsKey("Duns")
+                    || StringUtils.isEmpty((String) dnBCache.getCacheContext().get("Duns"))) {
+                if (matchLogs != null) {
+                    log.info("Match Logs: \n" + StringUtils.join(matchLogs, "\n"));
+                }
+                throw new LedpException(LedpCode.LEDP_25036, new String[]{String.valueOf(matchedDuns)});
+            } else {
+                duns = (String) dnBCache.getCacheContext().get("Duns");
+            }
+            dnBCache.setPatched(true);
+            dnBCacheService.getCacheMgr().create(dnBCache);
+            log.info("Updated dnb cache entry with id=" + dnbCacheId + " to patched.");
+        }
+
+        if (StringUtils.isEmpty(duns)) {
             if (matchLogs != null) {
                 log.info("Match Logs: \n" + StringUtils.join(matchLogs, "\n"));
             }
             throw new LedpException(LedpCode.LEDP_25036, new String[] { String.valueOf(matchedDuns) });
         }
 
-        String dnbCacheId = dnbCacheIds.get(0);
-        DnBCache dnBCache = dnBCacheService.getCacheMgr().findByKey(dnbCacheId);
-        dnBCache.setPatched(true);
-        dnBCacheService.getCacheMgr().create(dnBCache);
-        log.info("Updated dnb cache entry with id=" + dnbCacheId + " to patched." );
+        log.info("Duns to be patched is " + duns);
 
         AccountLookupEntry lookupEntry = new AccountLookupEntry();
         lookupEntry.setLatticeAccountId(updateRequest.getLatticeAccountId());
-        String duns = tokens[0];
         lookupEntry.setDuns(duns);
 
         AccountLookupRequest request = new AccountLookupRequest(currentVersion);

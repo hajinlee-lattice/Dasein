@@ -15,27 +15,25 @@ import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-
 import com.latticeengines.actors.exposed.traveler.TravelLog;
-import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.actors.MeasurementMessage;
-import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
@@ -46,9 +44,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     @Autowired
     private MatchActorSystem actorSystem;
-
-    @Autowired
-    private DnBCacheService dnBCacheService;
 
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, String rootOperationUid,
@@ -98,27 +93,17 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     // might be the case of low quality duns
 
                     List<DnBMatchContext> dnBMatchContexts = traveler.getDnBMatchContexts();
-                    List<String> possibleDuns = new ArrayList<>();
                     List<String> dnbCacheIds = new ArrayList<>();
 
                     if (dnBMatchContexts != null && !dnBMatchContexts.isEmpty()) {
                         for (DnBMatchContext dnBMatchContext : dnBMatchContexts) {
                             String cacheId = dnBMatchContext.getCacheId();
-                            if (cacheId != null) {
-                                DnBCache dnBCache = dnBCacheService.getCacheMgr().findByKey(cacheId);
-                                if (dnBCache != null && dnBCache.getCacheContext() != null
-                                        && dnBCache.getCacheContext().get("Duns") != null) {
-                                    String duns = (String) dnBCache.getCacheContext().get("Duns");
-                                    if (StringUtils.isNotEmpty(duns)) {
-                                        possibleDuns.add(duns);
-                                        dnbCacheIds.add(cacheId);
-                                    }
-                                }
+                            if (StringUtils.isNotEmpty(cacheId)) {
+                                dnbCacheIds.add(cacheId);
                             }
                         }
                     }
-                    if (!possibleDuns.isEmpty()) {
-                        matchRecord.setMatchedDuns(StringUtils.join(possibleDuns, ","));
+                    if (!dnbCacheIds.isEmpty()) {
                         matchRecord.setDnbCacheIds(dnbCacheIds);
                     }
                 }
