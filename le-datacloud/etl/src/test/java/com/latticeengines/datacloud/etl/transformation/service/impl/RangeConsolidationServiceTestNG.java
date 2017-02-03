@@ -5,7 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 public class RangeConsolidationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+    private static final Log log = LogFactory.getLog(RangeConsolidationServiceTestNG.class);
+
     GeneralSource source = new GeneralSource("ConsolidateRange");
 
     GeneralSource baseSource = new GeneralSource("ConsolidateRange_Test");
@@ -122,7 +127,26 @@ public class RangeConsolidationServiceTestNG
 
     @Override
     void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // TODO Auto-generated method stub
-
+        log.info("Start to verify records one by one.");
+        String[][] expectedData = { { "0-1M", "201-500", ">10,000" }, { "null", "null", "null" },
+                { "101-250M", "0", "1-10" } };
+        int rowNum = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String expectedRange1 = String.valueOf(record.get("ConsolidateRange"));
+            String expectedRange2 = String.valueOf(record.get("ConsolidateValue"));
+            String expectedRange3 = String.valueOf(record.get("ConsolidateLargeValue"));
+            boolean flag = false;
+            for (String[] data : expectedData) {
+                if (expectedRange1.equals(data[0]) && expectedRange2.equals(data[1])
+                        && expectedRange3.equals(data[2])) {
+                    flag = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(flag);
+            rowNum++;
+        }
+        Assert.assertEquals(rowNum, 3);
     }
 }
